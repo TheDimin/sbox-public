@@ -228,6 +228,11 @@ public static class Application
 			return menuScene;
 		}
 
+		if ( Editor.Scene is Scene editorScene && editorScene.IsValid() )
+		{
+			return editorScene;
+		}
+
 		return null;
 	}
 
