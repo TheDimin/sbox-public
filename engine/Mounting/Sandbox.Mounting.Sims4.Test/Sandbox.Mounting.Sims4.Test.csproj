@@ -18,10 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Sandbox.System\Sandbox.System.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="..\Sandbox.Mounting.Sims4\Package\DbpfPackage.cs" Link="Package\DbpfPackage.cs" />
+    <ProjectReference Include="..\Sandbox.Mounting.Sims4\Sandbox.Mounting.Sims4.csproj" />
   </ItemGroup>
 
 </Project>

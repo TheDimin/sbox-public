@@ -89,7 +89,7 @@ public class ModelLoaderTest
 			var data = package.ReadData( modelRecord );
 			Assert.IsNotNull( data, "Data should not be null." );
 			Assert.IsTrue( data.Length > 0, $"Data length should be greater than 0 for record 0x{modelRecord.InstanceId:X16}." );
-			Assert.AreEqual( modelRecord.DecompressedSize, data.Length,
+			Assert.AreEqual( (int)modelRecord.DecompressedSize, data.Length,
 				$"Data length should match decompressed size for record 0x{modelRecord.InstanceId:X16}." );
 			successCount++;
 		}

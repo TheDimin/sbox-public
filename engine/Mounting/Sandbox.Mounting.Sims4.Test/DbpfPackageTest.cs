@@ -61,7 +61,7 @@ public class DbpfPackageTest
 		using var package = DbpfPackage.Open( packagePath );
 
 		var compressedStbl = package.GetStblRecords()
-			.FirstOrDefault( x => x.IsCompressed && x.CompressionType == 0x5A42 );
+			.FirstOrDefault( x => x.IsCompressed && x.CompressionType == CompressionType.Zlib );
 
 		if ( compressedStbl is null )
 			Assert.Inconclusive( "No zlib-compressed STBL resource found in package." );
@@ -97,7 +97,7 @@ public class DbpfPackageTest
 		var packagePath = GetRealPackagePathOrInconclusive();
 		using var package = DbpfPackage.Open( packagePath );
 
-		var names = package.ReadObjectNames( 0x00 );
+		var names = package.ReadObjectNames( 0x00 ).ToList();
 		Assert.IsTrue( names.Count > 0, "Expected STBL object names to be extracted." );
 
 		var found = names.Any( x => x.Text.Contains( "Miiko Harmony Set Coffee Table", StringComparison.OrdinalIgnoreCase ) );
@@ -125,7 +125,7 @@ public class DbpfPackageTest
 		{
 			Assert.Inconclusive( "Loaded package has no records. Provide a valid Sims 4 package file." );
 		}
-		var textureCount = package.Records.Count( x => x.TypeId == TextureTypeId );
+		var textureCount = package.Records.Where( x => x.TypeId == TextureTypeId ).Count();
 		Assert.IsTrue( textureCount > 0, "Expected at least one texture record (DDS) in the real package." );
 	}
 
@@ -139,7 +139,7 @@ public class DbpfPackageTest
 			Assert.Inconclusive( "Loaded package has no records. Provide a valid Sims 4 package file." );
 		}
 
-		var record = package.Records.FirstOrDefault( x => x.TypeId == TextureTypeId );
+		var record = package.Records.Where( x => x.TypeId == TextureTypeId ).FirstOrDefault();
 		Assert.IsNotNull( record, "No texture record found in the real package." );
 
 		var data = package.ReadData( record );
@@ -155,7 +155,7 @@ public class DbpfPackageTest
 		{
 			Assert.Inconclusive( "Loaded package has no records. Provide a valid Sims 4 package file." );
 		}
-		var modelCount = package.Records.Count( x => x.TypeId == ModelTypeId );
+		var modelCount = package.Records.Where( x => x.TypeId == ModelTypeId ).Count();
 		Assert.IsTrue( modelCount > 0, "Expected at least one model record (GEOM) in the real package." );
 	}
 
@@ -268,7 +268,7 @@ public class DbpfPackageTest
 		}
 
 		// Find the first model record
-		var modelRecord = package.Records.FirstOrDefault( x => x.TypeId == ModelTypeId );
+		var modelRecord = package.Records.Where( x => x.TypeId == ModelTypeId ).FirstOrDefault();
 		Assert.IsNotNull( modelRecord, "No model record found in the real package." );
 
 		// Read model data
@@ -290,7 +290,7 @@ public class DbpfPackageTest
 
 		// Verify the record metadata is consistent
 		Assert.IsTrue( modelRecord.DecompressedSize > 0, "Decompressed size should be greater than zero." );
-		Assert.AreEqual( modelRecord.DecompressedSize, modelData.Length, "Decompressed size should match actual data length." );
+		Assert.AreEqual( (int)modelRecord.DecompressedSize, modelData.Length, "Decompressed size should match actual data length." );
 	}
 
 	[TestMethod]
