@@ -115,8 +115,8 @@ public class ModelLoaderTest
 			Assert.Inconclusive( "No model/texture assets found in package." );
 		}
 
-		var modelAssets = assets.Where( a => a.Kind == Sims4AssetKind.Model ).ToList();
-		var textureAssets = assets.Where( a => a.Kind == Sims4AssetKind.Texture ).ToList();
+		var modelAssets = assets.Where( a => a.Kind == ResourceType.GEOM ).ToList();
+		var textureAssets = assets.Where( a => a.Kind == ResourceType.MATD ).ToList();
 
 		Assert.IsTrue( modelAssets.Count > 0, "Expected at least one model asset." );
 		Assert.IsTrue( textureAssets.Count > 0, "Expected at least one texture asset." );

@@ -172,7 +172,7 @@ public class DbpfPackageTest
 
 		var assets = package.GetValidRecords().ToList();
 		Assert.IsTrue( assets.Count > 0, "Expected model/texture assets from the typed API." );
-		Assert.IsTrue( assets.Any( x => x.Kind == Sims4AssetKind.Texture ), "Expected at least one texture in typed assets." );
+		Assert.IsTrue( assets.Any( x => x.Kind == ResourceType.LITE), "Expected at least one texture in typed assets." );
 	}
 
 	[TestMethod]

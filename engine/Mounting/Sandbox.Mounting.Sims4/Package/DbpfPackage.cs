@@ -14,183 +14,177 @@ namespace Sandbox.Mounting.Sims4;
 /// </summary>
 public sealed class DbpfPackage : IDisposable
 {
-    private const uint StblTypeId = 0x220557DA;
-    private const uint TextureTypeId = 0x00B2D882;
-    private const uint ModelTypeId = 0x01661233;
+	private const uint TextureTypeId = 0x00B2D882;
+	private const uint ModelTypeId = 0x01661233;
 
-    private readonly DbpfInstance _instance;
-    private Dictionary<ulong, string>? _nameMapCache;
-    private List<StblNameEntry>? _objectNamesCache;
+	private readonly DbpfInstance _instance;
+	private Dictionary<ulong, string>? _nameMapCache;
+	private List<StblNameEntry>? _objectNamesCache;
 
-    private DbpfPackage(DbpfInstance instance)
-    {
-        _instance = instance;
-    }
+	public DbpfInstance Owner => _instance;
+	private DbpfPackage( DbpfInstance instance )
+	{
+		_instance = instance;
+	}
 
-    public static DbpfPackage Open(string path) => new DbpfPackage(DbpfInstance.Open(path));
+	public static DbpfPackage Open( string path ) => new DbpfPackage( DbpfInstance.Open( path ) );
 
-    /// <summary>
-    /// Gets all records as a list-like interface for Count and indexing.
-    /// </summary>
-    public DbpfRecordList Records => new DbpfRecordList(_instance.Records.ToArray());
+	/// <summary>
+	/// Gets all records as a list-like interface for Count and indexing.
+	/// </summary>
+	public DbpfRecordList Records => new DbpfRecordList( _instance.Records.ToArray() );
 
-    public IEnumerable<DbpfRecord> GetRecords(ResourceType type) => _instance.GetRecords(type);
+	public IEnumerable<DbpfRecord> GetRecords( ResourceType type ) => _instance.GetRecords( type );
 
-    public IEnumerable<DbpfRecord> GetModelRecords() => _instance.GetRecords(ResourceType.MODL);
+	public IEnumerable<DbpfRecord> GetGeomRecords() => _instance.GetRecords( ResourceType.GEOM );
 
-    public IEnumerable<DbpfRecord> GetTextureRecords() => _instance.GetRecords(ResourceType.DST);
+	public IEnumerable<DbpfRecord> GetModelRecords() => _instance.GetRecords( ResourceType.MODL );
 
-    public IEnumerable<DbpfRecord> GetStblRecords() => _instance.GetRecords((ResourceType)StblTypeId);
+	public IEnumerable<DbpfRecord> GetTextureRecords() => _instance.GetRecords( ResourceType.DST );
 
-    public IEnumerable<Sims4Asset> GetValidRecords()
-    {
-        var records = _instance.Records.ToArray();
-        foreach (var record in records)
-        {
-            var asset = RecordToAsset(record);
-            if (asset.HasValue)
-                yield return asset.Value;
-        }
-    }
+	public IEnumerable<DbpfRecord> GetStblRecords() => _instance.GetRecords( ResourceType.STBL );
 
-    public IEnumerable<GEOMResource> GetGeomResources() => _instance.GetEnumerator(ResourceType.GEOM);
+	public IEnumerable<Sims4Asset> GetValidRecords()
+	{
+		var records = _instance.Records.ToArray();
+		foreach ( var record in records )
+		{
+			var asset = RecordToAsset( record );
+			if ( asset.HasValue )
+				yield return asset.Value;
+		}
+	}
 
-    public byte[] ReadData(DbpfRecord record) => _instance.ReadRaw(record);
+	public IEnumerable<GEOMResource> GetGeomResources() => _instance.GetEnumerator( ResourceType.GEOM );
 
-    public IEnumerable<StblNameEntry> ReadObjectNames(uint unused)
-    {
-        _objectNamesCache ??= LoadObjectNames();
-        return _objectNamesCache;
-    }
+	public byte[] ReadData( DbpfRecord record ) => _instance.ReadRaw( record );
 
-    public Dictionary<ulong, string> ReadResolvedNames()
-    {
-        _nameMapCache ??= LoadResolvedNames();
-        return _nameMapCache;
-    }
+	public IEnumerable<StblNameEntry> ReadObjectNames( uint unused )
+	{
+		_objectNamesCache ??= LoadObjectNames();
+		return _objectNamesCache;
+	}
 
-    public bool TryResolveName(ulong instanceId, out string name)
-    {
-        var nameMap = ReadResolvedNames();
-        return nameMap.TryGetValue(instanceId, out name!);
-    }
+	public Dictionary<ulong, string> ReadResolvedNames()
+	{
+		_nameMapCache ??= LoadResolvedNames();
+		return _nameMapCache;
+	}
 
-    public static bool TryParseStblData(byte[] data, out List<StblNameEntry> strings)
-    {
-        strings = new List<StblNameEntry>();
+	public bool TryResolveName( ulong instanceId, out string name )
+	{
+		var nameMap = ReadResolvedNames();
+		return nameMap.TryGetValue( instanceId, out name! );
+	}
 
-        try
-        {
-            if (data.Length < 16)
-                return false;
+	public static bool TryParseStblData( byte[] data, out List<StblNameEntry> strings )
+	{
+		strings = new List<StblNameEntry>();
 
-            // Check STBL magic
-            if (data[0] != 'S' || data[1] != 'T' || data[2] != 'B' || data[3] != 'L')
-                return false;
+		try
+		{
+			if ( data.Length < 16 )
+				return false;
 
-            using var ms = new MemoryStream(data);
-            using var reader = new BinaryReader(ms);
+			// Check STBL magic
+			if ( data[0] != 'S' || data[1] != 'T' || data[2] != 'B' || data[3] != 'L' )
+				return false;
 
-            // Skip magic
-            reader.ReadUInt32();
+			using var ms = new MemoryStream( data );
+			using var reader = new BinaryReader( ms );
 
-            // Read number of entries
-            ms.Seek(12, SeekOrigin.Begin);
-            uint numEntries = reader.ReadUInt32();
+			// Skip magic
+			reader.ReadUInt32();
 
-            for (uint i = 0; i < numEntries; i++)
-            {
-                if (ms.Position + 8 > data.Length)
-                    break;
+			// Read number of entries
+			ms.Seek( 12, SeekOrigin.Begin );
+			uint numEntries = reader.ReadUInt32();
 
-                uint key = reader.ReadUInt32();
-                uint flags = reader.ReadUInt32();
+			for ( uint i = 0; i < numEntries; i++ )
+			{
+				if ( ms.Position + 8 > data.Length )
+					break;
 
-                // Read string length
-                if (ms.Position + 2 > data.Length)
-                    break;
+				uint key = reader.ReadUInt32();
+				uint flags = reader.ReadUInt32();
 
-                ushort stringLength = reader.ReadUInt16();
+				// Read string length
+				if ( ms.Position + 2 > data.Length )
+					break;
 
-                if (ms.Position + stringLength > data.Length)
-                    break;
+				ushort stringLength = reader.ReadUInt16();
 
-                var stringBytes = reader.ReadBytes(stringLength);
-                string text = Encoding.UTF8.GetString(stringBytes).TrimEnd('\0');
+				if ( ms.Position + stringLength > data.Length )
+					break;
 
-                strings.Add(new StblNameEntry(key, text));
-            }
+				var stringBytes = reader.ReadBytes( stringLength );
+				string text = Encoding.UTF8.GetString( stringBytes ).TrimEnd( '\0' );
 
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
+				strings.Add( new StblNameEntry( key, text ) );
+			}
 
-    private List<StblNameEntry> LoadObjectNames()
-    {
-        var objectNames = new List<StblNameEntry>();
-        var stblRecords = GetStblRecords().ToList();
+			return true;
+		}
+		catch
+		{
+			return false;
+		}
+	}
 
-        foreach (var record in stblRecords)
-        {
-            try
-            {
-                var data = ReadData(record);
-                if (TryParseStblData(data, out var names))
-                {
-                    objectNames.AddRange(names);
-                }
-            }
-            catch
-            {
-                // Continue on parse errors
-            }
-        }
+	private List<StblNameEntry> LoadObjectNames()
+	{
+		var objectNames = new List<StblNameEntry>();
+		var stblRecords = GetStblRecords().ToList();
 
-        return objectNames;
-    }
+		foreach ( var record in stblRecords )
+		{
+			try
+			{
+				var data = ReadData( record );
+				if ( TryParseStblData( data, out var names ) )
+				{
+					objectNames.AddRange( names );
+				}
+			}
+			catch
+			{
+				// Continue on parse errors
+			}
+		}
 
-    private Dictionary<ulong, string> LoadResolvedNames()
-    {
-        var nameMap = new Dictionary<ulong, string>();
+		return objectNames;
+	}
 
-        // Try to find object names
-        var objectNames = ReadObjectNames(0);
-        var groupedByInstance = objectNames.GroupBy(x => (ulong)x.Key).ToList();
+	private Dictionary<ulong, string> LoadResolvedNames()
+	{
+		var nameMap = new Dictionary<ulong, string>();
 
-        foreach (var group in groupedByInstance)
-        {
-            if (group.Count() > 0)
-            {
-                var name = group.First().Text;
-                if (!string.IsNullOrWhiteSpace(name))
-                {
-                    nameMap[group.Key] = name;
-                }
-            }
-        }
+		// Try to find object names
+		var objectNames = ReadObjectNames( 0 );
+		var groupedByInstance = objectNames.GroupBy( x => (ulong)x.Key ).ToList();
 
-        return nameMap;
-    }
+		foreach ( var group in groupedByInstance )
+		{
+			if ( group.Count() > 0 )
+			{
+				var name = group.First().Text;
+				if ( !string.IsNullOrWhiteSpace( name ) )
+				{
+					nameMap[group.Key] = name;
+				}
+			}
+		}
 
-    private Sims4Asset? RecordToAsset(DbpfRecord record)
-    {
-        return record.TypeId switch
-        {
-            ModelTypeId => new Sims4Asset(Sims4AssetKind.Model, record),
-            TextureTypeId => new Sims4Asset(Sims4AssetKind.Texture, record),
-            _ => null
-        };
-    }
+		return nameMap;
+	}
 
-    public void Dispose()
-    {
-        _instance.Dispose();
-        GC.SuppressFinalize(this);
-    }
+	private Sims4Asset? RecordToAsset( DbpfRecord record ) => new Sims4Asset( record.ResourceType, record );
+
+	public void Dispose()
+	{
+		_instance.Dispose();
+		GC.SuppressFinalize( this );
+	}
 }
 
 /// <summary>
@@ -198,25 +192,25 @@ public sealed class DbpfPackage : IDisposable
 /// </summary>
 public readonly struct DbpfRecordList : IEnumerable<DbpfRecord>
 {
-    private readonly DbpfRecord[] _records;
+	private readonly DbpfRecord[] _records;
 
-    internal DbpfRecordList(DbpfRecord[] records)
-    {
-        _records = records;
-    }
+	internal DbpfRecordList( DbpfRecord[] records )
+	{
+		_records = records;
+	}
 
-    public int Count => _records.Length;
+	public int Count => _records.Length;
 
-    public DbpfRecord this[int index] => _records[index];
+	public DbpfRecord this[int index] => _records[index];
 
-    public IEnumerator<DbpfRecord> GetEnumerator()
-    {
-        foreach (var record in _records)
-            yield return record;
-    }
+	public IEnumerator<DbpfRecord> GetEnumerator()
+	{
+		foreach ( var record in _records )
+			yield return record;
+	}
 
-    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
-    }
+	System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+	{
+		return GetEnumerator();
+	}
 }

@@ -13,6 +13,7 @@ public enum CompressionType : ushort
 /// <summary>
 /// Sims 4 DBPF resource types. Values mirror the ImHex definitions for 1:1 mapping.
 /// </summary>
+/// 
 public enum ResourceType : uint
 {
     GEOM = 0x015A1849,
