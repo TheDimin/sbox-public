@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <VersionPrefix>1.0.0</VersionPrefix>
@@ -21,14 +21,22 @@
 
   <ItemGroup>
     <Compile Include="Assembly.cs" />
+    <Compile Include="SimsLoader\CobjReader.cs" />
+    <Compile Include="SimsLoader\CompressionType.cs" />
+    <Compile Include="SimsLoader\DbpfEntry.cs" />
+    <Compile Include="SimsLoader\DbpfHeader.cs" />
+    <Compile Include="SimsLoader\DbpfIndexReader.cs" />
+    <Compile Include="SimsLoader\DbpfPackage.cs" />
+    <Compile Include="SimsLoader\Examples.cs" />
+    <Compile Include="SimsLoader\GeomReader.cs" />
+    <Compile Include="SimsLoader\GeomStructures.cs" />
+    <Compile Include="SimsLoader\PackageExtensions.cs" />
+    <Compile Include="SimsLoader\RcolReader.cs" />
+    <Compile Include="SimsLoader\ResourceKey.cs" />
+    <Compile Include="SimsLoader\ResourceType.cs" />
+    <Compile Include="SimsLoader\SpanReader.cs" />
+    <Compile Include="SimsLoader\StblReader.cs" />
     <Compile Include="SimsMount.cs" />
-    <Compile Include="PackageParser\ResourceTypes.cs" />
-    <Compile Include="PackageParser\SpanReader.cs" />
-    <Compile Include="PackageParser\DbpfStructures.cs" />
-    <Compile Include="PackageParser\DbpfInstance.cs" />
-    <Compile Include="PackageParser\GEOMResource.cs" />
-    <Compile Include="Package\DbpfPackage.cs" />
-    <Compile Include="Package\Sims4Asset.cs" />
     <Compile Include="Resource\ModelLoader.cs" />
   </ItemGroup>
 
