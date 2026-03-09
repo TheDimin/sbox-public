@@ -183,7 +183,7 @@ public sealed class GeomResource
     public uint EmbeddedShaderId;
 
     // MTNF block (if present)
-    public ShaderParam[]? ShaderParams;
+    public ShaderParam[] ShaderParams;
     public ReadOnlyMemory<byte> ShaderParamData;
 
     // Mesh properties

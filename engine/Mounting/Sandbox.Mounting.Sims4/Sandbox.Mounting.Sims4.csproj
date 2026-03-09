@@ -27,7 +27,7 @@
     <Compile Include="SimsLoader\DbpfHeader.cs" />
     <Compile Include="SimsLoader\DbpfIndexReader.cs" />
     <Compile Include="SimsLoader\DbpfPackage.cs" />
-    <Compile Include="SimsLoader\Examples.cs" />
+    <Compile Include="SimsLoader\GeomModelBuilder.cs" />
     <Compile Include="SimsLoader\GeomReader.cs" />
     <Compile Include="SimsLoader\GeomStructures.cs" />
     <Compile Include="SimsLoader\PackageExtensions.cs" />

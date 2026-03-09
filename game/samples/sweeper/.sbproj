@@ -8,6 +8,9 @@
   "Resources": null,
   "PackageReferences": [],
   "EditorReferences": null,
+  "Mounts": [
+    "sims4"
+  ],
   "IsStandaloneOnly": false,
   "Metadata": {
     "MaxPlayers": 64,

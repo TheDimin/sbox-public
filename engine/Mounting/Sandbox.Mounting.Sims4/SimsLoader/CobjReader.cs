@@ -10,6 +10,7 @@ using Sims4.Dbpf.Structures;
 
 namespace Sims4.Dbpf.Readers;
 
+
 // ---- Enums ------------------------------------------------------------------
 
 public enum TopicType : uint
@@ -87,7 +88,7 @@ public sealed class CatalogCommon
     public uint DevCategoryFlags;
     public LocaleEntry[] Locales = Array.Empty<LocaleEntry>();
     public StyleItem[] Styles = Array.Empty<StyleItem>();
-    public AuralProperties? Aural;
+    public AuralProperties Aural;
     public uint BuildBuyStatusFlags;
     public ulong PackNameHash;
     public ulong PackDescHash;

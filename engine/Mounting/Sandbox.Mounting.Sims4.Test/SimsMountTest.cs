@@ -1,75 +1,15 @@
 using Sandbox.Mounting;
-using Sandbox.Mounting.Sims4;
+using Sims4.Dbpf;
+using Sims4.Dbpf.Enums;
 using System.IO;
 using IoDirectory = System.IO.Directory;
-using Sims4ResourceType = Sandbox.Mounting.Sims4.ResourceType;
+using DbpfResourceType = Sims4.Dbpf.Enums.ResourceType;
 
 namespace Sims4MountTest;
 
 [TestClass]
 public class SimsMountTest
 {
-	[TestMethod]
-	public void ObjectDefinitionSet_ToString_WithUnresolvedNameAndNoInstances_FormatsExpectedOutput()
-	{
-		var record = new DbpfRecord(
-			Sims4ResourceType.MODL,
-			0x0000002A,
-			0x0123456789ABCDEF,
-			0x40,
-			0x100,
-			0x200,
-			CompressionType.Uncompressed,
-			0 );
-
-		var set = new ObjectDefinitionSet(
-			"objdef",
-			record,
-			string.Empty,
-			[],
-			[],
-			[],
-			[] );
-
-		var text = set.ToString();
-
-		StringAssert.Contains( text, "[objdef] type_id=0x01661233" );
-		StringAssert.Contains( text, "[objdef] resolved_name=<unresolved>" );
-		StringAssert.Contains( text, "[objdef] model_instances=[]" );
-		StringAssert.Contains( text, "[objdef] texture_instances=[]" );
-	}
-
-	[TestMethod]
-	public void ObjectDefinitionSet_ToString_WithInstances_FormatsHexInstanceLists()
-	{
-		var record = new DbpfRecord(
-			Sims4ResourceType.MODL,
-			0x0000ABCD,
-			0x1111222233334444,
-			0x80,
-			0x20,
-			0x30,
-			CompressionType.Zlib,
-			0 );
-
-		var set = new ObjectDefinitionSet(
-			"cobj",
-			record,
-			"chair_name",
-			[0x1, 0x2],
-			[0xABC],
-			[0xDEAD],
-			[0xBEEF] );
-
-		var text = set.ToString();
-
-		StringAssert.Contains( text, "[cobj] resolved_name=chair_name" );
-		StringAssert.Contains( text, "[cobj] model_instances=[0x0000000000000001, 0x0000000000000002]" );
-		StringAssert.Contains( text, "[cobj] geom_instances=[0x0000000000000ABC]" );
-		StringAssert.Contains( text, "[cobj] material_instances=[0x000000000000DEAD]" );
-		StringAssert.Contains( text, "[cobj] texture_instances=[0x000000000000BEEF]" );
-	}
-
 	[TestMethod]
 	public void Initialize_WhenSteamAppMissing_DoesNotMarkMountInstalled()
 	{
@@ -187,9 +127,9 @@ public class SimsMountTest
 	private static void EnsureFixtureHasModelRecordsOrInconclusive( string packagePath )
 	{
 		using var package = DbpfPackage.Open( packagePath );
-		if ( !package.GetModelRecords().Any() )
+		if ( package.CountOf( DbpfResourceType.GEOM ) == 0 )
 		{
-			Assert.Inconclusive( "Fixture package has no model records. Provide a fixture that contains MODL records." );
+			Assert.Inconclusive( "Fixture package has no GEOM resources. Provide a fixture that contains GEOM records." );
 		}
 	}
 

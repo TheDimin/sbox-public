@@ -1,5 +1,6 @@
 using System;
 using Sims4.Dbpf.Enums;
+using ResourceType = Sims4.Dbpf.Enums.ResourceType;
 
 namespace Sims4.Dbpf.Structures;
 
@@ -40,7 +41,7 @@ public readonly struct ResourceKey : IEquatable<ResourceKey>
     public bool Equals(ResourceKey other) =>
         Type == other.Type && Group == other.Group && Instance == other.Instance;
 
-    public override bool Equals(object? obj) => obj is ResourceKey k && Equals(k);
+    public override bool Equals(object obj) => obj is ResourceKey k && Equals(k);
     public override int GetHashCode() => HashCode.Combine(Type, Group, Instance);
     public static bool operator ==(ResourceKey a, ResourceKey b) => a.Equals(b);
     public static bool operator !=(ResourceKey a, ResourceKey b) => !a.Equals(b);

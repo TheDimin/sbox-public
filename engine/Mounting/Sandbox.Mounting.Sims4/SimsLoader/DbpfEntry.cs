@@ -14,12 +14,12 @@ namespace Sims4.Dbpf.Structures;
 public readonly struct DbpfEntry : IEquatable<DbpfEntry>
 {
     /// <summary>Resource type ID (e.g. GEOM = 0x015A1849).</summary>
-    public readonly ResourceType Type;
+    public readonly Sims4.Dbpf.Enums.ResourceType Type;
 
     /// <summary>Resource group / namespace.</summary>
     public readonly uint Group;
 
-    /// <summary>Full 64-bit instance ID (Hi << 32 | Lo).</summary>
+    /// <summary>Full 64-bit instance ID (Hi &lt;&lt; 32 | Lo).</summary>
     public readonly ulong Instance;
 
     /// <summary>Absolute file offset to the (possibly compressed) chunk data.</summary>
@@ -35,7 +35,7 @@ public readonly struct DbpfEntry : IEquatable<DbpfEntry>
     public readonly CompressionType Compression;
 
     public DbpfEntry(
-        ResourceType type, uint group, ulong instance,
+        Sims4.Dbpf.Enums.ResourceType type, uint group, ulong instance,
         uint chunkOffset, uint fileSizeRaw, uint memSize,
         CompressionType compression)
     {
@@ -63,7 +63,7 @@ public readonly struct DbpfEntry : IEquatable<DbpfEntry>
     public bool Equals(DbpfEntry other) =>
         Type == other.Type && Group == other.Group && Instance == other.Instance;
 
-    public override bool Equals(object? obj) => obj is DbpfEntry e && Equals(e);
+    public override bool Equals(object obj) => obj is DbpfEntry e && Equals(e);
     public override int GetHashCode() => HashCode.Combine(Type, Group, Instance);
     public static bool operator ==(DbpfEntry a, DbpfEntry b) => a.Equals(b);
     public static bool operator !=(DbpfEntry a, DbpfEntry b) => !a.Equals(b);

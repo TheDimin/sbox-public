@@ -1,5 +1,6 @@
 using Sandbox;
-using Sandbox.Mounting.Sims4;
+using Sims4.Dbpf;
+using Sims4.Dbpf.Enums;
 using System.IO;
 
 namespace Sims4MountTest;
@@ -7,159 +8,88 @@ namespace Sims4MountTest;
 [TestClass]
 public class ModelLoaderTest
 {
-	private const uint ModelTypeId = 0x01661233u;
-
 	[TestMethod]
-	public void ModelRecords_HaveValidNames()
+	public void GeomEntries_RealPackage_ReturnsValidEntries()
 	{
-
 		var packagePath = GetRealPackagePathOrInconclusive();
 		using var package = DbpfPackage.Open( packagePath );
 
-		var modelRecords = package.GetModelRecords().ToList();
+		var geomEntries = GetEntries( package, ResourceType.GEOM, 5 );
+		if ( geomEntries.Count == 0 )
+			Assert.Inconclusive( "No GEOM resources found in package." );
 
-		// Name maps are optional in real Sims 4 packages, so require at least one
-		// successful resolution from a sample instead of requiring every model record.
-		var sampledRecords = modelRecords.Take( 5 ).ToList();
-		int resolvedCount = 0;
-
-		foreach ( var record in sampledRecords )
+		foreach ( var entry in geomEntries )
 		{
-			if ( !package.TryResolveName( record.InstanceId, out var name ) )
-				continue;
-
-			Assert.IsFalse( string.IsNullOrWhiteSpace( name ), $"Resolved name is empty for modelID: {record.InstanceId}" );
-			resolvedCount++;
-		}
-
-		if ( resolvedCount == 0 )
-		{
-			Assert.Inconclusive( "No model names were resolvable in this package fixture. _KEY/STBL mappings for model IDs may be absent." );
+			Assert.AreEqual( ResourceType.GEOM, entry.Type );
+			Assert.IsTrue( entry.Instance > 0, "Instance ID should be greater than 0." );
+			Assert.IsTrue( entry.MemSize > 0, "Decompressed size should be greater than 0." );
 		}
 	}
 
 	[TestMethod]
-	public void GetModelRecords_RealPackage_ReturnsValidRecords()
+	public void ReadGeom_RealPackage_ReturnsValidMeshData()
 	{
 		var packagePath = GetRealPackagePathOrInconclusive();
 		using var package = DbpfPackage.Open( packagePath );
 
-		if ( package.Records.Count == 0 )
-		{
-			Assert.Inconclusive( "Loaded package has no records." );
-		}
+		var geomEntries = GetEntries( package, ResourceType.GEOM, 1 );
+		if ( geomEntries.Count == 0 )
+			Assert.Inconclusive( "No GEOM resources found in package." );
 
-		var modelRecords = package.GetModelRecords().ToList();
-		if ( modelRecords.Count == 0 )
-		{
-			Assert.Inconclusive( "No model records found in package." );
-		}
-
-		// Verify records are valid
-		foreach ( var record in modelRecords.Take( 5 ) )
-		{
-			Assert.IsNotNull( record );
-			Assert.AreEqual( ModelTypeId, record.TypeId );
-			Assert.IsTrue( record.InstanceId > 0, "Instance ID should be greater than 0." );
-			Assert.IsTrue( record.DecompressedSize > 0, "Decompressed size should be greater than 0." );
-		}
+		var geom = package.ReadGeom( geomEntries[0] );
+		Assert.IsTrue( geom.VertexCount > 0, "Expected GEOM to contain vertices." );
+		Assert.IsTrue( geom.VertexStride > 0, "Expected positive vertex stride." );
+		Assert.IsTrue( geom.Elements.Length > 0, "Expected GEOM to contain element definitions." );
+		Assert.IsTrue( geom.FaceGroups.Length > 0, "Expected GEOM to contain at least one face group." );
 	}
 
 	[TestMethod]
-	public void ReadModelData_RealPackage_ReturnsValidData()
+	public void ReadGeom_RealPackage_FirstFewEntries_AreParseable()
 	{
 		var packagePath = GetRealPackagePathOrInconclusive();
 		using var package = DbpfPackage.Open( packagePath );
 
-		if ( package.Records.Count == 0 )
-		{
-			Assert.Inconclusive( "Loaded package has no records." );
-		}
+		var geomEntries = GetEntries( package, ResourceType.GEOM, 5 );
+		if ( geomEntries.Count == 0 )
+			Assert.Inconclusive( "No GEOM resources found in package." );
 
-		var modelRecords = package.GetModelRecords().ToList();
-		if ( modelRecords.Count == 0 )
-		{
-			Assert.Inconclusive( "No model records found in package." );
-		}
-
-		// Read data from first few models
 		int successCount = 0;
-		foreach ( var modelRecord in modelRecords.Take( 5 ) )
+		foreach ( var entry in geomEntries )
 		{
-			var data = package.ReadData( modelRecord );
-			Assert.IsNotNull( data, "Data should not be null." );
-			Assert.IsTrue( data.Length > 0, $"Data length should be greater than 0 for record 0x{modelRecord.InstanceId:X16}." );
-			Assert.AreEqual( (int)modelRecord.DecompressedSize, data.Length,
-				$"Data length should match decompressed size for record 0x{modelRecord.InstanceId:X16}." );
+			var geom = package.ReadGeom( entry );
+			Assert.IsTrue( geom.VertexCount >= 0 );
+			Assert.IsTrue( geom.FaceGroups.Length > 0 );
 			successCount++;
 		}
 
-		Assert.IsTrue( successCount > 0, "At least one model should be readable." );
+		Assert.IsTrue( successCount > 0, "At least one GEOM should be readable." );
 	}
 
 	[TestMethod]
-	public void ModelAssetKind_RealPackage_IdentifiesModelsCorrectly()
+	public void ReadModelContainer_RealPackage_ModlCanBeParsedAsRcol()
 	{
 		var packagePath = GetRealPackagePathOrInconclusive();
 		using var package = DbpfPackage.Open( packagePath );
 
-		if ( package.Records.Count == 0 )
-		{
-			Assert.Inconclusive( "Loaded package has no records." );
-		}
+		var modlEntry = package.FindFirst( ResourceType.MODL );
+		if ( modlEntry is null )
+			Assert.Inconclusive( "No MODL resources found in package." );
 
-		// Get model and texture assets
-		var assets = package.GetValidRecords().ToList();
-		if ( assets.Count == 0 )
-		{
-			Assert.Inconclusive( "No model/texture assets found in package." );
-		}
-
-		var modelAssets = assets.Where( a => a.Kind == ResourceType.GEOM ).ToList();
-		var textureAssets = assets.Where( a => a.Kind == ResourceType.MATD ).ToList();
-
-		Assert.IsTrue( modelAssets.Count > 0, "Expected at least one model asset." );
-		Assert.IsTrue( textureAssets.Count > 0, "Expected at least one texture asset." );
-
-		// Verify asset types match record types
-		foreach ( var modelAsset in modelAssets.Take( 3 ) )
-		{
-			Assert.AreEqual( ModelTypeId, modelAsset.Record.TypeId,
-				$"Model asset should have TypeId 0x{ModelTypeId:X8}." );
-		}
+		var rcol = package.ReadRcol( modlEntry.Value );
+		Assert.IsTrue( rcol.ObjectLocations.Length > 0, "Expected RCOL object locations." );
+		Assert.IsTrue( rcol.ChunkData.Length > 0, "Expected RCOL chunk data." );
 	}
 
-	[TestMethod]
-	public void ModelData_RealPackage_ContainsValidHeader()
+	private static List<Sims4.Dbpf.Structures.DbpfEntry> GetEntries( DbpfPackage package, ResourceType type, int maxCount )
 	{
-		var packagePath = GetRealPackagePathOrInconclusive();
-		using var package = DbpfPackage.Open( packagePath );
-
-		if ( package.Records.Count == 0 )
+		var result = new List<Sims4.Dbpf.Structures.DbpfEntry>( maxCount );
+		foreach ( var entry in package.GetEntriesOfType( type ) )
 		{
-			Assert.Inconclusive( "Loaded package has no records." );
+			result.Add( entry );
+			if ( result.Count >= maxCount )
+				break;
 		}
-
-		var modelRecords = package.GetModelRecords().ToList();
-		if ( modelRecords.Count == 0 )
-		{
-			Assert.Inconclusive( "No model records found in package." );
-		}
-
-		// Test first model
-		var modelRecord = modelRecords[0];
-		var modelData = package.ReadData( modelRecord );
-
-		Assert.IsTrue( modelData.Length >= 4, "Model data should be at least 4 bytes." );
-
-		// Read and validate header
-		using var stream = new MemoryStream( modelData, writable: false );
-		using var reader = new BinaryReader( stream );
-
-		uint version = reader.ReadUInt32();
-		Assert.IsTrue( version > 0 || modelData[0] > 0, "Model data should contain meaningful header information." );
-
-		System.Diagnostics.Debug.WriteLine( $"Model 0x{modelRecord.InstanceId:X16} header: 0x{version:X8}, data size: {modelData.Length} bytes" );
+		return result;
 	}
 
 	private static string GetRealPackagePathOrInconclusive()

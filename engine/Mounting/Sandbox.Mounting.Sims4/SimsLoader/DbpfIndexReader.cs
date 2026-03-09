@@ -8,6 +8,7 @@
 
 using Sims4.Dbpf.Enums;
 using Sims4.Dbpf.Structures;
+using ResourceType = Sims4.Dbpf.Enums.ResourceType;
 
 namespace Sims4.Dbpf.Readers;
 
@@ -19,7 +20,7 @@ public static class DbpfIndexReader
     /// <param name="indexSpan">Span covering exactly the index block bytes.</param>
     /// <param name="entryCount">Number of entries (from the header).</param>
     /// <param name="entries">Pre-allocated array to fill. Must have length >= entryCount.</param>
-    public static void Read(ReadOnlySpan<byte> indexSpan, int entryCount, DbpfEntry[] entries)
+    public static void Read(global::System.ReadOnlySpan<byte> indexSpan, int entryCount, DbpfEntry[] entries)
     {
         var r = new SpanReader(indexSpan);
 
