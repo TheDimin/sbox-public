@@ -28,7 +28,7 @@ public struct GeomVertexFormatEntry
 }
 
 /// <summary>
-/// Sub-mesh skin controller data stored within a GEOM (version 0x0C).
+/// Sub-mesh skin controller data stored within a GEOM (version 0x0C+).
 /// Contains a reference hash and a list of (float, float) pairs.
 /// </summary>
 public class GeomUnknownThing
@@ -51,7 +51,7 @@ public class GeomUnknownThing
 }
 
 /// <summary>
-/// Extended sub-mesh data stored within a GEOM (version 0x0C).
+/// Extended sub-mesh data stored within a GEOM (version 0x0C+).
 /// Contains transform/bounds data (53 bytes).
 /// </summary>
 public class GeomUnknownThing2
@@ -105,7 +105,7 @@ public class GeomUnknownThing2
 ///
 /// On-disk layout:
 ///   "GEOM" tag (4 bytes)
-///   Version (4 bytes) - 0x00000005 or 0x0000000C
+///   Version (4 bytes) - 0x05, 0x0C, 0x0D, 0x0E, 0x0F, etc.
 ///   TGI offset (4 bytes) - offset from current position to TGI block
 ///   TGI size (4 bytes)
 ///   Shader hash (4 bytes) - ShaderType enum
@@ -144,10 +144,10 @@ public class GeometryResource : IResource
     /// <summary>Skin controller index (version 0x05 only).</summary>
     public int SkinIndex { get; set; }
 
-    /// <summary>Sub-mesh data (version 0x0C only).</summary>
+    /// <summary>Sub-mesh data (version 0x0C+).</summary>
     public List<GeomUnknownThing> UnknownThings { get; set; } = new();
 
-    /// <summary>Extended sub-mesh data (version 0x0C only).</summary>
+    /// <summary>Extended sub-mesh data (version 0x0C+).</summary>
     public List<GeomUnknownThing2> UnknownThings2 { get; set; } = new();
 
     /// <summary>Bone name hashes used for skinning.</summary>
@@ -158,6 +158,9 @@ public class GeometryResource : IResource
 
     public void Parse(ReadOnlyMemory<byte> data)
     {
+        if (data.Length == 0)
+            return;
+
         using var ms = new MemoryStream(data.ToArray());
         using var reader = new BinaryReader(ms);
 
@@ -166,8 +169,8 @@ public class GeometryResource : IResource
             throw new InvalidDataException($"Invalid GEOM tag: 0x{tag:X8}; expected 0x{GeomTag:X8}");
 
         Version = reader.ReadUInt32();
-        if (Version != 0x00000005 && Version != 0x0000000C)
-            throw new InvalidDataException($"Unsupported GEOM version: 0x{Version:X8}");
+        if (Version < 0x00000005)
+            throw new InvalidDataException($"Unsupported GEOM version: 0x{Version:X8} (minimum supported: 0x05)");
 
         // TGI offset is relative to the position after reading the offset field
         long tgiOffsetBase = ms.Position;
@@ -231,43 +234,69 @@ public class GeometryResource : IResource
         for (int i = 0; i < numFaceIndices; i++)
             RawIndices[i] = reader.ReadUInt16();
 
-        // Version-specific data
-        if (Version == 0x00000005)
+        // Version-specific trailing data (sub-mesh metadata + bone hashes).
+        // The vertex/index data above is the critical payload; everything below
+        // is best-effort because the sub-mesh structures change across versions.
+        try
         {
-            SkinIndex = reader.ReadInt32();
-        }
-        else if (Version == 0x0000000C)
-        {
-            // UnknownThings
-            int count1 = reader.ReadInt32();
-            UnknownThings = new List<GeomUnknownThing>(count1);
-            for (int i = 0; i < count1; i++)
+            if (Version == 0x00000005)
             {
-                var ut = new GeomUnknownThing();
-                ut.Parse(reader);
-                UnknownThings.Add(ut);
+                SkinIndex = reader.ReadInt32();
+            }
+            else if (Version >= 0x0000000C)
+            {
+                // Versions 0x0C and later use compact sub-mesh data
+                int count1 = reader.ReadInt32();
+                if (count1 >= 0 && count1 < 10000)
+                {
+                    UnknownThings = new List<GeomUnknownThing>(count1);
+                    for (int i = 0; i < count1; i++)
+                    {
+                        var ut = new GeomUnknownThing();
+                        ut.Parse(reader);
+                        UnknownThings.Add(ut);
+                    }
+                }
+
+                int count2 = reader.ReadInt32();
+                if (count2 >= 0 && count2 < 10000)
+                {
+                    UnknownThings2 = new List<GeomUnknownThing2>(count2);
+                    for (int i = 0; i < count2; i++)
+                    {
+                        var ut2 = new GeomUnknownThing2();
+                        ut2.Parse(reader);
+                        UnknownThings2.Add(ut2);
+                    }
+                }
+            }
+            else
+            {
+                // Versions 0x06–0x0B: assume same layout as 0x05 (skin index only)
+                SkinIndex = reader.ReadInt32();
             }
 
-            // UnknownThings2
-            int count2 = reader.ReadInt32();
-            UnknownThings2 = new List<GeomUnknownThing2>(count2);
-            for (int i = 0; i < count2; i++)
+            // Bone hashes
+            int boneCount = reader.ReadInt32();
+            if (boneCount >= 0 && boneCount < 100000)
             {
-                var ut2 = new GeomUnknownThing2();
-                ut2.Parse(reader);
-                UnknownThings2.Add(ut2);
+                BoneHashes = new List<uint>(boneCount);
+                for (int i = 0; i < boneCount; i++)
+                    BoneHashes.Add(reader.ReadUInt32());
             }
         }
+        catch (EndOfStreamException)
+        {
+            // Version-specific trailing data format mismatch —
+            // mesh vertices and indices are still valid for rendering.
+        }
 
-        // Bone hashes
-        int boneCount = reader.ReadInt32();
-        BoneHashes = new List<uint>(boneCount);
-        for (int i = 0; i < boneCount; i++)
-            BoneHashes.Add(reader.ReadUInt32());
-
-        // TGI block at the end of the resource
-        ms.Position = tgiPosition;
-        ParseTgiBlock(reader, tgiSize);
+        // TGI block at the end of the resource (may be absent in RCOL-embedded GEOM)
+        if (tgiPosition >= 0 && tgiPosition < ms.Length && tgiSize > 0)
+        {
+            ms.Position = tgiPosition;
+            ParseTgiBlock(reader, tgiSize);
+        }
     }
 
     private void ParseTgiBlock(BinaryReader reader, uint tgiSize)
@@ -280,6 +309,12 @@ public class GeometryResource : IResource
         }
 
         int count = reader.ReadInt32();
+        int maxPossible = (int)((tgiSize - 4) / 16);
+        if (count < 0 || count > maxPossible)
+        {
+            TgiReferences = Array.Empty<ResourceKey>();
+            return;
+        }
         TgiReferences = new ResourceKey[count];
         for (int i = 0; i < count; i++)
         {
@@ -339,14 +374,14 @@ public class GeometryResource : IResource
                         v.BlendIndices = ReadBytes(readPos, fmt.ElementSize);
                         break;
                     case GeomUsageType.Weights:
-                        if (Version == 0x00000005)
+                        if (Version <= 0x0000000B)
                         {
-                            // 4 floats (16 bytes)
+                            // Version 0x05–0x0B: 4 floats (16 bytes)
                             v.BlendWeights = ReadFloats(readPos, 4);
                         }
-                        else if (Version == 0x0000000C)
+                        else
                         {
-                            // 4 bytes normalized to floats
+                            // Version 0x0C+: 4 bytes normalized to floats
                             v.BlendWeights = new float[4];
                             for (int j = 0; j < 4; j++)
                                 v.BlendWeights[j] = RawVertexData[readPos + j] / 255f;

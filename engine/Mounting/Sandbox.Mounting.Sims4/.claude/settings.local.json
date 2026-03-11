@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build Sandbox.Mounting.Sims4.csproj)",
+      "Bash(dotnet build)",
+      "Bash(dotnet test --no-build --verbosity normal)",
+      "Bash(dotnet test --no-restore --filter \"DiagCobjTest\" --verbosity normal --logger \"console;verbosity=detailed\")",
+      "Bash(dotnet test --filter \"DiagCobjTest\" --verbosity quiet)",
+      "Bash(dotnet test --filter \"DiagCobjTest\" --verbosity normal)",
+      "Bash(dotnet test --filter \"DiagCobjTest\" --no-build)",
+      "Bash(dotnet build --no-restore -q)",
+      "Bash(dotnet test --no-build --filter \"DiagCobjTest\")",
+      "Bash(dotnet test --verbosity normal)",
+      "Bash(dotnet test --no-build)",
+      "Bash(dotnet build --nologo -v q)",
+      "Bash(dotnet test --nologo -v n)",
+      "Bash(dir /b \"E:\\\\SteamLibrary\\\\steamapps\\\\common\\\\The Sims 4\\\\Data\\\\Client\\\\*.package\")",
+      "Bash(ls \"E:/SteamLibrary/steamapps/common/The Sims 4/Data/Client/\"*.package)",
+      "Bash(dotnet test --nologo --filter \"AllGeomEntries_AllPackages_ParseWithoutException\" -v n)",
+      "Bash(dotnet clean --nologo -v q)",
+      "Bash(dotnet test --nologo --filter \"DiagnosticDump_FailingGeomEntry\" -v n)",
+      "Bash(dotnet test --nologo --filter \"DiagnosticDump_FailingGeomEntry\" -v d)",
+      "Bash(dotnet test --nologo --filter \"DiagnosticDump_FailingGeomEntry\" --logger \"console;verbosity=detailed\")",
+      "Bash(dotnet test --nologo --filter \"AllGeomEntries_AllPackages_ParseWithoutException\" --logger \"console;verbosity=detailed\")",
+      "Bash(dotnet test --nologo --logger \"console;verbosity=detailed\")",
+      "Bash(dotnet test --nologo --filter \"FullyQualifiedName!~AllGeomEntries\" -v n)",
+      "Bash(dotnet test --nologo --filter \"FullyQualifiedName!~AllGeomEntries\" --logger \"console;verbosity=detailed\")"
+    ]
+  }
+}

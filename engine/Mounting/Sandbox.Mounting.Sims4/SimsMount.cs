@@ -1,7 +1,6 @@
 using System;
-using System.Text;
 using Mounting.Sims4;
-using Sims4.Dbpf;
+using Sims4Reader;
 
 
 public class SimsMount : BaseGameMount
@@ -15,7 +14,7 @@ public class SimsMount : BaseGameMount
 	// TS4 on Steam
 	const long AppId = 1222670;
 
-	string _gameDir;
+	string? _gameDir;
 
 	protected override void Initialize( InitializeContext context )
 	{
@@ -33,18 +32,8 @@ public class SimsMount : BaseGameMount
 			}
 		}
 
-		//Detecting it trough EA app requires us to know if the user owns the game... 
+		//Detecting it trough EA app requires us to know if the user owns the game...
 		return;
-		// 2. EA App common paths
-		//foreach ( var path in EaAppPaths )
-		//{
-		//	if ( System.IO.Directory.Exists( path ) )
-		//	{
-		//		_gameDir = path;
-		//		IsInstalled = true;
-		//		return;
-		//	}
-		//}
 	}
 
 	protected override Task Mount( MountContext context )
@@ -74,35 +63,55 @@ public class SimsMount : BaseGameMount
 
 		var package = DbpfPackage.Open( file );
 
-		int count = 0;
-		foreach ( var item in package.GetEntriesOfType( Sims4.Dbpf.Enums.ResourceType.GEOM ) )
+		foreach ( var entry in package.Entries )
 		{
-			count++;
+			if ( entry.MemSize == 0 || entry.FileSize == 0 )
+				continue;
+
+			var key = entry.Key;
+			var name = $"{key.Group:X8}_{key.Instance:X16}";
+
 			try
 			{
-				//Log.Info( $"Found GEOM record: type=0x{(uint)item.Type:X8} group=0x{item.Group:X8} instance=0x{item.Instance:X16}" );
-				string DisplayName = package.GetResourceName( item.Instance );
-
-
-				if ( DisplayName.Length > 0 )
+				switch ( key.Type )
 				{
-					//Log.Warning( $"Failed to find displayname.. fallback instanceID used" );
-					DisplayName = $"{item.Instance}";
-				}
+					// Images (DST, RLE)
+					case Sims4Reader.ResourceType.DstImage:
+					case Sims4Reader.ResourceType.RleImage:
+					case Sims4Reader.ResourceType.RleImageAlt:
+						context.Add( Sandbox.Mounting.ResourceType.Texture,
+							$"textures/{name}",
+							new Sims4TextureLoader( package, entry ) );
+						break;
 
-				context.Add( Sandbox.Mounting.ResourceType.Model, $"BodyGeometry/{item.Group}/{DisplayName}", new ModelLoader( package, item, count ) );
+					// Materials (MATD in RCOL)
+					case Sims4Reader.ResourceType.MaterialDefinition:
+						context.Add( Sandbox.Mounting.ResourceType.Material,
+							$"materials/{name}",
+							new Sims4MaterialLoader( package, entry ) );
+						break;
+
+					// Models (GEOM in RCOL)
+					case Sims4Reader.ResourceType.Geometry:
+						context.Add( Sandbox.Mounting.ResourceType.Model,
+							$"models/{name}",
+							new ModelLoader( package, entry ) );
+						break;
+
+					// Catalog objects (COBJ)
+					case Sims4Reader.ResourceType.CatalogObject:
+						context.Add( Sandbox.Mounting.ResourceType.Text,
+							$"objects/{name}",
+							new CatalogObjectLoader( package, entry ) );
+						break;
+				}
 			}
 			catch ( Exception ex )
 			{
-				Log.Error( $"Error processing GEOM record: {ex.Message}" );
+				Log.Error( $"Error mounting {key.Type} {key}: {ex.Message}" );
 			}
-			//foreach ( var record in package.GetTextureRecords() )
-			//{
-			//	var mountPath = $"mount://{Ident}/textures/{record.ResourceGroup:X8}/{record.InstanceId:X16}";
-			//	context.Add( ResourceType.Texture, mountPath, new Sims4TextureLoader( package, record ) );
-			//	Log.Info( $"Mounted texture: {mountPath}" );
-			//}
 		}
+
 		packages.Add( package );
 	}
 

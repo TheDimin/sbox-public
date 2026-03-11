@@ -1,3 +1,4 @@
+using Sims4Reader.Material;
 using Sims4Reader.Rcol;
 
 namespace Sims4Reader.Mesh;
@@ -31,7 +32,8 @@ public class RcolContainer : IResource
         ["VPXY"] = () => new VpxyChunk(),
         ["FTPT"] = () => new FootprintChunk(),
         ["LITE"] = () => new LightChunk(),
-        // Additional tags produce generic (raw) chunks
+        ["MATD"] = () => new MaterialDefinition(),
+        ["MTST"] = () => new MaterialState(),
     };
 
     public uint Version { get; set; }
@@ -42,6 +44,9 @@ public class RcolContainer : IResource
 
     public void Parse(ReadOnlyMemory<byte> data)
     {
+        if (data.Length == 0)
+            return;
+
         using var ms = new MemoryStream(data.ToArray());
         using var reader = new BinaryReader(ms);
 

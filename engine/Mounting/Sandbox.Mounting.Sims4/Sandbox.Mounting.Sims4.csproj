@@ -6,7 +6,8 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>1701;1702;1591</NoWarn>
+    <Nullable>enable</Nullable>
+    <NoWarn>1701;1702;1591;CA2000</NoWarn>
     <LangVersion>14</LangVersion>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
@@ -21,23 +22,13 @@
 
   <ItemGroup>
     <Compile Include="Assembly.cs" />
-    <Compile Include="SimsLoader\CobjReader.cs" />
-    <Compile Include="SimsLoader\CompressionType.cs" />
-    <Compile Include="SimsLoader\DbpfEntry.cs" />
-    <Compile Include="SimsLoader\DbpfHeader.cs" />
-    <Compile Include="SimsLoader\DbpfIndexReader.cs" />
-    <Compile Include="SimsLoader\DbpfPackage.cs" />
-    <Compile Include="SimsLoader\GeomModelBuilder.cs" />
-    <Compile Include="SimsLoader\GeomReader.cs" />
-    <Compile Include="SimsLoader\GeomStructures.cs" />
-    <Compile Include="SimsLoader\PackageExtensions.cs" />
-    <Compile Include="SimsLoader\RcolReader.cs" />
-    <Compile Include="SimsLoader\ResourceKey.cs" />
-    <Compile Include="SimsLoader\ResourceType.cs" />
-    <Compile Include="SimsLoader\SpanReader.cs" />
-    <Compile Include="SimsLoader\StblReader.cs" />
     <Compile Include="SimsMount.cs" />
     <Compile Include="Resource\ModelLoader.cs" />
+    <Compile Include="Resource\TextureLoader.cs" />
+    <Compile Include="Resource\MaterialLoader.cs" />
+    <Compile Include="Resource\GeomModelBuilder.cs" />
+    <Compile Include="Resource\CatalogObjectLoader.cs" />
+    <Compile Include="Sims4Reader/**/*.cs" />
   </ItemGroup>
 
   <ItemGroup>

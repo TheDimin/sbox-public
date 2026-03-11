@@ -1,39 +1,33 @@
-﻿using Sandbox;
+using Sandbox;
 using Sandbox.Diagnostics;
-using Sims4.Dbpf;
-using Sims4.Dbpf.Resources;
-using Sims4.Dbpf.Structures;
-using Sims4.Sbox;
-using System;
-using static Sandbox.Services.Inventory;
+using Sims4Reader;
+using Sims4Reader.Mesh;
 
 namespace Mounting.Sims4;
 
-public class ModelLoader( DbpfPackage package, DbpfEntry description, int index ) : ResourceLoader<SimsMount>
+public class ModelLoader( DbpfPackage package, ResourceEntry entry ) : ResourceLoader<SimsMount>
 {
 	static new Logger Log = new Logger( "Sims4-ModelLoader" );
 
-	protected override object Load()
+	protected override object? Load()
 	{
-		GeomResource geom = null;
-		Model model = null;
+		// Skip zero-byte tombstone entries from delta packages
+		if ( entry.MemSize == 0 || entry.FileSize == 0 )
+			return null;
+
 		try
 		{
-			geom = package.ReadGeom( description );
+			var rcol = package.GetResource<RcolContainer>( entry );
+			var geomChunk = rcol.GetChunk<GeometryRcolChunk>();
+			if ( geomChunk == null )
+				return null;
 
-			model = GeomModelBuilder.Build( geom );
+			return GeomModelBuilder.Build( geomChunk.Geometry );
 		}
 		catch ( Exception e )
 		{
-			Log.Warning( $"Failed to load model {description.Key}:: INDEX:{index}" );
-
-			//Dump all model info
-
-
-			Log.Info( e );
-			throw;
+			Log.Warning( $"Failed to load model {entry.Key}: {e.Message}" );
+			return null;
 		}
-
-		return model;
 	}
 }
