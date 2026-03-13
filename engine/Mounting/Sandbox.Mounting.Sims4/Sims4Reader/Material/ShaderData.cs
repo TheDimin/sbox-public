@@ -232,6 +232,7 @@ public enum ShaderDataType : uint
     Int = 2,
     Texture = 4,
     ImageMap = 0x00010004,
+    ImageMap2 = 0x00040004,
 }
 
 /// <summary>
@@ -291,7 +292,7 @@ public abstract class ShaderData
                     5 => new ShaderTextureKey(),
                     _ => throw new InvalidDataException($"Invalid count {count} for Texture at 0x{reader.BaseStream.Position:X8}"),
                 },
-                ShaderDataType.ImageMap => count switch
+                ShaderDataType.ImageMap or ShaderDataType.ImageMap2 => count switch
                 {
                     4 => new ShaderImageMapKey(),
                     _ => throw new InvalidDataException($"Invalid count {count} for ImageMap at 0x{reader.BaseStream.Position:X8}"),

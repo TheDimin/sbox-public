@@ -5,58 +5,70 @@ namespace Sims4Reader.Resources;
 /// </summary>
 public struct CatalogTag
 {
-    public uint Category;
-    public uint Value;
+    public ushort Category;
+    public ushort Value;
 }
 
 /// <summary>
 /// COBJ (Catalog Object) resource - defines catalog properties for buyable/buildable
-/// objects in The Sims 4. Links OBJD to catalog metadata including price, tags,
+/// objects in The Sims 4. Links to catalog metadata including price, tags,
 /// thumbnails, and resource references.
 ///
-/// The COBJ format varies significantly across game versions. This parser extracts
-/// the guaranteed common header fields and uses best-effort parsing for the rest,
-/// tolerating format differences gracefully.
+/// Format based on s4pi CatalogCommon + AbstractCatalogResource.
 /// </summary>
 public class CatalogObjectResource : IResource
 {
     public uint Version { get; set; }
 
-    // Common block
+    // Common block (CatalogCommon)
     public uint CommonBlockVersion { get; set; }
     public uint NameHash { get; set; }
     public uint DescriptionHash { get; set; }
     public uint SimoleonPrice { get; set; }
     public ulong ThumbnailHash { get; set; }
     public uint DevCategoryFlags { get; set; }
-    public uint BuildBuyStatusFlags { get; set; }
 
-    // COBJ-specific
+    // Tags from common block
     public CatalogTag[] Tags { get; set; } = Array.Empty<CatalogTag>();
-    public ushort SelectionGroup { get; set; }
-    public ushort ObjectType { get; set; }
-    public uint ObjectTypeFlags { get; set; }
-    public uint WallPlacementFlags { get; set; }
-    public uint MovementFlags { get; set; }
 
-    /// <summary>
-    /// TGI reference list at end of resource (links to OBJD, models, thumbnails, etc.)
-    /// </summary>
-    public ResourceKey[] TgiReferences { get; set; } = Array.Empty<ResourceKey>();
+    // Category classification (from COBJ body / AbstractCatalogResource)
+    public uint RoomCategoryFlags { get; set; }
+    public uint FunctionCategoryFlags { get; set; }
+    public uint BuildCategoryFlags { get; set; }
 
     /// <summary>
     /// Whether the full COBJ body was parsed, or only the common header was readable.
     /// </summary>
     public bool IsFullyParsed { get; private set; }
 
+    /// <summary>
+    /// TGI reference list (links to OBJD, models, thumbnails, etc.)
+    /// </summary>
+    public ResourceKey[] TgiReferences { get; set; } = Array.Empty<ResourceKey>();
+
     public void Parse(ReadOnlyMemory<byte> data)
     {
         using var ms = new MemoryStream(data.ToArray());
         using var reader = new BinaryReader(ms);
 
-        Version = reader.ReadUInt32();
+        try
+        {
+            Version = reader.ReadUInt32();
+            ParseCatalogCommon(reader);
+            ParseAbstractCatalogBody(reader, ms);
+            IsFullyParsed = true;
+        }
+        catch (EndOfStreamException)
+        {
+            // Format mismatch for this version — common block tags are still usable
+        }
+    }
 
-        // Common block — always present
+    /// <summary>
+    /// Parse the CatalogCommon block (s4pi CatalogCommon.cs).
+    /// </summary>
+    private void ParseCatalogCommon(BinaryReader reader)
+    {
         CommonBlockVersion = reader.ReadUInt32();
         NameHash = reader.ReadUInt32();
         DescriptionHash = reader.ReadUInt32();
@@ -64,130 +76,120 @@ public class CatalogObjectResource : IResource
         ThumbnailHash = reader.ReadUInt64();
         DevCategoryFlags = reader.ReadUInt32();
 
-        // The remainder of the format is version-dependent and varies across game
-        // patches. Parse best-effort: if we hit end-of-stream, return what we have.
-        try
-        {
-            ParseCommonBlockTail(reader, ms);
-            ParseCobjBody(reader, ms);
-            ParseTgiReferences(reader, ms);
-            IsFullyParsed = true;
-        }
-        catch (EndOfStreamException)
-        {
-            // Format mismatch for this version — return partial data
-        }
-    }
+        // ProductStyles: byte count + TGI blocks (16 bytes each)
+        byte styleCount = reader.ReadByte();
+        for (int i = 0; i < styleCount; i++)
+            reader.ReadBytes(16); // TGI block (ITG format)
 
-    private void ParseCommonBlockTail(BinaryReader reader, MemoryStream ms)
-    {
-        // Locale overrides (commonBlockVersion >= 0x0A)
-        if (CommonBlockVersion >= 0x0A)
+        if (CommonBlockVersion >= 10)
         {
-            ushort localeCount = reader.ReadUInt16();
-            for (int i = 0; i < localeCount; i++)
+            reader.ReadInt16();  // PackId
+            reader.ReadByte();   // PackFlags
+            reader.ReadBytes(9); // ReservedBytes
+        }
+        else
+        {
+            byte unused2 = reader.ReadByte();
+            if (unused2 > 0)
+                reader.ReadByte(); // Unused3
+        }
+
+        // Tags
+        if (CommonBlockVersion >= 11)
+        {
+            // Tag list parsed as full tag objects
+            uint tagCount = reader.ReadUInt32();
+            if (tagCount > 1000) tagCount = 0; // sanity check
+            Tags = new CatalogTag[tagCount];
+            for (int i = 0; i < tagCount; i++)
             {
-                reader.ReadByte();   // localeId
-                reader.ReadUInt32(); // nameHash
-                reader.ReadUInt32(); // descHash
+                Tags[i] = new CatalogTag
+                {
+                    Category = reader.ReadUInt16(),
+                    Value = reader.ReadUInt16(),
+                };
+            }
+        }
+        else
+        {
+            // Older format: uint32 count, each tag as pair of uint16
+            uint tagCount = reader.ReadUInt32();
+            if (tagCount > 1000) tagCount = 0;
+            Tags = new CatalogTag[tagCount];
+            for (int i = 0; i < tagCount; i++)
+            {
+                Tags[i] = new CatalogTag
+                {
+                    Category = reader.ReadUInt16(),
+                    Value = reader.ReadUInt16(),
+                };
             }
         }
 
-        // Style items
-        ushort styleCount = reader.ReadUInt16();
-        for (int i = 0; i < styleCount; i++)
+        // SellingPoints
+        uint sellingPointCount = reader.ReadUInt32();
+        if (sellingPointCount > 1000) sellingPointCount = 0;
+        for (int i = 0; i < sellingPointCount; i++)
         {
-            reader.ReadBytes(16); // TGI reference (ITG)
-            reader.ReadUInt32();  // unknown1
+            reader.ReadUInt16(); // type
+            reader.ReadInt32();  // points
         }
 
-        // Aural properties (commonBlockVersion >= 0x0B)
-        if (CommonBlockVersion >= 0x0B)
-        {
-            uint auralVersion = reader.ReadUInt32();
-            reader.ReadUInt32(); // auralHash1
-            reader.ReadUInt32(); // auralHash2
-            if (auralVersion >= 0x02) reader.ReadUInt32(); // auralHash3
-            if (auralVersion >= 0x03) reader.ReadUInt32(); // auralHash4
-            if (auralVersion >= 0x04) reader.ReadByte();   // auralExtra
-        }
-
-        BuildBuyStatusFlags = reader.ReadUInt32();
-        reader.ReadUInt64(); // packNameHash
-        reader.ReadUInt64(); // packDescHash
-
-        if (CommonBlockVersion >= 0x0C)
-            reader.ReadByte(); // packIconIndex
+        reader.ReadUInt32(); // UnlockByHash
+        reader.ReadUInt32(); // UnlockedByHash
+        reader.ReadUInt16(); // SwatchColorsSortPriority
+        reader.ReadUInt64(); // VarientThumbImageHash
     }
 
-    private void ParseCobjBody(BinaryReader reader, MemoryStream ms)
+    /// <summary>
+    /// Parse AbstractCatalogResource body fields after the common block.
+    /// </summary>
+    private void ParseAbstractCatalogBody(BinaryReader reader, MemoryStream ms)
     {
-        // Tags
-        uint tagCount = reader.ReadUInt32();
-        if (tagCount > 1000) return; // sanity check
-        Tags = new CatalogTag[tagCount];
-        for (int i = 0; i < tagCount; i++)
+        // Aural materials
+        uint auralMaterialsVersion = reader.ReadUInt32();
+        reader.ReadUInt32(); // auralMaterials1
+        reader.ReadUInt32(); // auralMaterials2
+        reader.ReadUInt32(); // auralMaterials3
+
+        // Aural properties
+        uint auralPropertiesVersion = reader.ReadUInt32();
+        reader.ReadUInt32(); // auralQuality
+        if (auralPropertiesVersion > 1)
+            reader.ReadUInt32(); // auralAmbientObject
+        if (auralPropertiesVersion == 3)
         {
-            Tags[i] = new CatalogTag
-            {
-                Category = reader.ReadUInt32(),
-                Value = reader.ReadUInt32(),
-            };
+            reader.ReadUInt64(); // ambienceFileInstanceId
+            reader.ReadByte();   // isOverrideAmbience
         }
+        if (auralPropertiesVersion == 4)
+            reader.ReadByte(); // unknown01
 
-        SelectionGroup = reader.ReadUInt16();
-        ObjectType = reader.ReadUInt16();
-        ObjectTypeFlags = reader.ReadUInt32();
-        WallPlacementFlags = reader.ReadUInt32();
-        MovementFlags = reader.ReadUInt32();
+        reader.ReadUInt32(); // unused0
+        reader.ReadUInt32(); // unused1
+        reader.ReadUInt32(); // unused2
 
-        reader.ReadUInt32(); // cutoutTilesPerLevel
-        reader.ReadUInt32(); // numLevels
+        reader.ReadUInt32(); // placementFlagsHigh
+        reader.ReadUInt32(); // placementFlagsLow
+        reader.ReadUInt64(); // slotTypeSet
+        reader.ReadByte();   // slotDecoSize
+        reader.ReadUInt64(); // catalogGroup
+        reader.ReadByte();   // stateUsage
 
-        // Wall masks
-        byte wallMaskCount = reader.ReadByte();
-        for (int i = 0; i < wallMaskCount; i++)
-            reader.ReadBytes(21); // 4+4+4+4+4+1
+        // Colors list (byte count)
+        byte colorCount = reader.ReadByte();
+        for (int i = 0; i < colorCount; i++)
+            reader.ReadUInt32(); // ARGB color
 
-        reader.ReadByte();   // scriptEnabled
-        reader.ReadUInt32(); // diagonalIndex
-        reader.ReadUInt32(); // ambienceTypeHash
-        reader.ReadUInt32(); // roomCategoryFlags
-        reader.ReadUInt32(); // functionCategoryFlags
-        reader.ReadUInt64(); // subCategoryFlags
-        reader.ReadUInt64(); // subRoomFlags
-        reader.ReadUInt32(); // buildCategoryFlags
-        reader.ReadUInt32(); // slotPlacementFlags
+        reader.ReadUInt32(); // fenceHeight
+        reader.ReadByte();   // isStackable
+        reader.ReadByte();   // canItemDepreciate
 
-        // 7-bit encoded strings
-        ReadString7Bit(reader); // surfaceType
-        ReadString7Bit(reader); // sourceMaterial
+        if (Version >= 0x19)
+            reader.ReadBytes(16); // fallbackObjectKey TGI
 
-        reader.ReadUInt32(); // moodletGiven
-        reader.ReadUInt32(); // moodletScore
-
-        // Topic/Rating pairs
-        uint topicRatingCount = reader.ReadUInt32();
-        if (topicRatingCount > 1000) return; // sanity check
-        for (int i = 0; i < topicRatingCount; i++)
-        {
-            reader.ReadUInt32(); // topic
-            reader.ReadUInt32(); // rating
-        }
-
-        // Version-dependent fields
-        if (Version >= 0x0E) reader.ReadUInt32(); // fallbackIndex
-        if (Version >= 0x10)
-        {
-            reader.ReadUInt32(); // modularArchEndEastIndex
-            reader.ReadUInt32(); // modularArchEndWestIndex
-            reader.ReadUInt32(); // modularArchConnectingIndex
-            reader.ReadUInt32(); // modularArchSingleIndex
-        }
-        if (Version >= 0x12) reader.ReadByte();   // unknown1
-        if (Version >= 0x13) reader.ReadUInt32(); // unknown2
-        if (Version >= 0x16) reader.ReadUInt64(); // unknown3
-        if (Version >= 0x19) reader.ReadUInt32(); // unknown4
+        // Try to read any remaining TGI references at the end
+        ParseTgiReferences(reader, ms);
     }
 
     private void ParseTgiReferences(BinaryReader reader, MemoryStream ms)
@@ -195,21 +197,27 @@ public class CatalogObjectResource : IResource
         if (ms.Position >= ms.Length)
             return;
 
+        // Try reading as byte count + ITG entries
+        long remaining = ms.Length - ms.Position;
+        if (remaining < 1)
+            return;
+
         byte tgiCount = reader.ReadByte();
+        long tgiSize = tgiCount * 16L;
+
+        if (tgiSize > ms.Length - ms.Position)
+        {
+            // Not a valid TGI block, skip
+            return;
+        }
+
         TgiReferences = new ResourceKey[tgiCount];
         for (int i = 0; i < tgiCount; i++)
         {
             ulong instance = reader.ReadUInt64();
-            uint group = reader.ReadUInt32();
             uint type = reader.ReadUInt32();
+            uint group = reader.ReadUInt32();
             TgiReferences[i] = new ResourceKey((ResourceType)type, group, instance);
         }
-    }
-
-    private static void ReadString7Bit(BinaryReader reader)
-    {
-        byte length = reader.ReadByte();
-        if (length > 0)
-            reader.ReadBytes(length);
     }
 }

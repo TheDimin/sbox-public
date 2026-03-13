@@ -29,6 +29,7 @@ public class RcolContainer : IResource
         ["VBUF"] = () => new VertexBuffer(),
         ["IBUF"] = () => new IndexBuffer(),
         ["VRTF"] = () => new VertexFormat(),
+        ["MODL"] = () => new ModlChunk(),
         ["VPXY"] = () => new VpxyChunk(),
         ["FTPT"] = () => new FootprintChunk(),
         ["LITE"] = () => new LightChunk(),

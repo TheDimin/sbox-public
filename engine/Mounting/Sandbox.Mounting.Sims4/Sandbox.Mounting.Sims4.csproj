@@ -28,6 +28,9 @@
     <Compile Include="Resource\MaterialLoader.cs" />
     <Compile Include="Resource\GeomModelBuilder.cs" />
     <Compile Include="Resource\CatalogObjectLoader.cs" />
+    <Compile Include="Resource\ModlLoader.cs" />
+    <Compile Include="Resource\ModlModelBuilder.cs" />
+    <Compile Include="SimsDebug.cs" />
     <Compile Include="Sims4Reader/**/*.cs" />
   </ItemGroup>
 
@@ -39,7 +42,7 @@
   </ItemGroup>
 
   <Target Name="CopyOutputDll" AfterTargets="Build">
-    <Copy SourceFiles="$(OutputPath)\$(AssemblyName).dll" DestinationFiles="..\..\..\game\mount\sims4\sims4.dll" />
+    <Copy SourceFiles="$(OutputPath)\$(AssemblyName).dll" DestinationFiles="..\..\..\game\mount\sims4\sims4.dll" ContinueOnError="true" />
   </Target>
 
 </Project>

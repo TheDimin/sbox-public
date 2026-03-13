@@ -78,14 +78,8 @@ public static class GeomModelBuilder
 	{
 		var mesh = new Mesh( material );
 
-		mesh.CreateVertexBuffer<GeomVertex>( vertices.Length );
-		mesh.SetVertexBufferSize( vertices.Length );
-		mesh.SetVertexBufferData( vertices );
-
-		mesh.CreateIndexBuffer( indices.Length );
-		mesh.SetIndexBufferSize( indices.Length );
-		mesh.SetIndexBufferData( indices );
-
+		mesh.CreateVertexBuffer( vertices.Length, vertices );
+		mesh.CreateIndexBuffer( indices.Length, indices );
 		mesh.Bounds = bounds;
 
 		return mesh;

@@ -198,16 +198,35 @@ public class VertexBuffer : RcolChunk
                         break;
                     case ElementUsage.Normal:
                     case ElementUsage.Tangent:
+                        // Sims 4 byte-packed normals: value * 2.00787401f - 1.00787401f
+                        // which is (value - 128) / 127 when value is in [0..1] (i.e. byte/255)
                         for (int i = 0; i < output.Length - 1; i++)
-                            output[i] += element[2 - i] == 0 ? -1f : (((element[2 - i] + 1) / 128f) - 1f);
-                        // Handedness byte
-                        output[output.Length - 1] = element[3] switch
-                        {
-                            0 => -1f,
-                            127 => 0f,
-                            255 => 1f,
-                            _ => 0f,
-                        };
+                            output[i] += element[2 - i] / 255f * 2.00787401f - 1.00787401f;
+                        // Handedness / W component — same remap
+                        output[output.Length - 1] = element[3] / 255f * 2.00787401f - 1.00787401f;
+                        break;
+                }
+                break;
+
+            case ElementFormat.UByte4:
+            case ElementFormat.UByte4N:
+                switch (layout.Usage)
+                {
+                    case ElementUsage.Normal:
+                    case ElementUsage.Tangent:
+                        // Sims 4 byte-packed normals: value * 2.00787401f - 1.00787401f
+                        for (int i = 0; i < Math.Min(output.Length, 3); i++)
+                            output[i] += element[i] / 255f * 2.00787401f - 1.00787401f;
+                        if (output.Length > 3)
+                            output[3] = element[3] / 255f * 2.00787401f - 1.00787401f;
+                        break;
+                    case ElementUsage.BlendWeight:
+                        for (int i = 0; i < output.Length; i++)
+                            output[i] += element[i] / (float)byte.MaxValue;
+                        break;
+                    default:
+                        for (int i = 0; i < output.Length; i++)
+                            output[i] += element[i] / (float)byte.MaxValue;
                         break;
                 }
                 break;

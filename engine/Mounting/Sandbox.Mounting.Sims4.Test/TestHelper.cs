@@ -34,9 +34,39 @@ internal static class TestHelper
 				return path;
 		}
 
-		Assert.Inconclusive(
+		Assert.Fail(
 			"Real Sims 4 package not found. Set SIMS4_TEST_PACKAGE_PATH or place a .package fixture." );
 		return string.Empty;
+	}
+
+	/// <summary>
+	/// Find and open the first package that contains entries of the given resource type.
+	/// Returns the package and path, or null if none found.
+	/// Caller is responsible for disposing the returned package.
+	/// </summary>
+	public static (Sims4Reader.DbpfPackage package, string path)? FindPackageWithType( Sims4Reader.ResourceType type )
+	{
+		var paths = GetAllPackagePaths();
+		if ( paths.Count == 0 )
+		{
+			// Fall back to single package
+			var single = GetPackagePath();
+			var pkg = Sims4Reader.DbpfPackage.Open( single );
+			if ( pkg.FindAll( type ).Any( e => e.MemSize > 0 && e.FileSize > 0 ) )
+				return (pkg, single);
+			pkg.Dispose();
+			return null;
+		}
+
+		foreach ( var path in paths )
+		{
+			var pkg = Sims4Reader.DbpfPackage.Open( path );
+			if ( pkg.FindAll( type ).Any( e => e.MemSize > 0 && e.FileSize > 0 ) )
+				return (pkg, path);
+			pkg.Dispose();
+		}
+
+		return null;
 	}
 
 	/// <summary>

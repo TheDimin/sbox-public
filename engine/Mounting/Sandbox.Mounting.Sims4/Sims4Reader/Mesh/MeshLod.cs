@@ -63,10 +63,25 @@ public class GeometryState
 public class LodMesh
 {
     public uint Name { get; set; }
-    public int MaterialIndex { get; set; }
-    public int VertexFormatIndex { get; set; }
-    public int VertexBufferIndex { get; set; }
-    public int IndexBufferIndex { get; set; }
+
+    /// <summary>Raw chunk reference to the material (MATD) chunk.</summary>
+    public uint MaterialRef { get; set; }
+    /// <summary>Raw chunk reference to the vertex format (VRTF) chunk.</summary>
+    public uint VertexFormatRef { get; set; }
+    /// <summary>Raw chunk reference to the vertex buffer (VBUF) chunk.</summary>
+    public uint VertexBufferRef { get; set; }
+    /// <summary>Raw chunk reference to the index buffer (IBUF) chunk.</summary>
+    public uint IndexBufferRef { get; set; }
+
+    /// <summary>Decoded TGI index for the material chunk (-1 if null).</summary>
+    public int MaterialIndex => ChunkReference.GetTgiIndex(MaterialRef);
+    /// <summary>Decoded TGI index for the vertex format chunk (-1 if null).</summary>
+    public int VertexFormatIndex => ChunkReference.GetTgiIndex(VertexFormatRef);
+    /// <summary>Decoded TGI index for the vertex buffer chunk (-1 if null).</summary>
+    public int VertexBufferIndex => ChunkReference.GetTgiIndex(VertexBufferRef);
+    /// <summary>Decoded TGI index for the index buffer chunk (-1 if null).</summary>
+    public int IndexBufferIndex => ChunkReference.GetTgiIndex(IndexBufferRef);
+
     public ModelPrimitiveType PrimitiveType { get; set; }
     public MeshFlags Flags { get; set; }
     public uint StreamOffset { get; set; }
@@ -81,8 +96,14 @@ public class LodMesh
     /// <summary>Bounding box: max XYZ.</summary>
     public float[] BoundsMax { get; set; } = new float[3];
 
-    public int SkinControllerIndex { get; set; }
-    public int ScaleOffsetIndex { get; set; }
+    /// <summary>Raw chunk reference to the skin controller chunk.</summary>
+    public uint SkinControllerRef { get; set; }
+    /// <summary>Decoded TGI index for the skin controller (-1 if null).</summary>
+    public int SkinControllerIndex => ChunkReference.GetTgiIndex(SkinControllerRef);
+    /// <summary>Raw chunk reference to the scale offset chunk.</summary>
+    public uint ScaleOffsetRef { get; set; }
+    /// <summary>Decoded TGI index for the scale offset (-1 if null).</summary>
+    public int ScaleOffsetIndex => ChunkReference.GetTgiIndex(ScaleOffsetRef);
     public List<uint> JointReferences { get; set; } = new();
     public List<GeometryState> GeometryStates { get; set; } = new();
 
@@ -99,11 +120,11 @@ public class LodMesh
 
         Name = reader.ReadUInt32();
 
-        // ChunkReferences are stored as int32 indices
-        MaterialIndex = reader.ReadInt32();
-        VertexFormatIndex = reader.ReadInt32();
-        VertexBufferIndex = reader.ReadInt32();
-        IndexBufferIndex = reader.ReadInt32();
+        // Chunk references: encoded uint32 (upper 4 bits = ref type, lower 28 bits = TGI index + 1)
+        MaterialRef = reader.ReadUInt32();
+        VertexFormatRef = reader.ReadUInt32();
+        VertexBufferRef = reader.ReadUInt32();
+        IndexBufferRef = reader.ReadUInt32();
 
         // PrimitiveType is in low byte, Flags in upper bytes
         uint val = reader.ReadUInt32();
@@ -123,7 +144,7 @@ public class LodMesh
         for (int i = 0; i < 3; i++) BoundsMin[i] = reader.ReadSingle();
         for (int i = 0; i < 3; i++) BoundsMax[i] = reader.ReadSingle();
 
-        SkinControllerIndex = reader.ReadInt32();
+        SkinControllerRef = reader.ReadUInt32();
 
         // Joint references: count-prefixed uint list
         int jointCount = reader.ReadInt32();
@@ -131,7 +152,7 @@ public class LodMesh
         for (int i = 0; i < jointCount; i++)
             JointReferences.Add(reader.ReadUInt32());
 
-        ScaleOffsetIndex = reader.ReadInt32();
+        ScaleOffsetRef = reader.ReadUInt32();
 
         // Geometry states: count-prefixed list
         int geoCount = reader.ReadInt32();

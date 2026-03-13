@@ -48,6 +48,27 @@ public class VpxyChunk : RcolChunk
     /// </summary>
     public List<ResourceKey> TgiBlocks { get; set; } = new();
 
+    /// <summary>
+    /// Find the first TGI block of the given resource type, or null if not found.
+    /// </summary>
+    public ResourceKey? FindTgi( ResourceType type )
+    {
+        foreach ( var key in TgiBlocks )
+            if ( key.Type == type )
+                return key;
+        return null;
+    }
+
+    /// <summary>
+    /// Find all TGI blocks of the given resource type.
+    /// </summary>
+    public IEnumerable<ResourceKey> FindAllTgi( ResourceType type )
+    {
+        foreach ( var key in TgiBlocks )
+            if ( key.Type == type )
+                yield return key;
+    }
+
     public override void Parse(BinaryReader reader, uint version, ResourceKey[] externalReferences)
     {
         long basePosition = reader.BaseStream.Position;

@@ -15,7 +15,7 @@ public class RcolContainerTest
 
 		var entry = package.FindAll( ResourceType.Geometry ).FirstOrDefault();
 		if ( entry.Key.Type == ResourceType.Unknown )
-			Assert.Inconclusive( "No GEOM resources found in package." );
+			Assert.Fail( "No GEOM resources found in package." );
 
 		var rcol = package.GetResource<RcolContainer>( entry );
 		Assert.IsTrue( rcol.ChunkEntries.Count > 0, "Expected RCOL to have chunk entries." );
@@ -32,7 +32,7 @@ public class RcolContainerTest
 
 		var entry = package.FindAll( ResourceType.MaterialDefinition ).FirstOrDefault();
 		if ( entry.Key.Type == ResourceType.Unknown )
-			Assert.Inconclusive( "No MATD resources found in package." );
+			Assert.Fail( "No MATD resources found in package." );
 
 		var rcol = package.GetResource<RcolContainer>( entry );
 		Assert.IsTrue( rcol.ChunkEntries.Count > 0, "Expected RCOL to have chunk entries." );
@@ -49,7 +49,7 @@ public class RcolContainerTest
 
 		var entry = package.FindAll( ResourceType.MaterialDefinition ).FirstOrDefault();
 		if ( entry.Key.Type == ResourceType.Unknown )
-			Assert.Inconclusive( "No MATD resources found in package." );
+			Assert.Fail( "No MATD resources found in package." );
 
 		var rcol = package.GetResource<RcolContainer>( entry );
 		var matd = rcol.GetChunk<MaterialDefinition>();
@@ -66,9 +66,8 @@ public class RcolContainerTest
 
 		var matdEntries = package.FindAll( ResourceType.MaterialDefinition ).Take( 10 ).ToList();
 		if ( matdEntries.Count == 0 )
-			Assert.Inconclusive( "No MATD resources found in package." );
+			Assert.Fail( "No MATD resources found in package." );
 
-		// At least one MATD should contain texture reference entries
 		bool anyHasTextureRef = false;
 		foreach ( var entry in matdEntries )
 		{
@@ -99,7 +98,7 @@ public class RcolContainerTest
 
 		var entries = package.FindAll( ResourceType.MaterialDefinition ).Take( 5 ).ToList();
 		if ( entries.Count == 0 )
-			Assert.Inconclusive( "No MATD resources found in package." );
+			Assert.Fail( "No MATD resources found in package." );
 
 		int successCount = 0;
 		foreach ( var entry in entries )
@@ -111,5 +110,48 @@ public class RcolContainerTest
 		}
 
 		Assert.IsTrue( successCount > 0, "At least one MATD should be parseable via RCOL." );
+	}
+
+	[TestMethod]
+	public void RcolContainer_ModlEntry_ContainsModlChunk()
+	{
+		var packagePath = TestHelper.GetPackagePath();
+		using var package = DbpfPackage.Open( packagePath );
+
+		var entry = package.FindAll( ResourceType.Model ).FirstOrDefault();
+		if ( entry.Key.Type == ResourceType.Unknown )
+			Assert.Fail( "No MODL resources found in package." );
+
+		var rcol = package.GetResource<RcolContainer>( entry );
+		Assert.IsTrue( rcol.ChunkEntries.Count > 0, "Expected RCOL to have chunk entries." );
+
+		var modl = rcol.GetChunk<ModlChunk>();
+		Assert.IsNotNull( modl, "Expected RCOL to contain a ModlChunk." );
+	}
+
+	[TestMethod]
+	public void RcolContainer_HasExternalReferences()
+	{
+		var packagePath = TestHelper.GetPackagePath();
+		using var package = DbpfPackage.Open( packagePath );
+
+		var entries = package.FindAll( ResourceType.Model ).Take( 10 ).ToList();
+		if ( entries.Count == 0 )
+			Assert.Fail( "No MODL resources found in package." );
+
+		// MODL RCOLs typically have external references (MLOD, VBUF, IBUF, etc.)
+		bool anyHasExternal = false;
+		foreach ( var entry in entries )
+		{
+			var rcol = package.GetResource<RcolContainer>( entry );
+			if ( rcol.ExternalReferences.Length > 0 )
+			{
+				anyHasExternal = true;
+				break;
+			}
+		}
+
+		Assert.IsTrue( anyHasExternal,
+			"Expected at least one MODL RCOL to have external references." );
 	}
 }

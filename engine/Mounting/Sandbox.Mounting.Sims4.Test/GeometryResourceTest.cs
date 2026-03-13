@@ -11,7 +11,7 @@ public class GeometryResourceTest
 	{
 		var packages = TestHelper.GetAllPackagePaths();
 		if ( packages.Count == 0 )
-			Assert.Inconclusive( "No Sims 4 packages found." );
+			Assert.Fail( "No Sims 4 packages found." );
 
 		var versionsFound = new HashSet<uint>();
 		int totalEntries = 0;
@@ -96,7 +96,7 @@ public class GeometryResourceTest
 
 		var geomEntries = package.FindAll( ResourceType.Geometry ).Take( 10 ).ToList();
 		if ( geomEntries.Count == 0 )
-			Assert.Inconclusive( "No GEOM resources found in package." );
+			Assert.Fail( "No GEOM resources found in package." );
 
 		foreach ( var entry in geomEntries )
 		{
@@ -116,7 +116,7 @@ public class GeometryResourceTest
 
 		var entry = package.FindAll( ResourceType.Geometry ).FirstOrDefault();
 		if ( entry.Key.Type == ResourceType.Unknown )
-			Assert.Inconclusive( "No GEOM resources found in package." );
+			Assert.Fail( "No GEOM resources found in package." );
 
 		var rcol = package.GetResource<RcolContainer>( entry );
 		var geomChunk = rcol.GetChunk<GeometryRcolChunk>();
@@ -138,7 +138,7 @@ public class GeometryResourceTest
 
 		var entry = package.FindAll( ResourceType.Geometry ).FirstOrDefault();
 		if ( entry.Key.Type == ResourceType.Unknown )
-			Assert.Inconclusive( "No GEOM resources found in package." );
+			Assert.Fail( "No GEOM resources found in package." );
 
 		var rcol = package.GetResource<RcolContainer>( entry );
 		var geom = rcol.GetChunk<GeometryRcolChunk>()!.Geometry;
@@ -159,7 +159,7 @@ public class GeometryResourceTest
 
 		var entry = package.FindAll( ResourceType.Geometry ).FirstOrDefault();
 		if ( entry.Key.Type == ResourceType.Unknown )
-			Assert.Inconclusive( "No GEOM resources found in package." );
+			Assert.Fail( "No GEOM resources found in package." );
 
 		var rcol = package.GetResource<RcolContainer>( entry );
 		var geom = rcol.GetChunk<GeometryRcolChunk>()!.Geometry;
@@ -182,7 +182,7 @@ public class GeometryResourceTest
 
 		var geomEntries = package.FindAll( ResourceType.Geometry ).Take( 20 ).ToList();
 		if ( geomEntries.Count == 0 )
-			Assert.Inconclusive( "No GEOM resources found in package." );
+			Assert.Fail( "No GEOM resources found in package." );
 
 		int successCount = 0;
 		foreach ( var entry in geomEntries )

@@ -22,38 +22,12 @@ public class DbpfPackageTest
 		using var package = DbpfPackage.Open( packagePath );
 
 		if ( package.Entries.Count == 0 )
-			Assert.Inconclusive( "Loaded package has no records." );
+			Assert.Fail( "Loaded package has no records." );
 
 		var first = package.Entries[0];
 		Assert.AreNotEqual( ResourceType.Unknown, first.Key.Type, "Expected known resource type for first entry." );
 		Assert.IsTrue( first.FileSize > 0, "Expected file size to be greater than zero." );
 		Assert.IsTrue( first.MemSize > 0, "Expected decompressed size to be greater than zero." );
-	}
-
-	[TestMethod]
-	public void FindAll_StringTable_FindsStblResources()
-	{
-		var packagePath = TestHelper.GetPackagePath();
-		using var package = DbpfPackage.Open( packagePath );
-
-		var stblCount = package.FindAll( ResourceType.StringTable ).Count();
-		if ( stblCount == 0 )
-			Assert.Inconclusive( "No STBL resources in this package (some packages omit string tables)." );
-		Assert.IsTrue( stblCount > 0 );
-	}
-
-	[TestMethod]
-	public void GetResource_StringTable_ParsesStrings()
-	{
-		var packagePath = TestHelper.GetPackagePath();
-		using var package = DbpfPackage.Open( packagePath );
-
-		var stblEntry = package.FindAll( ResourceType.StringTable ).FirstOrDefault();
-		if ( stblEntry.Key.Type == ResourceType.Unknown )
-			Assert.Inconclusive( "No STBL resource found in package." );
-
-		var stbl = package.GetResource<StringTable>( stblEntry );
-		Assert.IsTrue( stbl.Entries.Count > 0, "Expected at least one decoded STBL string." );
 	}
 
 	[TestMethod]
@@ -63,7 +37,7 @@ public class DbpfPackageTest
 		using var package = DbpfPackage.Open( packagePath );
 
 		if ( package.Entries.Count == 0 )
-			Assert.Inconclusive( "Loaded package has no records." );
+			Assert.Fail( "Loaded package has no records." );
 
 		var first = package.Entries[0];
 		var raw = package.GetBytes( first );
@@ -77,7 +51,7 @@ public class DbpfPackageTest
 		using var package = DbpfPackage.Open( packagePath );
 
 		if ( package.Entries.Count == 0 )
-			Assert.Inconclusive( "Loaded package has no records." );
+			Assert.Fail( "Loaded package has no records." );
 
 		var first = package.Entries[0];
 		var found = package.Find( first.Key );

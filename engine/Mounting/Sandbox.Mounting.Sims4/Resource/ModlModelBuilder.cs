@@ -1,0 +1,173 @@
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using Sandbox;
+using Sims4Reader.Mesh;
+
+namespace Mounting.Sims4;
+
+/// <summary>
+/// Converts <see cref="ResolvedMesh"/> instances (from the MODL → MLOD pipeline) into a
+/// sandbox <see cref="Model"/> using the same vertex layout and coordinate transform
+/// as <see cref="GeomModelBuilder"/>.
+/// Supports building a single model from multiple meshes, each with its own material.
+/// </summary>
+public static class ModlModelBuilder
+{
+	/// <summary>
+	/// Build a sandbox Model from a single resolved MODL mesh.
+	/// </summary>
+	/// <param name="mesh">The resolved mesh with decoded vertices and indices.</param>
+	/// <param name="material">Material to apply. Pass null for default white.</param>
+	/// <param name="scale">Uniform scale. Default 39.37 converts meters to Source 2 inches.</param>
+	/// <param name="addCollision">Whether to add a collision mesh.</param>
+	public static Model? Build(
+		ResolvedMesh mesh,
+		Material? material = null,
+		float scale = 39.37f,
+		bool addCollision = true )
+	{
+		return Build(
+			new[] { (mesh, material) },
+			scale,
+			addCollision );
+	}
+
+	/// <summary>
+	/// Build a sandbox Model from multiple resolved meshes, each with its own material.
+	/// All meshes are combined into a single Model with separate draw calls per material.
+	/// </summary>
+	/// <param name="meshes">Array of (mesh, material) pairs. Each mesh gets its own material.</param>
+	/// <param name="scale">Uniform scale. Default 39.37 converts meters to Source 2 inches.</param>
+	/// <param name="addCollision">Whether to add a collision mesh from all geometry.</param>
+	public static Model? Build(
+		IReadOnlyList<(ResolvedMesh Mesh, Material? Material)> meshes,
+		float scale = 39.37f,
+		bool addCollision = true )
+	{
+		var defaultMaterial = Material.Load( "materials/default/white.vmat" );
+
+		var builder = new ModelBuilder();
+		bool anyMeshAdded = false;
+
+		// Collect all collision data across meshes
+		var allCollisionPositions = new List<Vector3>();
+		var allCollisionIndices = new List<int>();
+
+		foreach ( var (mesh, material) in meshes )
+		{
+			if ( mesh.Vertices.Length < 3 || mesh.Indices.Length < 3 )
+				continue;
+
+			var mat = material ?? defaultMaterial;
+
+			var vertices = ExtractVertices( mesh.Vertices, scale );
+			var indices = (int[])mesh.Indices.Clone();
+			FlipWinding( indices );
+
+			var bounds = ComputeBounds( vertices );
+			var sbMesh = CreateMesh( vertices, indices, bounds, mat );
+			builder.AddMesh( sbMesh );
+			anyMeshAdded = true;
+
+			// Accumulate collision data
+			if ( addCollision )
+			{
+				int baseIndex = allCollisionPositions.Count;
+				for ( int i = 0; i < vertices.Length; i++ )
+					allCollisionPositions.Add( vertices[i].Position );
+				for ( int i = 0; i < indices.Length; i++ )
+					allCollisionIndices.Add( indices[i] + baseIndex );
+			}
+		}
+
+		if ( !anyMeshAdded )
+			return null;
+
+		// Add combined collision mesh from all geometry
+		if ( addCollision && allCollisionPositions.Count >= 3 && allCollisionIndices.Count >= 3 )
+		{
+			builder.AddCollisionMesh( allCollisionPositions.ToArray(), allCollisionIndices.ToArray() );
+		}
+
+		return builder.Create();
+	}
+
+	private static Mesh CreateMesh( GeomModelBuilder.GeomVertex[] vertices, int[] indices, BBox bounds, Material material )
+	{
+		var mesh = new Mesh( material );
+
+		mesh.CreateVertexBuffer( vertices.Length, vertices );
+		mesh.CreateIndexBuffer( indices.Length, indices );
+		mesh.Bounds = bounds;
+
+		return mesh;
+	}
+
+	private static GeomModelBuilder.GeomVertex[] ExtractVertices( Sims4Reader.Mesh.Vertex[] srcVertices, float scale )
+	{
+		var output = new GeomModelBuilder.GeomVertex[srcVertices.Length];
+
+		for ( int i = 0; i < srcVertices.Length; i++ )
+		{
+			ref readonly var s = ref srcVertices[i];
+
+			var vert = new GeomModelBuilder.GeomVertex { Color = Vector4.One };
+
+			if ( s.Position != null && s.Position.Length >= 3 )
+				vert.Position = SwapYZ( s.Position[0], s.Position[1], s.Position[2] ) * scale;
+
+			if ( s.Normal != null && s.Normal.Length >= 3 )
+				vert.Normal = SwapYZ( s.Normal[0], s.Normal[1], s.Normal[2] ).Normal;
+
+			if ( s.Tangent != null && s.Tangent.Length >= 3 )
+				vert.Tangent = new Vector4( s.Tangent[0], s.Tangent[2], s.Tangent[1], 1f );
+
+			if ( s.UV != null )
+			{
+				if ( s.UV.Length > 0 && s.UV[0] != null && s.UV[0].Length >= 2 )
+					vert.TexCoord0 = new Vector2( s.UV[0][0], s.UV[0][1] );
+				if ( s.UV.Length > 1 && s.UV[1] != null && s.UV[1].Length >= 2 )
+					vert.TexCoord1 = new Vector2( s.UV[1][0], s.UV[1][1] );
+			}
+
+			if ( s.HasColor )
+			{
+				vert.Color = new Vector4(
+					(s.Color & 0xFF) / 255f,
+					((s.Color >> 8) & 0xFF) / 255f,
+					((s.Color >> 16) & 0xFF) / 255f,
+					((s.Color >> 24) & 0xFF) / 255f );
+			}
+
+			output[i] = vert;
+		}
+
+		return output;
+	}
+
+	private static void FlipWinding( int[] indices )
+	{
+		for ( int i = 0; i + 2 < indices.Length; i += 3 )
+			(indices[i + 1], indices[i + 2]) = (indices[i + 2], indices[i + 1]);
+	}
+
+	private static Vector3 SwapYZ( float x, float y, float z ) => new( x, z, y );
+
+	private static BBox ComputeBounds( GeomModelBuilder.GeomVertex[] vertices )
+	{
+		if ( vertices.Length == 0 )
+			return default;
+
+		var mins = new Vector3( float.MaxValue );
+		var maxs = new Vector3( float.MinValue );
+
+		for ( int i = 0; i < vertices.Length; i++ )
+		{
+			mins = Vector3.Min( mins, vertices[i].Position );
+			maxs = Vector3.Max( maxs, vertices[i].Position );
+		}
+
+		return new BBox( mins, maxs );
+	}
+}
