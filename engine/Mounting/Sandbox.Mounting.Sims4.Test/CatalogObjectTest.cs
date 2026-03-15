@@ -126,9 +126,6 @@ public class CatalogObjectTest
 
 		int totalCobjs = 0;
 		int fullyParsed = 0;
-		int withFuncFlags = 0;
-		int withBuildFlags = 0;
-		int withRoomFlags = 0;
 
 		// Count tag.Category frequency
 		var tagCategoryCounts = new Dictionary<ushort, int>();
@@ -146,9 +143,6 @@ public class CatalogObjectTest
 			if ( cobj.IsFullyParsed )
 			{
 				fullyParsed++;
-				if ( cobj.FunctionCategoryFlags != 0 ) withFuncFlags++;
-				if ( cobj.BuildCategoryFlags != 0 ) withBuildFlags++;
-				if ( cobj.RoomCategoryFlags != 0 ) withRoomFlags++;
 			}
 
 			foreach ( var tag in cobj.Tags )
@@ -172,7 +166,6 @@ public class CatalogObjectTest
 			.Select( kv => $"0x{kv.Key:X4}={kv.Value}" );
 
 		var summary = $"Total COBJs: {totalCobjs}, fully parsed: {fullyParsed}\n" +
-			$"FuncFlags>0: {withFuncFlags}, BuildFlags>0: {withBuildFlags}, RoomFlags>0: {withRoomFlags}\n" +
 			$"Top tag.Category by frequency: {string.Join( ", ", topCategories )}\n" +
 			$"Sample buy-range tags: {string.Join( "; ", sampleTags )}";
 

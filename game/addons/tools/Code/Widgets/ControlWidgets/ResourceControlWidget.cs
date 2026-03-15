@@ -1,4 +1,6 @@
-﻿namespace Editor;
+﻿using Sandbox.Mounting;
+
+namespace Editor;
 
 [CustomEditor( typeof( Resource ) )]
 public class ResourceControlWidget : ControlWidget
@@ -84,6 +86,20 @@ public class ResourceControlWidget : ControlWidget
 			Paint.Draw( iconRect, asset.GetAssetThumb( true ), alpha );
 
 			DrawContent( rect, asset.Name, asset.RelativePath );
+		}
+		else if ( resource != null && !string.IsNullOrEmpty( resource.ResourcePath ) && resource.ResourcePath.StartsWith( "mount://" ) && resource.IsValid )
+		{
+			var preview = MountUtility.GetPreviewTexture( resource.ResourcePath );
+			if ( preview != null )
+			{
+				Paint.Draw( iconRect, Pixmap.FromTexture( preview ), alpha );
+			}
+			else if ( icon != null )
+			{
+				Paint.Draw( iconRect, icon, alpha );
+			}
+
+			DrawContent( rect, resource.ResourceName, resource.ResourcePath );
 		}
 		else if ( resource != null && !string.IsNullOrEmpty( resource.ResourcePath ) )
 		{

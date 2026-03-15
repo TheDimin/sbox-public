@@ -30,6 +30,7 @@
     <Compile Include="Resource\CatalogObjectLoader.cs" />
     <Compile Include="Resource\ModlLoader.cs" />
     <Compile Include="Resource\ModlModelBuilder.cs" />
+    <Compile Include="Resource\InlineMaterialLoader.cs" />
     <Compile Include="SimsDebug.cs" />
     <Compile Include="Sims4Reader/**/*.cs" />
   </ItemGroup>
@@ -43,6 +44,20 @@
 
   <Target Name="CopyOutputDll" AfterTargets="Build">
     <Copy SourceFiles="$(OutputPath)\$(AssemblyName).dll" DestinationFiles="..\..\..\game\mount\sims4\sims4.dll" ContinueOnError="true" />
+  </Target>
+
+  <!-- Auto-compile mount shaders when source is newer than compiled output -->
+  <Target Name="CompileMountShaders" AfterTargets="CopyOutputDll"
+          Inputs="..\..\..\game\mount\sims4\Assets\shaders\sims4.shader"
+          Outputs="..\..\..\game\mount\sims4\Assets\shaders\sims4.shader_c">
+    <Message Importance="high" Text="Compiling sims4 mount shader..." />
+    <Exec Command="cd /d &quot;$(MSBuildThisFileDirectory)..\..\..\game&quot; &amp;&amp; bin\managed\ShaderCompiler.exe &quot;mount\sims4\Assets\shaders\sims4.shader&quot; -f -q"
+          IgnoreExitCode="true">
+      <Output TaskParameter="ExitCode" PropertyName="ShaderCompilerExitCode" />
+    </Exec>
+    <!-- Fail the build on real shader errors, but ignore exit code 139 (Steam inventory crash) -->
+    <Error Condition="'$(ShaderCompilerExitCode)' != '0' AND '$(ShaderCompilerExitCode)' != '139'"
+           Text="Shader compilation failed with exit code $(ShaderCompilerExitCode)" />
   </Target>
 
 </Project>

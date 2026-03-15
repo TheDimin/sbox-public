@@ -104,6 +104,28 @@ public class ResourceStringControlWidget : ControlWidget
 			Paint.SetDefaultFont( 7 );
 			Theme.DrawFilename( textRect, asset.RelativePath, TextFlag.LeftCenter, Theme.Text.WithAlpha( 0.5f ) );
 		}
+		else if ( !string.IsNullOrWhiteSpace( resource ) && resource.StartsWith( "mount://" ) )
+		{
+			var preview = Sandbox.Mounting.MountUtility.GetPreviewTexture( resource );
+			if ( preview != null )
+			{
+				Paint.Draw( iconRect, Pixmap.FromTexture( preview ) );
+			}
+			else if ( icon != null )
+			{
+				Paint.Draw( iconRect, icon );
+			}
+
+			var name = System.IO.Path.GetFileNameWithoutExtension( resource );
+			var textRect = rect.Shrink( 0, 3 );
+			Paint.SetPen( Theme.Text.WithAlpha( 0.9f ) );
+			Paint.SetHeadingFont( 8, 450 );
+			var t = Paint.DrawText( textRect, name, TextFlag.LeftTop );
+
+			textRect.Left = t.Right + 6;
+			Paint.SetDefaultFont( 7 );
+			Theme.DrawFilename( textRect, resource, TextFlag.LeftCenter, Theme.Text.WithAlpha( 0.5f ) );
+		}
 		else if ( !string.IsNullOrWhiteSpace( resource ) )
 		{
 			var textRect = rect.Shrink( 0, 3 );

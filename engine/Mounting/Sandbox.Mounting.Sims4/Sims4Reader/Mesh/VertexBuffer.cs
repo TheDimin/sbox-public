@@ -63,7 +63,7 @@ public class VertexBuffer : RcolChunk
         bool hasColor = format.Elements.Any(x => x.Usage == ElementUsage.Colour);
 
         var vertices = new Vertex[count];
-        uvScales ??= new float[] { 0f };
+        uvScales ??= new float[] { 1f };
 
         for (int i = 0; i < count; i++)
         {
@@ -91,7 +91,7 @@ public class VertexBuffer : RcolChunk
             {
                 var u = uvLayouts[j];
                 var pts = new float[VertexFormat.FloatCountFromFormat(u.Format)];
-                float scale = j < uvScales.Length && uvScales[j] != 0 ? uvScales[j] : (uvScales.Length > 0 ? uvScales[0] : 0f);
+                float scale = j < uvScales.Length && uvScales[j] != 0 ? uvScales[j] : (uvScales.Length > 0 && uvScales[0] != 0 ? uvScales[0] : 1f);
                 ReadUVData(data, u, ref pts, scale);
                 v.UV[j] = pts;
             }
@@ -149,7 +149,7 @@ public class VertexBuffer : RcolChunk
         {
             case ElementFormat.Short2:
                 for (int i = 0; i < output.Length; i++)
-                    output[i] += BitConverter.ToInt16(element, i * sizeof(short)) * scale;
+                    output[i] += (BitConverter.ToInt16(element, i * sizeof(short)) / (float)short.MaxValue) * scale;
                 break;
             case ElementFormat.Short4:
                 for (int i = 0; i < output.Length; i++)

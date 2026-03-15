@@ -145,6 +145,8 @@ public class VpxyLoader( DbpfPackage package, ResourceEntry vpxyEntry ) : Resour
 		bool anySet = false;
 		bool hasEmissive = false;
 		bool hasAlphaMap = false;
+		bool isGlass = mesh.Material != null && Sims4MaterialLoader.IsGlassShader( mesh.Material.Shader );
+		float transparency = 0f;
 
 		// Map TS4 texture keys to sims4 shader texture slots
 		foreach ( var (field, key) in mesh.TextureKeys )
@@ -203,6 +205,11 @@ public class VpxyLoader( DbpfPackage package, ResourceEntry vpxyEntry ) : Resour
 						material.Set( "g_flNormalStrength", f.Value );
 						anySet = true;
 						break;
+
+					// Transparency value for glass
+					case ShaderFloat f when entry.Field == ShaderFieldType.Transparency:
+						transparency = f.Value;
+						break;
 				}
 			}
 		}
@@ -212,6 +219,16 @@ public class VpxyLoader( DbpfPackage package, ResourceEntry vpxyEntry ) : Resour
 			material.Set( "F_ALPHA_TEST", true );
 		if ( hasEmissive )
 			material.Set( "F_EMISSIVE", true );
+
+		// Enable translucent rendering for glass/window materials
+		if ( isGlass )
+		{
+			material.Set( "F_TRANSLUCENT", true );
+			material.Set( "F_RENDER_BACKFACES", true );
+			float opacity = transparency > 0f ? transparency : 0.15f;
+			material.Set( "g_flOpacity", opacity );
+			anySet = true;
+		}
 
 		return anySet ? material : null;
 	}

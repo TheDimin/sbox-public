@@ -25,6 +25,7 @@ FEATURES
 
 	Feature( F_ALPHA_TEST, 0..1, "Alpha Test" );
 	Feature( F_EMISSIVE, 0..1, "Emissive" );
+	Feature( F_TRANSLUCENT, 0..1, "Translucent" );
 }
 
 MODES
@@ -35,6 +36,10 @@ MODES
 
 COMMON
 {
+	#ifndef S_TRANSLUCENT
+	#define S_TRANSLUCENT 0
+	#endif
+
 	#include "common/shared.hlsl"
 
 	#define CUSTOM_MATERIAL_INPUTS
@@ -63,6 +68,35 @@ VS
 
 PS
 {
+	// -------------------------------------------------------------------------
+	// Static combos
+	// -------------------------------------------------------------------------
+	StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( ALL ) );
+	StaticCombo( S_EMISSIVE, F_EMISSIVE, Sys( ALL ) );
+	StaticCombo( S_TRANSLUCENT, F_TRANSLUCENT, Sys( ALL ) );
+	StaticCombo( S_RENDER_BACKFACES, F_RENDER_BACKFACES, Sys( ALL ) );
+
+	// -------------------------------------------------------------------------
+	// Translucency blend states and attributes
+	// -------------------------------------------------------------------------
+	#if S_TRANSLUCENT
+		RenderState( BlendEnable, true );
+		RenderState( SrcBlend, SRC_ALPHA );
+		RenderState( DstBlend, INV_SRC_ALPHA );
+		RenderState( BlendOp, ADD );
+		RenderState( SrcBlendAlpha, ONE );
+		RenderState( DstBlendAlpha, INV_SRC_ALPHA );
+		RenderState( BlendOpAlpha, ADD );
+		RenderState( DepthWriteEnable, false );
+	#endif
+
+	// -------------------------------------------------------------------------
+	// Backface rendering for thin glass panes
+	// -------------------------------------------------------------------------
+	#if S_RENDER_BACKFACES
+		RenderState( CullMode, NONE );
+	#endif
+
 	#include "common/pixel.hlsl"
 
 	// -------------------------------------------------------------------------
@@ -100,13 +134,8 @@ PS
 	float g_flSpecularScale < UiGroup( "Material,20/Specular,20/10" ); Default1( 1.0 ); Range1( 0.0, 2.0 ); >;
 	float g_flEmissiveScale < UiGroup( "Material,20/Emissive,30/10" ); Default1( 1.0 ); Range1( 0.0, 10.0 ); >;
 	float g_flAlphaTestThreshold < UiGroup( "Material,20/Alpha,40/10" ); Default1( 0.5 ); Range1( 0.0, 1.0 ); >;
+	float g_flOpacity < UiGroup( "Material,20/Translucent,50/10" ); Default1( 0.3 ); Range1( 0.0, 1.0 ); >;
 	float3 g_vDiffuseTint < UiType( Color ); UiGroup( "Material,20/Diffuse,5/10" ); Default3( 1.0, 1.0, 1.0 ); >;
-
-	// -------------------------------------------------------------------------
-	// Static combos
-	// -------------------------------------------------------------------------
-	StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( ALL ) );
-	StaticCombo( S_EMISSIVE, F_EMISSIVE, Sys( ALL ) );
 
 	// -------------------------------------------------------------------------
 	// TS4 Specular → PBR Roughness mapping
@@ -202,6 +231,14 @@ PS
 			// TS4 assembly: diffuse.w * 255 - threshold, discard if < 0
 			float alphaRef = diffuseSample.a - g_flAlphaTestThreshold;
 			clip( alphaRef );
+		}
+
+		// ----- Glass / Translucent -----
+		// TS4 glass blends lit color with a fog/environment tint via vertex alpha.
+		// We approximate this with a uniform opacity parameter. Low opacity = clear glass.
+		if ( S_TRANSLUCENT )
+		{
+			m.Opacity = g_flOpacity;
 		}
 
 		// ----- Normal Map (TS4 DXT5nm: X=alpha, Y=blue) -----

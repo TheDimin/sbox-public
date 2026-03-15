@@ -44,6 +44,19 @@ public class ResolvedMesh
     /// </summary>
     public Dictionary<ShaderFieldType, ResourceKey> TextureKeys { get; set; } = new();
 
+    /// <summary>
+    /// The resource key of the MATD used by this mesh, if it was an external reference.
+    /// Null for inline (public/private) materials embedded in the MODL RCOL.
+    /// </summary>
+    public ResourceKey? MaterialResourceKey { get; set; }
+
+    /// <summary>
+    /// The mount path for this mesh's material. Always set when Material is non-null.
+    /// For external MATDs: "materials/{group:X}_{instance:X}"
+    /// For inline MATDs: "materials/inline/{modlGroup:X}_{modlInstance:X}_m{meshIndex}"
+    /// </summary>
+    public string? MaterialMountPath { get; set; }
+
     /// <summary>Bounding box minimum corner.</summary>
     public float[] BoundsMin { get; set; } = new float[3];
 
@@ -129,7 +142,7 @@ public static class ModlModelLoader
 
         foreach (var lodEntry in modl.LodEntries)
         {
-            var resolvedLod = ResolveLod(package, rcol, lodEntry, allPackages);
+            var resolvedLod = ResolveLod(package, rcol, lodEntry, modlEntry.Key, allPackages);
             if (resolvedLod != null)
                 model.Lods.Add(resolvedLod);
         }
@@ -181,6 +194,7 @@ public static class ModlModelLoader
         DbpfPackage package,
         RcolContainer rcol,
         LodEntry lodEntry,
+        ResourceKey modlKey,
         IReadOnlyList<DbpfPackage>? allPackages )
     {
         uint mlodRef = lodEntry.MlodChunkRef;
@@ -218,10 +232,28 @@ public static class ModlModelLoader
 
         var resolvedLod = new ResolvedLod { LodId = lodEntry.Id };
 
-        foreach (var lodMesh in mlodChunk.Meshes)
+        for (int meshIdx = 0; meshIdx < mlodChunk.Meshes.Count; meshIdx++)
         {
-            var resolvedMesh = ResolveMesh(package, mlodRcol, lodMesh, allPackages);
+            var resolvedMesh = ResolveMesh(package, mlodRcol, mlodChunk.Meshes[meshIdx], modlKey, meshIdx, allPackages);
             resolvedLod.Meshes.Add(resolvedMesh);
+        }
+
+        // Deduplicate inline material mount paths.
+        // Multiple meshes often reference different MTST chunks that all resolve
+        // to the same underlying MATD. Dedup by the resolved MATD identity
+        // (MaterialNameHash) so they share a single mount path and Material object.
+        var matdToPath = new Dictionary<uint, string>();
+        for (int i = 0; i < resolvedLod.Meshes.Count; i++)
+        {
+            var mesh = resolvedLod.Meshes[i];
+            if (mesh.MaterialResourceKey != null || mesh.Material == null || mesh.MaterialMountPath == null)
+                continue;
+
+            var matdHash = mesh.Material.MaterialNameHash;
+            if (matdToPath.TryGetValue(matdHash, out var canonicalPath))
+                mesh.MaterialMountPath = canonicalPath;
+            else
+                matdToPath[matdHash] = mesh.MaterialMountPath;
         }
 
         return resolvedLod;
@@ -231,6 +263,8 @@ public static class ModlModelLoader
         DbpfPackage package,
         RcolContainer rcol,
         LodMesh lodMesh,
+        ResourceKey modlKey,
+        int meshIndex,
         IReadOnlyList<DbpfPackage>? allPackages )
     {
         var resolved = new ResolvedMesh
@@ -278,7 +312,20 @@ public static class ModlModelLoader
         if (matdResult != null)
         {
             resolved.Material = matdResult.Value.Matd;
+            resolved.MaterialResourceKey = matdResult.Value.MatdResourceKey;
             resolved.TextureKeys = ExtractTextureKeys(matdResult.Value.Matd, matdResult.Value.ExternalReferences);
+
+            // Set MaterialMountPath for both external and inline MATDs
+            if (matdResult.Value.MatdResourceKey is { } matKey)
+            {
+                // External: use the MATD's own resource key
+                resolved.MaterialMountPath = $"materials/{matKey.Group:X}_{matKey.Instance:X}";
+            }
+            else
+            {
+                // Inline: use MODL key + mesh index for a deterministic path
+                resolved.MaterialMountPath = $"materials/inline/{modlKey.Group:X}_{modlKey.Instance:X}_m{meshIndex}";
+            }
         }
 
         return resolved;
@@ -290,7 +337,7 @@ public static class ModlModelLoader
     /// ShaderTextureIndex entries reference the MATD's own RCOL external references,
     /// not necessarily the MLOD's.
     /// </summary>
-    private record struct MaterialResult(MaterialDefinition Matd, ResourceKey[] ExternalReferences);
+    private record struct MaterialResult(MaterialDefinition Matd, ResourceKey[] ExternalReferences, ResourceKey? MatdResourceKey = null);
 
     /// <summary>
     /// Resolve a material chunk reference. If it points to a MATD, return it directly.
@@ -320,7 +367,7 @@ public static class ModlModelLoader
                     var extRcol = found.Value.Package.GetResource<RcolContainer>(found.Value.Entry);
                     // Try MATD first, then MTST
                     var matd = extRcol.GetChunk<MaterialDefinition>();
-                    if (matd != null) return new MaterialResult(matd, extRcol.ExternalReferences);
+                    if (matd != null) return new MaterialResult(matd, extRcol.ExternalReferences, extKey);
 
                     var mtst = extRcol.GetChunk<MaterialState>();
                     if (mtst != null)
@@ -409,7 +456,7 @@ public static class ModlModelLoader
                     var extRcol = found.Value.Package.GetResource<RcolContainer>(found.Value.Entry);
                     var matd = extRcol.GetChunk<MaterialDefinition>();
                     if (matd != null)
-                        return new MaterialResult(matd, extRcol.ExternalReferences);
+                        return new MaterialResult(matd, extRcol.ExternalReferences, extKey);
                 }
             }
             return null;
@@ -458,6 +505,91 @@ public static class ModlModelLoader
         int absIdx = ChunkReference.ResolveChunkIndex(chunkRef, publicChunks);
         if (absIdx >= 0 && absIdx < rcol.ChunkEntries.Count)
             return rcol.ChunkEntries[absIdx].Chunk as T;
+
+        return null;
+    }
+
+    /// <summary>
+    /// Lightweight scan: returns the number of meshes in the best LOD that use inline materials.
+    /// Does NOT decode any geometry (VBUF/IBUF). Only parses RCOL → MODL → MLOD chunk headers
+    /// and checks material reference types.
+    ///
+    /// Returns a list of mesh indices that have inline (non-delayed) material references.
+    /// Returns null if the MODL cannot be parsed.
+    /// </summary>
+    public static List<int>? ScanInlineMaterialMeshes(
+        DbpfPackage package,
+        ResourceEntry modlEntry )
+    {
+        var rcol = package.GetResource<RcolContainer>(modlEntry);
+        var modl = rcol.GetChunk<ModlChunk>();
+        if (modl == null || modl.LodEntries.Count == 0)
+            return null;
+
+        // Sort LODs by ID to get best (lowest ID = highest detail)
+        var sortedLods = modl.LodEntries.OrderBy(l => l.Id).ToList();
+
+        // Try to get the MLOD chunk for the best LOD
+        foreach (var lodEntry in sortedLods)
+        {
+            uint mlodRef = lodEntry.MlodChunkRef;
+            int mlodLocalIdx = ChunkReference.GetTgiIndex(mlodRef);
+            if (mlodLocalIdx < 0)
+                continue;
+
+            MeshLod? mlodChunk = null;
+            RcolContainer mlodRcol = rcol;
+
+            if (ChunkReference.IsDelayed(mlodRef))
+            {
+                if (mlodLocalIdx < rcol.ExternalReferences.Length)
+                {
+                    var extKey = rcol.ExternalReferences[mlodLocalIdx];
+                    var entry = package.Find(extKey);
+                    if (entry != null)
+                    {
+                        mlodRcol = package.GetResource<RcolContainer>(entry.Value);
+                        mlodChunk = mlodRcol.GetChunk<MeshLod>();
+                    }
+                }
+            }
+            else
+            {
+                int absIdx = ChunkReference.ResolveChunkIndex(mlodRef, rcol.PublicChunks);
+                if (absIdx >= 0 && absIdx < rcol.ChunkEntries.Count)
+                    mlodChunk = rcol.ChunkEntries[absIdx].Chunk as MeshLod;
+            }
+
+            if (mlodChunk == null)
+                continue;
+
+            var inlineMeshes = new List<int>();
+            var seenMatdHashes = new HashSet<uint>();
+            int publicChunks = mlodRcol.PublicChunks;
+            for (int i = 0; i < mlodChunk.Meshes.Count; i++)
+            {
+                var materialRef = mlodChunk.Meshes[i].MaterialRef;
+                int matIdx = ChunkReference.GetTgiIndex(materialRef);
+                if (matIdx < 0)
+                    continue;
+
+                // Delayed = external MATD (already mounted as standalone entry)
+                if (ChunkReference.IsDelayed(materialRef))
+                    continue;
+
+                // Resolve the inline ref to the actual MATD (following MTST if needed)
+                // to dedup by resolved material identity, not chunk ref.
+                var matdResult = ResolveMaterial(package, mlodRcol, materialRef, publicChunks, null);
+                if (matdResult == null)
+                    continue;
+
+                // Only mount one loader per unique resolved MATD
+                if (seenMatdHashes.Add(matdResult.Value.Matd.MaterialNameHash))
+                    inlineMeshes.Add(i);
+            }
+
+            return inlineMeshes;
+        }
 
         return null;
     }

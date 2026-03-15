@@ -21,16 +21,19 @@ public static class ModlModelBuilder
 	/// <param name="material">Material to apply. Pass null for default white.</param>
 	/// <param name="scale">Uniform scale. Default 39.37 converts meters to Source 2 inches.</param>
 	/// <param name="addCollision">Whether to add a collision mesh.</param>
+	/// <param name="name">Optional model name for resource identification.</param>
 	public static Model? Build(
 		ResolvedMesh mesh,
 		Material? material = null,
 		float scale = 39.37f,
-		bool addCollision = true )
+		bool addCollision = true,
+		string? name = null )
 	{
 		return Build(
 			new[] { (mesh, material) },
 			scale,
-			addCollision );
+			addCollision,
+			name );
 	}
 
 	/// <summary>
@@ -40,14 +43,18 @@ public static class ModlModelBuilder
 	/// <param name="meshes">Array of (mesh, material) pairs. Each mesh gets its own material.</param>
 	/// <param name="scale">Uniform scale. Default 39.37 converts meters to Source 2 inches.</param>
 	/// <param name="addCollision">Whether to add a collision mesh from all geometry.</param>
+	/// <param name="name">Optional model name for resource identification.</param>
 	public static Model? Build(
 		IReadOnlyList<(ResolvedMesh Mesh, Material? Material)> meshes,
 		float scale = 39.37f,
-		bool addCollision = true )
+		bool addCollision = true,
+		string? name = null )
 	{
 		var defaultMaterial = Material.Load( "materials/default/white.vmat" );
 
-		var builder = new ModelBuilder();
+		var builder = Model.Builder;
+		if ( !string.IsNullOrEmpty( name ) )
+			builder.WithName( name );
 		bool anyMeshAdded = false;
 
 		// Collect all collision data across meshes
@@ -84,10 +91,13 @@ public static class ModlModelBuilder
 		if ( !anyMeshAdded )
 			return null;
 
-		// Add combined collision mesh from all geometry
+		// Add combined collision + trace mesh from all geometry
 		if ( addCollision && allCollisionPositions.Count >= 3 && allCollisionIndices.Count >= 3 )
 		{
-			builder.AddCollisionMesh( allCollisionPositions.ToArray(), allCollisionIndices.ToArray() );
+			var positions = allCollisionPositions.ToArray();
+			var collisionIndices = allCollisionIndices.ToArray();
+			builder.AddCollisionMesh( positions, collisionIndices );
+			builder.AddTraceMesh( positions, collisionIndices );
 		}
 
 		return builder.Create();

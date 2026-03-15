@@ -45,11 +45,13 @@ public static class GeomModelBuilder
 	/// <param name="material">Material to apply. Pass null for default white.</param>
 	/// <param name="scale">Uniform scale. Default 39.37 converts meters to Source 2 inches.</param>
 	/// <param name="addCollision">Whether to add a collision mesh.</param>
+	/// <param name="name">Optional model name for resource identification.</param>
 	public static Model? Build(
 		GeometryResource geom,
 		Material? material = null,
 		float scale = 39.37f,
-		bool addCollision = true )
+		bool addCollision = true,
+		string? name = null )
 	{
 		material ??= Material.Load( "materials/default/white.vmat" );
 
@@ -64,7 +66,9 @@ public static class GeomModelBuilder
 
 		var bounds = ComputeBounds( vertices );
 		var mesh = CreateMesh( vertices, srcIndices, bounds, material );
-		var builder = new ModelBuilder();
+		var builder = Model.Builder;
+		if ( !string.IsNullOrEmpty( name ) )
+			builder.WithName( name );
 
 		builder.AddMesh( mesh );
 
@@ -95,6 +99,7 @@ public static class GeomModelBuilder
 			positions[i] = vertices[i].Position;
 
 		builder.AddCollisionMesh( positions, indices );
+		builder.AddTraceMesh( positions, indices );
 	}
 
 	private static GeomVertex[] ExtractVertices( Sims4Reader.Mesh.Vertex[] srcVertices, float scale )

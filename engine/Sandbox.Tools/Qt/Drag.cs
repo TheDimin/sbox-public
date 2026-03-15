@@ -185,7 +185,7 @@ namespace Editor
 		/// <summary>
 		/// Whether the drag data has at least 1 file or folder.
 		/// </summary>
-		public bool HasFileOrFolder => Text.StartsWith( "file:///" ) || (Url != null && Url.IsFile);
+		public bool HasFileOrFolder => Text.StartsWith( "file:///" ) || Text.StartsWith( "mount://" ) || (Url != null && Url.IsFile);
 
 		/// <summary>
 		/// The first file or folder in the drag data.
@@ -194,6 +194,12 @@ namespace Editor
 		{
 			get
 			{
+				// Mount paths are virtual resource paths, return them as-is
+				if ( Text.StartsWith( "mount://" ) )
+				{
+					return Text.Split( '\n' )[0];
+				}
+
 				if ( Url?.IsFile ?? false )
 				{
 					return Url.LocalPath;
@@ -229,6 +235,13 @@ namespace Editor
 
 				foreach ( var file in files )
 				{
+					// Mount paths are virtual resource paths, keep as-is
+					if ( file.StartsWith( "mount://" ) )
+					{
+						output.Add( file );
+						continue;
+					}
+
 					// Windows file explorer drags..
 					if ( file.Length > pre.Length + 1 && file.StartsWith( pre ) )
 					{

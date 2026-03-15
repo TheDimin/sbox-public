@@ -86,7 +86,9 @@
       "Bash(grep -n \"enum ResourceType\\\\|VertexProxy\\\\|Vpxy\" E:Projectssbox-publicengineMountingSandbox.Mounting.Sims4Sims4ReaderResources*.cs)",
       "Bash(tasklist /FI 'PID eq 30548')",
       "Bash(findstr \"sbox-dev\")",
-      "Bash(tasklist /FI \"IMAGENAME eq sbox*\")"
+      "Bash(tasklist /FI \"IMAGENAME eq sbox*\")",
+      "Bash(find E:Projectssbox-publicengineMounting -type f -name *Test*.cs)",
+      "Bash(printf '0x%X\\\\n' 3468328586)"
     ]
   }
 }

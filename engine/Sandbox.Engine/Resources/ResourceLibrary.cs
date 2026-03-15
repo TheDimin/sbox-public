@@ -254,15 +254,24 @@ public class ResourceSystem
 	{
 		filepath = filepath.Replace( '\\', '/' );
 		if ( !filepath.EndsWith( "/" ) ) filepath += "/";
-		return ResourceIndex.Values.OfType<T>().Distinct().Where( x =>
+
+		// Mount resources are loaded on demand from the mount system
+		if ( filepath.StartsWith( "mount://" ) )
 		{
-			if ( x.ResourcePath.StartsWith( filepath ) )
-			{
-				if ( recursive ) return true;
-				if ( !x.ResourcePath.Substring( filepath.Length ).Contains( "/" ) ) return true;
-			}
-			return false;
-		} );
+			foreach ( var resource in Mounting.Directory.GetAll<T>( filepath, recursive ) )
+				yield return resource;
+
+			yield break;
+		}
+
+		foreach ( var resource in ResourceIndex.Values.OfType<T>().Distinct() )
+		{
+			if ( !resource.ResourcePath.StartsWith( filepath ) )
+				continue;
+
+			if ( recursive || !resource.ResourcePath.Substring( filepath.Length ).Contains( "/" ) )
+				yield return resource;
+		}
 	}
 
 	/// <summary>

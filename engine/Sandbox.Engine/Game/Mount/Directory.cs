@@ -121,6 +121,47 @@ public static class Directory
 		EngineFileSystem.AddAssetPath( $"mnt_{name}", path );
 	}
 
+	/// <summary>
+	/// Find all mount resources whose path starts with the given prefix.
+	/// Loads each resource on demand and returns only those assignable to T.
+	/// </summary>
+	internal static IEnumerable<T> GetAll<T>( string pathPrefix, bool recursive ) where T : Resource
+	{
+		if ( _system is null ) yield break;
+		if ( !pathPrefix.StartsWith( "mount://" ) ) yield break;
+
+		var prefix = pathPrefix.Replace( '\\', '/' );
+		if ( !prefix.EndsWith( "/" ) ) prefix += "/";
+
+		// Extract mount name from mount://name/...
+		var sourceName = prefix.Substring( 8 );
+		var slash = sourceName.IndexOf( '/' );
+		if ( slash < 0 ) yield break;
+		sourceName = sourceName.Substring( 0, slash );
+
+		var source = Get( sourceName );
+		if ( source is null || !source.IsMounted ) yield break;
+
+		foreach ( var entry in source.Resources )
+		{
+			if ( !entry.Path.StartsWith( prefix, StringComparison.OrdinalIgnoreCase ) )
+				continue;
+
+			if ( !recursive && entry.Path.Substring( prefix.Length ).Contains( "/" ) )
+				continue;
+
+			var resource = SyncContext.RunBlocking( entry.GetOrCreate() );
+			if ( resource is not T typed ) continue;
+
+			if ( resource is Resource res )
+			{
+				res.RegisterWeakResourceId( entry.Path );
+			}
+
+			yield return typed;
+		}
+	}
+
 	internal static bool TryLoad( string filename, ResourceType type, out object resource )
 	{
 		resource = default;
@@ -152,6 +193,14 @@ public static class Directory
 		{
 			Log.Warning( $"Loading \"{filename}\" returned null!" );
 			return false;
+		}
+
+		// Ensure mounted resources have their ResourcePath set to the mount path
+		// so the editor can identify them correctly (e.g. inspector shows the mount
+		// reference instead of a fallback like "sbox_procedural_model").
+		if ( resource is Resource res )
+		{
+			res.RegisterWeakResourceId( filename );
 		}
 
 		return resource is not null;
@@ -186,6 +235,12 @@ public static class Directory
 		{
 			Log.Warning( $"Loading \"{filename}\" returned null!" );
 			return null;
+		}
+
+		// Ensure mounted resources have their ResourcePath set to the mount path
+		if ( resource is Resource res )
+		{
+			res.RegisterWeakResourceId( filename );
 		}
 
 		return resource;

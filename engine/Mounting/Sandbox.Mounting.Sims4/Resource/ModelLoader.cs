@@ -22,7 +22,7 @@ public class ModelLoader( DbpfPackage package, ResourceEntry entry ) : ResourceL
 			if ( geomChunk == null )
 				return null;
 
-			return GeomModelBuilder.Build( geomChunk.Geometry );
+			return GeomModelBuilder.Build( geomChunk.Geometry, name: Path );
 		}
 		catch ( Exception e )
 		{

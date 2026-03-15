@@ -87,7 +87,6 @@ internal class MountAsset : Asset
 	{
 
 	}
-
 	internal override async Task<bool> CacheAsync()
 	{
 		var r = await file.GetOrCreate();

@@ -94,20 +94,28 @@ public partial class AssetList : ListView, AssetSystem.IEventListener
 
 				if ( asset == null )
 				{
-					drag.Data.Text = ae.FileInfo.FullName;
-					drag.Data.Url = new System.Uri( "file:///" + ae.FileInfo.FullName );
+					var path = ae.FileInfo.ToString();
+					drag.Data.Text = path;
+
+					// Mount paths (mount://...) aren't real filesystem paths,
+					// so don't wrap them in a file:/// URI.
+					if ( !path.StartsWith( "mount://" ) )
+						drag.Data.Url = new System.Uri( "file:///" + ae.FileInfo.FullName );
 				}
 				else
 				{
 					drag.Data.Text = asset.RelativePath;
-					drag.Data.Url = new System.Uri( "file:///" + asset.AbsolutePath );
+
+					// Mount assets use virtual paths, not filesystem paths.
+					if ( !asset.RelativePath.StartsWith( "mount://" ) )
+						drag.Data.Url = new System.Uri( "file:///" + asset.AbsolutePath );
 				}
 
 				// Add the other selected assets too..
 				foreach ( var item in SelectedItems.OfType<AssetEntry>() )
 				{
 					if ( ae == item ) continue;
-					drag.Data.Text += "\n" + item.FileInfo.FullName;
+					drag.Data.Text += "\n" + item.FileInfo.ToString();
 				}
 
 				drag.Execute();

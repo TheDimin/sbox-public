@@ -1,3 +1,5 @@
+using Sandbox;
+
 namespace Sims4Reader.Resources;
 
 /// <summary>
@@ -27,14 +29,19 @@ public class CatalogObjectResource : IResource
     public uint SimoleonPrice { get; set; }
     public ulong ThumbnailHash { get; set; }
     public uint DevCategoryFlags { get; set; }
+    public short PackId { get; set; }
 
     // Tags from common block
     public CatalogTag[] Tags { get; set; } = Array.Empty<CatalogTag>();
 
-    // Category classification (from COBJ body / AbstractCatalogResource)
-    public uint RoomCategoryFlags { get; set; }
-    public uint FunctionCategoryFlags { get; set; }
-    public uint BuildCategoryFlags { get; set; }
+    // Swatch metadata from common block
+    public ushort SwatchColorsSortPriority { get; set; }
+    public ulong VariantThumbImageHash { get; set; }
+
+    // Body fields
+    public uint[] CatalogFilterColors { get; set; } = Array.Empty<uint>();
+    public bool IsStackable { get; set; }
+    public bool CanDepreciate { get; set; }
 
     /// <summary>
     /// Whether the full COBJ body was parsed, or only the common header was readable.
@@ -83,7 +90,7 @@ public class CatalogObjectResource : IResource
 
         if (CommonBlockVersion >= 10)
         {
-            reader.ReadInt16();  // PackId
+            PackId = reader.ReadInt16();
             reader.ReadByte();   // PackFlags
             reader.ReadBytes(9); // ReservedBytes
         }
@@ -137,8 +144,8 @@ public class CatalogObjectResource : IResource
 
         reader.ReadUInt32(); // UnlockByHash
         reader.ReadUInt32(); // UnlockedByHash
-        reader.ReadUInt16(); // SwatchColorsSortPriority
-        reader.ReadUInt64(); // VarientThumbImageHash
+        SwatchColorsSortPriority = reader.ReadUInt16();
+        VariantThumbImageHash = reader.ReadUInt64();
     }
 
     /// <summary>
@@ -176,14 +183,15 @@ public class CatalogObjectResource : IResource
         reader.ReadUInt64(); // catalogGroup
         reader.ReadByte();   // stateUsage
 
-        // Colors list (byte count)
+        // Catalog filter colors (dominant colors for buy-mode filtering)
         byte colorCount = reader.ReadByte();
+        CatalogFilterColors = new uint[colorCount];
         for (int i = 0; i < colorCount; i++)
-            reader.ReadUInt32(); // ARGB color
+            CatalogFilterColors[i] = reader.ReadUInt32(); // ARGB color
 
         reader.ReadUInt32(); // fenceHeight
-        reader.ReadByte();   // isStackable
-        reader.ReadByte();   // canItemDepreciate
+        IsStackable = reader.ReadByte() != 0;
+        CanDepreciate = reader.ReadByte() != 0;
 
         if (Version >= 0x19)
             reader.ReadBytes(16); // fallbackObjectKey TGI
