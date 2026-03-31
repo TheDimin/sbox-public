@@ -19,6 +19,31 @@ public class InlineMaterialLoader( DbpfPackage package, ResourceEntry modlEntry,
 {
 	static new Logger Log = new Logger( "Sims4-InlineMatLoader" );
 
+	protected override async Task<object?> LoadAsync()
+	{
+		try
+		{
+			var model = ModlModelLoader.LoadModel( package, modlEntry, allPackages );
+			var bestLod = model.GetBestLod();
+			if ( bestLod == null )
+				return null;
+
+			if ( meshIndex < 0 || meshIndex >= bestLod.Meshes.Count )
+				return null;
+
+			var mesh = bestLod.Meshes[meshIndex];
+			if ( mesh.Material == null )
+				return null;
+
+			return await Sims4MaterialLoader.BuildMaterialFromMatdAsync( Path, mesh.Material, mesh.TextureKeys );
+		}
+		catch ( Exception e )
+		{
+			Log.Warning( $"Failed to load inline material from MODL {modlEntry.Key} mesh {meshIndex}: {e.Message}" );
+			return null;
+		}
+	}
+
 	protected override object? Load()
 	{
 		try

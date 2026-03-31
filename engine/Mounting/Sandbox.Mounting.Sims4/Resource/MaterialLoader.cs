@@ -47,6 +47,36 @@ public class Sims4MaterialLoader( DbpfPackage package, ResourceEntry entry ) : R
 	}
 
 	/// <summary>
+	/// Returns true if the given TS4 shader type inherently requires alpha testing.
+	/// In practice, nearly all non-glass TS4 shaders can have masked geometry
+	/// (foliage, plants, hair, eyelashes, fences, props, etc.).
+	/// We default to true and exclude only shaders that are known to never need it.
+	/// </summary>
+	internal static bool IsAlphaTestShader( ShaderType shader )
+	{
+		// Glass/translucent shaders use blending instead of alpha test
+		if ( IsGlassShader( shader ) )
+			return false;
+
+		// These shaders never have meaningful diffuse alpha
+		return shader is not (
+			ShaderType.None
+			or ShaderType.ShadowMap
+			or ShaderType.DropShadow
+			or ShaderType.Plumbob
+			or ShaderType.Blueprint
+			or ShaderType.PreviewWallsAndFloors
+			or ShaderType.ImpostorWater
+			or ShaderType.StandingWater
+			or ShaderType.BasinWater
+			or ShaderType.Subtractive
+			or ShaderType.Additive
+			or ShaderType.ParticleAnim
+			or ShaderType.ParticleJet
+		);
+	}
+
+	/// <summary>
 	/// Build a sandbox Material from an already-parsed MaterialDefinition and its texture keys.
 	/// Shared by both Sims4MaterialLoader (standalone MATD) and InlineMaterialLoader (MATD from MODL RCOL).
 	/// </summary>
@@ -56,6 +86,8 @@ public class Sims4MaterialLoader( DbpfPackage package, ResourceEntry entry ) : R
 
 		bool hasEmissive = false;
 		bool hasAlphaMap = false;
+		bool useDiffuseForAlpha = false;
+		float alphaMaskThreshold = 0f;
 		bool isGlass = IsGlassShader( matd.Shader );
 		float transparency = 0f;
 
@@ -68,7 +100,7 @@ public class Sims4MaterialLoader( DbpfPackage package, ResourceEntry entry ) : R
 				ShaderFieldType.NormalMap => "g_tNormalMap",
 				ShaderFieldType.SpecularMap => "g_tSpecular",
 				ShaderFieldType.EmissionMap or ShaderFieldType.SelfIlluminationMap => "g_tEmissive",
-				ShaderFieldType.AlphaMap => "g_tDiffuse",
+				ShaderFieldType.AlphaMap => "g_tAlphaMap",
 				_ => null,
 			};
 
@@ -112,11 +144,42 @@ public class Sims4MaterialLoader( DbpfPackage package, ResourceEntry entry ) : R
 				case ShaderFloat f when shaderEntry.Field == ShaderFieldType.Transparency:
 					transparency = f.Value;
 					break;
+
+				case ShaderFloat f when shaderEntry.Field == ShaderFieldType.UseDiffuseForAlphaTest:
+					useDiffuseForAlpha = f.Value > 0f;
+					break;
+
+				case ShaderFloat f when shaderEntry.Field == ShaderFieldType.AlphaMaskThreshold:
+					alphaMaskThreshold = f.Value;
+					break;
 			}
 		}
 
-		if ( hasAlphaMap )
+		// If the AlphaMap points to the same texture as the DiffuseMap, the alpha
+		// data lives in the diffuse's .a channel (DXT5/DST5). Don't use the separate
+		// alpha map path (which reads .r) — just let the default diffuseSample.a work.
+		bool alphaMapIsSameAsDiffuse = hasAlphaMap
+			&& textureKeys.TryGetValue( ShaderFieldType.DiffuseMap, out var diffKey )
+			&& textureKeys.TryGetValue( ShaderFieldType.AlphaMap, out var alpKey )
+			&& diffKey.Instance == alpKey.Instance
+			&& diffKey.Group == alpKey.Group;
+
+		bool useSeparateAlphaMap = hasAlphaMap && !alphaMapIsSameAsDiffuse;
+
+		bool needsAlphaTest = useSeparateAlphaMap || hasAlphaMap || useDiffuseForAlpha || IsAlphaTestShader( matd.Shader );
+		if ( needsAlphaTest )
+		{
 			material.Set( "F_ALPHA_TEST", true );
+			// Always set a sensible threshold — shader Default1(0.5) is compile-time only
+			// and may not apply to runtime-created materials (leaving it at 0.0, which
+			// means clip(alpha - 0.0) never fires for any alpha >= 0).
+			// TS4 stores the threshold in 0-255 byte range; the shader operates in 0.0-1.0.
+			// Normalize any value > 1 (clearly a byte value) to float range.
+			float threshold = alphaMaskThreshold > 1f ? alphaMaskThreshold / 255f : alphaMaskThreshold;
+			material.Set( "g_flAlphaTestThreshold", threshold > 0f ? threshold : 0.5f );
+		}
+		if ( useSeparateAlphaMap )
+			material.Set( "F_SEPARATE_ALPHA_MAP", true );
 		if ( hasEmissive )
 			material.Set( "F_EMISSIVE", true );
 
@@ -131,8 +194,167 @@ public class Sims4MaterialLoader( DbpfPackage package, ResourceEntry entry ) : R
 			float opacity = transparency > 0f ? transparency : 0.15f;
 			material.Set( "g_flOpacity", opacity );
 		}
+		else if ( transparency > 0f )
+		{
+			// Non-glass materials with an explicit Transparency value
+			// (e.g. curtain fabric, frosted surfaces).
+			material.Set( "F_TRANSLUCENT", true );
+			material.Set( "g_flOpacity", transparency );
+		}
 
 		return material;
+	}
+
+	/// <summary>
+	/// Async variant of <see cref="BuildMaterialFromMatd"/> that kicks off all texture
+	/// loads concurrently via <c>Task.WhenAll</c> so the GPU can compile multiple
+	/// textures in parallel instead of sequentially.
+	/// </summary>
+	internal static async Task<Material?> BuildMaterialFromMatdAsync( string mountPath, MaterialDefinition matd, Dictionary<ShaderFieldType, ResourceKey> textureKeys )
+	{
+		var material = BaseMaterial.CreateCopy( mountPath );
+
+		bool hasEmissive = false;
+		bool hasAlphaMap = false;
+		bool useDiffuseForAlpha = false;
+		float alphaMaskThreshold = 0f;
+		bool isGlass = IsGlassShader( matd.Shader );
+		float transparency = 0f;
+
+		// Build a list of (paramName, path) pairs for all texture fields we handle
+		var pending = new List<(string ParamName, string Path, ShaderFieldType Field)>();
+
+		foreach ( var (field, key) in textureKeys )
+		{
+			var paramName = field switch
+			{
+				ShaderFieldType.DiffuseMap => "g_tDiffuse",
+				ShaderFieldType.NormalMap => "g_tNormalMap",
+				ShaderFieldType.SpecularMap => "g_tSpecular",
+				ShaderFieldType.EmissionMap or ShaderFieldType.SelfIlluminationMap => "g_tEmissive",
+				ShaderFieldType.AlphaMap => "g_tAlphaMap",
+				_ => null,
+			};
+
+			if ( paramName != null )
+			{
+				if ( field == ShaderFieldType.EmissionMap || field == ShaderFieldType.SelfIlluminationMap )
+					hasEmissive = true;
+				if ( field == ShaderFieldType.AlphaMap )
+					hasAlphaMap = true;
+
+				var texturePath = $"mount://sims4/textures/{key.Group:X}_{key.Instance:X}.vtex";
+				pending.Add( (paramName, texturePath, field) );
+			}
+		}
+
+		// Kick off ALL texture loads concurrently, then await completion of all
+		var tasks = pending.Select( p => Texture.LoadAsync( p.Path, false ) ).ToList();
+		await Task.WhenAll( tasks );
+
+		for ( int i = 0; i < pending.Count; i++ )
+		{
+			var texture = tasks[i].Result;
+			if ( texture != null && !texture.IsError )
+				material.Set( pending[i].ParamName, texture );
+		}
+
+		// Apply float/color parameters from shader entries
+		foreach ( var shaderEntry in matd.ShaderEntries )
+		{
+			switch ( shaderEntry )
+			{
+				case ShaderFloat3 f3 when shaderEntry.Field == ShaderFieldType.Diffuse:
+					material.Set( "g_vDiffuseTint", new Vector3( f3.X, f3.Y, f3.Z ) );
+					break;
+				case ShaderFloat4 f4 when shaderEntry.Field == ShaderFieldType.Diffuse:
+					material.Set( "g_vDiffuseTint", new Vector3( f4.X, f4.Y, f4.Z ) );
+					break;
+
+				case ShaderFloat f when shaderEntry.Field == ShaderFieldType.EmissiveBloomMultiplier
+					|| shaderEntry.Field == ShaderFieldType.EmissiveLightMultiplier:
+					material.Set( "g_flEmissiveScale", Math.Max( f.Value, 0f ) );
+					hasEmissive = true;
+					break;
+
+				case ShaderFloat f when shaderEntry.Field == ShaderFieldType.NormalMapScale
+					|| shaderEntry.Field == ShaderFieldType.NormalBumpScale:
+					material.Set( "g_flNormalStrength", f.Value );
+					break;
+
+				case ShaderFloat f when shaderEntry.Field == ShaderFieldType.Transparency:
+					transparency = f.Value;
+					break;
+
+				case ShaderFloat f when shaderEntry.Field == ShaderFieldType.UseDiffuseForAlphaTest:
+					useDiffuseForAlpha = f.Value > 0f;
+					break;
+
+				case ShaderFloat f when shaderEntry.Field == ShaderFieldType.AlphaMaskThreshold:
+					alphaMaskThreshold = f.Value;
+					break;
+			}
+		}
+
+		bool alphaMapIsSameAsDiffuse = hasAlphaMap
+			&& textureKeys.TryGetValue( ShaderFieldType.DiffuseMap, out var diffKey )
+			&& textureKeys.TryGetValue( ShaderFieldType.AlphaMap, out var alpKey )
+			&& diffKey.Instance == alpKey.Instance
+			&& diffKey.Group == alpKey.Group;
+
+		bool useSeparateAlphaMap = hasAlphaMap && !alphaMapIsSameAsDiffuse;
+
+		bool needsAlphaTest = useSeparateAlphaMap || hasAlphaMap || useDiffuseForAlpha || IsAlphaTestShader( matd.Shader );
+		if ( needsAlphaTest )
+		{
+			material.Set( "F_ALPHA_TEST", true );
+			float threshold = alphaMaskThreshold > 1f ? alphaMaskThreshold / 255f : alphaMaskThreshold;
+			material.Set( "g_flAlphaTestThreshold", threshold > 0f ? threshold : 0.5f );
+		}
+		if ( useSeparateAlphaMap )
+			material.Set( "F_SEPARATE_ALPHA_MAP", true );
+		if ( hasEmissive )
+			material.Set( "F_EMISSIVE", true );
+
+		if ( isGlass )
+		{
+			material.Set( "F_TRANSLUCENT", true );
+			material.Set( "F_RENDER_BACKFACES", true );
+			float opacity = transparency > 0f ? transparency : 0.15f;
+			material.Set( "g_flOpacity", opacity );
+		}
+		else if ( transparency > 0f )
+		{
+			material.Set( "F_TRANSLUCENT", true );
+			material.Set( "g_flOpacity", transparency );
+		}
+
+		return material;
+	}
+
+	protected override async Task<object?> LoadAsync()
+	{
+		if ( entry.MemSize == 0 || entry.FileSize == 0 )
+			return null;
+
+		try
+		{
+			var rcol = package.GetResource<RcolContainer>( entry );
+			var matd = rcol.GetChunk<MaterialDefinition>();
+			if ( matd == null )
+			{
+				Log.Warning( $"No MATD chunk found in RCOL {entry.Key}" );
+				return null;
+			}
+
+			var textureKeys = ModlModelLoader.ExtractTextureKeys( matd, rcol.ExternalReferences );
+			return await BuildMaterialFromMatdAsync( Path, matd, textureKeys );
+		}
+		catch ( Exception e )
+		{
+			Log.Warning( $"Failed to load material {entry.Key}: {e.Message}" );
+			return null;
+		}
 	}
 
 	protected override object? Load()

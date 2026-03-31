@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using Mounting.Sims4;
 using Sims4Reader;
 using Sims4Reader.Resources;
@@ -25,6 +26,12 @@ public class SimsMount : BaseGameMount
 	// TS4 on Steam
 	const long AppId = 1222670;
 
+	/// <summary>
+	/// Maximum number of inline material slots to blindly register per MODL.
+	/// Empirically, real TS4 MODLs have at most 8 meshes with inline materials.
+	/// </summary>
+	const int MaxInlineMeshSlots = 8;
+
 	string? _gameDir;
 
 	protected override void Initialize( InitializeContext context )
@@ -47,6 +54,25 @@ public class SimsMount : BaseGameMount
 		return;
 	}
 
+	/// <summary>
+	/// Pre-processed package data produced in parallel, consumed sequentially by MountResources.
+	/// </summary>
+	private readonly struct PreparedPackage
+	{
+		public readonly DbpfPackage Package;
+		public readonly Dictionary<ResourceKey, ModlMetadata> ModlMetadata;
+		public readonly Dictionary<ulong, ObjdMetadata> ObjdMetadata;
+		public readonly Dictionary<ulong, string> CobjCategories;
+
+		public PreparedPackage( DbpfPackage package, Dictionary<ResourceKey, ModlMetadata> modlMetadata, Dictionary<ulong, ObjdMetadata> objdMetadata, Dictionary<ulong, string> cobjCategories )
+		{
+			Package = package;
+			ModlMetadata = modlMetadata;
+			ObjdMetadata = objdMetadata;
+			CobjCategories = cobjCategories;
+		}
+	}
+
 	protected override Task Mount( MountContext context )
 	{
 		if ( string.IsNullOrWhiteSpace( _gameDir ) || !System.IO.Directory.Exists( _gameDir ) )
@@ -56,33 +82,44 @@ public class SimsMount : BaseGameMount
 		if ( !System.IO.Directory.Exists( dataDir ) )
 			return Task.CompletedTask;
 
-		//MountPackage( context, "E:\\SteamLibrary\\steamapps\\common\\The Sims 4\\Data\\Client\\ClientDeltaBuild0.package" );
+		var files = System.IO.Directory.GetFiles( dataDir, "*.package", SearchOption.AllDirectories );
 
-		foreach ( var file in System.IO.Directory.EnumerateFiles( dataDir, "*.package", SearchOption.AllDirectories ) )
+		// Phase 1 (parallel): Open packages + parse COBJ/OBJD metadata.
+		// Each package is independent — no shared state between packages.
+		// DbpfPackage.Open reads the DBPF index, BuildMetadataIndex parses
+		// COBJ/OBJD entries. Both are CPU+I/O bound and benefit from parallelism.
+		var prepared = new PreparedPackage[files.Length];
+
+		Parallel.For( 0, files.Length, i =>
 		{
-			MountPackage( context, file );
+			try
+			{
+				var package = DbpfPackage.Open( files[i] );
+				var (modlMeta, objdMeta, cobjCats) = BuildMetadataIndex( package );
+				prepared[i] = new PreparedPackage( package, modlMeta, objdMeta, cobjCats );
+			}
+			catch ( Exception ex )
+			{
+				Log.Error( $"Failed to open package {files[i]}: {ex.Message}" );
+			}
+		} );
+
+		// Phase 2 (sequential): Register resources with the mount system.
+		// context.Add is NOT thread-safe (writes to a plain Dictionary),
+		// so all registration must happen on this thread.
+		for ( int i = 0; i < prepared.Length; i++ )
+		{
+			var p = prepared[i];
+			if ( p.Package == null )
+				continue;
+
+			packages.Add( p.Package );
+			MountResources( context, p.Package, p.ModlMetadata, p.ObjdMetadata, p.CobjCategories );
 		}
 
 		Instance = this;
 		IsMounted = true;
 		return Task.CompletedTask;
-	}
-
-	private void MountPackage( MountContext context, string file )
-	{
-		Log.Info( $"Mounting package: {file}" );
-
-		var package = DbpfPackage.Open( file );
-		packages.Add( package );
-
-		// Pass 1: Build MODL key → category and name mappings from COBJ → OBJD → MODL chain
-		var (modlMetadata, objdMetadata) = BuildMetadataIndex( package );
-
-		// Pass 2: Mount resources using categorized paths
-		// Pass the full packages list for cross-package resource lookup.
-		// Resources load lazily, so by the time a MODL actually resolves,
-		// all packages will have been added to the list.
-		MountResources( context, package, modlMetadata, objdMetadata );
 	}
 
 	/// <summary>
@@ -97,14 +134,15 @@ public class SimsMount : BaseGameMount
 	internal record struct ObjdMetadata( string? Name, string? MaterialVariant );
 
 	/// <summary>
-	/// Pass 1: Scan COBJ and OBJD entries to build metadata (category + name) for each MODL key.
+	/// Scan COBJ and OBJD entries to build metadata (category + name) for each MODL key.
+	/// Thread-safe: operates only on the given package with local dictionaries.
 	///
 	/// Chain: COBJ and OBJD share the same instance ID.
 	///   COBJ tags → buy/build category
 	///   OBJD.Name → human-readable object name (e.g. "object_diningTable_squareSteel")
 	///   OBJD.Models[] → MODL resource keys
 	/// </summary>
-	private (Dictionary<ResourceKey, ModlMetadata> modl, Dictionary<ulong, ObjdMetadata> objd) BuildMetadataIndex( DbpfPackage package )
+	private static (Dictionary<ResourceKey, ModlMetadata> modl, Dictionary<ulong, ObjdMetadata> objd, Dictionary<ulong, string> cobjCategories) BuildMetadataIndex( DbpfPackage package )
 	{
 		var modlMetadata = new Dictionary<ResourceKey, ModlMetadata>();
 		var objdMetadata = new Dictionary<ulong, ObjdMetadata>();
@@ -163,9 +201,7 @@ public class SimsMount : BaseGameMount
 			}
 		}
 
-		Log.Info( $"Metadata index: {cobjCategories.Count} categorized COBJs, {modlMetadata.Count} MODLs with metadata, {objdMetadata.Count} OBJDs" );
-
-		return (modlMetadata, objdMetadata);
+		return (modlMetadata, objdMetadata, cobjCategories);
 	}
 
 	/// <summary>
@@ -190,7 +226,7 @@ public class SimsMount : BaseGameMount
 	}
 
 	/// <summary>
-	/// Pass 2: Mount all resources with categorized paths.
+	/// Mount all resources with categorized paths. Must be called from the mount thread only.
 	///
 	/// MODL RCOLs contain MTST and MATD chunks internally — material resolution
 	/// happens inside the ModelLoader via proper ChunkReference handling
@@ -198,7 +234,7 @@ public class SimsMount : BaseGameMount
 	///
 	/// GEOM → models/cas/, MODL → models/{category}/{name}
 	/// </summary>
-	private void MountResources( MountContext context, DbpfPackage package, Dictionary<ResourceKey, ModlMetadata> modlMetadata, Dictionary<ulong, ObjdMetadata> objdMetadata )
+	private void MountResources( MountContext context, DbpfPackage package, Dictionary<ResourceKey, ModlMetadata> modlMetadata, Dictionary<ulong, ObjdMetadata> objdMetadata, Dictionary<ulong, string> cobjCategories )
 	{
 		foreach ( var entry in package.Entries )
 		{
@@ -232,7 +268,7 @@ public class SimsMount : BaseGameMount
 					case Sims4Reader.ResourceType.Geometry:
 						context.Add( Sandbox.Mounting.ResourceType.Model,
 							$"models/cas/{keyName}",
-							new ModelLoader( package, entry ) );
+							new GeomtryLoader( package, entry ) );
 						break;
 
 					// Buy/build models (MODL)
@@ -246,8 +282,29 @@ public class SimsMount : BaseGameMount
 							$"models/{category}/{displayName}",
 							new ModlLoader( package, entry, packages ) );
 
-						// Mount inline MATDs embedded in this MODL's RCOL
-						MountInlineMaterials( context, package, entry );
+						// Register inline material slots without scanning.
+						// Real TS4 MODLs have at most 8 meshes. We blindly register
+						// slots 0..MaxInlineMeshSlots — unused slots return null from
+						// InlineMaterialLoader.Load() which is a no-op.
+						// This avoids a ~1s/package ScanInlineMaterialMeshes call at mount time.
+						for ( int meshIdx = 0; meshIdx < MaxInlineMeshSlots; meshIdx++ )
+						{
+							context.Add( Sandbox.Mounting.ResourceType.Material,
+								$"materials/inline/{keyName}_m{meshIdx}",
+								new InlineMaterialLoader( package, entry, meshIdx, packages ) );
+						}
+						break;
+					}
+
+					// Catalog surfaces (CFLR, CFLT, CWAL) — floor/wall paint materials
+					case Sims4Reader.ResourceType.CatalogFloor:
+					case Sims4Reader.ResourceType.CatalogFlooring:
+					case Sims4Reader.ResourceType.CatalogWall:
+					{
+						var surfaceType = key.Type == Sims4Reader.ResourceType.CatalogWall ? "wall" : "floor";
+						context.Add( Sandbox.Mounting.ResourceType.Text,
+							$"surfaces/{surfaceType}/{keyName}.s4sur",
+							new CatalogSurfaceLoader( package, entry, packages, surfaceType ) );
 						break;
 					}
 
@@ -255,8 +312,9 @@ public class SimsMount : BaseGameMount
 					case Sims4Reader.ResourceType.CatalogObject:
 					{
 						// Build a readable path: objects/{category}/{objectName}/{variant}.s4cor
-						var cobjResource = package.GetResource<CatalogObjectResource>( entry );
-						var category = BuyCategoryTag.GetCategory( cobjResource.Tags ) ?? "misc";
+						// Use cached category from BuildMetadataIndex — avoids re-parsing the COBJ.
+						cobjCategories.TryGetValue( key.Instance, out var category );
+						var cat = category ?? "misc";
 						objdMetadata.TryGetValue( key.Instance, out var objd );
 
 						var objName = objd.Name ?? keyName;
@@ -280,8 +338,8 @@ public class SimsMount : BaseGameMount
 						}
 
 						context.Add( Sandbox.Mounting.ResourceType.Text,
-							$"objects/{category}/{objName}/{fileName}.s4cor",
-							new CatalogObjectLoader( package, entry ) );
+							$"objects/{cat}/{objName}/{fileName}.s4cor",
+							new CatalogObjectLoader( package, entry, packages ) );
 						break;
 					}
 				}
@@ -293,33 +351,6 @@ public class SimsMount : BaseGameMount
 		}
 	}
 
-
-	/// <summary>
-	/// Scan a MODL RCOL for inline MATD chunks and mount them as material resources.
-	/// Uses a lightweight scan that only checks chunk reference types (no geometry decode).
-	/// Path scheme matches ModelLoader.ResolveMesh:
-	///   inline → materials/inline/{modlGroup:X}_{modlInstance:X}_m{meshIndex}
-	/// </summary>
-	private void MountInlineMaterials( MountContext context, DbpfPackage package, ResourceEntry modlEntry )
-	{
-		try
-		{
-			var inlineMeshes = Sims4Reader.Mesh.ModlModelLoader.ScanInlineMaterialMeshes( package, modlEntry );
-			if ( inlineMeshes == null || inlineMeshes.Count == 0 ) return;
-
-			foreach ( var meshIdx in inlineMeshes )
-			{
-				var mountPath = $"materials/inline/{modlEntry.Key.Group:X}_{modlEntry.Key.Instance:X}_m{meshIdx}";
-				context.Add( Sandbox.Mounting.ResourceType.Material,
-					mountPath,
-					new InlineMaterialLoader( package, modlEntry, meshIdx, packages ) );
-			}
-		}
-		catch ( Exception ex )
-		{
-			Log.Warning( $"Failed to scan MODL {modlEntry.Key} for inline materials: {ex.Message}" );
-		}
-	}
 
 	protected override void Shutdown()
 	{

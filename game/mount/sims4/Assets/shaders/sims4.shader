@@ -24,6 +24,7 @@ FEATURES
 	#include "common/features.hlsl"
 
 	Feature( F_ALPHA_TEST, 0..1, "Alpha Test" );
+	Feature( F_SEPARATE_ALPHA_MAP, 0..1, "Separate Alpha Map" );
 	Feature( F_EMISSIVE, 0..1, "Emissive" );
 	Feature( F_TRANSLUCENT, 0..1, "Translucent" );
 }
@@ -31,7 +32,7 @@ FEATURES
 MODES
 {
 	Forward();
-	Depth();
+	Depth( S_MODE_DEPTH );
 }
 
 COMMON
@@ -71,7 +72,9 @@ PS
 	// -------------------------------------------------------------------------
 	// Static combos
 	// -------------------------------------------------------------------------
+	StaticCombo( S_MODE_DEPTH, 0..1, Sys( ALL ) );
 	StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( ALL ) );
+	StaticCombo( S_SEPARATE_ALPHA_MAP, F_SEPARATE_ALPHA_MAP, Sys( ALL ) );
 	StaticCombo( S_EMISSIVE, F_EMISSIVE, Sys( ALL ) );
 	StaticCombo( S_TRANSLUCENT, F_TRANSLUCENT, Sys( ALL ) );
 	StaticCombo( S_RENDER_BACKFACES, F_RENDER_BACKFACES, Sys( ALL ) );
@@ -126,6 +129,12 @@ PS
 	// Emissive / self-illumination (sRGB)
 	CreateInputTexture2D( EmissiveMap, Srgb, 8, "None", "_emissive", "Textures,10/40", Default3( 0.0, 0.0, 0.0 ) );
 	Texture2D g_tEmissive < Channel( RGBA, Box( EmissiveMap ), Srgb ); OutputFormat( DXT5 ); SrgbRead( true ); >;
+
+	// Separate alpha/opacity map (linear, used when TS4 has a dedicated AlphaMap texture
+	// rather than alpha baked into the diffuse). TS4 alpha maps store opacity in the
+	// red channel. Default is fully opaque (white).
+	CreateInputTexture2D( AlphaMapTex, Linear, 8, "None", "_alpha", "Textures,10/50", Default4( 1.0, 1.0, 1.0, 1.0 ) );
+	Texture2D g_tAlphaMap < Channel( RGBA, Box( AlphaMapTex ), Linear ); OutputFormat( DXT5 ); SrgbRead( false ); >;
 
 	// -------------------------------------------------------------------------
 	// Material parameters
@@ -214,6 +223,14 @@ PS
 	// -------------------------------------------------------------------------
 	// Main pixel shader
 	// -------------------------------------------------------------------------
+	// earlydepthstencil is an optimization that runs depth/stencil test before
+	// the pixel shader. However, it also writes depth BEFORE the PS runs, so
+	// if the PS calls clip()/discard, the depth has already been written —
+	// occluding geometry behind the transparent area. Only safe for opaque
+	// (non-alpha-tested) materials.
+	#if ( S_MODE_DEPTH < 1 ) && ( !S_ALPHA_TEST )
+		[earlydepthstencil]
+	#endif
 	float4 MainPs( PixelInput i ) : SV_Target0
 	{
 		Material m = Material::Init();
@@ -226,11 +243,23 @@ PS
 		m.Opacity = diffuseSample.a;
 
 		// ----- Alpha Test -----
+		// Must clip in both forward and depth passes so transparent pixels
+		// don't write to the depth buffer or the color buffer.
 		if ( S_ALPHA_TEST )
 		{
-			// TS4 assembly: diffuse.w * 255 - threshold, discard if < 0
-			float alphaRef = diffuseSample.a - g_flAlphaTestThreshold;
-			clip( alphaRef );
+			float alpha = diffuseSample.a;
+
+			// When TS4 provides a separate AlphaMap texture (common for foliage
+			// where the diffuse is DXT1 with no alpha), read opacity from it.
+			// TS4 alpha maps store the mask in the red channel.
+			if ( S_SEPARATE_ALPHA_MAP )
+			{
+				float4 alphaSample = Tex2DS( g_tAlphaMap, g_sSampler0, uv );
+				alpha = alphaSample.r;
+			}
+
+			m.Opacity = alpha;
+			clip( alpha - g_flAlphaTestThreshold );
 		}
 
 		// ----- Glass / Translucent -----
@@ -285,6 +314,10 @@ PS
 		m.WorldTangentV = i.vTangentVWs;
 		m.TextureCoords = uv;
 
+		// ShadingModelStandard::Shade handles both forward and depth passes:
+		// - In depth mode (S_MODE_DEPTH=1): calls AdjustAlphaToCoverage() to clip
+		//   transparent pixels from the depth buffer, then returns DepthNormals::Output()
+		// - In forward mode (S_MODE_DEPTH=0): full PBR shading with earlydepthstencil
 		return ShadingModelStandard::Shade( i, m );
 	}
 }

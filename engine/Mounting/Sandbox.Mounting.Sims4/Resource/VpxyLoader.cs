@@ -145,6 +145,8 @@ public class VpxyLoader( DbpfPackage package, ResourceEntry vpxyEntry ) : Resour
 		bool anySet = false;
 		bool hasEmissive = false;
 		bool hasAlphaMap = false;
+		bool useDiffuseForAlpha = false;
+		float alphaMaskThreshold = 0f;
 		bool isGlass = mesh.Material != null && Sims4MaterialLoader.IsGlassShader( mesh.Material.Shader );
 		float transparency = 0f;
 
@@ -157,7 +159,7 @@ public class VpxyLoader( DbpfPackage package, ResourceEntry vpxyEntry ) : Resour
 				ShaderFieldType.NormalMap => "g_tNormalMap",
 				ShaderFieldType.SpecularMap => "g_tSpecular",
 				ShaderFieldType.EmissionMap or ShaderFieldType.SelfIlluminationMap => "g_tEmissive",
-				ShaderFieldType.AlphaMap => "g_tDiffuse", // alpha baked into diffuse alpha channel
+				ShaderFieldType.AlphaMap => "g_tAlphaMap",
 				_ => null,
 			};
 
@@ -210,13 +212,38 @@ public class VpxyLoader( DbpfPackage package, ResourceEntry vpxyEntry ) : Resour
 					case ShaderFloat f when entry.Field == ShaderFieldType.Transparency:
 						transparency = f.Value;
 						break;
+
+					case ShaderFloat f when entry.Field == ShaderFieldType.UseDiffuseForAlphaTest:
+						useDiffuseForAlpha = f.Value > 0f;
+						anySet = true;
+						break;
+
+					case ShaderFloat f when entry.Field == ShaderFieldType.AlphaMaskThreshold:
+						alphaMaskThreshold = f.Value;
+						break;
 				}
 			}
 		}
 
 		// Enable static combos based on detected features
-		if ( hasAlphaMap )
+		bool needsAlphaTest = hasAlphaMap
+			|| useDiffuseForAlpha
+			|| (mesh.Material != null && Sims4MaterialLoader.IsAlphaTestShader( mesh.Material.Shader ));
+
+		if ( needsAlphaTest )
+		{
 			material.Set( "F_ALPHA_TEST", true );
+			// Always set a sensible threshold — shader Default1(0.5) is compile-time only
+			// and may not apply to runtime-created materials (leaving it at 0.0, which
+			// means clip(alpha - 0.0) never fires for any alpha >= 0).
+			material.Set( "g_flAlphaTestThreshold", alphaMaskThreshold > 0f ? alphaMaskThreshold : 0.5f );
+			anySet = true;
+		}
+		if ( hasAlphaMap )
+		{
+			material.Set( "F_SEPARATE_ALPHA_MAP", true );
+			anySet = true;
+		}
 		if ( hasEmissive )
 			material.Set( "F_EMISSIVE", true );
 
@@ -227,6 +254,13 @@ public class VpxyLoader( DbpfPackage package, ResourceEntry vpxyEntry ) : Resour
 			material.Set( "F_RENDER_BACKFACES", true );
 			float opacity = transparency > 0f ? transparency : 0.15f;
 			material.Set( "g_flOpacity", opacity );
+			anySet = true;
+		}
+		else if ( transparency > 0f )
+		{
+			// Non-glass materials with an explicit Transparency value
+			material.Set( "F_TRANSLUCENT", true );
+			material.Set( "g_flOpacity", transparency );
 			anySet = true;
 		}
 

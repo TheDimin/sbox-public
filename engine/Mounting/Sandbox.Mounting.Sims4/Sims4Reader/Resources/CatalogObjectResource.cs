@@ -3,6 +3,63 @@ using Sandbox;
 namespace Sims4Reader.Resources;
 
 /// <summary>
+/// Build/buy product status flags from the COBJ common block.
+/// Controls catalog visibility and object classification.
+/// </summary>
+[Flags]
+public enum DevCategoryFlags : uint
+{
+    None = 0,
+    Debug           = 1 << 0,
+    Modded          = 1 << 1,
+    ShippingOnly    = 1 << 2,
+    ShowInCatalog   = 1 << 3,
+}
+
+/// <summary>
+/// Placement flags from the COBJ body — controls where the object can be placed.
+/// Stored on disk as two uint32 fields (High, Low) forming a 64-bit bitfield.
+/// Flag names sourced from decompiled game Python enumerables.
+/// </summary>
+[Flags]
+public enum PlacementFlags : ulong
+{
+    None = 0,
+    CenterOnWall          = 1UL << 0,
+    EdgeAgainstWall       = 1UL << 1,
+    AdjustHeightOnWall    = 1UL << 2,
+    Ceiling               = 1UL << 3,
+    ImmovableByUser       = 1UL << 4,
+    Diagonal              = 1UL << 5,
+    Roof                  = 1UL << 6,
+    RequiresFence         = 1UL << 7,
+    ShowObjIfWallDown     = 1UL << 8,
+    SlottedToFence        = 1UL << 9,
+    RequiresSlot          = 1UL << 10,
+    AllowedOnSlope        = 1UL << 11,
+    RepeatPlacement       = 1UL << 12,
+    NonDeleteable         = 1UL << 13,
+    NonInventoryable      = 1UL << 14,
+    NonAbandonable        = 1UL << 15,
+    RequiresTerrain       = 1UL << 16,
+    EncourageIndoor       = 1UL << 17,
+    EncourageOutdoor      = 1UL << 18,
+    NonDeletableByUser    = 1UL << 19,
+    NonInventoryableByUser = 1UL << 20,
+    RequiresWaterSurface  = 1UL << 21,
+    AllowedInFountain     = 1UL << 22,
+    GroundedAgainstWall   = 1UL << 23,
+    NotBlueprintable      = 1UL << 24,
+    IsHuman               = 1UL << 25,
+    AllowedOnWaterSurface = 1UL << 26,
+    AllowedInPool         = 1UL << 27,
+    OnWallTop             = 1UL << 28,
+    ForceDesignable       = 1UL << 29,
+    AlwaysBlueprintable   = 1UL << 30,
+    WallOptional          = 1UL << 31,
+}
+
+/// <summary>
 /// A tag/category pair used for catalog filtering.
 /// </summary>
 public struct CatalogTag
@@ -28,7 +85,7 @@ public class CatalogObjectResource : IResource
     public uint DescriptionHash { get; set; }
     public uint SimoleonPrice { get; set; }
     public ulong ThumbnailHash { get; set; }
-    public uint DevCategoryFlags { get; set; }
+    public DevCategoryFlags DevCategoryFlags { get; set; }
     public short PackId { get; set; }
 
     // Tags from common block
@@ -37,6 +94,15 @@ public class CatalogObjectResource : IResource
     // Swatch metadata from common block
     public ushort SwatchColorsSortPriority { get; set; }
     public ulong VariantThumbImageHash { get; set; }
+
+    // Placement
+    public uint PlacementFlagsHigh { get; set; }
+    public uint PlacementFlagsLow { get; set; }
+
+    /// <summary>
+    /// Combined 64-bit placement flags. High word stored in bits 32..63, Low in bits 0..31.
+    /// </summary>
+    public PlacementFlags Placement => (PlacementFlags)( ((ulong)PlacementFlagsHigh << 32) | PlacementFlagsLow );
 
     // Body fields
     public uint[] CatalogFilterColors { get; set; } = Array.Empty<uint>();
@@ -81,7 +147,7 @@ public class CatalogObjectResource : IResource
         DescriptionHash = reader.ReadUInt32();
         SimoleonPrice = reader.ReadUInt32();
         ThumbnailHash = reader.ReadUInt64();
-        DevCategoryFlags = reader.ReadUInt32();
+        DevCategoryFlags = (DevCategoryFlags)reader.ReadUInt32();
 
         // ProductStyles: byte count + TGI blocks (16 bytes each)
         byte styleCount = reader.ReadByte();
@@ -176,8 +242,8 @@ public class CatalogObjectResource : IResource
         reader.ReadUInt32(); // unused1
         reader.ReadUInt32(); // unused2
 
-        reader.ReadUInt32(); // placementFlagsHigh
-        reader.ReadUInt32(); // placementFlagsLow
+        PlacementFlagsHigh = reader.ReadUInt32();
+        PlacementFlagsLow = reader.ReadUInt32();
         reader.ReadUInt64(); // slotTypeSet
         reader.ReadByte();   // slotDecoSize
         reader.ReadUInt64(); // catalogGroup

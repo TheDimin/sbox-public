@@ -204,6 +204,268 @@ public static class BuyCategoryTag
     };
 
     /// <summary>
+    /// Get a specific subcategory name for a tag value (e.g. "TV", "TableLamp", "DiningChair").
+    /// Returns null if the tag is not a known buy/build subcategory.
+    /// </summary>
+    public static string? GetSubCategoryName(ushort tagValue) => tagValue switch
+    {
+        // === BUY_CAT_EE: Electronics & Entertainment ===
+        161 => "TV",
+        162 => "Computer",
+        163 => "Audio",
+        164 => "TVSets",
+        165 => "HobbySkill",
+        166 => "Party",
+        167 => "KidFurniture",
+        168 => "KidToy",
+        169 => "Alarm",
+        171 => "Clock",
+        172 => "Toddlers",
+        173 => "IndoorActivity",
+        174 => "KidActivity",
+        175 => "OutdoorActivity",
+        176 => "Bar",
+        177 => "MiscElectronics",
+        178 => "MiscEntertainment",
+        179 => "MiscKids",
+        456 => "Basketball",
+        457 => "Chess",
+        458 => "MonkeyBars",
+        968 => "CreativeActivity",
+        969 => "KnowledgeActivity",
+        970 => "ActiveActivity",
+        1122 => "TVStand",
+        1944 => "PetToys",
+        1947 => "PetVet",
+        1948 => "PetMisc",
+        2014 => "PetActivityToys",
+        2075 => "Gardening",
+        2237 => "Transportation",
+        55356 => "VideoGameConsole",
+
+        // === BUY_CAT_PA: Plumbing & Appliances ===
+        180 => "Sink",
+        181 => "Toilet",
+        182 => "SinkFreestanding",
+        183 => "Shower",
+        184 => "Tub",
+        185 => "LargeAppliance",
+        186 => "SmallAppliance",
+        187 => "Stove",
+        188 => "Disposable",
+        189 => "Refrigerator",
+        190 => "OutdoorCooking",
+        191 => "MiscSmallAppliance",
+        192 => "MiscPlumbing",
+        193 => "MiscAppliance",
+        913 => "StoveHood",
+        920 => "SinkCounter",
+        966 => "CoffeeMaker",
+        967 => "Microwave",
+        972 => "DisposalIndoor",
+        973 => "DisposalOutdoor",
+        1945 => "PetCare",
+        1976 => "PetFood",
+        1978 => "LitterBox",
+        2042 => "PublicRestroom",
+
+        // === BUY_CAT_LD: Lighting & Decor ===
+        194 => "BathroomAccent",
+        195 => "LawnOrnament",
+        196 => "KidDecoration",
+        197 => "WindowTreatment",
+        198 => "Rug",
+        199 => "FountainDecoration",
+        200 => "Sculpture",
+        201 => "WallDecoration",
+        202 => "Plant",
+        203 => "TableLamp",
+        204 => "FloorLamp",
+        205 => "CeilingLight",
+        206 => "OutdoorLight",
+        207 => "Mirror",
+        208 => "MiscLight",
+        209 => "MiscDecoration",
+        231 => "FountainEmitter",
+        252 => "FountainObjects",
+        310 => "WallLight",
+        785 => "Fireplace",
+        823 => "Clutter",
+        824 => "WallSculpture",
+        964 => "MirrorWall",
+        965 => "MirrorFreestanding",
+        978 => "CurtainBlind",
+        979 => "Awning",
+        1228 => "PoolObjects",
+        1246 => "PoolDecorations",
+        1496 => "RugManaged",
+        1718 => "NightLight",
+        2188 => "CeilingDecoration",
+        2211 => "PoolObjectsInventoryable",
+
+        // === BUY_CAT_SS: Seating & Surfaces ===
+        210 => "Counter",
+        211 => "Cabinet",
+        212 => "DiningTable",
+        213 => "EndTable",
+        214 => "CoffeeTable",
+        215 => "Desk",
+        216 => "Display",
+        217 => "DiningChair",
+        218 => "Sofa",
+        219 => "LoveSeat",
+        220 => "OutdoorChair",
+        221 => "LivingChair",
+        222 => "DeskChair",
+        223 => "OutdoorSeating",
+        224 => "Barstool",
+        225 => "Bed",
+        226 => "Bookshelf",
+        227 => "Dresser",
+        228 => "MiscSurface",
+        229 => "MiscComfort",
+        230 => "MiscStorage",
+        914 => "BedDouble",
+        916 => "OutdoorBench",
+        917 => "OutdoorTable",
+        962 => "DiningTableShort",
+        963 => "DiningTableLong",
+        971 => "BedSingle",
+        1071 => "PostcardBoard",
+        1072 => "ElementDisplay",
+        1123 => "AccentTable",
+        1126 => "HallwayTable",
+        1946 => "PetFurniture",
+        1977 => "PetBed",
+        1979 => "ScratchingPost",
+
+        // === BUY_CAT_MAG: Magazine/Room categories ===
+        270 => "LivingRoom",
+        271 => "Bathroom",
+        272 => "Bedroom",
+        273 => "DiningRoom",
+        274 => "Kitchen",
+        275 => "Outdoor",
+        276 => "Study",
+        407 => "Misc",
+        468 => "Career",
+        864 => "Kids",
+
+        // === BUILD mode items ===
+        535 => "Door",
+        536 => "Window",
+        537 => "Gate",
+        538 => "Column",
+        539 => "RoofAttachment",
+        540 => "Roof",
+        541 => "FloorPattern",
+        542 => "WallPattern",
+        543 => "RoofPattern",
+        544 => "Fence",
+        545 => "Spandrel",
+        546 => "Stair",
+        547 => "Railing",
+        548 => "Block",
+        549 => "Style",
+        550 => "Frieze",
+        551 => "RoofTrim",
+        552 => "Foundation",
+        554 => "FloorTrim",
+        555 => "WallAttachment",
+        556 => "Flower",
+        557 => "Shrub",
+        558 => "Tree",
+        559 => "Rug",
+        560 => "Rock",
+        561 => "Arch",
+        653 => "WallTool",
+        782 => "Post",
+        787 => "WorldObjects",
+        906 => "RoofDiagonal",
+        915 => "GateDouble",
+        918 => "DoorDouble",
+        919 => "RoofChimney",
+        974 => "DoorSingle",
+        975 => "RoofAttachmentMisc",
+        976 => "GateSingle",
+        977 => "RoofOrthogonal",
+        981 => "WeddingArch",
+        1062 => "Deck",
+        1063 => "DeckWithWalls",
+        1064 => "DeckNoWalls",
+        1065 => "Bush",
+        1066 => "Cactus",
+        1067 => "GroundCover",
+        1068 => "FlowerBush",
+        1069 => "FlowerMisc",
+        1070 => "DeckDiagonal",
+        1081 => "FountainTrim",
+        1226 => "Pool",
+        1227 => "PoolTool",
+        1441 => "HalfWall",
+        1442 => "HalfWallTrim",
+        1611 => "Elevator",
+        2425 => "Ladder",
+
+        // === Off-The-Grid ===
+        2380 => "OTG_Appliances",
+        2381 => "OTG_Crafting",
+        2382 => "OTG_Lighting",
+        2384 => "OTG_OutdoorActivities",
+        2385 => "OTG_Plumbing",
+
+        // === Collections ===
+        1041 => "Collection",
+        1159 => "Collection_Gardening",
+        2043 => "Collection_Treasure",
+
+        // === Holiday ===
+        2084 => "Holiday_All",
+        2085 => "Holiday_Decor",
+
+        _ => null,
+    };
+
+    /// <summary>
+    /// Get the high-level tag category group name from a Category field ID.
+    /// These are the group IDs used in the Category field of CatalogTag.
+    /// </summary>
+    public static string? GetTagCategoryGroupName(ushort categoryId) => categoryId switch
+    {
+        86 => "Electronics & Entertainment",
+        87 => "Plumbing & Appliances",
+        88 => "Lighting & Decor",
+        89 => "Seating & Surfaces",
+        90 => "Venue Objects",
+        91 => "Magazine",
+        92 => "Build",
+        93 => "Styles",
+        94 => "Collections",
+        95 => "Off-The-Grid",
+        96 => "Holiday",
+        _ => null,
+    };
+
+    /// <summary>
+    /// Get a user-friendly tag string like "Lighting: TableLamp" or "Seating: Sofa".
+    /// Falls back to partial info if only category or value is known, returns null if neither resolves.
+    /// </summary>
+    public static string? GetFriendlyTagName(CatalogTag tag)
+    {
+        var groupName = GetTagCategoryGroupName(tag.Category);
+        var subName = GetSubCategoryName(tag.Value);
+
+        if (groupName != null && subName != null)
+            return $"{groupName}: {subName}";
+        if (groupName != null)
+            return groupName;
+        if (subName != null)
+            return subName;
+
+        return null;
+    }
+
+    /// <summary>
     /// Determine the best category name from a set of catalog tags.
     /// Checks both Category and Value fields of each tag, returning
     /// the first matching buy/build category.
@@ -217,6 +479,25 @@ public static class BuyCategoryTag
                 return name;
 
             name = GetCategoryName(tag.Value);
+            if (name != null)
+                return name;
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Determine the best subcategory name from a set of catalog tags.
+    /// Returns the specific item type (e.g. "TableLamp", "DiningChair").
+    /// </summary>
+    public static string? GetSubCategory(CatalogTag[] tags)
+    {
+        foreach (var tag in tags)
+        {
+            var name = GetSubCategoryName(tag.Category);
+            if (name != null)
+                return name;
+
+            name = GetSubCategoryName(tag.Value);
             if (name != null)
                 return name;
         }

@@ -23,7 +23,7 @@
   <ItemGroup>
     <Compile Include="Assembly.cs" />
     <Compile Include="SimsMount.cs" />
-    <Compile Include="Resource\ModelLoader.cs" />
+    <Compile Include="Resource\GeomtryLoader.cs" />
     <Compile Include="Resource\TextureLoader.cs" />
     <Compile Include="Resource\MaterialLoader.cs" />
     <Compile Include="Resource\GeomModelBuilder.cs" />
@@ -47,17 +47,13 @@
   </Target>
 
   <!-- Auto-compile mount shaders when source is newer than compiled output -->
-  <Target Name="CompileMountShaders" AfterTargets="CopyOutputDll"
-          Inputs="..\..\..\game\mount\sims4\Assets\shaders\sims4.shader"
-          Outputs="..\..\..\game\mount\sims4\Assets\shaders\sims4.shader_c">
+  <Target Name="CompileMountShaders" AfterTargets="CopyOutputDll" Inputs="..\..\..\game\mount\sims4\Assets\shaders\sims4.shader" Outputs="..\..\..\game\mount\sims4\Assets\shaders\sims4.shader_c">
     <Message Importance="high" Text="Compiling sims4 mount shader..." />
-    <Exec Command="cd /d &quot;$(MSBuildThisFileDirectory)..\..\..\game&quot; &amp;&amp; bin\managed\ShaderCompiler.exe &quot;mount\sims4\Assets\shaders\sims4.shader&quot; -f -q"
-          IgnoreExitCode="true">
+    <Exec Command="cd /d &quot;$(MSBuildThisFileDirectory)..\..\..\game&quot; &amp;&amp; bin\managed\ShaderCompiler.exe &quot;mount\sims4\Assets\shaders\sims4.shader&quot; -f -q" IgnoreExitCode="true">
       <Output TaskParameter="ExitCode" PropertyName="ShaderCompilerExitCode" />
     </Exec>
     <!-- Fail the build on real shader errors, but ignore exit code 139 (Steam inventory crash) -->
-    <Error Condition="'$(ShaderCompilerExitCode)' != '0' AND '$(ShaderCompilerExitCode)' != '139'"
-           Text="Shader compilation failed with exit code $(ShaderCompilerExitCode)" />
+    <Error Condition="'$(ShaderCompilerExitCode)' != '0' AND '$(ShaderCompilerExitCode)' != '139'" Text="Shader compilation failed with exit code $(ShaderCompilerExitCode)" />
   </Target>
 
 </Project>

@@ -88,7 +88,11 @@
       "Bash(findstr \"sbox-dev\")",
       "Bash(tasklist /FI \"IMAGENAME eq sbox*\")",
       "Bash(find E:Projectssbox-publicengineMounting -type f -name *Test*.cs)",
-      "Bash(printf '0x%X\\\\n' 3468328586)"
+      "Bash(printf '0x%X\\\\n' 3468328586)",
+      "Bash(xargs -I {} head -50 {})",
+      "WebFetch(domain:docs.facepunch.com)",
+      "WebFetch(domain:sbox.game)",
+      "Bash(find /e/Projects/sbox-public/engine/Mounting/Sandbox.Mounting.Sims4 -type f \\\\\\(-name *.xml -o -name *.json -o -name *tag* -o -name *Tag* \\\\\\))"
     ]
   }
 }

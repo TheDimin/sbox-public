@@ -5,9 +5,17 @@ using Sims4Reader.Mesh;
 
 namespace Mounting.Sims4;
 
-public class ModelLoader( DbpfPackage package, ResourceEntry entry ) : ResourceLoader<SimsMount>
+public class GeomtryLoader : ResourceLoader<SimsMount>
 {
-	static new Logger Log = new Logger( "Sims4-ModelLoader" );
+	static new Logger Log = new Logger( "Sims4-GeomtryLoader" );
+	DbpfPackage package;
+	ResourceEntry entry;
+	public GeomtryLoader( DbpfPackage Package, ResourceEntry Entry )
+	{
+		package = Package;
+		entry = Entry;
+		Tags.Add( "Skinned" );
+	}
 
 	protected override object? Load()
 	{
@@ -16,7 +24,7 @@ public class ModelLoader( DbpfPackage package, ResourceEntry entry ) : ResourceL
 			return null;
 
 		try
-		{
+		{//
 			var rcol = package.GetResource<RcolContainer>( entry );
 			var geomChunk = rcol.GetChunk<GeometryRcolChunk>();
 			if ( geomChunk == null )
