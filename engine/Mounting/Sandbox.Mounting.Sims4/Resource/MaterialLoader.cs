@@ -167,6 +167,10 @@ public class Sims4MaterialLoader( DbpfPackage package, ResourceEntry entry ) : R
 		bool useSeparateAlphaMap = hasAlphaMap && !alphaMapIsSameAsDiffuse;
 
 		bool needsAlphaTest = useSeparateAlphaMap || hasAlphaMap || useDiffuseForAlpha || IsAlphaTestShader( matd.Shader );
+
+		// DEBUG: Log material alpha decisions
+		Log.Info( $"Material {mountPath}: shader={matd.Shader}, hasAlphaMap={hasAlphaMap}, useSeparateAlphaMap={useSeparateAlphaMap}, useDiffuseForAlpha={useDiffuseForAlpha}, alphaMaskThreshold={alphaMaskThreshold}, needsAlphaTest={needsAlphaTest}, textures=[{string.Join( ", ", textureKeys.Select( kv => $"{kv.Key}={kv.Value}" ) )}]" );
+
 		if ( needsAlphaTest )
 		{
 			material.Set( "F_ALPHA_TEST", true );

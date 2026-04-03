@@ -296,17 +296,18 @@ public class SimsMount : BaseGameMount
 						break;
 					}
 
-					// Catalog surfaces (CFLR, CFLT, CWAL) — floor/wall paint materials
-					case Sims4Reader.ResourceType.CatalogFloor:
-					case Sims4Reader.ResourceType.CatalogFlooring:
-					case Sims4Reader.ResourceType.CatalogWall:
-					{
-						var surfaceType = key.Type == Sims4Reader.ResourceType.CatalogWall ? "wall" : "floor";
-						context.Add( Sandbox.Mounting.ResourceType.Text,
-							$"surfaces/{surfaceType}/{keyName}.s4sur",
-							new CatalogSurfaceLoader( package, entry, packages, surfaceType ) );
-						break;
-					}
+					// TODO: Catalog surfaces (CFLR, CFLT, CWAL) — floor/wall paint materials
+					// Requires CatalogSurfaceLoader (WIP, not yet compilable)
+					// case Sims4Reader.ResourceType.CatalogFloor:
+					// case Sims4Reader.ResourceType.CatalogFlooring:
+					// case Sims4Reader.ResourceType.CatalogWall:
+					// {
+					// 	var surfaceType = key.Type == Sims4Reader.ResourceType.CatalogWall ? "wall" : "floor";
+					// 	context.Add( Sandbox.Mounting.ResourceType.Text,
+					// 		$"surfaces/{surfaceType}/{keyName}.s4sur",
+					// 		new CatalogSurfaceLoader( package, entry, packages, surfaceType ) );
+					// 	break;
+					// }
 
 					// Catalog objects (COBJ)
 					case Sims4Reader.ResourceType.CatalogObject:

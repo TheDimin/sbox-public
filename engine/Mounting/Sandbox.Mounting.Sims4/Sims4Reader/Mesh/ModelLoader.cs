@@ -296,12 +296,39 @@ public static class ModlModelLoader
                 lodMesh.VertexCount);
         }
 
-        // Decode indices
+        // Decode indices and rebase from shared-buffer positions to the 0-based
+        // extracted vertex slice. TS4 models may store indices as:
+        //   (a) Absolute offsets into the shared VBUF — need MinVertexIndex subtracted
+        //   (b) Already relative to the mesh's own vertex range — use as-is
+        // We detect the correct mode by checking if rebased indices fall in range.
         if (ibuf != null)
         {
             resolved.Indices = ibuf.GetIndices(
                 lodMesh.StartIndex,
                 lodMesh.PrimitiveCount);
+
+            int minVertex = lodMesh.MinVertexIndex;
+            int vertexCount = resolved.Vertices.Length;
+
+            if (minVertex > 0 && vertexCount > 0)
+            {
+                // Check if indices are absolute (need rebasing)
+                bool needsRebasing = false;
+                for (int i = 0; i < resolved.Indices.Length; i++)
+                {
+                    if (resolved.Indices[i] >= vertexCount)
+                    {
+                        needsRebasing = true;
+                        break;
+                    }
+                }
+
+                if (needsRebasing)
+                {
+                    for (int i = 0; i < resolved.Indices.Length; i++)
+                        resolved.Indices[i] -= minVertex;
+                }
+            }
         }
 
         // Resolve material (MATD)

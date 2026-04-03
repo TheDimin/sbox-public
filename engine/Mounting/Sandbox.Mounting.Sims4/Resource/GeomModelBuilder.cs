@@ -64,6 +64,15 @@ public static class GeomModelBuilder
 		var vertices = ExtractVertices( srcVertices, scale );
 		FlipWinding( srcIndices );
 
+		// Validate indices are within vertex buffer bounds.
+		// Out-of-range indices cause GPU DMA page faults (VK_ERROR_DEVICE_LOST).
+		int vertexCount = vertices.Length;
+		for ( int i = 0; i < srcIndices.Length; i++ )
+		{
+			if ( (uint)srcIndices[i] >= (uint)vertexCount )
+				return null;
+		}
+
 		var bounds = ComputeBounds( vertices );
 		var mesh = CreateMesh( vertices, srcIndices, bounds, material );
 		var builder = Model.Builder;

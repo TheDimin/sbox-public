@@ -72,6 +72,22 @@ public static class ModlModelBuilder
 			var indices = (int[])mesh.Indices.Clone();
 			FlipWinding( indices );
 
+			// Validate indices are within vertex buffer bounds.
+			// Out-of-range indices cause GPU DMA page faults (VK_ERROR_DEVICE_LOST).
+			int vertexCount = vertices.Length;
+			bool hasInvalidIndices = false;
+			for ( int i = 0; i < indices.Length; i++ )
+			{
+				if ( (uint)indices[i] >= (uint)vertexCount )
+				{
+					hasInvalidIndices = true;
+					break;
+				}
+			}
+
+			if ( hasInvalidIndices )
+				continue;
+
 			var bounds = ComputeBounds( vertices );
 			var sbMesh = CreateMesh( vertices, indices, bounds, mat );
 			builder.AddMesh( sbMesh );
