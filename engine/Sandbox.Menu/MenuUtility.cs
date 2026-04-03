@@ -195,6 +195,15 @@ public static partial class MenuUtility
 	}
 
 	/// <summary>
+	/// Connect to a lobby and close all open modals.
+	/// </summary>
+	public static void Connect( ulong lobbyId )
+	{
+		CloseAllModals();
+		Networking.Connect( lobbyId );
+	}
+
+	/// <summary>
 	/// Close every open modal
 	/// </summary>
 	public static void CloseAllModals()
@@ -305,9 +314,21 @@ public class StoragePublish
 	public Bitmap Thumbnail { get; set; }
 	public BaseFileSystem FileSystem { get; set; }
 
+	/// <summary>
+	/// If set, update this existing workshop item instead of creating a new one.
+	/// </summary>
+	public ulong PublishedFileId { get; set; }
+
 	public async Task Submit()
 	{
-		item = await Sandbox.Services.Ugc.CreateCommunityItem();
+		if ( PublishedFileId != 0 )
+		{
+			item = Sandbox.Services.Ugc.OpenItem( PublishedFileId );
+		}
+		else
+		{
+			item = await Sandbox.Services.Ugc.CreateCommunityItem();
+		}
 
 		string _imagePath = null;
 		string _dataPath = null;
