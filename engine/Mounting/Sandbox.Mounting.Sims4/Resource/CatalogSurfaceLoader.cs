@@ -2,19 +2,17 @@ using System.Text.Json;
 using Sandbox;
 using Sandbox.Diagnostics;
 using Sims4Reader;
-using Sims4Reader.Material;
-using Sims4Reader.Mesh;
-using Sims4Reader.Rcol;
 using Sims4Reader.Resources;
 
 namespace Mounting.Sims4;
 
 /// <summary>
-/// Loads CFLR (CatalogFloor), CFLT (CatalogFlooring), and CWAL (CatalogWall) entries.
-/// These share the CatalogCommon header with COBJ. Parses the common header inline
-/// to extract name, description, thumbnail, tags, and colors. Scans TGI references
-/// for a MaterialDefinition to resolve material and individual texture paths.
-/// Outputs JSON tagged with "CatalogPaint".
+/// Loads CFLR (CatalogFloor), CFLT (CatalogFlooring), and CWAL (CatalogWall) entries
+/// as JSON catalog metadata. These share the same CatalogCommon header as COBJ.
+///
+/// Material and texture resolution is deferred — this loader only records the
+/// MATD resource key as a mount path so that <see cref="Sims4MaterialLoader"/> handles
+/// actual parsing when the material is first accessed.
 /// </summary>
 public class CatalogSurfaceLoader : ResourceLoader<SimsMount>
 {
@@ -46,12 +44,11 @@ public class CatalogSurfaceLoader : ResourceLoader<SimsMount>
 
 		try
 		{
-			var data = package.GetBytes( entry );
-			var parsed = ParseCatalogCommon( data );
-			if ( parsed == null )
-				return null;
-
-			return JsonSerializer.Serialize( BuildJsonObject( parsed ), JsonOptions );
+			// CFLR/CFLT/CWAL share the CatalogCommon header with COBJ.
+			// The body fields differ, so IsFullyParsed may be false — that's fine,
+			// we only need the common block (name, tags, thumbnail, TGI refs).
+			var catalog = package.GetResource<CatalogObjectResource>( entry );
+			return JsonSerializer.Serialize( ToJsonObject( catalog ), JsonOptions );
 		}
 		catch ( Exception e )
 		{
@@ -60,39 +57,47 @@ public class CatalogSurfaceLoader : ResourceLoader<SimsMount>
 		}
 	}
 
-	private object BuildJsonObject( CatalogCommonData common )
+	private object ToJsonObject( CatalogObjectResource catalog )
 	{
-		// Resolve name/description from string tables
-		var name = ResolveString( common.NameHash );
-		var description = ResolveString( common.DescriptionHash );
-		var thumbnail = ResolveThumbnailPath( common.ThumbnailHash );
+		// Resolve name/description from string tables across all packages
+		var name = ResolveString( catalog.NameHash );
+		var description = ResolveString( catalog.DescriptionHash );
+
+		// Resolve thumbnail to a mounted texture path
+		var thumbnail = ResolveThumbnailPath( catalog.ThumbnailHash );
+		var variantThumbnail = ResolveThumbnailPath( catalog.VariantThumbImageHash );
 
 		// Build friendly tag list
 		var tags = new List<string>();
-		foreach ( var tag in common.Tags )
+		foreach ( var tag in catalog.Tags )
 		{
 			var friendly = BuyCategoryTag.GetFriendlyTagName( tag );
 			if ( friendly != null )
 				tags.Add( friendly );
 		}
 
-		// Catalog filter colors
-		var colors = new List<string>();
-		foreach ( var argb in common.CatalogFilterColors )
+		// Catalog filter colors (ARGB)
+		var catalogFilterColors = new List<string>();
+		foreach ( var argb in catalog.CatalogFilterColors )
 		{
-			colors.Add( $"#{argb:X8}" );
+			catalogFilterColors.Add( $"#{argb:X8}" );
 		}
 
-		// Resolve material and texture paths from TGI references
-		string materialPath = null;
-		Dictionary<string, string> textures = null;
+		// Collect TGI references as readable strings
+		var tgiRefs = new List<string>();
+		foreach ( var tgi in catalog.TgiReferences )
+		{
+			tgiRefs.Add( $"{tgi.Type} {tgi.Group:X}_{tgi.Instance:X}" );
+		}
 
-		foreach ( var tgi in common.TgiReferences )
+		// Find the MATD key in TGI references — record it as a mount path so
+		// Sims4MaterialLoader resolves the actual material lazily on first access.
+		string? materialPath = null;
+		foreach ( var tgi in catalog.TgiReferences )
 		{
 			if ( tgi.Type == Sims4Reader.ResourceType.MaterialDefinition )
 			{
 				materialPath = $"mount://sims4/materials/{tgi.Group:X}_{tgi.Instance:X}.vmat";
-				textures = ResolveTexturesFromMatd( tgi );
 				break;
 			}
 		}
@@ -102,248 +107,22 @@ public class CatalogSurfaceLoader : ResourceLoader<SimsMount>
 			Name = name,
 			Description = description,
 			Thumbnail = thumbnail,
-			MaterialPath = materialPath,
+			VariantThumbnail = variantThumbnail,
 			SurfaceType = surfaceType,
-			NameHash = common.NameHash,
-			CatalogFilterColors = colors,
+			MaterialPath = materialPath,
+			Version = catalog.Version,
+			Price = catalog.SimoleonPrice,
+			NameHash = catalog.NameHash,
+			DescriptionHash = catalog.DescriptionHash,
+			PackId = catalog.PackId,
+			SwatchSortPriority = catalog.SwatchColorsSortPriority,
+			CatalogFilterColors = catalogFilterColors,
 			Tags = tags,
-			Textures = textures,
+			TgiReferences = tgiRefs,
 		};
 	}
 
-	/// <summary>
-	/// Parse the MATD resource to extract individual texture keys (Diffuse, Normal, Specular).
-	/// </summary>
-	private Dictionary<string, string> ResolveTexturesFromMatd( ResourceKey matdKey )
-	{
-		var result = new Dictionary<string, string>();
-
-		try
-		{
-			// Find the MATD resource across all packages
-			ResourceEntry? matdEntry = null;
-			DbpfPackage matdPackage = null;
-
-			foreach ( var pkg in allPackages )
-			{
-				var found = pkg.Find( matdKey.Type, matdKey.Group, matdKey.Instance );
-				if ( found.HasValue )
-				{
-					matdEntry = found.Value;
-					matdPackage = pkg;
-					break;
-				}
-			}
-
-			// Also check local package first
-			if ( matdEntry == null )
-			{
-				var found = package.Find( matdKey.Type, matdKey.Group, matdKey.Instance );
-				if ( found.HasValue )
-				{
-					matdEntry = found.Value;
-					matdPackage = package;
-				}
-			}
-
-			if ( matdEntry == null || matdPackage == null )
-				return result;
-
-			var rcol = matdPackage.GetResource<RcolContainer>( matdEntry.Value );
-			var matd = rcol.GetChunk<MaterialDefinition>();
-			if ( matd == null )
-				return result;
-
-			var textureKeys = ModlModelLoader.ExtractTextureKeys( matd, rcol.ExternalReferences );
-
-			foreach ( var (field, key) in textureKeys )
-			{
-				var texPath = $"mount://sims4/textures/{key.Group:X}_{key.Instance:X}.vtex";
-
-				switch ( field )
-				{
-					case ShaderFieldType.DiffuseMap:
-						result["Diffuse"] = texPath;
-						break;
-					case ShaderFieldType.NormalMap:
-						result["Normal"] = texPath;
-						break;
-					case ShaderFieldType.SpecularMap:
-						result["Specular"] = texPath;
-						break;
-				}
-			}
-		}
-		catch ( Exception e )
-		{
-			Log.Warning( $"Failed to resolve textures from MATD {matdKey}: {e.Message}" );
-		}
-
-		return result;
-	}
-
-	#region CatalogCommon Parsing
-
-	/// <summary>
-	/// Minimal data extracted from the CatalogCommon header, shared by COBJ/CFLR/CFLT/CWAL.
-	/// </summary>
-	private class CatalogCommonData
-	{
-		public uint NameHash;
-		public uint DescriptionHash;
-		public ulong ThumbnailHash;
-		public CatalogTag[] Tags = Array.Empty<CatalogTag>();
-		public uint[] CatalogFilterColors = Array.Empty<uint>();
-		public ResourceKey[] TgiReferences = Array.Empty<ResourceKey>();
-	}
-
-	/// <summary>
-	/// Parse CatalogCommon header from raw bytes. Same binary format as COBJ common block.
-	/// Skips the type-specific body, then scans backwards for TGI references.
-	/// </summary>
-	private static CatalogCommonData? ParseCatalogCommon( ReadOnlyMemory<byte> data )
-	{
-		using var ms = new MemoryStream( data.ToArray() );
-		using var reader = new BinaryReader( ms );
-		var result = new CatalogCommonData();
-
-		try
-		{
-			// Version
-			reader.ReadUInt32();
-
-			// CatalogCommon block — identical to CatalogObjectResource.ParseCatalogCommon
-			uint commonBlockVersion = reader.ReadUInt32();
-			result.NameHash = reader.ReadUInt32();
-			result.DescriptionHash = reader.ReadUInt32();
-			reader.ReadUInt32(); // SimoleonPrice
-			result.ThumbnailHash = reader.ReadUInt64();
-			reader.ReadUInt32(); // DevCategoryFlags
-
-			// ProductStyles
-			byte styleCount = reader.ReadByte();
-			for ( int i = 0; i < styleCount; i++ )
-				reader.ReadBytes( 16 );
-
-			if ( commonBlockVersion >= 10 )
-			{
-				reader.ReadInt16(); // PackId
-				reader.ReadByte();  // PackFlags
-				reader.ReadBytes( 9 ); // ReservedBytes
-			}
-			else
-			{
-				byte unused2 = reader.ReadByte();
-				if ( unused2 > 0 )
-					reader.ReadByte();
-			}
-
-			// Tags
-			uint tagCount = reader.ReadUInt32();
-			if ( tagCount > 1000 ) tagCount = 0;
-			result.Tags = new CatalogTag[tagCount];
-			for ( int i = 0; i < tagCount; i++ )
-			{
-				result.Tags[i] = new CatalogTag
-				{
-					Category = reader.ReadUInt16(),
-					Value = reader.ReadUInt16(),
-				};
-			}
-
-			// SellingPoints
-			uint sellingPointCount = reader.ReadUInt32();
-			if ( sellingPointCount > 1000 ) sellingPointCount = 0;
-			for ( int i = 0; i < sellingPointCount; i++ )
-			{
-				reader.ReadUInt16();
-				reader.ReadInt32();
-			}
-
-			reader.ReadUInt32(); // UnlockByHash
-			reader.ReadUInt32(); // UnlockedByHash
-			reader.ReadUInt16(); // SwatchColorsSortPriority
-			reader.ReadUInt64(); // VariantThumbImageHash
-
-			// Skip the type-specific body — we don't need it.
-			// Instead, scan from the end for TGI references.
-			result.TgiReferences = ScanTgiReferences( data );
-
-			// Try to read CatalogFilterColors from body if accessible
-			// These appear after some fixed body fields in COBJ; format varies for CFLR/CWAL
-			// but we can try to find them at a fixed offset or just skip.
-			result.CatalogFilterColors = Array.Empty<uint>();
-		}
-		catch ( EndOfStreamException )
-		{
-			// Partial parse is OK — CatalogCommon fields are still usable
-		}
-
-		if ( result.Tags.Length == 0 && result.NameHash == 0 )
-			return null;
-
-		return result;
-	}
-
-	/// <summary>
-	/// Scan the tail of the resource data for a TGI reference block.
-	/// TS4 catalog resources typically end with: byte count + N × 16-byte ITG entries.
-	/// We try reading the last byte as the count and validate the block size.
-	/// </summary>
-	private static ResourceKey[] ScanTgiReferences( ReadOnlyMemory<byte> data )
-	{
-		var bytes = data.Span;
-		if ( bytes.Length < 17 ) // need at least 1 count byte + 1 TGI entry
-			return Array.Empty<ResourceKey>();
-
-		// The TGI block is at the very end: [count:byte] [entries:count×16]
-		// Try different positions near the end to find a valid TGI block
-		for ( int offset = 1; offset <= Math.Min( 64, bytes.Length - 16 ); offset++ )
-		{
-			int countPos = bytes.Length - offset * 16 - 1;
-			if ( countPos < 0 )
-				break;
-
-			byte count = bytes[countPos];
-			if ( count == 0 || count > 32 )
-				continue;
-
-			int blockSize = count * 16;
-			if ( countPos + 1 + blockSize != bytes.Length )
-				continue;
-
-			// Validate: each entry should have a recognizable resource type
-			var entries = new ResourceKey[count];
-			bool valid = true;
-			int pos = countPos + 1;
-
-			for ( int i = 0; i < count; i++ )
-			{
-				ulong instance = BitConverter.ToUInt64( bytes.Slice( pos, 8 ) );
-				uint type = BitConverter.ToUInt32( bytes.Slice( pos + 8, 4 ) );
-				uint group = BitConverter.ToUInt32( bytes.Slice( pos + 12, 4 ) );
-
-				// Basic sanity: type should be non-zero for valid references
-				if ( type == 0 && instance == 0 )
-				{
-					valid = false;
-					break;
-				}
-
-				entries[i] = new ResourceKey( (Sims4Reader.ResourceType)type, group, instance );
-				pos += 16;
-			}
-
-			if ( valid )
-				return entries;
-		}
-
-		return Array.Empty<ResourceKey>();
-	}
-
-	#endregion
-
-	#region String / Thumbnail Resolution (same patterns as CatalogObjectLoader)
+	#region String / Thumbnail Resolution (shared pattern with CatalogObjectLoader)
 
 	private string? ResolveString( uint hash )
 	{

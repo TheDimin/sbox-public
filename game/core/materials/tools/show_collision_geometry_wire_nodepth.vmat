@@ -1,9 +1,0 @@
-"Layer0"
-{
-	"shader"		"shaders/tools_visualize_collision_mesh.shader_c"
-	"F_WIREFRAME"		"1"
-	"Attributes"
-	{
-		"tools.toolsmaterial"		"1"
-	}
-}

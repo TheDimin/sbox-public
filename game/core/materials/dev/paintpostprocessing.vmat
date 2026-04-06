@@ -1,5 +1,0 @@
-"Layer0"
-{
-	"shader"		"shaders/error.shader_c"
-	"g_vErrorColorTint"		"[1.000000 0.000000 0.000000 0.000000]"
-}

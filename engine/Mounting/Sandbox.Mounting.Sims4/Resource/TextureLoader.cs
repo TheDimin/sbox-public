@@ -6,9 +6,9 @@ using S4ResourceType = Sims4Reader.ResourceType;
 
 namespace Mounting.Sims4;
 
-public class Sims4TextureLoader( DbpfPackage package, ResourceEntry entry ) : ResourceLoader<SimsMount>
+public static class Sims4TextureLoader
 {
-	static new Logger Log = new Logger( "Sims4-TextureLoader" );
+	static readonly Logger Log = new Logger( "Sims4-TextureLoader" );
 
 	/// <summary>
 	/// Create a texture from DDS bytes using <see cref="ImageFormat.DXT1_ONEBITALPHA"/>
@@ -57,6 +57,8 @@ public class Sims4TextureLoader( DbpfPackage package, ResourceEntry entry ) : Re
 			src += size;
 		}
 
+		Log.Info( "CreateDxt1WithAlpha" );
+
 		return Texture.Create( width, height, ImageFormat.DXT1_ONEBITALPHA )
 			.WithData( result )
 			.WithMips( mipCount )
@@ -64,7 +66,10 @@ public class Sims4TextureLoader( DbpfPackage package, ResourceEntry entry ) : Re
 			.Finish();
 	}
 
-	protected override object? Load()
+	/// <summary>
+	/// Load a texture directly from a package entry without the mount system.
+	/// </summary>
+	public static Texture? LoadFromPackage( DbpfPackage package, ResourceEntry entry )
 	{
 		if ( entry.MemSize == 0 || entry.FileSize == 0 )
 			return null;
@@ -80,16 +85,10 @@ public class Sims4TextureLoader( DbpfPackage package, ResourceEntry entry ) : Re
 				if ( dds == null || dds.Length == 0 )
 					return null;
 
-				// DST1 (DXT1) has 1-bit alpha used by foliage for transparency.
-				// The engine's FromDds maps DXT1 → ImageFormat.DXT1 which discards alpha.
-				// Bypass it and create the texture with DXT1_ONEBITALPHA to preserve it.
-				if ( dst.Format == FourCC.DST1 )
-				{
-					Log.Info( $"DST1 texture {entry.Key} → DXT1_ONEBITALPHA ({dst.Width}x{dst.Height}, {dds.Length} bytes)" );
-					return CreateDxt1WithAlpha( dds );
-				}
+				// DST1 (BC1) textures may have 1-bit punch-through alpha
+				if ( dst.Format == FourCC.DXT1 || dst.Format == FourCC.DST1 )
+					return CreateDxt1WithAlpha( dds ) ?? Sandbox.Mounting.TextureLoader.FromDds( dds );
 
-				Log.Info( $"DST texture {entry.Key} → format={dst.Format} ({dst.Width}x{dst.Height})" );
 				return Sandbox.Mounting.TextureLoader.FromDds( dds );
 			}
 
@@ -115,5 +114,29 @@ public class Sims4TextureLoader( DbpfPackage package, ResourceEntry entry ) : Re
 			Log.Warning( $"Failed to load texture {entry.Key}: {e.Message}" );
 			return null;
 		}
+	}
+
+	/// <summary>
+	/// Find and load a texture by resource key, searching primary package first then all packages.
+	/// </summary>
+	public static Texture? LoadFromPackages( ResourceKey key, DbpfPackage primaryPackage, IReadOnlyList<DbpfPackage> allPackages )
+	{
+		// Try primary package first
+		var entry = primaryPackage.Find( key );
+		if ( entry.HasValue )
+			return LoadFromPackage( primaryPackage, entry.Value );
+
+		// Search all other packages
+		foreach ( var pkg in allPackages )
+		{
+			if ( ReferenceEquals( pkg, primaryPackage ) )
+				continue;
+
+			entry = pkg.Find( key );
+			if ( entry.HasValue )
+				return LoadFromPackage( pkg, entry.Value );
+		}
+
+		return null;
 	}
 }

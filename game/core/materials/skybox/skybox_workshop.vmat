@@ -1,8 +1,0 @@
-"Layer0"
-{
-	"shader"		"shaders/sky.shader_c"
-	"F_TEXTURE_FORMAT2"		"6"
-	"g_flBrightnessExposureBias"		"0.000000"
-	"g_flRenderOnlyExposureBias"		"0.000000"
-	"SkyTexture"		"materials/skybox/skybox_workshop.exr"
-}

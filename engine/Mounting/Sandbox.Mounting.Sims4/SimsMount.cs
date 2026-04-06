@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Threading;
+using Microsoft.Win32;
 using Mounting.Sims4;
 using Sims4Reader;
 using Sims4Reader.Resources;
@@ -25,14 +28,11 @@ public class SimsMount : BaseGameMount
 
 	// TS4 on Steam
 	const long AppId = 1222670;
-
-	/// <summary>
-	/// Maximum number of inline material slots to blindly register per MODL.
-	/// Empirically, real TS4 MODLs have at most 8 meshes with inline materials.
-	/// </summary>
-	const int MaxInlineMeshSlots = 8;
+	const string ClientIconHash = "ca6bc8b2411bce4a2cd325ab75f0204bc3a4ad98";
 
 	string? _gameDir;
+	string? _steamIconPath;
+	readonly HashSet<string> _mountedCatalogPaths = new( StringComparer.OrdinalIgnoreCase );
 
 	protected override void Initialize( InitializeContext context )
 	{
@@ -46,6 +46,21 @@ public class SimsMount : BaseGameMount
 				Log.Info( $"Sims 4 Steam directory: {dir}" );
 				_gameDir = dir;
 				IsInstalled = true;
+
+				// Resolve Steam client icon from the library cache.
+				// The Steam install path comes from the registry because the game
+				// may be installed in a different Steam library folder.
+				if ( OperatingSystem.IsWindows() )
+				{
+					var steamPath = Registry.GetValue( @"HKEY_CURRENT_USER\Software\Valve\Steam", "SteamPath", null ) as string;
+					if ( !string.IsNullOrEmpty( steamPath ) )
+					{
+						var iconPath = System.IO.Path.Combine( steamPath, "appcache", "librarycache", AppId.ToString(), $"{ClientIconHash}.jpg" );
+						if ( System.IO.File.Exists( iconPath ) )
+							_steamIconPath = iconPath;
+					}
+				}
+
 				return;
 			}
 		}
@@ -82,15 +97,25 @@ public class SimsMount : BaseGameMount
 		if ( !System.IO.Directory.Exists( dataDir ) )
 			return Task.CompletedTask;
 
+		// Mount the Steam client icon if available
+		if ( _steamIconPath != null )
+			context.Add( Sandbox.Mounting.ResourceType.Texture, "icon", new SteamIconLoader( _steamIconPath ) );
+
 		var files = System.IO.Directory.GetFiles( dataDir, "*.package", SearchOption.AllDirectories );
+		var sw = Stopwatch.StartNew();
+
+		Log.Trace( $"Mount starting: {files.Length} packages in {dataDir}" );
 
 		// Phase 1 (parallel): Open packages + parse COBJ/OBJD metadata.
 		// Each package is independent — no shared state between packages.
 		// DbpfPackage.Open reads the DBPF index, BuildMetadataIndex parses
 		// COBJ/OBJD entries. Both are CPU+I/O bound and benefit from parallelism.
 		var prepared = new PreparedPackage[files.Length];
+		int failedPackages = 0;
 
-		Parallel.For( 0, files.Length, i =>
+
+
+		for ( int i = 0; i < files.Length; i++ )
 		{
 			try
 			{
@@ -100,22 +125,35 @@ public class SimsMount : BaseGameMount
 			}
 			catch ( Exception ex )
 			{
-				Log.Error( $"Failed to open package {files[i]}: {ex.Message}" );
+				Interlocked.Increment( ref failedPackages );
+				Log.Error( $"Failed to open package {files[i]}: {ex}" );
 			}
-		} );
+		}
+		;
+
+		Log.Trace( $"Phase 1 complete: {files.Length - failedPackages}/{files.Length} packages opened in {sw.ElapsedMilliseconds}ms" );
 
 		// Phase 2 (sequential): Register resources with the mount system.
 		// context.Add is NOT thread-safe (writes to a plain Dictionary),
 		// so all registration must happen on this thread.
+		int totalModels = 0, totalSurfaces = 0, totalCatalogs = 0;
 		for ( int i = 0; i < prepared.Length; i++ )
 		{
 			var p = prepared[i];
 			if ( p.Package == null )
 				continue;
 
+			Log.Trace( $"Phase 2: mounting package {i + 1}/{prepared.Length} — {System.IO.Path.GetFileName( files[i] )} ({p.Package.Entries.Count} entries)" );
+
 			packages.Add( p.Package );
-			MountResources( context, p.Package, p.ModlMetadata, p.ObjdMetadata, p.CobjCategories );
+			var (models, surfaces, catalogs) = MountResources( context, p.Package, p.ModlMetadata, p.ObjdMetadata, p.CobjCategories );
+			totalModels += models;
+			totalSurfaces += surfaces;
+			totalCatalogs += catalogs;
 		}
+
+		sw.Stop();
+		Log.Trace( $"Mount complete in {sw.ElapsedMilliseconds}ms: {totalModels} models, {totalSurfaces} surfaces, {totalCatalogs} catalogs" );
 
 		Instance = this;
 		IsMounted = true;
@@ -149,11 +187,13 @@ public class SimsMount : BaseGameMount
 
 		// 1a. Parse COBJs — extract BuyCat category from tags, keyed by instance ID.
 		var cobjCategories = new Dictionary<ulong, string>();
-
-		foreach ( var entry in package.FindAll( Sims4Reader.ResourceType.CatalogObject ) )
+		Parallel.ForEach( package.FindAll( Sims4Reader.ResourceType.CatalogObject ), entry =>
 		{
+			//foreach ( var entry in package.FindAll( Sims4Reader.ResourceType.CatalogObject ) )
+
+			//var entry = 
 			if ( entry.MemSize == 0 || entry.FileSize == 0 )
-				continue;
+				return;
 
 			try
 			{
@@ -167,7 +207,7 @@ public class SimsMount : BaseGameMount
 			{
 				Log.Warning( $"Failed to parse COBJ {entry.Key}: {ex.Message}" );
 			}
-		}
+		} );
 
 		// 1b. Parse OBJDs — match to COBJ by instance ID, extract Model references + name + variant
 		foreach ( var entry in package.FindAll( Sims4Reader.ResourceType.ObjectDefinition ) )
@@ -232,10 +272,12 @@ public class SimsMount : BaseGameMount
 	/// happens inside the ModelLoader via proper ChunkReference handling
 	/// (Public/Private/Delayed reference types).
 	///
-	/// GEOM → models/cas/, MODL → models/{category}/{name}
+	/// MODL → models/{category}/{name}
 	/// </summary>
-	private void MountResources( MountContext context, DbpfPackage package, Dictionary<ResourceKey, ModlMetadata> modlMetadata, Dictionary<ulong, ObjdMetadata> objdMetadata, Dictionary<ulong, string> cobjCategories )
+	private (int models, int surfaces, int catalogs) MountResources( MountContext context, DbpfPackage package, Dictionary<ResourceKey, ModlMetadata> modlMetadata, Dictionary<ulong, ObjdMetadata> objdMetadata, Dictionary<ulong, string> cobjCategories )
 	{
+		int models = 0, surfaces = 0, catalogs = 0;
+
 		foreach ( var entry in package.Entries )
 		{
 			if ( entry.MemSize == 0 || entry.FileSize == 0 )
@@ -243,113 +285,72 @@ public class SimsMount : BaseGameMount
 
 			var key = entry.Key;
 			var keyName = $"{key.Group:X}_{key.Instance:X}";
-			//
+
 			try
 			{
 				switch ( key.Type )
 				{
-					// Images (DST, RLE)
-					case Sims4Reader.ResourceType.DstImage:
-					case Sims4Reader.ResourceType.RleImage:
-					case Sims4Reader.ResourceType.RleImageAlt:
-						context.Add( Sandbox.Mounting.ResourceType.Texture,
-							$"textures/{keyName}",
-							new Sims4TextureLoader( package, entry ) );
-						break;
-
-					// Materials (MATD in RCOL)
-					case Sims4Reader.ResourceType.MaterialDefinition:
-						context.Add( Sandbox.Mounting.ResourceType.Material,
-							$"materials/{keyName}",
-							new Sims4MaterialLoader( package, entry ) );
-						break;
-
-					// CAS meshes (GEOM) — always human/CAS content
-					case Sims4Reader.ResourceType.Geometry:
-						context.Add( Sandbox.Mounting.ResourceType.Model,
-							$"models/cas/{keyName}",
-							new GeomtryLoader( package, entry ) );
-						break;
-
 					// Buy/build models (MODL)
 					case Sims4Reader.ResourceType.Model:
-					{
-						var meta = modlMetadata.TryGetValue( key, out var m ) ? m : default;
-						var category = meta.Category ?? "objects";
-						var displayName = meta.Name ?? keyName;
-
-						context.Add( Sandbox.Mounting.ResourceType.Model,
-							$"models/{category}/{displayName}",
-							new ModlLoader( package, entry, packages ) );
-
-						// Register inline material slots without scanning.
-						// Real TS4 MODLs have at most 8 meshes. We blindly register
-						// slots 0..MaxInlineMeshSlots — unused slots return null from
-						// InlineMaterialLoader.Load() which is a no-op.
-						// This avoids a ~1s/package ScanInlineMaterialMeshes call at mount time.
-						for ( int meshIdx = 0; meshIdx < MaxInlineMeshSlots; meshIdx++ )
 						{
-							context.Add( Sandbox.Mounting.ResourceType.Material,
-								$"materials/inline/{keyName}_m{meshIdx}",
-								new InlineMaterialLoader( package, entry, meshIdx, packages ) );
-						}
-						break;
-					}
+							var meta = modlMetadata.TryGetValue( key, out var m ) ? m : default;
+							var category = meta.Category ?? "objects";
+							var displayName = meta.Name ?? keyName;
 
-					// TODO: Catalog surfaces (CFLR, CFLT, CWAL) — floor/wall paint materials
-					// Requires CatalogSurfaceLoader (WIP, not yet compilable)
-					// case Sims4Reader.ResourceType.CatalogFloor:
-					// case Sims4Reader.ResourceType.CatalogFlooring:
-					// case Sims4Reader.ResourceType.CatalogWall:
-					// {
-					// 	var surfaceType = key.Type == Sims4Reader.ResourceType.CatalogWall ? "wall" : "floor";
-					// 	context.Add( Sandbox.Mounting.ResourceType.Text,
-					// 		$"surfaces/{surfaceType}/{keyName}.s4sur",
-					// 		new CatalogSurfaceLoader( package, entry, packages, surfaceType ) );
-					// 	break;
-					// }
+							context.Add( Sandbox.Mounting.ResourceType.Model,
+								$"models/{category}/{displayName}",
+								new ModlLoader( package, entry, packages ) );
+							models++;
+							break;
+						}
+
+					// Catalog surfaces (CFLR, CFLT, CWAL) — floor/wall paint materials
+					case Sims4Reader.ResourceType.CatalogFloor:
+					case Sims4Reader.ResourceType.CatalogFlooring:
+					case Sims4Reader.ResourceType.CatalogWall:
+						{
+							var surfaceType = key.Type == Sims4Reader.ResourceType.CatalogWall ? "wall" : "floor";
+							var path = $"catalogs/{keyName}.s4sur";
+							if ( _mountedCatalogPaths.Contains( path ) )
+							{
+								Log.Trace( $"Duplicate catalog surface path, skipping: {path}" );
+								break;
+							}
+							_mountedCatalogPaths.Add( path );
+
+							context.Add( Sandbox.Mounting.ResourceType.Text,
+								path,
+								new CatalogSurfaceLoader( package, entry, packages, surfaceType ) );
+							surfaces++;
+							break;
+						}
 
 					// Catalog objects (COBJ)
 					case Sims4Reader.ResourceType.CatalogObject:
-					{
-						// Build a readable path: objects/{category}/{objectName}/{variant}.s4cor
-						// Use cached category from BuildMetadataIndex — avoids re-parsing the COBJ.
-						cobjCategories.TryGetValue( key.Instance, out var category );
-						var cat = category ?? "misc";
-						objdMetadata.TryGetValue( key.Instance, out var objd );
-
-						var objName = objd.Name ?? keyName;
-						var variant = objd.MaterialVariant;
-						var fileName = !string.IsNullOrEmpty( variant ) ? variant : keyName;
-
-						// Strip variant suffix from folder name so variants group under the base object
-						// Variant is e.g. "set5-materialVariant", name ends with "set5"
-						// Extract the set identifier (part before first '-') and strip it from the name
-						if ( !string.IsNullOrEmpty( variant ) )
 						{
-							var variantPrefix = variant;
-							var dashIdx = variant.IndexOf( '-' );
-							if ( dashIdx > 0 )
-								variantPrefix = variant.Substring( 0, dashIdx );
-
-							if ( objName.EndsWith( variantPrefix, StringComparison.OrdinalIgnoreCase ) )
+							var path = $"catalogs/{keyName}.s4cor";
+							if ( _mountedCatalogPaths.Contains( path ) )
 							{
-								objName = objName.Substring( 0, objName.Length - variantPrefix.Length ).TrimEnd( '_' );
+								Log.Trace( $"Duplicate catalog object path, skipping: {path}" );
+								break;
 							}
-						}
+							_mountedCatalogPaths.Add( path );
 
-						context.Add( Sandbox.Mounting.ResourceType.Text,
-							$"objects/{cat}/{objName}/{fileName}.s4cor",
-							new CatalogObjectLoader( package, entry, packages ) );
-						break;
-					}
+							context.Add( Sandbox.Mounting.ResourceType.Text,
+								path,
+								new CatalogObjectLoader( package, entry, packages ) );
+							catalogs++;
+							break;
+						}
 				}
 			}
 			catch ( Exception ex )
 			{
-				Log.Error( $"Error mounting {key.Type} {key}: {ex.Message}" );
+				Log.Error( $"Error mounting {key.Type} {key}: {ex}" );
 			}
 		}
+
+		return (models, surfaces, catalogs);
 	}
 
 

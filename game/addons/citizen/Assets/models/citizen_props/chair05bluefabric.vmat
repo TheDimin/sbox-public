@@ -1,9 +1,0 @@
-"Layer0"
-{
-	"shader"		"shaders/complex.shader_c"
-	"F_SPECULAR"		"1"
-	"TextureColor"		"models/citizen_props/chair055bluefabric_color.png"
-	"TextureRoughness"		"models/citizen_props/chair055bluefabric_rough.png"
-	"TextureNormal"		"models/citizen_props/chair05bluefabric_normal.png"
-	"TextureAmbientOcclusion"		"models/citizen_props/chair05bluefabric_ao.png"
-}

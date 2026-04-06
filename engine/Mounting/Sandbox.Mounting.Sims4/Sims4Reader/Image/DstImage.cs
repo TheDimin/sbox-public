@@ -53,10 +53,21 @@ public class DstImage : IResource
         var temp = new byte[dataSize];
         Array.Copy(sourceData, DdsHeaderSize, temp, 0, dataSize);
 
-        using var result = new MemoryStream();
-        var writer = new BinaryWriter(result);
+        bool isDst1 = header.PixelFormat.Fourcc == FourCC.DST1;
+        bool isDst5 = header.PixelFormat.Fourcc == FourCC.DST5;
 
-        // Clone the header and change the FourCC from DST* to DXT*
+        int bytesPerBlock = isDst1 ? 8 : 16;
+
+        // Total blocks across all mips (from data size)
+        int totalBlocks = dataSize / bytesPerBlock;
+
+        // Compute mip0 block count
+        int mip0Bw = Math.Max(1, (header.Width + 3) / 4);
+        int mip0Bh = Math.Max(1, (header.Height + 3) / 4);
+        int mip0Blocks = mip0Bw * mip0Bh;
+        int mip0Bytes = mip0Blocks * bytesPerBlock;
+
+        // Build output header: mip0 only, DXT* FourCC
         var outputPixelFormat = new DdsPixelFormat
         {
             Flags = header.PixelFormat.Flags,
@@ -70,12 +81,12 @@ public class DstImage : IResource
 
         var outputHeader = new DdsHeader
         {
-            Flags = header.Flags,
+            Flags = header.Flags & ~HeaderFlags.Mipmap,
             Height = header.Height,
             Width = header.Width,
-            PitchOrLinearSize = header.PitchOrLinearSize,
+            PitchOrLinearSize = (uint)mip0Bytes,
             Depth = header.Depth,
-            MipMapCount = header.MipMapCount,
+            MipMapCount = 1,
             Reserved1 = header.Reserved1,
             PixelFormat = outputPixelFormat,
             SurfaceFlags = header.SurfaceFlags,
@@ -83,54 +94,48 @@ public class DstImage : IResource
             Reserved2 = header.Reserved2,
         };
 
-        if (header.PixelFormat.Fourcc == FourCC.DST1)
-        {
+        if (isDst1)
             outputHeader.PixelFormat.Fourcc = FourCC.DXT1;
-            writer.Write(DdsHeader.Signature);
-            outputHeader.Write(writer);
-
-            int blockOffset2 = 0;
-            int blockOffset3 = dataSize >> 1;
-            int count = (blockOffset3 - blockOffset2) / 4;
-
-            for (int i = 0; i < count; i++)
-            {
-                result.Write(temp, blockOffset2, 4);
-                result.Write(temp, blockOffset3, 4);
-                blockOffset2 += 4;
-                blockOffset3 += 4;
-            }
-        }
         else if (header.PixelFormat.Fourcc == FourCC.DST3)
         {
             outputHeader.PixelFormat.Fourcc = FourCC.DXT3;
-            writer.Write(DdsHeader.Signature);
-            outputHeader.Write(writer);
-            throw new NotSupportedException("DST3 unshuffling is not yet implemented (no samples available).");
+            throw new NotSupportedException("DST3 unshuffling is not yet implemented.");
         }
-        else if (header.PixelFormat.Fourcc == FourCC.DST5)
-        {
+        else if (isDst5)
             outputHeader.PixelFormat.Fourcc = FourCC.DXT5;
-            writer.Write(DdsHeader.Signature);
-            outputHeader.Write(writer);
 
-            int blockOffset0 = 0;
-            int blockOffset2 = blockOffset0 + (dataSize >> 3);
-            int blockOffset1 = blockOffset2 + (dataSize >> 2);
-            int blockOffset3 = blockOffset1 + (6 * dataSize >> 4);
-            int count = (blockOffset2 - blockOffset0) / 2;
+        using var result = new MemoryStream(DdsHeaderSize + mip0Bytes);
+        var writer = new BinaryWriter(result);
+        writer.Write(DdsHeader.Signature);
+        outputHeader.Write(writer);
 
-            for (int i = 0; i < count; i++)
+        // Unshuffle only mip0 blocks using dataSize-based section offsets
+        if (isDst1)
+        {
+            // DST1 sections (across all mips): [color_endpoints: 4B × N] [color_indices: 4B × N]
+            int sec0 = 0;
+            int sec1 = totalBlocks * 4;
+
+            for (int i = 0; i < mip0Blocks; i++)
             {
-                result.Write(temp, blockOffset0, 2);
-                result.Write(temp, blockOffset1, 6);
-                result.Write(temp, blockOffset2, 4);
-                result.Write(temp, blockOffset3, 4);
+                result.Write(temp, sec0 + i * 4, 4);
+                result.Write(temp, sec1 + i * 4, 4);
+            }
+        }
+        else if (isDst5)
+        {
+            // DST5 sections (across all mips): [alpha_ep: 2B × N] [color_ep: 4B × N] [alpha_idx: 6B × N] [color_idx: 4B × N]
+            int sec0 = 0;                          // alpha endpoints
+            int sec1 = totalBlocks * 2;             // color endpoints
+            int sec2 = sec1 + totalBlocks * 4;      // alpha indices
+            int sec3 = sec2 + totalBlocks * 6;      // color indices
 
-                blockOffset0 += 2;
-                blockOffset1 += 6;
-                blockOffset2 += 4;
-                blockOffset3 += 4;
+            for (int i = 0; i < mip0Blocks; i++)
+            {
+                result.Write(temp, sec0 + i * 2, 2);   // alpha endpoints
+                result.Write(temp, sec2 + i * 6, 6);   // alpha indices
+                result.Write(temp, sec1 + i * 4, 4);   // color endpoints
+                result.Write(temp, sec3 + i * 4, 4);   // color indices
             }
         }
 

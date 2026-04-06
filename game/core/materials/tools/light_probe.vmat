@@ -1,8 +1,0 @@
-"Layer0"
-{
-	"shader"		"shaders/tools_light_probe.shader_c"
-	"Attributes"
-	{
-		"tools.toolsmaterial"		"1"
-	}
-}

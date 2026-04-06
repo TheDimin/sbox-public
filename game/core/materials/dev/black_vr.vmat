@@ -1,7 +1,0 @@
-Layer0
-{
-	shader "shaders/complex.shader"
-
-	TextureColor "[0.000000 0.000000 0.000000 1.000000]"
-
-}

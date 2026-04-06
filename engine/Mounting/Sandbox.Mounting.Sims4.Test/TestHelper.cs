@@ -1,4 +1,5 @@
 using System.IO;
+using Microsoft.Win32;
 
 namespace Sims4MountTest;
 
@@ -7,20 +8,10 @@ namespace Sims4MountTest;
 /// </summary>
 internal static class TestHelper
 {
-	private static readonly string[] FixturePaths =
-	{
-		@"E:\SteamLibrary\steamapps\common\The Sims 4\Data\Client\ClientFullBuild0.package",
-	};
-
-	private static readonly string[] GameDataDirs =
-	{
-		@"E:\SteamLibrary\steamapps\common\The Sims 4\Data\Client",
-	};
-
 	/// <summary>
 	/// Locate a real .package file for integration tests.
-	/// Checks SIMS4_TEST_PACKAGE_PATH env var first, then hardcoded fallbacks.
-	/// Calls Assert.Inconclusive if no fixture is found.
+	/// Checks SIMS4_TEST_PACKAGE_PATH env var first, then discovers via Steam.
+	/// Calls Assert.Fail if no fixture is found.
 	/// </summary>
 	public static string GetPackagePath()
 	{
@@ -28,14 +19,16 @@ internal static class TestHelper
 		if ( !string.IsNullOrWhiteSpace( fromEnv ) && File.Exists( fromEnv ) )
 			return fromEnv;
 
-		foreach ( var path in FixturePaths )
+		var dataDir = FindSims4DataDir();
+		if ( dataDir != null )
 		{
-			if ( File.Exists( path ) )
-				return path;
+			var fullBuild = Path.Combine( dataDir, "ClientFullBuild0.package" );
+			if ( File.Exists( fullBuild ) )
+				return fullBuild;
 		}
 
 		Assert.Fail(
-			"Real Sims 4 package not found. Set SIMS4_TEST_PACKAGE_PATH or place a .package fixture." );
+			"Real Sims 4 package not found. Set SIMS4_TEST_PACKAGE_PATH or install The Sims 4 via Steam." );
 		return string.Empty;
 	}
 
@@ -84,24 +77,95 @@ internal static class TestHelper
 				.ToList();
 		}
 
-		foreach ( var dir in GameDataDirs )
+		var dataDir = FindSims4DataDir();
+		if ( dataDir != null && Directory.Exists( dataDir ) )
 		{
-			if ( Directory.Exists( dir ) )
-			{
-				var packages = Directory.EnumerateFiles( dir, "*.package" )
-					.Where( f =>
-					{
-						var name = Path.GetFileName( f );
-						return name.StartsWith( "ClientFullBuild" ) || name.StartsWith( "ClientDeltaBuild" );
-					} )
-					.OrderBy( f => f )
-					.ToList();
+			var packages = Directory.EnumerateFiles( dataDir, "*.package" )
+				.Where( f =>
+				{
+					var name = Path.GetFileName( f );
+					return name.StartsWith( "ClientFullBuild" ) || name.StartsWith( "ClientDeltaBuild" );
+				} )
+				.OrderBy( f => f )
+				.ToList();
 
-				if ( packages.Count > 0 )
-					return packages;
-			}
+			if ( packages.Count > 0 )
+				return packages;
 		}
 
 		return new List<string>();
+	}
+
+	/// <summary>
+	/// Dynamically discover the Sims 4 Data/Client directory via Steam.
+	/// Reads the Windows registry for Steam's install path, then parses
+	/// libraryfolders.vdf to find all Steam library folders.
+	/// </summary>
+	private static string? FindSims4DataDir()
+	{
+		var steamPath = GetSteamInstallPath();
+		if ( steamPath == null )
+			return null;
+
+		var libraryFolders = new List<string> { steamPath };
+
+		// Parse libraryfolders.vdf for additional library paths
+		var vdfPath = Path.Combine( steamPath, "steamapps", "libraryfolders.vdf" );
+		if ( File.Exists( vdfPath ) )
+		{
+			foreach ( var line in File.ReadLines( vdfPath ) )
+			{
+				// Lines look like:  "path"		"D:\SteamLibrary"
+				var trimmed = line.Trim();
+				if ( !trimmed.StartsWith( "\"path\"", StringComparison.OrdinalIgnoreCase ) )
+					continue;
+
+				var parts = trimmed.Split( '"' );
+				// Expected: "", "path", "", "", "D:\SteamLibrary", ""
+				if ( parts.Length >= 5 && Directory.Exists( parts[4] ) )
+					libraryFolders.Add( parts[4] );
+			}
+		}
+
+		// Check each library folder for The Sims 4
+		foreach ( var library in libraryFolders )
+		{
+			var dataDir = Path.Combine( library, "steamapps", "common", "The Sims 4", "Data", "Client" );
+			if ( Directory.Exists( dataDir ) )
+				return dataDir;
+		}
+
+		return null;
+	}
+
+	/// <summary>
+	/// Read Steam's install directory from the Windows registry.
+	/// </summary>
+	private static string? GetSteamInstallPath()
+	{
+		string[] registryKeys =
+		{
+			@"SOFTWARE\WOW6432Node\Valve\Steam",
+			@"SOFTWARE\Valve\Steam",
+		};
+
+		foreach ( var key in registryKeys )
+		{
+			using var regKey = Registry.LocalMachine.OpenSubKey( key );
+			var path = regKey?.GetValue( "InstallPath" ) as string;
+			if ( !string.IsNullOrWhiteSpace( path ) && Directory.Exists( path ) )
+				return path;
+		}
+
+		// Try current user as fallback
+		foreach ( var key in registryKeys )
+		{
+			using var regKey = Registry.CurrentUser.OpenSubKey( key );
+			var path = regKey?.GetValue( "SteamPath" ) as string;
+			if ( !string.IsNullOrWhiteSpace( path ) && Directory.Exists( path ) )
+				return path;
+		}
+
+		return null;
 	}
 }

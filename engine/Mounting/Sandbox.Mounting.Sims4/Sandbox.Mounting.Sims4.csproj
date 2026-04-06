@@ -23,15 +23,14 @@
   <ItemGroup>
     <Compile Include="Assembly.cs" />
     <Compile Include="SimsMount.cs" />
-    <Compile Include="Resource\GeomtryLoader.cs" />
     <Compile Include="Resource\TextureLoader.cs" />
     <Compile Include="Resource\MaterialLoader.cs" />
     <Compile Include="Resource\GeomModelBuilder.cs" />
     <Compile Include="Resource\CatalogObjectLoader.cs" />
+    <Compile Include="Resource\CatalogSurfaceLoader.cs" />
     <Compile Include="Resource\ModlLoader.cs" />
+    <Compile Include="Resource\SteamIconLoader.cs" />
     <Compile Include="Resource\ModlModelBuilder.cs" />
-    <Compile Include="Resource\InlineMaterialLoader.cs" />
-    <Compile Include="SimsDebug.cs" />
     <Compile Include="Sims4Reader/**/*.cs" />
   </ItemGroup>
 
@@ -44,6 +43,7 @@
 
   <Target Name="CopyOutputDll" AfterTargets="Build">
     <Copy SourceFiles="$(OutputPath)\$(AssemblyName).dll" DestinationFiles="..\..\..\game\mount\sims4\sims4.dll" ContinueOnError="true" />
+    <Copy SourceFiles="$(OutputPath)\$(AssemblyName).pdb" DestinationFiles="..\..\..\game\mount\sims4\sims4.pdb" ContinueOnError="true" />
   </Target>
 
   <!-- Auto-compile mount shaders when source is newer than compiled output -->

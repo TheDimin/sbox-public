@@ -327,6 +327,17 @@ public static class ModlModelLoader
                 {
                     for (int i = 0; i < resolved.Indices.Length; i++)
                         resolved.Indices[i] -= minVertex;
+
+                    // Validate post-rebasing: if any index is still out of range,
+                    // the rebasing was wrong — clear indices so the mesh is skipped downstream.
+                    for (int i = 0; i < resolved.Indices.Length; i++)
+                    {
+                        if ((uint)resolved.Indices[i] >= (uint)vertexCount)
+                        {
+                            resolved.Indices = Array.Empty<int>();
+                            break;
+                        }
+                    }
                 }
             }
         }

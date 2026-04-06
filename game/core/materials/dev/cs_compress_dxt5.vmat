@@ -1,6 +1,0 @@
-// THIS FILE IS AUTO-GENERATED
-
-Layer0
-{
-	shader "shaders/cs_compress_dxt5.shader"
-}

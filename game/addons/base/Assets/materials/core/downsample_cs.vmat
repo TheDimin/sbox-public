@@ -1,4 +1,0 @@
-"Layer0"
-{
-	"shader"		"shaders/downsample_cs.shader_c"
-}

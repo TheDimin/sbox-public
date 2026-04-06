@@ -1,6 +1,0 @@
-"Layer0"
-{
-	"shader"		"shaders/tools_solid.shader_c"
-	"F_UNLIT"		"1"
-	"g_flPhongExp"		"0.100000"
-}

@@ -1,8 +1,0 @@
-"Layer0"
-{
-	"shader"		"shaders/debugoverlay_wireframe.shader_c"
-	"g_flPhongBoost"		"0.100000"
-	"g_flPhongExp"		"0.100000"
-	"g_vAlbedo"		"[0.501961 0.501961 0.501961 0.000000]"
-	"g_flIndirectContrastBoost"		"0.000000"
-}

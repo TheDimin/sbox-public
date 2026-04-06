@@ -1,4 +1,0 @@
-"Layer0"
-{
-	"shader"		"shaders/depthaware_mask_cs.shader_c"
-}

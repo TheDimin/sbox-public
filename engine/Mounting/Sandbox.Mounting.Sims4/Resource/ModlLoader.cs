@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using Sandbox;
 using Sandbox.Diagnostics;
 using Sims4Reader;
@@ -11,88 +9,15 @@ namespace Mounting.Sims4;
 /// Engine-level loader for MODL (Model) resources.
 /// Resolves the MODL → MLOD → VBUF/IBUF/VRTF chain and builds a sandbox Model.
 /// Supports multiple meshes per LOD, each with its own material.
-/// Materials are always loaded from the mount system via their MATD resource key.
+/// Materials and textures are loaded directly from packages — no mount registration needed.
 /// </summary>
 public class ModlLoader( DbpfPackage package, ResourceEntry entry, IReadOnlyList<DbpfPackage> allPackages ) : ResourceLoader<SimsMount>
 {
 	static new Logger Log = new Logger( "Sims4-ModlLoader" );
 
-	protected override async Task<object?> LoadAsync()
+	protected override Task<object?> LoadAsync()
 	{
-		if ( entry.MemSize == 0 || entry.FileSize == 0 )
-			return null;
-
-		try
-		{
-			var resolved = ModlModelLoader.LoadModel( package, entry, allPackages );
-
-			if ( resolved.Lods.Count == 0 )
-			{
-				Log.Warning( $"MODL {entry.Key}: no LODs resolved" );
-				return null;
-			}
-
-			var bestLod = resolved.GetBestLod();
-			if ( bestLod == null || bestLod.Meshes.Count == 0 )
-			{
-				Log.Warning( $"MODL {entry.Key}: best LOD has no meshes" );
-				return null;
-			}
-
-			var validMeshes = bestLod.Meshes
-				.Where( m => m.Vertices.Length >= 3 && m.Indices.Length >= 3 )
-				.ToList();
-
-			if ( validMeshes.Count == 0 )
-			{
-				Log.Warning( $"MODL {entry.Key}: no meshes with valid geometry" );
-				return null;
-			}
-
-			// Kick off ALL material loads concurrently so each Sims4MaterialLoader.LoadAsync()
-			// can in turn load its textures in parallel (via BuildMaterialFromMatdAsync).
-			var materialTasks = validMeshes
-				.Select( m => LoadMaterialAsync( m ) )
-				.ToList();
-
-			await Task.WhenAll( materialTasks );
-
-			var meshMaterials = validMeshes
-				.Zip( materialTasks, ( mesh, task ) => (mesh, task.Result) )
-				.ToList();
-
-			return ModlModelBuilder.Build( meshMaterials, name: Path );
-		}
-		catch ( Exception e )
-		{
-			Log.Warning( $"Failed to load MODL {entry.Key}: {e.Message}" );
-			return null;
-		}
-	}
-
-	/// <summary>
-	/// Load the material for a mesh asynchronously via <see cref="Material.LoadAsync"/>,
-	/// which routes through <see cref="Sims4MaterialLoader.LoadAsync"/> and loads all
-	/// textures concurrently.
-	/// </summary>
-	private async Task<Material?> LoadMaterialAsync( ResolvedMesh mesh )
-	{
-		if ( string.IsNullOrEmpty( mesh.MaterialMountPath ) )
-		{
-			Log.Error( $"MODL {entry.Key}: mesh 0x{mesh.NameHash:X8} has no MaterialMountPath" );
-			return null;
-		}
-
-		var mountPath = $"mount://sims4/{mesh.MaterialMountPath}.vmat";
-		var material = await Material.LoadAsync( mountPath );
-
-		if ( material == null || !material.IsValid )
-		{
-			Log.Error( $"MODL {entry.Key}: mesh 0x{mesh.NameHash:X8} failed to load material from {mountPath}" );
-			return null;
-		}
-
-		return material;
+		return Task.FromResult( Load() );
 	}
 
 	protected override object? Load()
@@ -102,6 +27,8 @@ public class ModlLoader( DbpfPackage package, ResourceEntry entry, IReadOnlyList
 
 		try
 		{
+			Log.Trace( $"Loading MODL {entry.Key} (path={Path})" );
+
 			var resolved = ModlModelLoader.LoadModel( package, entry, allPackages );
 
 			if ( resolved.Lods.Count == 0 )
@@ -125,8 +52,15 @@ public class ModlLoader( DbpfPackage package, ResourceEntry entry, IReadOnlyList
 				if ( mesh.Vertices.Length < 3 || mesh.Indices.Length < 3 )
 					continue;
 
-				var material = LoadMaterial( mesh );
-				meshMaterials.Add( (mesh, material) );
+				try
+				{
+					var material = BuildMaterial( mesh );
+					meshMaterials.Add( (mesh, material) );
+				}
+				catch ( Exception matEx )
+				{
+					Log.Warning( $"MODL {entry.Key}: failed to build material for mesh #{i} (0x{mesh.NameHash:X8}): {matEx}" );
+				}
 			}
 
 			if ( meshMaterials.Count == 0 )
@@ -135,35 +69,38 @@ public class ModlLoader( DbpfPackage package, ResourceEntry entry, IReadOnlyList
 				return null;
 			}
 
-			return ModlModelBuilder.Build( meshMaterials, name: Path );
+			try
+			{
+				return ModlModelBuilder.Build( meshMaterials, name: Path );
+			}
+			catch ( Exception buildEx )
+			{
+				Log.Error( $"MODL {entry.Key}: ModlModelBuilder.Build crashed: {buildEx}" );
+				return null;
+			}
 		}
 		catch ( Exception e )
 		{
-			Log.Warning( $"Failed to load MODL {entry.Key}: {e.Message}" );
+			Log.Warning( $"Failed to load MODL {entry.Key}: {e}" );
 			return null;
 		}
 	}
 
 	/// <summary>
-	/// Load the material for a mesh from the mount system via its MATD resource key.
+	/// Build the material for a mesh directly from its resolved data.
+	/// Textures are loaded from packages, not from the mount system.
 	/// </summary>
-	private Material? LoadMaterial( ResolvedMesh mesh )
+	private Material? BuildMaterial( ResolvedMesh mesh )
 	{
-		if ( string.IsNullOrEmpty( mesh.MaterialMountPath ) )
+		if ( mesh.Material == null )
 		{
-			Log.Error( $"MODL {entry.Key}: mesh 0x{mesh.NameHash:X8} has no MaterialMountPath" );
+			Log.Error( $"MODL {entry.Key}: mesh 0x{mesh.NameHash:X8} has no material" );
 			return null;
 		}
 
-		var mountPath = $"mount://sims4/{mesh.MaterialMountPath}.vmat";
-		var material = Material.Load( mountPath );
+		var name = mesh.MaterialMountPath ?? $"sims4_mat_{mesh.NameHash:X}";
 
-		if ( material == null || !material.IsValid )
-		{
-			Log.Error( $"MODL {entry.Key}: mesh 0x{mesh.NameHash:X8} failed to load material from {mountPath}" );
-			return null;
-		}
-
-		return material;
+		return Sims4MaterialLoader.BuildMaterial( name, mesh.Material, mesh.TextureKeys,
+			key => Sims4TextureLoader.LoadFromPackages( key, package, allPackages ) );
 	}
 }

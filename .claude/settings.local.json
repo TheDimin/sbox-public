@@ -38,7 +38,21 @@
       "Bash(ls E:/Projects/sbox-public/engine/Mounting/Sandbox.Mounting.Sims4/Resource/*.cs)",
       "Bash(git checkout:*)",
       "Bash(git -C E:/Projects/sbox-public checkout HEAD -- game/mount/sims4/Assets/shaders/sims4.shader_c)",
-      "Bash(echo \"Exit: $?\")"
+      "Bash(echo \"Exit: $?\")",
+      "Bash(cmd //c \"bin\\\\managed\\\\ShaderCompiler.exe mount\\\\sims4\\\\Assets\\\\shaders\\\\sims4.shader -f\")",
+      "Bash(git ls-tree:*)",
+      "Bash(rm -f E:/Projects/sbox-public/game/addons/base/Assets/shaders/foliage.shader_c)",
+      "Bash(cmd //c \"bin\\\\managed\\\\ShaderCompiler.exe addons\\\\base\\\\Assets\\\\shaders\\\\foliage.shader -f\")",
+      "Bash(cmd //c \"bin\\\\win64\\\\sbox-dev.exe -compileShader addons\\\\base\\\\Assets\\\\shaders\\\\foliage.shader\")",
+      "Bash(ls E:/Projects/sbox-public/game/bin/win64/sbox*)",
+      "Bash(ls E:/Projects/sbox-public/game/bin/win64/*.exe)",
+      "Bash(find /e/Projects/sbox-public -path */bin/managed/* -name *shader* -o -path */bin/managed/* -name *compiler*)",
+      "Bash(find /e/Projects/sbox-public -name *.txt -path */bin/* -o -name BUILD* -o -name SHADER*)",
+      "Bash(xargs basename:*)",
+      "Bash(\"E:\\\\Projects\\\\sbox-public\\\\game\\\\bin\\\\managed\\\\ShaderCompiler.exe\" sims4.shader -f)",
+      "Bash(bin/managed/ShaderCompiler.exe \"*\" -f)",
+      "Bash(tasklist)",
+      "Bash(ls bin/managed/Managed.*)"
     ]
   }
 }

@@ -1,7 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Sandbox;
+using Sandbox.Diagnostics;
 using Sims4Reader.Mesh;
 
 namespace Mounting.Sims4;
@@ -14,6 +12,7 @@ namespace Mounting.Sims4;
 /// </summary>
 public static class ModlModelBuilder
 {
+	static readonly Logger Log = new Logger( "Sims4-ModlModelBuilder" );
 	/// <summary>
 	/// Build a sandbox Model from a single resolved MODL mesh.
 	/// </summary>
@@ -50,7 +49,16 @@ public static class ModlModelBuilder
 		bool addCollision = true,
 		string? name = null )
 	{
-		var defaultMaterial = Material.Load( "materials/default/white.vmat" );
+		Material? defaultMaterial = null;
+		try
+		{
+			defaultMaterial = Material.Load( "materials/default/white.vmat" );
+		}
+		catch ( Exception ex )
+		{
+			Log.Error( $"Failed to load default white material: {ex}" );
+			return null;
+		}
 
 		var builder = Model.Builder;
 		if ( !string.IsNullOrEmpty( name ) )
@@ -61,8 +69,11 @@ public static class ModlModelBuilder
 		var allCollisionPositions = new List<Vector3>();
 		var allCollisionIndices = new List<int>();
 
+		int meshIdx = 0;
 		foreach ( var (mesh, material) in meshes )
 		{
+			meshIdx++;
+
 			if ( mesh.Vertices.Length < 3 || mesh.Indices.Length < 3 )
 				continue;
 
@@ -86,12 +97,44 @@ public static class ModlModelBuilder
 			}
 
 			if ( hasInvalidIndices )
+			{
+				Log.Warning( $"Skipping mesh (name hash 0x{mesh.NameHash:X}): {indices.Length} indices, {vertexCount} vertices — out-of-range index detected" );
 				continue;
+			}
 
-			var bounds = ComputeBounds( vertices );
-			var sbMesh = CreateMesh( vertices, indices, bounds, mat );
-			builder.AddMesh( sbMesh );
-			anyMeshAdded = true;
+			// Check for NaN/Infinity in vertex positions — can crash GPU or hang driver
+			bool hasBadVertex = false;
+			for ( int i = 0; i < vertices.Length; i++ )
+			{
+				var p = vertices[i].Position;
+				if ( float.IsNaN( p.x ) || float.IsNaN( p.y ) || float.IsNaN( p.z ) ||
+				     float.IsInfinity( p.x ) || float.IsInfinity( p.y ) || float.IsInfinity( p.z ) )
+				{
+					hasBadVertex = true;
+					break;
+				}
+			}
+
+			if ( hasBadVertex )
+			{
+				Log.Warning( $"Skipping mesh #{meshIdx} '{name}' (name hash 0x{mesh.NameHash:X}): NaN/Infinity in vertex positions" );
+				continue;
+			}
+
+			Log.Trace( $"Building mesh #{meshIdx} '{name}' (0x{mesh.NameHash:X}): {vertexCount} verts, {indices.Length} indices, mat={mat!.ResourceName}" );
+
+			try
+			{
+				var bounds = ComputeBounds( vertices );
+				var sbMesh = CreateMesh( vertices, indices, bounds, mat );
+				builder.AddMesh( sbMesh );
+				anyMeshAdded = true;
+			}
+			catch ( Exception meshEx )
+			{
+				Log.Error( $"Failed to create mesh #{meshIdx} '{name}' (0x{mesh.NameHash:X}): {meshEx}" );
+				continue;
+			}
 
 			// Accumulate collision data
 			if ( addCollision )
@@ -114,9 +157,33 @@ public static class ModlModelBuilder
 			var collisionIndices = allCollisionIndices.ToArray();
 			builder.AddCollisionMesh( positions, collisionIndices );
 			builder.AddTraceMesh( positions, collisionIndices );
+
+			// Add a physics body with a convex hull so the model works as an interactable prop.
+			try
+			{
+				builder.AddBody()
+					.AddHull( positions, Transform.Zero, new PhysicsBodyBuilder.HullSimplify
+					{
+						AngleTolerance = 0.1f,
+						DistanceTolerance = 0.1f,
+						Method = PhysicsBodyBuilder.SimplifyMethod.QEM
+					} );
+			}
+			catch ( Exception e )
+			{
+				Log.Warning( $"Failed to create physics hull for '{name}': {e.Message}" );
+			}
 		}
 
-		return builder.Create();
+		try
+		{
+			return builder.Create();
+		}
+		catch ( Exception ex )
+		{
+			Log.Error( $"Model.Builder.Create() failed for '{name}': {ex}" );
+			return null;
+		}
 	}
 
 	private static Mesh CreateMesh( GeomModelBuilder.GeomVertex[] vertices, int[] indices, BBox bounds, Material material )

@@ -92,7 +92,16 @@
       "Bash(xargs -I {} head -50 {})",
       "WebFetch(domain:docs.facepunch.com)",
       "WebFetch(domain:sbox.game)",
-      "Bash(find /e/Projects/sbox-public/engine/Mounting/Sandbox.Mounting.Sims4 -type f \\\\\\(-name *.xml -o -name *.json -o -name *tag* -o -name *Tag* \\\\\\))"
+      "Bash(find /e/Projects/sbox-public/engine/Mounting/Sandbox.Mounting.Sims4 -type f \\\\\\(-name *.xml -o -name *.json -o -name *tag* -o -name *Tag* \\\\\\))",
+      "Bash(find /e/Projects/sbox-public -name *.sln)",
+      "Bash(find /e/Projects/sbox-public -type f \\\\\\(-name *.bat -o -name *.ps1 -o -name *.sh -o -name Makefile \\\\\\))",
+      "Bash(find /e/Projects/sbox-public -name *CLAUDE* -o -name *BUILD* -o -name *README*)",
+      "Read(//c/program files \\(x86\\)/steam/steamapps/common/sbox/mount/sims4//**)",
+      "Read(//c/Program Files \\(x86\\)/Steam/steamapps/common/sbox/mount/sims4//**)",
+      "Read(//c/Program Files/**)",
+      "Read(//c/Program Files \\(x86\\)/**)",
+      "Bash(cp \"E:/Projects/sbox-public/engine/Mounting/Sandbox.Mounting.Sims4/bin/Debug/Sandbox.Mounting.Sims4.dll\" \"E:/Projects/sbox-public/game/mount/sims4/sims4.dll\")",
+      "Bash(cp \"E:/Projects/sbox-public/engine/Mounting/Sandbox.Mounting.Sims4/bin/Debug/Sandbox.Mounting.Sims4.pdb\" \"E:/Projects/sbox-public/game/mount/sims4/sims4.pdb\")"
     ]
   }
 }

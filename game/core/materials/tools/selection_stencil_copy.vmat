@@ -1,4 +1,0 @@
-"Layer0"
-{
-	"shader"		"shaders/tools_selection_stencil_copy.shader_c"
-}
