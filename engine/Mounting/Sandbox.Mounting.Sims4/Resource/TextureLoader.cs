@@ -57,8 +57,6 @@ public static class Sims4TextureLoader
 			src += size;
 		}
 
-		Log.Info( "CreateDxt1WithAlpha" );
-
 		return Texture.Create( width, height, ImageFormat.DXT1_ONEBITALPHA )
 			.WithData( result )
 			.WithMips( mipCount )

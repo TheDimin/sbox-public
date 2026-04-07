@@ -121,8 +121,6 @@ public static class ModlModelBuilder
 				continue;
 			}
 
-			Log.Trace( $"Building mesh #{meshIdx} '{name}' (0x{mesh.NameHash:X}): {vertexCount} verts, {indices.Length} indices, mat={mat!.ResourceName}" );
-
 			try
 			{
 				var bounds = ComputeBounds( vertices );

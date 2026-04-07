@@ -89,8 +89,6 @@ public static class Sims4MaterialLoader
 		bool useSeparateAlphaMap = hasAlphaMap && !alphaMapIsSameAsDiffuse;
 		bool needsAlphaTest = useSeparateAlphaMap || hasAlphaMap || useDiffuseForAlpha || alphaMaskThreshold > 0f || IsAlphaTestShader( matd.Shader );
 
-		Log.Info( $"Material {name}: shader={matd.Shader}, hasAlphaMap={hasAlphaMap}, useSeparateAlphaMap={useSeparateAlphaMap}, useDiffuseForAlpha={useDiffuseForAlpha}, alphaMaskThreshold={alphaMaskThreshold}, needsAlphaTest={needsAlphaTest}, textures=[{string.Join( ", ", textureKeys.Select( kv => $"{kv.Key}={kv.Value}" ) )}]" );
-
 		// --- Phase 2: Create fresh material and set features on clean state ---
 		Material material;
 		try

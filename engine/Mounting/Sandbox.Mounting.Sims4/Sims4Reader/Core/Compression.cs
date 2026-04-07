@@ -18,8 +18,10 @@ internal static class Compression
 
         if (compressed[0] == 0x78)
         {
-            // DEFLATE (zlib) — skip 2-byte zlib header
-            using var source = new MemoryStream(compressed[2..].ToArray());
+            // DEFLATE (zlib) — skip 2-byte zlib header, write directly to avoid ToArray() copy
+            using var source = new MemoryStream(compressed.Length - 2);
+            source.Write(compressed[2..]);
+            source.Position = 0;
             using var deflate = new DeflateStream(source, CompressionMode.Decompress);
             int totalRead = 0;
             while (totalRead < memSize)
@@ -33,6 +35,123 @@ internal static class Compression
         {
             // Legacy Sims 3 compression
             DecompressLegacy(compressed, output, compressed[0]);
+        }
+        else
+        {
+            throw new InvalidDataException($"Unrecognized compression header: 0x{compressed[0]:X2}{compressed[1]:X2}");
+        }
+
+        return output;
+    }
+
+    /// <summary>
+    /// Zero-copy overload: wraps the existing byte[] in a MemoryStream without allocating
+    /// an internal buffer copy. Use when the compressed data is already in a byte[].
+    /// </summary>
+    public static byte[] Decompress(byte[] compressed, int offset, int length, int memSize)
+    {
+        if (length < 2)
+            throw new InvalidDataException("Compressed data too short");
+
+        byte[] output = new byte[memSize];
+
+        if (compressed[offset] == 0x78)
+        {
+            // DEFLATE (zlib) — skip 2-byte zlib header, wrap array directly (no copy)
+            using var source = new MemoryStream(compressed, offset + 2, length - 2, writable: false);
+            using var deflate = new DeflateStream(source, CompressionMode.Decompress);
+            int totalRead = 0;
+            while (totalRead < memSize)
+            {
+                int read = deflate.Read(output, totalRead, memSize - totalRead);
+                if (read == 0) break;
+                totalRead += read;
+            }
+        }
+        else if (compressed[offset + 1] == 0xFB)
+        {
+            DecompressLegacy(compressed.AsSpan(offset, length), output, compressed[offset]);
+        }
+        else
+        {
+            throw new InvalidDataException($"Unrecognized compression header: 0x{compressed[offset]:X2}{compressed[offset + 1]:X2}");
+        }
+
+        return output;
+    }
+
+    /// <summary>
+    /// Decompress directly from a raw memory pointer (memory-mapped file).
+    /// Eliminates all intermediate buffer allocations — reads compressed data
+    /// straight from mapped pages via UnmanagedMemoryStream.
+    /// </summary>
+    /// <summary>
+    /// Decompress directly from a raw memory pointer (memory-mapped file).
+    /// Uses UnmanagedMemoryStream + ZLibStream for zero-copy decompression
+    /// of zlib data straight from mapped pages.
+    /// </summary>
+    public static unsafe byte[] DecompressMapped(byte* compressed, int length, int memSize)
+    {
+        if (length < 2)
+            throw new InvalidDataException("Compressed data too short");
+
+        byte[] output = new byte[memSize];
+
+        if (compressed[0] == 0x78)
+        {
+            // ZLibStream handles the zlib header natively — no manual skip needed
+            using var source = new UnmanagedMemoryStream(compressed, length);
+            using var zlib = new ZLibStream(source, CompressionMode.Decompress);
+            int totalRead = 0;
+            while (totalRead < memSize)
+            {
+                int read = zlib.Read(output, totalRead, memSize - totalRead);
+                if (read == 0) break;
+                totalRead += read;
+            }
+        }
+        else if (compressed[1] == 0xFB)
+        {
+            var span = new ReadOnlySpan<byte>(compressed, length);
+            DecompressLegacy(span, output, compressed[0]);
+        }
+        else
+        {
+            throw new InvalidDataException($"Unrecognized compression header: 0x{compressed[0]:X2}{compressed[1]:X2}");
+        }
+
+        return output;
+    }
+
+    /// <summary>
+    /// Partial decompression from mapped memory — only decompresses up to maxOutput bytes.
+    /// Much faster than full decompression when only the header portion of data is needed.
+    /// </summary>
+    public static unsafe byte[] DecompressPartial(byte* compressed, int length, int maxOutput)
+    {
+        if (length < 2)
+            throw new InvalidDataException("Compressed data too short");
+
+        byte[] output = new byte[maxOutput];
+
+        if (compressed[0] == 0x78)
+        {
+            using var source = new UnmanagedMemoryStream(compressed, length);
+            using var zlib = new ZLibStream(source, CompressionMode.Decompress);
+            int totalRead = 0;
+            while (totalRead < maxOutput)
+            {
+                int read = zlib.Read(output, totalRead, maxOutput - totalRead);
+                if (read == 0) break;
+                totalRead += read;
+            }
+            if (totalRead < maxOutput)
+                return output.AsSpan(0, totalRead).ToArray();
+        }
+        else if (compressed[1] == 0xFB)
+        {
+            var span = new ReadOnlySpan<byte>(compressed, length);
+            DecompressLegacy(span, output, compressed[0]);
         }
         else
         {

@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Threading;
 using Microsoft.Win32;
 using Mounting.Sims4;
 using Sims4Reader;
@@ -32,8 +30,6 @@ public class SimsMount : BaseGameMount
 
 	string? _gameDir;
 	string? _steamIconPath;
-	readonly HashSet<string> _mountedCatalogPaths = new( StringComparer.OrdinalIgnoreCase );
-
 	protected override void Initialize( InitializeContext context )
 	{
 		// 1. Steam
@@ -70,23 +66,24 @@ public class SimsMount : BaseGameMount
 	}
 
 	/// <summary>
-	/// Pre-processed package data produced in parallel, consumed sequentially by MountResources.
+	/// Lightweight entry collected during parallel Phase 1.
+	/// No string paths or loader objects are allocated here — only TGI + package reference.
 	/// </summary>
-	private readonly struct PreparedPackage
+	private readonly struct RawEntry
 	{
 		public readonly DbpfPackage Package;
-		public readonly Dictionary<ResourceKey, ModlMetadata> ModlMetadata;
-		public readonly Dictionary<ulong, ObjdMetadata> ObjdMetadata;
-		public readonly Dictionary<ulong, string> CobjCategories;
+		public readonly ResourceEntry Entry;
+		public readonly EntryKind Kind;
 
-		public PreparedPackage( DbpfPackage package, Dictionary<ResourceKey, ModlMetadata> modlMetadata, Dictionary<ulong, ObjdMetadata> objdMetadata, Dictionary<ulong, string> cobjCategories )
+		public RawEntry( DbpfPackage package, ResourceEntry entry, EntryKind kind )
 		{
 			Package = package;
-			ModlMetadata = modlMetadata;
-			ObjdMetadata = objdMetadata;
-			CobjCategories = cobjCategories;
+			Entry = entry;
+			Kind = kind;
 		}
 	}
+
+	private enum EntryKind : byte { Model, CatalogObject, CatalogFloor, CatalogWall }
 
 	protected override Task Mount( MountContext context )
 	{
@@ -102,58 +99,102 @@ public class SimsMount : BaseGameMount
 			context.Add( Sandbox.Mounting.ResourceType.Texture, "icon", new SteamIconLoader( _steamIconPath ) );
 
 		var files = System.IO.Directory.GetFiles( dataDir, "*.package", SearchOption.AllDirectories );
-		var sw = Stopwatch.StartNew();
 
-		Log.Trace( $"Mount starting: {files.Length} packages in {dataDir}" );
+		// Phase 1 (parallel): Open packages, collect TGI entries, extract COBJ categories,
+		// and build OBJD→MODL name+category mappings — all in one pass for I/O overlap.
+		var dedup = new ConcurrentDictionary<ResourceKey, RawEntry>(
+			concurrencyLevel: Environment.ProcessorCount, capacity: 32000 );
+		var modelMeta = new ConcurrentDictionary<ResourceKey, (string Name, string? Category)>(
+			concurrencyLevel: Environment.ProcessorCount, capacity: 26000 );
+		var cobjCategories = new ConcurrentDictionary<ulong, string>(
+			concurrencyLevel: Environment.ProcessorCount, capacity: 8000 );
+		var openedPackages = new DbpfPackage[files.Length];
 
-		// Phase 1 (parallel): Open packages + parse COBJ/OBJD metadata.
-		// Each package is independent — no shared state between packages.
-		// DbpfPackage.Open reads the DBPF index, BuildMetadataIndex parses
-		// COBJ/OBJD entries. Both are CPU+I/O bound and benefit from parallelism.
-		var prepared = new PreparedPackage[files.Length];
-		int failedPackages = 0;
-
-
-
-		for ( int i = 0; i < files.Length; i++ )
+		Parallel.For( 0, files.Length, i =>
 		{
 			try
 			{
 				var package = DbpfPackage.Open( files[i] );
-				var (modlMeta, objdMeta, cobjCats) = BuildMetadataIndex( package );
-				prepared[i] = new PreparedPackage( package, modlMeta, objdMeta, cobjCats );
+				openedPackages[i] = package;
+				CollectEntries( package, dedup );
+
+				// Extract COBJ categories from tags (COBJ and OBJD share instance IDs)
+				foreach ( var entry in package.FindAll( Sims4Reader.ResourceType.CatalogObject ) )
+				{
+					if ( entry.MemSize == 0 || entry.FileSize == 0 ) continue;
+					try
+					{
+						var cobj = package.GetResource<CatalogObjectResource>( entry );
+						var category = BuyCategoryTag.GetCategory( cobj.Tags );
+						if ( category != null )
+							cobjCategories.TryAdd( entry.Key.Instance, category );
+					}
+					catch { }
+				}
+
+				// Extract OBJD→MODL name+category mappings
+				try { CollectObjdModelNames( package, modelMeta, cobjCategories ); }
+				catch { }
 			}
 			catch ( Exception ex )
 			{
-				Interlocked.Increment( ref failedPackages );
 				Log.Error( $"Failed to open package {files[i]}: {ex}" );
 			}
-		}
-		;
+		} );
 
-		Log.Trace( $"Phase 1 complete: {files.Length - failedPackages}/{files.Length} packages opened in {sw.ElapsedMilliseconds}ms" );
-
-		// Phase 2 (sequential): Register resources with the mount system.
-		// context.Add is NOT thread-safe (writes to a plain Dictionary),
-		// so all registration must happen on this thread.
-		int totalModels = 0, totalSurfaces = 0, totalCatalogs = 0;
-		for ( int i = 0; i < prepared.Length; i++ )
+		// Collect opened packages
+		for ( int i = 0; i < openedPackages.Length; i++ )
 		{
-			var p = prepared[i];
-			if ( p.Package == null )
-				continue;
-
-			Log.Trace( $"Phase 2: mounting package {i + 1}/{prepared.Length} — {System.IO.Path.GetFileName( files[i] )} ({p.Package.Entries.Count} entries)" );
-
-			packages.Add( p.Package );
-			var (models, surfaces, catalogs) = MountResources( context, p.Package, p.ModlMetadata, p.ObjdMetadata, p.CobjCategories );
-			totalModels += models;
-			totalSurfaces += surfaces;
-			totalCatalogs += catalogs;
+			if ( openedPackages[i] != null )
+				packages.Add( openedPackages[i] );
 		}
 
-		sw.Stop();
-		Log.Trace( $"Mount complete in {sw.ElapsedMilliseconds}ms: {totalModels} models, {totalSurfaces} surfaces, {totalCatalogs} catalogs" );
+		// Phase 2 (sequential): Build paths + loaders + register only unique entries.
+		foreach ( var raw in dedup.Values )
+		{
+			var key = raw.Entry.Key;
+			switch ( raw.Kind )
+			{
+				case EntryKind.Model:
+				{
+					string name;
+					if ( modelMeta.TryGetValue( key, out var meta ) )
+					{
+						var category = meta.Category ?? "objects";
+						name = string.Concat( "models/", category, "/", StripVariantSuffix( meta.Name ) );
+					}
+					else
+					{
+						name = string.Concat( "models/undefined/", key.Instance.ToString( "x" ) );
+					}
+
+					context.Add( Sandbox.Mounting.ResourceType.Model, name,
+						new ModlLoader( raw.Package, raw.Entry, packages ) );
+					break;
+				}
+				case EntryKind.CatalogObject:
+				{
+					var path = string.Concat( "catalogs/", key.Instance.ToString( "x" ), ".s4cor" );
+					context.Add( Sandbox.Mounting.ResourceType.Text, path,
+						new CatalogObjectLoader( raw.Package, raw.Entry, packages ) );
+					break;
+				}
+				case EntryKind.CatalogFloor:
+				{
+					var path = string.Concat( "catalogs/floors/", key.Instance.ToString( "x" ), ".s4sur" );
+					context.Add( Sandbox.Mounting.ResourceType.Text, path,
+						new CatalogSurfaceLoader( raw.Package, raw.Entry, packages, "floor" ) );
+					break;
+				}
+				case EntryKind.CatalogWall:
+				{
+					var path = string.Concat( "catalogs/walls/", key.Instance.ToString( "x" ), ".s4sur" );
+					context.Add( Sandbox.Mounting.ResourceType.Text, path,
+						new CatalogSurfaceLoader( raw.Package, raw.Entry, packages, "wall" ) );
+					break;
+				}
+			}
+		}
 
 		Instance = this;
 		IsMounted = true;
@@ -161,198 +202,236 @@ public class SimsMount : BaseGameMount
 	}
 
 	/// <summary>
-	/// Metadata collected per MODL key from the COBJ → OBJD chain.
+	/// Collect lightweight entries from a package directly into the shared dedup map.
+	/// Thread-safe: ConcurrentDictionary handles contention; last writer wins.
 	/// </summary>
-	private record struct ModlMetadata( string? Category, string? Name );
-
-	/// <summary>
-	/// Metadata from OBJD keyed by instance ID (shared with COBJ).
-	/// Used to derive readable file paths and swatch variant names for catalog objects.
-	/// </summary>
-	internal record struct ObjdMetadata( string? Name, string? MaterialVariant );
-
-	/// <summary>
-	/// Scan COBJ and OBJD entries to build metadata (category + name) for each MODL key.
-	/// Thread-safe: operates only on the given package with local dictionaries.
-	///
-	/// Chain: COBJ and OBJD share the same instance ID.
-	///   COBJ tags → buy/build category
-	///   OBJD.Name → human-readable object name (e.g. "object_diningTable_squareSteel")
-	///   OBJD.Models[] → MODL resource keys
-	/// </summary>
-	private static (Dictionary<ResourceKey, ModlMetadata> modl, Dictionary<ulong, ObjdMetadata> objd, Dictionary<ulong, string> cobjCategories) BuildMetadataIndex( DbpfPackage package )
+	private static void CollectEntries(
+		DbpfPackage package,
+		ConcurrentDictionary<ResourceKey, RawEntry> dedup )
 	{
-		var modlMetadata = new Dictionary<ResourceKey, ModlMetadata>();
-		var objdMetadata = new Dictionary<ulong, ObjdMetadata>();
-
-		// 1a. Parse COBJs — extract BuyCat category from tags, keyed by instance ID.
-		var cobjCategories = new Dictionary<ulong, string>();
-		Parallel.ForEach( package.FindAll( Sims4Reader.ResourceType.CatalogObject ), entry =>
+		foreach ( var entry in package.FindAll( Sims4Reader.ResourceType.Model ) )
 		{
-			//foreach ( var entry in package.FindAll( Sims4Reader.ResourceType.CatalogObject ) )
-
-			//var entry = 
-			if ( entry.MemSize == 0 || entry.FileSize == 0 )
-				return;
-
-			try
-			{
-				var cobj = package.GetResource<CatalogObjectResource>( entry );
-				var category = BuyCategoryTag.GetCategory( cobj.Tags );
-
-				if ( category != null )
-					cobjCategories[entry.Key.Instance] = category;
-			}
-			catch ( Exception ex )
-			{
-				Log.Warning( $"Failed to parse COBJ {entry.Key}: {ex.Message}" );
-			}
-		} );
-
-		// 1b. Parse OBJDs — match to COBJ by instance ID, extract Model references + name + variant
-		foreach ( var entry in package.FindAll( Sims4Reader.ResourceType.ObjectDefinition ) )
-		{
-			if ( entry.MemSize == 0 || entry.FileSize == 0 )
-				continue;
-
-			try
-			{
-				var objd = package.GetResource<ObjectDefinitionResource>( entry );
-
-				cobjCategories.TryGetValue( entry.Key.Instance, out var category );
-
-				// Clean up the OBJD name: strip "object_" prefix and convert underscores to readable form
-				var objName = CleanObjectName( objd.Name );
-
-				// Store OBJD metadata for catalog object file naming
-				objdMetadata.TryAdd( entry.Key.Instance, new ObjdMetadata( objName, objd.MaterialVariant ) );
-
-				foreach ( var modelKey in objd.Models )
-				{
-					if ( (uint)modelKey.Type == (uint)Sims4Reader.ResourceType.Model && modelKey.Instance != 0 )
-					{
-						modlMetadata.TryAdd( modelKey, new ModlMetadata( category, objName ) );
-					}
-				}
-			}
-			catch ( Exception ex )
-			{
-				Log.Warning( $"Failed to parse OBJD {entry.Key}: {ex.Message}" );
-			}
+			if ( entry.MemSize == 0 || entry.FileSize == 0 ) continue;
+			dedup[entry.Key] = new RawEntry( package, entry, EntryKind.Model );
 		}
 
-		return (modlMetadata, objdMetadata, cobjCategories);
+		foreach ( var entry in package.FindAll( Sims4Reader.ResourceType.CatalogFloor ) )
+		{
+			if ( entry.MemSize == 0 || entry.FileSize == 0 ) continue;
+			dedup[entry.Key] = new RawEntry( package, entry, EntryKind.CatalogFloor );
+		}
+
+		foreach ( var entry in package.FindAll( Sims4Reader.ResourceType.CatalogFlooring ) )
+		{
+			if ( entry.MemSize == 0 || entry.FileSize == 0 ) continue;
+			dedup[entry.Key] = new RawEntry( package, entry, EntryKind.CatalogFloor );
+		}
+
+		foreach ( var entry in package.FindAll( Sims4Reader.ResourceType.CatalogWall ) )
+		{
+			if ( entry.MemSize == 0 || entry.FileSize == 0 ) continue;
+			dedup[entry.Key] = new RawEntry( package, entry, EntryKind.CatalogWall );
+		}
+
+		foreach ( var entry in package.FindAll( Sims4Reader.ResourceType.CatalogObject ) )
+		{
+			if ( entry.MemSize == 0 || entry.FileSize == 0 ) continue;
+			dedup[entry.Key] = new RawEntry( package, entry, EntryKind.CatalogObject );
+		}
 	}
 
 	/// <summary>
-	/// Clean an OBJD name into a readable form for mount paths.
-	/// "object_diningTable_squareSteel" → "diningTable_squareSteel"
-	/// "object_Toilet" → "Toilet"
-	/// null/empty → null
+	/// Parse OBJD entries from a package to map MODL keys → object name + category.
+	/// Names come from the OBJD internal Name property. Categories come from COBJ tags
+	/// matched by shared instance ID.
+	/// </summary>
+	private static void CollectObjdModelNames(
+		DbpfPackage package,
+		ConcurrentDictionary<ResourceKey, (string Name, string? Category)> modelMeta,
+		ConcurrentDictionary<ulong, string> cobjCategories )
+	{
+		var objdEntries = new List<ResourceEntry>();
+		foreach ( var entry in package.FindAll( Sims4Reader.ResourceType.ObjectDefinition ) )
+		{
+			if ( entry.MemSize == 0 || entry.FileSize == 0 ) continue;
+			objdEntries.Add( entry );
+		}
+
+		if ( objdEntries.Count == 0 ) return;
+
+		var batchData = package.GetBytesBatch( objdEntries );
+		for ( int j = 0; j < batchData.Length; j++ )
+		{
+			try
+			{
+				if ( batchData[j] == null || batchData[j].Length == 0 ) continue;
+
+				var name = CleanObjectName( ExtractObjdName( batchData[j] ) );
+				if ( name == null ) continue;
+
+				cobjCategories.TryGetValue( objdEntries[j].Key.Instance, out var category );
+				ExtractObjdModelKeys( batchData[j], modelMeta, name, category );
+			}
+			catch { }
+		}
+	}
+
+	/// <summary>
+	/// Extract the Name property (0xE7F07786) from raw OBJD binary data.
+	/// </summary>
+	private static string? ExtractObjdName( byte[] data )
+	{
+		if ( data.Length < 6 ) return null;
+
+		uint tablePos = BitConverter.ToUInt32( data, 2 );
+		if ( tablePos + 2 > data.Length ) return null;
+
+		ushort entryCount = BitConverter.ToUInt16( data, (int)tablePos );
+		int tableStart = (int)tablePos + 2;
+
+		for ( int i = 0; i < entryCount; i++ )
+		{
+			int pos = tableStart + i * 8;
+			if ( pos + 8 > data.Length ) break;
+
+			uint propId = BitConverter.ToUInt32( data, pos );
+			if ( propId == 0xE7F07786 ) // Name
+			{
+				uint offset = BitConverter.ToUInt32( data, pos + 4 );
+				if ( offset + 4 > data.Length ) return null;
+
+				int length = BitConverter.ToInt32( data, (int)offset );
+				if ( length <= 0 || length > 10000 ) return null;
+
+				int strStart = (int)offset + 4;
+				if ( strStart + length > data.Length ) return null;
+
+				return System.Text.Encoding.ASCII.GetString( data, strStart, length );
+			}
+		}
+
+		return null;
+	}
+
+	/// <summary>
+	/// Fast binary extraction of Model TGI references from an OBJD resource.
+	/// Only reads the Model property (0x8D20ACC6) — name comes from OBJD Name,
+	/// category from COBJ tags.
+	/// </summary>
+	private static void ExtractObjdModelKeys( byte[] data, ConcurrentDictionary<ResourceKey, (string Name, string? Category)> modelMeta, string name, string? category )
+	{
+		if ( data.Length < 6 ) return;
+
+		// Header: version(2) + tablePosition(4)
+		uint tablePos = BitConverter.ToUInt32( data, 2 );
+		if ( tablePos + 2 > data.Length ) return;
+
+		ushort entryCount = BitConverter.ToUInt16( data, (int)tablePos );
+		int tableStart = (int)tablePos + 2;
+
+		uint modelOffset = 0;
+
+		// Scan property table for Model entry only
+		for ( int i = 0; i < entryCount; i++ )
+		{
+			int pos = tableStart + i * 8;
+			if ( pos + 8 > data.Length ) break;
+
+			uint propId = BitConverter.ToUInt32( data, pos );
+			if ( propId == 0x8D20ACC6 ) // Model
+			{
+				modelOffset = BitConverter.ToUInt32( data, pos + 4 );
+				break;
+			}
+		}
+
+		if ( modelOffset == 0 ) return;
+
+		// Read TGI block list at modelOffset
+		if ( modelOffset + 4 > data.Length ) return;
+		int byteCount = BitConverter.ToInt32( data, (int)modelOffset );
+		int count = byteCount / 4;
+		if ( count <= 0 || count > 1000 ) return;
+
+		int tgiStart = (int)modelOffset + 4;
+		for ( int i = 0; i < count; i++ )
+		{
+			int off = tgiStart + i * 16;
+			if ( off + 16 > data.Length ) break;
+
+			ulong instance = BitConverter.ToUInt64( data, off );
+			instance = (instance << 32) | (instance >> 32); // swap halves (s4pi convention)
+			uint type = BitConverter.ToUInt32( data, off + 8 );
+			uint group = BitConverter.ToUInt32( data, off + 12 );
+
+			if ( type == (uint)Sims4Reader.ResourceType.Model && instance != 0 )
+				modelMeta.TryAdd( new ResourceKey( (Sims4Reader.ResourceType)type, group, instance ), (name, category) );
+		}
+	}
+
+	/// <summary>
+	/// Strip common prefixes and normalize an OBJD name for use in mount paths.
 	/// </summary>
 	private static string? CleanObjectName( string? name )
 	{
 		if ( string.IsNullOrWhiteSpace( name ) )
 			return null;
 
-		// Strip common prefixes
 		if ( name.StartsWith( "object_", StringComparison.OrdinalIgnoreCase ) )
 			name = name.Substring( 7 );
 
-		// Replace characters that are invalid in paths
 		name = name.Replace( ' ', '_' ).Replace( '\\', '_' ).Replace( '/', '_' );
-
 		return string.IsNullOrWhiteSpace( name ) ? null : name;
 	}
 
 	/// <summary>
-	/// Mount all resources with categorized paths. Must be called from the mount thread only.
-	///
-	/// MODL RCOLs contain MTST and MATD chunks internally — material resolution
-	/// happens inside the ModelLoader via proper ChunkReference handling
-	/// (Public/Private/Delayed reference types).
-	///
-	/// MODL → models/{category}/{name}
+	/// Strip variant/swatch suffixes like "_01_set1", "_02", "_set3" from an object name.
+	/// "chessTableGENOutdoor_01_set1" → "chessTableGENOutdoor"
 	/// </summary>
-	private (int models, int surfaces, int catalogs) MountResources( MountContext context, DbpfPackage package, Dictionary<ResourceKey, ModlMetadata> modlMetadata, Dictionary<ulong, ObjdMetadata> objdMetadata, Dictionary<ulong, string> cobjCategories )
+	private static string StripVariantSuffix( string name )
 	{
-		int models = 0, surfaces = 0, catalogs = 0;
-
-		foreach ( var entry in package.Entries )
+		// Walk backwards, stripping trailing segments that are numeric (_01, _02)
+		// or set identifiers (_set1, _set2) or color swatches (_red, _blue)
+		var span = name.AsSpan();
+		while ( span.Length > 0 )
 		{
-			if ( entry.MemSize == 0 || entry.FileSize == 0 )
-				continue;
+			int lastUnderscore = span.LastIndexOf( '_' );
+			if ( lastUnderscore <= 0 ) break;
 
-			var key = entry.Key;
-			var keyName = $"{key.Group:X}_{key.Instance:X}";
+			var suffix = span.Slice( lastUnderscore + 1 );
 
-			try
+			// Pure numeric: _01, _02, _1, etc.
+			bool isNumeric = true;
+			for ( int i = 0; i < suffix.Length; i++ )
 			{
-				switch ( key.Type )
+				if ( !char.IsDigit( suffix[i] ) ) { isNumeric = false; break; }
+			}
+			if ( suffix.Length > 0 && isNumeric )
+			{
+				span = span.Slice( 0, lastUnderscore );
+				continue;
+			}
+
+			// Set identifier: _set1, _set2, etc.
+			if ( suffix.Length >= 4 && suffix[0] == 's' && suffix[1] == 'e' && suffix[2] == 't' )
+			{
+				bool setNumeric = true;
+				for ( int i = 3; i < suffix.Length; i++ )
 				{
-					// Buy/build models (MODL)
-					case Sims4Reader.ResourceType.Model:
-						{
-							var meta = modlMetadata.TryGetValue( key, out var m ) ? m : default;
-							var category = meta.Category ?? "objects";
-							var displayName = meta.Name ?? keyName;
-
-							context.Add( Sandbox.Mounting.ResourceType.Model,
-								$"models/{category}/{displayName}",
-								new ModlLoader( package, entry, packages ) );
-							models++;
-							break;
-						}
-
-					// Catalog surfaces (CFLR, CFLT, CWAL) — floor/wall paint materials
-					case Sims4Reader.ResourceType.CatalogFloor:
-					case Sims4Reader.ResourceType.CatalogFlooring:
-					case Sims4Reader.ResourceType.CatalogWall:
-						{
-							var surfaceType = key.Type == Sims4Reader.ResourceType.CatalogWall ? "wall" : "floor";
-							var path = $"catalogs/{keyName}.s4sur";
-							if ( _mountedCatalogPaths.Contains( path ) )
-							{
-								Log.Trace( $"Duplicate catalog surface path, skipping: {path}" );
-								break;
-							}
-							_mountedCatalogPaths.Add( path );
-
-							context.Add( Sandbox.Mounting.ResourceType.Text,
-								path,
-								new CatalogSurfaceLoader( package, entry, packages, surfaceType ) );
-							surfaces++;
-							break;
-						}
-
-					// Catalog objects (COBJ)
-					case Sims4Reader.ResourceType.CatalogObject:
-						{
-							var path = $"catalogs/{keyName}.s4cor";
-							if ( _mountedCatalogPaths.Contains( path ) )
-							{
-								Log.Trace( $"Duplicate catalog object path, skipping: {path}" );
-								break;
-							}
-							_mountedCatalogPaths.Add( path );
-
-							context.Add( Sandbox.Mounting.ResourceType.Text,
-								path,
-								new CatalogObjectLoader( package, entry, packages ) );
-							catalogs++;
-							break;
-						}
+					if ( !char.IsDigit( suffix[i] ) ) { setNumeric = false; break; }
+				}
+				if ( setNumeric )
+				{
+					span = span.Slice( 0, lastUnderscore );
+					continue;
 				}
 			}
-			catch ( Exception ex )
-			{
-				Log.Error( $"Error mounting {key.Type} {key}: {ex}" );
-			}
+
+			break;
 		}
 
-		return (models, surfaces, catalogs);
+		return span.Length > 0 ? span.ToString() : name;
 	}
-
 
 	protected override void Shutdown()
 	{

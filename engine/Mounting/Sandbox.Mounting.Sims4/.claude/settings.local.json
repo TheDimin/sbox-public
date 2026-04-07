@@ -101,7 +101,10 @@
       "Read(//c/Program Files/**)",
       "Read(//c/Program Files \\(x86\\)/**)",
       "Bash(cp \"E:/Projects/sbox-public/engine/Mounting/Sandbox.Mounting.Sims4/bin/Debug/Sandbox.Mounting.Sims4.dll\" \"E:/Projects/sbox-public/game/mount/sims4/sims4.dll\")",
-      "Bash(cp \"E:/Projects/sbox-public/engine/Mounting/Sandbox.Mounting.Sims4/bin/Debug/Sandbox.Mounting.Sims4.pdb\" \"E:/Projects/sbox-public/game/mount/sims4/sims4.pdb\")"
+      "Bash(cp \"E:/Projects/sbox-public/engine/Mounting/Sandbox.Mounting.Sims4/bin/Debug/Sandbox.Mounting.Sims4.pdb\" \"E:/Projects/sbox-public/game/mount/sims4/sims4.pdb\")",
+      "Bash(ls bin/Release/*.dll)",
+      "Bash(cp \"E:\\\\Projects\\\\sbox-public\\\\engine\\\\Mounting\\\\Sandbox.Mounting.Sims4\\\\bin\\\\Release\\\\Sandbox.Mounting.Sims4.dll\" \"E:\\\\Projects\\\\sbox-public\\\\game\\\\bin\\\\managed\\\\addons/\")",
+      "Bash(cp \"E:\\\\Projects\\\\sbox-public\\\\engine\\\\Mounting\\\\Sandbox.Mounting.Sims4\\\\bin\\\\Release\\\\Sandbox.Mounting.dll\" \"E:\\\\Projects\\\\sbox-public\\\\game\\\\bin\\\\managed/\")"
     ]
   }
 }

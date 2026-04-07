@@ -27,8 +27,6 @@ public class ModlLoader( DbpfPackage package, ResourceEntry entry, IReadOnlyList
 
 		try
 		{
-			Log.Trace( $"Loading MODL {entry.Key} (path={Path})" );
-
 			var resolved = ModlModelLoader.LoadModel( package, entry, allPackages );
 
 			if ( resolved.Lods.Count == 0 )
