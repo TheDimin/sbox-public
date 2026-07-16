@@ -639,7 +639,7 @@ public partial class AssetList
 
 			fcm.Menu.AddSeparator();
 
-			fcm.Menu.AddOption( "Delete", "delete", DeleteAsset, "editor.delete" ).Enabled = directoryInfo.Exists;
+			fcm.Menu.AddOption( "Delete", "delete", () => DeleteAsset(), "editor.delete" ).Enabled = directoryInfo.Exists && CanDelete( directoryInfo );
 			fcm.Menu.AddOption( "Rename", "edit", () => OpenRenameFlyout( directoryInfo, fcm.ScreenPosition ), "editor.rename" ).Enabled = directoryInfo.Exists;
 		}
 

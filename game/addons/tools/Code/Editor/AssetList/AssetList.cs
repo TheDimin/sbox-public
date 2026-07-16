@@ -583,9 +583,11 @@ public partial class AssetList : ListView, AssetSystem.IEventListener
 	}
 
 	[Shortcut( "editor.delete", "DEL" )]
-	void DeleteAsset()
+	internal void DeleteAsset( IEnumerable<object> selectedItems = null )
 	{
-		var items = SelectedItems.ToList();
+		var items = (selectedItems ?? SelectedItems)
+			.Where( x => x is not DirectoryEntry directory || CanDelete( directory.DirectoryInfo ) )
+			.ToList();
 		if ( items.Count() < 1 )
 			return;
 
@@ -626,6 +628,15 @@ public partial class AssetList : ListView, AssetSystem.IEventListener
 		);
 
 		confirm.Show();
+	}
+
+	internal static bool CanDelete( DirectoryInfo directory )
+	{
+		if ( !directory.Exists )
+			return false;
+
+		var location = new DiskLocation( directory );
+		return !location.IsRoot && location.Project == Project.Current;
 	}
 
 	[Shortcut( "editor.duplicate", "CTRL+D" )]

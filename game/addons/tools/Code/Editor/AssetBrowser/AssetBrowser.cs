@@ -23,7 +23,7 @@ public partial class AssetBrowser : Widget, IBrowser, AssetSystem.IEventListener
 	/// <summary>
 	/// Internal asset list panel.
 	/// </summary>
-	protected AssetList AssetList;
+	protected internal AssetList AssetList;
 
 	/// <inheritdoc cref="BaseItemWidget.MultiSelect"/>
 	public bool MultiSelect

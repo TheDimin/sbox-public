@@ -62,6 +62,35 @@ public class AssetLocations : TreeView
 		OnFolderSelected?.Invoke( location );
 	}
 
+	[Event( "folder.contextmenu", Priority = 5 )]
+	internal static void OnFolderContextMenu( FolderContextMenu e )
+	{
+		if ( e.Context is not FolderNode node || node.TreeView is not AssetLocations locations )
+			return;
+
+		if ( !AssetList.CanDelete( e.Target ) )
+			return;
+
+		e.Menu.AddOption( "Delete", "delete", () => locations.Browser.AssetList.DeleteAsset( [new DirectoryEntry( e.Target.FullName )] ), "editor.delete" );
+		e.Menu.AddSeparator();
+	}
+
+	protected override void OnKeyPress( KeyEvent e )
+	{
+		if ( e.Key == KeyCode.Delete && ResolveNode( SelectedItems.FirstOrDefault(), false ) is FolderNode { Value: DiskLocation location } node )
+		{
+			var directory = new DirectoryInfo( location.Path );
+			if ( node is not PinnedFolderNode && AssetList.CanDelete( directory ) )
+			{
+				Browser.AssetList.DeleteAsset( [new DirectoryEntry( directory.FullName )] );
+				e.Accepted = true;
+				return;
+			}
+		}
+
+		base.OnKeyPress( e );
+	}
+
 	protected override void OnDoubleClick( MouseEvent e )
 	{
 		// Avoid calling OnItemActivated if we double click the expand button
