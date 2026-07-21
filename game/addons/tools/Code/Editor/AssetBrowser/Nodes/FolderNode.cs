@@ -59,13 +59,14 @@ class FolderNode : TreeNode<LocalAssetBrowser.Location>
 
 		var rect = item.Rect;
 
-		Paint.SetPen( Theme.Yellow );
+		Paint.SetPen( Metadata.Color );
 		var iconRect = Paint.DrawIcon( rect, Icon, 18, TextFlag.LeftCenter );
 
-		if ( Value.ContentsIcon is not null )
+		var contentsIcon = string.IsNullOrEmpty( Metadata.Icon ) ? Value.ContentsIcon : Metadata.Icon;
+		if ( contentsIcon is not null )
 		{
-			Paint.SetPen( Theme.Yellow );
-			Paint.DrawIcon( iconRect.Shrink( 0, 1, 0, 0 ), Value.ContentsIcon, 9, TextFlag.Center );
+			Paint.SetPen( Metadata.Color.Darken( 0.25f ) );
+			Paint.DrawIcon( iconRect.Shrink( 0, 1, 0, 0 ), contentsIcon, 9, TextFlag.Center );
 		}
 
 		rect.Left += 24;
