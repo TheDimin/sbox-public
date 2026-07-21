@@ -45,6 +45,7 @@
     <Project Path="Sandbox.Compiling/Sandbox.Compiling.csproj" />
   </Folder>
   <Folder Name="/Engine/Tier0/Mounting/">
+    <Project Path="Mounting/Sandbox.Mounting.Fmod/Sandbox.Mounting.Fmod.csproj" />
     <Project Path="Mounting/Sandbox.Mounting.GoldSrc/Sandbox.Mounting.GoldSrc.csproj" />
     <Project Path="Mounting/Sandbox.Mounting.NS2/Sandbox.Mounting.NS2.csproj" />
     <Project Path="Mounting/Sandbox.Mounting.Quake/Sandbox.Mounting.Quake.csproj" />
@@ -65,6 +66,7 @@
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="Benchmark/Benchmark.csproj" />
+    <Project Path="Tests/Sandbox.Test.Mounting.Fmod/Sandbox.Test.Mounting.Fmod.csproj" />
     <Project Path="Tests/Sandbox.Test.Engine/Sandbox.Test.Engine.csproj" />
     <Project Path="Tests/Sandbox.Test.Integration/Sandbox.Test.Integration.csproj" />
     <Project Path="Tests/Sandbox.Test.Unit/Sandbox.Test.Unit.csproj" />

@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Mounting\Sandbox.Mounting.Fmod\Sandbox.Mounting.Fmod.csproj" AdditionalProperties="DeployMount=false" />
+	</ItemGroup>
+
+</Project>
