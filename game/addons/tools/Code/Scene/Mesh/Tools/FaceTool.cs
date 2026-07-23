@@ -140,6 +140,8 @@ public sealed partial class FaceTool( MeshTool tool ) : SelectionTool<MeshFace>(
 	{
 		base.BuildSceneContextMenu( menu, ray, trace );
 
+		AddMenuOption( menu, "Find / Replace Material", "find_replace", "mesh.find-replace-material-tool", true );
+
 		bool any = Selection.OfType<MeshFace>().Any( x => x.IsValid() );
 		if ( !any ) return;
 
