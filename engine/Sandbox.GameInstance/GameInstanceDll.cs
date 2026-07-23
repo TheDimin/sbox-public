@@ -172,6 +172,7 @@ internal partial class GameInstanceDll : Engine.IGameInstanceDll
 
 		FileWatchers.ForEach( w => w.Dispose() );
 		FileWatchers.Clear();
+		ResetNetworkFileManifest();
 
 		if ( !Application.IsHeadless )
 		{

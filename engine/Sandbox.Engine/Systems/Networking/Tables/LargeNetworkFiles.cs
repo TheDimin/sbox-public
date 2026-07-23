@@ -9,11 +9,13 @@ internal class LargeNetworkFiles
 	public BaseFileSystem Files { get; private set; }
 	public StringTable StringTable { get; init; }
 
-	record struct LargeFileInfo( long Size, ulong CRC );
+	internal record struct LargeFileInfo( long Size, ulong CRC );
 
 	RedirectFileSystem RedirectFileSystem { get; set; }
 
 	HashSet<string> downloadQueue = new();
+	Dictionary<string, BaseFileSystem> fileSources = new( StringComparer.OrdinalIgnoreCase );
+	Task activeDownload;
 
 	public LargeNetworkFiles( string name )
 	{
@@ -29,6 +31,7 @@ internal class LargeNetworkFiles
 	public void Reset()
 	{
 		StringTable.Reset();
+		fileSources.Clear();
 
 		Files?.Dispose();
 		RedirectFileSystem = AssetDownloadCache.CreateRedirectFileSystem();
@@ -49,15 +52,33 @@ internal class LargeNetworkFiles
 	/// <summary>
 	/// Add a file to be networked.
 	/// </summary>
-	public bool AddFile( string fileName )
+	public bool AddFile( string fileName, Action<long, TimeSpan> onCrc = null, Action<TimeSpan> onTableSet = null )
+		=> AddFile( EngineFileSystem.Mounted, fileName, onCrc, onTableSet );
+
+	/// <summary>
+	/// Add a file from a specific filesystem to be networked.
+	/// </summary>
+	public bool AddFile( BaseFileSystem fs, string fileName, Action<long, TimeSpan> onCrc = null, Action<TimeSpan> onTableSet = null )
 	{
-		if ( !EngineFileSystem.Mounted.FileExists( fileName ) )
+		if ( !fs.FileExists( fileName ) )
 			return false;
 
-		var crc = EngineFileSystem.Mounted.GetCrc( fileName );
-		var size = EngineFileSystem.Mounted.FileSize( fileName );
+		var crcTimer = System.Diagnostics.Stopwatch.StartNew();
+		var crc = fs.GetCrc( fileName );
+		crcTimer.Stop();
+		var size = fs.FileSize( fileName );
+		onCrc?.Invoke( size, crcTimer.Elapsed );
 		var normalizedFileName = NormalizeFileName( fileName );
-		StringTable.Set( normalizedFileName, new LargeFileInfo( size, crc ) );
+		fileSources[normalizedFileName] = fs;
+
+		var value = new LargeFileInfo( size, crc );
+		if ( TryGetFileInfo( normalizedFileName, out var existing ) && existing == value )
+			return true;
+
+		var tableTimer = System.Diagnostics.Stopwatch.StartNew();
+		StringTable.Set( normalizedFileName, value );
+		tableTimer.Stop();
+		onTableSet?.Invoke( tableTimer.Elapsed );
 
 		return true;
 	}
@@ -65,10 +86,24 @@ internal class LargeNetworkFiles
 	/// <summary>
 	/// Remove a networked file.
 	/// </summary>
-	public void RemoveFile( string fileName )
+	public bool RemoveFile( string fileName )
 	{
 		var normalizedFileName = NormalizeFileName( fileName );
-		StringTable.Remove( normalizedFileName );
+		fileSources.Remove( normalizedFileName );
+		return StringTable.Remove( normalizedFileName ) is not null;
+	}
+
+	internal bool TryGetFileInfo( string fileName, out LargeFileInfo info )
+	{
+		var normalizedFileName = NormalizeFileName( fileName );
+		if ( StringTable.Entries.TryGetValue( normalizedFileName, out var entry ) )
+		{
+			info = entry.Read<LargeFileInfo>();
+			return true;
+		}
+
+		info = default;
+		return false;
 	}
 
 	string NormalizeFileName( string fileName )
@@ -83,7 +118,8 @@ internal class LargeNetworkFiles
 
 	void OnTableEntryRemoved( StringTable.Entry entry )
 	{
-
+		downloadQueue.Remove( entry.Name );
+		RedirectFileSystem?.RemoveAbsFile( entry.Name );
 	}
 
 	void OnTableSnapshot()
@@ -130,7 +166,35 @@ internal class LargeNetworkFiles
 		downloadQueue.Add( fileName );
 	}
 
-	public async Task RunDownloadQueue( NetworkSystem system, CancellationToken token )
+	internal void EnableLiveDownloads( Func<Task> runDownloads )
+	{
+		StringTable.PostNetworkUpdate = async () =>
+		{
+			try
+			{
+				await runDownloads();
+			}
+			catch ( OperationCanceledException )
+			{
+				// The connection or environment was reset while downloading.
+			}
+			catch ( Exception e )
+			{
+				Log.Warning( e, "Failed to download updated network files" );
+			}
+		};
+	}
+
+	public Task RunDownloadQueue( NetworkSystem system, CancellationToken token )
+	{
+		if ( activeDownload is { IsCompleted: false } )
+			return activeDownload;
+
+		activeDownload = DrainDownloadQueue( system, token );
+		return activeDownload;
+	}
+
+	private async Task DrainDownloadQueue( NetworkSystem system, CancellationToken token )
 	{
 		if ( RedirectFileSystem is null )
 			return;
@@ -141,59 +205,66 @@ internal class LargeNetworkFiles
 		var currentCount = 0;
 		var sw = System.Diagnostics.Stopwatch.StartNew();
 
-		foreach ( var file in downloadQueue )
+		while ( downloadQueue.Count > 0 )
 		{
-			if ( !StringTable.Entries.TryGetValue( file, out var entry ) )
-				continue;
-
-			var info = entry.Read<LargeFileInfo>();
-
-			if ( AssetDownloadCache.DebugNetworkFiles )
+			foreach ( var file in downloadQueue.ToArray() )
 			{
-				Log.Info( $"Download file {file}" );
-			}
+				if ( !StringTable.Entries.TryGetValue( file, out var entry ) )
+				{
+					downloadQueue.Remove( file );
+					continue;
+				}
 
-			LoadingScreen.Title = $"Downloading Files ({currentCount + 1}/{downloadQueue.Count})";
-			LoadingScreen.Subtitle = file;
+				var info = entry.Read<LargeFileInfo>();
 
-			if ( RedirectFileSystem.FileExists( file.NormalizeFilename( true ) ) )
-			{
+				if ( AssetDownloadCache.DebugNetworkFiles )
+				{
+					Log.Info( $"Download file {file}" );
+				}
+
+				LoadingScreen.Title = $"Downloading Files ({currentCount + 1})";
+				LoadingScreen.Subtitle = file;
+
+				if ( RedirectFileSystem.FileExists( file.NormalizeFilename( true ) ) )
+				{
+					currentCount++;
+					downloadQueue.Remove( file );
+					continue;
+				}
+
+				token.ThrowIfCancellationRequested();
+
+				if ( Connection.Host is null )
+				{
+					throw new TaskCanceledException( "Connection became null" );
+				}
+
+				// download the file
+				var response = await Connection.Host.SendRequest( new RequestFile { filename = file } );
+
+				token.ThrowIfCancellationRequested();
+
+				if ( response is not byte[] data || data.Length == 0 )
+				{
+					Log.Warning( $"Failed to download file {file}! (response: {response})" );
+					currentCount++;
+					downloadQueue.Remove( file );
+					continue;
+				}
+
+				var fn = AssetDownloadCache.StoreFile( file, info.CRC, data );
+				if ( fn is not null )
+				{
+					RedirectFileSystem.AddAbsFile( file, fn );
+				}
+
 				currentCount++;
-				continue;
+				downloadQueue.Remove( file );
 			}
-
-			token.ThrowIfCancellationRequested();
-
-			if ( Connection.Host is null )
-			{
-				throw new TaskCanceledException( "Connection became null" );
-			}
-
-			// download the file
-			var response = await Connection.Host.SendRequest( new RequestFile { filename = file } );
-
-			token.ThrowIfCancellationRequested();
-
-			if ( response is not byte[] data || data.Length == 0 )
-			{
-				Log.Warning( $"Failed to download file {file}! (response: {response})" );
-				currentCount++;
-				continue;
-			}
-
-			var fn = AssetDownloadCache.StoreFile( file, info.CRC, data );
-			if ( fn is not null )
-			{
-				RedirectFileSystem.AddAbsFile( file, fn );
-			}
-
-			currentCount++;
 		}
 
 		LoadingScreen.Subtitle = null;
 		Log.Info( $"Download Complete ({currentCount} files total) ({sw.Elapsed.TotalSeconds:0.00}s)" );
-
-		downloadQueue.Clear();
 	}
 
 	internal void NetworkInitialize( GameNetworkSystem instance )
@@ -203,14 +274,19 @@ internal class LargeNetworkFiles
 
 	async Task OnRequestNetworkFile( RequestFile file, Connection connection, Guid msgGuid )
 	{
-		if ( !EngineFileSystem.Mounted.FileExists( file.filename ) )
+		var normalizedFileName = NormalizeFileName( file.filename );
+		var fs = fileSources.TryGetValue( normalizedFileName, out var source )
+			? source
+			: EngineFileSystem.Mounted;
+
+		if ( !fs.FileExists( normalizedFileName ) )
 		{
 			Log.Warning( $"Client ({connection.Name}) requested missing file: {file.filename}" );
 			connection.SendResponse( msgGuid, Array.Empty<byte>() );
 			return;
 		}
 
-		var contents = await EngineFileSystem.Mounted.ReadAllBytesAsync( file.filename );
+		var contents = await fs.ReadAllBytesAsync( normalizedFileName );
 
 		connection.SendResponse( msgGuid, contents );
 	}

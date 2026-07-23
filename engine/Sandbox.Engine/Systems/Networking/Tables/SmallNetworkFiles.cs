@@ -41,13 +41,22 @@ internal class SmallNetworkFiles
 	/// <summary>
 	/// Add a file to be networked.
 	/// </summary>
-	public bool AddFile( BaseFileSystem fs, string fileName, byte[] contents )
+	public bool AddFile( BaseFileSystem fs, string fileName, byte[] contents, Action<TimeSpan> onTableSet = null )
 	{
 		if ( !fs.FileExists( fileName ) )
 			return false;
 
 		var normalizedFileName = NormalizeFileName( fileName );
+		if ( StringTable.Entries.TryGetValue( normalizedFileName, out var existing ) &&
+			 existing.Data.AsSpan().SequenceEqual( contents ) )
+		{
+			return true;
+		}
+
+		var tableTimer = System.Diagnostics.Stopwatch.StartNew();
 		StringTable.Set( normalizedFileName, contents );
+		tableTimer.Stop();
+		onTableSet?.Invoke( tableTimer.Elapsed );
 
 		return true;
 	}
@@ -55,10 +64,10 @@ internal class SmallNetworkFiles
 	/// <summary>
 	/// Remove a networked file.
 	/// </summary>
-	public void RemoveFile( string fileName )
+	public bool RemoveFile( string fileName )
 	{
 		var normalizedFileName = NormalizeFileName( fileName );
-		StringTable.Remove( normalizedFileName );
+		return StringTable.Remove( normalizedFileName ) is not null;
 	}
 
 	string NormalizeFileName( string fileName )

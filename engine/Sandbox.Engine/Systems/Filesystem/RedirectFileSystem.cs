@@ -55,6 +55,19 @@ class RedirectFileSystem : Zio.FileSystems.PhysicalFileSystem
 		NativeEngine.FullFileSystem.AddSymLink( localPath[1..], "GAME", absoluteTargetFile );
 	}
 
+	/// <summary>
+	/// Remove a redirect path without deleting the cached target file.
+	/// </summary>
+	public bool RemoveAbsFile( string localPath )
+	{
+		localPath = localPath.NormalizeFilename( true );
+		if ( !Files.Remove( localPath ) )
+			return false;
+
+		NativeEngine.FullFileSystem.RemoveSymLink( localPath[1..], "GAME" );
+		return true;
+	}
+
 	protected override string ConvertPathToInternalImpl( UPath path )
 	{
 		if ( Files.TryGetValue( path, out var target ) )
