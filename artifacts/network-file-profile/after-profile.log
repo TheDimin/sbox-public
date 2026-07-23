@@ -1,0 +1,59 @@
+BuildNetworkedFiles optimized profile
+====================================
+Engine commit: 251de0eef048d51b2d74e033169b36abd211db05
+Project: VallArk (E:\Projects\survive\survive.sbproj)
+Scene: survival/scenes/gym.scene
+Configuration: Developer
+Date: 2026-07-23
+
+Cold first-play runs (editor restarted before every row)
+run,totalMs,enumerated,smallReads,smallBytes,crcFiles,crcBytes,addSmall,addLarge,tableSets,smallEntries,largeEntries
+1,25390.129,10394,283,795533,6734,9124294886,283,6734,7017,283,6734
+2,25726.003,10394,283,795533,6734,9124294886,283,6734,7017,283,6734
+3,27726.844,10394,283,795533,6734,9124294886,283,6734,7017,283,6734
+4,25737.597,10394,283,795533,6734,9124294886,283,6734,7017,283,6734
+5,28145.252,10394,283,795533,6734,9124294886,283,6734,7017,283,6734
+
+Cold statistics (linear-interpolated p95)
+n=5 minMs=25390.129 medianMs=25737.597 p95Ms=28061.570 maxMs=28145.252
+
+Warm unchanged play/stop runs (same final-commit editor instance)
+run,totalMs,mode,dirtyFiles,enumerated,smallReads,crcFiles,crcBytes,addSmall,addLarge,tableSets,watchersBefore,watchersAfter
+1,0.185,warm,0,0,0,0,0,0,0,0,4,4
+2,0.043,warm,0,0,0,0,0,0,0,0,4,4
+3,0.047,warm,0,0,0,0,0,0,0,0,4,4
+4,0.050,warm,0,0,0,0,0,0,0,0,4,4
+5,0.044,warm,0,0,0,0,0,0,0,0,4,4
+6,0.047,warm,0,0,0,0,0,0,0,0,4,4
+7,0.040,warm,0,0,0,0,0,0,0,0,4,4
+8,0.052,warm,0,0,0,0,0,0,0,0,4,4
+9,0.050,warm,0,0,0,0,0,0,0,0,4,4
+10,0.048,warm,0,0,0,0,0,0,0,0,4,4
+
+Warm statistics (linear-interpolated p95)
+n=10 minMs=0.040 medianMs=0.0475 p95Ms=0.12515 maxMs=0.185
+
+Representative complete warm row
+18:23:47 [Generic] Warn: NetworkFileProfile instance=106594a2-1a27-4777-a762-ae106cdce227 build=11 mode=warm dirtyFiles=0 configuredPatterns=0 uniquePatterns=0 includePaths=0 watchersBefore=4 watchersAfter=4 smallEntriesBefore=283 largeEntriesBefore=6734 smallEntriesAfter=283 largeEntriesAfter=6734 transientFileSystems=0 enumerated=0 rejectedLegal=0 rejectedRules=0 selectedSmall=0 selectedLarge=0 smallReads=0 smallBytes=0 smallReadMs=0 largeInspected=0 existenceChecks=0 sizeQueries=0 crcFiles=0 crcBytes=0 crcMs=0 addLarge=0 addSmall=0 tableSets=0 tableRemoves=0 gameScanMs=0 transientScanMs=0 filteringMs=0 metadataMs=0 tableMs=0 totalMs=0.048
+
+Dirty-path runtime checks
+scenario,totalMs,dirtyFiles,enumerated,smallReads,smallBytes,crcFiles,crcBytes,addSmall,addLarge,tableSets,tableRemoves
+small-create,14.317,1,0,1,44,0,0,1,0,1,0
+large-touch,1.575,1,0,0,0,1,65572,0,1,0,0
+large-timestamp-restore,0.663,1,0,0,0,1,65572,0,1,0,0
+rename-add,2.023,1,0,1,44,0,0,1,0,1,0
+rename-remove,0.183,1,0,0,0,0,0,0,0,0,1
+delete,0.104,1,0,0,0,0,0,0,0,0,1
+transient-touch,0.671,1,0,0,0,1,2478,0,1,0,0
+transient-timestamp-restore,0.633,1,0,0,0,1,2478,0,1,0,0
+
+Optimized manifest oracle after cold build and after all dirty-path cleanup
+hash=338C3982297079C8396CCC6EA8D198FD63D10D4A6EAF43B98401A1D19744B451 smallEntries=283 largeEntries=6734
+
+Optimized ETW capture (retained-manifest candidate; performance path is identical to final commit)
+E:\Projects\sbox-public\game\profiler_captures\sbox_2026-07-23_17_46_35.etl
+E:\Projects\sbox-public\game\profiler_captures\sbox_2026-07-23_17_46_35.json.gz
+
+An exact-final-commit ETW start was attempted after the counter runs, but the profiler helper
+stalled before opening its ETW session. The editor was closed without unsaved scene changes.
+No capture or result is claimed for that attempt.
