@@ -10,6 +10,7 @@ The baseline bottleneck was repeated hashing of 6,734 large files (9,124,294,886
 
 - Engine baseline/instrumentation commit: `95b7813cfa0366d5ad4a5fd18d928390b0a444eb`
 - Optimization commit: `251de0eef048d51b2d74e033169b36abd211db05`
+- Live-update follow-up commit: `2e11ebf6`
 - Project: VallArk, `E:\Projects\survive\survive.sbproj`
 - Scene: `survival/scenes/gym.scene`
 - Build: Developer
@@ -54,19 +55,26 @@ VallArk has `Project.Config.Resources = null`, so include-pattern growth could n
 - Project/filesystem/transient-root/resource-configuration changes and the explicit `network_manifest_invalidate` command force full rebuilds.
 - `ResetEnvironment` disposes watchers and clears retained state.
 - Standalone and dedicated hosts explicitly retain full-rebuild behavior; caching is editor-only.
+- Connected clients drain large-file table updates after the initial join and remove stale redirect mappings after deletions.
 - Temporary constructor/finalizer diagnostics were removed. Summary profiling logs are emitted only with `debug_network_files`.
 
 ## Validation
 
 - `dotnet build engine\Sandbox.GameInstance\Sandbox.GameInstance.csproj -c Developer --no-restore`: passed, 0 warnings / 0 errors.
-- Focused network tests: 11/11 passed.
-- Full `Sandbox.Test.Unit`: 1,004 passed, 1 skipped, 0 failed.
+- Focused network tests: 12/12 passed.
+- Full `Sandbox.Test.Unit`: 1,005 passed, 1 skipped, 0 failed.
 - The new string-table regression test was first observed red against the instrumentation build, then green after the no-op setter fix.
 - Gym launched successfully for every retained cold and warm measurement.
+- A loopback headless client downloaded the retained manifest, mounted it, joined the gym host as `Nelson`, and began processing scene snapshots.
+- Before the follow-up fix, a live compiled-material update was added to the client's queue but never drained; there was no post-update download event.
+- After the fix, the same connected-client probe produced `Downloading 1 files` and `Download Complete (1 files total)` for both the edit and restoration. The host processed only the affected 5,811-byte material and performed one table update.
 
-Not fully exercised in this run: a separate joining client, later scene transition, dynamic prefab delivery, live client receipt of changed assets, threshold-crossing files, resource-config reload, and project reload. The underlying complete manifest was proven byte/metadata equivalent, and the relevant routing/invalidation logic is covered or inspected, but these items should remain explicit multiplayer/editor acceptance checks rather than being represented as completed runtime tests.
+The headless VallArk client emitted existing gameplay/input null-reference errors after entering the scene; these were outside the network-file path and did not prevent manifest download or joining. Not fully exercised: a later scene transition, direct observation of a small-file hot update inside the headless client, threshold-crossing files, and an in-process resource-config reload. Project restart/reload was exercised repeatedly by the five-run cold protocol.
+
+The live acceptance probe used the editor's asset compiler on an already-generated material and its shader dependencies. Its source probe was restored, but the compiler legitimately produced new generated CRCs, so the later live-session manifest hash changed to `691DBE2BA2EC5AD96F79B4C0D5860225B64D423B0B137AFBD75D90D2E82C9165`. This does not replace the controlled before/after equivalence result above; it records that the project output actually changed during the live-update test.
 
 ## Raw evidence
 
 - `baseline-instrumented.log` contains the five cold rows, ten warm rows, lifetime/watcher series, manifest hash, and ETW attribution.
 - `after-profile.log` contains the final-commit cold/warm rows, dirty-path rows, manifest hash, and optimized ETW locations.
+- `runtime-acceptance.log` contains the joining-client and live large-file red/green evidence.

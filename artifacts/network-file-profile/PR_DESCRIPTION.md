@@ -12,6 +12,8 @@ Resource include rules are replaced from the current normalized/deduplicated con
 
 Full rebuilds remain the fallback for first build, project/filesystem/transient-root/resource-rule changes, environment reset, and explicit debug invalidation. Standalone and dedicated hosts continue to use full builds.
 
+Connected clients also drain large-file table updates after initial join. Downloads are serialized so updates arriving during an in-flight batch remain queued, and deleted table entries remove stale redirect mappings without deleting cached payloads.
+
 ## Invariants
 
 - The complete small/large manifest contract is preserved.
@@ -30,11 +32,12 @@ Same machine, VallArk revision, gym scene, Developer build:
 - Warm operational counters: 0 scans, 0 reads, 0 CRCs/bytes, 0 `AddFile` calls, 0 table changes, 0 new watchers, 0 dirty paths.
 - One large path: one 65,572-byte CRC, no project scan, 1.575 ms.
 - Manifest hash before and after: `338C3982297079C8396CCC6EA8D198FD63D10D4A6EAF43B98401A1D19744B451`.
+- A loopback headless client downloaded the complete manifest and joined VallArk's gym scene. A live 5,811-byte compiled-material update and its restoration each produced a one-file client download.
 
 ## Tests
 
 - Developer build: passed with zero warnings/errors.
-- Focused networking tests: 11/11 passed.
-- Full unit suite: 1,004 passed, 1 skipped, 0 failed.
+- Focused networking tests: 12/12 passed.
+- Full unit suite: 1,005 passed, 1 skipped, 0 failed.
 
-See `artifacts/network-file-profile/REPORT.md` for the protocol, raw-log links, lifetime evidence, ETW attribution, and remaining manual multiplayer acceptance checks.
+See `artifacts/network-file-profile/REPORT.md` for the protocol, raw-log links, lifetime evidence, ETW attribution, connected-client evidence, and remaining manual acceptance checks.

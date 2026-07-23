@@ -1,0 +1,65 @@
+Connected-client and live-update acceptance
+===========================================
+Engine branch: CRCImprove
+Retained-manifest commit: 251de0eef048d51b2d74e033169b36abd211db05
+Live-update follow-up commit: 2e11ebf6
+Project: VallArk
+Scene: survival/scenes/gym.scene
+Client: game\sbox.exe -headless -joinlocal +instanceid <n> +headless_fps 60
+
+Initial client acceptance
+20:28:53 [Generic] Installation Complete (14.30s)
+20:28:53 [Generic] Downloading 6684 files..
+
+The first attempt was intentionally stopped after confirming the full retained table was
+being consumed. The resumed client used the same download cache:
+
+20:33:11 [Generic] Downloading 3617 files..
+20:34:54 [Generic] Download Complete (3617 files total) (102.90s)
+20:35:07 [Generic] Info: Nelson has joined the game
+
+The client entered the gym scene and processed scene snapshots. VallArk then emitted
+headless-input/gameplay null-reference errors in PlayerController, PlayerContext, and
+MineableResourceComponent. Those errors did not prevent manifest download or joining.
+
+Live large-file red state
+-------------------------
+Probe: add a comment to
+benchmarks/syntygrass/materials/grass_short_static.vmat, force compile, and retain the
+connected client.
+
+Host result:
+mode=dirty dirtyFiles=1 enumerated=0 selectedLarge=1 crcFiles=1 crcBytes=5811
+addLarge=1 tableSets=1 totalMs=0.731
+
+Client result before follow-up:
+The updated table entry was queued by LargeNetworkFiles.OnTableEntryUpdated, but no
+subsequent "Downloading 1 files" event occurred. RunDownloadQueue was only called from
+the initial LoadNetworkTables path.
+
+Live large-file green state
+---------------------------
+Same probe after commit 2e11ebf6:
+
+20:52:57 [Generic] Info: Milhouse has joined the game
+20:54:24 [Generic] Downloading 1 files..
+20:54:24 [Generic] Download Complete (1 files total) (0.00s)
+
+Host changed-file row:
+mode=dirty dirtyFiles=1 enumerated=0 selectedLarge=1 crcFiles=1 crcBytes=5811
+addLarge=1 tableSets=1 totalMs=0.748
+
+After restoring the source and compiling again:
+
+20:55:15 [Generic] Downloading 1 files..
+20:55:15 [Generic] Download Complete (1 files total) (0.00s)
+
+Host restoration row:
+mode=dirty dirtyFiles=1 enumerated=0 selectedLarge=1 crcFiles=1 crcBytes=5811
+addLarge=1 tableSets=1 totalMs=0.632
+
+Automated validation
+--------------------
+Focused networking tests: 12 passed, 0 failed.
+Full Sandbox.Test.Unit: 1005 passed, 1 skipped, 0 failed.
+Developer build: 0 warnings, 0 errors.
