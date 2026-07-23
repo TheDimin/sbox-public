@@ -47,6 +47,12 @@ internal class SmallNetworkFiles
 			return false;
 
 		var normalizedFileName = NormalizeFileName( fileName );
+		if ( StringTable.Entries.TryGetValue( normalizedFileName, out var existing ) &&
+			 existing.Data.AsSpan().SequenceEqual( contents ) )
+		{
+			return true;
+		}
+
 		var tableTimer = System.Diagnostics.Stopwatch.StartNew();
 		StringTable.Set( normalizedFileName, contents );
 		tableTimer.Stop();
@@ -58,10 +64,10 @@ internal class SmallNetworkFiles
 	/// <summary>
 	/// Remove a networked file.
 	/// </summary>
-	public void RemoveFile( string fileName )
+	public bool RemoveFile( string fileName )
 	{
 		var normalizedFileName = NormalizeFileName( fileName );
-		StringTable.Remove( normalizedFileName );
+		return StringTable.Remove( normalizedFileName ) is not null;
 	}
 
 	string NormalizeFileName( string fileName )

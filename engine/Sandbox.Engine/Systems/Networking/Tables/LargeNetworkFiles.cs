@@ -9,11 +9,12 @@ internal class LargeNetworkFiles
 	public BaseFileSystem Files { get; private set; }
 	public StringTable StringTable { get; init; }
 
-	record struct LargeFileInfo( long Size, ulong CRC );
+	internal record struct LargeFileInfo( long Size, ulong CRC );
 
 	RedirectFileSystem RedirectFileSystem { get; set; }
 
 	HashSet<string> downloadQueue = new();
+	Dictionary<string, BaseFileSystem> fileSources = new( StringComparer.OrdinalIgnoreCase );
 
 	public LargeNetworkFiles( string name )
 	{
@@ -29,6 +30,7 @@ internal class LargeNetworkFiles
 	public void Reset()
 	{
 		StringTable.Reset();
+		fileSources.Clear();
 
 		Files?.Dispose();
 		RedirectFileSystem = AssetDownloadCache.CreateRedirectFileSystem();
@@ -50,18 +52,30 @@ internal class LargeNetworkFiles
 	/// Add a file to be networked.
 	/// </summary>
 	public bool AddFile( string fileName, Action<long, TimeSpan> onCrc = null, Action<TimeSpan> onTableSet = null )
+		=> AddFile( EngineFileSystem.Mounted, fileName, onCrc, onTableSet );
+
+	/// <summary>
+	/// Add a file from a specific filesystem to be networked.
+	/// </summary>
+	public bool AddFile( BaseFileSystem fs, string fileName, Action<long, TimeSpan> onCrc = null, Action<TimeSpan> onTableSet = null )
 	{
-		if ( !EngineFileSystem.Mounted.FileExists( fileName ) )
+		if ( !fs.FileExists( fileName ) )
 			return false;
 
 		var crcTimer = System.Diagnostics.Stopwatch.StartNew();
-		var crc = EngineFileSystem.Mounted.GetCrc( fileName );
+		var crc = fs.GetCrc( fileName );
 		crcTimer.Stop();
-		var size = EngineFileSystem.Mounted.FileSize( fileName );
+		var size = fs.FileSize( fileName );
 		onCrc?.Invoke( size, crcTimer.Elapsed );
 		var normalizedFileName = NormalizeFileName( fileName );
+		fileSources[normalizedFileName] = fs;
+
+		var value = new LargeFileInfo( size, crc );
+		if ( TryGetFileInfo( normalizedFileName, out var existing ) && existing == value )
+			return true;
+
 		var tableTimer = System.Diagnostics.Stopwatch.StartNew();
-		StringTable.Set( normalizedFileName, new LargeFileInfo( size, crc ) );
+		StringTable.Set( normalizedFileName, value );
 		tableTimer.Stop();
 		onTableSet?.Invoke( tableTimer.Elapsed );
 
@@ -71,10 +85,24 @@ internal class LargeNetworkFiles
 	/// <summary>
 	/// Remove a networked file.
 	/// </summary>
-	public void RemoveFile( string fileName )
+	public bool RemoveFile( string fileName )
 	{
 		var normalizedFileName = NormalizeFileName( fileName );
-		StringTable.Remove( normalizedFileName );
+		fileSources.Remove( normalizedFileName );
+		return StringTable.Remove( normalizedFileName ) is not null;
+	}
+
+	internal bool TryGetFileInfo( string fileName, out LargeFileInfo info )
+	{
+		var normalizedFileName = NormalizeFileName( fileName );
+		if ( StringTable.Entries.TryGetValue( normalizedFileName, out var entry ) )
+		{
+			info = entry.Read<LargeFileInfo>();
+			return true;
+		}
+
+		info = default;
+		return false;
 	}
 
 	string NormalizeFileName( string fileName )
@@ -209,14 +237,19 @@ internal class LargeNetworkFiles
 
 	async Task OnRequestNetworkFile( RequestFile file, Connection connection, Guid msgGuid )
 	{
-		if ( !EngineFileSystem.Mounted.FileExists( file.filename ) )
+		var normalizedFileName = NormalizeFileName( file.filename );
+		var fs = fileSources.TryGetValue( normalizedFileName, out var source )
+			? source
+			: EngineFileSystem.Mounted;
+
+		if ( !fs.FileExists( normalizedFileName ) )
 		{
 			Log.Warning( $"Client ({connection.Name}) requested missing file: {file.filename}" );
 			connection.SendResponse( msgGuid, Array.Empty<byte>() );
 			return;
 		}
 
-		var contents = await EngineFileSystem.Mounted.ReadAllBytesAsync( file.filename );
+		var contents = await fs.ReadAllBytesAsync( normalizedFileName );
 
 		connection.SendResponse( msgGuid, contents );
 	}

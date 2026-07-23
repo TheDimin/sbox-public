@@ -77,6 +77,9 @@ internal class StringTable
 	{
 		if ( Entries.TryGetValue( name, out var entry ) )
 		{
+			if ( entry.Data.AsSpan().SequenceEqual( assemblyBytes ) )
+				return entry;
+
 			entry.Data = assemblyBytes;
 			Log.Trace( $"Updated {name} [{assemblyBytes.Length}]" );
 		}

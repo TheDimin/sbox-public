@@ -26,6 +26,19 @@ public class StringTableTest
 		Assert.AreEqual( 1, table.Entries.Count );
 	}
 
+	[TestMethod]
+	public void SettingIdenticalPayloadDoesNotMarkEntryChanged()
+	{
+		Sandbox.Network.StringTable table = new( "Assembly", true );
+		var payload = new byte[] { 1, 2, 3, 4 };
+
+		table.Set( "same", payload );
+		table.ClearChanges();
+		table.Set( "same", payload.ToArray() );
+
+		Assert.IsFalse( table.HasChanged );
+	}
+
 	void DoUpdateExchange( Sandbox.Network.StringTable a, Sandbox.Network.StringTable b )
 	{
 		Assert.IsTrue( a.HasChanged );
