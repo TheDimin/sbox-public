@@ -63,3 +63,20 @@ Automated validation
 Focused networking tests: 12 passed, 0 failed.
 Full Sandbox.Test.Unit: 1005 passed, 1 skipped, 0 failed.
 Developer build: 0 warnings, 0 errors.
+
+Project/resource reload acceptance
+----------------------------------
+The project was closed before each configuration edit and reopened in
+survival/scenes/gym.scene.
+
+Resources = "codex_profile_resources/*":
+build=1 mode=full configuredPatterns=1 uniquePatterns=1 includePaths=1
+enumerated=10394 crcFiles=6734 watchersBefore=2 watchersAfter=4
+build=2 mode=warm configuredPatterns=1 uniquePatterns=1 includePaths=1
+enumerated=0 crcFiles=0 tableSets=0 watchersBefore=4 watchersAfter=4 totalMs=0.276
+
+After restoring Resources = null and reopening:
+build=1 mode=full configuredPatterns=0 uniquePatterns=0 includePaths=0
+enumerated=10394 crcFiles=6734 watchersBefore=2 watchersAfter=4
+
+The project file was left restored with "Resources": null.

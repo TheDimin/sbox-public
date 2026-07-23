@@ -33,6 +33,7 @@ Same machine, VallArk revision, gym scene, Developer build:
 - One large path: one 65,572-byte CRC, no project scan, 1.575 ms.
 - Manifest hash before and after: `338C3982297079C8396CCC6EA8D198FD63D10D4A6EAF43B98401A1D19744B451`.
 - A loopback headless client downloaded the complete manifest and joined VallArk's gym scene. A live 5,811-byte compiled-material update and its restoration each produced a one-file client download.
+- Adding and removing a resource pattern across project reload produced active pattern counts of `1` then `0`; the populated configuration remained stable on a warm play with zero file work.
 
 ## Tests
 
