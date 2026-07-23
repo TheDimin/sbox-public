@@ -87,7 +87,7 @@ internal static class EngineLoop
 	static double GetMaxFrameRate()
 	{
 		if ( Application.IsBenchmark ) return -1;
-		if ( Application.IsHeadless ) return 60;
+		if ( Application.IsHeadless ) return HeadlessClientOptions.GetFrameRate();
 
 		double effectiveFps = RenderSettings.Instance.MaxFrameRate;
 
@@ -222,8 +222,11 @@ internal static class EngineLoop
 		// Update performance stats (should be called every frame)
 		//
 		UpdatePerformance();
-		DebugOverlay.Draw();
-		UpdateInput();
+		if ( !Application.IsHeadless )
+		{
+			DebugOverlay.Draw();
+			UpdateInput();
+		}
 
 		//
 		// Dispatch callbacks for any changed files
@@ -233,22 +236,31 @@ internal static class EngineLoop
 		//
 		// Update any animated textures
 		//
-		using ( PerformanceStats.Timings.Video.Scope() )
+		if ( !Application.IsHeadless )
 		{
-			Texture.Tick();
+			using ( PerformanceStats.Timings.Video.Scope() )
+			{
+				Texture.Tick();
+			}
 		}
 
 		//
 		// Update VR
 		//
-		VRSystem.FrameStart();
+		if ( !Application.IsHeadless )
+		{
+			VRSystem.FrameStart();
+		}
 
 		//
 		// Expire any unused resources
 		//
 		NativeResourceCache.Tick();
 		Game.Resources.PruneWeakIndex();
-		Mounting.MountUtility.TickPreviewRenders();
+		if ( !Application.IsHeadless )
+		{
+			Mounting.MountUtility.TickPreviewRenders();
+		}
 
 		//
 		// Run Tasks
@@ -296,29 +308,29 @@ internal static class EngineLoop
 
 		// Simulate UI last. This works out all the styles and shit, so we want
 		// that to be reflected right BEFORE the frame is rendered.
-		using ( PerformanceStats.Timings.Ui.Scope() )
+		if ( !Application.IsHeadless )
 		{
-			SimulateUI();
-		}
+			using ( PerformanceStats.Timings.Ui.Scope() )
+			{
+				SimulateUI();
+			}
 
-		// Give each sound handle an opportunity to for a frame think
-		using ( PerformanceStats.Timings.Audio.Scope() )
-		{
-			MixingThread.UpdateGlobals();
-		}
+			// Give each sound handle an opportunity to for a frame think
+			using ( PerformanceStats.Timings.Audio.Scope() )
+			{
+				MixingThread.UpdateGlobals();
+			}
 
 		//
 		// Update the mouse visibility status
 		//
-		if ( !Application.IsHeadless )
-		{
 			Engine.InputRouter.Frame();
+
+			Audio.AudioEngine.Tick();
 		}
 
-		// Keep room up to date
+		// Keep room up to date even when presentation systems are disabled.
 		PartyRoom.Current?.Tick();
-
-		Audio.AudioEngine.Tick();
 	}
 
 	public static void RunAsyncTasks()
@@ -346,7 +358,10 @@ internal static class EngineLoop
 		//
 		// Update VR
 		//
-		VRSystem.FrameEnd();
+		if ( !Application.IsHeadless )
+		{
+			VRSystem.FrameEnd();
+		}
 
 		//
 		// Free strings allocated by Interop shit, and let us know how many
@@ -374,7 +389,10 @@ internal static class EngineLoop
 		DrainFrameEndDisposables();
 
 		// Free render targets
-		RenderTarget.EndOfFrame();
+		if ( !Application.IsHeadless )
+		{
+			RenderTarget.EndOfFrame();
+		}
 	}
 
 
@@ -481,6 +499,8 @@ internal static class EngineLoop
 
 	internal static void OnClientOutput()
 	{
+		if ( Application.IsHeadless ) return;
+
 		using var _outputScope = _clientOutput.Start();
 
 		// The editor renders it's own game scene

@@ -184,9 +184,11 @@ internal static class Bootstrap
 			//
 			// Init vr system
 			//
-			VRSystem.Init();
-
-			Screen.UpdateFromEngine();
+			if ( !Application.IsHeadless )
+			{
+				VRSystem.Init();
+				Screen.UpdateFromEngine();
+			}
 
 			if ( !Application.IsHeadless && !Application.IsStandalone )
 			{

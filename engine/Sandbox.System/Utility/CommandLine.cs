@@ -32,6 +32,7 @@ internal static class CommandLine
 	/// </summary>
 	public static void Parse()
 	{
+		switches.Clear();
 		commandLine = CommandLineString ?? Environment.CommandLine;
 
 		if ( string.IsNullOrEmpty( commandLine ) )

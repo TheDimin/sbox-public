@@ -154,7 +154,10 @@ internal partial class GameInstanceDll : Engine.IGameInstanceDll
 		}
 
 		FontManager.Instance.Clear( false );
-		FontManager.Instance.LoadAll( FileSystem.Mounted );
+		if ( !Application.IsHeadless )
+		{
+			FontManager.Instance.LoadAll( FileSystem.Mounted );
+		}
 
 		AssemblyEnroller?.Dispose();
 		AssemblyEnroller = null;
@@ -170,7 +173,10 @@ internal partial class GameInstanceDll : Engine.IGameInstanceDll
 		FileWatchers.ForEach( w => w.Dispose() );
 		FileWatchers.Clear();
 
-		Screen.UpdateFromEngine();
+		if ( !Application.IsHeadless )
+		{
+			Screen.UpdateFromEngine();
+		}
 
 		Game.InitTypeLibrary();
 
@@ -436,6 +442,7 @@ internal partial class GameInstanceDll : Engine.IGameInstanceDll
 			//
 			// Update input
 			//
+			if ( !Application.IsHeadless )
 			{
 				_perFrameInput.Flip();
 				_perFrameInput.Push();

@@ -305,11 +305,14 @@ internal class GameInstance : IGameInstance
 			await achievementTask;
 		}
 
-		LoadingScreen.Title = $"Loading Fonts";
-		await Task.Delay( 5, token ); // make frame
+		if ( !Application.IsHeadless )
+		{
+			LoadingScreen.Title = $"Loading Fonts";
+			await Task.Delay( 5, token ); // make frame
 
-		Log.Trace( $"Loading Fonts" );
-		FontManager.Instance.LoadAll( FileSystem.Mounted );
+			Log.Trace( $"Loading Fonts" );
+			FontManager.Instance.LoadAll( FileSystem.Mounted );
+		}
 
 		SetupFileWatch();
 
@@ -364,7 +367,10 @@ internal class GameInstance : IGameInstance
 		ProjectSettings.ClearCache();
 
 		Input.ReadConfig( ProjectSettings.Input );
-		Audio.Mixer.LoadFromSettings( ProjectSettings.Mixer, GlobalContext.Current.TypeLibrary );
+		if ( !Application.IsHeadless )
+		{
+			Audio.Mixer.LoadFromSettings( ProjectSettings.Mixer, GlobalContext.Current.TypeLibrary );
+		}
 		LoadCursors();
 	}
 

@@ -648,6 +648,12 @@ public static partial class Networking
 	/// </summary>
 	public static void Connect( string target )
 	{
+		if ( HeadlessClientOptions.IsActive && !HeadlessClientOptions.IsLoopbackTarget( target ) )
+		{
+			Log.Warning( $"Headless clients can only connect to local targets; rejected '{target}'." );
+			return;
+		}
+
 		_ = TryConnect( target );
 	}
 

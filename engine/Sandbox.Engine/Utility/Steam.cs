@@ -29,6 +29,10 @@ public static class Steam
 		"Krusty", "Milhouse", "Nelson", "Ralph", "Wiggum"
 	];
 
+	internal static ulong GetLocalTestSteamId( int instanceId ) => BaseFakeSteamId + (ulong)instanceId;
+
+	internal static string GetHeadlessClientName( int instanceId ) => $"Headless Client {instanceId}";
+
 	internal static void InitializeClient()
 	{
 		if ( Application.IsUnitTest )
@@ -38,17 +42,21 @@ public static class Steam
 		var su = NativeEngine.Steam.SteamUser();
 		var utils = NativeEngine.Steam.SteamUtils();
 
-		if ( Application.IsJoinLocal && Application.LocalInstanceId > 0 )
+		var localTestInstance = (Application.IsJoinLocal || HeadlessClientOptions.IsActive) && Application.LocalInstanceId > 0;
+
+		if ( localTestInstance )
 		{
-			SteamId = BaseFakeSteamId + (ulong)Application.LocalInstanceId;
-			PersonaName = LocalInstanceNames[Random.Shared.Next( LocalInstanceNames.Length )];
+			SteamId = GetLocalTestSteamId( Application.LocalInstanceId );
+			PersonaName = HeadlessClientOptions.IsActive
+				? GetHeadlessClientName( Application.LocalInstanceId )
+				: LocalInstanceNames[Random.Shared.Next( LocalInstanceNames.Length )];
 		}
 		else if ( su.IsValid )
 		{
 			SteamId = su.GetSteamID();
 		}
 
-		if ( sf.IsValid && !Application.IsJoinLocal )
+		if ( sf.IsValid && !localTestInstance )
 		{
 			PersonaName = sf.GetPersonaName();
 		}
