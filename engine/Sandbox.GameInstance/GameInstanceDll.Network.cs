@@ -270,6 +270,7 @@ internal partial class GameInstanceDll
 		system.InstallTable( NetworkedLangFiles.StringTable );
 		system.InstallTable( NetworkedLargeFiles.StringTable );
 		system.InstallTable( ReplicatedConvars.StringTable );
+		NetworkedLargeFiles.EnableLiveDownloads( () => NetworkedLargeFiles.RunDownloadQueue( system, default ) );
 
 		CodeArchiveTable.OnChangeOrAdd = ( entry ) =>
 		{

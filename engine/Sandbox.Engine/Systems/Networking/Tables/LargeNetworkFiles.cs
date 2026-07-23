@@ -15,6 +15,7 @@ internal class LargeNetworkFiles
 
 	HashSet<string> downloadQueue = new();
 	Dictionary<string, BaseFileSystem> fileSources = new( StringComparer.OrdinalIgnoreCase );
+	Task activeDownload;
 
 	public LargeNetworkFiles( string name )
 	{
@@ -117,7 +118,8 @@ internal class LargeNetworkFiles
 
 	void OnTableEntryRemoved( StringTable.Entry entry )
 	{
-
+		downloadQueue.Remove( entry.Name );
+		RedirectFileSystem?.RemoveAbsFile( entry.Name );
 	}
 
 	void OnTableSnapshot()
@@ -164,7 +166,35 @@ internal class LargeNetworkFiles
 		downloadQueue.Add( fileName );
 	}
 
-	public async Task RunDownloadQueue( NetworkSystem system, CancellationToken token )
+	internal void EnableLiveDownloads( Func<Task> runDownloads )
+	{
+		StringTable.PostNetworkUpdate = async () =>
+		{
+			try
+			{
+				await runDownloads();
+			}
+			catch ( OperationCanceledException )
+			{
+				// The connection or environment was reset while downloading.
+			}
+			catch ( Exception e )
+			{
+				Log.Warning( e, "Failed to download updated network files" );
+			}
+		};
+	}
+
+	public Task RunDownloadQueue( NetworkSystem system, CancellationToken token )
+	{
+		if ( activeDownload is { IsCompleted: false } )
+			return activeDownload;
+
+		activeDownload = DrainDownloadQueue( system, token );
+		return activeDownload;
+	}
+
+	private async Task DrainDownloadQueue( NetworkSystem system, CancellationToken token )
 	{
 		if ( RedirectFileSystem is null )
 			return;
@@ -175,59 +205,66 @@ internal class LargeNetworkFiles
 		var currentCount = 0;
 		var sw = System.Diagnostics.Stopwatch.StartNew();
 
-		foreach ( var file in downloadQueue )
+		while ( downloadQueue.Count > 0 )
 		{
-			if ( !StringTable.Entries.TryGetValue( file, out var entry ) )
-				continue;
-
-			var info = entry.Read<LargeFileInfo>();
-
-			if ( AssetDownloadCache.DebugNetworkFiles )
+			foreach ( var file in downloadQueue.ToArray() )
 			{
-				Log.Info( $"Download file {file}" );
-			}
+				if ( !StringTable.Entries.TryGetValue( file, out var entry ) )
+				{
+					downloadQueue.Remove( file );
+					continue;
+				}
 
-			LoadingScreen.Title = $"Downloading Files ({currentCount + 1}/{downloadQueue.Count})";
-			LoadingScreen.Subtitle = file;
+				var info = entry.Read<LargeFileInfo>();
 
-			if ( RedirectFileSystem.FileExists( file.NormalizeFilename( true ) ) )
-			{
+				if ( AssetDownloadCache.DebugNetworkFiles )
+				{
+					Log.Info( $"Download file {file}" );
+				}
+
+				LoadingScreen.Title = $"Downloading Files ({currentCount + 1})";
+				LoadingScreen.Subtitle = file;
+
+				if ( RedirectFileSystem.FileExists( file.NormalizeFilename( true ) ) )
+				{
+					currentCount++;
+					downloadQueue.Remove( file );
+					continue;
+				}
+
+				token.ThrowIfCancellationRequested();
+
+				if ( Connection.Host is null )
+				{
+					throw new TaskCanceledException( "Connection became null" );
+				}
+
+				// download the file
+				var response = await Connection.Host.SendRequest( new RequestFile { filename = file } );
+
+				token.ThrowIfCancellationRequested();
+
+				if ( response is not byte[] data || data.Length == 0 )
+				{
+					Log.Warning( $"Failed to download file {file}! (response: {response})" );
+					currentCount++;
+					downloadQueue.Remove( file );
+					continue;
+				}
+
+				var fn = AssetDownloadCache.StoreFile( file, info.CRC, data );
+				if ( fn is not null )
+				{
+					RedirectFileSystem.AddAbsFile( file, fn );
+				}
+
 				currentCount++;
-				continue;
+				downloadQueue.Remove( file );
 			}
-
-			token.ThrowIfCancellationRequested();
-
-			if ( Connection.Host is null )
-			{
-				throw new TaskCanceledException( "Connection became null" );
-			}
-
-			// download the file
-			var response = await Connection.Host.SendRequest( new RequestFile { filename = file } );
-
-			token.ThrowIfCancellationRequested();
-
-			if ( response is not byte[] data || data.Length == 0 )
-			{
-				Log.Warning( $"Failed to download file {file}! (response: {response})" );
-				currentCount++;
-				continue;
-			}
-
-			var fn = AssetDownloadCache.StoreFile( file, info.CRC, data );
-			if ( fn is not null )
-			{
-				RedirectFileSystem.AddAbsFile( file, fn );
-			}
-
-			currentCount++;
 		}
 
 		LoadingScreen.Subtitle = null;
 		Log.Info( $"Download Complete ({currentCount} files total) ({sw.Elapsed.TotalSeconds:0.00}s)" );
-
-		downloadQueue.Clear();
 	}
 
 	internal void NetworkInitialize( GameNetworkSystem instance )

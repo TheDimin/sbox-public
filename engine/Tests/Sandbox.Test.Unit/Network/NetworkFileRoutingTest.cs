@@ -39,6 +39,22 @@ public class NetworkFileRoutingTest
 	}
 
 	[TestMethod]
+	public void LiveLargeFileUpdateRunsDownloadCallback()
+	{
+		var files = new LargeNetworkFiles( "large" );
+		var calls = 0;
+		files.EnableLiveDownloads( () =>
+		{
+			calls++;
+			return Task.CompletedTask;
+		} );
+
+		files.StringTable.PostNetworkUpdate();
+
+		Assert.AreEqual( 1, calls );
+	}
+
+	[TestMethod]
 	public void ResourcePatternsAreNormalizedAndDeduplicated()
 	{
 		var patterns = GameInstanceDll.ParseNetworkIncludePaths(
