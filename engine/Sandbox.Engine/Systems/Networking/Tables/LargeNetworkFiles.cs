@@ -49,15 +49,21 @@ internal class LargeNetworkFiles
 	/// <summary>
 	/// Add a file to be networked.
 	/// </summary>
-	public bool AddFile( string fileName )
+	public bool AddFile( string fileName, Action<long, TimeSpan> onCrc = null, Action<TimeSpan> onTableSet = null )
 	{
 		if ( !EngineFileSystem.Mounted.FileExists( fileName ) )
 			return false;
 
+		var crcTimer = System.Diagnostics.Stopwatch.StartNew();
 		var crc = EngineFileSystem.Mounted.GetCrc( fileName );
+		crcTimer.Stop();
 		var size = EngineFileSystem.Mounted.FileSize( fileName );
+		onCrc?.Invoke( size, crcTimer.Elapsed );
 		var normalizedFileName = NormalizeFileName( fileName );
+		var tableTimer = System.Diagnostics.Stopwatch.StartNew();
 		StringTable.Set( normalizedFileName, new LargeFileInfo( size, crc ) );
+		tableTimer.Stop();
+		onTableSet?.Invoke( tableTimer.Elapsed );
 
 		return true;
 	}

@@ -41,13 +41,16 @@ internal class SmallNetworkFiles
 	/// <summary>
 	/// Add a file to be networked.
 	/// </summary>
-	public bool AddFile( BaseFileSystem fs, string fileName, byte[] contents )
+	public bool AddFile( BaseFileSystem fs, string fileName, byte[] contents, Action<TimeSpan> onTableSet = null )
 	{
 		if ( !fs.FileExists( fileName ) )
 			return false;
 
 		var normalizedFileName = NormalizeFileName( fileName );
+		var tableTimer = System.Diagnostics.Stopwatch.StartNew();
 		StringTable.Set( normalizedFileName, contents );
+		tableTimer.Stop();
+		onTableSet?.Invoke( tableTimer.Elapsed );
 
 		return true;
 	}

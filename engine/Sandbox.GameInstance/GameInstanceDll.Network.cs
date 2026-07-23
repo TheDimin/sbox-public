@@ -8,6 +8,56 @@ namespace Sandbox;
 
 internal partial class GameInstanceDll
 {
+	private readonly Guid _lifetimeDebugId = Guid.NewGuid();
+	private int _networkFileBuildCount;
+
+	public GameInstanceDll()
+	{
+		Log.Warning( $"GameInstanceDll created: {_lifetimeDebugId}" );
+	}
+
+	~GameInstanceDll()
+	{
+		Log.Warning( $"GameInstanceDll finalized: {_lifetimeDebugId}" );
+	}
+
+	private sealed class NetworkFileProfile
+	{
+		public int Build;
+		public int ConfiguredPatterns;
+		public int UniquePatterns;
+		public int WatchersBefore;
+		public int WatchersAfter;
+		public int SmallEntriesBefore;
+		public int LargeEntriesBefore;
+		public int SmallEntriesAfter;
+		public int LargeEntriesAfter;
+		public int TransientFileSystems;
+		public int FilesEnumerated;
+		public int RejectedLegal;
+		public int RejectedRules;
+		public int SelectedSmall;
+		public int SelectedLarge;
+		public int SmallReads;
+		public long SmallBytes;
+		public double SmallReadMs;
+		public int LargeInspected;
+		public int LargeExistenceChecks;
+		public int LargeSizeQueries;
+		public int LargeCrcCalculations;
+		public long LargeCrcBytes;
+		public double LargeCrcMs;
+		public int AddLarge;
+		public int AddSmall;
+		public int TableSets;
+		public int TableRemoves = 0;
+		public double GameScanMs;
+		public double TransientScanMs;
+		public double FilteringMs;
+		public double MetadataMs;
+		public double TableMs;
+	}
+
 	readonly StringTable CodeArchiveTable = new( "CodeArchive", true );
 
 	internal readonly ServerPackages ServerPackages = new();
@@ -278,28 +328,86 @@ internal partial class GameInstanceDll
 		return _interestingExtensions.Any( x => filename.EndsWith( x ) );
 	}
 
-	void UpdateNetworkFile( BaseFileSystem fs, string filename )
+	void UpdateNetworkFile( BaseFileSystem fs, string filename, NetworkFileProfile profile = null )
 	{
+		var filtering = System.Diagnostics.Stopwatch.StartNew();
+
 		// ignore code junk
 		if ( filename.Contains( "\\code\\obj\\", System.StringComparison.OrdinalIgnoreCase ) )
-			return;
-
-		if ( filename.EndsWith( "vmap" ) ) filename = Path.ChangeExtension( filename, ".vpk" );
-		else if ( !ShouldNetworkFile( filename ) )
 		{
+			filtering.Stop();
+			if ( profile is not null ) profile.FilteringMs += filtering.Elapsed.TotalMilliseconds;
 			return;
 		}
 
-		if ( !fs.FileExists( filename ) )
+		if ( filename.EndsWith( "vmap" ) ) filename = Path.ChangeExtension( filename, ".vpk" );
+		else
+		{
+			var normalized = filename.NormalizeFilename();
+			if ( !AssetDownloadCache.IsLegalDownload( normalized ) )
+			{
+				filtering.Stop();
+				if ( profile is not null )
+				{
+					profile.RejectedLegal++;
+					profile.FilteringMs += filtering.Elapsed.TotalMilliseconds;
+				}
+				return;
+			}
+
+			var included = _netIncludePaths.Any( x => normalized.WildcardMatch( x ) );
+			var interesting = _interestingExtensions.Any( x => normalized.EndsWith( x ) );
+			if ( !included && !interesting )
+			{
+				filtering.Stop();
+				if ( profile is not null )
+				{
+					profile.RejectedRules++;
+					profile.FilteringMs += filtering.Elapsed.TotalMilliseconds;
+				}
+				return;
+			}
+		}
+
+		filtering.Stop();
+		if ( profile is not null ) profile.FilteringMs += filtering.Elapsed.TotalMilliseconds;
+
+		var metadata = System.Diagnostics.Stopwatch.StartNew();
+		var exists = fs.FileExists( filename );
+		metadata.Stop();
+		if ( profile is not null ) profile.MetadataMs += metadata.Elapsed.TotalMilliseconds;
+
+		if ( !exists )
 			return;
 
 		var fullPath = fs.GetFullPath( filename );
+		metadata.Restart();
 		var size = fs.FileSize( filename );
+		metadata.Stop();
+		if ( profile is not null ) profile.MetadataMs += metadata.Elapsed.TotalMilliseconds;
 
 		if ( !ShouldUseLargeDownload( filename, size ) )
 		{
+			if ( profile is not null ) profile.SelectedSmall++;
+
+			var read = System.Diagnostics.Stopwatch.StartNew();
 			var bytes = fs.ReadAllBytes( filename );
-			var wasAdded = NetworkedSmallFiles.AddFile( fs, filename, bytes.ToArray() );
+			var contents = bytes.ToArray();
+			read.Stop();
+			if ( profile is not null )
+			{
+				profile.SmallReads++;
+				profile.SmallBytes += contents.LongLength;
+				profile.SmallReadMs += read.Elapsed.TotalMilliseconds;
+				profile.AddSmall++;
+			}
+
+			var wasAdded = NetworkedSmallFiles.AddFile( fs, filename, contents, tableElapsed =>
+			{
+				if ( profile is null ) return;
+				profile.TableSets++;
+				profile.TableMs += tableElapsed.TotalMilliseconds;
+			} );
 
 			if ( wasAdded )
 			{
@@ -313,7 +421,30 @@ internal partial class GameInstanceDll
 		}
 		else
 		{
-			var wasAdded = NetworkedLargeFiles.AddFile( filename );
+			if ( profile is not null )
+			{
+				profile.SelectedLarge++;
+				profile.LargeInspected++;
+				profile.LargeExistenceChecks += 2;
+				profile.LargeSizeQueries++;
+				profile.AddLarge++;
+			}
+
+			var wasAdded = NetworkedLargeFiles.AddFile( filename,
+				(crcBytes, crcElapsed) =>
+				{
+					if ( profile is null ) return;
+					profile.LargeCrcCalculations++;
+					profile.LargeCrcBytes += crcBytes;
+					profile.LargeCrcMs += crcElapsed.TotalMilliseconds;
+					profile.LargeSizeQueries++;
+				},
+				tableElapsed =>
+				{
+					if ( profile is null ) return;
+					profile.TableSets++;
+					profile.TableMs += tableElapsed.TotalMilliseconds;
+				} );
 
 			if ( wasAdded )
 			{
@@ -334,6 +465,13 @@ internal partial class GameInstanceDll
 	void BuildNetworkedFiles()
 	{
 		var sw = System.Diagnostics.Stopwatch.StartNew();
+		var profile = new NetworkFileProfile
+		{
+			Build = ++_networkFileBuildCount,
+			WatchersBefore = FileWatchers.Count,
+			SmallEntriesBefore = NetworkedSmallFiles.StringTable.Entries.Count,
+			LargeEntriesBefore = NetworkedLargeFiles.StringTable.Entries.Count
+		};
 
 		var gameInstance = IGameInstance.Current as GameInstance;
 		if ( gameInstance is null )
@@ -355,17 +493,30 @@ internal partial class GameInstanceDll
 			var resourcePaths = project.Config.Resources.Split( "\n", StringSplitOptions.RemoveEmptyEntries )
 			.Select( x => x.Trim() )
 			.Where( x => !x.StartsWith( "//" ) )
-			.Select( x => x.NormalizeFilename( true, false ) );
+			.Select( x => x.NormalizeFilename( true, false ) )
+			.ToArray();
 
+			profile.ConfiguredPatterns = resourcePaths.Length;
+			profile.UniquePatterns = resourcePaths.Distinct( StringComparer.OrdinalIgnoreCase ).Count();
 			_netIncludePaths.AddRange( resourcePaths );
 		}
 
 		var fs = gameInstance.GameFileSystem;
 		var files = fs.FindFile( "/", "*", true );
 
-		foreach ( var file in files )
+		using ( var enumerator = files.GetEnumerator() )
 		{
-			UpdateNetworkFile( fs, file );
+			while ( true )
+			{
+				var scan = System.Diagnostics.Stopwatch.StartNew();
+				var hasNext = enumerator.MoveNext();
+				scan.Stop();
+				profile.GameScanMs += scan.Elapsed.TotalMilliseconds;
+				if ( !hasNext ) break;
+
+				profile.FilesEnumerated++;
+				UpdateNetworkFile( fs, enumerator.Current, profile );
+			}
 		}
 
 		var watcher = fs.Watch();
@@ -379,7 +530,30 @@ internal partial class GameInstanceDll
 
 		FileWatchers.Add( watcher );
 
-		NetworkTransientGeneratedFiles( project );
+		NetworkTransientGeneratedFiles( project, profile );
+		profile.WatchersAfter = FileWatchers.Count;
+		profile.SmallEntriesAfter = NetworkedSmallFiles.StringTable.Entries.Count;
+		profile.LargeEntriesAfter = NetworkedLargeFiles.StringTable.Entries.Count;
+		sw.Stop();
+
+		Log.Warning(
+			$"NetworkFileProfile " +
+			$"instance={_lifetimeDebugId} build={profile.Build} mode=full " +
+			$"configuredPatterns={profile.ConfiguredPatterns} uniquePatterns={profile.UniquePatterns} " +
+			$"includePaths={_netIncludePaths.Count} watchersBefore={profile.WatchersBefore} watchersAfter={profile.WatchersAfter} " +
+			$"smallEntriesBefore={profile.SmallEntriesBefore} largeEntriesBefore={profile.LargeEntriesBefore} " +
+			$"smallEntriesAfter={profile.SmallEntriesAfter} largeEntriesAfter={profile.LargeEntriesAfter} " +
+			$"transientFileSystems={profile.TransientFileSystems} enumerated={profile.FilesEnumerated} " +
+			$"rejectedLegal={profile.RejectedLegal} rejectedRules={profile.RejectedRules} " +
+			$"selectedSmall={profile.SelectedSmall} selectedLarge={profile.SelectedLarge} " +
+			$"smallReads={profile.SmallReads} smallBytes={profile.SmallBytes} smallReadMs={profile.SmallReadMs:0.###} " +
+			$"largeInspected={profile.LargeInspected} existenceChecks={profile.LargeExistenceChecks} " +
+			$"sizeQueries={profile.LargeSizeQueries} crcFiles={profile.LargeCrcCalculations} " +
+			$"crcBytes={profile.LargeCrcBytes} crcMs={profile.LargeCrcMs:0.###} " +
+			$"addLarge={profile.AddLarge} addSmall={profile.AddSmall} tableSets={profile.TableSets} tableRemoves={profile.TableRemoves} " +
+			$"gameScanMs={profile.GameScanMs:0.###} transientScanMs={profile.TransientScanMs:0.###} " +
+			$"filteringMs={profile.FilteringMs:0.###} metadataMs={profile.MetadataMs:0.###} " +
+			$"tableMs={profile.TableMs:0.###} totalMs={sw.Elapsed.TotalMilliseconds:0.###}" );
 
 		if ( AssetDownloadCache.DebugNetworkFiles )
 			Log.Info( $"..done in {sw.Elapsed.TotalSeconds:0.00}s" );
@@ -389,7 +563,7 @@ internal partial class GameInstanceDll
 	/// Make runtime-generated assets in the project's .sbox/transient/ folder available to joining clients
 	/// This is necessary for connected clients to see things like TextureGenerators.
 	/// </summary>
-	void NetworkTransientGeneratedFiles( Project project )
+	void NetworkTransientGeneratedFiles( Project project, NetworkFileProfile profile = null )
 	{
 		if ( project is null )
 			return;
@@ -399,10 +573,22 @@ internal partial class GameInstanceDll
 			return;
 
 		var transientFs = new LocalFileSystem( transientFolder );
+		if ( profile is not null ) profile.TransientFileSystems++;
 
-		foreach ( var file in transientFs.FindFile( "/", "*", true ) )
+		var files = transientFs.FindFile( "/", "*", true );
+		using ( var enumerator = files.GetEnumerator() )
 		{
-			UpdateNetworkFile( transientFs, file );
+			while ( true )
+			{
+				var scan = System.Diagnostics.Stopwatch.StartNew();
+				var hasNext = enumerator.MoveNext();
+				scan.Stop();
+				if ( profile is not null ) profile.TransientScanMs += scan.Elapsed.TotalMilliseconds;
+				if ( !hasNext ) break;
+
+				if ( profile is not null ) profile.FilesEnumerated++;
+				UpdateNetworkFile( transientFs, enumerator.Current, profile );
+			}
 		}
 
 		var watcher = transientFs.Watch();
