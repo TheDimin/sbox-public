@@ -156,14 +156,26 @@ public sealed class SoundEventEditor : BaseResourceEditor<SoundEvent>
 				return;
 			}
 
-			var license = Sandbox.Services.PackageType.Sound?
-				.GetAssetLicenseOptions()
-				.FirstOrDefault( x => x.Name == fullPackage.AssetLicense );
+			var licenseTitle = fullPackage.AssetLicense;
+			string licenseDescription = null;
+			var licenseOptions = Sandbox.Services.PackageType.Sound?.GetAssetLicenseOptions();
+			if ( licenseOptions is not null )
+			{
+				foreach ( var option in licenseOptions )
+				{
+					if ( option.Name != fullPackage.AssetLicense )
+						continue;
 
-			_licenseTitle.Text = $"License: {license.Title ?? fullPackage.AssetLicense}";
-			_licenseDetails.Text = string.IsNullOrWhiteSpace( license.Description )
+					licenseTitle = option.Title;
+					licenseDescription = option.Description;
+					break;
+				}
+			}
+
+			_licenseTitle.Text = $"License: {licenseTitle}";
+			_licenseDetails.Text = string.IsNullOrWhiteSpace( licenseDescription )
 				? "Full license details are unavailable from the current license catalog."
-				: license.Description;
+				: licenseDescription;
 		}
 		catch ( Exception exception )
 		{
