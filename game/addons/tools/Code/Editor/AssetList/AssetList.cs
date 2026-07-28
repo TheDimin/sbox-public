@@ -67,7 +67,9 @@ public partial class AssetList : ListView, AssetSystem.IEventListener
 			{
 				var package = pe.Package;
 
-				a = AssetSystem.IsCloudInstalled( package )
+				// Keep cloud sounds as package URLs even after preview/install so the scene drop
+				// path can create the Sound Event wrapper and retain the cloud reference.
+				a = package.TypeName != "sound" && AssetSystem.IsCloudInstalled( package )
 					? AssetSystem.FindByPath( package.GetMeta<string>( "PrimaryAsset" ) )
 					: null;
 

@@ -83,7 +83,12 @@ public class ResourceControlWidget : ControlWidget
 		{
 			Paint.Draw( iconRect, asset.GetAssetThumb( true ), alpha );
 
-			DrawContent( rect, asset.Name, asset.RelativePath );
+			var isCloud = asset.Package is not null && AssetSystem.IsCloudInstalled( asset.Package );
+			DrawContent(
+				rect,
+				isCloud ? $"☁ {asset.Name}" : asset.Name,
+				isCloud ? $"Cloud-hosted • {asset.RelativePath}" : asset.RelativePath
+			);
 		}
 		else if ( resource is not null )
 		{

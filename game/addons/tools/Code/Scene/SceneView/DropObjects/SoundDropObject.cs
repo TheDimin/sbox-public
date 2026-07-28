@@ -6,10 +6,12 @@ namespace Editor;
 partial class SoundDropObject : BaseDropObject
 {
 	SoundEvent sound;
+	SoundFile soundFile;
+	Asset asset;
 
 	protected override async Task Initialize( string dragData, CancellationToken token )
 	{
-		Asset asset = await InstallAsset( dragData, token );
+		asset = await InstallAsset( dragData, token );
 
 		if ( asset is null )
 			return;
@@ -19,6 +21,7 @@ partial class SoundDropObject : BaseDropObject
 
 		PackageStatus = "Loading Sound";
 		sound = asset.LoadResource<SoundEvent>();
+		soundFile = sound is null ? asset.LoadResource<SoundFile>() : null;
 		PackageStatus = null;
 	}
 
@@ -39,6 +42,13 @@ partial class SoundDropObject : BaseDropObject
 	{
 		await WaitForLoad();
 
+		if ( sound is null && soundFile is not null )
+		{
+			PackageStatus = "Creating Sound Event";
+			sound = await CreateSoundEvent();
+			PackageStatus = null;
+		}
+
 		if ( sound is null )
 			return;
 
@@ -56,5 +66,33 @@ partial class SoundDropObject : BaseDropObject
 			EditorScene.Selection.Clear();
 			EditorScene.Selection.Add( GameObject );
 		}
+	}
+
+	async Task<SoundEvent> CreateSoundEvent()
+	{
+		var packageName = asset.Package?.FullIdent;
+		var fileName = string.IsNullOrWhiteSpace( packageName )
+			? System.IO.Path.GetFileNameWithoutExtension( asset.Name )
+			: packageName;
+		var relativePath = $"sounds/cloud/{fileName}.sound";
+		var eventAsset = AssetSystem.FindByPath( relativePath );
+
+		if ( eventAsset is null )
+		{
+			var absolutePath = System.IO.Path.Combine( Project.Current.GetAssetsPath(), relativePath );
+			System.IO.Directory.CreateDirectory( System.IO.Path.GetDirectoryName( absolutePath ) );
+			eventAsset = AssetSystem.CreateResource( "sound", absolutePath );
+			if ( eventAsset is null )
+				return null;
+
+			await eventAsset.CompileIfNeededAsync();
+		}
+
+		if ( !eventAsset.TryLoadResource<SoundEvent>( out var soundEvent ) )
+			return null;
+
+		soundEvent.Sounds = new List<SoundFile> { soundFile };
+		eventAsset.SaveToDisk( soundEvent );
+		return soundEvent;
 	}
 }
