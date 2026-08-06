@@ -411,6 +411,7 @@ public abstract partial class GameResource : Resource, ISourceLineProvider
 			}
 		}
 
+		IToolsDll.Current?.RunEvent<ResourceLibrary.IEventListener>( i => i.OnSourceSaved( this, filename, jsonString ) );
 		IToolsDll.Current?.RunEvent<ResourceLibrary.IEventListener>( i => i.OnSave( this ) );
 	}
 

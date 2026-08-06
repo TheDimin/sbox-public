@@ -89,6 +89,16 @@ namespace Editor
 			Singleton = null;
 		}
 
+		internal static void BlockEditorWhileFinishingAssets()
+		{
+			if ( !Singleton.IsValid() )
+				return;
+
+			Singleton.SetModal( true, true );
+			Singleton.Raise();
+			g_pToolFramework2.SetStallMonitorMainThreadWindow( Singleton._widget );
+		}
+
 		string LatestMessage;
 		float Progress;
 

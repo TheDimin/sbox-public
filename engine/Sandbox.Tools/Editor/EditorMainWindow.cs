@@ -379,6 +379,7 @@ public class EditorMainWindow : DockWindow
 	}
 
 	internal static bool showLauncherOnExit = false;
+	private bool _startupComplete;
 	public override void OnDestroyed()
 	{
 		// Unsubscribe from events
@@ -401,6 +402,10 @@ public class EditorMainWindow : DockWindow
 	/// </summary>
 	internal void Startup()
 	{
+		if ( _startupComplete )
+			return;
+
+		_startupComplete = true;
 		Size = new Vector2( 1920, 1080 );
 
 		g_pToolFramework2.SetStallMonitorMainThreadWindow( _widget );

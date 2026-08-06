@@ -10,9 +10,11 @@ public class ResourceSystem
 {
 	// Index of Json based, GameResources PrefabFile, DecalDefintions etc.
 	private Dictionary<int, Resource> ResourceIndex { get; } = new();
+	private HashSet<int> AmbiguousResourceIds { get; } = new();
 
 	// Weak references to native resources (Model, Material, Texture, Shader, etc.) — GC-friendly.
 	private Dictionary<int, WeakReference<Resource>> WeakIndex { get; } = new();
+	private HashSet<int> AmbiguousWeakResourceIds { get; } = new();
 
 	private Dictionary<ulong, Resource> ResourceIndexLong { get; } = new();
 
@@ -34,6 +36,12 @@ public class ResourceSystem
 	internal void Register( Resource resource )
 	{
 #pragma warning disable CS0618 // Type or member is obsolete
+		if ( ResourceIndex.TryGetValue( resource.ResourceId, out var existing )
+			&& existing.ResourceIdLong != resource.ResourceIdLong )
+		{
+			AmbiguousResourceIds.Add( resource.ResourceId );
+		}
+
 		ResourceIndex[resource.ResourceId] = resource;
 #pragma warning restore CS0618 // Type or member is obsolete
 		ResourceIndexLong[resource.ResourceIdLong] = resource;
@@ -50,6 +58,13 @@ public class ResourceSystem
 	internal void RegisterWeak( Resource resource )
 	{
 #pragma warning disable CS0618 // Type or member is obsolete
+		if ( WeakIndex.TryGetValue( resource.ResourceId, out var existing )
+			&& existing.TryGetTarget( out var existingResource )
+			&& existingResource.ResourceIdLong != resource.ResourceIdLong )
+		{
+			AmbiguousWeakResourceIds.Add( resource.ResourceId );
+		}
+
 		WeakIndex[resource.ResourceId] = new WeakReference<Resource>( resource );
 #pragma warning restore CS0618 // Type or member is obsolete
 		WeakIndexLong[resource.ResourceIdLong] = new WeakReference<Resource>( resource );
@@ -62,14 +77,19 @@ public class ResourceSystem
 
 		// Make sure we're unregistering the currently indexed resource
 
-		ResourceIndexLong.Remove( resource.ResourceIdLong );
-		WeakIndexLong.Remove( resource.ResourceIdLong );
+		if ( ResourceIndexLong.TryGetValue( resource.ResourceIdLong, out var indexedStrong )
+			&& ReferenceEquals( indexedStrong, resource ) )
+			ResourceIndexLong.Remove( resource.ResourceIdLong );
+
+		if ( WeakIndexLong.TryGetValue( resource.ResourceIdLong, out var indexedWeak )
+			&& (!indexedWeak.TryGetTarget( out var indexedWeakResource )
+				|| ReferenceEquals( indexedWeakResource, resource )) )
+			WeakIndexLong.Remove( resource.ResourceIdLong );
 
 #pragma warning disable CS0618 // Type or member is obsolete
-		ResourceIndex.Remove( resource.ResourceId );
-		WeakIndex.Remove( resource.ResourceId );
+		UnregisterLegacyStrong( resource, resource.ResourceId );
+		UnregisterLegacyWeak( resource, resource.ResourceId );
 #pragma warning restore CS0618 // Type or member is obsolete
-
 
 		if ( resource is GameResource gameResource && !gameResource.IsPromise )
 		{
@@ -106,13 +126,16 @@ public class ResourceSystem
 		{
 			WeakIndexLong.Remove( key );
 		}
+
+		foreach ( var legacyId in AmbiguousWeakResourceIds.ToArray() )
+			RebuildLegacyWeakIndex( legacyId );
 	}
 
 	internal void Clear()
 	{
 		// TODO: remove from native too?
 
-		var toDispose = ResourceIndex.Values.ToArray();
+		var toDispose = ResourceIndexLong.Values.ToArray();
 
 		foreach ( var resource in toDispose.OfType<GameResource>() )
 		{
@@ -127,6 +150,8 @@ public class ResourceSystem
 
 		ResourceIndex.Clear();
 		WeakIndex.Clear();
+		AmbiguousResourceIds.Clear();
+		AmbiguousWeakResourceIds.Clear();
 
 		ResourceIndexLong.Clear();
 		WeakIndexLong.Clear();
@@ -141,7 +166,7 @@ public class ResourceSystem
 	/// </summary>
 	internal IEnumerable<T> FindWeakByPathPrefix<T>( string pathPrefix ) where T : Resource
 	{
-		foreach ( var kvp in WeakIndex )
+		foreach ( var kvp in WeakIndexLong )
 		{
 			if ( !kvp.Value.TryGetTarget( out var resource ) )
 				continue;
@@ -184,6 +209,12 @@ public class ResourceSystem
 	[Obsolete( "Use Get<T>(path) instead. Identifier based access will be removed in a future update." )]
 	public T Get<T>( int identifier ) where T : Resource
 	{
+		if ( AmbiguousResourceIds.Contains( identifier ) || AmbiguousWeakResourceIds.Contains( identifier ) )
+		{
+			Log.Warning( $"Legacy 32-bit resource id {identifier} is ambiguous; use a path lookup instead." );
+			return default;
+		}
+
 		if ( ResourceIndex.TryGetValue( identifier, out var resource ) )
 			return resource as T;
 
@@ -191,6 +222,97 @@ public class ResourceSystem
 			return weakResource as T;
 
 		return default;
+	}
+
+	private void UnregisterLegacyStrong( Resource resource, int legacyId )
+	{
+		if ( !ResourceIndex.TryGetValue( legacyId, out var indexed ) )
+			return;
+
+		if ( AmbiguousResourceIds.Contains( legacyId ) )
+		{
+			RebuildLegacyStrongIndex( legacyId );
+			return;
+		}
+
+		if ( ReferenceEquals( indexed, resource ) )
+			ResourceIndex.Remove( legacyId );
+	}
+
+	private void RebuildLegacyStrongIndex( int legacyId )
+	{
+		Resource first = null;
+		var matchCount = 0;
+
+		foreach ( var candidate in ResourceIndexLong.Values )
+		{
+#pragma warning disable CS0618 // Type or member is obsolete
+			if ( candidate.ResourceId != legacyId )
+				continue;
+#pragma warning restore CS0618 // Type or member is obsolete
+
+			first ??= candidate;
+			matchCount++;
+			if ( matchCount > 1 )
+				break;
+		}
+
+		if ( first is null )
+			ResourceIndex.Remove( legacyId );
+		else
+			ResourceIndex[legacyId] = first;
+
+		if ( matchCount > 1 )
+			AmbiguousResourceIds.Add( legacyId );
+		else
+			AmbiguousResourceIds.Remove( legacyId );
+	}
+
+	private void UnregisterLegacyWeak( Resource resource, int legacyId )
+	{
+		if ( !WeakIndex.TryGetValue( legacyId, out var indexed ) )
+			return;
+
+		if ( AmbiguousWeakResourceIds.Contains( legacyId ) )
+		{
+			RebuildLegacyWeakIndex( legacyId );
+			return;
+		}
+
+		if ( !indexed.TryGetTarget( out var indexedResource ) || ReferenceEquals( indexedResource, resource ) )
+			WeakIndex.Remove( legacyId );
+	}
+
+	private void RebuildLegacyWeakIndex( int legacyId )
+	{
+		Resource first = null;
+		var matchCount = 0;
+
+		foreach ( var weakReference in WeakIndexLong.Values )
+		{
+			if ( !weakReference.TryGetTarget( out var candidate ) )
+				continue;
+
+#pragma warning disable CS0618 // Type or member is obsolete
+			if ( candidate.ResourceId != legacyId )
+				continue;
+#pragma warning restore CS0618 // Type or member is obsolete
+
+			first ??= candidate;
+			matchCount++;
+			if ( matchCount > 1 )
+				break;
+		}
+
+		if ( first is null )
+			WeakIndex.Remove( legacyId );
+		else
+			WeakIndex[legacyId] = new WeakReference<Resource>( first );
+
+		if ( matchCount > 1 )
+			AmbiguousWeakResourceIds.Add( legacyId );
+		else
+			AmbiguousWeakResourceIds.Remove( legacyId );
 	}
 
 	// Internal use only — do not expose ulong IDs publicly.
@@ -241,7 +363,7 @@ public class ResourceSystem
 	/// <typeparam name="T">Resource type to get.</typeparam>
 	public IEnumerable<T> GetAll<T>()
 	{
-		return ResourceIndex.Values.OfType<T>().Distinct();
+		return ResourceIndexLong.Values.OfType<T>().Distinct();
 	}
 
 	/// <summary>
@@ -254,7 +376,7 @@ public class ResourceSystem
 	{
 		filepath = filepath.Replace( '\\', '/' );
 		if ( !filepath.EndsWith( "/" ) ) filepath += "/";
-		return ResourceIndex.Values.OfType<T>().Distinct().Where( x =>
+		return ResourceIndexLong.Values.OfType<T>().Distinct().Where( x =>
 		{
 			if ( x.ResourcePath.StartsWith( filepath ) )
 			{
@@ -272,14 +394,14 @@ public class ResourceSystem
 	{
 		var stats = new ResourceStats();
 
-		foreach ( var resource in ResourceIndex.Values )
+		foreach ( var resource in ResourceIndexLong.Values )
 		{
 			var typeName = resource.GetType().Name;
 			stats.StrongIndex.TryGetValue( typeName, out var count );
 			stats.StrongIndex[typeName] = count + 1;
 		}
 
-		foreach ( var kvp in WeakIndex )
+		foreach ( var kvp in WeakIndexLong )
 		{
 			var alive = kvp.Value.TryGetTarget( out var resource );
 			var typeName = alive ? resource.GetType().Name : "(dead)";
@@ -287,8 +409,8 @@ public class ResourceSystem
 			stats.WeakIndexEntries[typeName] = count + 1;
 		}
 
-		stats.StrongTotal = ResourceIndex.Count;
-		stats.WeakTotal = WeakIndex.Count;
+		stats.StrongTotal = ResourceIndexLong.Count;
+		stats.WeakTotal = WeakIndexLong.Count;
 
 		return stats;
 	}
@@ -468,8 +590,7 @@ public class ResourceSystem
 				var sourceFilePath = file.Substring( 0, file.Length - 2 );
 				if ( fs.FileExists( sourceFilePath ) )
 				{
-					var jsonBlob = fs.ReadAllText( sourceFilePath );
-					se.LastSavedSourceHash = jsonBlob.FastHash();
+					se.LastSavedSourceHash = FileHashCache.Current.GetOrComputeSourceHash( fs, sourceFilePath, out _ );
 				}
 			}
 
@@ -616,6 +737,11 @@ public static class ResourceLibrary
 		/// Called when a previously known resource has been unregistered
 		/// </summary>
 		void OnUnregister( GameResource resource ) { }
+
+		/// <summary>
+		/// Called after a resource source file has been written and before <see cref="OnSave"/>.
+		/// </summary>
+		void OnSourceSaved( GameResource resource, string filename, string json ) { }
 
 		/// <summary>
 		/// Called when a resource has been saved

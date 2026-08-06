@@ -5,6 +5,77 @@ namespace EditorTests;
 [TestClass]
 public class CloudAssetTest
 {
+	sealed class TestPackage : Package
+	{
+		readonly IRevision revision;
+
+		public override IRevision Revision => revision;
+
+		public TestPackage( IRevision revision = null )
+		{
+			this.revision = revision;
+		}
+	}
+
+	sealed class TestRevision : Package.IRevision
+	{
+		public long VersionId => 1;
+		public long FileCount => Manifest?.Files?.Length ?? 0;
+		public long TotalSize => 0;
+		public string Summary => "";
+		public System.DateTimeOffset Created => default;
+		public int EngineVersion => 0;
+		public ManifestSchema Manifest { get; init; }
+		public int DownloadCount { get; private set; }
+
+		public Task DownloadManifestAsync( System.Threading.CancellationToken token = default )
+		{
+			DownloadCount++;
+			return Task.CompletedTask;
+		}
+	}
+
+	[TestMethod]
+	public async Task PublishedManifestUsesActivePackageRevision()
+	{
+		var revision = new TestRevision
+		{
+			Manifest = new ManifestSchema
+			{
+				Files = new[]
+				{
+					new ManifestSchema.File { Path = "models/published.vmdl_c" },
+					new ManifestSchema.File { Path = "materials/published.vmat_c" }
+				}
+			}
+		};
+
+		var result = await CloudAsset.GetPublishedManifestFiles( new TestPackage( revision ) );
+
+		Assert.AreEqual( 1, revision.DownloadCount );
+		CollectionAssert.AreEquivalent( new[] { "models/published.vmdl_c", "materials/published.vmat_c" }, result.ToArray() );
+	}
+
+	[TestMethod]
+	public void ManifestMembershipDistinguishesPublishedAssets()
+	{
+		System.Collections.Generic.HashSet<string> files = new( System.StringComparer.OrdinalIgnoreCase )
+		{
+			"models/published.vmdl_c"
+		};
+
+		Assert.IsTrue( CloudAsset.IsPublishedAsset( files, "models/published.vmdl" ) );
+		Assert.IsTrue( CloudAsset.IsPublishedAsset( files, "MODELS/PUBLISHED.VMDL_C" ) );
+		Assert.IsFalse( CloudAsset.IsPublishedAsset( files, "models/new.vmdl" ) );
+	}
+	[TestMethod]
+	public async Task MissingPublishedRevisionProducesEmptyManifest()
+	{
+		var result = await CloudAsset.GetPublishedManifestFiles( new TestPackage() );
+
+		Assert.AreEqual( 0, result.Count );
+	}
+
 	/// <summary>
 	/// Multiple references to the same package should collapse to one.
 	/// </summary>

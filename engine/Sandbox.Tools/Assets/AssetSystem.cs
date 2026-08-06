@@ -25,6 +25,7 @@ public static partial class AssetSystem
 	static bool IsInitialized = false;
 
 	static HashSet<Asset> UpdateQueue = new();
+	static CloudAssetReferenceListener CloudReferenceListener;
 
 	/// <summary>
 	/// Called after the asset types have been loaded from
@@ -41,6 +42,10 @@ public static partial class AssetSystem
 
 	internal static void InitializeFromProject( Project project )
 	{
+		CloudAsset.ResetReferenceIndex();
+		if ( CloudReferenceListener is not null ) EditorEvent.Unregister( CloudReferenceListener );
+		CloudReferenceListener = new CloudAssetReferenceListener();
+		EditorEvent.Register( CloudReferenceListener );
 		string path = System.IO.Path.Combine( project.GetRootPath(), ".sbox", "cloud.db" );
 		CloudDirectory = new CloudAssetDirectory( path );
 
@@ -51,6 +56,12 @@ public static partial class AssetSystem
 
 	internal static void Shutdown()
 	{
+		CloudAsset.ResetReferenceIndex();
+		if ( CloudReferenceListener is not null )
+		{
+			EditorEvent.Unregister( CloudReferenceListener );
+			CloudReferenceListener = null;
+		}
 		CloudDirectory?.Dispose();
 		CloudDirectory = null;
 	}

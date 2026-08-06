@@ -35,6 +35,8 @@ public partial class StandaloneExporter
 
 	public static async Task<StandaloneExporter> FromConfig( ExportConfig config )
 	{
+		using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
+
 		var p = new StandaloneExporter( config );
 		await p.GenerateAssetManifest();
 		return p;
@@ -73,6 +75,8 @@ public partial class StandaloneExporter
 
 	public async Task Run()
 	{
+		using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
+
 		Logger.Info( $"Exporting {Project.Config.Title} to {_exportConfig.TargetDir}" );
 
 		Logger.Info( $"Compiling assemblies.." );

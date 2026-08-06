@@ -16,9 +16,11 @@ internal class LargeNetworkFiles
 	HashSet<string> downloadQueue = new();
 	Dictionary<string, BaseFileSystem> fileSources = new( StringComparer.OrdinalIgnoreCase );
 	Task activeDownload;
+	readonly FileHashCache fileHashCache;
 
-	public LargeNetworkFiles( string name )
+	internal LargeNetworkFiles( string name, FileHashCache fileHashCache = null )
 	{
+		this.fileHashCache = fileHashCache;
 		StringTable = new( name, true );
 		StringTable.OnChangeOrAdd += OnTableEntryUpdated;
 		StringTable.OnRemoved += OnTableEntryRemoved;
@@ -52,22 +54,21 @@ internal class LargeNetworkFiles
 	/// <summary>
 	/// Add a file to be networked.
 	/// </summary>
-	public bool AddFile( string fileName, Action<long, TimeSpan> onCrc = null, Action<TimeSpan> onTableSet = null )
-		=> AddFile( EngineFileSystem.Mounted, fileName, onCrc, onTableSet );
+	public bool AddFile( string fileName, Action<long, TimeSpan, bool> onCrc = null, Action<TimeSpan> onTableSet = null )
+		=> AddFile( EngineFileSystem.Mounted, fileName, false, onCrc, onTableSet );
 
 	/// <summary>
 	/// Add a file from a specific filesystem to be networked.
 	/// </summary>
-	public bool AddFile( BaseFileSystem fs, string fileName, Action<long, TimeSpan> onCrc = null, Action<TimeSpan> onTableSet = null )
+	public bool AddFile( BaseFileSystem fs, string fileName, bool forceRefresh, Action<long, TimeSpan, bool> onCrc = null, Action<TimeSpan> onTableSet = null )
 	{
 		if ( !fs.FileExists( fileName ) )
 			return false;
 
 		var crcTimer = System.Diagnostics.Stopwatch.StartNew();
-		var crc = fs.GetCrc( fileName );
+		var crc = (fileHashCache ?? FileHashCache.Current).GetOrComputeCrc( fs, fileName, forceRefresh, out var size, out var cacheHit );
 		crcTimer.Stop();
-		var size = fs.FileSize( fileName );
-		onCrc?.Invoke( size, crcTimer.Elapsed );
+		onCrc?.Invoke( size, crcTimer.Elapsed, cacheHit );
 		var normalizedFileName = NormalizeFileName( fileName );
 		fileSources[normalizedFileName] = fs;
 

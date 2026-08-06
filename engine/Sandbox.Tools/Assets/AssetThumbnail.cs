@@ -5,6 +5,15 @@ namespace Editor;
 
 static class AssetThumbnail
 {
+	private static int MaximumConcurrentBuilds => AssetPipelineCompatibility.UseFastEditorPath
+		? Math.Clamp( Math.Max( 1, Environment.ProcessorCount / 4 ), 1, 4 )
+		: 1;
+
+	private static readonly HashSet<Asset> NonResidentBuilds = new();
+	private static int NonResidentBuildsSinceCollection;
+
+	internal static int PendingBuildCount => RenderQueue.Count + RenderingList.Count;
+
 	internal static string GetThumbnailFile( Asset asset, bool createDirectory )
 	{
 		bool isCloud = asset.AbsolutePath.Contains( ".sbox/cloud/" );
@@ -96,48 +105,66 @@ static class AssetThumbnail
 	{
 		var asset = AssetSystem.Get( assetId );
 		if ( asset is null ) return;
-		RenderQueue.RemoveAll( x => x == asset );
-		RenderQueue.Insert( 0, asset );
+		NonResidentBuilds.Remove( asset );
+		RenderQueue.EnqueueFirst( asset );
 	}
 
-	static List<Asset> RenderQueue = new();
-	static List<Asset> RenderingList = new();
+	private static readonly UniqueWorkQueue<Asset> RenderQueue = new();
+	private static readonly HashSet<Asset> RenderingList = new();
 
 	internal static void DequeueThumbBuild( Asset asset )
 	{
 		if ( RenderingList.Contains( asset ) )
 			return; // too late!
 
-		RenderQueue.RemoveAll( x => x == asset );
+		RenderQueue.Remove( asset );
+		NonResidentBuilds.Remove( asset );
 	}
 
-	internal static void QueueThumbBuild( Asset asset, bool add = true )
+	internal static void QueueThumbBuild( Asset asset, bool add = true, bool keepResident = true )
 	{
+		if ( keepResident )
+			NonResidentBuilds.Remove( asset );
+
 		if ( RenderingList.Contains( asset ) )
 			return;
 
-		if ( RenderQueue.RemoveAll( x => x == asset ) == 0 && !add )
-			return;
+		// A background cache-warm request must never downgrade an existing visible request.
+		if ( !keepResident && !RenderQueue.Contains( asset ) )
+			NonResidentBuilds.Add( asset );
 
-		RenderQueue.Add( asset );
+		RenderQueue.Enqueue( asset, add );
+	}
+
+	internal static int QueueMissingThumbBuilds( IEnumerable<Asset> assets )
+	{
+		var queued = 0;
+
+		foreach ( var asset in assets )
+		{
+			if ( System.IO.File.Exists( GetThumbnailFile( asset, false ) ) )
+				continue;
+
+			QueueThumbBuild( asset, keepResident: false );
+			queued++;
+		}
+
+		return queued;
 	}
 
 	internal static void Frame()
 	{
-		for ( int i = 0; i < RenderQueue.Count && RenderingList.Count < 1; i++ )
+		while ( RenderingList.Count < MaximumConcurrentBuilds && RenderQueue.TryDequeue( out var asset ) )
 		{
-			var asset = RenderQueue[i];
 			RenderingList.Add( asset );
-			RenderQueue.RemoveAt( i );
-
 			_ = RenderThumbnailAsync( asset );
-
-			i--;
 		}
 	}
 
 	static async Task RenderThumbnailAsync( Asset asset )
 	{
+		var keepResident = !NonResidentBuilds.Contains( asset );
+
 		//
 		// We always yield when calling this, so it'll be called
 		// in the next frame, instead of RIGHT NOW. This prevents
@@ -158,14 +185,26 @@ static class AssetThumbnail
 			{
 				asset.CachedThumbnail = pix;
 
-				if ( asset is NativeAsset nativeAsset )
+				if ( keepResident && asset is NativeAsset nativeAsset )
 				{
 					IAssetPreviewSystem.OnThumbnailGenerated( nativeAsset.native, asset.CachedThumbnail.ptr );
 				}
 
 				var fullPath = GetThumbnailFile( asset, true );
-
-				await Task.Run( () => pix.SavePng( fullPath ) );
+				await Task.Run( () =>
+				{
+					var temporaryPath = $"{fullPath}.{Guid.NewGuid():N}.tmp";
+					try
+					{
+						pix.SavePng( temporaryPath );
+						System.IO.File.Move( temporaryPath, fullPath, true );
+					}
+					finally
+					{
+						if ( System.IO.File.Exists( temporaryPath ) )
+							System.IO.File.Delete( temporaryPath );
+					}
+				} );
 
 				EditorEvent.RunInterface<AssetSystem.IEventListener>( x => x.OnAssetThumbGenerated( asset ) );
 			}
@@ -176,8 +215,22 @@ static class AssetThumbnail
 		}
 		finally
 		{
+			if ( !keepResident )
+				asset.CachedThumbnail = null;
+
 			asset.Uncache();
 			RenderingList.Remove( asset );
+			NonResidentBuilds.Remove( asset );
+
+			// Native model and material wrappers are weakly held, but their unmanaged allocations
+			// are large enough that managed GC pressure does not trigger promptly. Bound their
+			// lifetime during startup cache warming so thousands of previews cannot exhaust VRAM.
+			if ( !keepResident && ++NonResidentBuildsSinceCollection >= 32 )
+			{
+				NonResidentBuildsSinceCollection = 0;
+				GC.Collect( 2, GCCollectionMode.Forced, true, false );
+				GC.WaitForPendingFinalizers();
+			}
 		}
 	}
 

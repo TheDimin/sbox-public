@@ -42,6 +42,8 @@ public partial class ProjectPublisher
 
 		public async Task BuildFromAssets( Project project, IProgress progress = null, CancellationToken cancel = default )
 		{
+			using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
+
 			Assets.Clear();
 
 			var rootFolder = project.RootDirectory.FullName;
@@ -156,6 +158,8 @@ public partial class ProjectPublisher
 
 		internal async Task BuildFrom( Asset singleAsset, Project project = null, CancellationToken cancel = default )
 		{
+			using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
+
 			Assets.Clear();
 
 			var assetList = new List<Asset>
@@ -183,6 +187,8 @@ public partial class ProjectPublisher
 
 		public async Task BuildFromSource( Project addon, IProgress progress = null, CancellationToken cancel = default )
 		{
+			using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
+
 			Assets.Clear();
 
 			var rootFolder = addon.RootDirectory.FullName;

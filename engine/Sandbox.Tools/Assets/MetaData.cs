@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace Editor
@@ -21,31 +22,78 @@ namespace Editor
 		}
 
 		/// <summary>
-		/// Note - not caching anything here, and reading the whole json file
-		/// every time. Lets see how this turns out.
+		/// Read and parse the metadata document when it changes on disk. Asset hydration often
+		/// asks for multiple keys in succession, so retaining the parsed root avoids repeating
+		/// the same file read and JSON parse for every key.
 		/// </summary>
 		JsonElement? Read()
 		{
-			if ( !System.IO.File.Exists( FilePath ) )
-				return null;
+			const int stableReadAttempts = 3;
+			var bypassCache = AssetPipelineCompatibility.IsLegacyForced;
 
-			try
-			{
-				var json = System.IO.File.ReadAllText( FilePath );
+			if ( bypassCache )
+				MetaDataDocumentCache.Remove( FilePath );
 
-				var document = JsonDocument.Parse( json, new JsonDocumentOptions { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip } );
-				return document.RootElement;
-			}
-			catch ( System.Exception e )
+			for ( var attempt = 0; attempt < stableReadAttempts; attempt++ )
 			{
-				Log.Warning( e, $"Couldn't parse '{FilePath}' ({e.Message})" );
-				return null;
+				var before = new System.IO.FileInfo( FilePath );
+				before.Refresh();
+
+				if ( !before.Exists )
+				{
+					MetaDataDocumentCache.Remove( FilePath );
+					return null;
+				}
+
+				if ( !bypassCache
+					&& MetaDataDocumentCache.TryGet( FilePath, before.LastWriteTimeUtc, before.Length, out var cachedRoot ) )
+				{
+					return cachedRoot;
+				}
+
+				try
+				{
+					var json = System.IO.File.ReadAllText( FilePath );
+					using var document = JsonDocument.Parse( json, new JsonDocumentOptions { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip } );
+					var root = document.RootElement.Clone();
+
+					var after = new System.IO.FileInfo( FilePath );
+					after.Refresh();
+
+					if ( !after.Exists )
+					{
+						MetaDataDocumentCache.Remove( FilePath );
+						return null;
+					}
+
+					var stableIdentity = before.LastWriteTimeUtc == after.LastWriteTimeUtc
+						&& before.Length == after.Length;
+
+					if ( !stableIdentity && attempt + 1 < stableReadAttempts )
+						continue;
+
+					if ( stableIdentity && !bypassCache )
+						MetaDataDocumentCache.Store( FilePath, after.LastWriteTimeUtc, after.Length, root );
+
+					return root;
+				}
+				catch ( System.Exception e )
+				{
+					if ( attempt + 1 < stableReadAttempts
+						&& (e is System.IO.IOException || e is JsonException) )
+						continue;
+
+					MetaDataDocumentCache.Remove( FilePath );
+					Log.Warning( e, $"Couldn't parse '{FilePath}' ({e.Message})" );
+					return null;
+				}
 			}
+
+			return null;
 		}
 
 		/// <summary>
-		/// Note - not caching anything here, and reading the whole json file
-		/// every time. Lets see how this turns out.
+		/// Start from the cached document when possible.
 		/// </summary>
 		JsonObject StartWrite()
 		{
@@ -72,6 +120,7 @@ namespace Editor
 						}
 					}
 
+					MetaDataDocumentCache.Remove( FilePath );
 					return;
 				}
 				catch ( System.IO.IOException ex )

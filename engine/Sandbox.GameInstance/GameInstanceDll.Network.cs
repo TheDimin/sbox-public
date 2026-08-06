@@ -37,6 +37,8 @@ internal partial class GameInstanceDll
 		public int LargeExistenceChecks;
 		public int LargeSizeQueries;
 		public int LargeCrcCalculations;
+		public int LargeCrcCacheHits;
+		public int LargeCrcCacheMisses;
 		public long LargeCrcBytes;
 		public double LargeCrcMs;
 		public int AddLarge;
@@ -531,8 +533,8 @@ internal partial class GameInstanceDll
 			$"selectedSmall={profile.SelectedSmall} selectedLarge={profile.SelectedLarge} " +
 			$"smallReads={profile.SmallReads} smallBytes={profile.SmallBytes} smallReadMs={profile.SmallReadMs:0.###} " +
 			$"largeInspected={profile.LargeInspected} existenceChecks={profile.LargeExistenceChecks} " +
-			$"sizeQueries={profile.LargeSizeQueries} crcFiles={profile.LargeCrcCalculations} " +
-			$"crcBytes={profile.LargeCrcBytes} crcMs={profile.LargeCrcMs:0.###} " +
+			$"sizeQueries={profile.LargeSizeQueries} crcCacheHits={profile.LargeCrcCacheHits} crcCacheMisses={profile.LargeCrcCacheMisses} " +
+			$"crcFiles={profile.LargeCrcCalculations} crcBytes={profile.LargeCrcBytes} crcMs={profile.LargeCrcMs:0.###} " +
 			$"addLarge={profile.AddLarge} addSmall={profile.AddSmall} tableSets={profile.TableSets} tableRemoves={profile.TableRemoves} " +
 			$"gameScanMs={profile.GameScanMs:0.###} transientScanMs={profile.TransientScanMs:0.###} " +
 			$"filteringMs={profile.FilteringMs:0.###} metadataMs={profile.MetadataMs:0.###} " +
@@ -544,7 +546,8 @@ internal partial class GameInstanceDll
 		NetworkFileSource source,
 		string fileName,
 		Dictionary<string, NetworkFileManifestEntry> manifest,
-		NetworkFileProfile profile )
+		NetworkFileProfile profile,
+		bool forceCrcRefresh )
 	{
 		var filtering = System.Diagnostics.Stopwatch.StartNew();
 		if ( fileName.Contains( "/code/obj/", StringComparison.OrdinalIgnoreCase ) ||
@@ -625,12 +628,20 @@ internal partial class GameInstanceDll
 			profile.TableRemoves++;
 
 		if ( !NetworkedLargeFiles.AddFile( fs, path,
-			(crcBytes, crcElapsed) =>
+			forceCrcRefresh,
+			(crcBytes, crcElapsed, cacheHit) =>
 			{
+				profile.LargeSizeQueries++;
+				if ( cacheHit )
+				{
+					profile.LargeCrcCacheHits++;
+					return;
+				}
+
+				profile.LargeCrcCacheMisses++;
 				profile.LargeCrcCalculations++;
 				profile.LargeCrcBytes += crcBytes;
 				profile.LargeCrcMs += crcElapsed.TotalMilliseconds;
-				profile.LargeSizeQueries++;
 			},
 			tableElapsed =>
 			{
@@ -675,7 +686,7 @@ internal partial class GameInstanceDll
 			if ( !hasNext ) break;
 
 			profile.FilesEnumerated++;
-			ProcessNetworkFile( fs, source, enumerator.Current, manifest, profile );
+			ProcessNetworkFile( fs, source, enumerator.Current, manifest, profile, false );
 		}
 	}
 
@@ -703,6 +714,7 @@ internal partial class GameInstanceDll
 
 		_dirtyNetworkFiles.Clear();
 		_networkManifestBuilt = true;
+		FileHashCache.Current.Flush();
 	}
 
 	private bool TryResolveNetworkFile( string path, out BaseFileSystem fs, out NetworkFileSource source )
@@ -740,7 +752,7 @@ internal partial class GameInstanceDll
 				profile.DirtyFiles++;
 				if ( TryResolveNetworkFile( path, out var fs, out var source ) && ShouldNetworkFile( path ) )
 				{
-					refreshed = ProcessNetworkFile( fs, source, path, _networkFileManifest, profile );
+					refreshed = ProcessNetworkFile( fs, source, path, _networkFileManifest, profile, true );
 				}
 				else
 				{
@@ -754,6 +766,7 @@ internal partial class GameInstanceDll
 					_dirtyNetworkFiles.Remove( path );
 			}
 		}
+		FileHashCache.Current.Flush();
 	}
 
 	/// <summary>

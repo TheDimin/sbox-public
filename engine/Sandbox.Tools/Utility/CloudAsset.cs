@@ -7,6 +7,10 @@ namespace Editor;
 
 public class CloudAsset
 {
+	private static readonly CloudAssetReferenceIndex<Asset> ReferenceIndex = new();
+
+	internal static void ResetReferenceIndex() => ReferenceIndex.Reset();
+
 	/// <summary>
 	/// Checks if a package is installed on disk, including checking the version if it's present in the ident.
 	/// </summary>
@@ -194,23 +198,13 @@ public class CloudAsset
 		// find out what stuff we're referencing in the project that's not already a part of the published project (a NEW package)
 		// add these to our ServerPackages string table so connecting clients know to fetch these
 
-		if ( IGameInstance.Current is null )
+		var gamePackage = IGameInstance.Current?.Package;
+		if ( gamePackage is null )
 			return;
 
 		var sw = System.Diagnostics.Stopwatch.StartNew();
 
-		HashSet<string> filesInManifest = new( StringComparer.OrdinalIgnoreCase );
-
-		var gamePackage = await Package.FetchAsync( IGameInstance.Current.Package.GetIdent( false, true ), false );
-		if ( gamePackage is not null && gamePackage.Revision is not null )
-		{
-			await gamePackage.Revision.DownloadManifestAsync();
-
-			foreach ( var file in gamePackage.Revision.Manifest.Files )
-			{
-				filesInManifest.Add( file.Path );
-			}
-		}
+		var filesInManifest = await GetPublishedManifestFiles( gamePackage );
 
 		var packages = GetAssetReferences( true );
 
@@ -228,10 +222,7 @@ public class CloudAsset
 			if ( string.IsNullOrEmpty( filepath ) )
 				continue;
 
-			if ( !filepath.EndsWith( "_c" ) )
-				filepath += "_c";
-
-			if ( !filesInManifest.Contains( filepath ) )
+			if ( !IsPublishedAsset( filesInManifest, filepath ) )
 			{
 				ServerPackages.Current.AddRequirement( package );
 				count++;
@@ -239,6 +230,34 @@ public class CloudAsset
 		}
 
 		Log.Info( $"Added new {count} cloud reference(s) to ServerPackage table.. (took {sw.Elapsed.TotalSeconds:0.000}s)" );
+	}
+
+	internal static bool IsPublishedAsset( IReadOnlySet<string> filesInManifest, string primaryAsset )
+	{
+		if ( string.IsNullOrEmpty( primaryAsset ) )
+			return false;
+
+		if ( !primaryAsset.EndsWith( "_c", StringComparison.OrdinalIgnoreCase ) )
+			primaryAsset += "_c";
+
+		return filesInManifest.Contains( primaryAsset );
+	}
+	internal static async Task<HashSet<string>> GetPublishedManifestFiles( Package gamePackage )
+	{
+		HashSet<string> files = new( StringComparer.OrdinalIgnoreCase );
+		var revision = gamePackage?.Revision;
+		if ( revision is null )
+			return files;
+
+		await revision.DownloadManifestAsync();
+
+		foreach ( var file in revision.Manifest?.Files ?? Array.Empty<ManifestSchema.File>() )
+		{
+			if ( !string.IsNullOrEmpty( file.Path ) )
+				files.Add( file.Path );
+		}
+
+		return files;
 	}
 
 	/// <summary>
@@ -255,25 +274,6 @@ public class CloudAsset
 	public static Dictionary<string, List<Asset>> GetAssetReferenceSources( bool currentProjectOnly )
 	{
 		string projectPath = Project.Current.GetAssetsPath().Replace( '\\', '/' );
-		var references = new Dictionary<string, List<Asset>>( StringComparer.OrdinalIgnoreCase );
-		var seen = new Dictionary<string, HashSet<Asset>>( StringComparer.OrdinalIgnoreCase );
-
-		void AddReference( string packageIdent, Asset asset )
-		{
-			if ( string.IsNullOrWhiteSpace( packageIdent ) )
-				return;
-
-			if ( !references.TryGetValue( packageIdent, out var sources ) )
-			{
-				sources = new List<Asset>();
-				references[packageIdent] = sources;
-				seen[packageIdent] = new HashSet<Asset>();
-			}
-
-			// A single asset can list the same package more than once, prevent duplicates
-			if ( seen[packageIdent].Add( asset ) )
-				sources.Add( asset );
-		}
 
 		HashSet<string> validAssetPaths = null;
 		if ( currentProjectOnly )
@@ -294,58 +294,78 @@ public class CloudAsset
 			}
 		}
 
-		var gr = AssetSystem.All.Where( x => x.AssetType.IsGameResource && (!currentProjectOnly || validAssetPaths.Any( path => x.AbsolutePath.StartsWith( path, StringComparison.OrdinalIgnoreCase ) )) );
-		foreach ( var r in gr )
+		ReferenceIndex.Build( AssetSystem.All, x => x.AbsolutePath, ReadReferences );
+		return ReferenceIndex.Snapshot( asset => !currentProjectOnly || validAssetPaths.Any( path => asset.AbsolutePath.StartsWith( path, StringComparison.OrdinalIgnoreCase ) ) );
+	}
+
+	internal static void UpdateReferenceIndex( Asset asset, string json = null )
+	{
+		if ( asset is null )
+		{
+			ReferenceIndex.Reset();
+			return;
+		}
+
+		var references = asset.AssetType.IsGameResource && json is not null
+			? ReadGameResourceReferences( asset, json )
+			: ReadReferences( asset );
+		ReferenceIndex.Update( asset, asset.AbsolutePath, references );
+	}
+
+	internal static void ReconcileReferenceIndex()
+	{
+		ReferenceIndex.Reconcile( AssetSystem.All, x => x.AbsolutePath, ReadReferences );
+	}
+
+	private static IEnumerable<string> ReadReferences( Asset asset )
+	{
+		if ( asset.AssetType.IsGameResource )
 		{
 			string json = null;
 			try
 			{
-				json = r.ReadJson();
-				if ( string.IsNullOrWhiteSpace( json ) ) continue;
-
-				if ( JsonNode.Parse( json ) is not JsonObject jso ) continue;
-				if ( jso["__references"] is not JsonArray refs ) continue;
-				if ( refs.Count == 0 ) continue;
-
-				foreach ( var jsonNode in refs )
-				{
-					AddReference( jsonNode.ToString(), r );
-				}
-			}
-			catch ( JsonException e )
-			{
-				Log.Info( $"{r.AbsolutePath} - {e.Message}" );
-				Log.Info( json );
+				json = asset.ReadJson();
+				return ReadGameResourceReferences( asset, json );
 			}
 			catch ( Exception e )
 			{
-				Log.Info( $"{r.AbsolutePath} - {e.Message}" );
+				Log.Info( $"{asset.AbsolutePath} - {e.Message}" );
+				return Array.Empty<string>();
 			}
 		}
 
-		var nativeResources = AssetSystem.All.Where( x => !x.AssetType.IsGameResource && (!currentProjectOnly || validAssetPaths.Any( path => x.AbsolutePath.StartsWith( path, StringComparison.OrdinalIgnoreCase ) )) ).ToArray();
-		foreach ( var r in nativeResources )
-		{
-			var config = r?.Publishing?.ProjectConfig;
-			if ( config is null ) continue;
-
-			if ( config.EditorReferences is not null )
-			{
-				foreach ( var packageIdent in config.EditorReferences )
-				{
-					AddReference( packageIdent, r );
-				}
-			}
-
-			if ( config.DistinctPackageReferences is not null )
-			{
-				foreach ( var packageIdent in config.DistinctPackageReferences )
-				{
-					AddReference( packageIdent, r );
-				}
-			}
-		}
-
-		return references;
+		var config = asset.Publishing?.ProjectConfig;
+		if ( config is null ) return Array.Empty<string>();
+		return (config.EditorReferences?.AsEnumerable() ?? Enumerable.Empty<string>())
+			.Concat( config.DistinctPackageReferences?.AsEnumerable() ?? Enumerable.Empty<string>() )
+			.ToArray();
 	}
+
+	internal static string[] ReadGameResourceReferences( Asset asset, string json )
+	{
+		if ( string.IsNullOrWhiteSpace( json ) ) return Array.Empty<string>();
+		try
+		{
+			if ( JsonNode.Parse( json ) is not JsonObject jso ) return Array.Empty<string>();
+			if ( jso["__references"] is not JsonArray refs ) return Array.Empty<string>();
+			return refs.Select( x => x?.ToString() ).Where( x => !string.IsNullOrWhiteSpace( x ) ).ToArray();
+		}
+		catch ( JsonException e )
+		{
+			Log.Info( $"{asset?.AbsolutePath} - {e.Message}" );
+			Log.Info( json );
+			return Array.Empty<string>();
+		}
+	}
+}
+
+internal sealed class CloudAssetReferenceListener : ResourceLibrary.IEventListener, AssetSystem.IEventListener
+{
+	void ResourceLibrary.IEventListener.OnSourceSaved( GameResource resource, string filename, string json )
+	{
+		CloudAsset.UpdateReferenceIndex( AssetSystem.FindByPath( filename ), json );
+	}
+
+	void AssetSystem.IEventListener.OnAssetChanged( Asset asset ) => CloudAsset.UpdateReferenceIndex( asset );
+	void AssetSystem.IEventListener.OnAssetSystemChanges() => CloudAsset.ReconcileReferenceIndex();
 }

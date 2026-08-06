@@ -12,42 +12,65 @@ internal static class ResourceLoader
 		".vmat_c", ".vmdl_c", ".vtex_c", ".shader_c", ".vanmgrph_c"
 	};
 
-	/// Registers resource paths into PathIndex without loading them, for any file whose
-	/// extension is in <paramref name="extensions"/>. Called during LoadAllGameResource.
-	private static void RegisterPaths( ReadOnlySpan<string> files, IReadOnlySet<string> extensions )
-	{
-		foreach ( var file in files )
-		{
-			if ( !extensions.Contains( System.IO.Path.GetExtension( file ) ) )
-				continue;
+	internal readonly record struct DiscoveryCandidate( string Path, AssetTypeAttribute Type );
 
-			// RegisterPath calls FixPath internally, which strips the _c suffix.
-			Game.Resources.RegisterPath( file );
+	/// <summary>
+	/// Builds the compact second-phase load plan while the mounted filesystem is enumerated.
+	/// Native and unrelated files are never retained by the plan.
+	/// </summary>
+	internal sealed class DiscoveryPlan
+	{
+		private readonly List<DiscoveryCandidate> _gameResources = new();
+
+		internal IReadOnlyList<DiscoveryCandidate> GameResources => _gameResources;
+		internal int ScannedFileCount { get; private set; }
+		internal int RegisteredPathCount { get; private set; }
+
+		/// <returns>True when the path should be registered in the resource path index.</returns>
+		internal bool Observe( string file, IReadOnlyDictionary<string, AssetTypeAttribute> types, IReadOnlySet<string> registeredExtensions )
+		{
+			ScannedFileCount++;
+
+			var extension = System.IO.Path.GetExtension( file );
+			if ( !registeredExtensions.Contains( extension ) )
+				return false;
+
+			RegisteredPathCount++;
+
+			if ( types.TryGetValue( extension, out var type ) )
+				_gameResources.Add( new DiscoveryCandidate( file, type ) );
+
+			return true;
 		}
 	}
 
 	internal static void LoadAllGameResource( BaseFileSystem fileSystem, bool reloadExisting = false, Package sourcePackage = null )
 	{
-		var sw = Stopwatch.StartNew();
+		var totalTimer = Stopwatch.StartNew();
 		var types = Game.TypeLibrary.GetAttributes<AssetTypeAttribute>().DistinctBy( x => x.Extension )
 			.ToDictionary( x => $".{x.Extension}_c", x => x, StringComparer.OrdinalIgnoreCase );
-
-		var allFiles = fileSystem.FindFile( "/", "*", true ).ToArray();
 
 		// Union GameResource extensions with native-only ones so PathIndex covers everything.
 		var allExtensions = new HashSet<string>( types.Keys, StringComparer.OrdinalIgnoreCase );
 		allExtensions.UnionWith( NativeExtensions );
 
-		RegisterPaths( allFiles, allExtensions );
+		var discovery = new DiscoveryPlan();
+		var pathsToRegister = new List<string>();
+		foreach ( var file in fileSystem.FindFile( "/", "*", true ) )
+		{
+			if ( discovery.Observe( file, types, allExtensions ) )
+				pathsToRegister.Add( file );
+		}
+
+		foreach ( var file in pathsToRegister )
+			Game.Resources.RegisterPath( file );
 
 		var allResources = new List<GameResource>();
 
-		foreach ( var file in allFiles )
+		foreach ( var candidate in discovery.GameResources )
 		{
-			var extension = System.IO.Path.GetExtension( file );
-
-			if ( !types.TryGetValue( extension, out var type ) )
-				continue;
+			var file = candidate.Path;
+			var type = candidate.Type;
 
 			// Skip resources that are already fully loaded - this allows calling this method
 			// multiple times (e.g. once per package) without redundant work.
@@ -80,36 +103,43 @@ internal static class ResourceLoader
 			AddWatcherForType( type.Value );
 		}
 
+
+		FileHashCache.Current.Flush();
+		if ( totalTimer.Elapsed.TotalSeconds > 1 )
+		{
+			Log.Info( $"Resource discovery scanned {discovery.ScannedFileCount:N0} files, indexed {discovery.RegisteredPathCount:N0} paths, and loaded {allResources.Count:N0} GameResources in {totalTimer.Elapsed.TotalSeconds:0.000}s" );
+		}
+
 		// TODO: Check for edited but not saved OR recompiled assets and load in their values on server/client
 		// like editing an asset while the gamemode is running would?
 	}
 
 	internal static async Task LoadAllGameResourceAsync( BaseFileSystem fileSystem, CancellationToken ct = default, bool reloadExisting = false, Package sourcePackage = null )
 	{
-		var sw = Stopwatch.StartNew();
+		var totalTimer = Stopwatch.StartNew();
+		var yieldTimer = Stopwatch.StartNew();
 		var types = Game.TypeLibrary.GetAttributes<AssetTypeAttribute>().DistinctBy( x => x.Extension )
 			.ToDictionary( x => $".{x.Extension}_c", x => x, StringComparer.OrdinalIgnoreCase );
 
 		var allExtensions = new HashSet<string>( types.Keys, StringComparer.OrdinalIgnoreCase );
 		allExtensions.UnionWith( NativeExtensions );
 
-		var allFiles = new List<string>();
+		var discovery = new DiscoveryPlan();
 		foreach ( var file in fileSystem.FindFile( "/", "*", true ) )
 		{
 			ct.ThrowIfCancellationRequested();
-			allFiles.Add( file );
-			if ( allExtensions.Contains( System.IO.Path.GetExtension( file ) ) )
+			if ( discovery.Observe( file, types, allExtensions ) )
 				Game.Resources.RegisterPath( file );
-			if ( sw.ElapsedMilliseconds > 8 ) { LoadingScreen.Subtitle = System.IO.Path.GetFileName( file ); await Task.Yield(); sw.Restart(); }
+			if ( yieldTimer.ElapsedMilliseconds > 8 ) { LoadingScreen.Subtitle = System.IO.Path.GetFileName( file ); await Task.Yield(); yieldTimer.Restart(); }
 		}
 
 		var allResources = new List<GameResource>();
 
-		foreach ( var file in allFiles )
+		foreach ( var candidate in discovery.GameResources )
 		{
 			ct.ThrowIfCancellationRequested();
-			var extension = System.IO.Path.GetExtension( file );
-			if ( !types.TryGetValue( extension, out var type ) ) continue;
+			var file = candidate.Path;
+			var type = candidate.Type;
 
 			// Skip resources that are already fully loaded - this allows calling this method
 			// multiple times (e.g. once per package) without redundant work.
@@ -126,20 +156,28 @@ internal static class ResourceLoader
 				Log.Warning( ex, $"Exception when trying to load {file}" );
 			}
 
-			if ( sw.ElapsedMilliseconds > 8 ) { LoadingScreen.Subtitle = System.IO.Path.GetFileName( file ); await Task.Yield(); sw.Restart(); }
+			if ( yieldTimer.ElapsedMilliseconds > 8 ) { LoadingScreen.Subtitle = System.IO.Path.GetFileName( file ); await Task.Yield(); yieldTimer.Restart(); }
 		}
 
 		foreach ( var resource in allResources )
 		{
 			ct.ThrowIfCancellationRequested();
 			resource.PostLoadInternal();
-			if ( sw.ElapsedMilliseconds > 8 ) { LoadingScreen.Subtitle = System.IO.Path.GetFileName( resource.ResourcePath ); await Task.Yield(); sw.Restart(); }
+
+			if ( yieldTimer.ElapsedMilliseconds > 8 ) { LoadingScreen.Subtitle = System.IO.Path.GetFileName( resource.ResourcePath ); await Task.Yield(); yieldTimer.Restart(); }
 		}
 
 		LoadingScreen.Subtitle = null;
 
 		foreach ( var type in types )
 			AddWatcherForType( type.Value );
+
+		FileHashCache.Current.Flush();
+
+		if ( totalTimer.Elapsed.TotalSeconds > 1 )
+		{
+			Log.Info( $"Resource discovery scanned {discovery.ScannedFileCount:N0} files, indexed {discovery.RegisteredPathCount:N0} paths, and loaded {allResources.Count:N0} GameResources in {totalTimer.Elapsed.TotalSeconds:0.000}s" );
+		}
 	}
 
 

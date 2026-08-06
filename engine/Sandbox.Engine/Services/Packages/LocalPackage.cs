@@ -6,6 +6,10 @@ namespace Sandbox;
 /// </summary>
 internal sealed class LocalPackage : Package
 {
+	Package publishedPackage;
+
+	public override IRevision Revision => publishedPackage?.Revision;
+
 	public Project Project { get; set; }
 
 	/// <summary>
@@ -82,6 +86,7 @@ internal sealed class LocalPackage : Package
 
 	internal void UpdateFromPackage( Package cachedPackage )
 	{
+		publishedPackage = cachedPackage;
 		Summary = cachedPackage.Summary;
 		Description = cachedPackage.Description;
 		Thumb = cachedPackage.Thumb;

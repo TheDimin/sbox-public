@@ -13,6 +13,9 @@ namespace Editor;
 /// </summary>
 static class StartupLoadProject
 {
+	[ConVar( "asset_pipeline_warm_all_thumbnails", ConVarFlags.Protected, Help = "Experimental: generate every missing model thumbnail before the editor becomes interactive." )]
+	internal static bool WarmAllThumbnails { get; set; }
+
 	public static bool IsLoading { get; private set; } = false;
 
 	public static Logger Log = new( "Startup" );
@@ -280,7 +283,7 @@ static class StartupLoadProject
 			await CompileAllShaders();
 
 			Step( "Compiling assets" );
-			CompileAllAssets();
+			await CompileAllAssets();
 
 			FileWatch.Tick();
 
@@ -354,27 +357,87 @@ static class StartupLoadProject
 		}
 	}
 
-	static void CompileAllAssets()
+	static async Task CompileAllAssets()
 	{
 		var sw = Stopwatch.StartNew();
+		var useFastEditorPath = AssetPipelineCompatibility.UseFastEditorPath;
+		var warmAllThumbnails = useFastEditorPath && WarmAllThumbnails;
+
+		Bootstrap.StartupTiming?.SetValue( "AssetPipeline.Mode", useFastEditorPath ? "fast-editor" : "legacy" );
+		Bootstrap.StartupTiming?.SetValue( "AssetPipeline.WarmAllThumbnails", warmAllThumbnails );
+
 		var gr = AssetSystem.All.Where( x => !x.IsTrivialChild && x.CanRecompile && !x.IsCompiledAndUpToDate ).ToArray();
-		if ( gr.Length == 0 ) return;
+		Bootstrap.StartupTiming?.SetValue( "AssetPipeline.CompileCandidates", gr.Length );
 
-		FastTimer timer = FastTimer.StartNew();
-
-		for ( int i = 0; i < gr.Length; i++ )
+		if ( useFastEditorPath )
 		{
-			EditorSplashScreen.SetMessage( $"Compiling asset {i + 1}/{gr.Length} {gr[i].Path}" );
-			StepProgress( (float)i / gr.Length );
+			var orderedAssets = gr
+				.OrderByDescending( asset => asset.Path.StartsWith( "thirdparty/synty/", StringComparison.OrdinalIgnoreCase ) )
+				.ThenBy( asset => asset.AssetType == AssetType.Model )
+				.ToArray();
 
-			IToolsDll.Current?.Spin();
-			gr[i].Compile( false );
+			for ( int i = 0; i < orderedAssets.Length; i++ )
+			{
+				if ( i % 128 == 0 )
+				{
+					EditorSplashScreen.SetMessage( $"Compiling asset {i + 1:N0}/{orderedAssets.Length:N0}" );
+					StepProgress( (float)i / orderedAssets.Length );
+					IToolsDll.Current?.Spin();
+				}
+
+				orderedAssets[i].Compile( false );
+			}
+		}
+		else
+		{
+			// Compatibility path: preserve the original catalog order and pump the editor for
+			// every compile. Publishing and the default editor configuration use this path.
+			for ( int i = 0; i < gr.Length; i++ )
+			{
+				EditorSplashScreen.SetMessage( $"Compiling asset {i + 1}/{gr.Length} {gr[i].Path}" );
+				StepProgress( (float)i / gr.Length );
+				IToolsDll.Current?.Spin();
+				gr[i].Compile( false );
+			}
 		}
 
 		if ( sw.Elapsed.TotalSeconds > 2 )
+			Log.Info( useFastEditorPath
+				? $"Compiled {gr.Length:N0} assets in {sw.Elapsed.TotalSeconds:0.000}s"
+				: $"Compiling assets took {sw.Elapsed.TotalSeconds:0.000}s" );
+
+		Bootstrap.StartupTiming?.SetValue( "AssetPipeline.CompileMilliseconds", (int)sw.ElapsedMilliseconds );
+
+		if ( !warmAllThumbnails )
+			return;
+
+		var thumbnailAssets = AssetSystem.All.Where( asset => asset.AssetType == AssetType.Model ).ToArray();
+
+		// Native model previews require a live editor framebuffer. Initialize the editor behind
+		// the application-modal splash, and only release it after the preview queue is empty.
+		EditorWindow.Startup();
+		EditorSplashScreen.BlockEditorWhileFinishingAssets();
+		for ( var frame = 0; frame < 3; frame++ )
 		{
-			Log.Info( $"Compiling assets took {sw.Elapsed.TotalSeconds:0.000}s" );
+			IToolsDll.Current?.Spin();
+			await Task.Yield();
 		}
+
+		var missingThumbnailCount = AssetThumbnail.QueueMissingThumbBuilds( thumbnailAssets );
+
+		var thumbnailStart = Stopwatch.StartNew();
+		while ( AssetThumbnail.PendingBuildCount > 0 )
+		{
+			EditorSplashScreen.SetMessage( $"Generating previews ({AssetThumbnail.PendingBuildCount:N0} remaining)" );
+			AssetThumbnail.Frame();
+			IToolsDll.Current?.Spin();
+			await Task.Delay( 1 );
+		}
+
+		Log.Info( $"Generated {missingThumbnailCount:N0} missing model previews; all {thumbnailAssets.Length:N0} previews checked in {thumbnailStart.Elapsed.TotalSeconds:0.000}s" );
+		Bootstrap.StartupTiming?.SetValue( "AssetPipeline.ThumbnailCandidates", thumbnailAssets.Length );
+		Bootstrap.StartupTiming?.SetValue( "AssetPipeline.ThumbnailsGenerated", missingThumbnailCount );
+		Bootstrap.StartupTiming?.SetValue( "AssetPipeline.ThumbnailMilliseconds", (int)thumbnailStart.ElapsedMilliseconds );
 	}
 
 	/// <summary>

@@ -29,6 +29,8 @@ public partial class ProjectPublisher
 
 	public static async Task<ProjectPublisher> FromAsset( Asset asset )
 	{
+		using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
+
 		await asset.CompileIfNeededAsync( 60 );
 
 		if ( asset.Publishing is null )
@@ -59,6 +61,8 @@ public partial class ProjectPublisher
 
 	public static async Task<ProjectPublisher> FromProject( Project project )
 	{
+		using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
+
 		// library
 		if ( project.IsSourcePublish() )
 		{
@@ -190,6 +194,8 @@ public partial class ProjectPublisher
 	/// </summary>
 	public async Task Publish( IProgress progress = null, CancellationToken cancel = default )
 	{
+		using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
+
 		if ( Project.Config.IsStandaloneOnly )
 			return;
 
@@ -203,6 +209,8 @@ public partial class ProjectPublisher
 	/// </summary>
 	public async Task PrePublish( CancellationToken cancellationToken = default )
 	{
+		using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
+
 		FinishAddingFiles();
 
 		if ( Project.Config.IsStandaloneOnly )

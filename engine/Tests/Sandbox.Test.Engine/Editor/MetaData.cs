@@ -3,8 +3,30 @@ using System.IO;
 namespace EditorTests;
 
 [TestClass]
+[DoNotParallelize]
 public partial class MetaDataTest
 {
+	[TestMethod]
+	public void RepeatedReadUsesCachedDocument()
+	{
+		var fn = Path.Combine( System.Environment.CurrentDirectory, ".source2", $"metadata_cached_{System.Guid.NewGuid():N}.json" );
+
+		try
+		{
+			File.WriteAllText( fn, """{"value":"cached"}""" );
+
+			var md = new Editor.MetaData( fn );
+			Assert.AreEqual( "cached", md.GetString( "value" ) );
+
+			using var lockedFile = File.Open( fn, FileMode.Open, FileAccess.Read, FileShare.None );
+			Assert.AreEqual( "cached", md.GetString( "value" ) );
+		}
+		finally
+		{
+			File.Delete( fn );
+		}
+	}
+
 	/// <summary>
 	/// File shouldn't get created on pure read
 	/// </summary>

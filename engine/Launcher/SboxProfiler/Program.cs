@@ -65,6 +65,9 @@ class Launcher
 
 		var kernelEvents = KernelTraceEventParser.Keywords.Profile
 							| KernelTraceEventParser.Keywords.ContextSwitch
+							| KernelTraceEventParser.Keywords.Dispatcher
+							| KernelTraceEventParser.Keywords.DeferedProcedureCalls
+							| KernelTraceEventParser.Keywords.Interrupt
 							| KernelTraceEventParser.Keywords.ImageLoad
 							| KernelTraceEventParser.Keywords.Process
 							| KernelTraceEventParser.Keywords.Thread;

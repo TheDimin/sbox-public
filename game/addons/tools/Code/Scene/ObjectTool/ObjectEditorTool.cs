@@ -17,6 +17,7 @@ public class ObjectEditorTool : EditorTool
 		yield return new PositionEditorTool();
 		yield return new RotationEditorTool();
 		yield return new ScaleEditorTool();
+		yield return new SurfacePlacementEditorTool();
 	}
 
 	public override void OnUpdate()
@@ -97,6 +98,9 @@ public class ObjectEditorTool : EditorTool
 
 	void UpdateSelectionMode()
 	{
+		if ( CurrentTool is { AllowGameObjectSelection: false } )
+			return;
+
 		if ( !Gizmo.HasMouseFocus )
 			return;
 
@@ -116,7 +120,7 @@ public class ObjectEditorTool : EditorTool
 		EditorToolManager.SetTool( nameof( ObjectEditorTool ) );
 	}
 
-	public override bool HasBoxSelectionMode() => true;
+	public override bool HasBoxSelectionMode() => CurrentTool?.AllowGameObjectSelection ?? true;
 }
 
 file class ObjectEditorToolShortcutsWidget : Widget
