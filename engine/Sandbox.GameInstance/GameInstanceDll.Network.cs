@@ -138,6 +138,12 @@ internal partial class GameInstanceDll
 			$"largeEntries={Current.NetworkedLargeFiles.StringTable.Entries.Count}" );
 	}
 
+	/// <summary>
+	/// What we enumerate for files to offer joining clients: the game's content plus any local
+	/// libraries. We own this so it needs disposing, the filesystems mounted into it don't.
+	/// </summary>
+	internal AggregateFileSystem NetworkedFileSystem { get; private set; }
+
 	public GameNetworkSystem CreateGameNetworking( NetworkSystem system )
 	{
 		var instance = new SceneNetworkSystem( TypeLibrary, system );
@@ -794,7 +800,21 @@ internal partial class GameInstanceDll
 		profile.ConfiguredPatterns = CountConfiguredNetworkIncludePaths( project?.Config.Resources );
 		profile.UniquePatterns = includePaths.Count;
 
-		EnsureNetworkFileWatchers( project, gameInstance.GameFileSystem, profile );
+		if ( NetworkedFileSystem is null )
+		{
+			NetworkedFileSystem = new AggregateFileSystem();
+			NetworkedFileSystem.Mount( gameInstance.GameFileSystem );
+
+			// Libraries are separate packages, so their assets aren't present in the
+			// game's filesystem unless we explicitly include their mounted filesystems.
+			foreach ( var library in Project.Libraries.Where( x => x.Active && x.RootDirectory is not null ) )
+			{
+				if ( PackageManager.Find( library.Package.FullIdent, true ) is { } libraryPackage )
+					NetworkedFileSystem.Mount( libraryPackage.FileSystem );
+			}
+		}
+
+		EnsureNetworkFileWatchers( project, NetworkedFileSystem, profile );
 
 		// Retaining the manifest is an editor-session optimization. Preserve the
 		// complete rebuild behavior for standalone and dedicated-server hosts.

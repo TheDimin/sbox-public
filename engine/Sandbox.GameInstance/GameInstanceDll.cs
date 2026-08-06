@@ -145,6 +145,8 @@ internal partial class GameInstanceDll : Engine.IGameInstanceDll
 			PackageLoader.OnAfterHotload = OnAfterHotload;
 		}
 
+		ResourceLoader.Clear();
+
 		if ( DidMountNetworkedFiles )
 		{
 			EngineFileSystem.Mounted.UnMount( NetworkedLargeFiles.Files );
@@ -173,6 +175,9 @@ internal partial class GameInstanceDll : Engine.IGameInstanceDll
 		FileWatchers.ForEach( w => w.Dispose() );
 		FileWatchers.Clear();
 		ResetNetworkFileManifest();
+
+		NetworkedFileSystem?.Dispose();
+		NetworkedFileSystem = null;
 
 		if ( !Application.IsHeadless )
 		{
