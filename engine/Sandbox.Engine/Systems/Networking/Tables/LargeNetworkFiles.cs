@@ -135,29 +135,67 @@ internal class LargeNetworkFiles
 
 	void AddFileToFileSystem( string fileName, LargeFileInfo contents )
 	{
-		// Can we find this file somewhere, or do we need to download it?
-
-		if ( EngineFileSystem.Mounted.FileExists( fileName ) )
+		if ( TryReuseMatchingMountedFile(
+			EngineFileSystem.Mounted,
+			fileName,
+			contents,
+			(path, fullPath) => RedirectFileSystem?.AddAbsFile( path, fullPath ) ) )
 		{
-			var size = EngineFileSystem.Mounted.FileSize( fileName );
-			if ( size == contents.Size )
-			{
-				var crc = EngineFileSystem.Mounted.GetCrc( fileName );
-				if ( crc == contents.CRC )
-				{
-					if ( AssetDownloadCache.DebugNetworkFiles )
-					{
-						Log.Info( $"Skipping downloading {fileName} - we already have it" );
-					}
-					return;
-				}
-			}
+			return;
 		}
 
+		QueueFileIfNeeded(
+			fileName,
+			contents,
+			(path, crc) => AssetDownloadCache.TryMount( RedirectFileSystem, path, crc ) );
+	}
+
+	internal static bool TryReuseMatchingMountedFile(
+		BaseFileSystem mountedFiles,
+		string fileName,
+		LargeFileInfo contents,
+		Action<string, string> addRedirect )
+	{
+		if ( mountedFiles is null )
+			return false;
+
+		foreach ( var fullPath in mountedFiles.GetPhysicalPaths( fileName ) )
+		{
+			if ( !PhysicalPathMatchesLogicalPath( fullPath, fileName ) )
+				continue;
+
+			var fileInfo = new System.IO.FileInfo( fullPath );
+			if ( fileInfo.Length != contents.Size )
+				continue;
+
+			using var stream = System.IO.File.OpenRead( fullPath );
+			if ( Sandbox.Utility.Crc64.FromStream( stream ) != contents.CRC )
+				continue;
+
+			addRedirect?.Invoke( fileName.NormalizeFilename( true ), fullPath );
+			return true;
+		}
+
+		return false;
+	}
+
+	internal static bool PhysicalPathMatchesLogicalPath( string fullPath, string fileName )
+	{
+		if ( string.IsNullOrWhiteSpace( fullPath ) || string.IsNullOrWhiteSpace( fileName ) )
+			return false;
+
+		var relativePath = BaseFileSystem.NormalizeFilename( fileName )
+			.TrimStart( '/' )
+			.Replace( '/', System.IO.Path.DirectorySeparatorChar );
+		return fullPath.EndsWith( relativePath, StringComparison.OrdinalIgnoreCase );
+	}
+
+	internal void QueueFileIfNeeded( string fileName, LargeFileInfo contents, Func<string, ulong, bool> tryMount )
+	{
 		if ( !AssetDownloadCache.IsLegalDownload( fileName ) )
 			return;
 
-		if ( AssetDownloadCache.TryMount( RedirectFileSystem, fileName, contents.CRC ) )
+		if ( tryMount?.Invoke( fileName, contents.CRC ) == true )
 			return;
 
 		if ( AssetDownloadCache.DebugNetworkFiles )
@@ -166,6 +204,8 @@ internal class LargeNetworkFiles
 		}
 		downloadQueue.Add( fileName );
 	}
+
+	internal int PendingDownloadCount => downloadQueue.Count;
 
 	internal void EnableLiveDownloads( Func<Task> runDownloads )
 	{

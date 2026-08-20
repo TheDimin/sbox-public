@@ -362,6 +362,7 @@ internal partial class GameInstanceDll
 			LoadingScreen.Title = "Loading..";
 
 		await NetworkedLargeFiles.RunDownloadQueue( system, default );
+		NativeEngine.g_pResourceSystem.ReloadSymlinkedResidentResources();
 
 		return true;
 	}
@@ -372,7 +373,7 @@ internal partial class GameInstanceDll
 
 	// Small files only live in an in-memory filesystem, which native loaders can't read - engine assets must be a real file on disk.
 	internal static bool ShouldUseLargeDownload( string filename, long size )
-		=> size >= 1024 * 64 || _engineAssets.Any( x => filename.EndsWith( x ) );
+		=> size >= 1024 * 64 || filename.EndsWith( "_c" ) || _engineAssets.Any( x => filename.EndsWith( x ) );
 
 	internal static List<string> ParseNetworkIncludePaths( string resources )
 	{

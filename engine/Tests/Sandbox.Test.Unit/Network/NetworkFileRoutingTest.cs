@@ -1,3 +1,6 @@
+using System;
+using System.IO;
+
 namespace NetworkTests;
 
 // Issue #11195: small compiled shaders (.shader_c < 64KB) took the in-memory small-file path and
@@ -82,6 +85,12 @@ public class NetworkFileRoutingTest
 	}
 
 	[TestMethod]
+	public void SmallCompiledPrefabUsesLargeDownload()
+	{
+		Assert.IsTrue( GameInstanceDll.ShouldUseLargeDownload( "survival/prefabs/player.prefab_c", 1024 ) );
+	}
+
+	[TestMethod]
 	public void SmallNonEngineFileUsesSmallDownload()
 	{
 		Assert.IsFalse( GameInstanceDll.ShouldUseLargeDownload( "styles/menu.scss", 1024 ) );
@@ -91,5 +100,83 @@ public class NetworkFileRoutingTest
 	public void LargeFileUsesLargeDownload()
 	{
 		Assert.IsTrue( GameInstanceDll.ShouldUseLargeDownload( "styles/menu.scss", 1024 * 64 ) );
+	}
+
+	[TestMethod]
+	public void MatchingDeveloperFileInstallsPhysicalRedirect()
+	{
+		var root = Path.Combine( Path.GetTempPath(), "sbox-network-file-routing", Guid.NewGuid().ToString( "N" ) );
+		Directory.CreateDirectory( root );
+		var source = new LocalFileSystem( root );
+
+		try
+		{
+			source.WriteAllBytes( "models/player.vmdl_c", [1, 2, 3, 4] );
+			var info = new LargeNetworkFiles.LargeFileInfo(
+				source.FileSize( "models/player.vmdl_c" ),
+				source.GetCrc( "models/player.vmdl_c" ) );
+			string redirectPath = null;
+			string redirectTarget = null;
+
+			Assert.IsTrue( LargeNetworkFiles.TryReuseMatchingMountedFile(
+				source,
+				"models/player.vmdl_c",
+				info,
+				(path, target) =>
+				{
+					redirectPath = path;
+					redirectTarget = target;
+				} ) );
+			Assert.AreEqual( "/models/player.vmdl_c", redirectPath );
+			Assert.AreEqual( source.GetFullPath( "models/player.vmdl_c" ), redirectTarget );
+		}
+		finally
+		{
+			source.Dispose();
+			Directory.Delete( root, true );
+		}
+	}
+
+	[TestMethod]
+	public void MismatchedDeveloperFileQueuesDownload()
+	{
+		var files = new LargeNetworkFiles( "large-queue" );
+		files.QueueFileIfNeeded(
+			"models/player.vmdl_c",
+			new LargeNetworkFiles.LargeFileInfo( 4, 123 ),
+			(_, _) => false );
+
+		Assert.AreEqual( 1, files.PendingDownloadCount );
+	}
+
+	[TestMethod]
+	public void CachedFileInstallsPhysicalRedirect()
+	{
+		var root = Path.Combine( Path.GetTempPath(), "sbox-cached-network-file", Guid.NewGuid().ToString( "N" ) );
+		Directory.CreateDirectory( root );
+		var cacheFiles = new LocalFileSystem( root );
+
+		try
+		{
+			cacheFiles.WriteAllBytes( "models/player.vmdl_c", [1, 2, 3] );
+			string redirectPath = null;
+			string redirectTarget = null;
+
+			Assert.IsTrue( AssetDownloadCache.TryAddPhysicalRedirect(
+				cacheFiles,
+				"models/player.vmdl_c",
+				(path, target) =>
+				{
+					redirectPath = path;
+					redirectTarget = target;
+				} ) );
+			Assert.AreEqual( "/models/player.vmdl_c", redirectPath );
+			Assert.AreEqual( cacheFiles.GetFullPath( "models/player.vmdl_c" ), redirectTarget );
+		}
+		finally
+		{
+			cacheFiles.Dispose();
+			Directory.Delete( root, true );
+		}
 	}
 }

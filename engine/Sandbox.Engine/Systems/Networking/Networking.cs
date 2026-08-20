@@ -25,7 +25,7 @@ public static partial class Networking
 	internal static int ReceiveBatchSizePerTick { get; set; } = 1024;
 
 	[ConVar( "net_allow_local", ConVarFlags.Protected, Help = "Allow loopback connections for multi-instance testing on one machine (P2P-like)." )]
-	internal static bool AllowLocal { get; set; } = false;
+	internal static bool AllowLocal { get; set; } = true;
 
 	internal static Dictionary<string, string> ServerData { get; set; } = new();
 

@@ -136,8 +136,10 @@ static class AssetDownloadCache
 		if ( EngineFileSystem.Root.FileExists( gc ) )
 		{
 			//Log.Info( $"GAMECACHE: [{path}]" );
-			fs.AddAbsFile( path.NormalizeFilename( true ), EngineFileSystem.Root.GetFullPath( gc ) );
-			return true;
+			return TryAddPhysicalRedirect(
+				EngineFileSystem.Root,
+				gc,
+				(_, fullPath) => fs?.AddAbsFile( path.NormalizeFilename( true ), fullPath ) );
 		}
 
 		if ( IsFileDownloaded( path, crc, out var wasCoreContent ) )
@@ -150,6 +152,26 @@ static class AssetDownloadCache
 				return true;
 			}
 
+			return TryAddPhysicalRedirect(
+				EngineFileSystem.CoreContent,
+				path,
+				(redirectPath, fullPath) => fs?.AddAbsFile( redirectPath, fullPath ) );
+		}
+
+		return false;
+	}
+
+	internal static bool TryAddPhysicalRedirect(
+		BaseFileSystem source,
+		string path,
+		Action<string, string> addRedirect )
+	{
+		if ( source is null || addRedirect is null )
+			return false;
+
+		foreach ( var fullPath in source.GetPhysicalPaths( path ) )
+		{
+			addRedirect( path.NormalizeFilename( true ), fullPath );
 			return true;
 		}
 

@@ -178,6 +178,37 @@ public class BaseFileSystem
 		return null;
 	}
 
+	/// <summary>
+	/// Return every physical file that provides this logical path.
+	/// Aggregate filesystems can contain a cache entry and a source-tree entry for the same file.
+	/// </summary>
+	internal IEnumerable<string> GetPhysicalPaths( string path )
+	{
+		var fixedPath = FixPath( path );
+
+		if ( system is Zio.FileSystems.AggregateFileSystem aggregate )
+		{
+			foreach ( var fileSystem in aggregate.GetFileSystems() )
+			{
+				if ( !fileSystem.FileExists( fixedPath ) )
+					continue;
+
+				var fullPath = fileSystem.ConvertPathToInternal( fixedPath );
+				if ( System.IO.File.Exists( fullPath ) )
+					yield return fullPath;
+			}
+
+			yield break;
+		}
+
+		if ( system.FileExists( fixedPath ) )
+		{
+			var fullPath = system.ConvertPathToInternal( fixedPath );
+			if ( System.IO.File.Exists( fullPath ) )
+				yield return fullPath;
+		}
+	}
+
 	static string GetRelativePath( Zio.IFileSystem system, string path )
 	{
 		if ( system is Zio.FileSystems.SubFileSystem sfs )

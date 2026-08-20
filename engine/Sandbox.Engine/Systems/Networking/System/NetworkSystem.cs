@@ -53,7 +53,8 @@ internal partial class NetworkSystem
 	{
 		DebugName = debugName;
 		TypeLibrary = library;
-		IsDeveloperHost = Application.IsEditor;
+		IsDeveloperHost = Application.IsEditor
+			|| (Application.IsDedicatedServer && Application.GamePackage is LocalPackage);
 		ConnectionInfo = new( this );
 
 		log = new( $"NetworkSystem/{debugName}" );
