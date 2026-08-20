@@ -5,6 +5,22 @@ namespace Sandbox;
 public partial class Terrain
 {
 	private TerrainStorage _storage;
+	private bool _enableRendering = true;
+
+	/// <summary>
+	/// Enables the terrain render resources. Disable this for collision-only terrain chunks.
+	/// </summary>
+	[Property, Category( "Rendering" )]
+	public bool EnableRendering
+	{
+		get => _enableRendering;
+		set
+		{
+			if ( _enableRendering == value ) return;
+			_enableRendering = value;
+			RefreshRendering();
+		}
+	}
 
 	[Property]
 	public TerrainStorage Storage

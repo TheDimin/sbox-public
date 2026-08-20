@@ -50,10 +50,28 @@ public sealed partial class Terrain : Collider, Component.ExecuteInEditor
 		MaterialsBuffer?.Dispose();
 		MaterialsBuffer = null;
 
-		if ( !Scene.GetAllComponents<Terrain>().Any( t => t != this && t.Active ) )
+		ClearTerrainRenderStateIfUnused();
+	}
+
+	private void ClearTerrainRenderStateIfUnused()
+	{
+		if ( Scene.GetAllComponents<Terrain>().Any( t => t != this && t.Active && t.EnableRendering ) ) return;
+		Scene.RenderAttributes.Set( "TerrainCount", 0 );
+	}
+
+	private void RefreshRendering()
+	{
+		DisposeRenderResources();
+		if ( !Active || Storage is null || Application.IsHeadless || !EnableRendering )
 		{
-			Scene.RenderAttributes.Set( "TerrainCount", 0 );
+			ClearTerrainRenderStateIfUnused();
+			return;
 		}
+
+		CreateTextureMaps();
+		CreateClipmapSceneObject();
+		UpdateTerrainBuffer();
+		UpdateMaterialsBuffer();
 	}
 
 	// Tear down the scene object and the GPU textures. Shared by DestroyInternal and Create (which rebuilds them).
@@ -130,8 +148,10 @@ public sealed partial class Terrain : Collider, Component.ExecuteInEditor
 
 		if ( Storage is null )
 			return;
+		if ( !EnableRendering )
+			ClearTerrainRenderStateIfUnused();
 
-		if ( !Application.IsHeadless )
+		if ( !Application.IsHeadless && EnableRendering )
 		{
 			CreateTextureMaps();
 			CreateClipmapSceneObject();

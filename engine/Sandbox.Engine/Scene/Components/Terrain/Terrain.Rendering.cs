@@ -69,7 +69,7 @@ public partial class Terrain
 
 	void CreateClipmapSceneObject()
 	{
-		if ( !Active || Application.IsHeadless )
+		if ( !Active || Application.IsHeadless || !EnableRendering )
 			return;
 
 		// These get created once

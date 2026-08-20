@@ -24,10 +24,29 @@ internal sealed class TerrainClipmapSceneObject : SceneCustomObject
 	{
 		public Model Mesh;
 		public Meshlet[] Meshlets;
+		public CullGroup[] CullGroups;
 		public GpuBuffer<Meshlet> FullBuffer;    // the whole layout, drawn by shadow passes
 		public GpuBuffer<Meshlet> VisibleBuffer; // frustum-culled subset, refreshed for each camera view
 		public Meshlet[] Visible;
 		public int VisibleCount;
+	}
+
+	private readonly struct CullGroup
+	{
+		public readonly int Start;
+		public readonly int Count;
+		public readonly int Level;
+		public readonly Vector2 MinimumBlockOffset;
+		public readonly Vector2 MaximumBlockOffset;
+
+		public CullGroup( int start, int count, int level, Vector2 minimumBlockOffset, Vector2 maximumBlockOffset )
+		{
+			Start = start;
+			Count = count;
+			Level = level;
+			MinimumBlockOffset = minimumBlockOffset;
+			MaximumBlockOffset = maximumBlockOffset;
+		}
 	}
 
 	public TerrainClipmapSceneObject( SceneWorld world ) : base( world ) { }
@@ -41,10 +60,38 @@ internal sealed class TerrainClipmapSceneObject : SceneCustomObject
 		{
 			Mesh = Model.Builder.AddMesh( BuildBlockMesh( blockSize, density, material ) ).Create(),
 			Meshlets = meshlets,
+			CullGroups = BuildCullGroups( meshlets ),
 			FullBuffer = fullBuffer,
 			VisibleBuffer = new GpuBuffer<Meshlet>( meshlets.Length, GpuBuffer.UsageFlags.Structured, "TerrainMeshlets" ),
 			Visible = new Meshlet[meshlets.Length],
 		};
+	}
+
+	private static CullGroup[] BuildCullGroups( Meshlet[] meshlets )
+	{
+		const int maximumGroupSize = 16;
+		var groups = new List<CullGroup>( (meshlets.Length + maximumGroupSize - 1) / maximumGroupSize );
+		int start = 0;
+
+		while ( start < meshlets.Length )
+		{
+			int level = meshlets[start].Level;
+			int end = start + 1;
+			var minimum = meshlets[start].BlockOffset;
+			var maximum = minimum;
+
+			while ( end < meshlets.Length && end - start < maximumGroupSize && meshlets[end].Level == level )
+			{
+				minimum = Vector2.Min( minimum, meshlets[end].BlockOffset );
+				maximum = Vector2.Max( maximum, meshlets[end].BlockOffset );
+				end++;
+			}
+
+			groups.Add( new CullGroup( start, end - start, level, minimum, maximum ) );
+			start = end;
+		}
+
+		return [.. groups];
 	}
 
 	/// <summary>
@@ -126,28 +173,23 @@ internal sealed class TerrainClipmapSceneObject : SceneCustomObject
 	{
 		var terrainTransform = Transform;
 
-		// Meshlets are level-ordered, so per-level constants only need recomputing when the level changes
-		int level = -1;
-		float vertexStep = 0, increment = 0;
-		Vector2 center = default;
-
 		int vis = 0;
-		for ( int i = 0; i < tier.Meshlets.Length; i++ )
+		foreach ( ref readonly var group in tier.CullGroups.AsSpan() )
 		{
-			ref readonly var m = ref tier.Meshlets[i];
+			float vertexStep = UnitsPerTexel * (1 << group.Level);
+			float increment = vertexStep * 2.0f;
+			var center = _clipCameraLocal.SnapToGrid( increment );
 
-			if ( m.Level != level )
+			if ( !_cullFrustum.IsInside( GetCullGroupAABB( in group, center, vertexStep, increment, terrainTransform ), partially: true ) )
+				continue;
+
+			int end = group.Start + group.Count;
+			for ( int i = group.Start; i < end; i++ )
 			{
-				level = m.Level;
-				vertexStep = UnitsPerTexel * (1 << level);
-				increment = vertexStep * 2.0f;
-
-				// Per-level snap matching the shader's roundToIncrement, so the AABBs track the drawn geometry
-				center = _clipCameraLocal.SnapToGrid( increment );
+				ref readonly var meshlet = ref tier.Meshlets[i];
+				if ( _cullFrustum.IsInside( GetMeshletAABB( in meshlet, center, vertexStep, increment, terrainTransform ), partially: true ) )
+					tier.Visible[vis++] = meshlet;
 			}
-
-			if ( _cullFrustum.IsInside( GetMeshletAABB( in m, center, vertexStep, increment, terrainTransform ), partially: true ) )
-				tier.Visible[vis++] = m;
 		}
 
 		if ( vis > 0 )
@@ -166,6 +208,28 @@ internal sealed class TerrainClipmapSceneObject : SceneCustomObject
 		var localBox = new BBox(
 			new Vector3( ox - increment, oy - increment, -increment ),
 			new Vector3( ox + ext + increment, oy + ext + increment, HeightScale + increment ) );
+
+		return TransformBounds( localBox, terrainTransform );
+	}
+
+	private BBox GetCullGroupAABB( in CullGroup group, Vector2 center, float vertexStep, float increment, in Transform terrainTransform )
+	{
+		float minX = center.x + group.MinimumBlockOffset.x * vertexStep;
+		float minY = center.y + group.MinimumBlockOffset.y * vertexStep;
+		float maxX = center.x + (group.MaximumBlockOffset.x + BlockSize) * vertexStep;
+		float maxY = center.y + (group.MaximumBlockOffset.y + BlockSize) * vertexStep;
+
+		var localBox = new BBox(
+			new Vector3( minX - increment, minY - increment, -increment ),
+			new Vector3( maxX + increment, maxY + increment, HeightScale + increment ) );
+
+		return TransformBounds( localBox, terrainTransform );
+	}
+
+	private static BBox TransformBounds( in BBox localBox, in Transform terrainTransform )
+	{
+		if ( terrainTransform.Rotation == Rotation.Identity && terrainTransform.Scale == Vector3.One )
+			return new BBox( localBox.Mins + terrainTransform.Position, localBox.Maxs + terrainTransform.Position );
 
 		return localBox.Transform( terrainTransform );
 	}
