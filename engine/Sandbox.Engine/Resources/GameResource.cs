@@ -91,7 +91,11 @@ public abstract partial class GameResource : Resource, ISourceLineProvider
 	/// </summary>
 	public IEnumerable<string> GetReferencedPackages()
 	{
-		return referencedPackages ?? Array.Empty<string>();
+		foreach ( var reference in referencedPackages ?? Array.Empty<string>() )
+		{
+			if ( Package.TryParseIdent( reference, out _ ) )
+				yield return reference;
+		}
 	}
 
 	/// <summary>
