@@ -36,6 +36,12 @@ namespace Sandbox.UI
 		public bool RenderOnce { get; set; }
 
 		/// <summary>
+		/// If disabled, the scene clock advances without running scene systems and
+		/// components. Use this for static render scenes that only need shader time.
+		/// </summary>
+		public bool TickScene { get; set; } = true;
+
+		/// <summary>
 		/// The texture that the panel is rendering to internally. This will change to a different
 		/// texture if the panel changes size, so I wouldn't hold onto this object.
 		/// </summary>
@@ -98,7 +104,14 @@ namespace Sandbox.UI
 
 			using ( RenderScene.Push() )
 			{
-				RenderScene.GameTick( RealTime.Delta );
+				if ( TickScene )
+				{
+					RenderScene.GameTick( RealTime.Delta );
+				}
+				else
+				{
+					RenderScene.UpdateTime( RealTime.Delta );
+				}
 			}
 
 			if ( Box.RectInner.Size.x <= 0 ) return;
@@ -171,6 +184,7 @@ namespace Sandbox.UI
 			}
 			else if ( RenderScene.IsValid() && RenderScene.Camera.IsValid() )
 			{
+				using var timeScope = Time.Scope( RenderScene.TimeNow, RenderScene.TimeDelta );
 				RenderScene.PreCameraRender(); // TODO WTF?... terrible hack to get around Graphics.IsActive guard in RenderToTexture
 				RenderScene.Camera.RenderToTexture( RenderTexture );
 			}
