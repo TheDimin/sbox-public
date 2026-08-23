@@ -217,6 +217,8 @@ public class CloudAsset
 			var package = AssetSystem.CloudDirectory.FindPackage( Package.FormatIdent( parts.org, parts.package ) );
 			if ( package is null )
 				continue;
+			if ( string.Equals( package.FullIdent, gamePackage.FullIdent, StringComparison.OrdinalIgnoreCase ) )
+				continue;
 
 			string filepath = package.PrimaryAsset;
 			if ( string.IsNullOrEmpty( filepath ) )
