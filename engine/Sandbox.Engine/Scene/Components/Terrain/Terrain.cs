@@ -1,4 +1,4 @@
-﻿using NativeEngine;
+using NativeEngine;
 
 namespace Sandbox;
 
@@ -151,7 +151,7 @@ public sealed partial class Terrain : Collider, Component.ExecuteInEditor
 		if ( !EnableRendering )
 			ClearTerrainRenderStateIfUnused();
 
-		if ( !Application.IsHeadless && EnableRendering )
+		if ( Graphics.IsAvailable && !Application.IsHeadless && EnableRendering )
 		{
 			CreateTextureMaps();
 			CreateClipmapSceneObject();

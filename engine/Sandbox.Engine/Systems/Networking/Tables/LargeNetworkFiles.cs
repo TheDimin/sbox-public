@@ -1,5 +1,6 @@
-﻿using Sandbox.Internal;
+using Sandbox.Internal;
 using Sandbox.Network;
+using System.IO;
 using System.Threading;
 
 namespace Sandbox;
@@ -52,7 +53,7 @@ internal class LargeNetworkFiles
 	}
 
 	/// <summary>
-	/// Add a file to be networked.
+	/// Add a file from the mounted filesystem used to serve download requests.
 	/// </summary>
 	public bool AddFile( string fileName, Action<long, TimeSpan, bool> onCrc = null, Action<TimeSpan> onTableSet = null )
 		=> AddFile( EngineFileSystem.Mounted, fileName, false, onCrc, onTableSet );
@@ -60,13 +61,25 @@ internal class LargeNetworkFiles
 	/// <summary>
 	/// Add a file from a specific filesystem to be networked.
 	/// </summary>
-	public bool AddFile( BaseFileSystem fs, string fileName, bool forceRefresh, Action<long, TimeSpan, bool> onCrc = null, Action<TimeSpan> onTableSet = null )
+	public bool AddFile( BaseFileSystem fs, string fileName, bool forceRefresh = false, Action<long, TimeSpan, bool> onCrc = null, Action<TimeSpan> onTableSet = null )
 	{
-		if ( !fs.FileExists( fileName ) )
-			return false;
 
 		var crcTimer = System.Diagnostics.Stopwatch.StartNew();
-		var crc = (fileHashCache ?? FileHashCache.Current).GetOrComputeCrc( fs, fileName, forceRefresh, out var size, out var cacheHit );
+		ulong crc;
+		long size;
+		bool cacheHit;
+		try
+		{
+			crc = (fileHashCache ?? FileHashCache.Current).GetOrComputeCrc( fs, fileName, forceRefresh, out size, out cacheHit );
+		}
+		catch ( FileNotFoundException )
+		{
+			return false;
+		}
+		catch ( DirectoryNotFoundException )
+		{
+			return false;
+		}
 		crcTimer.Stop();
 		onCrc?.Invoke( size, crcTimer.Elapsed, cacheHit );
 		var normalizedFileName = NormalizeFileName( fileName );

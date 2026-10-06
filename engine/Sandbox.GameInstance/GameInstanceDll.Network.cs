@@ -1,4 +1,4 @@
-﻿using Sandbox.Network;
+using Sandbox.Network;
 using Sandbox.Tasks;
 using System;
 using System.Collections.Generic;
@@ -118,6 +118,11 @@ internal partial class GameInstanceDll
 	/// Hold and network any small files such as StyleSheets and compiled prefab assets.
 	/// </summary>
 	readonly ReplicatedConvars ReplicatedConvars = new( "ReplicatedConvars" );
+
+	public void OnBecameHost()
+	{
+		ReplicatedConvars.OnBecameHost();
+	}
 
 	private List<FileWatch> FileWatchers { get; set; } = new();
 	private bool DidMountNetworkedFiles { get; set; }
@@ -368,7 +373,7 @@ internal partial class GameInstanceDll
 	}
 
 	static readonly string[] _interestingExtensions = ["_c", ".scss", ".ttf"];
-	static readonly string[] _engineAssets = ["vtex_c", "vmat_c", "vsnd_c", "vmdl_c", "vpk", "vanmgrph_c", "shader_c"]; // anything the native engine loads from disk has to be a LARGE download
+	static readonly string[] _engineAssets = ["vtex_c", "vmat_c", "vsnd_c", "vmdl_c", "vphys_c", "vpk", "vanmgrph_c", "shader_c"]; // anything the native engine loads from disk has to be a LARGE download
 	List<string> _netIncludePaths = new(); // wildcard-supported paths we also want to include content of
 
 	// Small files only live in an in-memory filesystem, which native loaders can't read - engine assets must be a real file on disk.
@@ -593,48 +598,62 @@ internal partial class GameInstanceDll
 		if ( !exists )
 			return false;
 
-		metadata.Restart();
-		var size = fs.FileSize( path );
-		metadata.Stop();
-		profile.MetadataMs += metadata.Elapsed.TotalMilliseconds;
-
-		if ( !ShouldUseLargeDownload( path, size ) )
+		if ( !ShouldUseLargeDownload( path, 0 ) )
 		{
-			profile.SelectedSmall++;
-			var read = System.Diagnostics.Stopwatch.StartNew();
-			var contents = fs.ReadAllBytes( path ).ToArray();
-			read.Stop();
-			profile.SmallReads++;
-			profile.SmallBytes += contents.LongLength;
-			profile.SmallReadMs += read.Elapsed.TotalMilliseconds;
-			profile.AddSmall++;
-
-			if ( NetworkedLargeFiles.RemoveFile( path ) )
-				profile.TableRemoves++;
-
-			if ( !NetworkedSmallFiles.AddFile( fs, path, contents, tableElapsed =>
+			Stream stream;
+			try
 			{
-				profile.TableSets++;
-				profile.TableMs += tableElapsed.TotalMilliseconds;
-			} ) )
+				stream = fs.OpenRead( path );
+			}
+			catch ( FileNotFoundException )
+			{
+				return false;
+			}
+			catch ( DirectoryNotFoundException )
 			{
 				return false;
 			}
 
-			manifest[path] = new( source, false, size, 0 );
-			return true;
+			if ( stream is null ) return false;
+			using ( stream )
+			{
+				var size = stream.Length;
+				if ( !ShouldUseLargeDownload( path, size ) )
+				{
+					profile.SelectedSmall++;
+					var read = System.Diagnostics.Stopwatch.StartNew();
+					var contents = new byte[size];
+					stream.ReadExactly( contents );
+					read.Stop();
+					profile.SmallReads++;
+					profile.SmallBytes += contents.LongLength;
+					profile.SmallReadMs += read.Elapsed.TotalMilliseconds;
+					profile.AddSmall++;
+
+					if ( NetworkedLargeFiles.RemoveFile( path ) )
+						profile.TableRemoves++;
+
+					NetworkedSmallFiles.AddFile( path, contents, tableElapsed =>
+					{
+						profile.TableSets++;
+						profile.TableMs += tableElapsed.TotalMilliseconds;
+					} );
+
+					manifest[path] = new( source, false, size, 0 );
+					return true;
+				}
+			}
 		}
 
 		profile.SelectedLarge++;
 		profile.LargeInspected++;
-		profile.LargeExistenceChecks += 2;
-		profile.LargeSizeQueries++;
+		profile.LargeExistenceChecks++;
 		profile.AddLarge++;
 
 		if ( NetworkedSmallFiles.RemoveFile( path ) )
 			profile.TableRemoves++;
 
-		if ( !NetworkedLargeFiles.AddFile( fs, path,
+		if ( !NetworkedLargeFiles.AddFile( EngineFileSystem.Mounted, path,
 			forceCrcRefresh,
 			(crcBytes, crcElapsed, cacheHit) =>
 			{

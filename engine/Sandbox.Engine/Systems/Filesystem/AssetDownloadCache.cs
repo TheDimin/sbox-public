@@ -1,4 +1,4 @@
-﻿using Sandbox.Internal;
+using Sandbox.Internal;
 using System.Text.RegularExpressions;
 
 namespace Sandbox;
@@ -130,51 +130,66 @@ static class AssetDownloadCache
 		return $"{path.ToLowerInvariant().Md5()}.{crc}.cache";
 	}
 
-	internal static bool TryMount( RedirectFileSystem fs, string path, ulong crc )
+	/// <summary>
+	/// Is this file in the game cache, core content or the download cache, without mounting it
+	/// </summary>
+	internal static bool IsCached( string path, ulong crc )
+	{
+		var gc = "/gamecache/" + CreateGameCacheFilename( path, crc.ToString( "x" ) );
+		return EngineFileSystem.Root.FileExists( gc ) || IsFileDownloaded( path, crc, out _ );
+	}
+
+	/// <summary>
+	/// <see cref="ResolveCached"/>'s answer for a file core content already has, so nothing needs mounting.
+	/// </summary>
+	internal static readonly string CoreContent = "core";
+
+	/// <summary>
+	/// Where a cached copy of this file is: the absolute path in the game or download cache,
+	/// <see cref="CoreContent"/>, or null when it has to be downloaded. Only reads, safe off the main thread.
+	/// </summary>
+	internal static string ResolveCached( string path, ulong crc )
 	{
 		var gc = "/gamecache/" + CreateGameCacheFilename( path, crc.ToString( "x" ) );
 		if ( EngineFileSystem.Root.FileExists( gc ) )
-		{
-			//Log.Info( $"GAMECACHE: [{path}]" );
-			return TryAddPhysicalRedirect(
-				EngineFileSystem.Root,
-				gc,
-				(_, fullPath) => fs?.AddAbsFile( path.NormalizeFilename( true ), fullPath ) );
-		}
+			return EngineFileSystem.Root.GetPhysicalPaths( gc ).FirstOrDefault();
 
-		if ( IsFileDownloaded( path, crc, out var wasCoreContent ) )
-		{
-			if ( !wasCoreContent )
-			{
-				var cachePath = GetAbsolutePath( path, crc );
-				//Log.Info( $"DOWNLOAD: [{path}]" );
-				fs.AddAbsFile( path.NormalizeFilename( true ), cachePath );
-				return true;
-			}
+		if ( !IsFileDownloaded( path, crc, out var wasCoreContent ) )
+			return null;
 
-			return TryAddPhysicalRedirect(
-				EngineFileSystem.CoreContent,
-				path,
-				(redirectPath, fullPath) => fs?.AddAbsFile( redirectPath, fullPath ) );
-		}
-
-		return false;
+		return wasCoreContent ? CoreContent : GetAbsolutePath( path, crc );
 	}
 
-	internal static bool TryAddPhysicalRedirect(
-		BaseFileSystem source,
-		string path,
-		Action<string, string> addRedirect )
+	internal static bool TryMount( RedirectFileSystem fs, string path, ulong crc )
 	{
-		if ( source is null || addRedirect is null )
-			return false;
+		var resolved = ResolveCached( path, crc );
+		if ( resolved is null ) return false;
+		if ( ReferenceEquals( resolved, CoreContent ) )
+			return TryAddPhysicalRedirect( EngineFileSystem.CoreContent, path,
+				(redirectPath, fullPath) => fs?.AddAbsFile( redirectPath, fullPath ) );
 
+		Mount( fs, path, resolved );
+		return true;
+	}
+
+	/// <summary>
+	/// Mount a file at what <see cref="ResolveCached"/> found for it.
+	/// </summary>
+	internal static void Mount( RedirectFileSystem fs, string path, string resolved )
+	{
+		if ( ReferenceEquals( resolved, CoreContent ) ) return;
+
+		fs.AddAbsFile( path.NormalizeFilename( true ), resolved );
+	}
+
+	internal static bool TryAddPhysicalRedirect( BaseFileSystem source, string path, Action<string, string> addRedirect )
+	{
+		if ( source is null || addRedirect is null ) return false;
 		foreach ( var fullPath in source.GetPhysicalPaths( path ) )
 		{
 			addRedirect( path.NormalizeFilename( true ), fullPath );
 			return true;
 		}
-
 		return false;
 	}
 }

@@ -105,9 +105,10 @@ internal sealed class FileHashCache
 		if ( !TryGetPhysicalFile( fs, path, out var physicalPath, out var before ) )
 		{
 			cacheHit = false;
-			var uncached = fs.GetCrc( path );
-			size = fs.FileSize( path );
-			return uncached;
+			using var stream = fs.OpenRead( path );
+			if ( stream is null ) throw new FileNotFoundException( "File is not mapped", path );
+			size = stream.Length;
+			return Sandbox.Utility.Crc64.FromStream( stream );
 		}
 
 		if ( !forceRefresh && TryGetCrc( physicalPath, before, out var cached ) )

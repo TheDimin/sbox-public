@@ -1,4 +1,4 @@
-﻿using Sandbox.Network;
+using Sandbox.Network;
 using System.IO;
 
 namespace Sandbox;
@@ -46,19 +46,25 @@ internal class SmallNetworkFiles
 		if ( !fs.FileExists( fileName ) )
 			return false;
 
+		AddFile( fileName, contents, onTableSet );
+
+		return true;
+	}
+
+	/// <summary>
+	/// Add contents already read from an open file, without resolving its path again.
+	/// </summary>
+	internal void AddFile( string fileName, byte[] contents, Action<TimeSpan> onTableSet = null )
+	{
 		var normalizedFileName = NormalizeFileName( fileName );
 		if ( StringTable.Entries.TryGetValue( normalizedFileName, out var existing ) &&
 			 existing.Data.AsSpan().SequenceEqual( contents ) )
-		{
-			return true;
-		}
+			return;
 
 		var tableTimer = System.Diagnostics.Stopwatch.StartNew();
 		StringTable.Set( normalizedFileName, contents );
 		tableTimer.Stop();
 		onTableSet?.Invoke( tableTimer.Elapsed );
-
-		return true;
 	}
 
 	/// <summary>
