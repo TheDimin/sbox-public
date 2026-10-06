@@ -655,7 +655,7 @@ internal partial class GameInstanceDll
 
 		if ( !NetworkedLargeFiles.AddFile( EngineFileSystem.Mounted, path,
 			forceCrcRefresh,
-			(crcBytes, crcElapsed, cacheHit) =>
+			( crcBytes, crcElapsed, cacheHit ) =>
 			{
 				profile.LargeSizeQueries++;
 				if ( cacheHit )

@@ -63,7 +63,6 @@ internal class LargeNetworkFiles
 	/// </summary>
 	public bool AddFile( BaseFileSystem fs, string fileName, bool forceRefresh = false, Action<long, TimeSpan, bool> onCrc = null, Action<TimeSpan> onTableSet = null )
 	{
-
 		var crcTimer = System.Diagnostics.Stopwatch.StartNew();
 		ulong crc;
 		long size;
@@ -152,7 +151,7 @@ internal class LargeNetworkFiles
 			EngineFileSystem.Mounted,
 			fileName,
 			contents,
-			(path, fullPath) => RedirectFileSystem?.AddAbsFile( path, fullPath ) ) )
+			( path, fullPath ) => RedirectFileSystem?.AddAbsFile( path, fullPath ) ) )
 		{
 			return;
 		}
@@ -160,7 +159,7 @@ internal class LargeNetworkFiles
 		QueueFileIfNeeded(
 			fileName,
 			contents,
-			(path, crc) => AssetDownloadCache.TryMount( RedirectFileSystem, path, crc ) );
+			( path, crc ) => AssetDownloadCache.TryMount( RedirectFileSystem, path, crc ) );
 	}
 
 	internal static bool TryReuseMatchingMountedFile(

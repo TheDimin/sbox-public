@@ -157,7 +157,9 @@ static class AssetDownloadCache
 		if ( !IsFileDownloaded( path, crc, out var wasCoreContent ) )
 			return null;
 
-		return wasCoreContent ? CoreContent : GetAbsolutePath( path, crc );
+		return wasCoreContent
+			? EngineFileSystem.CoreContent.GetPhysicalPaths( path ).FirstOrDefault() ?? CoreContent
+			: GetAbsolutePath( path, crc );
 	}
 
 	internal static bool TryMount( RedirectFileSystem fs, string path, ulong crc )
@@ -166,7 +168,7 @@ static class AssetDownloadCache
 		if ( resolved is null ) return false;
 		if ( ReferenceEquals( resolved, CoreContent ) )
 			return TryAddPhysicalRedirect( EngineFileSystem.CoreContent, path,
-				(redirectPath, fullPath) => fs?.AddAbsFile( redirectPath, fullPath ) );
+				( redirectPath, fullPath ) => fs?.AddAbsFile( redirectPath, fullPath ) );
 
 		Mount( fs, path, resolved );
 		return true;

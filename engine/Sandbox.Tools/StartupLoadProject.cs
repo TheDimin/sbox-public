@@ -1,4 +1,4 @@
-﻿using Sandbox.Engine;
+using Sandbox.Engine;
 using Sandbox.Engine.Shaders;
 using Sandbox.Physics;
 using System;
@@ -419,7 +419,7 @@ static class StartupLoadProject
 		var thumbnailAssets = AssetSystem.All.Where( asset => asset.AssetType == AssetType.Model ).ToArray();
 
 		// Native model previews require a live editor framebuffer. Initialize the editor behind
-		// the application-modal splash, and only release it after the preview queue is empty.
+		// the splash with editor input disabled, and only release it after the preview queue is empty.
 		EditorWindow.Startup();
 		EditorSplashScreen.BlockEditorWhileFinishingAssets();
 		for ( var frame = 0; frame < 3; frame++ )

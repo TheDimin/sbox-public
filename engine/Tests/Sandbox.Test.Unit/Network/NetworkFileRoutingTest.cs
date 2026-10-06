@@ -9,6 +9,58 @@ namespace NetworkTests;
 public class NetworkFileRoutingTest
 {
 	[TestMethod]
+	public void MissingLargeFileDoesNotEnterManifest()
+	{
+		var source = new MemoryFileSystem();
+		try
+		{
+			var files = new LargeNetworkFiles( "missing-large", new FileHashCache( null ) );
+			Assert.IsFalse( files.AddFile( source, "missing.vmdl_c" ) );
+			Assert.AreEqual( 0, files.StringTable.Entries.Count );
+		}
+		finally
+		{
+			source.Dispose();
+		}
+	}
+
+	[TestMethod]
+	public void VirtualLargeFileUsesStreamSizeAndChecksum()
+	{
+		var source = new MemoryFileSystem();
+		try
+		{
+			source.WriteAllBytes( "models/test.vmdl_c", [1, 3, 5, 7] );
+			var files = new LargeNetworkFiles( "virtual-large", new FileHashCache( null ) );
+			var tableWrites = 0;
+
+			Assert.IsTrue( files.AddFile( source, "models/test.vmdl_c", onTableSet: _ => tableWrites++ ) );
+			Assert.IsTrue( files.TryGetFileInfo( "models/test.vmdl_c", out var info ) );
+			Assert.AreEqual( 4L, info.Size );
+			Assert.AreEqual( source.GetCrc( "models/test.vmdl_c" ), info.CRC );
+			Assert.IsTrue( files.AddFile( source, "models/test.vmdl_c", onTableSet: _ => tableWrites++ ) );
+			Assert.AreEqual( 1, tableWrites );
+		}
+		finally
+		{
+			source.Dispose();
+		}
+	}
+
+	[TestMethod]
+	public void AlreadyReadSmallFileSkipsUnchangedTableWrites()
+	{
+		var files = new SmallNetworkFiles( "small-preloaded" );
+		var tableWrites = 0;
+		files.AddFile( "styles/menu.scss", [1, 2], _ => tableWrites++ );
+		files.AddFile( "styles/menu.scss", [1, 2], _ => tableWrites++ );
+		files.AddFile( "styles/menu.scss", [1, 3], _ => tableWrites++ );
+
+		Assert.AreEqual( 2, tableWrites );
+		CollectionAssert.AreEqual( new byte[] { 1, 3 }, files.StringTable.Entries["styles/menu.scss"].Data );
+	}
+
+	[TestMethod]
 	public void ManifestOracleIsStableAcrossInsertionOrder()
 	{
 		var smallA = new Sandbox.Network.StringTable( "small-a", true );
@@ -131,7 +183,7 @@ public class NetworkFileRoutingTest
 				source,
 				"models/player.vmdl_c",
 				info,
-				(path, target) =>
+				( path, target ) =>
 				{
 					redirectPath = path;
 					redirectTarget = target;
@@ -153,7 +205,7 @@ public class NetworkFileRoutingTest
 		files.QueueFileIfNeeded(
 			"models/player.vmdl_c",
 			new LargeNetworkFiles.LargeFileInfo( 4, 123 ),
-			(_, _) => false );
+			( _, _ ) => false );
 
 		Assert.AreEqual( 1, files.PendingDownloadCount );
 	}
@@ -174,7 +226,7 @@ public class NetworkFileRoutingTest
 			Assert.IsTrue( AssetDownloadCache.TryAddPhysicalRedirect(
 				cacheFiles,
 				"models/player.vmdl_c",
-				(path, target) =>
+				( path, target ) =>
 				{
 					redirectPath = path;
 					redirectTarget = target;

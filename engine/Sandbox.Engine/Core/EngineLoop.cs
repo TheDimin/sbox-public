@@ -238,9 +238,9 @@ internal static class EngineLoop
 				MixingThread.UpdateGlobals();
 			}
 
-		//
-		// Update the mouse visibility status
-		//
+			//
+			// Update the mouse visibility status
+			//
 			Engine.InputRouter.Frame();
 
 			Audio.AudioEngine.Tick();
