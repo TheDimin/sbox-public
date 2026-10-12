@@ -126,6 +126,8 @@ internal partial class GameInstanceDll : Engine.IGameInstanceDll
 	/// </summary>
 	public void ResetEnvironment()
 	{
+		var hadPreviousEnvironment = gameInstance is not null || AssemblyEnroller is not null || DidMountNetworkedFiles;
+
 		using var scope = GlobalContext.GameScope();
 
 		Log.Trace( "Game Menu - ResetEnvironment" );
@@ -260,12 +262,15 @@ internal partial class GameInstanceDll : Engine.IGameInstanceDll
 
 		IMenuDll.Current?.Reset();
 
-		// Run GC and finalizers to clear any native resources held
-		GC.Collect();
-		GC.WaitForPendingFinalizers();
+		if ( hadPreviousEnvironment )
+		{
+			// Run GC and finalizers to clear any native resources held
+			GC.Collect();
+			GC.WaitForPendingFinalizers();
 
-		// Run the queue one more time, since some finalizers queue tasks
-		MainThread.RunQueues();
+			// Run the queue one more time, since some finalizers queue tasks
+			MainThread.RunQueues();
+		}
 	}
 
 	/// <summary>
@@ -443,7 +448,7 @@ internal partial class GameInstanceDll : Engine.IGameInstanceDll
 	{
 		var scene = Game.ActiveScene;
 
-		using var sceneScope = scene?.Push();
+		using var sceneScope = new ScenePushScope( scene );
 
 		if ( scene is not null )
 		{
@@ -542,7 +547,7 @@ internal partial class GameInstanceDll : Engine.IGameInstanceDll
 			mouseIsAllowed = !IMenuDll.Current.HasOverlayMouseInput();
 		}
 
-		using ( Game.ActiveScene?.Push() )
+		using ( new ScenePushScope( Game.ActiveScene ) )
 		{
 			Game.Language?.Tick();
 			GlobalContext.Current.UISystem.Simulate( mouseIsAllowed );
@@ -903,9 +908,9 @@ internal partial class GameInstanceDll : Engine.IGameInstanceDll
 	/// <summary>
 	/// Pushes the game scope. This will push the active scene and the right time.
 	/// </summary>
-	public IDisposable PushScope()
+	public ScenePushScope PushScope()
 	{
-		return Game.ActiveScene?.Push();
+		return new ScenePushScope( Game.ActiveScene );
 	}
 
 	/// <summary>
@@ -914,12 +919,21 @@ internal partial class GameInstanceDll : Engine.IGameInstanceDll
 	void TickSceneStats( Scene scene )
 	{
 		var sceneValid = scene.IsValid();
+
+		// Counted with direct queries, this runs every frame
+		int cameraCount = 0, particleCount = 0;
+		if ( sceneValid )
+		{
+			foreach ( var _ in scene.Query<CameraComponent>() ) cameraCount++;
+			foreach ( var effect in scene.Query<ParticleEffect>() ) particleCount += effect.Particles.Count;
+		}
+
 		Api.Performance.CollectStat( "GameObjectCount", sceneValid ? scene.Directory.GameObjectCount : 0 );
 		Api.Performance.CollectStat( "ComponentCount", sceneValid ? scene.Directory.ComponentCount : 0 );
 		Api.Performance.CollectStat( "RootGameObjects", sceneValid ? scene.Children.Count : 0 );
-		Api.Performance.CollectStat( "CameraCount", sceneValid ? scene.GetAllComponents<CameraComponent>().Count() : 0 );
+		Api.Performance.CollectStat( "CameraCount", cameraCount );
 		Api.Performance.CollectStat( "ColliderCount", sceneValid ? scene.PhysicsWorld.BodyCount : 0 );
-		Api.Performance.CollectStat( "Particles", sceneValid ? scene.GetAllComponents<ParticleEffect>().Sum( x => x.Particles.Count ) : 0 );
+		Api.Performance.CollectStat( "Particles", particleCount );
 
 		Api.Performance.CollectStat( "GameObjectsDestroyed", SceneMetrics.GameObjectsDestroyed );
 		Api.Performance.CollectStat( "ParticlesCreated", SceneMetrics.ParticlesCreated );

@@ -102,7 +102,7 @@ namespace Sandbox.UI
 			if ( !RenderScene.IsValid() )
 				return;
 
-			using ( RenderScene.Push() )
+			using ( RenderScene.PushScope() )
 			{
 				if ( TickScene )
 				{

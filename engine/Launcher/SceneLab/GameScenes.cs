@@ -357,6 +357,23 @@ internal static class GameScenes
 		return scene;
 	}
 
+	/// <summary>
+	/// The Blur effect at a size: it samples the frame's gaussian mip chain (<c>downsample_cs</c>), so this shows the
+	/// downsampler's blur and any drift in it.
+	/// </summary>
+	public static Func<Scene> Blur( float size ) => () =>
+	{
+		var scene = Stage( out var camera );
+		using var _ = scene.Push();
+		PostProps();
+
+		var go = camera.GameObject;
+		go.Components.Create<Tonemapping>().AutoExposureEnabled = false;
+		go.Components.Create<Sandbox.Blur>().Size = size;
+
+		return scene;
+	};
+
 	const string UIStyles = """
 		.lab { position: absolute; left: 0; top: 0; right: 0; bottom: 0; font-family: Poppins; color: white; }
 		.card { position: absolute; left: 40px; top: 40px; width: 420px; padding: 20px; flex-direction: column; gap: 10px;
@@ -1191,7 +1208,7 @@ internal static class GameScenes
 		go.WorldRotation = Rotation.FromYaw( 180 );
 
 		var renderer = go.Components.Create<SkinnedModelRenderer>();
-		renderer.Model = Model.Load( "models/citizen/citizen.vmdl" );
+		renderer.Model = Model.Load( "models/citizen_human/human.vmdl" );
 		renderer.UseAnimGraph = false;
 		renderer.Sequence.Name = "AvatarMenu_Entry_Jump";
 		renderer.Sequence.TimeNormalized = 0.4f;
