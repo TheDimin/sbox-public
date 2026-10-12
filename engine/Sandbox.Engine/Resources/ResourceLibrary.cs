@@ -111,8 +111,8 @@ public class ResourceSystem
 		removed |= RemoveIndexedWeak( WeakIndexLong, resource.ResourceIdLong, resource );
 
 #pragma warning disable CS0618 // Type or member is obsolete
-		removed |= RemoveIndexed( ResourceIndex, resource.ResourceId, resource );
-		removed |= RemoveIndexedWeak( WeakIndex, resource.ResourceId, resource );
+		UnregisterLegacyStrong( resource, resource.ResourceId );
+		UnregisterLegacyWeak( resource, resource.ResourceId );
 #pragma warning restore CS0618 // Type or member is obsolete
 
 		removed |= RemoveIndexed( GuidIndex, resource.Guid, resource );
