@@ -15,6 +15,14 @@ public class TestInit
 	[AssemblyInitialize]
 	public static void AssemblyInitialize( TestContext context )
 	{
+		// This tier skips Bootstrap.PreInit, which sets the engine's numeric culture.
+		// Apply it to test workers as well as the assembly initialization thread.
+		var culture = System.Globalization.CultureInfo.GetCultureInfo( "en-US" );
+		System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
+		System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
+		System.Globalization.CultureInfo.CurrentCulture = culture;
+		System.Globalization.CultureInfo.CurrentUICulture = culture;
+
 		// Engine-attached tier: load the native engine DLLs so interop works, but never boot
 		// the engine loop. Tests that need a booted engine belong in Sandbox.Test.Integration;
 		// tests that need no native code at all belong in Sandbox.Test.Unit.
