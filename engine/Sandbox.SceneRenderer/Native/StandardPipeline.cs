@@ -89,9 +89,11 @@ internal sealed class StandardPipeline
 		depthDownsample.Setup( view, viewport, depth, multisampled );
 		depthDownsample.AddToView( view, viewport );
 
-		// Motion vectors, for the temporal upscalers (FSR3, DLSS)
-		if ( Upscaler.IsTemporal( setup.m_nUpscalerMode ) )
+		// Motion vectors for temporal upscalers and camera command consumers.
+		var wantsObjectMotion = IManagedCamera.FindById( view.m_ManagedCameraId )?.WantsMotionVectors ?? false;
+		if ( Upscaler.IsTemporal( setup.m_nUpscalerMode ) || wantsObjectMotion )
 		{
+			viewAttributes.SetBoolValue( "WantsMotionVectors", true );
 			motionVectors.Setup( view, viewport );
 			motionVectors.AddToView( view, viewport );
 

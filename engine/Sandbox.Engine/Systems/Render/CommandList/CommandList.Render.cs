@@ -3,6 +3,48 @@ namespace Sandbox.Rendering;
 
 public sealed unsafe partial class CommandList
 {
+	RenderAttributes sceneObjectDrawAttributes;
+
+	/// <summary>
+	/// Records a scene-object draw using the executing view's shader mode and targets.
+	/// Custom objects run their render callback with private attributes merged from
+	/// the view and object. They own their draw transforms and materials. Ordinary
+	/// objects use the native draw path. Destroyed objects are skipped. The caller
+	/// must retain the object until execution and select materials for the pass.
+	/// </summary>
+	public void DrawSceneObject( SceneObject sceneObject )
+	{
+		if ( !sceneObject.IsValid() ) return;
+
+		static void Execute( ref Entry entry, CommandList commandList )
+		{
+			var sceneObject = (SceneObject)entry.Object1;
+			if ( !sceneObject.IsValid() ) return;
+			if ( sceneObject is not SceneCustomObject custom )
+			{
+				Graphics.Render( sceneObject );
+				return;
+			}
+
+			// The native immediate draw does not invoke a custom callback.
+			// Use a private attribute set so the callback cannot change its caller.
+			var attributes = commandList.sceneObjectDrawAttributes ??= new RenderAttributes();
+			try
+			{
+				Graphics.Attributes.MergeTo( attributes );
+				custom.Attributes.MergeTo( attributes );
+				using var scope = new Graphics.AttributeScope( attributes );
+				custom.RenderSceneObject();
+			}
+			finally
+			{
+				attributes.Clear( false );
+			}
+		}
+
+		AddEntry( &Execute, new Entry { Object1 = sceneObject } );
+	}
+
 	/// <summary>
 	/// Render a <see cref="Renderer"/> with the specified overrides.
 	/// </summary>

@@ -18,6 +18,31 @@ public sealed partial class ClutterGridSystem : GameObjectSystem
 	private readonly HashSet<ClutterTile> _pendingTiles = [];
 	private readonly HashSet<Terrain> _subscribedTerrains = [];
 	private Vector3 _lastCameraPosition;
+	public Vector3 PaintedDrawCameraPosition { get; private set; }
+	public bool PaintedDrawCameraValid { get; private set; }
+
+	/// <summary>
+	/// Maximum draw distance in world inches for selected painted model paths.
+	/// Missing paths and zero values keep the unlimited default. Prefabs and component layers are unaffected.
+	/// Changing a value affects the native cull without rebuilding painted storage.
+	/// </summary>
+	[Property]
+	public Dictionary<string, float> PaintedDrawDistances
+	{
+		get;
+		set
+		{
+			ArgumentNullException.ThrowIfNull( value );
+			var replacement = new Dictionary<string, float>( StringComparer.OrdinalIgnoreCase );
+			foreach ( var pair in value )
+			{
+				if ( string.IsNullOrWhiteSpace( pair.Key ) || !float.IsFinite( pair.Value ) || pair.Value < 0 )
+					throw new ArgumentException( "Painted draw distances require model paths and finite non-negative world inches.", nameof( value ) );
+				replacement.Add( pair.Key, pair.Value );
+			}
+			field = replacement;
+		}
+	} = new( StringComparer.OrdinalIgnoreCase );
 
 	// Reused by the update path so an idle scene doesn't allocate.
 	private readonly List<ClutterComponent> _activeInfinite = [];
@@ -56,6 +81,7 @@ public sealed partial class ClutterGridSystem : GameObjectSystem
 
 	public override void Dispose()
 	{
+		PaintedDrawCameraValid = false;
 		base.Dispose();
 
 		foreach ( var terrain in _subscribedTerrains )
@@ -76,10 +102,14 @@ public sealed partial class ClutterGridSystem : GameObjectSystem
 	/// </summary>
 	private void OnUpdate()
 	{
+		PaintedDrawCameraValid = false;
 		var camera = GetActiveCamera();
 		if ( camera is not null )
 		{
 			_lastCameraPosition = camera.WorldPosition;
+			// Only this scene's main update publishes the cutoff camera. Light views do not.
+			PaintedDrawCameraPosition = _lastCameraPosition;
+			PaintedDrawCameraValid = camera.IsValid() && camera.Scene == Scene && _lastCameraPosition.IsFinite;
 
 			PublishLodParameters( camera );
 

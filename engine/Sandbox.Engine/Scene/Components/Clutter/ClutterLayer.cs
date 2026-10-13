@@ -148,6 +148,8 @@ class ClutterLayer
 	{
 		if ( _dirty )
 			RebuildBatches();
+		foreach ( var batch in _batches.Values )
+			batch.UpdateDeformationBounds();
 	}
 
 	/// <summary>
@@ -363,7 +365,7 @@ class ClutterLayer
 
 			if ( !_batches.TryGetValue( key, out var batch ) )
 			{
-				batch = new ClutterBatchSceneObject( scene.SceneWorld, key.Model, key.CastShadows );
+				batch = new ClutterBatchSceneObject( scene.SceneWorld, key.Model, key.CastShadows, ParentObject is null ? GridSystem : null );
 				_batches[key] = batch;
 			}
 

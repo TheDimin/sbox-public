@@ -3,6 +3,14 @@
 public enum Stage
 {
 	AfterDepthPrepass = 1000,
+
+	/// <summary>
+	/// Draws into the current view's motion-vector target after camera motion is filled.
+	/// Runs only when the view requests motion vectors. Commands must preserve its
+	/// camera vectors outside their visible geometry and perform their own depth test.
+	/// The target has no depth attachment. Scene mutation is not allowed here.
+	/// </summary>
+	MotionVectors = 1100,
 	AfterOpaque = 2000,
 	AfterSkybox = 3000,
 	AfterTransparent = 4000,

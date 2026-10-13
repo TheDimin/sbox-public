@@ -25,8 +25,18 @@ CS
 	StructuredBuffer<TransformBufferData_t> AllInstances < Attribute( "AllInstances" ); >;
 	StructuredBuffer<float4> AllInstanceSpheres < Attribute( "AllInstanceSpheres" ); >;
 	int InstanceCount < Attribute( "InstanceCount" ); >;
+	// Selected painted models only. Zero keeps existing unlimited drawing.
+	float ClutterDrawDistance < Attribute( "ClutterDrawDistance" ); Default( 0.0 ); >;
+	int ClutterDrawCameraValid < Attribute( "ClutterDrawCameraValid" ); Default( 0 ); >;
+	float3 ClutterDrawCameraPosition < Attribute( "ClutterDrawCameraPosition" ); Default3( 0, 0, 0 ); >;
 
 	float ClutterModelRadius < Attribute( "ClutterModelRadius" ); >;
+	float ClutterLodBlendWidth < Attribute( "ClutterLodBlendWidth" ); Default( 0.0 ); >;
+	float ClutterVertexBoundsLocalMargin < Attribute( "ClutterVertexBoundsLocalMargin" ); Default( 0.0 ); >;
+	float ClutterVertexBoundsWorldMargin < Attribute( "ClutterVertexBoundsWorldMargin" ); Default( 0.0 ); >;
+	int ClutterVertexBoundsPerLod < Attribute( "ClutterVertexBoundsPerLod" ); Default( 0 ); >;
+	float4 ClutterVertexBoundsLocalMargins < Attribute( "ClutterVertexBoundsLocalMargins" ); Default4( 0.0, 0.0, 0.0, 0.0 ); >;
+	float4 ClutterVertexBoundsWorldMargins < Attribute( "ClutterVertexBoundsWorldMargins" ); Default4( 0.0, 0.0, 0.0, 0.0 ); >;
 
 	// Survivors per LOD - each survivor appends its full transform to its bucket.
 	AppendStructuredBuffer<TransformBufferData_t> VisibleLod0 < Attribute( "VisibleLod0" ); >;
@@ -87,7 +97,7 @@ CS
 	}
 
 	// Matches the native LOD metric: screen coverage of a 0.5-radius sphere, then walk switch distances.
-	int ComputeLod( float3 worldPos, float scale )
+	float LodMetric( float3 worldPos )
 	{
 		float dist = length( worldPos - ClutterLodCameraPos );
 		float tanHalf = max( ClutterLodTanHalfFov, 1e-5 );
@@ -98,6 +108,11 @@ CS
 		float pixels = screen * ClutterLodViewportWidth;
 		float metric = ( pixels > 0.0 ) ? ( 50.0 / pixels ) : 0.0;
 
+		return metric;
+	}
+
+	int ComputeLod( float metric, float scale )
+	{
 		int lod = max( ClutterLodCount - 1, 0 );
 		[loop]
 		while ( lod > 0 )
@@ -108,6 +123,22 @@ CS
 			lod--;
 		}
 		return lod;
+	}
+
+	// At most two adjacent buckets. Each bucket still has at most InstanceCount
+	// entries, so the existing append-buffer capacities remain sufficient.
+	int BlendBoundary( float metric, float scale )
+	{
+		if ( ClutterLodBlendWidth <= 0.0 ) return -1;
+		for ( int boundary = 1; boundary < min( ClutterLodCount, 4 ); boundary++ )
+		{
+			float threshold = ClutterLodSwitchDistances[boundary] * scale;
+			float width = threshold * ClutterLodBlendWidth;
+			if ( boundary > 1 ) width = min( width, (threshold - ClutterLodSwitchDistances[boundary - 1] * scale) * 0.49 );
+			if ( boundary + 1 < ClutterLodCount ) width = min( width, (ClutterLodSwitchDistances[boundary + 1] * scale - threshold) * 0.49 );
+			if ( threshold > 0 && width > 0 && abs( metric - threshold ) < width ) return boundary;
+		}
+		return -1;
 	}
 
 	void AppendLod( int lod, TransformBufferData_t t )
@@ -132,13 +163,32 @@ CS
 		if ( sphere.w < 0.0 ) // Free tile slot.
 			return;
 
-		if ( !SphereInFrustum( sphere.xyz, sphere.w ) )
+		float scale = ( ClutterModelRadius > 1e-6 ) ? ( sphere.w / ClutterModelRadius ) : 1.0;
+		// LOD stays on the resting radius. Use that LOD's full deformation envelope.
+		float metric = LodMetric( sphere.xyz );
+		int boundary = BlendBoundary( metric, scale );
+		int lod = boundary > 0 ? boundary - 1 : ComputeLod( metric, scale );
+		float localMargin = ClutterVertexBoundsPerLod != 0 ? ClutterVertexBoundsLocalMargins[lod] : ClutterVertexBoundsLocalMargin;
+		float worldMargin = ClutterVertexBoundsPerLod != 0 ? ClutterVertexBoundsWorldMargins[lod] : ClutterVertexBoundsWorldMargin;
+		if ( boundary > 0 && ClutterVertexBoundsPerLod != 0 )
+		{
+			localMargin = max( localMargin, ClutterVertexBoundsLocalMargins[boundary] );
+			worldMargin = max( worldMargin, ClutterVertexBoundsWorldMargins[boundary] );
+		}
+		float cullRadius = sphere.w + localMargin * scale + worldMargin;
+		if ( !SphereInFrustum( sphere.xyz, cullRadius ) )
+			return;
+
+		// Remove the full wind-expanded sphere before transform fetch and native draw-list append.
+		// Use the owning main-camera snapshot in every pass, including light views.
+		if ( ClutterDrawDistance > 0.0 && ClutterDrawCameraValid != 0
+			&& length( sphere.xyz - ClutterDrawCameraPosition ) - cullRadius >= ClutterDrawDistance )
 			return;
 
 		// Only the full transform is fetched once an instance survives.
-		float scale = ( ClutterModelRadius > 1e-6 ) ? ( sphere.w / ClutterModelRadius ) : 1.0;
-		int lod = ComputeLod( sphere.xyz, scale );
 
-		AppendLod( lod, AllInstances[id] );
+		TransformBufferData_t transform = AllInstances[id];
+		AppendLod( lod, transform );
+		if ( boundary > 0 ) AppendLod( boundary, transform );
 	}
 }

@@ -1474,9 +1474,13 @@ public sealed unsafe partial class CommandList
 	}
 
 	/// <summary>
-	/// Records an action to execute on the render thread. Cache the delegate to avoid allocations when recording.
+	/// Records a callback at this point in playback, inside the executing graphics
+	/// block. It runs on a render worker on each replay. Use Graphics.NativeViewIdentity
+	/// to identify a native view; do not assume this is the main game camera.
+	/// Do not edit scene objects or this command list from the callback. Cache the
+	/// delegate to avoid allocations when recording. A null callback is ignored.
 	/// </summary>
-	internal void AddAction( Action a )
+	public void AddAction( Action a )
 	{
 		static void Execute( ref Entry entry, CommandList commandList )
 		{

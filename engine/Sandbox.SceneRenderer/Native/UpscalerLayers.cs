@@ -9,6 +9,8 @@ namespace Sandbox.SceneRenderer.Native;
 internal sealed class MotionVectorLayer : NativeProceduralLayer
 {
 	static readonly Material MotionVectorMaterial = Material.FromShader( "shaders/motion_vectors.shader" );
+	RenderTarget motionVectorTarget;
+	int cameraId;
 
 	public MotionVectorLayer() : base( "Static Motion Vectors" )
 	{
@@ -17,21 +19,27 @@ internal sealed class MotionVectorLayer : NativeProceduralLayer
 
 	public void Setup( ISceneView view, RenderViewport viewport )
 	{
-		var target = RenderTarget.GetTemporary(
+		cameraId = view.m_ManagedCameraId;
+		motionVectorTarget = RenderTarget.GetTemporary(
 			(int)viewport.Rect.Width,
 			(int)viewport.Rect.Height,
 			colorFormat: ImageFormat.RGBA16161616F,
 			depthFormat: ImageFormat.None,
 			targetName: "MotionVectors" );
 
-		ColorAttachment = target.ToColorHandle( view );
+		ColorAttachment = motionVectorTarget.ToColorHandle( view );
 
-		view.GetRenderAttributesPtr().SetTextureValue( "MotionVectors", target.ColorTarget.native, -1 );
+		view.GetRenderAttributesPtr().SetTextureValue( "MotionVectors", motionVectorTarget.ColorTarget.native, -1 );
 	}
 
 	protected override void OnRender()
 	{
 		Graphics.Blit( MotionVectorMaterial );
+
+		// Publish the bound target for camera commands that overwrite object motion.
+		// This pipeline retains this view's state until submission completes.
+		Graphics.Attributes.Set( "MotionVectors", motionVectorTarget.ColorTarget );
+		IManagedCamera.FindById( cameraId )?.OnRenderStage( Stage.MotionVectors );
 	}
 }
 

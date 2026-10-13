@@ -228,6 +228,7 @@ public sealed partial class CameraComponent : Component, Component.ExecuteInEdit
 
 		sceneCamera.OnRenderStageHook = ExecuteCommandLists;
 		sceneCamera.WantsDepthNormalsHook = WantsDepthNormals;
+		sceneCamera.WantsMotionVectorsHook = WantsMotionVectors;
 		sceneCamera.HasAsyncComputeHook = HasAsyncCompute;
 		sceneCamera.RenderAsyncComputeHook = RenderAsyncCompute;
 	}
@@ -402,6 +403,7 @@ public sealed partial class CameraComponent : Component, Component.ExecuteInEdit
 	/// </summary>
 	Action<Stage, SceneCamera> executeCommandListsHook;
 	Func<bool> wantsDepthNormalsHook;
+	Func<SceneCamera, bool> wantsMotionVectorsHook;
 	Func<Stage, bool> hasAsyncComputeHook;
 	Action<Stage> renderAsyncComputeHook;
 
@@ -477,6 +479,7 @@ public sealed partial class CameraComponent : Component, Component.ExecuteInEdit
 		//
 		camera.OnRenderStageHook = executeCommandListsHook ??= ExecuteCommandLists;
 		camera.WantsDepthNormalsHook = wantsDepthNormalsHook ??= WantsDepthNormals;
+		camera.WantsMotionVectorsHook = wantsMotionVectorsHook ??= WantsMotionVectors;
 		camera.HasAsyncComputeHook = hasAsyncComputeHook ??= HasAsyncCompute;
 		camera.RenderAsyncComputeHook = renderAsyncComputeHook ??= RenderAsyncCompute;
 

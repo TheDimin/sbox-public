@@ -73,6 +73,9 @@ public sealed partial class SceneCamera : IDisposable, IManagedCamera
 	/// </summary>
 	internal Func<bool> WantsDepthNormalsHook;
 
+	internal Func<SceneCamera, bool> WantsMotionVectorsHook;
+	bool IManagedCamera.WantsMotionVectors => WantsMotionVectorsHook?.Invoke( this ) ?? false;
+
 	/// <summary>
 	/// Whether something in this camera's frame reads the normals and roughness G-buffer of the depth-normals prepass
 	/// (AO, SSR). Native always draws it; the managed scene renderer only when this says so.

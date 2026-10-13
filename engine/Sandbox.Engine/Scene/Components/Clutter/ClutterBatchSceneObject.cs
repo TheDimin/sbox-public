@@ -32,13 +32,37 @@ internal class ClutterBatchSceneObject : SceneCustomObject
 	private static readonly int ArgsInstanceCountOffset = Marshal.OffsetOf<GpuBuffer.IndirectDrawIndexedArguments>( nameof( GpuBuffer.IndirectDrawIndexedArguments.InstanceCount ) ).ToInt32();
 
 	private readonly Model _model;
+	private readonly ClutterGridSystem _paintedDrawOwner;
 	private readonly int _lodCount;
 	private readonly float _modelRadius;
+	private Vector4 _lodSwitches = default;
+	private float _lodBlendWidth;
+	private BBox _baseBounds;
+	private float _maximumScale;
+	private float _localVertexBoundsMargin;
+	private float _worldVertexBoundsMargin;
+	private Vector4 _localVertexBoundsMargins;
+	private Vector4 _worldVertexBoundsMargins;
 	private readonly GpuBuffer<float> _lodDistances;
 
 	private readonly int[] _drawCallCounts;
 
 	private readonly CommandList _commandList = new( "ClutterBatch" );
+	private readonly CommandList _shadowCommandList = new( "ClutterBatch.Shadow" );
+
+	// A LOD remains shadow eligible unless every draw call in that LOD opts out
+	// through its material. Mixed LODs keep casting shadows.
+	private uint _shadowCastingLodMask;
+	private bool _lastShadowPassDetected;
+	private SceneObjectFlags _lastShadowRequiredFlags;
+	private int _shadowPassCount;
+	private int _shadowLodDrawsSkipped;
+
+	internal uint ShadowCastingLodMask => _shadowCastingLodMask;
+	internal bool LastShadowPassDetected => _lastShadowPassDetected;
+	internal SceneObjectFlags LastShadowRequiredFlags => _lastShadowRequiredFlags;
+	internal int ShadowPassCount => _shadowPassCount;
+	internal int ShadowLodDrawsSkipped => _shadowLodDrawsSkipped;
 
 	private GpuBuffer<GpuInstanceTransform>[] _visible;
 
@@ -73,6 +97,7 @@ internal class ClutterBatchSceneObject : SceneCustomObject
 		public Vector4[] Spheres { get; }
 		public BBox Bounds { get; private set; }
 		public int Count { get; }
+		public float MaximumScale { get; private set; }
 
 		private int _next;
 		private readonly BBox _modelBounds;
@@ -91,7 +116,9 @@ internal class ClutterBatchSceneObject : SceneCustomObject
 		{
 			var center = transform.PointToWorld( _modelBounds.Center );
 			var scale = transform.Scale;
-			var radius = _modelRadius * MathF.Max( scale.x, MathF.Max( scale.y, scale.z ) );
+			var maximumScale = MathF.Max( MathF.Abs( scale.x ), MathF.Max( MathF.Abs( scale.y ), MathF.Abs( scale.z ) ) );
+			MaximumScale = MathF.Max( MaximumScale, maximumScale );
+			var radius = _modelRadius * maximumScale;
 			Transforms[_next] = GpuInstanceTransform.From( transform );
 			Spheres[_next] = new Vector4( center.x, center.y, center.z, radius );
 			var bounds = _modelBounds.Transform( transform );
@@ -106,13 +133,15 @@ internal class ClutterBatchSceneObject : SceneCustomObject
 		}
 	}
 
-	public ClutterBatchSceneObject( SceneWorld world, Model model, bool castShadows = true ) : base( world )
+	public ClutterBatchSceneObject( SceneWorld world, Model model, bool castShadows = true, ClutterGridSystem paintedDrawOwner = null ) : base( world )
 	{
 		_model = model;
+		_paintedDrawOwner = paintedDrawOwner;
 		_modelRadius = model.Bounds.Size.Length * 0.5f;
 
 		var switches = model.GetLodSwitchDistances() ?? [];
 		_lodCount = Math.Clamp( switches.Length, 1, MaxLods );
+		_shadowCastingLodMask = (uint)((1 << _lodCount) - 1);
 
 		var distances = new float[_lodCount];
 		_drawCallCounts = new int[_lodCount];
@@ -122,6 +151,7 @@ internal class ClutterBatchSceneObject : SceneCustomObject
 			_drawCallCounts[i] = Math.Max( 1, model.GetLodDrawCallCount( i ) );
 		}
 
+		for ( int i = 0; i < _lodCount; i++ ) _lodSwitches[i] = distances[i];
 		_lodDistances = new GpuBuffer<float>( _lodCount, GpuBuffer.UsageFlags.Structured );
 		_lodDistances.SetData( distances );
 
@@ -203,8 +233,108 @@ internal class ClutterBatchSceneObject : SceneCustomObject
 		foreach ( var tile in tiles )
 			worldBounds = worldBounds.AddBBox( tile.Bounds );
 
-		Bounds = worldBounds;
+		_baseBounds = worldBounds;
+		_maximumScale = tiles.Max( tile => tile.MaximumScale );
+		UpdateDeformationBounds( true );
 		BuildCommandList();
+	}
+
+	/// <summary>
+	/// Shader margins cover vertex motion without changing the resting spheres used for LOD.
+	/// Refresh after material hotload, including while the instance set stays unchanged.
+	/// </summary>
+	internal void UpdateDeformationBounds( bool force = false )
+	{
+		if ( _count == 0 )
+		{
+			if ( Attributes.GetInt( "VertexMotionVectorsAvailable" ) != 0 )
+				Attributes.Set( "VertexMotionVectorsAvailable", 0 );
+			return;
+		}
+		bool supportsMotionVectors = true;
+		var shadowCastingLodMask = CalculateShadowCastingLodMask();
+		bool shadowCastingLodMaskChanged = shadowCastingLodMask != _shadowCastingLodMask;
+		_shadowCastingLodMask = shadowCastingLodMask;
+		float blendWidth = 0.15f;
+		int materialCount = 0;
+		var locals = Vector4.Zero;
+		var worlds = Vector4.Zero;
+		foreach ( var mesh in _model.MeshInfo.Meshes )
+		{
+			foreach ( var draw in mesh.DrawCalls )
+			{
+				var material = draw.Material;
+				materialCount++;
+				supportsMotionVectors &= material.Flags.GetBool( "VertexMotionVectors" );
+				var width = material.Flags.GetFloat( "ClutterLodBlendWidth" );
+				blendWidth = !float.IsFinite( width ) || width <= 0f ? 0f : MathF.Min( blendWidth, width );
+				var localMargin = material.Flags.GetFloat( "VertexBoundsLocalMargin" );
+				var worldMargin = material.Flags.GetFloat( "VertexBoundsWorldMargin" );
+				if ( !float.IsFinite( localMargin ) || localMargin < 0f || !float.IsFinite( worldMargin ) || worldMargin < 0f )
+					throw new InvalidOperationException( $"{material.ResourcePath} has invalid vertex bounds margins." );
+				for ( int lod = 0; lod < _lodCount; lod++ )
+				{
+					if ( (mesh.LodMask & (1 << lod)) == 0 ) continue;
+					locals[lod] = MathF.Max( locals[lod], localMargin );
+					worlds[lod] = MathF.Max( worlds[lod], worldMargin );
+				}
+			}
+		}
+		// All LOD draws must implement the same pass. Refresh before the bounds
+		// early return so material hotload can remove support without moving plants.
+		// Crossfade is opt-in on every material, including every shadow/depth draw.
+		// Unordered or missing thresholds use the existing hard LOD selector.
+		for ( int lod = 1; lod < _lodCount; lod++ )
+			if ( !float.IsFinite( _lodSwitches[lod] ) || _lodSwitches[lod] <= _lodSwitches[lod - 1] ) blendWidth = 0f;
+		_lodBlendWidth = materialCount > 0 && _lodCount > 1 ? blendWidth : 0f;
+		int motionVectorsAvailable = supportsMotionVectors && materialCount > 0 ? 1 : 0;
+		if ( Attributes.GetInt( "VertexMotionVectorsAvailable" ) != motionVectorsAvailable )
+			Attributes.Set( "VertexMotionVectorsAvailable", motionVectorsAvailable );
+		if ( !force && !shadowCastingLodMaskChanged && locals == _localVertexBoundsMargins && worlds == _worldVertexBoundsMargins ) return;
+		_localVertexBoundsMargins = locals;
+		_worldVertexBoundsMargins = worlds;
+		float local = 0f, world = 0f, total = 0f;
+		for ( int lod = 0; lod < _lodCount; lod++ )
+		{
+			local = MathF.Max( local, locals[lod] );
+			world = MathF.Max( world, worlds[lod] );
+			total = MathF.Max( total, locals[lod] * _maximumScale + worlds[lod] );
+		}
+		_localVertexBoundsMargin = local;
+		_worldVertexBoundsMargin = world;
+		Bounds = _baseBounds.Grow( total );
+		if ( shadowCastingLodMaskChanged && !force && _instances is not null )
+			BuildCommandList();
+	}
+
+	private uint CalculateShadowCastingLodMask()
+	{
+		uint mask = 0;
+		for ( int lod = 0; lod < _lodCount; lod++ )
+		{
+			bool hasDrawCall = false;
+			bool hasCastingMaterial = false;
+			foreach ( var mesh in _model.MeshInfo.Meshes )
+			{
+				if ( (mesh.LodMask & (1 << lod)) == 0 ) continue;
+				foreach ( var draw in mesh.DrawCalls )
+				{
+					hasDrawCall = true;
+					if ( draw.Material is null || !draw.Material.Flags.GetBool( "DoNotCastShadows" ) )
+					{
+						hasCastingMaterial = true;
+						break;
+					}
+				}
+				if ( hasCastingMaterial ) break;
+			}
+
+			// Missing draw-call metadata is treated as casting to preserve the old
+			// behaviour and avoid removing a shadow from an unknown model.
+			if ( !hasDrawCall || hasCastingMaterial ) mask |= (uint)(1 << lod);
+		}
+
+		return mask;
 	}
 
 	private void UploadTile( PreparedInstances tile, TileSlot slot )
@@ -303,54 +433,63 @@ internal class ClutterBatchSceneObject : SceneCustomObject
 	}
 
 	/// <summary>
-	/// Bakes the cull dispatch and indirect draws into <see cref="_commandList"/> for the current
-	/// instance set. Per-view inputs are pushed through Graphics.Attributes in RenderSceneObject.
+	/// Bakes the cull dispatch and indirect draws into the normal and shadow command lists for the
+	/// current instance set. Per-view inputs are pushed through Graphics.Attributes in RenderSceneObject.
 	/// </summary>
 	private void BuildCommandList()
 	{
-		_commandList.Reset();
+		BuildCommandList( _commandList, (uint)((1 << _lodCount) - 1) );
+		BuildCommandList( _shadowCommandList, _shadowCastingLodMask );
+	}
+
+	private void BuildCommandList( CommandList commandList, uint drawLodMask )
+	{
+		commandList.Reset();
 
 		if ( _instances == null || _count == 0 )
 			return;
 
-		_commandList.Attributes.Set( "AllInstances", _instances );
-		_commandList.Attributes.Set( "AllInstanceSpheres", _spheres );
-		_commandList.Attributes.Set( "InstanceCount", _count );
-		_commandList.Attributes.Set( "ClutterModelRadius", _modelRadius );
-		_commandList.Attributes.Set( "DisableScreenSpaceShadows", Flags.CastShadows ? 0 : 1 );
-		_commandList.Attributes.Set( "ClutterLodCount", _lodCount );
-		_commandList.Attributes.Set( "ClutterLodSwitchDistances", _lodDistances );
+		commandList.Attributes.Set( "AllInstances", _instances );
+		commandList.Attributes.Set( "AllInstanceSpheres", _spheres );
+		commandList.Attributes.Set( "InstanceCount", _count );
+		commandList.Attributes.Set( "ClutterModelRadius", _modelRadius );
+		commandList.Attributes.Set( "DisableScreenSpaceShadows", Flags.CastShadows ? 0 : 1 );
+		commandList.Attributes.Set( "ClutterLodCount", _lodCount );
+		commandList.Attributes.Set( "ClutterModelBoundsCenter", _model.Bounds.Center );
+		commandList.Attributes.Set( "ClutterLodSwitches", _lodSwitches );
+		commandList.Attributes.Set( "ClutterLodSwitchDistances", _lodDistances );
 
 		for ( int slot = 0; slot < MaxLods; slot++ )
-			_commandList.Attributes.Set( $"VisibleLod{slot}", _visible[slot < _lodCount ? slot : 0] );
+			commandList.Attributes.Set( $"VisibleLod{slot}", _visible[slot < _lodCount ? slot : 0] );
 
 		for ( int lod = 0; lod < _lodCount; lod++ )
 		{
-			_commandList.ResourceBarrierTransition( _visible[lod], ResourceState.UnorderedAccess );
-			_commandList.SetCounterValue( _visible[lod], 0 );
+			commandList.ResourceBarrierTransition( _visible[lod], ResourceState.UnorderedAccess );
+			commandList.SetCounterValue( _visible[lod], 0 );
 		}
 
-		_commandList.DispatchCompute( CullShader, _count, 1, 1 );
+		commandList.DispatchCompute( CullShader, _count, 1, 1 );
 
 		// Appends must complete before reading each bucket's count.
 		for ( int lod = 0; lod < _lodCount; lod++ )
-			_commandList.UavBarrier( _visible[lod] );
+			commandList.UavBarrier( _visible[lod] );
 
 		for ( int lod = 0; lod < _lodCount; lod++ )
 		{
-			_commandList.ResourceBarrierTransition( _args[lod], ResourceState.CopyDestination );
+			commandList.ResourceBarrierTransition( _args[lod], ResourceState.CopyDestination );
 
 			// Every draw call at this LOD draws the same visible-instance set, just a different
 			// material's index range, so the same counter is replicated into each entry's InstanceCount.
 			for ( int d = 0; d < _drawCallCounts[lod]; d++ )
-				_commandList.CopyStructureCount( _visible[lod], _args[lod], d * ArgsStride + ArgsInstanceCountOffset );
+				commandList.CopyStructureCount( _visible[lod], _args[lod], d * ArgsStride + ArgsInstanceCountOffset );
 		}
 
 		for ( int lod = 0; lod < _lodCount; lod++ )
 		{
-			_commandList.ResourceBarrierTransition( _visible[lod], ResourceState.GenericRead );
-			_commandList.ResourceBarrierTransition( _args[lod], ResourceState.IndirectArgument );
-			_commandList.DrawModelInstancedIndirect( _model, _visible[lod], _args[lod], 0, lod );
+			commandList.ResourceBarrierTransition( _visible[lod], ResourceState.GenericRead );
+			commandList.ResourceBarrierTransition( _args[lod], ResourceState.IndirectArgument );
+			if ( (drawLodMask & (1u << lod)) != 0 )
+				commandList.DrawModelInstancedIndirect( _model, _visible[lod], _args[lod], 0, lod );
 		}
 	}
 
@@ -361,13 +500,68 @@ internal class ClutterBatchSceneObject : SceneCustomObject
 
 		// Per-view inputs, read by the cull dispatch during replay.
 		Graphics.Attributes.Set( "ClutterFrustumScale", CullFrustumScale );
+		Graphics.Attributes.Set( "ClutterLodBlendWidth", _lodBlendWidth );
+		Graphics.Attributes.Set( "ClutterVertexBoundsLocalMargin", _localVertexBoundsMargin );
+		Graphics.Attributes.Set( "ClutterVertexBoundsWorldMargin", _worldVertexBoundsMargin );
+		Graphics.Attributes.Set( "ClutterVertexBoundsPerLod", 1 );
+		Graphics.Attributes.Set( "ClutterVertexBoundsLocalMargins", _localVertexBoundsMargins );
+		Graphics.Attributes.Set( "ClutterVertexBoundsWorldMargins", _worldVertexBoundsMargins );
 		Graphics.Attributes.Set( "ClutterLodCameraPos", Lod.CameraPos );
 		Graphics.Attributes.Set( "ClutterLodTanHalfFov", Lod.TanHalfFov );
 		Graphics.Attributes.Set( "ClutterLodViewportWidth", Lod.ViewportWidth );
 		Graphics.Attributes.Set( "ClutterLodOrthoWidth", Lod.OrthoWidth );
 		Graphics.Attributes.Set( "ClutterWorldToProjection", Graphics.ViewFrustum.GetReverseZViewProjTranspose() );
+		float drawDistance = 0;
+		bool drawCameraValid = _paintedDrawOwner?.PaintedDrawCameraValid == true;
+		if ( _paintedDrawOwner is not null
+			&& _paintedDrawOwner.PaintedDrawDistances.TryGetValue( _model.ResourcePath, out var configuredDistance ) )
+		{
+			// In-place dictionary edits are permitted, so validate at the native boundary too.
+			if ( !float.IsFinite( configuredDistance ) || configuredDistance < 0 )
+				throw new InvalidOperationException( $"{_model.ResourcePath}: painted draw distance must be finite non-negative world inches." );
+			drawDistance = drawCameraValid ? configuredDistance : 0;
+		}
+		Graphics.Attributes.Set( "ClutterDrawDistance", drawDistance );
+		Graphics.Attributes.Set( "ClutterDrawCameraValid", drawCameraValid ? 1 : 0 );
+		Graphics.Attributes.Set( "ClutterDrawCameraPosition", drawCameraValid ? _paintedDrawOwner.PaintedDrawCameraPosition : Vector3.Zero );
 
-		_commandList.ExecuteOnRenderThread();
+		var shadowPass = IsShadowPass( out var requiredFlags );
+		_lastShadowPassDetected = shadowPass;
+		if ( shadowPass )
+		{
+			_lastShadowRequiredFlags = requiredFlags;
+			_shadowPassCount++;
+			_shadowLodDrawsSkipped += CountBits( ((uint)((1 << _lodCount) - 1)) & ~_shadowCastingLodMask );
+			// No shadow draw can consume these buffers when every LOD opts out.
+			// Keep the batch shadow flag for normal-view shadow receiving.
+			if ( _shadowCastingLodMask == 0 ) return;
+		}
+		(shadowPass ? _shadowCommandList : _commandList).ExecuteOnRenderThread();
+	}
+
+	private static int CountBits( uint value )
+	{
+		int count = 0;
+		while ( value != 0 )
+		{
+			count += (int)(value & 1);
+			value >>= 1;
+		}
+		return count;
+	}
+
+	private static bool IsShadowPass( out SceneObjectFlags requiredFlags )
+	{
+		var layer = Graphics.SceneLayer;
+		if ( layer.IsValid )
+		{
+			requiredFlags = layer.GetObjectFlagsRequiredMask();
+			if ( (requiredFlags & SceneObjectFlags.CastShadows) == SceneObjectFlags.CastShadows )
+				return true;
+		}
+
+		requiredFlags = SceneObjectFlags.None;
+		return Graphics.LayerType == SceneLayerType.Shadow;
 	}
 
 	private void DisposeBuffers()

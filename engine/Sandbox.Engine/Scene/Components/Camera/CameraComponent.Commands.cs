@@ -103,6 +103,25 @@ public sealed partial class CameraComponent : Component, Component.ExecuteInEdit
 		}
 	}
 
+	/// <summary>Query the same registrations and filters that playback uses.</summary>
+	private bool WantsMotionVectors( SceneCamera currentCamera )
+	{
+		lock ( _commandListLock )
+		{
+			if ( !commandlists.TryGetValue( Stage.MotionVectors, out var list ) )
+				return false;
+
+			foreach ( var entry in list )
+			{
+				if ( !entry.List.Enabled ) continue;
+				if ( entry.List.Flags.Contains( CommandList.Flag.PostProcess ) && !currentCamera.EnablePostProcessing ) continue;
+				return true;
+			}
+
+			return false;
+		}
+	}
+
 	static Superluminal _executeCommandList = new Superluminal( "ExecuteCommandList", Color.Cyan );
 
 	/// <summary>

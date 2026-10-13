@@ -17,6 +17,28 @@ public class CameraComponentExtrasTest
 		return cam;
 	}
 
+	[TestMethod]
+	public void SceneDestructionWithReentrantCameraDestroyRunsCleanupOnce()
+	{
+		var scene = new Scene();
+		using var sceneScope = scene.Push();
+		var parent = scene.CreateObject();
+		var child = scene.CreateObject();
+		child.Parent = parent;
+		var camera = child.Components.Create<CameraComponent>();
+		var probe = parent.Components.Create<CameraTeardownProbe>();
+		probe.Camera = camera;
+		var destroyedCalls = 0;
+		camera.OnComponentDestroy = () => destroyedCalls++;
+		Assert.IsNotNull( camera.SceneCamera );
+
+		scene.Destroy();
+
+		Assert.AreEqual( 1, destroyedCalls, "A teardown callback must not schedule the same camera twice" );
+		Assert.IsNull( camera.SceneCamera );
+		Assert.IsFalse( scene.Cameras.Contains( camera ) );
+	}
+
 	/// <summary>
 	/// A world point straight ahead of the camera maps to the centre of the
 	/// screen: (0.5, 0.5) in normalized coordinates and half the custom size in
@@ -247,4 +269,10 @@ public class CameraComponentExtrasTest
 		copy.Destroy();
 		scene.ProcessDeletes();
 	}
+}
+
+public class CameraTeardownProbe : Component
+{
+	public CameraComponent Camera { get; set; }
+	protected override void OnDisabled() => Camera.Destroy();
 }

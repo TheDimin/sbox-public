@@ -164,6 +164,24 @@ public static partial class Graphics
 	internal static IFrameView CurrentView => _state.view;
 
 	/// <summary>
+	/// The native renderer's temporal view identity for the current graphics block.
+	/// Use both values as the key. Different native cameras or ViewSetup.ViewHash
+	/// values have different histories, including editor views that borrow a camera
+	/// component's command lists. Null outside a native managed-camera view.
+	/// This does not advance history or imply that a view completed a frame.
+	/// </summary>
+	public static (int CameraId, int ViewId)? NativeViewIdentity
+	{
+		get
+		{
+			if ( _state.view is not NativeFrameView native || !native.View.IsValid )
+				return null;
+			var cameraId = native.View.m_ManagedCameraId;
+			return cameraId == 0 ? null : (cameraId, native.View.m_ViewUniqueId);
+		}
+	}
+
+	/// <summary>
 	/// The frame, for what only a view can answer - which a standalone render block has none of.
 	/// </summary>
 	static IFrameView View => _state.view ?? throw new InvalidOperationException( "A standalone render block has no view." );

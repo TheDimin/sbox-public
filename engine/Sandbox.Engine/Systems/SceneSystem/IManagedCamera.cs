@@ -17,6 +17,9 @@ internal interface IManagedCamera
 	/// </summary>
 	void OnRenderStage( Rendering.Stage renderStage );
 
+	/// <summary>Whether this view has enabled object motion-vector commands.</summary>
+	bool WantsMotionVectors { get; }
+
 	/// <summary>
 	/// Allocate a camera id for this camera. This is used to find the camera in the c++ code.
 	/// </summary>
