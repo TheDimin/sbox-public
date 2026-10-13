@@ -87,6 +87,13 @@ public class ProjectConfig
 	public string Resources { get; set; }
 
 	/// <summary>
+	/// Files to omit from publishing, including library source packages. One wildcard per line,
+	/// relative to the package root. Matching is case insensitive; * matches across folders.
+	/// Blank lines and lines starting with // are ignored. Does not change local compilation.
+	/// </summary>
+	public string PublishExclude { get; set; }
+
+	/// <summary>
 	/// A list of packages that this package depends on. These should be installed alongside this package.
 	/// </summary>
 	public List<string> PackageReferences { get; set; }

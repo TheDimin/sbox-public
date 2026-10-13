@@ -39,12 +39,27 @@ public partial class ProjectPublisher
 
 		public List<ProjectFile> Assets { get; set; } = new();
 
+		string[] publishExclusions = Array.Empty<string>();
+
+		internal void SetPublishExclusions( string patterns )
+		{
+			publishExclusions = (patterns ?? "")
+				.Split( '\n', StringSplitOptions.RemoveEmptyEntries )
+				.Select( x => x.Trim() )
+				.Where( x => x.Length > 0 && !x.StartsWith( "//" ) )
+				.Select( x => x.Replace( '\\', '/' ).TrimStart( '/' ) )
+				.ToArray();
+		}
+
+		bool IsExcluded( string path ) => publishExclusions.Any( pattern => path.WildcardMatch( pattern ) );
+
 
 		public async Task BuildFromAssets( Project project, IProgress progress = null, CancellationToken cancel = default )
 		{
 			using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
 
 			Assets.Clear();
+			SetPublishExclusions( project.Config.PublishExclude );
 
 			var rootFolder = project.RootDirectory.FullName;
 
@@ -147,6 +162,7 @@ public partial class ProjectPublisher
 			using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
 
 			Assets.Clear();
+			SetPublishExclusions( project?.Config.PublishExclude );
 
 			var assetList = new List<Asset>
 			{
@@ -176,6 +192,7 @@ public partial class ProjectPublisher
 			using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
 
 			Assets.Clear();
+			SetPublishExclusions( addon.Config.PublishExclude );
 
 			var rootFolder = addon.RootDirectory.FullName;
 
@@ -386,6 +403,7 @@ public partial class ProjectPublisher
 			}
 
 			relativePath = relativePath.NormalizeFilename( false, false ).TrimStart( '/' );
+			if ( IsExcluded( relativePath ) ) return;
 
 			//
 			// already added
@@ -507,6 +525,9 @@ public partial class ProjectPublisher
 
 		internal async Task AddFile( byte[] contents, string relativePath )
 		{
+			relativePath = relativePath.NormalizeFilename( false, false ).TrimStart( '/' );
+			if ( IsExcluded( relativePath ) ) return;
+
 			//
 			// already added
 			//
