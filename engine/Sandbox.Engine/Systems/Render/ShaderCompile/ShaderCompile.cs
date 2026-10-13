@@ -1,4 +1,4 @@
-﻿using System.Threading;
+using System.Threading;
 
 namespace Sandbox.Engine.Shaders;
 
@@ -121,7 +121,7 @@ public static class ShaderCompile
 		if ( dumping )
 			return results;
 
-		await System.IO.File.WriteAllBytesAsync( shader.AbsolutePath + "_c", results.CompiledShader );
+		await ShaderCompiledFile.WriteAsync( shader.AbsolutePath + "_c", results.CompiledShader, token );
 
 		return results;
 	}
