@@ -83,6 +83,7 @@ public abstract partial class Component : IJsonConvert, IComponentLister, IValid
 	bool _enabledState = false;
 	bool _enabled = false;
 	bool _onEnabled = false;
+	bool _destroyQueued = false;
 
 	/// <summary>
 	/// <para>
@@ -364,10 +365,12 @@ public abstract partial class Component : IJsonConvert, IComponentLister, IValid
 	public void Destroy()
 	{
 		using var batch = CallbackBatch.Batch();
-		// already destroyed
-		if ( !IsValid )
+		// The object link stays valid until the callback runs. Fence repeated and
+		// reentrant requests before removing the component or queuing any callbacks.
+		if ( _destroyQueued || !IsValid )
 			return;
 
+		_destroyQueued = true;
 		GameObject.Components.OnDestroyedInternal( this );
 		CallbackBatch.Add( CommonCallback.Destroy, this, "OnDestroy" );
 

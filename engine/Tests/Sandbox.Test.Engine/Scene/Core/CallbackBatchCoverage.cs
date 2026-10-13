@@ -40,6 +40,26 @@ public class ThrowingEnableProbe : Component
 [DoNotParallelize]
 public class CallbackBatchCoverageTest : SceneTest
 {
+	[DataTestMethod]
+	[DataRow( false )]
+	[DataRow( true )]
+	public void ComponentDestroyIsIdempotentBeforeCallbacksRun( bool reenterFromDisabled )
+	{
+		var scene = new Scene();
+		using var scope = scene.Push();
+		var probe = scene.CreateObject().Components.Create<ReentrantDestroyProbe>();
+		probe.ReenterFromDisabled = reenterFromDisabled;
+		using ( CallbackBatch.Batch() )
+		{
+			probe.Destroy();
+			if ( !reenterFromDisabled ) probe.Destroy();
+		}
+		Assert.AreEqual( 1, probe.DisabledCalls );
+		Assert.AreEqual( 1, probe.DestroyedCalls );
+		Assert.IsTrue( probe.SceneAvailableDuringDestroy );
+		scene.Destroy();
+	}
+
 	/// <summary>
 	/// Queuing a callback when no batch is open is a programming error and throws -
 	/// for both the direct-dispatch and the action-based overloads.
@@ -166,5 +186,25 @@ public class CallbackBatchCoverageTest : SceneTest
 		Assert.AreEqual( 1, probe.EnabledCalls );
 
 		scene.Destroy();
+	}
+}
+
+public class ReentrantDestroyProbe : Component
+{
+	public bool ReenterFromDisabled;
+	public int DisabledCalls;
+	public int DestroyedCalls;
+	public bool SceneAvailableDuringDestroy = true;
+
+	protected override void OnDisabled()
+	{
+		DisabledCalls++;
+		if ( ReenterFromDisabled ) Destroy();
+	}
+
+	protected override void OnDestroy()
+	{
+		DestroyedCalls++;
+		SceneAvailableDuringDestroy &= Scene is not null;
 	}
 }
