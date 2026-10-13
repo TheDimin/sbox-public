@@ -198,6 +198,64 @@ public class NetworkFileRoutingTest
 		}
 	}
 
+	[DataTestMethod]
+	[DataRow( false )]
+	[DataRow( true )]
+	public void NestedMountedDeveloperFileInstallsPhysicalRedirect( bool virtualMountFirst )
+	{
+		var root = Path.Combine( Path.GetTempPath(), "sbox-nested-network-file", Guid.NewGuid().ToString( "N" ) );
+		Directory.CreateDirectory( root );
+		var source = new LocalFileSystem( root );
+		var virtualFiles = new MemoryFileSystem();
+		var inner = new AggregateFileSystem();
+		var outer = new AggregateFileSystem();
+		try
+		{
+			source.WriteAllBytes( "models/player.vmdl_c", [1, 2, 3, 4] );
+			virtualFiles.WriteAllBytes( "models/player.vmdl_c", [9] );
+			if ( virtualMountFirst ) inner.Mount( virtualFiles );
+			inner.Mount( source );
+			if ( !virtualMountFirst ) inner.Mount( virtualFiles );
+			outer.Mount( inner );
+			string target = null;
+			var info = new LargeNetworkFiles.LargeFileInfo( 4, source.GetCrc( "models/player.vmdl_c" ) );
+
+			Assert.IsTrue( LargeNetworkFiles.TryReuseMatchingMountedFile(
+				outer, "models/player.vmdl_c", info, ( _, path ) => target = path ) );
+			Assert.AreEqual( source.GetFullPath( "models/player.vmdl_c" ), target );
+		}
+		finally
+		{
+			outer.UnMountAll();
+			inner.UnMountAll();
+			outer.Dispose();
+			inner.Dispose();
+			virtualFiles.Dispose();
+			source.Dispose();
+			Directory.Delete( root, true );
+		}
+	}
+
+	[TestMethod]
+	public void VirtualMountedFileFallsBackToNetworkDownload()
+	{
+		var source = new MemoryFileSystem();
+		try
+		{
+			source.WriteAllBytes( "models/player.vmdl_c", [1, 2, 3, 4] );
+			var files = new LargeNetworkFiles( "virtual-mounted" );
+			var info = new LargeNetworkFiles.LargeFileInfo( 4, source.GetCrc( "models/player.vmdl_c" ) );
+			Assert.IsFalse( LargeNetworkFiles.TryReuseMatchingMountedFile(
+				source, "models/player.vmdl_c", info, ( _, _ ) => Assert.Fail( "Virtual file has no physical redirect" ) ) );
+			files.QueueFileIfNeeded( "models/player.vmdl_c", info, ( _, _ ) => false );
+			Assert.AreEqual( 1, files.PendingDownloadCount );
+		}
+		finally
+		{
+			source.Dispose();
+		}
+	}
+
 	[TestMethod]
 	public void MismatchedDeveloperFileQueuesDownload()
 	{

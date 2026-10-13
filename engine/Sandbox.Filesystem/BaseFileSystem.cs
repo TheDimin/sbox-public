@@ -187,26 +187,29 @@ public class BaseFileSystem
 	/// </summary>
 	internal IEnumerable<string> GetPhysicalPaths( string path )
 	{
-		var fixedPath = FixPath( path );
+		return GetPhysicalPaths( system, FixPath( path ) );
+	}
 
-		if ( system is Zio.FileSystems.AggregateFileSystem aggregate )
+	static IEnumerable<string> GetPhysicalPaths( Zio.IFileSystem fileSystem, Zio.UPath path )
+	{
+		if ( fileSystem is null )
+			yield break;
+
+		if ( fileSystem is Zio.FileSystems.AggregateFileSystem aggregate )
 		{
-			foreach ( var fileSystem in aggregate.GetFileSystems() )
+			// Aggregates have no physical path of their own. Visit nested mounts as well.
+			foreach ( var mount in aggregate.GetFileSystems() )
 			{
-				if ( !fileSystem.FileExists( fixedPath ) )
-					continue;
-
-				var fullPath = fileSystem.ConvertPathToInternal( fixedPath );
-				if ( System.IO.File.Exists( fullPath ) )
+				foreach ( var fullPath in GetPhysicalPaths( mount, path ) )
 					yield return fullPath;
 			}
 
 			yield break;
 		}
 
-		if ( system.FileExists( fixedPath ) )
+		if ( fileSystem.FileExists( path ) )
 		{
-			var fullPath = system.ConvertPathToInternal( fixedPath );
+			var fullPath = fileSystem.ConvertPathToInternal( path );
 			if ( System.IO.File.Exists( fullPath ) )
 				yield return fullPath;
 		}
