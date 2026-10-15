@@ -13,7 +13,6 @@ public class MinContentTests
 	[DataRow( "extraordinary\nsmall", "extraordinary", false, false )]
 	[DataRow( "small extraordinary words", "small extraordinary words", true, false )]
 	[DataRow( "small words  ", "small words  ", true, false )]
-	[DataRow( "a \u05d0\u05d1\u05d2\u05d3\u05d4 words", "words", false, false )]
 	[DataRow( "a   bb", "bb", false, true )]
 	[DataRow( "bb   a", "bb ", false, true )]
 	[DataRow( "   ", " ", false, true )]
@@ -23,16 +22,36 @@ public class MinContentTests
 	[DataRow( "", "", false, false )]
 	public void WidthAndHeightMatchIntrinsicConstraint( string text, string longest, bool noWrap, bool preserveSpaces )
 	{
+		AssertIntrinsicConstraint( text, [longest], noWrap, preserveSpaces );
+	}
+
+	[DataTestMethod]
+	[DataRow( "a \u05d0\u05d1\u05d2\u05d3\u05d4 words" )]
+	[DataRow( "words \u05d0\u05d1\u05d2\u05d3\u05d4 a" )]
+	public void MixedDirectionWordsUseWidestShapedWord( string text )
+	{
+		// Font fallback can change which script has the widest word.
+		AssertIntrinsicConstraint( text, ["a", "\u05d0\u05d1\u05d2\u05d3\u05d4", "words"], false, false );
+	}
+
+	private static void AssertIntrinsicConstraint( string text, string[] unbreakableRuns, bool noWrap, bool preserveSpaces )
+	{
 		var block = new TextBlock { NoWrap = noWrap, MaxWidth = 20, MaxHeight = 10, Overflow = TextOverflow.Ellipsis };
 		var reference = new TextBlock();
 		try
 		{
 			var style = new Style { FontFamily = "Arial", FontSize = 16 };
 			block.AddText( text, style );
-			reference.AddText( longest, style );
+			float expectedWidth = 0;
+			foreach ( var run in unbreakableRuns )
+			{
+				reference.Clear();
+				reference.AddText( run, style );
+				expectedWidth = MathF.Max( expectedWidth, reference.MeasuredWidth );
+			}
 			var before = (block.MeasuredWidth, block.MeasuredHeight, block.Lines.Count, block.Truncated);
 			var intrinsic = block.MeasureMinContent( preserveSpaces: preserveSpaces );
-			Assert.AreEqual( reference.MeasuredWidth, intrinsic.Width, 0.01f );
+			Assert.AreEqual( expectedWidth, intrinsic.Width, 0.01f );
 			Assert.AreEqual( before, (block.MeasuredWidth, block.MeasuredHeight, block.Lines.Count, block.Truncated) );
 
 			reference.Clear();
