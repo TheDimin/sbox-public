@@ -232,10 +232,13 @@ internal static class EngineLoop
 			{
 				SimulateUI();
 			}
+		}
 
-			// After the game and menu UI, outside the game's UI timing scope.
-			PerfHub.Simulate();
+		// After the game and menu UI so it draws over them. Outside the UI scope so it doesn't count as the game's UI.
+		PerfHub.Simulate();
 
+		if ( !Application.IsHeadless )
+		{
 			// Give each sound handle an opportunity to for a frame think
 			using ( PerformanceStats.Timings.Audio.Scope() )
 			{
