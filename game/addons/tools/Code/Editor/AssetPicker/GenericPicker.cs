@@ -7,7 +7,7 @@ namespace Editor.AssetPickers;
 /// An asset browser allowing the user to pick a single asset.
 /// Supports limiting display to only certain asset types.
 /// </summary>
-public class GenericPicker : AssetPicker
+public partial class GenericPicker : AssetPicker
 {
 	/// <summary>
 	/// Internal asset browser.
@@ -46,6 +46,7 @@ public class GenericPicker : AssetPicker
 
 		Layout = Layout.Column();
 		CreateUI( assetTypes );
+		InitializeRecentState( assetTypes );
 	}
 
 	internal DockManager DockManager;
@@ -110,6 +111,9 @@ public class GenericPicker : AssetPicker
 
 	public override void SetSelection( Asset asset )
 	{
+		if ( HasRecentState )
+			return;
+
 		if ( asset is null )
 		{
 			DockManager.RaiseDock( "Asset Browser" );
@@ -136,7 +140,12 @@ public class GenericPicker : AssetPicker
 
 	public override void SetSelection( Package package )
 	{
+		if ( HasRecentState )
+			return;
+
 		if ( package is null )
+			return;
+		if ( CloudBrowser is null )
 			return;
 
 		DockManager.RaiseDock( "Cloud Browser" );

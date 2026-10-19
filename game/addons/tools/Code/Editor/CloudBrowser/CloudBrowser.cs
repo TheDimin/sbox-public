@@ -501,7 +501,7 @@ public partial class CloudAssetBrowser : Widget, IBrowser
 	/// Breadcrumb clicks truncate the path, so we reset the breadcrumb and let the next
 	/// tree selection rebuild it.
 	/// </summary>
-	void NavigateTo( string filter )
+	internal void NavigateTo( string filter )
 	{
 		BaseQuery = filter;
 
@@ -630,10 +630,16 @@ public partial class CloudAssetBrowser : Widget, IBrowser
 	/// </summary>
 	public async void FocusOnPackage( Package package, bool skipEvents = false )
 	{
+		await RestoreSelection( package, skipEvents );
+	}
+
+	internal async Task RestoreSelection( Package package, bool skipEvents = false )
+	{
 		if ( package is null ) return;
 
 		await ResultsTask;
 		await Task.Yield();
+		if ( !IsValid ) return;
 
 		var entry = AssetList.Items.OfType<PackageEntry>().Where( x => x.Package.Ident == package.Ident ).FirstOrDefault();
 		AssetList.SelectItem( entry, skipEvents: skipEvents );

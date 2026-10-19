@@ -731,10 +731,18 @@ public partial class AssetBrowser : Widget, IBrowser, AssetSystem.IEventListener
 		EditorWindow.DockManager.RaiseDock( this );
 
 		NavigateTo( asset.AbsolutePath );
+		await RestoreSelection( asset, skipEvents );
+	}
+
+	/// <summary>
+	/// Select an asset in the current results without changing the folder or search.
+	/// </summary>
+	internal async Task RestoreSelection( Asset asset, bool skipEvents = false )
+	{
 
 		// wait for the list to (successfully) populate before selecting the item
 		var success = await RefreshTask;
-		if ( !success )
+		if ( !success || !IsValid )
 			return;
 
 		var entry = AssetList.Items.OfType<AssetEntry>().FirstOrDefault( x => x.Asset?.RelativePath == asset.RelativePath );
