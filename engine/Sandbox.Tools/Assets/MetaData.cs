@@ -124,6 +124,12 @@ namespace Editor
 					MetaDataDocumentCache.Remove( FilePath );
 					return;
 				}
+				catch ( System.IO.DirectoryNotFoundException ex )
+				{
+					// Not a transient failure like a locked file - waiting won't make the folder appear
+					Log.Warning( $"Failed to save {FilePath} ({ex.Message})" );
+					return;
+				}
 				catch ( System.IO.IOException ex )
 				{
 					const int delay = 100;

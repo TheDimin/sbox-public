@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace Editor.Mcp;
 
@@ -503,6 +503,7 @@ public static partial class UiTools
 	static Bitmap Capture( Rect rect, int padding )
 	{
 		using var frame = CaptureFrame();
+
 		return Crop( frame, rect, padding );
 	}
 

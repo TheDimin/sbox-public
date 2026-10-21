@@ -90,6 +90,12 @@ public abstract partial class GameObjectSystem : IDisposable
 		/// Use an earlier order to prepare state before a later order saves it.
 		/// </summary>
 		SceneDestroying,
+
+		/// <summary>
+		/// Before cameras copy scene rendering attributes, on the main thread. Also runs for unticked captures.
+		/// May run multiple times per frame; render-thread child views consume the prepared snapshot.
+		/// </summary>
+		PrepareRender,
 	}
 
 	/// <summary>

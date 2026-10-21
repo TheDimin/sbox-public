@@ -114,7 +114,7 @@ internal static class ResourceLoader
 		// like editing an asset while the gamemode is running would?
 	}
 
-	internal static async Task LoadAllGameResourceAsync( BaseFileSystem fileSystem, CancellationToken ct = default, bool reloadExisting = false, Package sourcePackage = null )
+	internal static async Task LoadAllGameResourceAsync( BaseFileSystem fileSystem, CancellationToken ct = default, bool reloadExisting = false, Package sourcePackage = null, Task<List<string>> preEnumeratedFiles = null, Func<string, bool> includeExtension = null )
 	{
 		var totalTimer = Stopwatch.StartNew();
 		var yieldTimer = Stopwatch.StartNew();
@@ -125,7 +125,8 @@ internal static class ResourceLoader
 		allExtensions.UnionWith( NativeExtensions );
 
 		var discovery = new DiscoveryPlan();
-		foreach ( var file in fileSystem.FindFile( "/", "*", true ) )
+		var enumeratedFiles = preEnumeratedFiles is null ? fileSystem.FindFile( "/", "*", true ) : await preEnumeratedFiles;
+		foreach ( var file in enumeratedFiles )
 		{
 			ct.ThrowIfCancellationRequested();
 			if ( discovery.Observe( file, types, allExtensions ) )
@@ -140,6 +141,8 @@ internal static class ResourceLoader
 			ct.ThrowIfCancellationRequested();
 			var file = candidate.Path;
 			var type = candidate.Type;
+			var extension = System.IO.Path.GetExtension( file );
+			if ( includeExtension is not null && !includeExtension( extension ) ) continue;
 
 			// Skip resources that are already fully loaded - this allows calling this method
 			// multiple times (e.g. once per package) without redundant work.
@@ -148,7 +151,7 @@ internal static class ResourceLoader
 
 			try
 			{
-				var se = Game.Resources.LoadGameResource( type, file, fileSystem, true, sourcePackage );
+				var se = Game.Resources.LoadGameResource( type, file, fileSystem, true, sourcePackage, knownToExist: true );
 				if ( se != null ) allResources.Add( se );
 			}
 			catch ( Exception ex )

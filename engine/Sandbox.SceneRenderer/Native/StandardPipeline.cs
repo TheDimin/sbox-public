@@ -11,6 +11,9 @@ namespace Sandbox.SceneRenderer.Native;
 /// </summary>
 internal sealed class StandardPipeline
 {
+	readonly EarlyPostProcessLayer earlyCompute = new( PostProcessQueue.AsyncCompute );
+	readonly EarlyPostProcessLayer earlyGraphics = new( PostProcessQueue.Graphics );
+
 	/// <summary>
 	/// The slice of the depth range game overlays draw in, at the near end (reverse-Z): <c>DEPTH_RANGE_GAME_OVERLAYS</c>.
 	/// </summary>
@@ -34,6 +37,7 @@ internal sealed class StandardPipeline
 	readonly MotionVectorLayer motionVectors = new();
 	readonly ReactiveMaskLayer reactiveMask = new();
 	readonly BloomDepthLayer bloomDepth = new();
+	readonly UpscaleDepthLayer upscaleDepth = new();
 	readonly MotionVectorDebugLayer motionVectorDebug = new();
 	readonly ReactiveMaskDebugLayer reactiveMaskDebug = new();
 
@@ -85,9 +89,32 @@ internal sealed class StandardPipeline
 
 		AddDepthNormalPrepasses( setup, viewport, depth, multisampled );
 
-		// Compute: the depth chain
+		var camera = IManagedCamera.FindById( view.m_ManagedCameraId ) as SceneCamera;
+		var overlap = RenderPipeline.OverlapReflections && hooks && view.GetPostProcessEnabled()
+			&& camera?.HasEarlyPostProcess( Stage.AfterDepthPrepass, PostProcessQueue.AsyncCompute ) == true
+			&& camera.HasEarlyPostProcess( Stage.AfterDepthPrepass, PostProcessQueue.Graphics )
+			&& RenderDeviceManager.SupportsAsyncCompute();
+		camera?.ScheduleEarlyPostProcess( Stage.AfterDepthPrepass, overlap );
+
+		// Hi-Z stays on graphics so both effects can read it without waiting for each other.
 		depthDownsample.Setup( view, viewport, depth, multisampled );
-		depthDownsample.AddToView( view, viewport );
+		depthDownsample.SignalPostProcess = overlap;
+		var depthLayer = depthDownsample.AddToView( view, viewport );
+
+		if ( overlap )
+		{
+			earlyCompute.Msaa = msaa;
+			var computeLayer = earlyCompute.AddToView( view, viewport );
+			computeLayer.AddSemaphoreDependency( depthLayer );
+
+			earlyGraphics.Msaa = msaa;
+			earlyGraphics.AddToView( view, viewport );
+
+			// Each binary semaphore has one consumer. Ordinary hooks and forward draws see both results.
+			var ready = view.AddLabelLayer( "Post processing ready" );
+			ready.m_nLayerFlags |= LayerFlags.NeverRemove;
+			ready.AddSemaphoreDependency( computeLayer );
+		}
 
 		// Motion vectors for temporal upscalers and camera command consumers.
 		var wantsObjectMotion = IManagedCamera.FindById( view.m_ManagedCameraId )?.WantsMotionVectors ?? false;
@@ -277,7 +304,7 @@ internal sealed class StandardPipeline
 		var upscaling = setup.m_nUpscalerMode != 0;
 		if ( upscaling )
 		{
-			Upscaler.Add( setup, color, setup.m_skyViewport );
+			Upscaler.Add( setup, color, setup.m_skyViewport, upscaleDepth );
 			color = setup.m_hUpscaleColor;
 			depth = setup.m_hUpscaleDepth;
 			viewport = setup.m_upscaleViewport;
@@ -370,6 +397,17 @@ internal sealed class StandardPipeline
 	{
 		var view = setup.m_pView;
 		var screen = setup.m_screenViewport.Rect;
+		var noCulling = view.GetRenderAttributesPtr().GetBoolValue( "NoPrepassCulling", false );
+
+		// Cameras without post effects or custom command lists don't consume the G-buffer. Other views retain it.
+		if ( !view.GetRenderAttributesPtr().GetBoolValue( "NeedsDepthNormals", true ) && !setup.m_bToolsView )
+		{
+			AddDepthNormalPrepass( view, viewport, "Depth Prepass (Overlay)", NativeRenderPipeline.NoTarget, depth, overlay: true, cullPercent: 0, noCulling );
+			AddDepthNormalPrepass( view, viewport, "Depth Prepass (Large)", NativeRenderPipeline.NoTarget, depth, overlay: false, LargePrepassCullPercent, noCulling );
+			AddDepthNormalPrepass( view, viewport, "Depth Prepass (Small)", NativeRenderPipeline.NoTarget, depth, overlay: false, -LargePrepassCullPercent, noCulling );
+			view.GetRenderAttributesPtr().SetIntValue( "NormalsTextureIndex", -1 );
+			return;
+		}
 
 		var normals = RenderTarget.GetTemporary(
 			(int)screen.Width,
@@ -378,8 +416,6 @@ internal sealed class StandardPipeline
 			depthFormat: ImageFormat.None,
 			msaa: setup.m_nMSAA.FromEngine() );
 		var normalsHandle = normals.ToColorHandle( view );
-
-		var noCulling = view.GetRenderAttributesPtr().GetBoolValue( "NoPrepassCulling", false );
 
 		AddDepthNormalPrepass( view, viewport, "Depth Normal Prepass (Overlay)", normalsHandle, depth, overlay: true, cullPercent: 0, noCulling );
 		AddDepthNormalPrepass( view, viewport, "Depth Normal Prepass (Large)", normalsHandle, depth, overlay: false, LargePrepassCullPercent, noCulling );
@@ -394,7 +430,9 @@ internal sealed class StandardPipeline
 		bool overlay, float cullPercent, bool noCulling )
 	{
 		var flags = LayerFlags.NeverRemove;
-		if ( overlay ) flags |= LayerFlags.DiscardColorBuffers;
+		var depthOnly = normals == NativeRenderPipeline.NoTarget;
+		if ( depthOnly ) flags |= LayerFlags.IsDepthRenderingPass;
+		else if ( overlay ) flags |= LayerFlags.DiscardColorBuffers;
 
 		// With fewer, larger objects we favor GPU perf over CPU perf by using fullsort
 		if ( cullPercent > 0 ) flags |= LayerFlags.NeedsFullSort;
@@ -406,8 +444,11 @@ internal sealed class StandardPipeline
 
 		if ( overlay )
 		{
-			layer.m_nClearFlags = (int)ClearFlags.Color;
-			layer.SetClearColor( default, 0 );
+			if ( !depthOnly )
+			{
+				layer.m_nClearFlags = (int)ClearFlags.Color;
+				layer.SetClearColor( default, 0 );
+			}
 			layer.AddObjectFlagsRequiredMask( SceneObjectFlags.GameOverlayLayer );
 		}
 		else
