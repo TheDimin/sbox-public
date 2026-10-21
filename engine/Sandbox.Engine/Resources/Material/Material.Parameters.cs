@@ -12,6 +12,9 @@ public partial class Material
 	/// </summary>
 	public Texture FirstTexture => Texture.FromNative( native.GetFirstTextureAttribute() );
 
+	/// <summary>Whether this material defines a native parameter with the given name.</summary>
+	public bool HasParameter( string name ) => native.HasParam( name );
+
 	/// <summary>
 	/// Gets the material's shader
 	/// </summary>

@@ -182,6 +182,50 @@ public static partial class Graphics
 	}
 
 	/// <summary>
+	/// Native layer target metadata for the current render callback. Null outside an active native
+	/// camera view, in child views, or while Graphics.RenderTarget overrides the layer targets.
+	/// Read at the start of an unmodified main-camera AfterOpaque callback, before target changes.
+	/// Match CameraId and ViewId to the intended view; this property does not identify the main camera.
+	/// The viewport is current context state. Target sizes describe mip zero of the layer resources,
+	/// not a resolved copy or swap chain. Samples is the exact texture sample count (one means no MSAA).
+	/// This is layer metadata, not an inspection of arbitrary native target rebinding.
+	/// </summary>
+	public static (int CameraId, int ViewId, SceneLayerType Layer, Rect Viewport,
+		(int Width, int Height, int Samples) Color, (int Width, int Height, int Samples) Depth)? NativeLayerTargetInfo
+	{
+		get
+		{
+			if ( !IsActive || _state.renderTarget is not null ||
+				_state.view is not NativeFrameView native || !native.View.IsValid ||
+				!native.Layer.IsValid || native.IsChildView || NativeViewIdentity is not { } identity )
+				return null;
+
+			var color = native.GetColorTarget( out var ownsColor );
+			try
+			{
+				var depth = native.GetDepthTarget( out var ownsDepth );
+				try
+				{
+					if ( !color.IsValid || !depth.IsValid ) return null;
+					var colorDesc = g_pRenderDevice.GetTextureDesc( color );
+					var depthDesc = g_pRenderDevice.GetTextureDesc( depth );
+					return (identity.CameraId, identity.ViewId, LayerType, Context.GetViewport().Rect,
+						(colorDesc.m_nWidth, colorDesc.m_nHeight, RenderMultiSampleToNum( g_pRenderDevice.GetTextureMultisampleType( color ) )),
+						(depthDesc.m_nWidth, depthDesc.m_nHeight, RenderMultiSampleToNum( g_pRenderDevice.GetTextureMultisampleType( depth ) )));
+				}
+				finally
+				{
+					if ( ownsDepth && !depth.IsNull ) depth.DestroyStrongHandle();
+				}
+			}
+			finally
+			{
+				if ( ownsColor && !color.IsNull ) color.DestroyStrongHandle();
+			}
+		}
+	}
+
+	/// <summary>
 	/// The frame, for what only a view can answer - which a standalone render block has none of.
 	/// </summary>
 	static IFrameView View => _state.view ?? throw new InvalidOperationException( "A standalone render block has no view." );

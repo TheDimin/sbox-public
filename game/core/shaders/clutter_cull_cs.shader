@@ -17,12 +17,22 @@ COMMON
 {
 	#include "system.fxc"
 	#include "common.fxc"
-	#include "transform_buffer.fxc" // TransformBufferData_t
+	#include "clutter_lod2_density.hlsl"
 }
 
 CS
 {
-	StructuredBuffer<TransformBufferData_t> AllInstances < Attribute( "AllInstances" ); >;
+	// Matches the public 64-byte GpuInstanceTransform layout, including trailing metadata.
+	struct ClutterInstanceData
+	{
+		float4 Row0; float4 Row1; float4 Row2;
+		float Alpha; uint Tint; uint VertexCacheOffset; uint BlendWeightCount;
+	};
+	float ClutterLod2Density < Attribute( "ClutterLod2Density" ); Default( 1.0 ); >;
+	float4 ClutterLod2DepthLayers < Attribute( "ClutterLod2DepthLayers" ); Default4( 0, 0, 0, 0 ); >;
+	float3 ClutterModelBoundsCenter < Attribute( "ClutterModelBoundsCenter" ); Default3( 0, 0, 0 ); >;
+	float4 ClutterLodSwitches < Attribute( "ClutterLodSwitches" ); Default4( 0, 0, 0, 0 ); >;
+	StructuredBuffer<ClutterInstanceData> AllInstances < Attribute( "AllInstances" ); >;
 	StructuredBuffer<float4> AllInstanceSpheres < Attribute( "AllInstanceSpheres" ); >;
 	int InstanceCount < Attribute( "InstanceCount" ); >;
 	// Selected painted models only. Zero keeps existing unlimited drawing.
@@ -39,10 +49,10 @@ CS
 	float4 ClutterVertexBoundsWorldMargins < Attribute( "ClutterVertexBoundsWorldMargins" ); Default4( 0.0, 0.0, 0.0, 0.0 ); >;
 
 	// Survivors per LOD - each survivor appends its full transform to its bucket.
-	AppendStructuredBuffer<TransformBufferData_t> VisibleLod0 < Attribute( "VisibleLod0" ); >;
-	AppendStructuredBuffer<TransformBufferData_t> VisibleLod1 < Attribute( "VisibleLod1" ); >;
-	AppendStructuredBuffer<TransformBufferData_t> VisibleLod2 < Attribute( "VisibleLod2" ); >;
-	AppendStructuredBuffer<TransformBufferData_t> VisibleLod3 < Attribute( "VisibleLod3" ); >;
+	AppendStructuredBuffer<ClutterInstanceData> VisibleLod0 < Attribute( "VisibleLod0" ); >;
+	AppendStructuredBuffer<ClutterInstanceData> VisibleLod1 < Attribute( "VisibleLod1" ); >;
+	AppendStructuredBuffer<ClutterInstanceData> VisibleLod2 < Attribute( "VisibleLod2" ); >;
+	AppendStructuredBuffer<ClutterInstanceData> VisibleLod3 < Attribute( "VisibleLod3" ); >;
 
 	float3 ClutterLodCameraPos     < Attribute( "ClutterLodCameraPos" ); >;
 	float  ClutterLodTanHalfFov    < Attribute( "ClutterLodTanHalfFov" ); >;
@@ -59,9 +69,9 @@ CS
 	float4x4 ClutterWorldToProjection < Attribute( "ClutterWorldToProjection" ); >;
 
 	// Bounding-sphere frustum test - cheaper and slightly looser than an 8-corner OBB test.
-	bool SphereInFrustum( float3 center, float radius )
+	bool SphereInFrustumMatrix( float3 center, float radius, float4x4 vp )
 	{
-		float4x4 vp = ClutterWorldToProjection;
+		// The caller supplies the render view or owning main-camera snapshot.
 
 		bool ortho = abs( vp[3].x ) < 1e-5 && abs( vp[3].y ) < 1e-5 && abs( vp[3].z ) < 1e-5;
 		float4 keepAll = float4( 0, 0, 0, 1 );
@@ -141,7 +151,7 @@ CS
 		return -1;
 	}
 
-	void AppendLod( int lod, TransformBufferData_t t )
+	void AppendLod( int lod, ClutterInstanceData t )
 	{
 		switch ( lod )
 		{
@@ -151,6 +161,8 @@ CS
 			default: VisibleLod3.Append( t ); break;
 		}
 	}
+
+	#include "clutter_anchor_coverage.hlsl"
 
 	[numthreads( 64, 1, 1 )]
 	void MainCs( uint3 vThreadId : SV_DispatchThreadID )
@@ -176,7 +188,7 @@ CS
 			worldMargin = max( worldMargin, ClutterVertexBoundsWorldMargins[boundary] );
 		}
 		float cullRadius = sphere.w + localMargin * scale + worldMargin;
-		if ( !SphereInFrustum( sphere.xyz, cullRadius ) )
+		if ( !SphereInFrustumMatrix( sphere.xyz, cullRadius, ClutterWorldToProjection ) )
 			return;
 
 		// Remove the full wind-expanded sphere before transform fetch and native draw-list append.
@@ -187,7 +199,18 @@ CS
 
 		// Only the full transform is fetched once an instance survives.
 
-		TransformBufferData_t transform = AllInstances[id];
+		ClutterInstanceData transform = AllInstances[id];
+		if ( ClutterAnchorCoverageEnabled == 1 && lod == 2 && boundary < 0 )
+		{
+			transform.Alpha *= ClutterAnchorCoverage( id, transform );
+			if ( transform.Alpha <= 0.0 ) return;
+		}
+		if ( ClutterAnchorCoverageEnabled == 0 && ClutterLod2Density < 1.0 && lod == 2 && boundary < 0
+			&& ClutterLod2Coverage( float3x4( transform.Row0, transform.Row1, transform.Row2 ),
+				ClutterModelBoundsCenter, ClutterLodCameraPos, ClutterLodTanHalfFov,
+				ClutterLodViewportWidth, ClutterLodOrthoWidth, ClutterLodSwitches,
+				ClutterLodBlendWidth, ClutterLodCount, ClutterLod2Density, ClutterLod2DepthLayers ) <= 0.0 )
+			return;
 		AppendLod( lod, transform );
 		if ( boundary > 0 ) AppendLod( boundary, transform );
 	}

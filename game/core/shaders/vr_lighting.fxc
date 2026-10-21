@@ -413,7 +413,9 @@ void ComputeDirectLightingForLight( const FinalCombinerInput_t f, float3 vReceiv
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
-void ComputeDirectionalLight( const FinalCombinerInput_t f, float3 vReceiverNormalWs, inout float3 vDiffuse, inout float3 vSpecular, inout float3 vTransmissive )
+// A negative visibility keeps the native lookup. A shared value must use the same
+// world position, screen position, and world-position receiver normal.
+void ComputeDirectionalLight( const FinalCombinerInput_t f, float3 vReceiverNormalWs, inout float3 vDiffuse, inout float3 vSpecular, inout float3 vTransmissive, float flDirectionalShadowVisibility = -1.0f )
 {
 	if ( !g_DirectionalLightEnabled )
 		return;
@@ -431,7 +433,11 @@ void ComputeDirectionalLight( const FinalCombinerInput_t f, float3 vReceiverNorm
 	// Only sample shadows if cascades exist
 	if ( g_DirectionalLightCascadeCount > 0 )
 	{
-		flShadowScalar = DirectionalLightShadow::GetVisibility( f.vPositionWs.xyz, vReceiverNormalWs, f.vPositionSs );
+		[branch]
+		if ( flDirectionalShadowVisibility >= 0.0f )
+			flShadowScalar = flDirectionalShadowVisibility;
+		else
+			flShadowScalar = DirectionalLightShadow::GetVisibility( f.vPositionWs.xyz, vReceiverNormalWs, f.vPositionSs );
 	}
 
 	float3 vTransmissiveThickness = 1.0f;
@@ -465,7 +471,7 @@ void ComputeDirectionalLight( const FinalCombinerInput_t f, float3 vReceiverNorm
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
-void ComputeDirectLighting( inout LightingTerms_t o, const FinalCombinerInput_t f )
+void ComputeDirectLighting( inout LightingTerms_t o, const FinalCombinerInput_t f, float flDirectionalShadowVisibility = -1.0f )
 {
 	o.vDiffuse 		= float3( 0.0, 0.0, 0.0 );
 	o.vSpecular 	= float3( 0.0, 0.0, 0.0 );
@@ -480,7 +486,7 @@ void ComputeDirectLighting( inout LightingTerms_t o, const FinalCombinerInput_t 
 	// directional light through the indexed baked light loop with per-texel strength
 	// and CSM shadows are sampled inside ComputeDirectLightingForLight.
 	if ( !LightmappedLight::UsesLightmaps() && !ProbeLight::UsesProbes() )
-		ComputeDirectionalLight( f, vReceiverNormalWs, o.vDiffuse.rgb, o.vSpecular.rgb, o.vTransmissive.rgb );
+		ComputeDirectionalLight( f, vReceiverNormalWs, o.vDiffuse.rgb, o.vSpecular.rgb, o.vTransmissive.rgb, flDirectionalShadowVisibility );
 
 	// Cascade debug visualization — always runs regardless of baked/dynamic path
 	if ( DirectionalLightDebug > 0 && g_DirectionalLightCascadeCount > 0 )

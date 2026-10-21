@@ -491,7 +491,23 @@ public static partial class Networking
 		//
 		config.Privacy = LaunchArguments.ResolvePrivacy( config.Privacy );
 
-		_ = CreateLobbyAsync( config, lobbyCts.Token );
+		if ( Application.IsEditor )
+			config.Privacy = EditorLobbyPrivacy;
+
+		var token = lobbyCts.Token;
+		try
+		{
+			// Capture the attempt's system before startup can invoke game or editor callbacks.
+			var system = new NetworkSystem( Application.IsDedicatedServer ? "server" : "lobbyhost", Engine.IGameInstanceDll.Current.TypeLibrary )
+			{
+				Config = config
+			};
+			_ = ObserveLobbyCreationAsync( CreateLobbyAsync( system, token ), system, token );
+		}
+		catch ( Exception exception )
+		{
+			Log.Error( exception, "Failed to create lobby." );
+		}
 	}
 
 	/// <summary>
@@ -508,63 +524,91 @@ public static partial class Networking
 		CreateLobby( config );
 	}
 
-	static async Task<bool> CreateDedicatedServer( LobbyConfig config, CancellationToken token = default )
+	/// <summary>
+	/// Observe the public fire-and-forget API's startup task and release a failed session.
+	/// The captured system belongs to this attempt; a late failure must not close its replacement.
+	/// </summary>
+	internal static async Task ObserveLobbyCreationAsync( Task<bool> creation, NetworkSystem system, CancellationToken token )
 	{
-		lock ( NetworkThreadLock )
+		var succeeded = false;
+		try
 		{
-			var net = new NetworkSystem( "server", Engine.IGameInstanceDll.Current.TypeLibrary )
-			{
-				Config = config
-			};
-
-			System = net;
-			System.InitializeHost();
+			succeeded = await creation && !token.IsCancellationRequested;
 		}
-
-		var success = await DedicatedServer.Start( config );
-		if ( !success )
+		catch ( OperationCanceledException ) when ( token.IsCancellationRequested )
 		{
-			// Currently we shutdown the server if we fail to start the lobby, however lets clean up just incase.
-			lock ( NetworkThreadLock )
-			{
-				System = null;
-			}
-			return false;
+			// Disconnecting or starting another lobby cancels this attempt.
 		}
-
-		lock ( NetworkThreadLock )
+		catch ( Exception exception )
 		{
-			System.AddSocket( DedicatedServer.IpSocket );
-			System.AddSocket( DedicatedServer.IdSocket );
-
-			if ( AllowLocal )
+			Log.Error( exception, "Failed to create lobby." );
+		}
+		finally
+		{
+			if ( !succeeded && system is not null )
 			{
-				System.AddSocket( new TcpSocket( "127.0.0.1", LocalPort ) );
+				lock ( NetworkThreadLock )
+				{
+					if ( ReferenceEquals( System, system ) )
+					{
+						try
+						{
+							// Startup may have failed before the game system or sockets existed.
+							// Do not process messages or hand off an incomplete host.
+							system.Disconnect();
+							DedicatedServer.Hide();
+						}
+						catch ( Exception exception )
+						{
+							Log.Error( exception, "Failed to clean up lobby startup." );
+						}
+						finally
+						{
+							if ( ReferenceEquals( System, system ) )
+								System = null;
+						}
+					}
+				}
 			}
-
-			return !token.IsCancellationRequested;
 		}
 	}
 
-	static async Task<bool> CreateLobbyAsync( LobbyConfig config, CancellationToken token = default )
+	static async Task<bool> CreateDedicatedServer( NetworkSystem net, CancellationToken token )
 	{
-		if ( IsActive )
+		lock ( NetworkThreadLock )
+		{
+			System = net;
+			net.InitializeHost();
+		}
+
+		var success = await DedicatedServer.Start( net.Config );
+		if ( !success )
 			return false;
 
-		if ( Application.IsEditor )
+		lock ( NetworkThreadLock )
 		{
-			config.Privacy = EditorLobbyPrivacy;
+			if ( token.IsCancellationRequested || !ReferenceEquals( System, net ) )
+				return false;
+
+			net.AddSocket( DedicatedServer.IpSocket );
+			net.AddSocket( DedicatedServer.IdSocket );
+
+			if ( AllowLocal )
+			{
+				net.AddSocket( new TcpSocket( "127.0.0.1", LocalPort ) );
+			}
+
+			return true;
 		}
+	}
+
+	static async Task<bool> CreateLobbyAsync( NetworkSystem net, CancellationToken token )
+	{
+		if ( IsActive || token.IsCancellationRequested )
+			return false;
 
 		if ( Application.IsDedicatedServer )
-		{
-			return await CreateDedicatedServer( config, token );
-		}
-
-		var net = new NetworkSystem( "lobbyhost", Engine.IGameInstanceDll.Current.TypeLibrary )
-		{
-			Config = config
-		};
+			return await CreateDedicatedServer( net, token );
 
 		lock ( NetworkThreadLock )
 		{
@@ -580,23 +624,22 @@ public static partial class Networking
 		if ( token.IsCancellationRequested )
 			return false;
 
-		var socket = await SteamLobbySocket.Create( config );
+		var socket = await SteamLobbySocket.Create( net.Config );
 		if ( socket is null )
+			return false;
+
+		lock ( NetworkThreadLock )
 		{
-			if ( token.IsCancellationRequested )
+			if ( token.IsCancellationRequested || !ReferenceEquals( System, net ) )
+			{
+				socket.Dispose();
 				return false;
+			}
 
-			Disconnect();
-			return false;
+			net.AddSocket( socket );
+			AddLocalListenSocket( net );
+			return true;
 		}
-
-		if ( token.IsCancellationRequested )
-			return false;
-
-		net.AddSocket( socket );
-		AddLocalListenSocket( net );
-
-		return true;
 	}
 
 	/// <summary>

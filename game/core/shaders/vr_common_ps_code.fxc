@@ -292,7 +292,7 @@ FinalCombinerInput_t CalculateDiffuseAndSpecularFromAlbedoAndMetalness( FinalCom
 // This function should be run by all pixel shaders prior to framebuffer submission, will perform lighting, tonemapping, fogging etc.
 //
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
-PS_OUTPUT PS_FinalCombinerDoLighting( FinalCombinerInput_t f, inout LightingTerms_t lightingTerms )
+PS_OUTPUT PS_FinalCombinerDoLighting( FinalCombinerInput_t f, inout LightingTerms_t lightingTerms, float flDirectionalShadowVisibility = -1.0f )
 {
 	PS_OUTPUT o;
 
@@ -315,7 +315,7 @@ PS_OUTPUT PS_FinalCombinerDoLighting( FinalCombinerInput_t f, inout LightingTerm
 		f.vRoughness.xy = AdjustRoughnessByGeometricNormal( f.vRoughness.xy, f.vNormalWs.xyz );
 
 		// Compute lighting
-		ComputeDirectLighting( lightingTerms, f );
+		ComputeDirectLighting( lightingTerms, f, flDirectionalShadowVisibility );
 		CalculateIndirectLighting( lightingTerms, f );
 
 		//

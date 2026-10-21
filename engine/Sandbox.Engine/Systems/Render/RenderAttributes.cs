@@ -35,6 +35,66 @@ public partial class RenderAttributes
 		manuallyAllocated = false;
 	}
 
+	/// <summary>
+	/// Tests for a buffer-valued binding, including an explicit null. The valid comparison buffer
+	/// is used only as an attribute marker; this method performs no GPU work and changes no source values.
+	/// </summary>
+	public bool HasBufferBinding( in StringToken name, GpuBuffer comparisonBuffer )
+	{
+		ArgumentNullException.ThrowIfNull( comparisonBuffer );
+		if ( !comparisonBuffer.IsValid ) throw new ArgumentException( "The comparison buffer must be valid.", nameof( comparisonBuffer ) );
+		return HasResourceBinding( name, comparisonBuffer, null );
+	}
+
+	/// <summary>
+	/// Tests for a texture-valued binding, including an explicit null. The valid comparison texture
+	/// is used only as an attribute marker; this method performs no GPU work and changes no source values.
+	/// </summary>
+	public bool HasTextureBinding( in StringToken name, Texture comparisonTexture )
+	{
+		ArgumentNullException.ThrowIfNull( comparisonTexture );
+		if ( !comparisonTexture.IsValid ) throw new ArgumentException( "The comparison texture must be valid.", nameof( comparisonTexture ) );
+		return HasResourceBinding( name, null, comparisonTexture );
+	}
+
+	private bool HasResourceBinding( in StringToken name, GpuBuffer comparisonBuffer, Texture comparisonTexture )
+	{
+		if ( !attributes.IsValid ) return false;
+		var left = Pool.Get();
+		var right = Pool.Get();
+		try
+		{
+			// If the source has this key, opposite merge orders disagree for at least one of
+			// two distinct markers. Null alone cannot distinguish missing from explicit null.
+			for ( int marker = 0; marker < 2; marker++ )
+			{
+				left.Clear( false );
+				right.Clear( false );
+				MergeTo( left );
+				if ( comparisonTexture is not null )
+				{
+					var value = marker == 0 ? null : comparisonTexture;
+					left.Set( name, value );
+					right.Set( name, value );
+				}
+				else
+				{
+					var value = marker == 0 ? null : comparisonBuffer;
+					left.Set( name, value );
+					right.Set( name, value );
+				}
+				MergeTo( right );
+				if ( !CRenderAttributes.AreEqual( left.attributes, right.attributes, true ) ) return true;
+			}
+			return false;
+		}
+		finally
+		{
+			Pool.Return( right );
+			Pool.Return( left );
+		}
+	}
+
 	public RenderAttributes()
 	{
 		manuallyAllocated = true;

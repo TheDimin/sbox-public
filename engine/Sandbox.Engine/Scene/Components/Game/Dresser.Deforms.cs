@@ -126,7 +126,9 @@ public sealed partial class Dresser
 
 	private void UpdateDeforms()
 	{
-		if ( _settingAppearance || !BodyTarget.IsValid() || BodyTarget.Scene.IsPrefabCacheSceneRoot )
+		if ( _settingAppearance || !BodyTarget.IsValid() || BodyTarget.Scene.IsPrefabCacheSceneRoot
+			|| GameObject.Flags.Contains( GameObjectFlags.Deserializing )
+			|| BodyTarget.GameObject.Flags.Contains( GameObjectFlags.Deserializing ) )
 			return;
 
 		using var scope = BodyTarget.Scene.Push();

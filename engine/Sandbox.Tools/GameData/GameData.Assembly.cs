@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Reflection;
 
 namespace Editor;
@@ -115,7 +115,7 @@ public static partial class GameData
 		}
 	}
 
-	static async Task<Package> GetAssemblyPackage( Assembly assembly )
+	internal static async Task<Package> GetAssemblyPackage( Assembly assembly )
 	{
 		//
 		// Assemblies are named package.org.ident - they do not have a good way to tell if they're local?
@@ -133,6 +133,10 @@ public static partial class GameData
 		}
 
 		var ident = name[8..];
+
+		// Assembly names omit #local. Prefer the active project before asking the backend.
+		if ( Package.TryGetCached( $"{ident}#local", out var localPackage ) && localPackage is not null )
+			return localPackage;
 
 		if ( !Package.TryParseIdent( ident, out _ ) )
 		{

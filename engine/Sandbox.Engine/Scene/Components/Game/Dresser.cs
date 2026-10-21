@@ -365,6 +365,9 @@ public sealed partial class Dresser : Component, Component.ExecuteInEditor
 			BodyTarget = GetComponentInChildren<SkinnedModelRenderer>();
 		}
 
+		// Cloning defers generated children until the complete hierarchy is ready.
+		UpdateDeforms();
+
 		if ( Scene.IsEditor )
 		{
 			if ( Source == ClothingSource.Manual )

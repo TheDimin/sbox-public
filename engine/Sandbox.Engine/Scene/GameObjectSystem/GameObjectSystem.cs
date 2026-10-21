@@ -84,6 +84,12 @@ public abstract partial class GameObjectSystem : IDisposable
 		/// Called after a scene has been loaded
 		/// </summary>
 		SceneLoaded,
+
+		/// <summary>
+		/// Called once before scene objects, indexes, and systems are destroyed.
+		/// Use an earlier order to prepare state before a later order saves it.
+		/// </summary>
+		SceneDestroying,
 	}
 
 	/// <summary>

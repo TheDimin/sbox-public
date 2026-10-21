@@ -8,12 +8,17 @@ namespace Sandbox.Clutter;
 /// <summary>
 /// Batched clutter, GPU frustum-culled per view and drawn indirect through each model's material.
 /// </summary>
-internal class ClutterBatchSceneObject : SceneCustomObject
+internal partial class ClutterBatchSceneObject : SceneCustomObject
 {
 	private static ComputeShader CullShader = new( "shaders/clutter_cull_cs.shader" );
 
 	[ConVar( "clutter_cull_frustum_scale", ConVarFlags.Cheat )]
 	internal static float CullFrustumScale { get; set; } = 1.0f;
+
+	[ConVar( "clutter_profile_batches", ConVarFlags.Cheat )]
+	internal static bool ProfileBatches { get; set; }
+
+	private bool _profileBatches;
 
 	private const int MaxLods = 4; // dont think we need more than that
 	private const uint EmptySphereBits = 0xBF800000; // -1.0f radius marks an unused slot.
@@ -49,6 +54,10 @@ internal class ClutterBatchSceneObject : SceneCustomObject
 
 	private readonly CommandList _commandList = new( "ClutterBatch" );
 	private readonly CommandList _shadowCommandList = new( "ClutterBatch.Shadow" );
+	private IClutterDrawPreparationProvider _drawPreparationProvider;
+	private readonly List<IClutterDrawPreparation> _drawPreparations = [];
+	// Lock order: batch state, then either command list. Never acquire in reverse.
+	private readonly object _batchRenderLock = new();
 
 	// A LOD remains shadow eligible unless every draw call in that LOD opts out
 	// through its material. Mixed LODs keep casting shadows.
@@ -169,74 +178,80 @@ internal class ClutterBatchSceneObject : SceneCustomObject
 	/// </summary>
 	public void SetInstances( List<PreparedInstances> tiles )
 	{
-		_incomingTiles.Clear();
-		foreach ( var tile in tiles )
-			_incomingTiles.Add( tile );
-
-		_removedTiles.Clear();
-		foreach ( var tile in _tileSlots.Keys )
+		lock ( _batchRenderLock )
 		{
-			if ( !_incomingTiles.Contains( tile ) )
-				_removedTiles.Add( tile );
-		}
+			_incomingTiles.Clear();
+			foreach ( var tile in tiles )
+				_incomingTiles.Add( tile );
 
-		_addedTiles.Clear();
-		foreach ( var tile in tiles )
-		{
-			if ( !_tileSlots.ContainsKey( tile ) )
-				_addedTiles.Add( tile );
-		}
-
-		if ( _removedTiles.Count == 0 && _addedTiles.Count == 0 )
-			return;
-
-		_slotsToClear.Clear();
-		foreach ( var tile in _removedTiles )
-		{
-			var slot = _tileSlots[tile];
-			_slotsToClear.Add( slot );
-			_tileSlots.Remove( tile );
-			FreeSlot( slot );
-		}
-
-		foreach ( var tile in _addedTiles )
-			_tileSlots[tile] = AllocateSlot( tile.Count );
-
-		_count = _highWater;
-		if ( _count == 0 )
-		{
-			BuildCommandList();
-			return;
-		}
-
-		bool resized = EnsureCapacity( _count );
-		if ( resized )
-		{
-			// New buffers have no tile data. Mark unused slots, then restore every active tile.
-			_spheres.Clear( EmptySphereBits );
-			foreach ( var (tile, slot) in _tileSlots )
-				UploadTile( tile, slot );
-		}
-		else
-		{
-			foreach ( var slot in _slotsToClear )
+			_removedTiles.Clear();
+			foreach ( var tile in _tileSlots.Keys )
 			{
-				using var empty = new PooledSpan<Vector4>( slot.Count );
-				empty.Span.Fill( new Vector4( 0, 0, 0, -1 ) );
-				_spheres.SetData( empty.Span, slot.Offset );
+				if ( !_incomingTiles.Contains( tile ) )
+					_removedTiles.Add( tile );
 			}
+
+			_addedTiles.Clear();
+			foreach ( var tile in tiles )
+			{
+				if ( !_tileSlots.ContainsKey( tile ) )
+					_addedTiles.Add( tile );
+			}
+
+			if ( _removedTiles.Count == 0 && _addedTiles.Count == 0 )
+				return;
+
+			_anchorStorageDirty = true;
+			_slotsToClear.Clear();
+			foreach ( var tile in _removedTiles )
+			{
+				var slot = _tileSlots[tile];
+				_slotsToClear.Add( slot );
+				_tileSlots.Remove( tile );
+				FreeSlot( slot );
+			}
+
 			foreach ( var tile in _addedTiles )
-				UploadTile( tile, _tileSlots[tile] );
+				_tileSlots[tile] = AllocateSlot( tile.Count );
+
+			_count = _highWater;
+			if ( _count == 0 )
+			{
+				ReleaseDrawPreparations();
+				DisposeAnchorNeighbors();
+				BuildCommandList();
+				return;
+			}
+
+			bool resized = EnsureCapacity( _count );
+			if ( resized )
+			{
+				// New buffers have no tile data. Mark unused slots, then restore every active tile.
+				_spheres.Clear( EmptySphereBits );
+				foreach ( var (tile, slot) in _tileSlots )
+					UploadTile( tile, slot );
+			}
+			else
+			{
+				foreach ( var slot in _slotsToClear )
+				{
+					using var empty = new PooledSpan<Vector4>( slot.Count );
+					empty.Span.Fill( new Vector4( 0, 0, 0, -1 ) );
+					_spheres.SetData( empty.Span, slot.Offset );
+				}
+				foreach ( var tile in _addedTiles )
+					UploadTile( tile, _tileSlots[tile] );
+			}
+
+			var worldBounds = tiles[0].Bounds;
+			foreach ( var tile in tiles )
+				worldBounds = worldBounds.AddBBox( tile.Bounds );
+
+			_baseBounds = worldBounds;
+			_maximumScale = tiles.Max( tile => tile.MaximumScale );
+			UpdateDeformationBounds( true );
+			BuildCommandList();
 		}
-
-		var worldBounds = tiles[0].Bounds;
-		foreach ( var tile in tiles )
-			worldBounds = worldBounds.AddBBox( tile.Bounds );
-
-		_baseBounds = worldBounds;
-		_maximumScale = tiles.Max( tile => tile.MaximumScale );
-		UpdateDeformationBounds( true );
-		BuildCommandList();
 	}
 
 	/// <summary>
@@ -245,66 +260,72 @@ internal class ClutterBatchSceneObject : SceneCustomObject
 	/// </summary>
 	internal void UpdateDeformationBounds( bool force = false )
 	{
-		if ( _count == 0 )
+		lock ( _batchRenderLock )
 		{
-			if ( Attributes.GetInt( "VertexMotionVectorsAvailable" ) != 0 )
-				Attributes.Set( "VertexMotionVectorsAvailable", 0 );
-			return;
-		}
-		bool supportsMotionVectors = true;
-		var shadowCastingLodMask = CalculateShadowCastingLodMask();
-		bool shadowCastingLodMaskChanged = shadowCastingLodMask != _shadowCastingLodMask;
-		_shadowCastingLodMask = shadowCastingLodMask;
-		float blendWidth = 0.15f;
-		int materialCount = 0;
-		var locals = Vector4.Zero;
-		var worlds = Vector4.Zero;
-		foreach ( var mesh in _model.MeshInfo.Meshes )
-		{
-			foreach ( var draw in mesh.DrawCalls )
+			if ( _profileBatches != ProfileBatches || !ReferenceEquals( _drawPreparationProvider, _paintedDrawOwner?.DrawPreparationProvider ) )
+				BuildCommandList();
+			if ( _count == 0 )
 			{
-				var material = draw.Material;
-				materialCount++;
-				supportsMotionVectors &= material.Flags.GetBool( "VertexMotionVectors" );
-				var width = material.Flags.GetFloat( "ClutterLodBlendWidth" );
-				blendWidth = !float.IsFinite( width ) || width <= 0f ? 0f : MathF.Min( blendWidth, width );
-				var localMargin = material.Flags.GetFloat( "VertexBoundsLocalMargin" );
-				var worldMargin = material.Flags.GetFloat( "VertexBoundsWorldMargin" );
-				if ( !float.IsFinite( localMargin ) || localMargin < 0f || !float.IsFinite( worldMargin ) || worldMargin < 0f )
-					throw new InvalidOperationException( $"{material.ResourcePath} has invalid vertex bounds margins." );
-				for ( int lod = 0; lod < _lodCount; lod++ )
+				if ( Attributes.GetInt( "VertexMotionVectorsAvailable" ) != 0 )
+					Attributes.Set( "VertexMotionVectorsAvailable", 0 );
+				return;
+			}
+			RefreshAnchorNeighbors();
+			bool supportsMotionVectors = true;
+			var shadowCastingLodMask = CalculateShadowCastingLodMask();
+			bool shadowCastingLodMaskChanged = shadowCastingLodMask != _shadowCastingLodMask;
+			_shadowCastingLodMask = shadowCastingLodMask;
+			float blendWidth = 0.15f;
+			int materialCount = 0;
+			var locals = Vector4.Zero;
+			var worlds = Vector4.Zero;
+			foreach ( var mesh in _model.MeshInfo.Meshes )
+			{
+				foreach ( var draw in mesh.DrawCalls )
 				{
-					if ( (mesh.LodMask & (1 << lod)) == 0 ) continue;
-					locals[lod] = MathF.Max( locals[lod], localMargin );
-					worlds[lod] = MathF.Max( worlds[lod], worldMargin );
+					var material = draw.Material;
+					materialCount++;
+					supportsMotionVectors &= material.Flags.GetBool( "VertexMotionVectors" );
+					var width = material.Flags.GetFloat( "ClutterLodBlendWidth" );
+					blendWidth = !float.IsFinite( width ) || width <= 0f ? 0f : MathF.Min( blendWidth, width );
+					var localMargin = material.Flags.GetFloat( "VertexBoundsLocalMargin" );
+					var worldMargin = material.Flags.GetFloat( "VertexBoundsWorldMargin" );
+					if ( !float.IsFinite( localMargin ) || localMargin < 0f || !float.IsFinite( worldMargin ) || worldMargin < 0f )
+						throw new InvalidOperationException( $"{material.ResourcePath} has invalid vertex bounds margins." );
+					for ( int lod = 0; lod < _lodCount; lod++ )
+					{
+						if ( (mesh.LodMask & (1 << lod)) == 0 ) continue;
+						locals[lod] = MathF.Max( locals[lod], localMargin );
+						worlds[lod] = MathF.Max( worlds[lod], worldMargin );
+					}
 				}
 			}
+			// All LOD draws must implement the same pass. Refresh before the bounds
+			// early return so material hotload can remove support without moving plants.
+			// Crossfade is opt-in on every material, including every shadow/depth draw.
+			// Unordered or missing thresholds use the existing hard LOD selector.
+			for ( int lod = 1; lod < _lodCount; lod++ )
+				if ( !float.IsFinite( _lodSwitches[lod] ) || _lodSwitches[lod] <= _lodSwitches[lod - 1] ) blendWidth = 0f;
+			_lodBlendWidth = materialCount > 0 && _lodCount > 1 ? blendWidth : 0f;
+			int motionVectorsAvailable = supportsMotionVectors && materialCount > 0 ? 1 : 0;
+			if ( Attributes.GetInt( "VertexMotionVectorsAvailable" ) != motionVectorsAvailable )
+				Attributes.Set( "VertexMotionVectorsAvailable", motionVectorsAvailable );
+			if ( !force && !shadowCastingLodMaskChanged && locals == _localVertexBoundsMargins && worlds == _worldVertexBoundsMargins ) return;
+			_localVertexBoundsMargins = locals;
+			_worldVertexBoundsMargins = worlds;
+			float local = 0f, world = 0f, total = 0f;
+			for ( int lod = 0; lod < _lodCount; lod++ )
+			{
+				local = MathF.Max( local, locals[lod] );
+				world = MathF.Max( world, worlds[lod] );
+				total = MathF.Max( total, locals[lod] * _maximumScale + worlds[lod] );
+			}
+			_localVertexBoundsMargin = local;
+			_worldVertexBoundsMargin = world;
+			Bounds = _baseBounds.Grow( total );
+			if ( shadowCastingLodMaskChanged && !force && _instances is not null )
+				BuildCommandList();
 		}
-		// All LOD draws must implement the same pass. Refresh before the bounds
-		// early return so material hotload can remove support without moving plants.
-		// Crossfade is opt-in on every material, including every shadow/depth draw.
-		// Unordered or missing thresholds use the existing hard LOD selector.
-		for ( int lod = 1; lod < _lodCount; lod++ )
-			if ( !float.IsFinite( _lodSwitches[lod] ) || _lodSwitches[lod] <= _lodSwitches[lod - 1] ) blendWidth = 0f;
-		_lodBlendWidth = materialCount > 0 && _lodCount > 1 ? blendWidth : 0f;
-		int motionVectorsAvailable = supportsMotionVectors && materialCount > 0 ? 1 : 0;
-		if ( Attributes.GetInt( "VertexMotionVectorsAvailable" ) != motionVectorsAvailable )
-			Attributes.Set( "VertexMotionVectorsAvailable", motionVectorsAvailable );
-		if ( !force && !shadowCastingLodMaskChanged && locals == _localVertexBoundsMargins && worlds == _worldVertexBoundsMargins ) return;
-		_localVertexBoundsMargins = locals;
-		_worldVertexBoundsMargins = worlds;
-		float local = 0f, world = 0f, total = 0f;
-		for ( int lod = 0; lod < _lodCount; lod++ )
-		{
-			local = MathF.Max( local, locals[lod] );
-			world = MathF.Max( world, worlds[lod] );
-			total = MathF.Max( total, locals[lod] * _maximumScale + worlds[lod] );
-		}
-		_localVertexBoundsMargin = local;
-		_worldVertexBoundsMargin = world;
-		Bounds = _baseBounds.Grow( total );
-		if ( shadowCastingLodMaskChanged && !force && _instances is not null )
-			BuildCommandList();
 	}
 
 	private uint CalculateShadowCastingLodMask()
@@ -438,8 +459,35 @@ internal class ClutterBatchSceneObject : SceneCustomObject
 	/// </summary>
 	private void BuildCommandList()
 	{
-		BuildCommandList( _commandList, (uint)((1 << _lodCount) - 1) );
-		BuildCommandList( _shadowCommandList, _shadowCastingLodMask );
+		lock ( _batchRenderLock )
+		{
+			ReleaseDrawPreparations();
+			_drawPreparationProvider = _paintedDrawOwner?.DrawPreparationProvider;
+			// Snapshot once so both retained paths use the same diagnostic setting.
+			_profileBatches = ProfileBatches;
+			try
+			{
+				BuildCommandList( _commandList, (uint)((1 << _lodCount) - 1) );
+				BuildCommandList( _shadowCommandList, _shadowCastingLodMask );
+			}
+			catch
+			{
+				ReleaseDrawPreparations();
+				throw;
+			}
+		}
+	}
+
+	private void ReleaseDrawPreparations()
+	{
+		lock ( _batchRenderLock )
+		{
+			// Reset waits for managed playback, not GPU completion. Native destruction follows GpuBuffer disposal.
+			_commandList.Reset();
+			_shadowCommandList.Reset();
+			foreach ( var preparation in _drawPreparations ) preparation.Dispose();
+			_drawPreparations.Clear();
+		}
 	}
 
 	private void BuildCommandList( CommandList commandList, uint drawLodMask )
@@ -449,7 +497,11 @@ internal class ClutterBatchSceneObject : SceneCustomObject
 		if ( _instances == null || _count == 0 )
 			return;
 
+		// Null samplers record no entries. Disabled replay has no diagnostic work.
+		using var modelScope = commandList.ProfileScope( _profileBatches ? new ProfilingSampler( _model.ResourcePath ) : null );
+
 		commandList.Attributes.Set( "AllInstances", _instances );
+		if ( _anchorNeighbors is not null ) commandList.Attributes.Set( "ClutterAnchorNeighbors", _anchorNeighbors );
 		commandList.Attributes.Set( "AllInstanceSpheres", _spheres );
 		commandList.Attributes.Set( "InstanceCount", _count );
 		commandList.Attributes.Set( "ClutterModelRadius", _modelRadius );
@@ -462,6 +514,7 @@ internal class ClutterBatchSceneObject : SceneCustomObject
 		for ( int slot = 0; slot < MaxLods; slot++ )
 			commandList.Attributes.Set( $"VisibleLod{slot}", _visible[slot < _lodCount ? slot : 0] );
 
+		var cullScope = commandList.ProfileScope( _profileBatches ? new ProfilingSampler( "Cull and counter copies" ) : null );
 		for ( int lod = 0; lod < _lodCount; lod++ )
 		{
 			commandList.ResourceBarrierTransition( _visible[lod], ResourceState.UnorderedAccess );
@@ -484,59 +537,129 @@ internal class ClutterBatchSceneObject : SceneCustomObject
 				commandList.CopyStructureCount( _visible[lod], _args[lod], d * ArgsStride + ArgsInstanceCountOffset );
 		}
 
+		cullScope.Dispose();
+
 		for ( int lod = 0; lod < _lodCount; lod++ )
 		{
 			commandList.ResourceBarrierTransition( _visible[lod], ResourceState.GenericRead );
 			commandList.ResourceBarrierTransition( _args[lod], ResourceState.IndirectArgument );
 			if ( (drawLodMask & (1u << lod)) != 0 )
-				commandList.DrawModelInstancedIndirect( _model, _visible[lod], _args[lod], 0, lod );
+			{
+				var preparation = _drawPreparationProvider?.Create( _model, lod, _capacity, _visible[lod] );
+				if ( preparation is not null ) _drawPreparations.Add( preparation );
+				using ( commandList.ProfileScope( _profileBatches && preparation is not null ? new ProfilingSampler( $"LOD {lod} preparation" ) : null ) )
+					preparation?.RecordBeforeDraw( commandList );
+				// Draw scope covers all model ranges. Args record d is at d * ArgsStride.
+				using ( commandList.ProfileScope( _profileBatches ? new ProfilingSampler( $"LOD {lod} draw" ) : null ) )
+					commandList.DrawModelInstancedIndirect( _model, _visible[lod], _args[lod], 0, lod );
+				using ( commandList.ProfileScope( _profileBatches && preparation is not null ? new ProfilingSampler( $"LOD {lod} cleanup" ) : null ) )
+					preparation?.RecordAfterDraw( commandList );
+			}
 		}
 	}
 
 	public override void RenderSceneObject()
 	{
-		if ( _instances == null || _count == 0 )
-			return;
-
-		// Per-view inputs, read by the cull dispatch during replay.
-		Graphics.Attributes.Set( "ClutterFrustumScale", CullFrustumScale );
-		Graphics.Attributes.Set( "ClutterLodBlendWidth", _lodBlendWidth );
-		Graphics.Attributes.Set( "ClutterVertexBoundsLocalMargin", _localVertexBoundsMargin );
-		Graphics.Attributes.Set( "ClutterVertexBoundsWorldMargin", _worldVertexBoundsMargin );
-		Graphics.Attributes.Set( "ClutterVertexBoundsPerLod", 1 );
-		Graphics.Attributes.Set( "ClutterVertexBoundsLocalMargins", _localVertexBoundsMargins );
-		Graphics.Attributes.Set( "ClutterVertexBoundsWorldMargins", _worldVertexBoundsMargins );
-		Graphics.Attributes.Set( "ClutterLodCameraPos", Lod.CameraPos );
-		Graphics.Attributes.Set( "ClutterLodTanHalfFov", Lod.TanHalfFov );
-		Graphics.Attributes.Set( "ClutterLodViewportWidth", Lod.ViewportWidth );
-		Graphics.Attributes.Set( "ClutterLodOrthoWidth", Lod.OrthoWidth );
-		Graphics.Attributes.Set( "ClutterWorldToProjection", Graphics.ViewFrustum.GetReverseZViewProjTranspose() );
-		float drawDistance = 0;
-		bool drawCameraValid = _paintedDrawOwner?.PaintedDrawCameraValid == true;
-		if ( _paintedDrawOwner is not null
-			&& _paintedDrawOwner.PaintedDrawDistances.TryGetValue( _model.ResourcePath, out var configuredDistance ) )
+		lock ( _batchRenderLock )
 		{
-			// In-place dictionary edits are permitted, so validate at the native boundary too.
-			if ( !float.IsFinite( configuredDistance ) || configuredDistance < 0 )
-				throw new InvalidOperationException( $"{_model.ResourcePath}: painted draw distance must be finite non-negative world inches." );
-			drawDistance = drawCameraValid ? configuredDistance : 0;
-		}
-		Graphics.Attributes.Set( "ClutterDrawDistance", drawDistance );
-		Graphics.Attributes.Set( "ClutterDrawCameraValid", drawCameraValid ? 1 : 0 );
-		Graphics.Attributes.Set( "ClutterDrawCameraPosition", drawCameraValid ? _paintedDrawOwner.PaintedDrawCameraPosition : Vector3.Zero );
+			if ( _instances == null || _count == 0 )
+				return;
 
-		var shadowPass = IsShadowPass( out var requiredFlags );
-		_lastShadowPassDetected = shadowPass;
-		if ( shadowPass )
-		{
-			_lastShadowRequiredFlags = requiredFlags;
-			_shadowPassCount++;
-			_shadowLodDrawsSkipped += CountBits( ((uint)((1 << _lodCount) - 1)) & ~_shadowCastingLodMask );
-			// No shadow draw can consume these buffers when every LOD opts out.
-			// Keep the batch shadow flag for normal-view shadow receiving.
-			if ( _shadowCastingLodMask == 0 ) return;
+			// Per-view inputs, read by the cull dispatch during replay.
+			Graphics.Attributes.Set( "ClutterFrustumScale", CullFrustumScale );
+			Graphics.Attributes.Set( "ClutterLodBlendWidth", _lodBlendWidth );
+			Graphics.Attributes.Set( "ClutterVertexBoundsLocalMargin", _localVertexBoundsMargin );
+			Graphics.Attributes.Set( "ClutterVertexBoundsWorldMargin", _worldVertexBoundsMargin );
+			Graphics.Attributes.Set( "ClutterVertexBoundsPerLod", 1 );
+			Graphics.Attributes.Set( "ClutterVertexBoundsLocalMargins", _localVertexBoundsMargins );
+			Graphics.Attributes.Set( "ClutterVertexBoundsWorldMargins", _worldVertexBoundsMargins );
+			Graphics.Attributes.Set( "ClutterLodCameraPos", Lod.CameraPos );
+			Graphics.Attributes.Set( "ClutterLodTanHalfFov", Lod.TanHalfFov );
+			Graphics.Attributes.Set( "ClutterLodViewportWidth", Lod.ViewportWidth );
+			Graphics.Attributes.Set( "ClutterLodOrthoWidth", Lod.OrthoWidth );
+			Graphics.Attributes.Set( "ClutterWorldToProjection", Graphics.ViewFrustum.GetReverseZViewProjTranspose() );
+			float drawDistance = 0;
+			bool drawCameraValid = _paintedDrawOwner?.PaintedDrawCameraValid == true;
+			if ( _paintedDrawOwner is not null
+				&& _paintedDrawOwner.PaintedDrawDistances.TryGetValue( _model.ResourcePath, out var configuredDistance ) )
+			{
+				// In-place dictionary edits are permitted, so validate at the native boundary too.
+				if ( !float.IsFinite( configuredDistance ) || configuredDistance < 0 )
+					throw new InvalidOperationException( $"{_model.ResourcePath}: painted draw distance must be finite non-negative world inches." );
+				drawDistance = drawCameraValid ? configuredDistance : 0;
+			}
+			float lod2Density = 1;
+			if ( _paintedDrawOwner is not null
+				&& _paintedDrawOwner.PaintedLod2Densities.TryGetValue( _model.ResourcePath, out var configuredDensity ) )
+			{
+				if ( !float.IsFinite( configuredDensity ) || configuredDensity < 0 || configuredDensity > 1 )
+					throw new InvalidOperationException( $"{_model.ResourcePath}: painted LOD2 density must be finite and between zero and one." );
+				lod2Density = drawCameraValid && _lodCount == 3 ? configuredDensity : 1;
+			}
+			float depthLayerWidth = 0;
+			if ( _paintedDrawOwner is not null
+				&& _paintedDrawOwner.PaintedLod2DepthLayerWidths.TryGetValue( _model.ResourcePath, out var configuredWidth ) )
+			{
+				if ( !float.IsFinite( configuredWidth ) || configuredWidth < 0 )
+					throw new InvalidOperationException( $"{_model.ResourcePath}: depth layer width must be finite non-negative world inches." );
+				depthLayerWidth = drawCameraValid ? configuredWidth : 0;
+			}
+			Graphics.Attributes.Set( "ClutterDrawDistance", drawDistance );
+			Graphics.Attributes.Set( "ClutterDrawCameraValid", drawCameraValid ? 1 : 0 );
+			Graphics.Attributes.Set( "ClutterDrawCameraPosition", drawCameraValid ? _paintedDrawOwner.PaintedDrawCameraPosition : Vector3.Zero );
+
+			var shadowPass = IsShadowPass( out var requiredFlags );
+			_lastShadowPassDetected = shadowPass;
+			if ( shadowPass )
+			{
+				_lastShadowRequiredFlags = requiredFlags;
+				_shadowPassCount++;
+				_shadowLodDrawsSkipped += CountBits( ((uint)((1 << _lodCount) - 1)) & ~_shadowCastingLodMask );
+				// No shadow draw can consume these buffers when every LOD opts out.
+				// Keep the batch shadow flag for normal-view shadow receiving.
+				if ( _shadowCastingLodMask == 0 ) return;
+			}
+			// This is a per-draw-list uniform, not scene state. Both paths set it,
+			// and reset it even if command execution reports or throws an error.
+			Graphics.Attributes.Set( "ClutterLod2Density", lod2Density );
+			Graphics.Attributes.Set( "ClutterLod2DepthLayers", new Vector4( drawCameraValid ? _paintedDrawOwner.PaintedDrawCameraForward : Vector3.Zero, depthLayerWidth ) );
+			Graphics.Attributes.Set( "ClutterShadowPass", shadowPass ? 1 : 0 );
+			BindAnchorCoverage( lod2Density, drawCameraValid && !shadowPass );
+			Exception playbackError = null;
+			try
+			{
+				(shadowPass ? _shadowCommandList : _commandList).ExecuteOnRenderThread();
+			}
+			catch ( Exception error )
+			{
+				playbackError = error;
+				throw;
+			}
+			finally
+			{
+				List<Exception> cleanupErrors = null;
+				try
+				{
+					foreach ( var preparation in _drawPreparations )
+					{
+						try { preparation.ResetDrawState(); }
+						catch ( Exception error ) { (cleanupErrors ??= []).Add( error ); }
+					}
+				}
+				finally
+				{
+					Graphics.Attributes.Set( "ClutterLod2Density", 1.0f );
+					Graphics.Attributes.Set( "ClutterAnchorCoverageEnabled", 0 );
+					Graphics.Attributes.Set( "ClutterLod2DepthLayers", Vector4.Zero );
+					Graphics.Attributes.Set( "ClutterShadowPass", 0 );
+				}
+				if ( cleanupErrors is not null )
+				{
+					if ( playbackError is not null ) cleanupErrors.Insert( 0, playbackError );
+					throw new AggregateException( "Clutter draw cleanup failed.", cleanupErrors );
+				}
+			}
 		}
-		(shadowPass ? _shadowCommandList : _commandList).ExecuteOnRenderThread();
 	}
 
 	private static int CountBits( uint value )
@@ -566,27 +689,35 @@ internal class ClutterBatchSceneObject : SceneCustomObject
 
 	private void DisposeBuffers()
 	{
-		_instances?.Dispose();
-		_instances = null;
-
-		_spheres?.Dispose();
-		_spheres = null;
-
-		for ( int lod = 0; lod < _lodCount; lod++ )
+		lock ( _batchRenderLock )
 		{
-			_visible[lod]?.Dispose();
-			_visible[lod] = null;
-			_args[lod]?.Dispose();
-			_args[lod] = null;
-		}
+			ReleaseDrawPreparations();
+			DisposeAnchorNeighbors();
+			_instances?.Dispose();
+			_instances = null;
 
-		_capacity = 0;
+			_spheres?.Dispose();
+			_spheres = null;
+
+			for ( int lod = 0; lod < _lodCount; lod++ )
+			{
+				_visible[lod]?.Dispose();
+				_visible[lod] = null;
+				_args[lod]?.Dispose();
+				_args[lod] = null;
+			}
+
+			_capacity = 0;
+		}
 	}
 
 	internal override void OnNativeDestroy()
 	{
-		DisposeBuffers();
-		_lodDistances?.Dispose();
-		base.OnNativeDestroy();
+		lock ( _batchRenderLock )
+		{
+			DisposeBuffers();
+			_lodDistances?.Dispose();
+			base.OnNativeDestroy();
+		}
 	}
 }

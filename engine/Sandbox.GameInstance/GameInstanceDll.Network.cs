@@ -159,7 +159,7 @@ internal partial class GameInstanceDll
 		if ( Networking.IsHost )
 		{
 			AddFilesToNetwork( NetworkedConfigFiles, EngineFileSystem.ProjectSettings, [".config"] );
-			AddFilesToNetwork( NetworkedLangFiles, Game.Language.FileSystem, [".json"] );
+			AddFilesToNetwork( NetworkedLangFiles, Game.Language?.FileSystem, [".json"] );
 			BuildNetworkedFiles();
 		}
 		else if ( !DidMountNetworkedFiles )
@@ -194,7 +194,7 @@ internal partial class GameInstanceDll
 		if ( Networking.IsHost )
 		{
 			AddFilesToNetwork( NetworkedConfigFiles, EngineFileSystem.ProjectSettings, [".config"] );
-			AddFilesToNetwork( NetworkedLangFiles, Game.Language.FileSystem, [".json"] );
+			AddFilesToNetwork( NetworkedLangFiles, Game.Language?.FileSystem, [".json"] );
 			BuildNetworkedFiles();
 		}
 		else if ( !DidMountNetworkedFiles )
@@ -220,7 +220,7 @@ internal partial class GameInstanceDll
 		return instance;
 	}
 
-	void AddFilesToNetwork( SmallNetworkFiles target, BaseFileSystem fs, HashSet<string> validExtensions )
+	internal void AddFilesToNetwork( SmallNetworkFiles target, BaseFileSystem fs, HashSet<string> validExtensions )
 	{
 		if ( _smallFileWatchers.TryGetValue( target, out var registration ) )
 		{
@@ -231,6 +231,15 @@ internal partial class GameInstanceDll
 			FileWatchers.Remove( registration.Watcher );
 			_smallFileWatchers.Remove( target );
 		}
+
+		// A scene can be played without a loaded game package. In that case settings and
+		// localization use defaults and there is no source filesystem to replicate.
+		// Remove entries from a previous source before replacing or removing it.
+		foreach ( var fileName in target.StringTable.Entries.Keys.ToArray() )
+			target.RemoveFile( fileName );
+
+		if ( fs is null )
+			return;
 
 		var files = fs.FindFile( "/", "*", true );
 

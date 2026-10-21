@@ -6,6 +6,41 @@ namespace SceneTests.Components;
 [TestClass]
 public class DresserTests
 {
+	[TestMethod]
+	public void CloningCitizenDefersGeneratedDeformsUntilHierarchyIsReady()
+	{
+		var scene = new Scene();
+		using var scope = scene.Push();
+		var root = scene.CreateObject( false );
+		var bodyObject = scene.CreateObject( false );
+		bodyObject.Parent = root;
+		var body = bodyObject.AddComponent<SkinnedModelRenderer>( false );
+		body.Model = Model.Load( "models/citizen/citizen.vmdl" );
+		Assert.IsFalse( body.Model.IsError );
+		var dresser = root.AddComponent<Dresser>( false );
+		dresser.BodyTarget = body;
+		dresser.NeckSize = 0.8f;
+		var warnings = new System.Collections.Generic.List<string>();
+		void OnMessage( LogEvent e )
+		{
+			if ( e.Level >= LogLevel.Warn ) warnings.Add( e.Message );
+		}
+		Sandbox.Diagnostics.Logging.OnMessage += OnMessage;
+		try
+		{
+			var clone = root.Clone( new CloneConfig { StartEnabled = false } );
+			var clonedDresser = clone.GetComponent<Dresser>( true );
+			Assert.IsNotNull( LegacyDeforms( clonedDresser.BodyTarget ) );
+			Assert.AreEqual( 0.8f, clonedDresser.NeckSize );
+			Assert.IsFalse( warnings.Any( x => x.Contains( "Object created during cloning" ) ), string.Join( "\n", warnings ) );
+		}
+		finally
+		{
+			Sandbox.Diagnostics.Logging.OnMessage -= OnMessage;
+			scene.Destroy();
+		}
+	}
+
 	private static SkinnedModelRenderer CreateBody( Scene scene )
 	{
 		var body = scene.CreateObject().AddComponent<SkinnedModelRenderer>( false );

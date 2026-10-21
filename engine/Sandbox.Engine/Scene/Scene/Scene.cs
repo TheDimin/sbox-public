@@ -27,6 +27,7 @@ public partial class Scene : GameObject
 	}
 
 	bool _destroyed;
+	bool _destroying;
 	SceneWorld _sceneWorld;
 
 	/// <summary>
@@ -201,6 +202,11 @@ public partial class Scene : GameObject
 
 	internal virtual void DestroyInternal()
 	{
+		if ( _destroyed || _destroying )
+			return;
+		_destroying = true;
+
+		Signal( GameObjectSystem.Stage.SceneDestroying );
 		_all.Remove( this );
 
 		// Clearing the object index now means we can save time

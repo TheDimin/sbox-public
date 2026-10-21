@@ -19,6 +19,7 @@ public sealed partial class ClutterGridSystem : GameObjectSystem
 	private readonly HashSet<Terrain> _subscribedTerrains = [];
 	private Vector3 _lastCameraPosition;
 	public Vector3 PaintedDrawCameraPosition { get; private set; }
+	public Vector3 PaintedDrawCameraForward { get; private set; }
 	public bool PaintedDrawCameraValid { get; private set; }
 
 	/// <summary>
@@ -44,6 +45,22 @@ public sealed partial class ClutterGridSystem : GameObjectSystem
 		}
 	} = new( StringComparer.OrdinalIgnoreCase );
 
+	/// <summary>
+	/// Runtime-only retained fractions for painted models with exactly three native LODs.
+	/// Missing paths retain every instance. Values must be finite and between zero and one.
+	/// Materials must implement the shared clutter LOD2 coverage fade. The fade starts after
+	/// the complete LOD1-to-LOD2 transition and ends one quarter of its switch metric later.
+	/// Other layers and models are unaffected. Clear a path to disable its reduction.
+	/// </summary>
+	public Dictionary<string, float> PaintedLod2Densities { get; } = new( StringComparer.OrdinalIgnoreCase );
+
+	/// <summary>
+	/// Runtime-only world-space cell widths for horizontal view-depth density layers.
+	/// Missing paths or zero use stable random placement selection. Positive widths use
+	/// smooth, irregular depth layers with a world-anchored phase and the owning main camera.
+	/// Only models opted into PaintedLod2Densities are affected. Materials must use the shared helper.
+	/// </summary>
+	public Dictionary<string, float> PaintedLod2DepthLayerWidths { get; } = new( StringComparer.OrdinalIgnoreCase );
 	// Reused by the update path so an idle scene doesn't allocate.
 	private readonly List<ClutterComponent> _activeInfinite = [];
 	private readonly List<ClutterComponent> _componentsToRemove = [];
@@ -70,6 +87,13 @@ public sealed partial class ClutterGridSystem : GameObjectSystem
 	/// This is transient - rebuilt from Storage on scene load.
 	/// </summary>
 	private ClutterLayer _painted;
+
+	/// <summary>
+	/// Optional preparation for painted native clutter draws in this scene. Runtime only.
+	/// Replacing this provider refreshes existing batch command lists on the next update.
+	/// The batch owns and disposes each preparation returned by the provider.
+	/// </summary>
+	public IClutterDrawPreparationProvider DrawPreparationProvider { get; set; }
 
 	private bool _dirty = false;
 
@@ -109,7 +133,17 @@ public sealed partial class ClutterGridSystem : GameObjectSystem
 			_lastCameraPosition = camera.WorldPosition;
 			// Only this scene's main update publishes the cutoff camera. Light views do not.
 			PaintedDrawCameraPosition = _lastCameraPosition;
-			PaintedDrawCameraValid = camera.IsValid() && camera.Scene == Scene && _lastCameraPosition.IsFinite;
+			PaintedDrawCameraForward = camera.WorldRotation.Forward;
+			PaintedDrawCameraRight = camera.WorldRotation.Right;
+			PaintedDrawCameraUp = camera.WorldRotation.Up;
+			PaintedAnchorCameraValid = false;
+			if ( PaintedLod2AnchorModels.Count > 0 && camera.SceneCamera is not null )
+			{
+				camera.GetFrustum(); // Refresh the native camera before taking the main-view snapshot.
+				PaintedDrawWorldToProjection = camera.SceneCamera.ReverseZViewProjectionMatrix;
+				PaintedAnchorCameraValid = true;
+			}
+			PaintedDrawCameraValid = camera.IsValid() && camera.Scene == Scene && _lastCameraPosition.IsFinite && PaintedDrawCameraForward.IsFinite;
 
 			PublishLodParameters( camera );
 
