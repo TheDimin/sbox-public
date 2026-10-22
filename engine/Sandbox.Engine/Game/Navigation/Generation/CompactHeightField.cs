@@ -1,5 +1,4 @@
 using System.Buffers;
-using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 
 namespace Sandbox.Navigation.Generation;
@@ -76,6 +75,16 @@ internal partial class CompactHeightfield : IDisposable
 	public Span<int> Areas => areasArray.AsSpan( 0, SpanCount );
 	private int[] areasArray;
 
+	internal long RetainedBytes => (cellsArray?.LongLength ?? 0) * 4
+		+ (spansArray?.LongLength ?? 0) * 8 + (areasArray?.LongLength ?? 0) * sizeof( int );
+
+	internal void ReleaseMemory()
+	{
+		cellsArray = null;
+		spansArray = null;
+		areasArray = null;
+	}
+
 	internal void Init( int width, int height, int spanCount, int walkableHeight, int walkableClimb,
 		Vector3 bmin, Vector3 bmax, float cellSize, float cellHeight )
 	{
@@ -133,19 +142,18 @@ internal partial class CompactHeightfield : IDisposable
 		return copy;
 	}
 
-	private static ConcurrentQueue<CompactHeightfield> _pool = new();
+	private static readonly GenerationPool<CompactHeightfield> _pool = new(
+		() => new(), heightfield => heightfield.ReleaseMemory(), heightfield => heightfield.RetainedBytes, NavMesh.GenerationPoolByteBudget );
+
+	internal static void TrimPool( long now ) => _pool.Trim( now );
 
 	public static CompactHeightfield GetPooled()
 	{
-		return _pool.TryDequeue( out var hf ) ? hf : new CompactHeightfield();
+		return _pool.Get();
 	}
 
 	public void Dispose()
 	{
-		_pool.Enqueue( this );
-		// Those will get disposed on shutdown, i guess
-		//ArrayPool<CompactCell>.Shared.Return( cellsArray );
-		//ArrayPool<CompactSpan>.Shared.Return( spansArray );
-		//ArrayPool<byte>.Shared.Return( areasArray );
+		_pool.Return( this );
 	}
 }

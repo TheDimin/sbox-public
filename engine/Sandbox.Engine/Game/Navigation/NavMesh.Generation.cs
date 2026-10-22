@@ -1,6 +1,5 @@
 using Sandbox.Navigation.Pathfinding;
 using Sandbox.Navigation.Generation;
-using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,43 +21,24 @@ public sealed partial class NavMesh
 		get => HeightFieldGenerationThreadCount;
 	}
 
-	internal class GeneratorPool<T> : IDisposable where T : class, IDisposable, new()
+	internal const long GenerationPoolByteBudget = 16 * 1024 * 1024;
+	static internal GenerationPool<HeightFieldGenerator> HeightFieldGeneratorPool = new(
+		() => new(), generator => generator.Dispose(), generator => generator.RetainedBytes, GenerationPoolByteBudget );
+	static internal GenerationPool<NavMeshGenerator> NavMeshGeneratorPool = new(
+		() => new(), generator => generator.Dispose(), generator => generator.RetainedBytes, GenerationPoolByteBudget );
+	private static long _lastPoolTrim;
+
+	internal static void TrimGenerationPools()
 	{
-		public GeneratorPool( int poolSize )
-		{
-			for ( int i = 0; i < poolSize; i++ )
-			{
-				var generator = new T();
-				_pool.Enqueue( generator );
-			}
-		}
+		var now = Environment.TickCount64;
+		if ( now - _lastPoolTrim < 1000 ) return;
+		_lastPoolTrim = now;
 
-		public T Get()
-		{
-			if ( _pool.TryDequeue( out var o ) )
-				return o;
-
-			return new T();
-		}
-
-		public void Return( T obj )
-		{
-			_pool.Enqueue( obj );
-		}
-
-		ConcurrentQueue<T> _pool = new();
-
-		public void Dispose()
-		{
-			while ( _pool.TryDequeue( out var o ) )
-			{
-				o.Dispose();
-			}
-		}
+		// Run on the main thread: generator disposal also releases native geometry buffers.
+		HeightFieldGeneratorPool.Trim( now );
+		NavMeshGeneratorPool.Trim( now );
+		CompactHeightfield.TrimPool( now );
 	}
-
-	static internal GeneratorPool<HeightFieldGenerator> HeightFieldGeneratorPool = new( HeightFieldGenerationThreadCount );
-	static internal GeneratorPool<NavMeshGenerator> NavMeshGeneratorPool = new( NavMeshGenerationThreadCount );
 
 	/// <summary>
 	/// Generates or regenerates the navmesh tile at the given world position.

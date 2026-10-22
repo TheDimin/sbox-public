@@ -24,9 +24,12 @@ class HeightFieldGenerator : IDisposable
 
 	public bool IsEmpty => inputGeoVerticesCount < 3 || inputGeoIndicesCount < 3;
 
+	internal long RetainedBytes => (cachedHeightField?.RetainedBytes ?? 0)
+		+ (inputGeoVertices?.LongLength ?? 0) * 12 + (inputGeoIndices?.LongLength ?? 0) * sizeof( int );
+
 	public void Dispose()
 	{
-		cachedHeightField?.Dispose();
+		cachedHeightField?.ReleaseMemory();
 		cachedHeightField = null;
 
 		triangulationVertArrCache.DeleteThis();
@@ -34,13 +37,11 @@ class HeightFieldGenerator : IDisposable
 
 		if ( inputGeoVertices != null )
 		{
-			ArrayPool<Vector3>.Shared.Return( inputGeoVertices );
 			inputGeoVertices = null;
 		}
 
 		if ( inputGeoIndices != null )
 		{
-			ArrayPool<int>.Shared.Return( inputGeoIndices );
 			inputGeoIndices = null;
 		}
 	}

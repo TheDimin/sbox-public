@@ -14,6 +14,8 @@ class NavMeshGenerator : IDisposable
 
 	private Config cfg;
 
+	internal long RetainedBytes => chfWorkingCopy?.RetainedBytes ?? 0;
+
 	public void Init( Config config, CompactHeightfield inputChf )
 	{
 		cfg = config;
@@ -37,7 +39,7 @@ class NavMeshGenerator : IDisposable
 	{
 		if ( chfWorkingCopy != null )
 		{
-			chfWorkingCopy.Dispose();
+			chfWorkingCopy.ReleaseMemory();
 			chfWorkingCopy = null;
 		}
 	}

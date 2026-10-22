@@ -43,6 +43,17 @@ internal sealed class Heightfield : IDisposable
 
 	public bool _isCompressed = false;
 
+	internal long RetainedBytes => (_spans?.LongLength ?? 0) * 8
+		+ ((_columnCounts?.LongLength ?? 0) + (_compressedColumnStarts?.LongLength ?? 0)) * sizeof( int );
+
+	internal void ReleaseMemory()
+	{
+		// Evicted scratch must become collectible, rather than move into another long-lived pool.
+		_spans = null;
+		_columnCounts = null;
+		_compressedColumnStarts = null;
+	}
+
 	public Heightfield( int sizeX, int sizeZ, in Vector3 minBounds, in Vector3 maxBounds,
 		float cellSize, float cellHeight )
 	{
