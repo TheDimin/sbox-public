@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Sandbox;
 
@@ -13,6 +14,8 @@ internal class BlacklistCodeWalker( SemanticModel semanticModel ) : CSharpSyntax
 	HashSet<LineSymbol> LineSymbols = [];
 
 	private readonly SemanticModel _semanticModel = semanticModel;
+	private readonly Dictionary<SyntaxNode, IMethodSymbol> _invokedMethods = [];
+	private readonly Dictionary<ISymbol, string> _blockedSymbols = new( ReferenceEqualityComparer.Instance );
 
 	static readonly SymbolDisplayFormat FullyQualifiedSymbolFormat = new SymbolDisplayFormat(
 		globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted,
@@ -30,10 +33,31 @@ internal class BlacklistCodeWalker( SemanticModel semanticModel ) : CSharpSyntax
 	/// </summary>
 	public override void DefaultVisit( SyntaxNode node )
 	{
-		var symbolInfo = _semanticModel.GetSymbolInfo( node );
+		ISymbol symbol;
+		if ( _invokedMethods.TryGetValue( node, out var invokedMethod ) )
+		{
+			symbol = invokedMethod;
+		}
+		else
+		{
+			var symbolInfo = _semanticModel.GetSymbolInfo( node );
 
-		// Consider the CandidateSymbols even though you'd assume it can't compile.. It can!
-		var symbol = symbolInfo.Symbol ?? symbolInfo.CandidateSymbols.FirstOrDefault();
+			// Unresolved calls and method references still need the original candidate checks.
+			symbol = symbolInfo.Symbol ?? symbolInfo.CandidateSymbols.FirstOrDefault();
+
+			if ( node is InvocationExpressionSyntax invocation &&
+				symbolInfo.Symbol is IMethodSymbol { MethodKind: not MethodKind.DelegateInvoke } method )
+			{
+				// The invocation already resolved this method. Binding its method group again
+				// makes Roslyn search all extension containers for each spelling of the call.
+				// Continue visiting receivers, arguments and generic type arguments normally.
+				_invokedMethods[invocation.Expression] = method;
+				if ( invocation.Expression is MemberAccessExpressionSyntax access )
+					_invokedMethods[access.Name] = method;
+				else if ( invocation.Expression is MemberBindingExpressionSyntax binding )
+					_invokedMethods[binding.Name] = method;
+			}
+		}
 
 		if ( symbol is null )
 		{
@@ -41,9 +65,18 @@ internal class BlacklistCodeWalker( SemanticModel semanticModel ) : CSharpSyntax
 			return;
 		}
 
-		var fullyQualifiedName = symbol.ToDisplayString( FullyQualifiedSymbolFormat );
+		// The same constructed method is visited at its invocation, method group and name,
+		// and often at many other call sites. Keep only its decision for this tree walk.
+		// Do not use OriginalDefinition: generic arguments can change the rule match.
+		// Reference identity also keeps distinct display forms such as dynamic and object.
+		if ( !_blockedSymbols.TryGetValue( symbol, out var fullyQualifiedName ) )
+		{
+			var displayName = symbol.ToDisplayString( FullyQualifiedSymbolFormat );
+			fullyQualifiedName = CompilerRules.IsBlocked( displayName ) ? displayName : null;
+			_blockedSymbols.Add( symbol, fullyQualifiedName );
+		}
 
-		if ( !CompilerRules.IsBlocked( fullyQualifiedName ) )
+		if ( fullyQualifiedName is null )
 		{
 			base.DefaultVisit( node );
 			return;

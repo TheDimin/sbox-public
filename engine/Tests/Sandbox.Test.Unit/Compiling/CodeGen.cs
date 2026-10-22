@@ -391,6 +391,110 @@ namespace CompilingTests
 			Assert.IsTrue( tree.GetText().ToString().Contains( "[DescriptionAttribute( \"This parameter has a description!\" )]int baz" ) );
 		}
 
+		[TestMethod]
+		public void StringTokenReplacementWithoutCloudResolver()
+		{
+			var compiler = BuildString( """
+				using Sandbox;
+				public static class Program
+				{
+					public static void Main()
+					{
+						RenderAttributes attributes = new();
+						attributes.Set( "PoopSock", Vector3.One );
+					}
+				}
+				""", configureProcessor: processor => processor.PackageAssetResolver = null );
+			Assert.IsTrue( compiler.SyntaxTrees.First().GetText().ToString().Contains( "\"PoopSock\",1590150592U" ) );
+		}
+
+		[TestMethod]
+		public void CloudProviderReportsNonLiteralArguments()
+		{
+			Sandbox.Generator.Processor processor = null;
+			BuildString( """
+				using Sandbox;
+				public static class Program
+				{
+					public static Model Load( string ident ) => Cloud.Model( ident );
+				}
+				""", configureProcessor: value => processor = value );
+			Assert.IsTrue( processor.Diagnostics.Any( diagnostic => diagnostic.GetMessage().Contains( "Must use a string literal for a CloudAssetProvider" ) ) );
+		}
+
+		[DataTestMethod]
+		[DataRow( "Alias.Fetch( ident )", "Must use a string literal" )]
+		[DataRow( "Fetch( ident )", "Must use a string literal" )]
+		[DataRow( "ident.FetchExtension( ident )", "Must use a string literal" )]
+		[DataRow( "Alias.Fetch()", "Wrong argument count" )]
+		[DataRow( "Alias.Fetch( ident, ident )", "Wrong argument count" )]
+		public void CustomCloudProviderAliasesKeepDiagnostics( string expression, string expected )
+		{
+			Sandbox.Generator.Processor processor = null;
+			BuildString( $$"""
+				using System;
+				using Alias = Providers;
+				using Marker = CloudAssetProviderAttribute;
+				using static Providers;
+				public sealed class CloudAssetProviderAttribute : Attribute { }
+				public static class Providers
+				{
+					[Marker] public static string Fetch( string value ) => value;
+					[Marker] public static string FetchExtension( this string receiver, string value ) => value;
+				}
+				public static class Consumer
+				{
+					public static string Run( string ident ) => {{expression}};
+				}
+				""", configureProcessor: value => processor = value );
+
+			Assert.IsNull( processor.Exception );
+			Assert.IsTrue( processor.Diagnostics.Any( diagnostic => diagnostic.GetMessage().Contains( expected ) ) );
+		}
+
+		[DataTestMethod]
+		[DataRow( false )]
+		[DataRow( true )]
+		public void ReferencedCustomCloudProvidersKeepDiagnosticsAndAssetRegistration( bool sourceReference )
+		{
+			var runtimePath = Path.GetDirectoryName( typeof( object ).Assembly.Location );
+			var references = new[]
+			{
+				MetadataReference.CreateFromFile( typeof( object ).Assembly.Location ),
+				MetadataReference.CreateFromFile( Path.Combine( runtimePath, "System.Runtime.dll" ) )
+			};
+			var provider = CSharpCompilation.Create( "custom_providers", new[] { CSharpSyntaxTree.ParseText( """
+				using System;
+				namespace Custom
+				{
+					public sealed class CloudAssetProviderAttribute : Attribute { }
+					public static class Providers
+					{
+						[CloudAssetProvider] public static string Fetch<T>( T value ) => value.ToString();
+					}
+				}
+				""" ) }, references, new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary ) );
+
+			using var stream = new MemoryStream();
+			var emitted = provider.Emit( stream );
+			Assert.IsTrue( emitted.Success, string.Join( "\n", emitted.Diagnostics ) );
+			MetadataReference reference = sourceReference ? provider.ToMetadataReference() : MetadataReference.CreateFromImage( stream.ToArray() );
+
+			Sandbox.Generator.Processor processor = null;
+			var output = BuildString( """
+				using Alias = Custom.Providers;
+				public static class Consumer
+				{
+					public static string Invalid( string ident ) => Alias.Fetch<string>( ident );
+					public static string Valid() => Alias.Fetch<string>( "facepunch.test" );
+				}
+				""", configureProcessor: value => processor = value, additionalReferences: new[] { reference } );
+
+			Assert.IsNull( processor.Exception );
+			Assert.AreEqual( 1, processor.Diagnostics.Count( diagnostic => diagnostic.GetMessage().Contains( "Must use a string literal" ) ) );
+			Assert.IsTrue( output.SyntaxTrees.Any( tree => tree.GetText().ToString().Contains( "[assembly:Sandbox.Cloud.Asset( \"facepunch.test\"" ) ) );
+		}
+
 
 		[TestMethod]
 		public void ReturnsDescriptionAttribute()

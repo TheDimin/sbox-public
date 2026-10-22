@@ -13,6 +13,7 @@
 		<!-- Exercise the menu's pure party grouping without Steam or the UI runtime. -->
 		<Compile Include="..\..\..\game\addons\menu\Code\MenuUI\Front\FriendPartyGrouping.cs" Link="Menu\FriendPartyGrouping.cs" />
 		<Compile Include="..\..\..\game\addons\tools\Code\Editor\AssetPicker\AssetPickerState.cs" Link="Editor\AssetPickerState.cs" />
+		<Compile Include="..\..\Launcher\SboxCli\ProjectLaunchCoordinator.cs" Link="Launcher\ProjectLaunchCoordinator.cs" />
 	</ItemGroup>
 
 	<ItemGroup>

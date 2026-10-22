@@ -333,6 +333,9 @@ internal class GameInstance : IGameInstance
 		// done via the network tables.
 		if ( !IsDeveloperHost )
 		{
+			// The editor can register the complete set of project asset types and scan
+			// native dependencies now that assemblies and mounted paths are ready.
+			if ( Application.IsEditor ) IToolsDll.Current?.RunEvent( "game.resources.preload" );
 			Log.Trace( $"Loading GameResources" );
 			await ResourceLoader.LoadAllGameResourceAsync( FileSystem.Mounted, token );
 		}

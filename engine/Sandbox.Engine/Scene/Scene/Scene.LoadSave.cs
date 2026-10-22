@@ -41,6 +41,8 @@ public partial class Scene : GameObject
 			return false;
 		}
 
+		sceneFile.EnsureManifest();
+
 		if ( sceneFile.ResourceName != null )
 		{
 			Name = sceneFile.ResourceName;

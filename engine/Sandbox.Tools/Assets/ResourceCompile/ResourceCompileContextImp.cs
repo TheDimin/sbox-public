@@ -163,12 +163,30 @@ unsafe class ResourceCompileContextImp : ResourceCompileContext, IDisposable
 			return jsonString;
 		}
 
-		RecurseJsonNodes( node );
+		// Asset types cannot change during this synchronous scan. Include misses in this
+		// per-scan lookup instead of searching every asset type for every JSON string.
+		var referenceTypes = CreateReferenceTypes( AssetType.All );
+		RecurseJsonNodes( node, referenceTypes );
 
 		return node.ToJsonString( serializeOptions );
 	}
 
-	private void RecurseJsonNodes( JsonNode element )
+	internal static Dictionary<string, AssetType> CreateReferenceTypes( IEnumerable<AssetType> types )
+	{
+		var result = new Dictionary<string, AssetType>( StringComparer.InvariantCultureIgnoreCase );
+		foreach ( var type in types )
+			result.TryAdd( type.FileExtension, type );
+		return result;
+	}
+
+	internal static AssetType FindReferenceType( string extension, IReadOnlyDictionary<string, AssetType> types )
+	{
+		extension = extension.Trim( '.' );
+		if ( extension.EndsWith( "_c" ) ) extension = extension[..^2];
+		return types.TryGetValue( extension, out var type ) ? type : null;
+	}
+
+	private void RecurseJsonNodes( JsonNode element, IReadOnlyDictionary<string, AssetType> referenceTypes )
 	{
 		if ( element is null )
 			return;
@@ -178,7 +196,7 @@ unsafe class ResourceCompileContextImp : ResourceCompileContext, IDisposable
 			// This is a copy cause it's modified during enumuration, specifically for embedded resources below
 			foreach ( var e in array.ToList() )
 			{
-				RecurseJsonNodes( e );
+				RecurseJsonNodes( e, referenceTypes );
 			}
 		}
 
@@ -244,7 +262,7 @@ unsafe class ResourceCompileContextImp : ResourceCompileContext, IDisposable
 					}
 				}
 
-				RecurseJsonNodes( e.Value );
+				RecurseJsonNodes( e.Value, referenceTypes );
 			}
 		}
 
@@ -280,7 +298,7 @@ unsafe class ResourceCompileContextImp : ResourceCompileContext, IDisposable
 					Log.Trace( $"AddRuntimeReference: {str} {asset.Path}" );
 				}
 			}
-			else if ( AssetType.FromExtension( extension ) is { } type )
+			else if ( FindReferenceType( extension, referenceTypes ) is { } type )
 			{
 				// the c++ asset system supports refs to currently unrecognized assets where, if/when that asset is registered,
 				// our dependency tree will be rebuilt, and include proper refs to those assets - so lets make sure we use that, otherwise this is all order dependent

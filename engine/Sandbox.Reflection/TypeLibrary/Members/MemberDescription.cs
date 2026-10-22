@@ -28,7 +28,7 @@ public class MemberDescription : ISourceLineProvider, IMemberNameProvider, ITitl
 	}
 
 	/// <summary>
-	/// Unique identifier based on full name
+	/// Member key retained while the declaring type is removed, for reuse after hotload.
 	/// </summary>
 	internal string Ident { get; set; }
 

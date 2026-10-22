@@ -5,6 +5,29 @@ namespace Editor;
 
 static class AssetThumbnail
 {
+	private const long MaximumResidentThumbnailBytes = 64 * 1024 * 1024;
+	// Keys do not reference their Asset. Embedded assets can refer to a whole editable scene,
+	// and retaining a thumbnail must not keep that scene alive after its editor closes.
+	private static readonly ThumbnailMemoryCache<object, Pixmap> ResidentThumbnails = new( MaximumResidentThumbnailBytes );
+
+	internal static int ResidentThumbnailCount => ResidentThumbnails.Count;
+	internal static long ResidentThumbnailBytes => ResidentThumbnails.RetainedBytes;
+
+	internal static void TrackCachedThumbnail( Asset asset, Pixmap image )
+	{
+		ResidentThumbnails.Remove( asset.ThumbnailCacheIdentity );
+		if ( image is null || image == asset.thumbnailOverride || image == asset.AssetType?.Icon256 )
+			return;
+
+		ResidentThumbnails.Store( asset.ThumbnailCacheIdentity, image, (long)image.Width * image.Height * 4 );
+	}
+
+	private static void TouchCachedThumbnail( Asset asset, Pixmap image )
+	{
+		if ( !ResidentThumbnails.TryGet( asset.ThumbnailCacheIdentity, out var resident ) || resident != image )
+			TrackCachedThumbnail( asset, image );
+	}
+
 	private static int MaximumConcurrentBuilds => AssetPipelineCompatibility.UseFastEditorPath
 		? Math.Clamp( Math.Max( 1, Environment.ProcessorCount / 4 ), 1, 4 )
 		: 1;
@@ -42,9 +65,11 @@ static class AssetThumbnail
 	{
 		ArgumentNullException.ThrowIfNull( asset, nameof( asset ) );
 
-		if ( asset.HasCachedThumbnail )
+		var cached = asset.CachedThumbnail;
+		if ( cached is not null && cached != asset.AssetType?.Icon256 )
 		{
-			return asset.CachedThumbnail;
+			TouchCachedThumbnail( asset, cached );
+			return cached;
 		}
 
 		var fullPath = GetThumbnailFile( asset, false );
@@ -52,7 +77,7 @@ static class AssetThumbnail
 		{
 			var pix = Pixmap.FromFile( fullPath );
 			asset.CachedThumbnail = pix;
-			return asset.CachedThumbnail;
+			return pix;
 		}
 
 		// start an async render
@@ -64,19 +89,20 @@ static class AssetThumbnail
 			await Task.Delay( 100 );
 		}
 
-		// If it was null still
-		asset.CachedThumbnail ??= asset.AssetType.Icon256;
-
-		return asset.CachedThumbnail;
+		// A completed image may have left the resident set while this caller was waiting.
+		// Reload its PNG on use, with the same type-icon fallback if generation failed.
+		return GetAssetThumb( asset, generateIfNotInCache: false );
 	}
 
 	internal static Pixmap GetAssetThumb( Asset asset, bool generateIfNotInCache = true )
 	{
 		ArgumentNullException.ThrowIfNull( asset, nameof( asset ) );
 
-		if ( asset.HasCachedThumbnail )
+		var cached = asset.CachedThumbnail;
+		if ( cached is not null && cached != asset.AssetType?.Icon256 )
 		{
-			return asset.CachedThumbnail;
+			TouchCachedThumbnail( asset, cached );
+			return cached;
 		}
 
 		var fullPath = GetThumbnailFile( asset, false );
@@ -84,7 +110,7 @@ static class AssetThumbnail
 		{
 			var pix = Pixmap.FromFile( fullPath );
 			asset.CachedThumbnail = pix;
-			return asset.CachedThumbnail;
+			return pix;
 		}
 
 		if ( asset.AssetType != null )

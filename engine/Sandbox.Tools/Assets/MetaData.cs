@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -21,15 +21,99 @@ namespace Editor
 			FilePath = sourceFile;
 		}
 
-		/// <summary>
-		/// Read and parse the metadata document when it changes on disk. Asset hydration often
-		/// asks for multiple keys in succession, so retaining the parsed root avoids repeating
-		/// the same file read and JSON parse for every key.
-		/// </summary>
-		JsonElement? Read()
+		[ThreadStatic] static MetaData _scopeOwner;
+		[ThreadStatic] static JsonElement? _scopeRoot;
+		[ThreadStatic] static ReadStamp? _scopeStamp;
+		[ThreadStatic] static bool _scopeRead;
+		[ThreadStatic] static int _scopeVersion;
+		static int _writeVersion;
+
+		internal readonly record struct ReadStamp( DateTime WriteTimeUtc, long Length, int WriteVersion );
+		internal sealed record MissingProperty( MetaData Owner, string Key, ReadStamp Stamp );
+
+		bool IsCurrent( ReadStamp stamp )
 		{
+			if ( AssetPipelineCompatibility.IsLegacyForced || stamp.WriteVersion != System.Threading.Volatile.Read( ref _writeVersion ) )
+				return false;
+			if ( _scopeOwner == this && _scopeRead && _scopeVersion == stamp.WriteVersion )
+				return _scopeStamp == stamp;
+
+			var file = new System.IO.FileInfo( FilePath );
+			file.Refresh();
+			return file.Exists && file.LastWriteTimeUtc == stamp.WriteTimeUtc && file.Length == stamp.Length
+				&& stamp.WriteVersion == System.Threading.Volatile.Read( ref _writeVersion );
+		}
+
+		/// <summary>
+		/// Reuse one document during a synchronous asset update. The bounded cache still
+		/// validates the first read, and saves invalidate scopes across nested files and threads.
+		/// </summary>
+		internal static ReadScope CacheReads( MetaData meta ) => new( meta );
+
+		internal readonly struct ReadScope : IDisposable
+		{
+			readonly MetaData _owner;
+			readonly MetaData _previousOwner;
+			readonly JsonElement? _previousRoot;
+			readonly ReadStamp? _previousStamp;
+			readonly bool _previousRead;
+			readonly int _previousVersion;
+
+			internal ReadScope( MetaData owner )
+			{
+				_owner = AssetPipelineCompatibility.IsLegacyForced ? null : owner;
+				_previousOwner = _scopeOwner;
+				_previousRoot = _scopeRoot;
+				_previousStamp = _scopeStamp;
+				_previousRead = _scopeRead;
+				_previousVersion = _scopeVersion;
+				if ( _owner is null ) return;
+				_scopeOwner = _owner;
+				_scopeRoot = null;
+				_scopeStamp = null;
+				_scopeRead = false;
+			}
+
+			public void Dispose()
+			{
+				if ( _owner is null ) return;
+				_scopeOwner = _previousOwner;
+				_scopeRoot = _previousRoot;
+				_scopeStamp = _previousStamp;
+				_scopeRead = _previousRead && _previousOwner != _owner;
+				_scopeVersion = _previousVersion;
+			}
+		}
+
+		JsonElement? Read() => Read( out _ );
+
+		JsonElement? Read( out ReadStamp? stamp )
+		{
+			if ( AssetPipelineCompatibility.IsLegacyForced )
+			{
+				_scopeRead = false;
+				return ReadUnscoped( out stamp );
+			}
+			if ( _scopeOwner != this )
+				return ReadUnscoped( out stamp );
+
+			var version = System.Threading.Volatile.Read( ref _writeVersion );
+			if ( !_scopeRead || _scopeVersion != version )
+			{
+				_scopeRoot = ReadUnscoped( out _scopeStamp );
+				_scopeRead = true;
+				_scopeVersion = version;
+			}
+			stamp = _scopeStamp;
+			return _scopeRoot;
+		}
+
+		JsonElement? ReadUnscoped( out ReadStamp? stamp )
+		{
+			stamp = null;
 			const int stableReadAttempts = 3;
 			var bypassCache = AssetPipelineCompatibility.IsLegacyForced;
+			var writeVersion = System.Threading.Volatile.Read( ref _writeVersion );
 
 			if ( bypassCache )
 				MetaDataDocumentCache.Remove( FilePath );
@@ -48,6 +132,7 @@ namespace Editor
 				if ( !bypassCache
 					&& MetaDataDocumentCache.TryGet( FilePath, before.LastWriteTimeUtc, before.Length, out var cachedRoot ) )
 				{
+					stamp = new ReadStamp( before.LastWriteTimeUtc, before.Length, writeVersion );
 					return cachedRoot;
 				}
 
@@ -73,7 +158,10 @@ namespace Editor
 						continue;
 
 					if ( stableIdentity && !bypassCache )
+					{
 						MetaDataDocumentCache.Store( FilePath, after.LastWriteTimeUtc, after.Length, root );
+						stamp = new ReadStamp( after.LastWriteTimeUtc, after.Length, writeVersion );
+					}
 
 					return root;
 				}
@@ -122,6 +210,7 @@ namespace Editor
 					}
 
 					MetaDataDocumentCache.Remove( FilePath );
+					System.Threading.Interlocked.Increment( ref _writeVersion );
 					return;
 				}
 				catch ( System.IO.DirectoryNotFoundException ex )
@@ -172,6 +261,35 @@ namespace Editor
 
 				// if it was the wrong type, we don't care
 				return defaultValue;
+			}
+		}
+
+		/// <summary>
+		/// Cache only the absence of a property, without retaining its JSON document.
+		/// Failed reads and invalid values are retried through the normal read path.
+		/// </summary>
+		internal T GetWithMissingPropertyCache<T>( string keyName, ref MissingProperty missingProperty )
+		{
+			try
+			{
+				if ( missingProperty is { } previous && previous.Owner == this && previous.Key == keyName && IsCurrent( previous.Stamp ) ) return default;
+				missingProperty = null;
+
+				var root = Read( out var stamp );
+				if ( root is null || root.Value.ValueKind != JsonValueKind.Object ) return default;
+				if ( !root.Value.TryGetProperty( keyName, out var value ) )
+				{
+					if ( stamp is { } identity ) missingProperty = new MissingProperty( this, keyName, identity );
+					return default;
+				}
+
+				return value.Deserialize<T>( JsonSerializerOptions.Default );
+			}
+			catch ( System.Exception e )
+			{
+				missingProperty = null;
+				Log.Warning( e, $"MetaData.Get<{typeof( T )}>( '{keyName}' ) - {e.Message}" );
+				return default;
 			}
 		}
 

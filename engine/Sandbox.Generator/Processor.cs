@@ -61,6 +61,8 @@ public class Processor
 
 	public bool ILHotloadSupported { get; set; }
 
+	internal CloudAssetProviderMethods CloudAssetProviderMethods { get; private set; }
+
 	/// <summary>
 	/// A function that will take a package name and return the path to the asset
 	/// </summary>
@@ -94,6 +96,9 @@ public class Processor
 
 		try
 		{
+			CloudAssetProviderMethods = Context == null && PackageAssetResolver is not null
+				? CloudAssetProviderMethods.Create( compilation ) : null;
+
 			if ( syntaxTrees.Any() )
 			{
 				var sync = new Sync();

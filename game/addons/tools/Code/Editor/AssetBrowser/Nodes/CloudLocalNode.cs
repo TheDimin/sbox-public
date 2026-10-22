@@ -5,7 +5,6 @@ partial class CloudLocalNode : AssetFilterNode, ResourceLibrary.IEventListener
 	public CloudLocalNode() : base( "attach_file", "Referenced", "@referenced" )
 	{
 		EditorEvent.Register( this );
-		UpdateCount();
 	}
 
 	~CloudLocalNode()
@@ -13,13 +12,24 @@ partial class CloudLocalNode : AssetFilterNode, ResourceLibrary.IEventListener
 		EditorEvent.Unregister( this );
 	}
 
-	void ResourceLibrary.IEventListener.OnSave( GameResource resource ) => UpdateCount();
-	void ResourceLibrary.IEventListener.OnExternalChanges( GameResource resource ) => UpdateCount();
+	void ResourceLibrary.IEventListener.OnSave( GameResource resource ) => InvalidateCount();
+	void ResourceLibrary.IEventListener.OnExternalChanges( GameResource resource ) => InvalidateCount();
 
-	void UpdateCount()
+	bool _countStale = true;
+
+	void InvalidateCount()
 	{
-		var packages = CloudAsset.GetAssetReferences( true );
-		Count = packages.Count;
-		Dirty();
+		_countStale = true;
+		TreeView?.Update();
+	}
+
+	public override void OnPaint( VirtualWidget item )
+	{
+		if ( _countStale )
+		{
+			_countStale = false;
+			Count = CloudAsset.GetAssetReferences( true ).Count;
+		}
+		base.OnPaint( item );
 	}
 }

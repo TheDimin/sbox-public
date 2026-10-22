@@ -80,6 +80,7 @@ public abstract partial class GameResource : Resource, ISourceLineProvider
 	/// True if we're waiting for our load to complete
 	/// </summary>
 	bool _awaitingLoad;
+	volatile bool _manifestDeferred;
 
 	/// <summary>
 	/// True if we're a promise, waiting to finalize the load
@@ -196,8 +197,10 @@ public abstract partial class GameResource : Resource, ISourceLineProvider
 #pragma warning restore CS0618 // Type or member is obsolete
 			ResourceIdLong = ResourcePath.FastHash64();
 
-			// Sol: the actual load happens via LoadGameResource, what's this for?
-			Manifest = AsyncResourceLoader.Load( ResourcePath );
+			// The editor catalog needs scene metadata before it needs native dependencies.
+			_manifestDeferred = Application.IsEditor && (this is PrefabFile or SceneFile);
+			if ( !_manifestDeferred )
+				Manifest = AsyncResourceLoader.Load( ResourcePath );
 		}
 
 		if ( id.Guid is Guid guid && guid != default )
@@ -206,6 +209,22 @@ public abstract partial class GameResource : Resource, ISourceLineProvider
 		}
 
 		_awaitingLoad = true;
+	}
+
+	internal override bool RequiresMainThreadForManifest => IsValid && _manifestDeferred;
+
+	internal override AsyncResourceLoader EnsureManifest()
+	{
+		if ( !IsValid ) return null;
+
+		if ( _manifestDeferred )
+		{
+			ThreadSafe.AssertIsMainThread();
+			Manifest = AsyncResourceLoader.Load( ResourcePath );
+			_manifestDeferred = false;
+		}
+
+		return Manifest;
 	}
 
 	/// <summary>
@@ -499,6 +518,7 @@ public abstract partial class GameResource : Resource, ISourceLineProvider
 		if ( _destroyed ) return;
 
 		_destroyed = true;
+		_manifestDeferred = false;
 
 		Game.Resources.Unregister( this );
 

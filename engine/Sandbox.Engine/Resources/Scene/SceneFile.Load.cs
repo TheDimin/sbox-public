@@ -4,8 +4,28 @@ namespace Sandbox;
 
 public partial class SceneFile
 {
+	bool _isSourceView;
+
+	internal override bool RequiresMainThreadForManifest => IsValid && (_isSourceView || base.RequiresMainThreadForManifest);
+
+	internal override AsyncResourceLoader EnsureManifest()
+	{
+		if ( !IsValid ) return null;
+		if ( !_isSourceView ) return base.EnsureManifest();
+
+		// Source views keep their unsaved data separate from the resource catalog. Use the
+		// catalog's dependency manifest only at actual use, and leave its ownership there.
+		ThreadSafe.AssertIsMainThread();
+		var catalog = Game.Resources.Get<SceneFile>( Guid );
+		if ( catalog is null && !string.IsNullOrEmpty( ResourcePath ) )
+			catalog = Game.Resources.Get<SceneFile>( ResourcePath );
+
+		return catalog is { IsValid: true, _isSourceView: false } ? catalog.EnsureManifest() : null;
+	}
+
 	internal void InitializeSource( string path, Guid guid )
 	{
+		_isSourceView = true;
 		ResourcePath = FixPath( path );
 		ResourceName = Path.GetFileNameWithoutExtension( ResourcePath );
 		Guid = guid;

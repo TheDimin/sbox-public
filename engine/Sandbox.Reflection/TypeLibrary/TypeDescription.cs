@@ -351,15 +351,14 @@ public sealed class TypeDescription : ISourceLineProvider
 		ConcurrentBag<MemberDescription> md = new();
 		System.Threading.Tasks.Parallel.ForEach( members, x =>
 		{
-			var ident = GetMemberIdentity( x );
-
 			MemberDescription previous = null;
-			previousPool?.TryGetValue( ident, out previous );
+			previousPool?.TryGetValue( GetMemberIdentity( x ), out previous );
 			var memberDesc = MemberDescription.Create( this, x, previous );
 
 			if ( memberDesc is not null )
 			{
-				memberDesc.Ident = ident;
+				// Only removed types need string keys to match members after hotload.
+				memberDesc.Ident = null;
 				md.Add( memberDesc );
 			}
 		} );
@@ -412,6 +411,7 @@ public sealed class TypeDescription : ISourceLineProvider
 		//
 		foreach ( var member in Members ?? Array.Empty<MemberDescription>() )
 		{
+			if ( member.MemberInfo is not null ) member.Ident = GetMemberIdentity( member.MemberInfo );
 			member.Dispose();
 		}
 

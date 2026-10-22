@@ -31,6 +31,7 @@ internal class NativeAsset : Asset
 		AbsoluteSourcePath = Sandbox.CaseInsensitivePhysicalFileSystem.ResolveNativeCasing( native.GetAbsolutePath_Transient( AssetLocation_t.Content ).NormalizeFilename( false, false ) );
 		AbsoluteCompiledPath = Sandbox.CaseInsensitivePhysicalFileSystem.ResolveNativeCasing( native.GetAbsolutePath_Transient( AssetLocation_t.Game ).NormalizeFilename( false, false ) );
 		IsDeleted = string.IsNullOrEmpty( AbsolutePath );
+		using var metadataReads = MetaData.CacheReads( MetaData );
 
 		if ( MetaData is { } meta && (!meta.TryGet<Guid>( "guid", out var existingGuid ) || existingGuid != Guid) )
 		{

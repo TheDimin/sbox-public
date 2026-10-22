@@ -185,8 +185,30 @@ public abstract partial class Asset
 		return f;
 	}
 
-	internal Pixmap CachedThumbnail;
-	public bool HasCachedThumbnail => CachedThumbnail is not null && CachedThumbnail != AssetType?.Icon256;
+	// The bounded thumbnail cache owns residency. Other widgets may keep an evicted image
+	// alive, in which case reuse it instead of loading another copy of the same PNG.
+	private WeakReference<Pixmap> cachedThumbnail;
+	private object thumbnailCacheIdentity;
+	internal object ThumbnailCacheIdentity => thumbnailCacheIdentity ??= new();
+
+	internal Pixmap CachedThumbnail
+	{
+		get => cachedThumbnail is not null && cachedThumbnail.TryGetTarget( out var image ) ? image : null;
+		set
+		{
+			cachedThumbnail = value is null ? null : new WeakReference<Pixmap>( value );
+			AssetThumbnail.TrackCachedThumbnail( this, value );
+		}
+	}
+
+	public bool HasCachedThumbnail
+	{
+		get
+		{
+			var image = CachedThumbnail;
+			return image is not null && image != AssetType?.Icon256;
+		}
+	}
 
 	/// <summary>
 	/// Returns the asset preview thumbnail, with fallback to the asset type icon if there is no preview.
@@ -433,8 +455,9 @@ public abstract partial class Asset
 		if ( !attribute.TargetType.IsAssignableTo( t ) || attribute.TargetType.IsAbstract )
 			return false;
 
-		// Make sure we have an up to date compiled version
-		if ( CanRecompile )
+		// Publishing can request the original eager dependency checks.
+		var forceCompileCheck = AssetPipelineCompatibility.IsLegacyForced;
+		if ( forceCompileCheck && CanRecompile )
 		{
 			Compile( false );
 		}
@@ -442,6 +465,13 @@ public abstract partial class Asset
 		obj = GameResource.GetPromise( attribute.TargetType, new ResourceId() { Guid = Guid, Path = Path } );
 		if ( obj != null && !obj.IsPromise )
 			return true; // already exists and loaded
+
+		// Startup's final compile pass and file watchers refresh loaded resources. Only
+		// resources that still need to be read require another compile check here.
+		if ( !forceCompileCheck && CanRecompile )
+		{
+			Compile( false );
+		}
 
 		// get compiled path
 		var compiledFilePath = GetCompiledFile( true );

@@ -35,6 +35,8 @@ public static partial class Game
 		if ( !Networking.IsHost )
 			return false;
 
+		SdlGamepads.StopAdaptiveTriggers();
+
 		// We don't want to send any networked messages to do with deletion or creation
 		// of GameObjects here. Because the client will destroy their scene locally
 		// anyway. This saves us sending a message for potentially 100s of objects.
@@ -84,6 +86,7 @@ public static partial class Game
 
 	internal static void Shutdown()
 	{
+		SdlGamepads.StopAdaptiveTriggers();
 		IsClosing = true;
 		IsPlaying = false;
 

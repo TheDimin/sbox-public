@@ -31,6 +31,8 @@ public partial class PrefabScene : Scene, IJsonConvert
 			return false;
 		}
 
+		file.EnsureManifest();
+
 		Source = file;
 
 		// Conna: Don't network spawn any GameObjects we create here...

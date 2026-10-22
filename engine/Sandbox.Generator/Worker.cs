@@ -204,17 +204,20 @@ namespace Sandbox.Generator
 		}
 
 		/// <summary>
-		/// Binding every call is most of the generator's time, and the units that look at the invoked
-		/// method only rewrite calls with a literal argument. Without one, the symbol can only feed a
-		/// CloudAssetProvider diagnostic, so skip it when nobody reads those.
+		/// StringToken rewrites need a string literal. Other calls only need binding if their name
+		/// can refer to a cloud provider. The name filter includes custom providers and aliases;
+		/// overload resolution still decides whether the method is actually a provider.
 		/// </summary>
 		bool NeedsInvokedSymbols( InvocationExpressionSyntax node )
 		{
-			if ( !Processor.IgnoreDiagnostics ) return true;
+			var cloudProvider = IsFullGeneration && Processor.PackageAssetResolver is not null &&
+				Processor.CloudAssetProviderMethods.MayContain( node.Expression );
+			if ( !Processor.IgnoreDiagnostics && cloudProvider ) return true;
 
 			foreach ( var argument in node.ArgumentList.Arguments )
 			{
-				if ( argument.Expression is LiteralExpressionSyntax ) return true;
+				if ( argument.Expression is LiteralExpressionSyntax literal &&
+					(cloudProvider || literal.IsKind( SyntaxKind.StringLiteralExpression )) ) return true;
 			}
 
 			return false;

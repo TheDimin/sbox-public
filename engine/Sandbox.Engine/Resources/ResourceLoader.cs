@@ -56,7 +56,8 @@ internal static class ResourceLoader
 
 		var discovery = new DiscoveryPlan();
 		var pathsToRegister = new List<string>();
-		foreach ( var file in fileSystem.FindFile( "/", "*", true ) )
+		var index = fileSystem.IndexFiles( "/" );
+		foreach ( var file in index.Files )
 		{
 			if ( discovery.Observe( file, types, allExtensions ) )
 				pathsToRegister.Add( file );
@@ -79,7 +80,7 @@ internal static class ResourceLoader
 
 			try
 			{
-				var se = Game.Resources.LoadGameResource( type, file, fileSystem, true, sourcePackage );
+				var se = Game.Resources.LoadGameResource( type, file, fileSystem, true, sourcePackage, index );
 				if ( se != null ) allResources.Add( se );
 			}
 			catch ( Exception ex )
@@ -116,6 +117,13 @@ internal static class ResourceLoader
 
 	internal static async Task LoadAllGameResourceAsync( BaseFileSystem fileSystem, CancellationToken ct = default, bool reloadExisting = false, Package sourcePackage = null, Task<List<string>> preEnumeratedFiles = null, Func<string, bool> includeExtension = null )
 	{
+		// StartupTiming remains allocated after startup. Its completed Time value and the
+		// first engine frame exclude later project reloads and background resource loads.
+		var profile = StartupProfiler.Enabled && Bootstrap.StartupTiming is { } startupTiming
+			&& !startupTiming.Data.ContainsKey( "Time" ) && EngineLoop.LoopFrames == 0;
+		var profileStart = profile ? Stopwatch.GetTimestamp() : 0;
+		long yieldTicks = 0, maxYieldTicks = 0;
+		int yieldCount = 0;
 		var totalTimer = Stopwatch.StartNew();
 		var yieldTimer = Stopwatch.StartNew();
 		var types = Game.TypeLibrary.GetAttributes<AssetTypeAttribute>().DistinctBy( x => x.Extension )
@@ -125,16 +133,36 @@ internal static class ResourceLoader
 		allExtensions.UnionWith( NativeExtensions );
 
 		var discovery = new DiscoveryPlan();
-		var enumeratedFiles = preEnumeratedFiles is null ? fileSystem.FindFile( "/", "*", true ) : await preEnumeratedFiles;
+		var phaseStart = profile ? Stopwatch.GetTimestamp() : 0;
+		var index = preEnumeratedFiles is null ? fileSystem.IndexFiles( "/" ) : null;
+		var enumeratedFiles = index is null ? await preEnumeratedFiles : index.Files;
+		var indexTicks = profile ? Stopwatch.GetTimestamp() - phaseStart : 0;
+		phaseStart = profile ? Stopwatch.GetTimestamp() : 0;
 		foreach ( var file in enumeratedFiles )
 		{
 			ct.ThrowIfCancellationRequested();
 			if ( discovery.Observe( file, types, allExtensions ) )
 				Game.Resources.RegisterPath( file );
-			if ( yieldTimer.ElapsedMilliseconds > 8 ) { LoadingScreen.Subtitle = System.IO.Path.GetFileName( file ); await Task.Yield(); yieldTimer.Restart(); }
+			if ( yieldTimer.ElapsedMilliseconds > 8 )
+			{
+				LoadingScreen.Subtitle = System.IO.Path.GetFileName( file );
+				var yieldStart = profile ? Stopwatch.GetTimestamp() : 0;
+				await Task.Yield();
+				if ( profile )
+				{
+					var elapsed = Stopwatch.GetTimestamp() - yieldStart;
+					yieldTicks += elapsed;
+					maxYieldTicks = Math.Max( maxYieldTicks, elapsed );
+					yieldCount++;
+				}
+				yieldTimer.Restart();
+			}
 		}
+		var registrationTicks = profile ? Stopwatch.GetTimestamp() - phaseStart - yieldTicks : 0;
 
 		var allResources = new List<GameResource>();
+		phaseStart = profile ? Stopwatch.GetTimestamp() : 0;
+		var phaseYieldTicks = yieldTicks;
 
 		foreach ( var candidate in discovery.GameResources )
 		{
@@ -151,7 +179,7 @@ internal static class ResourceLoader
 
 			try
 			{
-				var se = Game.Resources.LoadGameResource( type, file, fileSystem, true, sourcePackage, knownToExist: true );
+				var se = Game.Resources.LoadGameResource( type, file, fileSystem, true, sourcePackage, index );
 				if ( se != null ) allResources.Add( se );
 			}
 			catch ( Exception ex )
@@ -159,23 +187,65 @@ internal static class ResourceLoader
 				Log.Warning( ex, $"Exception when trying to load {file}" );
 			}
 
-			if ( yieldTimer.ElapsedMilliseconds > 8 ) { LoadingScreen.Subtitle = System.IO.Path.GetFileName( file ); await Task.Yield(); yieldTimer.Restart(); }
+			if ( yieldTimer.ElapsedMilliseconds > 8 )
+			{
+				LoadingScreen.Subtitle = System.IO.Path.GetFileName( file );
+				var yieldStart = profile ? Stopwatch.GetTimestamp() : 0;
+				await Task.Yield();
+				if ( profile )
+				{
+					var elapsed = Stopwatch.GetTimestamp() - yieldStart;
+					yieldTicks += elapsed;
+					maxYieldTicks = Math.Max( maxYieldTicks, elapsed );
+					yieldCount++;
+				}
+				yieldTimer.Restart();
+			}
 		}
+		var loadTicks = profile ? Stopwatch.GetTimestamp() - phaseStart - (yieldTicks - phaseYieldTicks) : 0;
 
+		phaseStart = profile ? Stopwatch.GetTimestamp() : 0;
+		phaseYieldTicks = yieldTicks;
 		foreach ( var resource in allResources )
 		{
 			ct.ThrowIfCancellationRequested();
 			resource.PostLoadInternal();
 
-			if ( yieldTimer.ElapsedMilliseconds > 8 ) { LoadingScreen.Subtitle = System.IO.Path.GetFileName( resource.ResourcePath ); await Task.Yield(); yieldTimer.Restart(); }
+			if ( yieldTimer.ElapsedMilliseconds > 8 )
+			{
+				LoadingScreen.Subtitle = System.IO.Path.GetFileName( resource.ResourcePath );
+				var yieldStart = profile ? Stopwatch.GetTimestamp() : 0;
+				await Task.Yield();
+				if ( profile )
+				{
+					var elapsed = Stopwatch.GetTimestamp() - yieldStart;
+					yieldTicks += elapsed;
+					maxYieldTicks = Math.Max( maxYieldTicks, elapsed );
+					yieldCount++;
+				}
+				yieldTimer.Restart();
+			}
 		}
+		var postLoadTicks = profile ? Stopwatch.GetTimestamp() - phaseStart - (yieldTicks - phaseYieldTicks) : 0;
 
 		LoadingScreen.Subtitle = null;
 
 		foreach ( var type in types )
 			AddWatcherForType( type.Value );
 
+		phaseStart = profile ? Stopwatch.GetTimestamp() : 0;
 		FileHashCache.Current.Flush();
+		var flushTicks = profile ? Stopwatch.GetTimestamp() - phaseStart : 0;
+
+		if ( profile )
+		{
+			static double Milliseconds( long ticks ) => ticks * 1000.0 / Stopwatch.Frequency;
+			var context = GlobalContext.Current == GlobalContext.Game ? "game" : GlobalContext.Current == GlobalContext.Menu ? "menu" : "other";
+			Log.Info( $"Startup profile (resource discovery): context={context}, startTicks={profileStart}, reloadExisting={reloadExisting}, preEnumerated={preEnumeratedFiles is not null}, filtered={includeExtension is not null}, " +
+				$"scannedFiles={discovery.ScannedFileCount}, registeredPaths={discovery.RegisteredPathCount}, loadedResources={allResources.Count}, " +
+				$"indexOrEnumerationAwaitMs={Milliseconds( indexTicks ):F3}, discoveryRegistrationWorkMs={Milliseconds( registrationTicks ):F3}, loadWorkMs={Milliseconds( loadTicks ):F3}, postLoadWorkMs={Milliseconds( postLoadTicks ):F3}, flushMs={Milliseconds( flushTicks ):F3}, " +
+				$"yieldCount={yieldCount}, yieldWaitMs={Milliseconds( yieldTicks ):F3}, maxYieldWaitMs={Milliseconds( maxYieldTicks ):F3}, totalMs={totalTimer.Elapsed.TotalMilliseconds:F3}" );
+		}
 
 		if ( totalTimer.Elapsed.TotalSeconds > 1 )
 		{

@@ -371,20 +371,46 @@ public class AssetType
 	internal static void ImportCustomTypeFiles()
 	{
 		var sw = Stopwatch.StartNew();
+		var registeredCount = 0;
+		var index = FileSystem.Content.IndexFiles( "/" );
 
-		foreach ( var file in FileSystem.Content.FindFile( "/", "*", true ) )
+		foreach ( var file in GetCustomTypeFiles( index.Files,
+			extension => FromExtension( extension )?.IsGameResource == true ) )
 		{
-			var ext = System.IO.Path.GetExtension( file );
-			var t = FromExtension( ext );
-			if ( t is null ) continue;
-			if ( !t.IsGameResource ) continue;
-
-			AssetSystem.RegisterFile( FileSystem.Content.GetFullPath( file ) );
+			if ( !index.TryGetFileSystem( file, out var owner, out var ownerPath ) )
+				continue;
+			AssetSystem.RegisterFile( owner.GetFullPath( ownerPath ) );
+			registeredCount++;
 		}
 
 		if ( sw.Elapsed.TotalSeconds > 1 )
 		{
-			Log.Warning( $"ImportCustomTypeFiles took {sw.Elapsed.TotalSeconds:0.00} seconds" );
+			Log.Info( $"ImportCustomTypeFiles registered {registeredCount:N0} unique resources in {sw.Elapsed.TotalSeconds:0.00} seconds" );
+		}
+	}
+
+	internal static IEnumerable<string> GetCustomTypeFiles( IEnumerable<string> files, Func<string, bool> isGameResourceExtension )
+	{
+		var resources = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
+		var extensions = new Dictionary<string, bool>( StringComparer.OrdinalIgnoreCase );
+
+		foreach ( var file in files )
+		{
+			var extension = System.IO.Path.GetExtension( file );
+			if ( !extensions.TryGetValue( extension, out var isGameResource ) )
+			{
+				isGameResource = isGameResourceExtension( extension );
+				extensions.Add( extension, isGameResource );
+			}
+
+			if ( !isGameResource )
+				continue;
+
+			// Source and compiled paths resolve to the same native asset. Keep the first
+			// path, including compiled-only assets, without checking its dependencies twice.
+			var resource = file.EndsWith( "_c", StringComparison.OrdinalIgnoreCase ) ? file[..^2] : file;
+			if ( resources.Add( resource ) )
+				yield return file;
 		}
 	}
 

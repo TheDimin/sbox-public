@@ -41,6 +41,17 @@ public abstract partial class Resource : IValid, IJsonConvert, BytePack.ISeriali
 	/// </summary>
 	internal AsyncResourceLoader Manifest { get; set; }
 
+	/// <summary>
+	/// Start a deferred native dependency load when the resource is about to be used.
+	/// Reading the manifest itself must not allocate, including during finalization.
+	/// </summary>
+	internal virtual AsyncResourceLoader EnsureManifest() => Manifest;
+
+	/// <summary>
+	/// Whether ensuring the manifest requires native creation or catalog access on the main thread.
+	/// </summary>
+	internal virtual bool RequiresMainThreadForManifest => false;
+
 
 	[Hide, JsonIgnore] public abstract bool IsValid { get; }
 	[Hide, JsonIgnore] public virtual bool IsError => false;

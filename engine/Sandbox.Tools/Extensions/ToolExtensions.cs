@@ -225,7 +225,14 @@ public static partial class SandboxToolExtensions
 	/// </summary>
 	public static async Task WaitForLoadAsync( this Resource resource, CancellationToken ct = default )
 	{
-		if ( resource.Manifest is not { } manifest ) return;
+		if ( resource.RequiresMainThreadForManifest && !ThreadSafe.IsMainThread )
+		{
+			ct.ThrowIfCancellationRequested();
+			await MainThread.Wait();
+			ct.ThrowIfCancellationRequested();
+		}
+
+		if ( resource.EnsureManifest() is not { } manifest ) return;
 
 		await manifest.WaitForLoad( ct );
 	}

@@ -42,6 +42,12 @@ public static class Preferences
 	[ConVar( "controller_joystick_deadzone", ConVarFlags.Protected, Help = "Percentage of joystick travel ignored around the neutral position", Saved = true, Min = 0.0f, Max = 50.0f )]
 	public static float ControllerJoystickDeadzone { get; internal set; } = 12.5f;
 
+	/// <summary>
+	/// Whether games can apply adaptive trigger resistance. Disabling this releases active effects.
+	/// </summary>
+	[ConVar( "controller_adaptive_triggers", ConVarFlags.Protected, Help = "Allow adaptive trigger resistance", Saved = true )]
+	public static bool AdaptiveTriggers { get; internal set; } = true;
+
 	[ConVar( "controller_analog_speed", ConVarFlags.Protected, Help = "How fast the left joystick moves, for stuff like the virtual cursor in menus", Saved = true, Min = 0.1f, Max = 360.0f )]
 	internal static float ControllerAnalogSpeed { get; set; } = 2.0f;
 

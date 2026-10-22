@@ -736,25 +736,18 @@ public class ResourceSystem
 
 	/// <summary>
 	/// Loads a Gameresource from disk. Doesn't look at cache. Registers the resource if successful.
-	/// Pass <c>knownToExist</c> for files that came from a directory listing, to skip checking they exist.
+	/// Bulk loads pass a filesystem snapshot to read each file from its owning mount.
 	/// </summary>
-	internal GameResource LoadGameResource( AssetTypeAttribute type, string file, BaseFileSystem fs, bool deferPostload = false, Package sourcePackage = null, bool knownToExist = false )
+	internal GameResource LoadGameResource( AssetTypeAttribute type, string file, BaseFileSystem fs, bool deferPostload = false, Package sourcePackage = null, FileIndex index = null )
 	{
 		Assert.NotNull( type );
 		Assert.NotNull( file );
 
 		if ( !file.EndsWith( "_c" ) ) file += "_c";
 
-		Span<byte> data = null;
-
 		try
 		{
-			if ( knownToExist || fs.FileExists( file ) )
-			{
-				data = fs.ReadAllBytes( file );
-			}
-
-			if ( data.Length <= 3 )
+			if ( !TryReadFile( fs, index, file, out var data ) || data.Length <= 3 )
 			{
 				Log.Warning( $"		Skipping {file} (is null)" );
 				return null;
@@ -780,9 +773,11 @@ public class ResourceSystem
 			if ( Application.IsEditor )
 			{
 				var sourceFilePath = file.Substring( 0, file.Length - 2 );
-				if ( fs.FileExists( sourceFilePath ) )
+				var sourceFileSystem = fs;
+				var hasSource = index is null || index.TryGetFileSystem( sourceFilePath, out sourceFileSystem, out sourceFilePath );
+				if ( hasSource && sourceFileSystem.FileExists( sourceFilePath ) )
 				{
-					se.LastSavedSourceHash = FileHashCache.Current.GetOrComputeSourceHash( fs, sourceFilePath, out _ );
+					se.LastSavedSourceHash = FileHashCache.Current.GetOrComputeSourceHash( sourceFileSystem, sourceFilePath, out _ );
 				}
 			}
 
@@ -819,6 +814,27 @@ public class ResourceSystem
 			Log.Warning( ex, $"		Error when deserializing {file} ({ex.Message})" );
 			return null;
 		}
+	}
+
+	static bool TryReadFile( BaseFileSystem fs, FileIndex index, string path, out Span<byte> bytes )
+	{
+		if ( index is not null )
+		{
+			var found = index.TryReadAllBytes( path, out var indexed );
+			bytes = indexed;
+			return found;
+		}
+
+		try
+		{
+			bytes = fs.ReadAllBytes( path );
+			return true;
+		}
+		catch ( FileNotFoundException ) { }
+		catch ( DirectoryNotFoundException ) { }
+
+		bytes = default;
+		return false;
 	}
 
 	/// <summary>

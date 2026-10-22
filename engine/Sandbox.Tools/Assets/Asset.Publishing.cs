@@ -1,4 +1,4 @@
-﻿using Sandbox.DataModel;
+using Sandbox.DataModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Text;
@@ -9,6 +9,7 @@ namespace Editor;
 public partial class Asset
 {
 	PublishSettings _publishConfig;
+	MetaData.MissingProperty _missingPublishConfig;
 
 	/// <summary>
 	/// Access the asset publisher config.
@@ -23,7 +24,7 @@ public partial class Asset
 		if ( _publishConfig is not null )
 			return _publishConfig;
 
-		var settings = MetaData?.Get<PublishSettings>( "publish" );
+		var settings = MetaData?.GetWithMissingPropertyCache<PublishSettings>( "publish", ref _missingPublishConfig );
 		if ( createNew ) settings ??= new PublishSettings();
 
 		if ( settings is not null )

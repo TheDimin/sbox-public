@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace Editor;
 
@@ -26,6 +27,118 @@ public static partial class AssetSystem
 
 	static HashSet<Asset> UpdateQueue = new();
 	static CloudAssetReferenceListener CloudReferenceListener;
+	static NativeScanCallbackProfile nativeScanCallbackProfile;
+
+	internal static IDisposable ProfileNativeScanCallbacks()
+	{
+		if ( !Sandbox.Engine.StartupProfiler.Enabled ) return null;
+		ThreadSafe.AssertIsMainThread();
+		return new NativeScanCallbackProfile();
+	}
+
+	enum ScanCallback
+	{
+		AssetAdded,
+		AssetChanged,
+		ChangedAssetUpdate,
+		ChangedAssetProcessor,
+		UpdateAutoTags
+	}
+
+	sealed class NativeScanCallbackProfile : IDisposable
+	{
+		const int MaxTrackedAssets = 8192;
+		static readonly ScanCallback[] Kinds = Enum.GetValues<ScanCallback>();
+		readonly NativeScanCallbackProfile previous;
+		readonly long start = Stopwatch.GetTimestamp();
+		readonly object sync = new();
+		readonly long[] counts = new long[Kinds.Length];
+		readonly long[] ticks = new long[Kinds.Length];
+		readonly Dictionary<ulong, (string Path, long Count, long Ticks)> changedAssets = new();
+		long untrackedChangedCalls;
+		bool disposed;
+
+		internal NativeScanCallbackProfile()
+		{
+			previous = nativeScanCallbackProfile;
+			nativeScanCallbackProfile = this;
+		}
+
+		internal Measurement Measure( ScanCallback callback, Asset asset = null ) => new( this, callback, asset );
+
+		internal readonly struct Measurement : IDisposable
+		{
+			readonly NativeScanCallbackProfile owner;
+			readonly ScanCallback callback;
+			readonly Asset asset;
+			readonly long start;
+
+			internal Measurement( NativeScanCallbackProfile owner, ScanCallback callback, Asset asset )
+			{
+				this.owner = owner;
+				this.callback = callback;
+				this.asset = asset;
+				start = Stopwatch.GetTimestamp();
+			}
+
+			public void Dispose() => owner.Record( callback, asset, Stopwatch.GetTimestamp() - start );
+		}
+
+		void Record( ScanCallback callback, Asset asset, long elapsed )
+		{
+			lock ( sync )
+			{
+				counts[(int)callback]++;
+				ticks[(int)callback] += elapsed;
+				if ( callback != ScanCallback.AssetChanged ) return;
+				if ( changedAssets.TryGetValue( asset.AssetId, out var entry ) )
+				{
+					changedAssets[asset.AssetId] = (entry.Path, entry.Count + 1, entry.Ticks + elapsed);
+				}
+				else if ( changedAssets.Count < MaxTrackedAssets )
+				{
+					changedAssets.Add( asset.AssetId, (asset.RelativePath ?? asset.Path ?? $"asset:{asset.AssetId}", 1, elapsed) );
+				}
+				else
+				{
+					untrackedChangedCalls++;
+				}
+			}
+		}
+
+		public void Dispose()
+		{
+			if ( disposed ) return;
+			disposed = true;
+			nativeScanCallbackProfile = previous;
+			var scanTicks = Stopwatch.GetTimestamp() - start;
+			string json;
+			lock ( sync )
+			{
+				var summary = new
+				{
+					ScanMilliseconds = scanTicks * 1000.0 / Stopwatch.Frequency,
+					// Callback times are inclusive and can overlap. The two ChangedAsset
+					// phases are contained in AssetChanged, not additional scan time.
+					Callbacks = Kinds.Select( kind => new
+					{
+						Kind = kind.ToString(),
+						Count = counts[(int)kind],
+						InclusiveMilliseconds = ticks[(int)kind] * 1000.0 / Stopwatch.Frequency
+					} ).ToArray(),
+					TrackedChangedAssets = changedAssets.Count,
+					UntrackedChangedCalls = untrackedChangedCalls,
+					// Exact counts for the first bounded set; do not imply global top paths
+					// when UntrackedChangedCalls is nonzero.
+					TopRepeatedTrackedPaths = changedAssets.Values.Where( x => x.Count > 1 )
+						.OrderByDescending( x => x.Count ).ThenByDescending( x => x.Ticks ).Take( 10 )
+						.Select( x => new { x.Path, x.Count, InclusiveMilliseconds = x.Ticks * 1000.0 / Stopwatch.Frequency } ).ToArray()
+				};
+				json = System.Text.Json.JsonSerializer.Serialize( summary );
+			}
+			log.Info( $"Startup profile (native asset callbacks): {json}" );
+		}
+	}
 
 	/// <summary>
 	/// Called after the asset types have been loaded from
@@ -38,6 +151,10 @@ public static partial class AssetSystem
 		{
 			type.Value.Init();
 		}
+
+		// Engine resource types must exist before the first native dependency scan.
+		// Project types are added after the project assemblies have loaded.
+		if ( EditorTypeLibrary is not null ) AssetType.UpdateCustomTypes();
 	}
 
 	internal static void InitializeFromProject( Project project )
@@ -68,6 +185,7 @@ public static partial class AssetSystem
 
 	internal static void AssetAdded( IAsset native )
 	{
+		using var measurement = nativeScanCallbackProfile?.Measure( ScanCallback.AssetAdded );
 		// log.Trace( $"Asset Added: {native.GetAbsolutePath_Transient()}" );
 
 		var a = new NativeAsset( native );
@@ -129,11 +247,18 @@ public static partial class AssetSystem
 	internal static void AssetChanged( uint index )
 	{
 		var asset = allAssets[index];
-		UpdateAsset( asset );
+		using var measurement = nativeScanCallbackProfile?.Measure( ScanCallback.AssetChanged, asset );
+		using ( nativeScanCallbackProfile?.Measure( ScanCallback.ChangedAssetUpdate ) )
+		{
+			UpdateAsset( asset );
+		}
 
 		if ( UpdateQueue.Add( asset ) )
 		{
-			NativeAssetProcessor.OnAssetChanged( asset );
+			using ( nativeScanCallbackProfile?.Measure( ScanCallback.ChangedAssetProcessor ) )
+			{
+				NativeAssetProcessor.OnAssetChanged( asset );
+			}
 
 			HasChanges = true;
 		}
@@ -141,6 +266,7 @@ public static partial class AssetSystem
 
 	internal static void UpdateAssetAutoTags( uint index )
 	{
+		using var measurement = nativeScanCallbackProfile?.Measure( ScanCallback.UpdateAutoTags );
 		allAssets[index].UpdateAutoTags();
 	}
 
@@ -166,6 +292,9 @@ public static partial class AssetSystem
 	{
 		if ( !HasChanges || !IsInitialized ) return;
 		HasChanges = false;
+		var profile = Sandbox.Engine.StartupProfiler.Enabled && StartupLoadProject.IsLoading;
+		var assetCount = UpdateQueue.Count;
+		var phaseStart = profile ? Stopwatch.GetTimestamp() : 0;
 
 		// Everything below is safe to do in parallel as long as our dependency info is up to date
 		// Which needs to be done on the main thread
@@ -176,9 +305,13 @@ public static partial class AssetSystem
 				nativeAsset.native.RequireDependencyInfo_Virtual();
 			}
 		}
+		var dependencyTicks = profile ? Stopwatch.GetTimestamp() - phaseStart : 0;
 
+		phaseStart = profile ? Stopwatch.GetTimestamp() : 0;
 		Parallel.ForEach( UpdateQueue, ( Asset asset ) => UpdateAsset( asset, false ) );
+		var updateTicks = profile ? Stopwatch.GetTimestamp() - phaseStart : 0;
 
+		phaseStart = profile ? Stopwatch.GetTimestamp() : 0;
 		// Thumbnails have their own queue, so do that all in main
 		foreach ( var asset in UpdateQueue )
 		{
@@ -198,6 +331,11 @@ public static partial class AssetSystem
 		UpdateQueue.Clear();
 
 		EditorEvent.RunInterface<IEventListener>( x => x.OnAssetSystemChanges() );
+		if ( profile )
+		{
+			var notificationTicks = Stopwatch.GetTimestamp() - phaseStart;
+			log.Info( $"Startup profile (asset update): assets={assetCount}, dependencyMs={dependencyTicks * 1000.0 / Stopwatch.Frequency:F3}, updateMs={updateTicks * 1000.0 / Stopwatch.Frequency:F3}, notificationMs={notificationTicks * 1000.0 / Stopwatch.Frequency:F3}" );
+		}
 	}
 
 	/// <summary>

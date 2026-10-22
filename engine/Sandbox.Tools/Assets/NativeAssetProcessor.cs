@@ -54,10 +54,23 @@ static class NativeAssetProcessor
 			packageReferences.Add( package.GetIdent( false, true ) );
 		}
 
-		if ( !packageReferences.Any() && asset.Publishing.ProjectConfig.EditorReferences is null )
+		SaveEditorReferences( asset.Publishing, asset.MetaData, packageReferences );
+	}
+
+	internal static void SaveEditorReferences( Asset.PublishSettings publishing, MetaData metadata, IReadOnlyCollection<string> packageReferences )
+	{
+		var existing = publishing.ProjectConfig.EditorReferences;
+		if ( packageReferences.Count == 0 && existing is null )
 			return; // no packages and no change, avoid writing empty metadata
 
-		asset.Publishing.ProjectConfig.EditorReferences = packageReferences.ToList();
-		asset.MetaData?.Set( "publish", asset.Publishing );
+		// Compare the saved state too: an earlier save can fail, or the file can
+		// change externally while the editable publishing settings remain cached.
+		if ( existing is not null && existing.SequenceEqual( packageReferences )
+			&& metadata?.Get<Asset.PublishSettings>( "publish" )?.ProjectConfig?.EditorReferences is { } saved
+			&& saved.SequenceEqual( packageReferences ) )
+			return;
+
+		publishing.ProjectConfig.EditorReferences = packageReferences.ToList();
+		metadata?.Set( "publish", publishing );
 	}
 }

@@ -308,10 +308,17 @@ public class CloudAsset
 			return;
 		}
 
-		var references = asset.AssetType.IsGameResource && json is not null
-			? ReadGameResourceReferences( asset, json )
-			: ReadReferences( asset );
-		ReferenceIndex.Update( asset, asset.AbsolutePath, references );
+		if ( !ReferenceIndex.IsBuilt ) return;
+
+		if ( asset.AssetType.IsGameResource && json is not null )
+		{
+			// Keep only the supplied reference list, not a closure over the whole saved resource.
+			ReferenceIndex.Update( asset, asset.AbsolutePath, ReadGameResourceReferences( asset, json ) );
+		}
+		else
+		{
+			ReferenceIndex.Update( asset, asset.AbsolutePath, () => ReadReferences( asset ) );
+		}
 	}
 
 	internal static void ReconcileReferenceIndex()
@@ -336,7 +343,7 @@ public class CloudAsset
 			}
 		}
 
-		var config = asset.Publishing?.ProjectConfig;
+		var config = asset.GetPublishSettings( false )?.ProjectConfig;
 		if ( config is null ) return Array.Empty<string>();
 		return (config.EditorReferences?.AsEnumerable() ?? Enumerable.Empty<string>())
 			.Concat( config.DistinctPackageReferences?.AsEnumerable() ?? Enumerable.Empty<string>() )

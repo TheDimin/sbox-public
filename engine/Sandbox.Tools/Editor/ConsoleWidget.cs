@@ -23,6 +23,7 @@ internal class ConsoleWidget : Widget
 	ConsoleOutput Output { get; init; }
 	LineEdit Filter { get; init; }
 	StatusBarLog CurrentStatusBarLog { get; set; }
+	bool OutputNeedsRefresh;
 
 	MessageCategory Message;
 	MessageCategory Warning;
@@ -338,7 +339,10 @@ internal class ConsoleWidget : Widget
 
 		if ( ShouldShowEvent( e ) )
 		{
-			Output.AddEvent( e );
+			if ( Visible )
+				Output.AddEvent( e );
+			else
+				OutputNeedsRefresh = true;
 		}
 
 		UpdateStatusBar( e );
@@ -370,6 +374,14 @@ internal class ConsoleWidget : Widget
 	{
 		Output.FilterTerms = GetFilterTerms();
 		Output.SetEvents( Events.Where( x => ShouldShowEvent( x ) ) );
+		OutputNeedsRefresh = false;
+	}
+
+	protected override void OnVisibilityChanged( bool visible )
+	{
+		base.OnVisibilityChanged( visible );
+		if ( visible && OutputNeedsRefresh && Output.IsValid() )
+			OnFilter();
 	}
 
 	void ClearStatusBarButtons()
@@ -660,7 +672,7 @@ internal class ConsoleWidget : Widget
 				LogEvent logEvent = ev;
 
 				var lastEvent = events.LastOrDefault();
-				if ( lastEvent.Message == ev.Message )
+				if ( lastEvent.Message == ev.Message && lastEvent.Logger == ev.Logger && lastEvent.Stack == ev.Stack )
 				{
 					logEvent.Repeats = lastEvent.Repeats + 1;
 					events.RemoveAt( events.Count() - 1 );

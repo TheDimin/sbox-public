@@ -133,6 +133,7 @@ internal static class Program
 	static async Task Connect( Options options, ChannelReader<string> messages, CancellationToken cancellation )
 	{
 		OwnedProcess owned = null;
+		IDisposable launchLease = null;
 		Process process = null;
 		NamedPipeClientStream pipe = null;
 
@@ -143,22 +144,30 @@ internal static class Program
 			{
 				process = await FindTarget( options );
 			}
-			else if ( options.Mode == "--project" && await FindRunning( options.Target, required: false ) is { } running )
-			{
-				// Never open a second editor on a project that's already open; attach to it instead.
-				process = running;
-			}
 			else
 			{
-				var executable = Path.Combine( options.EngineDirectory, options.Mode == "--project" ? "sbox-dev.exe" : "sbox.exe" );
-				if ( !File.Exists( executable ) )
-					throw new FileNotFoundException( "Engine executable not found. Use --engine to specify the game directory.", executable );
+				if ( options.Mode == "--project" )
+				{
+					launchLease = await ProjectLaunchCoordinator.WaitForLaunchAsync( options.Target, async token =>
+					{
+						process = await FindRunning( options.Target, required: false, token );
+						return process is not null;
+					}, options.StartupTimeout, cancellation );
+				}
 
-				string[] arguments = options.Mode == "--project"
-					? ["-mcp", "-project", options.Target]
-					: ["-mcp", "+game", options.Target];
-				owned = new OwnedProcess( executable, options.EngineDirectory, arguments );
-				process = owned.Process;
+				if ( process is null )
+				{
+					cancellation.ThrowIfCancellationRequested();
+					var executable = Path.Combine( options.EngineDirectory, options.Mode == "--project" ? "sbox-dev.exe" : "sbox.exe" );
+					if ( !File.Exists( executable ) )
+						throw new FileNotFoundException( "Engine executable not found. Use --engine to specify the game directory.", executable );
+
+					string[] arguments = options.Mode == "--project"
+						? ["-mcp", "-project", options.Target]
+						: ["-mcp", "+game", options.Target];
+					owned = new OwnedProcess( executable, options.EngineDirectory, arguments );
+					process = owned.Process;
+				}
 			}
 
 			Console.Error.WriteLine( $"sbox-cli: connecting to PID {process.Id} ({(owned is null ? "attached" : "owned")})." );
@@ -184,6 +193,7 @@ internal static class Program
 
 			}
 			owned?.Dispose();
+			launchLease?.Dispose();
 			process?.Dispose();
 			pipe?.Dispose();
 		}
@@ -237,9 +247,9 @@ internal static class Program
 	/// Find the running instance for a project, or the only running instance when project is null.
 	/// Never falls back to a different project's instance.
 	/// </summary>
-	static async Task<Process> FindRunning( string project, bool required )
+	static async Task<Process> FindRunning( string project, bool required, CancellationToken cancellation = default )
 	{
-		var instances = await FindInstances();
+		var instances = await FindInstances( cancellation );
 		var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 		var matches = project is null ? instances : instances
 			.Where( x => x["project"]?.GetValue<string>() is { } path && string.Equals( Path.GetFullPath( path ), project, comparison ) )
@@ -265,7 +275,7 @@ internal static class Program
 	/// <summary>
 	/// Ask every s&amp;box process for its MCP identity. Processes without a reachable pipe are skipped.
 	/// </summary>
-	static async Task<List<JsonObject>> FindInstances()
+	static async Task<List<JsonObject>> FindInstances( CancellationToken cancellation = default )
 	{
 		var instances = new List<JsonObject>();
 		foreach ( var process in Process.GetProcesses() )
@@ -274,10 +284,12 @@ internal static class Program
 			{
 				try
 				{
+					cancellation.ThrowIfCancellationRequested();
 					if ( !process.ProcessName.StartsWith( "sbox", StringComparison.OrdinalIgnoreCase ) || process.ProcessName == "sbox-cli" )
 						continue;
 
-					using var timeout = new CancellationTokenSource( 300 );
+					using var timeout = CancellationTokenSource.CreateLinkedTokenSource( cancellation );
+					timeout.CancelAfter( 300 );
 					using var pipe = CreatePipe( process );
 					await pipe.ConnectAsync( timeout.Token );
 					VerifyServer( pipe, process.Id );
@@ -286,7 +298,7 @@ internal static class Program
 					if ( JsonNode.Parse( response )?["result"] is JsonObject instance )
 						instances.Add( (JsonObject)instance.DeepClone() );
 				}
-				catch ( Exception )
+				catch ( Exception ) when ( !cancellation.IsCancellationRequested )
 				{
 					// Exited, inaccessible, not enabled or an older engine build.
 				}
