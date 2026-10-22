@@ -15,6 +15,9 @@ public partial class Material
 	/// <summary>Whether this material defines a native parameter with the given name.</summary>
 	public bool HasParameter( string name ) => native.HasParam( name );
 
+	// Made from an anonymous shader, which can't be loaded by the name the material has for it
+	internal Shader anonymousShader;
+
 	/// <summary>
 	/// Gets the material's shader
 	/// </summary>
@@ -22,11 +25,15 @@ public partial class Material
 	{
 		get
 		{
-			return Shader.Load( native.GetString( "shader", "invalid" ) );
+			return anonymousShader ?? Shader.Load( native.GetString( "shader", "invalid" ) );
 		}
 
 		set
 		{
+			if ( value is { IsAnonymous: true } )
+				throw new InvalidOperationException( "An anonymous shader can't be set by name, make the material with Material.Create( name, shader )" );
+
+			anonymousShader = null;
 			native.Set( "shader", value?.ResourcePath ?? "invalid" );
 		}
 	}
