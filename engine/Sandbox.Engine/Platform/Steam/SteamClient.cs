@@ -1,4 +1,4 @@
-﻿namespace Steamworks
+namespace Steamworks
 {
 	internal static class SteamClient
 	{
@@ -19,6 +19,7 @@
 			AddInterface<SteamFriends>();
 			AddInterface<SteamMatchmaking>();
 			AddInterface<SteamUtils>();
+			AddInterface<SteamInput>();
 
 			var user = NativeEngine.Steam.SteamUser();
 			if ( user.IsValid )

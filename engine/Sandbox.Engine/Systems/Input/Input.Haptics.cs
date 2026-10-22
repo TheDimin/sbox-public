@@ -66,7 +66,7 @@ public static partial class Input
 	}
 
 	/// <summary>
-	/// Stop all vibration events on the current controller.
+	/// Stop all vibration events and adaptive trigger resistance on the current controller.
 	/// </summary>
 	public static void StopAllHaptics()
 	{

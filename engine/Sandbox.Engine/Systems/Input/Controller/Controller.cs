@@ -153,10 +153,7 @@ internal sealed partial class Controller
 	/// </summary>
 	public void StopAllHaptics()
 	{
-		// Calling with 0 intensity stops any rumbling
-		Rumble( 0, 0, 0 );
-		RumbleTriggers( 0, 0, 0 );
-
-		ActiveHapticEffect = null;
+		StopAllVibrations();
+		StopAdaptiveTriggerResistance();
 	}
 }

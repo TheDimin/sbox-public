@@ -38,6 +38,7 @@ internal static class SdlEvents
 		{
 			polling = false;
 			WindowInput.UpdateApplicationState();
+			SdlGamepads.UpdateAdaptiveTriggers();
 		}
 	}
 

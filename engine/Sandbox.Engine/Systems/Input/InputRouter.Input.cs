@@ -56,6 +56,7 @@ internal static partial class InputRouter
 			// Reset state and do button release events
 			//
 			PressedButtons.Clear();
+			SdlGamepads.StopAdaptiveTriggers();
 
 			foreach ( var context in Contexts )
 			{
@@ -237,6 +238,9 @@ internal static partial class InputRouter
 		if ( controller is not null )
 		{
 			Log.Info( $"{controller} controller removed" );
+			// Steam can remove its virtual gamepad while the physical controller remains connected.
+			controller.StopAdaptiveTriggerResistance();
+			controller.ForgetAdaptiveTriggers();
 			Controller.All.Remove( controller );
 		}
 		else

@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace EngineTests;
 
 [TestClass, DoNotParallelize]
-public unsafe class ControllerTests
+public unsafe partial class ControllerTests
 {
 	static bool connected, sensorSupported, succeeds;
 	static int calls, sensorReads;
@@ -109,7 +109,7 @@ public unsafe class ControllerTests
 		}
 	}
 
-	[UnmanagedCallersOnly] static IntPtr Get( uint id ) => connected ? (IntPtr)123 : IntPtr.Zero;
+	[UnmanagedCallersOnly] static IntPtr Get( uint id ) => connected ? (IntPtr)id : IntPtr.Zero;
 	[UnmanagedCallersOnly] static IntPtr Name( IntPtr gamepad ) => IntPtr.Zero;
 	[UnmanagedCallersOnly] static long Type( IntPtr gamepad ) => (long)Sdl.GamepadType.PS5;
 	[UnmanagedCallersOnly] static int Led( IntPtr gamepad, byte r, byte g, byte b ) { calls++; return succeeds ? 1 : 0; }

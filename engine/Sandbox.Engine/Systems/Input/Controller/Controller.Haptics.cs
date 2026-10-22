@@ -9,7 +9,9 @@ partial class Controller
 	/// </summary>
 	public void StopAllVibrations()
 	{
-		StopAllHaptics();
+		Rumble( 0, 0, 0 );
+		RumbleTriggers( 0, 0, 0 );
+		ActiveHapticEffect = null;
 	}
 
 	internal void UpdateHaptics()

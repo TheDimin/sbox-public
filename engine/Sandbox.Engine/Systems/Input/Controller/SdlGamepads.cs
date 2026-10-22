@@ -1,4 +1,5 @@
 using NativeEngine;
+using System.Diagnostics;
 
 namespace Sandbox.Engine;
 
@@ -68,11 +69,25 @@ internal static class SdlGamepads
 		if ( !initialized ) return;
 		foreach ( var controller in Controller.All )
 		{
+			controller.StopAdaptiveTriggerResistance();
 			var gamepad = Sdl.GetGamepadFromID( (uint)controller.DeviceId );
 			if ( gamepad != IntPtr.Zero ) Sdl.CloseGamepad( gamepad );
 		}
 		Controller.All.Clear();
 		Sdl.QuitSubSystem( Sdl.InitFlags.Gamepad );
 		initialized = mappingsLoaded = false;
+	}
+
+	internal static void UpdateAdaptiveTriggers()
+	{
+		var now = Stopwatch.GetTimestamp();
+		foreach ( var controller in Controller.All )
+			controller.UpdateAdaptiveTriggerResistance( now );
+	}
+
+	internal static void StopAdaptiveTriggers()
+	{
+		foreach ( var controller in Controller.All )
+			controller.StopAdaptiveTriggerResistance();
 	}
 }

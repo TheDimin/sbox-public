@@ -179,6 +179,7 @@ internal static class EngineLoop
 		// Expire any unused resources
 		//
 		NativeResourceCache.Tick();
+		Sandbox.Navigation.NavMesh.TrimGenerationPools();
 		Game.Resources.PruneWeakIndex();
 		if ( !Application.IsHeadless )
 		{
