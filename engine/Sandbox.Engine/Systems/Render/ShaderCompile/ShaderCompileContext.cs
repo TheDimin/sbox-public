@@ -9,6 +9,8 @@ class ShaderCompileContext : IDisposable
 {
 	private IShaderCompileContext _native;
 	private string _maskedSource;
+	private readonly object disposeLock = new();
+	private bool disposed;
 
 	internal ShaderCompileContext( IShaderCompileContext shaderCompileContext )
 	{
@@ -23,8 +25,13 @@ class ShaderCompileContext : IDisposable
 
 	public void Dispose()
 	{
-		_native.Delete();
-		_native = default;
+		lock ( disposeLock )
+		{
+			if ( disposed ) return;
+			disposed = true;
+			_native.Delete();
+			_native = default;
+		}
 
 		GC.SuppressFinalize( this );
 	}

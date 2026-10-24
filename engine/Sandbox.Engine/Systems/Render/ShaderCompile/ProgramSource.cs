@@ -106,7 +106,7 @@ class ProgramSource
 		{
 			try
 			{
-				if ( errors > 0 )
+				if ( Volatile.Read( ref errors ) > 0 )
 					return;
 
 				if ( token.IsCancellationRequested )
@@ -132,25 +132,13 @@ class ProgramSource
 			}
 			catch ( System.Exception e )
 			{
+				Interlocked.Increment( ref errors );
 				Log.Warning( e );
 			}
 		};
 
-		if ( options.SingleThreaded )
-		{
-			foreach ( var d in combos )
-			{
-				await Task.Run( () => compileCombo( d ), token );
-			}
-		}
-		else
-		{
-			var parallel = new ParallelOptions { MaxDegreeOfParallelism = threads };
-			await Task.Run( () =>
-			{
-				Parallel.ForEach( combos, parallel, compileCombo );
-			}, token );
-		}
+		await ShaderCompilerWorkers.Pool.RunAsync( totalCombos, threads,
+			i => compileCombo( combos[i] ), token, context.Dispose );
 
 		token.ThrowIfCancellationRequested();
 
@@ -172,7 +160,7 @@ class ProgramSource
 		}
 
 		// One of our compiles failed, so just bail
-		if ( allCompiles.Any( x => !x.IsSuccess ) )
+		if ( errors > 0 || allCompiles.Count != totalCombos || allCompiles.Any( x => !x.IsSuccess ) )
 		{
 			return false;
 		}

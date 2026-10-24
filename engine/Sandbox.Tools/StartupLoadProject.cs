@@ -370,13 +370,16 @@ static class StartupLoadProject
 		options.SingleThreaded = false;
 		options.ConsoleOutput = false;
 
-		FastTimer timer = FastTimer.StartNew();
+		int reused = 0, compiled = 0, failed = 0;
 		for ( int i = 0; i < gr.Length; i++ )
 		{
-			EditorSplashScreen.SetMessage( $"Compiling shader {i + 1}/{gr.Length} {gr[i].RelativePath}" );
+			EditorSplashScreen.SetMessage( $"Checking shader {i + 1}/{gr.Length} {gr[i].RelativePath}" );
 			StepProgress( (float)i / gr.Length );
 
 			var result = await ShaderCompile.Compile( gr[i].AbsolutePath, gr[i].RelativePath, options, default );
+			if ( !result.Success ) failed++;
+			else if ( result.Skipped ) reused++;
+			else compiled++;
 			if ( result.Success && !result.Skipped )
 			{
 				// Resident shaders may still have combo offsets from before the compiled file was rewritten.
@@ -384,10 +387,10 @@ static class StartupLoadProject
 				ConsoleSystem.Run( $"mat_reloadshaders \"{gr[i].RelativePath}\"" );
 			}
 		}
-		if ( sw.Elapsed.TotalSeconds > 2 )
-		{
-			Log.Info( $"Compiling shaders took {sw.Elapsed.TotalSeconds:0.000}s" );
-		}
+		Bootstrap.StartupTiming?.SetValue( "Shaders.Reused", reused );
+		Bootstrap.StartupTiming?.SetValue( "Shaders.Compiled", compiled );
+		Bootstrap.StartupTiming?.SetValue( "Shaders.Failed", failed );
+		Log.Info( $"Shader checks took {sw.Elapsed.TotalSeconds:0.000}s: {reused} reused, {compiled} compiled, {failed} failed" );
 	}
 
 	static async Task CompileAllAssets()

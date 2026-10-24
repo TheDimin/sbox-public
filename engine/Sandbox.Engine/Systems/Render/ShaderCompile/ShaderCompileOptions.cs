@@ -9,7 +9,8 @@ public struct ShaderCompileOptions
 	public bool ForceRecompile { get; set; }
 
 	/// <summary>
-	/// Most combos to compile at once. 0 picks from the core count and free memory.
+	/// Most combos to compile at once in this batch. 0 uses the process worker limit.
+	/// The fixed compiler pool and available memory can reduce this value.
 	/// </summary>
 	public int MaxThreads { get; set; }
 

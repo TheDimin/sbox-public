@@ -1,4 +1,4 @@
-﻿using System.Buffers.Binary;
+using System.Buffers.Binary;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 
@@ -17,7 +17,7 @@ class ShaderSource
 
 	public bool IsOutOfDate { get; set; }
 
-	public void Read()
+	public void Read( bool checkCompiled = true )
 	{
 		var text = System.IO.File.ReadAllLines( AbsolutePath );
 		ReadPrograms( text );
@@ -28,7 +28,9 @@ class ShaderSource
 			p.IsOutOfDate = true;
 		}
 
-		CheckOutOfDate();
+		IsOutOfDate = true;
+		if ( checkCompiled )
+			CheckOutOfDate();
 	}
 
 	/// <summary>
@@ -53,7 +55,7 @@ class ShaderSource
 		}
 
 		// Needs a compile
-		IsOutOfDate = Programs.Any( x => x.IsOutOfDate );
+		IsOutOfDate = !loaded || Programs.Any( x => x.IsOutOfDate );
 	}
 
 	/// <summary>

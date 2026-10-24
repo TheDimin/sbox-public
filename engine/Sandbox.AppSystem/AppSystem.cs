@@ -181,6 +181,9 @@ public class AppSystem
 
 	public virtual void Shutdown()
 	{
+		// Stop queued shader work and join native calls before engine resources are released.
+		Engine.Shaders.ShaderCompilerWorkers.Shutdown();
+
 		startupWindow?.Dispose();
 		startupWindow = null;
 

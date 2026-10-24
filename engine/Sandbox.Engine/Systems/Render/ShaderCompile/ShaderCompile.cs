@@ -5,6 +5,7 @@ namespace Sandbox.Engine.Shaders;
 public static class ShaderCompile
 {
 	static IVfx native;
+	static readonly ShaderCompilerCache compilerCache;
 
 	/// <summary>
 	/// The results of a shader compile
@@ -86,6 +87,13 @@ public static class ShaderCompile
 		var createinterface = NativeEngine.CreateInterface.GetCreateInterface( "filesystem_stdio.dll" );
 
 		native.Init( createinterface );
+
+		// Snapshot the installed compiler on first use. Do not pick up a later download's
+		// identity while this process continues to use its loaded libraries.
+		var gameDirectory = EngineFileSystem.Root.GetFullPath( "/" );
+		compilerCache = new ShaderCompilerCache(
+			System.IO.Path.Combine( gameDirectory, ".source2", "shadercompiler" ),
+			ShaderCompilerIdentity.Read( gameDirectory ) );
 	}
 
 	/// <summary>
@@ -97,7 +105,14 @@ public static class ShaderCompile
 		shader.AbsolutePath = absoluteFilePath;
 		shader.RelativePath = relativeFilePath;
 
-		shader.Read();
+		var compiledPath = absoluteFilePath + "_c";
+		var compilerMatches = await compilerCache.IsCurrentAsync( compiledPath, token );
+		// Unknown compiler provenance requires one compile. Do not stamp an old output as
+		// current, or let the native combo cache hide a compiler change.
+		if ( !compilerMatches )
+			compileOptions.ForceRecompile = true;
+
+		shader.Read( checkCompiled: compilerMatches );
 
 		bool dumping = !string.IsNullOrEmpty( compileOptions.SpirvDumpPath );
 
@@ -115,6 +130,17 @@ public static class ShaderCompile
 			return results;
 
 		await ShaderCompiledFile.WriteAsync( shader.AbsolutePath + "_c", results.CompiledShader, token );
+
+		try
+		{
+			await compilerCache.RecordAsync( compiledPath, results.CompiledShader, token );
+		}
+		catch ( Exception e ) when ( e is System.IO.IOException or UnauthorizedAccessException )
+		{
+			// The shader was published successfully. A missing record just requires another
+			// compile next time; it must never make an unverified output a cache hit.
+			Log.Warning( e, $"Could not record shader compiler checksums for {absoluteFilePath}" );
+		}
 
 		return results;
 	}
@@ -248,32 +274,20 @@ public static class ShaderCompile
 
 	internal static CompiledCombo CompileSingleCombo( Shader vfx, ProgramSource program, ulong staticCombo, ulong dynamicCombo, ShaderCompileContext context, bool useShaderCache )
 	{
+		if ( !ShaderCompilerWorkers.Pool.IsWorker )
+			throw new InvalidOperationException( "Native shader compilation requires a dedicated compiler worker." );
+
 		var result = native.CompileShader( context.GetNative(), staticCombo, dynamicCombo, vfx.native, NativeEngine.VfxCompileTarget_t.SM_6_0_VULKAN, program.ProgramType, useShaderCache, 0 );
 		return new CompiledCombo( result, program, staticCombo, dynamicCombo );
 	}
 
 	/// <summary>
-	/// Free memory each combo thread needs. A full compile peaks around 9 GB on 26 threads, about a third
-	/// of a gig each, so this leaves plenty of headroom for heavier shaders.
-	/// </summary>
-	const long MemoryPerComboThread = 768L * 1024 * 1024;
-
-	/// <summary>
-	/// How many combos to compile at once: <see cref="ShaderCompileOptions.MaxThreads"/> if set, otherwise
-	/// one per core, cut back if free memory can't cover that many. Machines with the memory for their
-	/// cores get one per core as before; big shared build boxes stop running out.
+	/// Batch concurrency, bounded by the process-lifetime worker count and available memory.
+	/// Explicit options can reduce this limit, but cannot create more native compiler sessions.
 	/// </summary>
 	internal static int ComboThreads( ShaderCompileOptions options )
 	{
-		if ( options.MaxThreads > 0 )
-			return options.MaxThreads;
-
-		var threads = Environment.ProcessorCount;
-
-		if ( SystemMemory.AvailablePhysicalBytes() is long available )
-			threads = (int)Math.Min( threads, available / MemoryPerComboThread );
-
-		return Math.Max( 1, threads );
+		return ShaderCompilerWorkers.Concurrency( options, Environment.ProcessorCount, SystemMemory.AvailablePhysicalBytes() );
 	}
 
 	internal static ShaderCompileContext GetSharedContext( ShaderProgramType programType )
