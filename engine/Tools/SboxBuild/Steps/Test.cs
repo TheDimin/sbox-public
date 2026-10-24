@@ -76,6 +76,11 @@ internal partial class Test( bool noBuild = true, string filter = null )
 			string engineDir = Path.Combine( rootDir, "engine" );
 			string gameDir = Path.Combine( rootDir, "game" );
 
+			// Test shards share project references and intermediate files. Build once before
+			// starting them, otherwise concurrent compilers can overwrite the same assembly.
+			if ( !noBuild && !Utility.RunDotnetCommand( engineDir, "build -c Release Sandbox-Engine.slnx -p:TreatWarningsAsErrors=true" ) )
+				return ExitCode.Failure;
+
 			Log.Info( $"Running {Projects.Length} test processes at the same time..." );
 
 			var tasks = Projects
@@ -129,7 +134,7 @@ internal partial class Test( bool noBuild = true, string filter = null )
 		var csproj = Path.Combine( "Tests", project.Name, $"{project.Name}.csproj" );
 
 		// --no-build: BuildManaged already compiled all projects in Sandbox-Engine.slnx (including test projects).
-		var noBuildFlag = noBuild ? " --no-build" : string.Empty;
+		const string noBuildFlag = " --no-build";
 		var filters = new[] { filter, project.ShardFilter }.Where( x => !string.IsNullOrEmpty( x ) ).Select( x => $"({x})" ).ToArray();
 		var filterFlag = filters.Length == 0 ? string.Empty : $" --filter \"{string.Join( "&", filters )}\"";
 		// Run settings after the --, overriding the assembly's [Parallelize]
