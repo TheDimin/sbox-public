@@ -277,7 +277,6 @@ internal static class Bootstrap
 	{
 		try
 		{
-			Material.Preload();
 			using ( var _ = StartupTiming?.ScopeTimer( "Material Preload" ) )
 				Material.Preload();
 			GameWindow.Current?.UpdateStartupProgress( 0.55f, "Loading engine assemblies" );

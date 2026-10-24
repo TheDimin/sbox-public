@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
 
 namespace Sandbox;
@@ -208,14 +208,9 @@ public sealed partial class Compiler : IDisposable
 	internal async Task<IReadOnlyList<PortableExecutableReference>> BuildReferencesAsync( CodeArchive archive )
 	{
 		var output = new List<PortableExecutableReference>( FrameworkReferences.All.Values );
-		var foundHash = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
 
 		foreach ( var name in archive.References )
 		{
-			// We already got it from a package reference
-			if ( foundHash.Contains( name ) )
-				continue;
-
 			// FindReferenceAsync throws if not found
 
 			if ( await Group.FindReferenceAsync( name, this ) is { } mr )

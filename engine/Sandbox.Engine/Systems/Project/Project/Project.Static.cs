@@ -1,4 +1,4 @@
-﻿using Sandbox.Engine;
+using Sandbox.Engine;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -44,7 +44,8 @@ public partial class Project
 		CompileGroup.PrintErrorsInConsole = !Application.IsEditor;
 		CompileGroup.OnCompileStarted = OnCompileStarted;
 		CompileGroup.OnCompileFinished = OnCompileFinished;
-		CompileGroup.OnCompileSuccess = OnCompileSuccess;
+		var group = CompileGroup;
+		group.OnCompileSuccessAsync = () => OnCompileSuccessAsync( group );
 	}
 
 	internal static void RebuildCompilers()
@@ -56,7 +57,8 @@ public partial class Project
 		CompileGroup.PrintErrorsInConsole = !Application.IsEditor;
 		CompileGroup.OnCompileStarted = OnCompileStarted;
 		CompileGroup.OnCompileFinished = OnCompileFinished;
-		CompileGroup.OnCompileSuccess = OnCompileSuccess;
+		var group = CompileGroup;
+		group.OnCompileSuccessAsync = () => OnCompileSuccessAsync( group );
 
 		foreach ( var proj in All )
 		{

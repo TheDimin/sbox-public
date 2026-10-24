@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using System.Collections.Immutable;
@@ -88,15 +88,21 @@ partial class Compiler
 		{
 			// Do the expensive archive building on a worker thread
 
-			var archive = await Task.Run( () => BuildArchive( output ) );
+			var razorTrees = await Task.Run( () =>
+			{
+				var archive = BuildArchive( output );
+				// Razor generation needs source and configuration, not compiled references.
+				// Prepare it while the other compilers are still building their dependencies.
+				return ProcessRazorFiles( archive, output );
+			} );
 
 			// Build a list of references, waiting for other compilers to finish if needed
 
-			var refs = await BuildReferencesAsync( archive );
+			var refs = await BuildReferencesAsync( output.Archive );
 
 			// Actually compile, again on a worker thread since it's expensive
 
-			await Task.Run( () => BuildInternal( refs, output ) );
+			await Task.Run( () => BuildInternal( refs, output, razorTrees ) );
 		}
 		catch ( System.Exception e )
 		{
@@ -161,7 +167,7 @@ partial class Compiler
 		return archive;
 	}
 
-	void BuildInternal( IReadOnlyList<PortableExecutableReference> refs, CompilerOutput output )
+	void BuildInternal( IReadOnlyList<PortableExecutableReference> refs, CompilerOutput output, List<SyntaxTree> razorTrees )
 	{
 		var archive = output.Archive;
 		var releaseMode = archive.Configuration.ReleaseMode == ReleaseMode.Release;
@@ -186,7 +192,7 @@ partial class Compiler
 		List<SyntaxTree> inputSyntaxTrees =
 		[
 			.. archive.SyntaxTrees, // from source files
-			.. ProcessRazorFiles(archive, output) // processed razor files
+			.. razorTrees // processed razor files
 		];
 
 		List<SyntaxTree> modifiedSyntaxTrees;

@@ -1,4 +1,4 @@
-﻿using NativeEngine;
+using NativeEngine;
 using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
@@ -444,7 +444,6 @@ public static partial class AssetSystem
 
 		var orphans = All
 						.Where( x => x.IsTrivialChild )
-						.Where( x => !x.IsDeleted )
 						.Where( x => x.AssetType == AssetType.Texture ) // Note - gib models can be trivial children too, but I don't want to push my luck
 						.Where( x => transientRoot is not null && x.AbsolutePath.StartsWith( transientRoot, StringComparison.OrdinalIgnoreCase ) )
 						.ToArray();

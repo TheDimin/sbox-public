@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 
@@ -122,8 +122,6 @@ partial class Compiler
 
 			if ( contents is null ) return;
 
-			var hash = contents.FastHash64();
-
 			lock ( targetArchive.FileMap )
 			{
 				targetArchive.FileMap[physicalPath] = localPath;
@@ -140,46 +138,41 @@ partial class Compiler
 				{
 					targetArchive.AdditionalFiles.Add( new CodeArchive.AdditionalFile( contents, localPath ) );
 				}
-				targetArchive.FileHashMap[localPath] = hash;
+				targetArchive.FileHashMap[localPath] = contents.FastHash64();
 			}
 
 			if ( localPath.EndsWith( ".cs", StringComparison.OrdinalIgnoreCase ) )
 			{
-				var sourceText = SourceText.From( contents, Encoding.UTF8 );
+				// Parse the effective source once. Its hash also tracks changes to the
+				// replacement directive, including edits to the configuration dictionary.
+				var directive = GetReplacementDirective( localPath );
+				if ( !string.IsNullOrEmpty( directive ) )
+				{
+					contents = $"#if {directive}\r\n{contents}\r\n#endif";
+				}
+				var hash = contents.FastHash64();
 
-				// Get base parse options
-				var fileOptions = options;
-
-				// Create syntax tree with file-specific options
 				SyntaxTree tree;
-				if ( oldTrees?.TryGetValue( physicalPath, out var existing ) ?? false )
+				if ( (oldTrees?.TryGetValue( physicalPath, out var existing ) ?? false)
+					&& existing.Options.Equals( options ) )
 				{
 					if ( incrementalState.FileHashMap.TryGetValue( physicalPath, out var oldHash ) && oldHash == hash )
 					{
-						// unchanged since last compile, reuse the existing tree
+						// SetConfiguration resets incremental state, including when the
+						// disabled-trivia setting changes. Reuse the final tree unchanged.
 						tree = existing;
 					}
 					else
 					{
-						// file content changed, create a new tree with the modified text
-						tree = existing.WithChangedText( sourceText );
+						tree = existing.WithChangedText( SourceText.From( contents, Encoding.UTF8 ) );
+
+						if ( _config.StripDisabledTextTrivia )
+							tree = StripDisabledTextTrivia( tree );
 					}
 				}
 				else
 				{
-					tree = CSharpSyntaxTree.ParseText( text: sourceText, options: fileOptions, path: physicalPath );
-
-					if ( _config.StripDisabledTextTrivia )
-						tree = StripDisabledTextTrivia( tree );
-				}
-
-				// Handle replacements if needed
-				var directive = GetReplacementDirective( localPath );
-				if ( !string.IsNullOrEmpty( directive ) )
-				{
-					var wrappedText = $"#if {directive}\r\n{sourceText}\r\n#endif";
-					var wrappedSourceText = SourceText.From( wrappedText, Encoding.UTF8 );
-					tree = CSharpSyntaxTree.ParseText( wrappedSourceText, fileOptions, physicalPath );
+					tree = CSharpSyntaxTree.ParseText( text: SourceText.From( contents, Encoding.UTF8 ), options: options, path: physicalPath );
 
 					if ( _config.StripDisabledTextTrivia )
 						tree = StripDisabledTextTrivia( tree );

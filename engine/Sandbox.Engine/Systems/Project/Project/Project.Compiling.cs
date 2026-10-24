@@ -382,45 +382,46 @@ public partial class Project
 		return CompileGroup.BuildResult.Diagnostics;
 	}
 
-	private static void OnCompileSuccess()
+	private static async Task OnCompileSuccessAsync( CompileGroup group )
 	{
-		var grouped = CompileGroup.BuildResult.Output.GroupBy( x => Project.FindByCompiler( x.Compiler ) );
+		if ( group != CompileGroup )
+			return;
 
-		foreach ( var grouping in grouped )
+		// Resolve projects before yielding, and retain the existing project/output order.
+		var grouped = group.BuildResult.Output.GroupBy( x => Project.FindByCompiler( x.Compiler ) )
+			.Where( x => x.Key is not null ).ToArray();
+		var outputs = grouped.SelectMany( x => x.Where( output => output.Successful ) ).ToArray();
+		var projects = grouped.SelectMany( x => x.Select( output => (Output: output, Project: x.Key) ) )
+			.ToDictionary( x => x.Output, x => x.Project );
+
+		await CompilerOutput.PublishArchivesAsync( outputs, ( assembly, cll ) =>
 		{
-			var project = grouping.Key;
-			if ( project is null ) continue;
+			var project = projects[assembly];
+			// A project can be removed or its compiler replaced while the workers run.
+			// Do not publish an old output into the new project's files or a disposed filesystem.
+			if ( group != CompileGroup || (project.Compiler != assembly.Compiler && project.EditorCompiler != assembly.Compiler) )
+				return;
 
-			foreach ( var assembly in grouping )
+			project.AssemblyFileSystem.CreateDirectory( "/.bin" );
+			project.AssemblyFileSystem.WriteAllBytes( $"/.bin/{assembly.Compiler.AssemblyName}.dll", assembly.AssemblyData );
+			project.AssemblyFileSystem.WriteAllBytes( $"/.bin/{assembly.Compiler.AssemblyName}.cll", cll );
+
+			if ( project.CacheAssemblies )
 			{
-				if ( !assembly.Successful )
+				try
 				{
-					continue;
+					string binPath = Path.Combine( project.GetRootPath(), ".sbox", "bin" );
+					Directory.CreateDirectory( binPath );
+
+					File.WriteAllBytes( Path.Combine( binPath, $"{assembly.Compiler.AssemblyName}.dll" ), assembly.AssemblyData );
+					File.WriteAllBytes( Path.Combine( binPath, $"{assembly.Compiler.AssemblyName}.cll" ), cll );
 				}
-
-				var cll = assembly.Archive.Serialize();
-
-				project.AssemblyFileSystem.CreateDirectory( "/.bin" );
-				project.AssemblyFileSystem.WriteAllBytes( $"/.bin/{assembly.Compiler.AssemblyName}.dll", assembly.AssemblyData );
-				project.AssemblyFileSystem.WriteAllBytes( $"/.bin/{assembly.Compiler.AssemblyName}.cll", cll );
-
-				if ( project.CacheAssemblies )
+				catch ( Exception ex )
 				{
-					try
-					{
-						string binPath = Path.Combine( project.GetRootPath(), ".sbox", "bin" );
-						Directory.CreateDirectory( binPath );
-
-						File.WriteAllBytes( Path.Combine( binPath, $"{assembly.Compiler.AssemblyName}.dll" ), assembly.AssemblyData );
-						File.WriteAllBytes( Path.Combine( binPath, $"{assembly.Compiler.AssemblyName}.cll" ), cll );
-					}
-					catch ( Exception ex )
-					{
-						Log.Warning( $"Failed to write cached assembly for project {project.Config.FullIdent}: {ex.Message}" );
-					}
+					Log.Warning( $"Failed to write cached assembly for project {project.Config.FullIdent}: {ex.Message}" );
 				}
 			}
-		}
+		} );
 	}
 
 	/// <summary>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Reflection;
 
@@ -186,6 +186,18 @@ public class AssetType
 
 	internal void Init()
 	{
+		// Native scans initialize every registered type again. A custom type is already
+		// bound to its managed resource and has its own icons; do not replace either
+		// with the native fallback. UpdateCustomTypes refreshes it after type changes.
+		if ( IsGameResource )
+			return;
+
+		BindNativeType();
+		GenerateNativeIcons();
+	}
+
+	private void BindNativeType()
+	{
 		if ( FriendlyName == "Model" )
 		{
 			Model = this;
@@ -245,7 +257,10 @@ public class AssetType
 			ImageFile = this;
 			ResourceType = typeof( Texture );
 		}
+	}
 
+	private void GenerateNativeIcons()
+	{
 		IconPathLarge ??= "assettypes/dmx_lg.png";
 		IconPathSmall ??= "assettypes/dmx_sm.png";
 		Icon256 = Pixmap.FromFile( IconPathLarge ).Resize( 256, 256 );

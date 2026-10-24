@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using System.Threading;
 
 namespace Sandbox;
@@ -63,6 +63,12 @@ public class CompileGroup : IDisposable
 	/// Called when a compile completes successfully. Can access the result from BuildResult. 
 	/// </summary>
 	public Action OnCompileSuccess { get; set; }
+
+	/// <summary>
+	/// Prepare and publish local project outputs before the synchronous success notification.
+	/// The group remains building until publication completes.
+	/// </summary>
+	internal Func<Task> OnCompileSuccessAsync { get; set; }
 
 	/// <summary>
 	/// All created compilers.
@@ -241,17 +247,6 @@ public class CompileGroup : IDisposable
 
 		BuildResult = result;
 
-		if ( !NeedsBuild )
-		{
-			// give the impression that everything is fine
-			result.Failed = false;
-			BuildResult = result;
-
-			IsBuilding = false;
-			log.Trace( $"BuildAsync Finish - no build needed" );
-			return true;
-		}
-
 		try
 		{
 			var timer = Stopwatch.StartNew();
@@ -346,6 +341,18 @@ public class CompileGroup : IDisposable
 			timer.Restart();
 
 			log.Trace( $"OnCompileSuccess" );
+			if ( OnCompileSuccessAsync is { } publish )
+			{
+				try
+				{
+					await publish();
+				}
+				catch ( Exception e )
+				{
+					// Match the existing success callback's exception handling.
+					Log.Warning( e, e.Message );
+				}
+			}
 			OnCompileSuccess?.InvokeWithWarning();
 
 			return true;

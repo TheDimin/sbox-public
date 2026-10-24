@@ -1,4 +1,4 @@
-﻿using NativeEngine;
+using NativeEngine;
 using System;
 using System.IO;
 
@@ -491,11 +491,6 @@ public abstract partial class Asset
 		}
 
 		var data = System.IO.File.ReadAllBytes( compiledFilePath );
-		if ( data == null )
-		{
-			Log.Warning( $"Tried to load {this} but couldn't read file" );
-			return false;
-		}
 
 		if ( !obj.TryLoadFromData( data ) )
 		{

@@ -100,3 +100,8 @@ engine/TestResults/
 /game/screenshots
 /game/tools
 /game/aftermath_dumps
+
+# Local validation output and generated runtime files
+/Temp/
+/game/bin/managed/
+/game/core/vma_memdump*.json
