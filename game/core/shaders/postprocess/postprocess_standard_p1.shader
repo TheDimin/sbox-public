@@ -92,7 +92,8 @@ PS
     float4 MotionBlurEx(float2 texCoords)
     {
         // Get the velocity vector for the current texture coordinates
-        float2 velocityVector = GetCameraVelocityVector(texCoords);
+        // Scale the displacement, rather than always sampling a full frame of motion.
+        float2 velocityVector = lerp( texCoords, GetCameraVelocityVector( texCoords ), flMotionBlurScale );
 
         // Initialize the color accumulator
         float4 color = float4(0.0f, 0.0f, 0.0f, 0.0f);
