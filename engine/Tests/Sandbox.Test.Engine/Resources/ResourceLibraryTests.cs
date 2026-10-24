@@ -82,7 +82,7 @@ public class ResourceLibraryTests
 		{
 			var path = $"resource-index-collision/{i:x8}.resource";
 			var hash = path.FastHash64();
-			var truncated = unchecked( (int)hash );
+			var truncated = unchecked((int)hash);
 
 			if ( hashes.TryGetValue( truncated, out var previous ) && previous.Hash != hash )
 				return (previous.Path, path);

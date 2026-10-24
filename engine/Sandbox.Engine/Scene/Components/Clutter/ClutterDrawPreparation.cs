@@ -8,7 +8,7 @@ namespace Sandbox.Clutter;
 /// </summary>
 public interface IClutterDrawPreparationProvider
 {
-    IClutterDrawPreparation Create( Model model, int lod, int capacity, GpuBuffer<GpuInstanceTransform> visibleTransforms );
+	IClutterDrawPreparation Create( Model model, int lod, int capacity, GpuBuffer<GpuInstanceTransform> visibleTransforms );
 }
 
 /// <summary>
@@ -18,13 +18,13 @@ public interface IClutterDrawPreparationProvider
 /// </summary>
 public interface IClutterDrawPreparation : IDisposable
 {
-    /// <summary>Record preparation after culling and the visible-transform read transition.</summary>
-    void RecordBeforeDraw( CommandList commands );
+	/// <summary>Record preparation after culling and the visible-transform read transition.</summary>
+	void RecordBeforeDraw( CommandList commands );
 
-    /// <summary>Record removal of draw-local bindings before the next LOD.</summary>
-    void RecordAfterDraw( CommandList commands );
+	/// <summary>Record removal of draw-local bindings before the next LOD.</summary>
+	void RecordAfterDraw( CommandList commands );
 
-    /// <summary>Clear transient draw state even when command playback throws. Runs in the render block.
-    /// This must not access owned GPU resources and must remain safe after Dispose.</summary>
-    void ResetDrawState();
+	/// <summary>Clear transient draw state even when command playback throws. Runs in the render block.
+	/// This must not access owned GPU resources and must remain safe after Dispose.</summary>
+	void ResetDrawState();
 }

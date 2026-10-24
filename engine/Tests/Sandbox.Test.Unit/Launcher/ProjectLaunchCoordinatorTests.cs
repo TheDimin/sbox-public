@@ -49,7 +49,7 @@ public class ProjectLaunchCoordinatorTests
 	public async Task OwnerExitLetsAWaitingClientStartAReplacement()
 	{
 		using var fixture = new Fixture();
-		Task<bool> Missing( CancellationToken token ) => Task.FromResult( false );
+		static Task<bool> Missing( CancellationToken token ) => Task.FromResult( false );
 		var owner = await fixture.Join( Missing );
 		try
 		{

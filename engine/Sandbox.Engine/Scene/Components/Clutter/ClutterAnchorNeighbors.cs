@@ -65,27 +65,27 @@ internal static class ClutterAnchorNeighbors
 				// taking only the first budget entries would depend on storage order.
 				int candidateCount = 0;
 				for ( int z = -1; z <= 1; ++z )
-				for ( int y = -1; y <= 1; ++y )
-				for ( int x = -1; x <= 1; ++x )
-					if ( cells.TryGetValue( (cell.X + x, cell.Y + y, cell.Z + z), out var candidates ) ) candidateCount += candidates.Count;
+					for ( int y = -1; y <= 1; ++y )
+						for ( int x = -1; x <= 1; ++x )
+							if ( cells.TryGetValue( (cell.X + x, cell.Y + y, cell.Z + z), out var candidates ) ) candidateCount += candidates.Count;
 				if ( candidateCount > CandidateBudget ) continue;
 				for ( int z = -1; z <= 1; ++z )
-				for ( int y = -1; y <= 1; ++y )
-				for ( int x = -1; x <= 1; ++x )
-				{
-					if ( !cells.TryGetValue( (cell.X + x, cell.Y + y, cell.Z + z), out var entries ) ) continue;
-					foreach ( var anchor in entries )
-					{
-						float distance = (roots[anchor] - roots[id]).LengthSquared;
-						if ( !float.IsFinite( distance ) || distance > cellWidth * cellWidth ) continue;
-						var candidate = (Distance: distance, Hash: PlacementHash( roots[anchor] ), Id: anchor);
-						int position = 0;
-						while ( position < nearest.Count && nearest[position].CompareTo( candidate ) <= 0 ) ++position;
-						if ( position >= NeighborCount ) continue;
-						nearest.Insert( position, candidate );
-						if ( nearest.Count > NeighborCount ) nearest.RemoveAt( NeighborCount );
-					}
-				}
+					for ( int y = -1; y <= 1; ++y )
+						for ( int x = -1; x <= 1; ++x )
+						{
+							if ( !cells.TryGetValue( (cell.X + x, cell.Y + y, cell.Z + z), out var entries ) ) continue;
+							foreach ( var anchor in entries )
+							{
+								float distance = (roots[anchor] - roots[id]).LengthSquared;
+								if ( !float.IsFinite( distance ) || distance > cellWidth * cellWidth ) continue;
+								var candidate = (Distance: distance, Hash: PlacementHash( roots[anchor] ), Id: anchor);
+								int position = 0;
+								while ( position < nearest.Count && nearest[position].CompareTo( candidate ) <= 0 ) ++position;
+								if ( position >= NeighborCount ) continue;
+								nearest.Insert( position, candidate );
+								if ( nearest.Count > NeighborCount ) nearest.RemoveAt( NeighborCount );
+							}
+						}
 				for ( int index = 0; index < nearest.Count; ++index ) result[id * NeighborCount + index] = (uint)nearest[index].Id;
 			}
 		}

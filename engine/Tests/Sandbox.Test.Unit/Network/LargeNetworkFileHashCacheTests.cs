@@ -33,7 +33,7 @@ public class LargeNetworkFileHashCacheTests
 		var first = new LargeNetworkFiles( "large-first", cache );
 		var firstHit = true;
 
-		Assert.IsTrue( first.AddFile( _files, "large.vtex_c", false, (_, _, hit) => firstHit = hit ) );
+		Assert.IsTrue( first.AddFile( _files, "large.vtex_c", false, ( _, _, hit ) => firstHit = hit ) );
 		Assert.IsFalse( firstHit );
 		Assert.IsTrue( first.TryGetFileInfo( "large.vtex_c", out var firstInfo ) );
 		Assert.AreEqual( new LargeNetworkFiles.LargeFileInfo( 6, _files.GetCrc( "large.vtex_c" ) ), firstInfo );
@@ -43,7 +43,7 @@ public class LargeNetworkFileHashCacheTests
 		var second = new LargeNetworkFiles( "large-second", reloaded );
 		var secondHit = false;
 
-		Assert.IsTrue( second.AddFile( _files, "large.vtex_c", false, (_, _, hit) => secondHit = hit ) );
+		Assert.IsTrue( second.AddFile( _files, "large.vtex_c", false, ( _, _, hit ) => secondHit = hit ) );
 		Assert.IsTrue( secondHit );
 		Assert.IsTrue( second.TryGetFileInfo( "large.vtex_c", out var secondInfo ) );
 		Assert.AreEqual( firstInfo, secondInfo );
@@ -59,7 +59,7 @@ public class LargeNetworkFileHashCacheTests
 		var files = new LargeNetworkFiles( "large-forced", reloaded );
 		var cacheHit = true;
 
-		Assert.IsTrue( files.AddFile( _files, "large.vtex_c", true, (_, _, hit) => cacheHit = hit ) );
+		Assert.IsTrue( files.AddFile( _files, "large.vtex_c", true, ( _, _, hit ) => cacheHit = hit ) );
 		Assert.IsFalse( cacheHit );
 		Assert.IsTrue( files.TryGetFileInfo( "large.vtex_c", out var info ) );
 		Assert.AreEqual( new LargeNetworkFiles.LargeFileInfo( 6, _files.GetCrc( "large.vtex_c" ) ), info );
