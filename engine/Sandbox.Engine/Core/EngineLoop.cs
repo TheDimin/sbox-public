@@ -100,7 +100,7 @@ internal static class EngineLoop
 
 		var idleMs = framePacer.Wait( FrameRateLimit.FramesPerSecond );
 		PerformanceStats.Timings.Idle.AddMilliseconds( idleMs );
-		PerfHub.SampleFrame( frameTimer.ElapsedMilliSeconds, idleMs );
+		DevTools.SampleFrame( frameTimer.ElapsedMilliSeconds, idleMs );
 
 		previousTime = time;
 	}
@@ -241,7 +241,7 @@ internal static class EngineLoop
 		}
 
 		// After the game and menu UI so it draws over them. Outside the UI scope so it doesn't count as the game's UI.
-		PerfHub.Simulate();
+		DevTools.Simulate();
 
 		if ( !Application.IsHeadless )
 		{

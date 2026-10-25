@@ -1,4 +1,5 @@
 using NativeEngine;
+using Sandbox.Diagnostics;
 using Sandbox.Modals;
 
 namespace Sandbox.Engine;
@@ -11,7 +12,13 @@ internal static partial class InputRouter
 	{
 		SetButtonState( button, down );
 
-		var mouse = Contexts.FirstOrDefault( x => x.MouseState != InputContext.InputState.Ignore );
+		var modifiers = GetCurrentModifiers();
+
+		// Dev tools docked in the window take the clicks on them, and the release of a click that started there
+		if ( DevTools.GameDockMouseButton( button, down, MouseCursorPosition, modifiers ) )
+			return;
+
+		var mouse = MouseTarget();
 
 		// if this was likely the click that made the window active - and we're not in UI mode
 		// then ignore it.. because we don't want people shooting guns every time they re-activate
@@ -21,8 +28,6 @@ internal static partial class InputRouter
 			if ( mouse is null || mouse.MouseState != InputContext.InputState.UI )
 				return;
 		}
-
-		var modifiers = GetCurrentModifiers();
 
 		if ( mouse is not null )
 		{
@@ -76,7 +81,7 @@ internal static partial class InputRouter
 		MouseCursorPosition += delta;
 
 		// game or mouse capture
-		var mouse = Contexts.FirstOrDefault( x => x.MouseState != InputContext.InputState.Ignore );
+		var mouse = MouseTarget();
 		if ( mouse is not null )
 		{
 			mouse.In_MousePosition( MouseCursorPosition, delta );
@@ -107,7 +112,7 @@ internal static partial class InputRouter
 
 		MouseCursorDelta += new Vector2( dx, dy );
 
-		var mouse = Contexts.FirstOrDefault( x => x.MouseState != InputContext.InputState.Ignore );
+		var mouse = MouseTarget();
 		mouse?.In_MousePosition( MouseCursorPosition, new Vector2( dx, dy ) );
 	}
 
@@ -263,6 +268,10 @@ internal static partial class InputRouter
 			if ( repeat )
 				return;
 
+			// Escape leaves a focused text box in dev tools docked in the window, before the game or menu sees it
+			if ( down && DevTools.GameDockKey( scanButtonCode, true, modifiers ) )
+				return;
+
 			// Reserve Shift+Escape for the platform menu while testing in the editor.
 			// Capture the chord now, before Shift can be released or game UI can consume Escape.
 			if ( down && Application.IsEditor && Game.IsPlaying && modifiers.Contains( KeyboardModifiers.Shift ) )
@@ -305,7 +314,18 @@ internal static partial class InputRouter
 			return;
 		}
 
-		var keyboard = Contexts.FirstOrDefault( x => x.KeyboardState != InputContext.InputState.Ignore );
+		// Dev tools docked in the window have the keys while one of their panels has focus. A release still goes to the
+		// contexts below, which may have seen the key go down.
+		InputContext keyboard = null;
+		if ( DevTools.GameDockKey( keyButtonCode, down, modifiers ) )
+		{
+			if ( down ) return;
+		}
+		else
+		{
+			keyboard = Contexts.FirstOrDefault( x => x.KeyboardState != InputContext.InputState.Ignore );
+		}
+
 		if ( keyboard is not null )
 		{
 			keyboard.IN_Button( down, scanButtonCode, keyButtonCode, repeat, modifiers );
@@ -328,6 +348,9 @@ internal static partial class InputRouter
 
 	internal static void OnText( string text )
 	{
+		if ( DevTools.GameDockText( text ) )
+			return;
+
 		var keyboard = Contexts.FirstOrDefault( x => x.KeyboardState == InputContext.InputState.UI );
 		if ( keyboard is not null )
 		{
@@ -338,8 +361,12 @@ internal static partial class InputRouter
 	internal static void OnMouseWheel( float x, float y )
 	{
 		var value = new Vector2( x, y );
-		var mouse = Contexts.FirstOrDefault( x => x.MouseState != InputContext.InputState.Ignore );
 		var modifiers = GetCurrentModifiers();
+
+		if ( DevTools.GameDockMouseWheel( value, MouseCursorPosition, modifiers ) )
+			return;
+
+		var mouse = MouseTarget();
 
 		if ( mouse is not null )
 		{

@@ -230,6 +230,7 @@ public class AppSystem
 
 		Engine.InputRouter.Shutdown();
 		Diagnostics.Logging.ClearListeners();
+		MenuUtility.ClearLoggers();
 
 		// Flush mount utility preview cache — holds strong refs to textures
 		Mounting.MountUtility.FlushCache();

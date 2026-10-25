@@ -428,6 +428,24 @@ internal partial class GameInstanceDll
 		return BaseFileSystem.NormalizeFilename( path ).TrimStart( '/' );
 	}
 
+	internal static IEnumerable<string> GetNetworkIncludePaths( string resources, bool publishUsedAssetsOnly )
+	{
+		if ( publishUsedAssetsOnly ) yield return "/resources/*";
+		foreach ( var line in (resources ?? "").Split( '\n', StringSplitOptions.RemoveEmptyEntries ) )
+		{
+			var path = line.Trim();
+			if ( path.StartsWith( "//" ) ) continue;
+			if ( publishUsedAssetsOnly )
+			{
+				// These only add loose downloads; publishing exclusions must not block required assets.
+				if ( path.Length == 0 || path.StartsWith( '#' ) || path.StartsWith( '!' ) ) continue;
+				path = path.Replace( '\\', '/' );
+				if ( path.EndsWith( '/' ) ) path += "*";
+			}
+			yield return path.NormalizeFilename( true, false );
+		}
+	}
+
 	bool ShouldNetworkFile( string filename )
 	{
 		filename = NormalizeNetworkFilePath( filename );
@@ -832,7 +850,9 @@ internal partial class GameInstanceDll
 			return;
 
 		var project = Project.Current;
-		var includePaths = ParseNetworkIncludePaths( project?.Config.Resources );
+		var includePaths = GetNetworkIncludePaths( project?.Config.Resources, project?.Config.PublishUsedAssetsOnly == true )
+			.Select( path => path.TrimStart( '/' ) )
+			.Distinct( StringComparer.OrdinalIgnoreCase ).ToList();
 		var resourceConfiguration = string.Join( "\n", includePaths );
 		profile.ConfiguredPatterns = CountConfiguredNetworkIncludePaths( project?.Config.Resources );
 		profile.UniquePatterns = includePaths.Count;

@@ -1,4 +1,4 @@
-﻿using Sandbox.DataModel;
+using Sandbox.DataModel;
 using Sandbox.Services;
 using System;
 using System.Text.Json;
@@ -62,7 +62,7 @@ public partial class ProjectPublisher
 		return p;
 	}
 
-	public static async Task<ProjectPublisher> FromProject( Project project )
+	public static async Task<ProjectPublisher> FromProject( Project project, bool previewOnly = false, CancellationToken cancel = default )
 	{
 		using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
 
@@ -82,7 +82,7 @@ public partial class ProjectPublisher
 		// game
 		{
 			var p = new ProjectPublisher( project );
-			await p.GenerateAssetManifest();
+			await p.GenerateAssetManifest( cancel: cancel, previewOnly: previewOnly );
 			return p;
 		}
 	}
@@ -174,9 +174,9 @@ public partial class ProjectPublisher
 	/// <summary>
 	/// Build a list of files to upload for this version. Return false if errors that would prevent the upload.
 	/// </summary>
-	async Task GenerateAssetManifest( IProgress progress = null, CancellationToken cancel = default )
+	async Task GenerateAssetManifest( IProgress progress = null, CancellationToken cancel = default, bool previewOnly = false )
 	{
-		await Manifest.BuildFromAssets( Project, progress, cancel );
+		await Manifest.BuildFromAssets( Project, progress, cancel, previewOnly: previewOnly );
 	}
 
 	/// <summary>
@@ -193,6 +193,15 @@ public partial class ProjectPublisher
 	}
 
 	/// <summary>
+	/// Projects with the whitelist disabled are standalone only and can't be published
+	/// </summary>
+	void ThrowIfWhitelistDisabled()
+	{
+		if ( Project.Config.IsStandaloneOnly )
+			throw new InvalidOperationException( $"This project has the whitelist disabled (Disable Whitelist in Project Settings > Game Exporting), so it can't be published to {Global.BackendTitle}." );
+	}
+
+	/// <summary>
 	/// Publish a new revision
 	/// </summary>
 	public async Task Publish( IProgress progress = null, CancellationToken cancel = default )
@@ -201,6 +210,8 @@ public partial class ProjectPublisher
 
 		if ( Project.Config.IsStandaloneOnly )
 			return;
+		Manifest.RequireUploadManifest();
+		ThrowIfWhitelistDisabled();
 
 		await TryWorkshopUpload();
 
@@ -226,10 +237,9 @@ public partial class ProjectPublisher
 	{
 		using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
 
+		Manifest.RequireUploadManifest();
 		FinishAddingFiles();
-
-		if ( Project.Config.IsStandaloneOnly )
-			return;
+		ThrowIfWhitelistDisabled();
 
 		if ( Manifest.Assets.Count == 0 )
 		{
@@ -490,6 +500,7 @@ public partial class ProjectPublisher
 
 	public async Task UploadFiles()
 	{
+		Manifest.RequireUploadManifest();
 		// upload
 		var uploads = Manifest.Assets.Where( x => !x.Skip ).ToArray();
 
