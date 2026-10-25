@@ -142,8 +142,17 @@ internal sealed class CaseInsensitivePhysicalFileSystem : PhysicalFileSystem
 
 	protected override void CreateDirectoryImpl( UPath path )
 	{
-		base.CreateDirectoryImpl( path );
 		var resolved = ConvertPathToInternal( path );
+		var createdParents = new List<string>();
+		for ( var directory = resolved; directory is not null && !Directory.Exists( directory ); directory = Path.GetDirectoryName( directory ) )
+		{
+			var parent = Path.GetDirectoryName( directory );
+			if ( parent is not null ) createdParents.Add( parent );
+		}
+		base.CreateDirectoryImpl( path );
+		// Directory.CreateDirectory can create several ancestors at once. Their parent
+		// listings may already be cached, including the first existing ancestor.
+		foreach ( var parent in createdParents ) _directoryCache.TryRemove( parent, out _ );
 		InvalidateParent( resolved );
 		_directoryCache.TryRemove( resolved, out _ );
 	}

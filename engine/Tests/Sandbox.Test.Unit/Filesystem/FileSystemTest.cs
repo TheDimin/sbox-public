@@ -171,4 +171,21 @@ public class FileSystemTest
 		public string Name { get; set; }
 		public int Count { get; set; }
 	}
+	[TestMethod]
+	public void NestedDirectoryCreationInvalidatesCachedAncestors()
+	{
+		var directory = Directory.CreateTempSubdirectory( "sbox-nested-casing-" );
+		var fs = new LocalFileSystem( directory.FullName );
+		try
+		{
+			fs.WriteAllText( "seed.txt", "seed" );
+			Assert.IsFalse( fs.DirectoryExists( "addons" ) ); // cache the existing root listing
+			fs.CreateDirectory( "Addons/Red" );
+			fs.WriteAllText( "Addons/Red/file.txt", "value" );
+			var sub = fs.CreateSubSystem( "addons/red" );
+			Assert.AreEqual( "value", sub.ReadAllText( "FILE.TXT" ) );
+		}
+		finally { fs.Dispose(); directory.Delete( true ); }
+	}
+
 }
