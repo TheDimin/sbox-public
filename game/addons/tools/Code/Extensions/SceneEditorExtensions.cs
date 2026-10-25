@@ -54,7 +54,10 @@ public static class SceneEditorExtensions
 			pos.x < rect.Left ? rect.Right : pos.x > rect.Right ? rect.Left : pos.x,
 			pos.y < rect.Top ? rect.Bottom : pos.y > rect.Bottom ? rect.Top : pos.y );
 
-		Application.UnscaledCursorPosition += (newPos - pos) * canvas.DpiScale;
+		if ( OperatingSystem.IsLinux() )
+			Application.CursorPosition = canvas.ToScreen( newPos );
+		else
+			Application.UnscaledCursorPosition += (newPos - pos) * canvas.DpiScale;
 
 		return true;
 	}
