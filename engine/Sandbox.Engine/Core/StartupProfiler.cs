@@ -16,14 +16,14 @@ internal static class StartupProfiler
 			return;
 
 		var entries = timing.Data
-			.Where( x => x.Value is int )
+			.Where( x => timing.DurationKeys.Contains( x.Key ) && x.Value is int )
 			.Select( x => new Entry( x.Key, (int)x.Value ) )
 			.Where( x => x.Milliseconds > 0 )
 			.OrderByDescending( x => x.Milliseconds )
 			.ToArray();
 
 		var total = entries.FirstOrDefault( x => x.Name == "Time" ).Milliseconds;
-		var report = new Report( DateTime.UtcNow, Environment.ProcessPath, timing.Mode, timing.Version, total, entries );
+		var report = new Report( DateTime.UtcNow, Environment.ProcessPath, timing.Mode, timing.Version, total, entries, timing.Data.Where( x => !timing.DurationKeys.Contains( x.Key ) ).ToDictionary( x => x.Key, x => x.Value ) );
 		var json = JsonSerializer.Serialize( report, new JsonSerializerOptions { WriteIndented = true } );
 		var markdown = BuildMarkdown( timing, entries, total );
 
@@ -56,10 +56,10 @@ internal static class StartupProfiler
 		}
 
 		builder.AppendLine();
-		builder.AppendLine( "The stages are ordered by measured duration. Use the largest rows as the next optimization targets; values are captured from the same process and do not include time before the managed bootstrap timer starts." );
+		builder.AppendLine( "The stages are ordered by measured duration. Use the largest rows as the next optimization targets; values are captured from the same process and do not include time before the managed bootstrap timer starts. Nested stages overlap and must not be summed. Counters and configuration are recorded separately in the JSON Metrics object." );
 		return builder.ToString();
 	}
 
-	readonly record struct Report( DateTime GeneratedUtc, string Process, string Mode, string Version, double TotalMilliseconds, Entry[] Stages );
+	readonly record struct Report( DateTime GeneratedUtc, string Process, string Mode, string Version, double TotalMilliseconds, Entry[] Stages, Dictionary<string, object> Metrics );
 	readonly record struct Entry( string Name, double Milliseconds );
 }

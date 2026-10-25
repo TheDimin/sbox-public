@@ -1,0 +1,8 @@
+[
+  {
+    "wall_seconds": 131.23608464000063,
+    "exit": 0,
+    "stdout": "{\n  \"EngineVersion\": \"0000000\",\n  \"Project\": \"vallark\",\n  \"ProjectTitle\": \"VallArk\",\n  \"ActiveScene\": \"minimal\",\n  \"ActiveScenePath\": \"scenes/minimal.scene\",\n  \"SceneHasUnsavedChanges\": false,\n  \"IsPlaying\": false,\n  \"IsPaused\": false,\n  \"ToolCount\": 490,\n  \"IsCompiling\": false,\n  \"LastCompileSucceeded\": true,\n  \"LastCompileErrors\": 0,\n  \"Paths\": {\n    \"Engine\": \"/home/damian/.codex/worktrees/linux-engine-validation/sbox-public/game\",\n    \"Logs\": \"/home/damian/.codex/worktrees/linux-engine-validation/sbox-public/game/logs\",\n    \"ProjectRoot\": \"/home/damian/.codex/worktrees/linux-engine-validation/Survive-profile\",\n    \"ProjectSettings\": \"/home/damian/.codex/worktrees/linux-engine-validation/Survive-profile/ProjectSettings\"\n  }\n}\n",
+    "stderr": ""
+  }
+]

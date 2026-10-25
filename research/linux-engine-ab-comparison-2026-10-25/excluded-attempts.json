@@ -1,0 +1,197 @@
+[
+  {
+    "variant": "A",
+    "name": "prepare-A",
+    "started_utc": "2026-10-25T15:15:33.153383+00:00",
+    "revision": "3a9b4eb11ddc5d0c92b6b952e5017be65f16a356",
+    "pid": 217313,
+    "failure": "RuntimeError('Editor exited -15')",
+    "cleanup_exit": -15
+  },
+  {
+    "variant": "A",
+    "name": "prepare-A",
+    "started_utc": "2026-10-25T15:19:27.463846+00:00",
+    "revision": "3a9b4eb11ddc5d0c92b6b952e5017be65f16a356",
+    "pid": 221469,
+    "failure": "ProcessLookupError(3, 'No such process')",
+    "cleanup_exit": -15
+  },
+  {
+    "variant": "B",
+    "name": "prepare-B",
+    "started_utc": "2026-10-25T15:24:47.800979+00:00",
+    "revision": "ca8f176b6f55ff216e04dceedfd8b898f64a3a90",
+    "pid": 224553,
+    "editor_status": {
+      "EngineVersion": "0000000",
+      "Project": "vallark",
+      "ProjectTitle": "VallArk",
+      "ActiveScene": "minimal",
+      "ActiveScenePath": "scenes/minimal.scene",
+      "SceneHasUnsavedChanges": false,
+      "IsPlaying": false,
+      "IsPaused": false,
+      "ToolCount": 490,
+      "IsCompiling": false,
+      "LastCompileSucceeded": true,
+      "LastCompileErrors": 0,
+      "Paths": {
+        "Engine": "/home/damian/.codex/worktrees/linux-engine-comparison/sbox-public/game",
+        "Logs": "/home/damian/.codex/worktrees/linux-engine-comparison/sbox-public/game/logs",
+        "ProjectRoot": "/home/damian/.codex/worktrees/linux-engine-validation/Survive-profile",
+        "ProjectSettings": "/home/damian/.codex/worktrees/linux-engine-validation/Survive-profile/ProjectSettings"
+      }
+    },
+    "profile": {
+      "GeneratedUtc": "2026-10-25T15:26:42.8935549Z",
+      "Process": "/home/damian/.codex/worktrees/linux-engine-comparison/sbox-public/game/sbox-dev",
+      "Mode": "editor",
+      "Version": "0000000",
+      "TotalMilliseconds": 112931,
+      "Stages": [
+        {
+          "Name": "Time",
+          "Milliseconds": 112931
+        },
+        {
+          "Name": "Load Project",
+          "Milliseconds": 90699
+        },
+        {
+          "Name": "Load Project: Check Compiled Projects",
+          "Milliseconds": 31629
+        },
+        {
+          "Name": "Load Project: CompileAllAssets",
+          "Milliseconds": 26955
+        },
+        {
+          "Name": "AssetPipeline.CompileMilliseconds",
+          "Milliseconds": 26295
+        },
+        {
+          "Name": "Load Project: Load Game",
+          "Milliseconds": 23359
+        },
+        {
+          "Name": "TimeToMenu",
+          "Milliseconds": 23278
+        },
+        {
+          "Name": "AssetPipeline.CandidateScanMilliseconds",
+          "Milliseconds": 19590
+        },
+        {
+          "Name": "Load Project: Scan Asset Dependencies",
+          "Milliseconds": 14941
+        },
+        {
+          "Name": "IToolsDll Bootstrap Init",
+          "Milliseconds": 13789
+        },
+        {
+          "Name": "Tools - Compile Base Projects",
+          "Milliseconds": 13724
+        },
+        {
+          "Name": "Load Project: Builtin Projects",
+          "Milliseconds": 2806
+        },
+        {
+          "Name": "Load Project: Init AssetSystem",
+          "Milliseconds": 1480
+        },
+        {
+          "Name": "Menu PreInit Bootstrap",
+          "Milliseconds": 736
+        },
+        {
+          "Name": "Load Project: Register CustomAssetTypes",
+          "Milliseconds": 697
+        },
+        {
+          "Name": "Tools PreInit Bootstrap",
+          "Milliseconds": 688
+        },
+        {
+          "Name": "Load Project: DownloadCloudAssets",
+          "Milliseconds": 595
+        },
+        {
+          "Name": "Static Constructors",
+          "Milliseconds": 533
+        },
+        {
+          "Name": "MenuBootstrap",
+          "Milliseconds": 410
+        },
+        {
+          "Name": "Game PreInit Bootstrap",
+          "Milliseconds": 354
+        },
+        {
+          "Name": "BuiltIn Projects Init",
+          "Milliseconds": 197
+        },
+        {
+          "Name": "Load Project: PruneOrphans",
+          "Milliseconds": 196
+        },
+        {
+          "Name": "IGameMenuDll Bootstrap",
+          "Milliseconds": 195
+        },
+        {
+          "Name": "Load Project: Update ProjectFilesystem",
+          "Milliseconds": 155
+        },
+        {
+          "Name": "Load Project: Sync PackageManager",
+          "Milliseconds": 121
+        },
+        {
+          "Name": "Menu - Fonts",
+          "Milliseconds": 44
+        },
+        {
+          "Name": "Load Project: Generate Solution",
+          "Milliseconds": 30
+        },
+        {
+          "Name": "Load Project: Init Libraries",
+          "Milliseconds": 22
+        },
+        {
+          "Name": "Load Project: Init FileSystem",
+          "Milliseconds": 7
+        },
+        {
+          "Name": "Load Project: Reload Project",
+          "Milliseconds": 5
+        }
+      ],
+      "Metrics": {
+        "Shaders.Reused": 19,
+        "Shaders.Compiled": 0,
+        "Shaders.Failed": 0,
+        "AssetPipeline.Mode": "legacy",
+        "AssetPipeline.WarmAllThumbnails": false,
+        "AssetPipeline.CompileCandidates": 45,
+        "package.ident": "identity.vallark"
+      }
+    },
+    "ready_seconds": 116.96961248399748,
+    "startup_cpu_seconds": 387.62,
+    "startup_peak_rss_MiB": 4922.26953125,
+    "idle_cpu_percent_one_core": 41.02015622953879,
+    "idle_median_VmRSS_MiB": 6271.8125,
+    "idle_median_RssAnon_MiB": 5399.73046875,
+    "idle_median_Pss_MiB": 6059.1513671875,
+    "idle_median_Private_Clean_MiB": 189.94140625,
+    "idle_median_Private_Dirty_MiB": 5835.0390625,
+    "perf_cpu_error": "RuntimeError('sbox-cli: tools/call exceeded --request-timeout. The outcome of an already running tool is unknown; inspect state before retrying.\\n')",
+    "perf_memory_error": "RuntimeError('sbox-cli: The instance closed its MCP connection.\\n')",
+    "cleanup_exit": -15
+  }
+]

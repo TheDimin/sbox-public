@@ -36,7 +36,7 @@ public class GuidTests
 		_testPath = System.IO.Path.Combine( _assetsPath, testName );
 		System.IO.Directory.CreateDirectory( _testPath );
 
-		NativeEngine.FullFileSystem.AddProjectPath( "unittest", _assetsPath.ToLowerInvariant() );
+		NativeEngine.FullFileSystem.AddProjectPath( "unittest", _assetsPath );
 
 		// Rebuild the guid mappings once so they include the fixtures. A rebuild rescans
 		// everything mounted (~0.5s), and later tests only add files in their own new folder
@@ -272,7 +272,7 @@ public class GuidTests
 					}
 				}
 				""" );
-			var start = new ProcessStartInfo( Path.Combine( engine, "bin", "win64", "resourcecompiler.exe" ) )
+			var start = new ProcessStartInfo( Path.Combine( engine, NetCore.NativeDllPath, OperatingSystem.IsWindows() ? "resourcecompiler.exe" : "resourcecompiler" ) )
 			{
 				UseShellExecute = false,
 				CreateNoWindow = true,

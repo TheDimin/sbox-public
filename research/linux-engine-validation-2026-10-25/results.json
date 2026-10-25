@@ -1,0 +1,544 @@
+{
+  "generated_utc": "2026-10-25T14:13:45.664887+00:00",
+  "branch": "codex/linux-engine-validation",
+  "source_revision": "5c7fa5e8e5dc9e4474f33a58f9e21d6b31beb4db",
+  "commands": {
+    "build": "dotnet run --project engine/Tools/SboxBuild/SboxBuild.csproj -- build --config Developer",
+    "tests": "dotnet run --project engine/Tools/SboxBuild/SboxBuild.csproj -- test --filter \"TestCategory!=LiveBackend\"",
+    "format": "dotnet run --no-build --project engine/Tools/SboxBuild/SboxBuild.csproj -- format --verify"
+  },
+  "build_passed": true,
+  "test_totals": {
+    "Total tests": 11298,
+    "Passed": 10692,
+    "Failed": 1,
+    "Skipped": 605
+  },
+  "test_suites": [
+    {
+      "suite": "Sandbox.Test.Text",
+      "wall_seconds": 3,
+      "counts": {
+        "Total tests": 16,
+        "Passed": 16
+      }
+    },
+    {
+      "suite": "Sandbox.Test.NetSim",
+      "wall_seconds": 29,
+      "counts": {
+        "Total tests": 94,
+        "Passed": 91,
+        "Skipped": 3
+      }
+    },
+    {
+      "suite": "Sandbox.Test.Engine",
+      "wall_seconds": 49,
+      "counts": {
+        "Total tests": 3157,
+        "Passed": 3155,
+        "Skipped": 2
+      }
+    },
+    {
+      "suite": "Sandbox.Test.Integration (compiles and exports)",
+      "wall_seconds": 52,
+      "counts": {
+        "Total tests": 3,
+        "Passed": 2,
+        "Skipped": 1
+      }
+    },
+    {
+      "suite": "Sandbox.Test.Unit",
+      "wall_seconds": 62,
+      "counts": {
+        "Total tests": 5751,
+        "Passed": 5368,
+        "Skipped": 383
+      }
+    },
+    {
+      "suite": "Sandbox.Test.Integration (most)",
+      "wall_seconds": 84,
+      "counts": {
+        "Total tests": 2233,
+        "Passed": 2016,
+        "Failed": 1,
+        "Skipped": 216
+      }
+    },
+    {
+      "suite": "Sandbox.Test.Integration (allocations)",
+      "wall_seconds": 12,
+      "counts": {
+        "Total tests": 4,
+        "Passed": 4
+      }
+    },
+    {
+      "suite": "Sandbox.Test.Unit (allocations)",
+      "wall_seconds": 4,
+      "counts": {
+        "Total tests": 14,
+        "Passed": 14
+      }
+    },
+    {
+      "suite": "Sandbox.Test.Engine (allocations)",
+      "wall_seconds": 4,
+      "counts": {
+        "Total tests": 26,
+        "Passed": 26
+      }
+    }
+  ],
+  "remaining_test_failure": {
+    "test": "SceneTests.Components.PlayerControllerTest.WalkingOnHeightfieldsPreservesTheRequestedHorizontalHeading",
+    "parameters": [
+      2,
+      225,
+      160,
+      1
+    ],
+    "observed_before_velocity": [
+      -102.5328,
+      -102.5328,
+      -67.6317
+    ],
+    "observed_after_velocity": [
+      -100.1142,
+      -97.9074,
+      24.6977
+    ],
+    "ground_normal": [
+      0.0544,
+      0.1041,
+      0.9931
+    ],
+    "status": "Reproduced in a focused run; assertion unchanged; root cause across managed controller and prebuilt native physics not conclusively isolated."
+  },
+  "environment": {
+    "recorded_utc": "2026-10-25T12:49:34.824011+00:00",
+    "source_revision": "35bc7e9fa35e58900e7e5b45e4f63c8ded223b02",
+    "project_source_revision": "9e1a231aa0a6da4400e1ba952558e92f1dbdbaf2",
+    "sdl_alias_repairs_in_isolated_runtime": [
+      {
+        "path": "/home/damian/.codex/worktrees/linux-engine-validation/sbox-public/game/bin/linuxsteamrt64/libSDL3.so",
+        "before": "regular file",
+        "target": "libSDL3.so.0.4.14",
+        "sha256": "93ca94040384ab27db123f4e2697695c5eb57d1d0b876c9d944e52a579e9ee6b"
+      },
+      {
+        "path": "/home/damian/.codex/worktrees/linux-engine-validation/sbox-public/game/bin/linuxsteamrt64/libSDL3.so.0",
+        "before": "regular file",
+        "target": "libSDL3.so.0.4.14",
+        "sha256": "93ca94040384ab27db123f4e2697695c5eb57d1d0b876c9d944e52a579e9ee6b"
+      }
+    ],
+    "environment": {
+      "QT_QPA_PLATFORM": "xcb",
+      "SDL_VIDEO_X11_EXTERNAL_WINDOW_INPUT": "1",
+      "SDL_VIDEO_X11_XINPUT2": "0",
+      "GPU": "NVIDIA Vulkan ICD",
+      "LD_PRELOAD": "/home/damian/.codex/worktrees/linux-engine-validation/sbox-public/game/bin/linuxsteamrt64/libHarfBuzzSharp.so"
+    },
+    "notes": [
+      "Independent engine and project copies; no hardlinks back to original binaries.",
+      "Preparation is separate from warm samples; original editor remains running and can contribute background system load.",
+      "Profile stage durations overlap and are not additive."
+    ]
+  },
+  "original_binary_verification": [
+    {
+      "path": "/home/damian/projects/sbox-public/game/sbox-dev",
+      "same_hash": false,
+      "same_inode": false,
+      "same_mtime": false,
+      "observed_mtime_utc": "2026-10-25T14:12:20.098692+00:00",
+      "mtime_after_last_profile": true
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.Engine.dll",
+      "same_hash": false,
+      "same_inode": false,
+      "same_mtime": false,
+      "observed_mtime_utc": "2026-10-25T13:43:58.920573+00:00",
+      "mtime_after_last_profile": true
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.Tools.dll",
+      "same_hash": false,
+      "same_inode": false,
+      "same_mtime": false,
+      "observed_mtime_utc": "2026-10-25T14:12:13.302605+00:00",
+      "mtime_after_last_profile": true
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/game/bin/linuxsteamrt64/libSDL3.so.0.4.14",
+      "same_hash": true,
+      "same_inode": true,
+      "same_mtime": true,
+      "observed_mtime_utc": "2026-10-24T18:05:29.706150+00:00",
+      "mtime_after_last_profile": false
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/game/bin/linuxsteamrt64/libengine2.so",
+      "same_hash": true,
+      "same_inode": true,
+      "same_mtime": true,
+      "observed_mtime_utc": "2026-10-25T11:20:38.687718+00:00",
+      "mtime_after_last_profile": false
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/game/bin/linuxsteamrt64/libtier0.so",
+      "same_hash": true,
+      "same_inode": true,
+      "same_mtime": true,
+      "observed_mtime_utc": "2026-10-25T11:20:31.219492+00:00",
+      "mtime_after_last_profile": false
+    }
+  ],
+  "samples": [
+    {
+      "sample": "preparation-initial",
+      "started_utc": "2026-10-25T12:50:25.608901+00:00",
+      "managed_startup_seconds": 472.308,
+      "profile_observed_wall_seconds": 474.15469880100136,
+      "readiness_wall_seconds": null,
+      "readiness_verified": false,
+      "shader_checks_seconds": 344.48,
+      "metrics": {
+        "Shaders.Reused": 0,
+        "Shaders.Compiled": 19,
+        "Shaders.Failed": 0,
+        "AssetPipeline.Mode": "legacy",
+        "AssetPipeline.WarmAllThumbnails": false,
+        "AssetPipeline.CompileCandidates": 46,
+        "package.ident": "identity.vallark"
+      },
+      "stage_milliseconds": {
+        "Time": 472308,
+        "Load Project": 437976,
+        "Load Project: CompileAllAssets": 371187,
+        "Load Project: Check Compiled Projects": 35364,
+        "TimeToMenu": 34081,
+        "AssetPipeline.CompileMilliseconds": 26630,
+        "IToolsDll Bootstrap Init": 24408,
+        "Tools - Compile Base Projects": 24317,
+        "Load Project: Load Game": 21532,
+        "AssetPipeline.CandidateScanMilliseconds": 19765,
+        "Load Project: Scan Asset Dependencies": 12241,
+        "Load Project: Builtin Projects": 4017,
+        "Load Project: Init AssetSystem": 1352,
+        "IGameMenuDll Bootstrap": 951,
+        "Menu PreInit Bootstrap": 761,
+        "Load Project: Register CustomAssetTypes": 702,
+        "Tools PreInit Bootstrap": 699,
+        "MenuBootstrap": 537,
+        "Static Constructors": 510,
+        "Game PreInit Bootstrap": 401,
+        "Load Project: DownloadCloudAssets": 340,
+        "Load Project: Sync PackageManager": 269,
+        "Load Project: PruneOrphans": 249,
+        "Load Project: Update ProjectFilesystem": 178,
+        "BuiltIn Projects Init": 60,
+        "Load Project: Generate Solution": 52,
+        "Menu - Fonts": 51,
+        "Load Project: Init Libraries": 50,
+        "Load Project: Init FileSystem": 13,
+        "Load Project: Reload Project": 11,
+        "FilesystemInit": 1
+      },
+      "editor_state": null,
+      "failure": "editor main-thread readiness was not verified",
+      "resource_discovery": {
+        "files_scanned": 87985,
+        "paths_indexed": 17406,
+        "game_resources": 3070,
+        "seconds": 5.193
+      }
+    },
+    {
+      "sample": "warm-1",
+      "started_utc": "2026-10-25T13:07:57.362526+00:00",
+      "managed_startup_seconds": 116.086,
+      "profile_observed_wall_seconds": 119.06412572800036,
+      "readiness_wall_seconds": 119.39093356500234,
+      "readiness_verified": true,
+      "shader_checks_seconds": 0.588,
+      "metrics": {
+        "Shaders.Reused": 19,
+        "Shaders.Compiled": 0,
+        "Shaders.Failed": 0,
+        "AssetPipeline.Mode": "legacy",
+        "AssetPipeline.WarmAllThumbnails": false,
+        "AssetPipeline.CompileCandidates": 45,
+        "package.ident": "identity.vallark"
+      },
+      "stage_milliseconds": {
+        "Time": 116086,
+        "Load Project": 101845,
+        "Load Project: Check Compiled Projects": 40916,
+        "Load Project: CompileAllAssets": 29053,
+        "AssetPipeline.CompileMilliseconds": 28392,
+        "AssetPipeline.CandidateScanMilliseconds": 21115,
+        "Load Project: Load Game": 21109,
+        "TimeToMenu": 14640,
+        "Load Project: Scan Asset Dependencies": 12017,
+        "Load Project: Builtin Projects": 4141,
+        "Menu PreInit Bootstrap": 2166,
+        "Load Project: Init AssetSystem": 1455,
+        "Tools PreInit Bootstrap": 1211,
+        "IGameMenuDll Bootstrap": 1057,
+        "MenuBootstrap": 905,
+        "Game PreInit Bootstrap": 746,
+        "Load Project: Register CustomAssetTypes": 724,
+        "Load Project: DownloadCloudAssets": 687,
+        "Static Constructors": 558,
+        "BuiltIn Projects Init": 444,
+        "Load Project: PruneOrphans": 221,
+        "Load Project: Update ProjectFilesystem": 160,
+        "IToolsDll Bootstrap Init": 135,
+        "Menu - Fonts": 77,
+        "Load Project: Sync PackageManager": 50,
+        "Load Project: Generate Solution": 34,
+        "Load Project: Init Libraries": 31,
+        "Load Project: Init FileSystem": 19,
+        "Load Project: Reload Project": 5,
+        "FilesystemInit": 3,
+        "Tools - Compile Base Projects": 2
+      },
+      "editor_state": {
+        "EngineVersion": "0000000",
+        "Project": "vallark",
+        "ProjectTitle": "VallArk",
+        "ActiveScene": "minimal",
+        "ActiveScenePath": "scenes/minimal.scene",
+        "SceneHasUnsavedChanges": false,
+        "IsPlaying": false,
+        "IsPaused": false,
+        "ToolCount": 490,
+        "IsCompiling": false,
+        "LastCompileSucceeded": true,
+        "LastCompileErrors": 0,
+        "Paths": {
+          "Engine": "/home/damian/.codex/worktrees/linux-engine-validation/sbox-public/game",
+          "Logs": "/home/damian/.codex/worktrees/linux-engine-validation/sbox-public/game/logs",
+          "ProjectRoot": "/home/damian/.codex/worktrees/linux-engine-validation/Survive-profile",
+          "ProjectSettings": "/home/damian/.codex/worktrees/linux-engine-validation/Survive-profile/ProjectSettings"
+        }
+      },
+      "failure": null,
+      "resource_discovery": {
+        "files_scanned": 87986,
+        "paths_indexed": 17406,
+        "game_resources": 3070,
+        "seconds": 4.988
+      }
+    },
+    {
+      "sample": "warm-2",
+      "started_utc": "2026-10-25T13:10:02.570202+00:00",
+      "managed_startup_seconds": 87.428,
+      "profile_observed_wall_seconds": 89.0366653509991,
+      "readiness_wall_seconds": 90.51734773299904,
+      "readiness_verified": true,
+      "shader_checks_seconds": 0.631,
+      "metrics": {
+        "Shaders.Reused": 19,
+        "Shaders.Compiled": 0,
+        "Shaders.Failed": 0,
+        "AssetPipeline.Mode": "legacy",
+        "AssetPipeline.WarmAllThumbnails": false,
+        "AssetPipeline.CompileCandidates": 45,
+        "package.ident": "identity.vallark"
+      },
+      "stage_milliseconds": {
+        "Time": 87428,
+        "Load Project": 78379,
+        "Load Project: Check Compiled Projects": 32524,
+        "Load Project: Load Game": 19088,
+        "Load Project: CompileAllAssets": 17830,
+        "AssetPipeline.CompileMilliseconds": 17132,
+        "Load Project: Scan Asset Dependencies": 10568,
+        "AssetPipeline.CandidateScanMilliseconds": 9937,
+        "TimeToMenu": 9770,
+        "Load Project: Builtin Projects": 2705,
+        "Load Project: Init AssetSystem": 1473,
+        "Menu PreInit Bootstrap": 915,
+        "Tools PreInit Bootstrap": 856,
+        "Load Project: Register CustomAssetTypes": 759,
+        "Load Project: DownloadCloudAssets": 746,
+        "Static Constructors": 596,
+        "Game PreInit Bootstrap": 481,
+        "MenuBootstrap": 448,
+        "BuiltIn Projects Init": 237,
+        "Load Project: PruneOrphans": 216,
+        "IGameMenuDll Bootstrap": 206,
+        "Load Project: Update ProjectFilesystem": 150,
+        "IToolsDll Bootstrap Init": 76,
+        "Load Project: Sync PackageManager": 44,
+        "Menu - Fonts": 37,
+        "Load Project: Generate Solution": 26,
+        "Load Project: Init Libraries": 21,
+        "Load Project: Init FileSystem": 5,
+        "Load Project: Reload Project": 5,
+        "FilesystemInit": 1,
+        "Tools - Compile Base Projects": 1
+      },
+      "editor_state": {
+        "EngineVersion": "0000000",
+        "Project": "vallark",
+        "ProjectTitle": "VallArk",
+        "ActiveScene": "minimal",
+        "ActiveScenePath": "scenes/minimal.scene",
+        "SceneHasUnsavedChanges": false,
+        "IsPlaying": false,
+        "IsPaused": false,
+        "ToolCount": 490,
+        "IsCompiling": false,
+        "LastCompileSucceeded": true,
+        "LastCompileErrors": 0,
+        "Paths": {
+          "Engine": "/home/damian/.codex/worktrees/linux-engine-validation/sbox-public/game",
+          "Logs": "/home/damian/.codex/worktrees/linux-engine-validation/sbox-public/game/logs",
+          "ProjectRoot": "/home/damian/.codex/worktrees/linux-engine-validation/Survive-profile",
+          "ProjectSettings": "/home/damian/.codex/worktrees/linux-engine-validation/Survive-profile/ProjectSettings"
+        }
+      },
+      "failure": null,
+      "resource_discovery": {
+        "files_scanned": 87986,
+        "paths_indexed": 17406,
+        "game_resources": 3070,
+        "seconds": 4.941
+      }
+    },
+    {
+      "sample": "warm-3",
+      "started_utc": "2026-10-25T13:11:38.826312+00:00",
+      "managed_startup_seconds": 128.404,
+      "profile_observed_wall_seconds": 130.06527688200003,
+      "readiness_wall_seconds": 131.23629666000124,
+      "readiness_verified": true,
+      "shader_checks_seconds": 0.656,
+      "metrics": {
+        "Shaders.Reused": 19,
+        "Shaders.Compiled": 0,
+        "Shaders.Failed": 0,
+        "AssetPipeline.Mode": "legacy",
+        "AssetPipeline.WarmAllThumbnails": false,
+        "AssetPipeline.CompileCandidates": 45,
+        "package.ident": "identity.vallark"
+      },
+      "stage_milliseconds": {
+        "Time": 128404,
+        "Load Project": 122384,
+        "Load Project: Check Compiled Projects": 58423,
+        "Load Project: CompileAllAssets": 30615,
+        "AssetPipeline.CompileMilliseconds": 29896,
+        "Load Project: Load Game": 23908,
+        "AssetPipeline.CandidateScanMilliseconds": 22809,
+        "Load Project: Scan Asset Dependencies": 11856,
+        "TimeToMenu": 6509,
+        "Load Project: Builtin Projects": 2881,
+        "Load Project: Init AssetSystem": 1262,
+        "Load Project: Register CustomAssetTypes": 913,
+        "Load Project: DownloadCloudAssets": 880,
+        "Menu PreInit Bootstrap": 843,
+        "Tools PreInit Bootstrap": 767,
+        "Game PreInit Bootstrap": 435,
+        "MenuBootstrap": 397,
+        "Static Constructors": 329,
+        "BuiltIn Projects Init": 239,
+        "IGameMenuDll Bootstrap": 200,
+        "Load Project: PruneOrphans": 188,
+        "Load Project: Update ProjectFilesystem": 152,
+        "IToolsDll Bootstrap Init": 63,
+        "Load Project: Sync PackageManager": 46,
+        "Menu - Fonts": 36,
+        "Load Project: Generate Solution": 25,
+        "Load Project: Init Libraries": 16,
+        "Load Project: Init FileSystem": 5,
+        "Load Project: Reload Project": 4,
+        "FilesystemInit": 1,
+        "Tools - Compile Base Projects": 1,
+        "Load Project: Init Mounts": 1
+      },
+      "editor_state": {
+        "EngineVersion": "0000000",
+        "Project": "vallark",
+        "ProjectTitle": "VallArk",
+        "ActiveScene": "minimal",
+        "ActiveScenePath": "scenes/minimal.scene",
+        "SceneHasUnsavedChanges": false,
+        "IsPlaying": false,
+        "IsPaused": false,
+        "ToolCount": 490,
+        "IsCompiling": false,
+        "LastCompileSucceeded": true,
+        "LastCompileErrors": 0,
+        "Paths": {
+          "Engine": "/home/damian/.codex/worktrees/linux-engine-validation/sbox-public/game",
+          "Logs": "/home/damian/.codex/worktrees/linux-engine-validation/sbox-public/game/logs",
+          "ProjectRoot": "/home/damian/.codex/worktrees/linux-engine-validation/Survive-profile",
+          "ProjectSettings": "/home/damian/.codex/worktrees/linux-engine-validation/Survive-profile/ProjectSettings"
+        }
+      },
+      "failure": null,
+      "resource_discovery": {
+        "files_scanned": 87986,
+        "paths_indexed": 17406,
+        "game_resources": 3070,
+        "seconds": 6.32
+      }
+    }
+  ],
+  "warm_summary": {
+    "samples": 3,
+    "median_managed_startup_seconds": 116.086,
+    "median_readiness_wall_seconds": 119.39093356500234,
+    "readiness_range_seconds": [
+      90.51734773299904,
+      131.23629666000124
+    ]
+  },
+  "raw_results_directory": "/home/damian/.codex/worktrees/linux-engine-validation/sbox-public/validation-results",
+  "notes": [
+    "The preparation profile is valid, but its initial readiness probe failed to launch the CLI (exit 131); its 654.5-second status attempt is not a readiness measurement.",
+    "Warm samples use the corrected bundled-runtime CLI and report successful project compilation with zero errors.",
+    "Stages overlap; do not add parent and nested timings.",
+    "The original editor remained outside this recorder; the recorder terminated only its own isolated children.",
+    "Original managed files changed after the profiling window; the final baseline check cannot certify global immutability across unrelated activity.",
+    "The initial build required a 5.81 GB artifact restore; this installation cost is separate from editor load measurements."
+  ],
+  "format_passed": true,
+  "validation_runs": {
+    "initial_build": {
+      "wall_seconds": 476.94,
+      "exit_code": 0,
+      "max_rss_kb": 306876,
+      "time_report": "build.time.txt"
+    },
+    "final_build": {
+      "wall_seconds": 64.14,
+      "exit_code": 0,
+      "max_rss_kb": 288736,
+      "time_report": "build-cli-runtime.time.txt"
+    },
+    "full_tests": {
+      "wall_seconds": 115.13,
+      "exit_code": 1,
+      "max_rss_kb": 503208,
+      "time_report": "tests-serial-allocations.time.txt"
+    },
+    "final_format_verify": {
+      "wall_seconds": 90.86,
+      "exit_code": 0,
+      "max_rss_kb": 3143508,
+      "time_report": "format-final-cli.time.txt"
+    }
+  }
+}

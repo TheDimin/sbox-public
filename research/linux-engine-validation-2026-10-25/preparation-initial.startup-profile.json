@@ -1,0 +1,142 @@
+{
+  "GeneratedUtc": "2026-10-25T12:58:19.3929386Z",
+  "Process": "/home/damian/.codex/worktrees/linux-engine-validation/sbox-public/game/sbox-dev",
+  "Mode": "editor",
+  "Version": "0000000",
+  "TotalMilliseconds": 472308,
+  "Stages": [
+    {
+      "Name": "Time",
+      "Milliseconds": 472308
+    },
+    {
+      "Name": "Load Project",
+      "Milliseconds": 437976
+    },
+    {
+      "Name": "Load Project: CompileAllAssets",
+      "Milliseconds": 371187
+    },
+    {
+      "Name": "Load Project: Check Compiled Projects",
+      "Milliseconds": 35364
+    },
+    {
+      "Name": "TimeToMenu",
+      "Milliseconds": 34081
+    },
+    {
+      "Name": "AssetPipeline.CompileMilliseconds",
+      "Milliseconds": 26630
+    },
+    {
+      "Name": "IToolsDll Bootstrap Init",
+      "Milliseconds": 24408
+    },
+    {
+      "Name": "Tools - Compile Base Projects",
+      "Milliseconds": 24317
+    },
+    {
+      "Name": "Load Project: Load Game",
+      "Milliseconds": 21532
+    },
+    {
+      "Name": "AssetPipeline.CandidateScanMilliseconds",
+      "Milliseconds": 19765
+    },
+    {
+      "Name": "Load Project: Scan Asset Dependencies",
+      "Milliseconds": 12241
+    },
+    {
+      "Name": "Load Project: Builtin Projects",
+      "Milliseconds": 4017
+    },
+    {
+      "Name": "Load Project: Init AssetSystem",
+      "Milliseconds": 1352
+    },
+    {
+      "Name": "IGameMenuDll Bootstrap",
+      "Milliseconds": 951
+    },
+    {
+      "Name": "Menu PreInit Bootstrap",
+      "Milliseconds": 761
+    },
+    {
+      "Name": "Load Project: Register CustomAssetTypes",
+      "Milliseconds": 702
+    },
+    {
+      "Name": "Tools PreInit Bootstrap",
+      "Milliseconds": 699
+    },
+    {
+      "Name": "MenuBootstrap",
+      "Milliseconds": 537
+    },
+    {
+      "Name": "Static Constructors",
+      "Milliseconds": 510
+    },
+    {
+      "Name": "Game PreInit Bootstrap",
+      "Milliseconds": 401
+    },
+    {
+      "Name": "Load Project: DownloadCloudAssets",
+      "Milliseconds": 340
+    },
+    {
+      "Name": "Load Project: Sync PackageManager",
+      "Milliseconds": 269
+    },
+    {
+      "Name": "Load Project: PruneOrphans",
+      "Milliseconds": 249
+    },
+    {
+      "Name": "Load Project: Update ProjectFilesystem",
+      "Milliseconds": 178
+    },
+    {
+      "Name": "BuiltIn Projects Init",
+      "Milliseconds": 60
+    },
+    {
+      "Name": "Load Project: Generate Solution",
+      "Milliseconds": 52
+    },
+    {
+      "Name": "Menu - Fonts",
+      "Milliseconds": 51
+    },
+    {
+      "Name": "Load Project: Init Libraries",
+      "Milliseconds": 50
+    },
+    {
+      "Name": "Load Project: Init FileSystem",
+      "Milliseconds": 13
+    },
+    {
+      "Name": "Load Project: Reload Project",
+      "Milliseconds": 11
+    },
+    {
+      "Name": "FilesystemInit",
+      "Milliseconds": 1
+    }
+  ],
+  "Metrics": {
+    "Shaders.Reused": 0,
+    "Shaders.Compiled": 19,
+    "Shaders.Failed": 0,
+    "AssetPipeline.Mode": "legacy",
+    "AssetPipeline.WarmAllThumbnails": false,
+    "AssetPipeline.CompileCandidates": 46,
+    "package.ident": "identity.vallark"
+  }
+}

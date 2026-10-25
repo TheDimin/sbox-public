@@ -1,0 +1,1035 @@
+[
+  {
+    "variant": "A",
+    "name": "prepare-A",
+    "started_utc": "2026-10-25T15:29:16.709730+00:00",
+    "revision": "3a9b4eb11ddc5d0c92b6b952e5017be65f16a356",
+    "pid": 227234,
+    "editor_status": {
+      "EngineVersion": "0000000",
+      "Project": "vallark",
+      "ProjectTitle": "VallArk",
+      "ActiveScene": "minimal",
+      "ActiveScenePath": "scenes/minimal.scene",
+      "SceneHasUnsavedChanges": false,
+      "IsPlaying": false,
+      "IsPaused": false,
+      "ToolCount": 490,
+      "IsCompiling": false,
+      "LastCompileSucceeded": true,
+      "LastCompileErrors": 0,
+      "Paths": {
+        "Engine": "/home/damian/.codex/worktrees/linux-engine-baseline/sbox-public/game",
+        "Logs": "/home/damian/.codex/worktrees/linux-engine-baseline/sbox-public/game/logs",
+        "ProjectRoot": "/home/damian/.codex/worktrees/linux-engine-validation/Survive-profile",
+        "ProjectSettings": "/home/damian/.codex/worktrees/linux-engine-validation/Survive-profile/ProjectSettings"
+      }
+    },
+    "profile": {
+      "GeneratedUtc": "2026-10-25T15:30:45.2469055Z",
+      "Process": "/home/damian/.codex/worktrees/linux-engine-baseline/sbox-public/game/sbox-dev",
+      "Mode": "editor",
+      "Version": "0000000",
+      "TotalMilliseconds": 87356,
+      "Stages": [
+        {
+          "Name": "Time",
+          "Milliseconds": 87356
+        },
+        {
+          "Name": "Load Project",
+          "Milliseconds": 79506
+        },
+        {
+          "Name": "Load Project: Check Compiled Projects",
+          "Milliseconds": 30049
+        },
+        {
+          "Name": "Load Project: CompileAllAssets",
+          "Milliseconds": 24354
+        },
+        {
+          "Name": "AssetPipeline.CompileMilliseconds",
+          "Milliseconds": 23738
+        },
+        {
+          "Name": "Load Project: Load Game",
+          "Milliseconds": 16991
+        },
+        {
+          "Name": "Load Project: Scan Asset Dependencies",
+          "Milliseconds": 9190
+        },
+        {
+          "Name": "TimeToMenu",
+          "Milliseconds": 8544
+        },
+        {
+          "Name": "Load Project: Builtin Projects",
+          "Milliseconds": 2548
+        },
+        {
+          "Name": "Load Project: Init AssetSystem",
+          "Milliseconds": 1295
+        },
+        {
+          "Name": "Menu PreInit Bootstrap",
+          "Milliseconds": 686
+        },
+        {
+          "Name": "Load Project: DownloadCloudAssets",
+          "Milliseconds": 680
+        },
+        {
+          "Name": "Load Project: Register CustomAssetTypes",
+          "Milliseconds": 669
+        },
+        {
+          "Name": "Tools PreInit Bootstrap",
+          "Milliseconds": 656
+        },
+        {
+          "Name": "Static Constructors",
+          "Milliseconds": 530
+        },
+        {
+          "Name": "MenuBootstrap",
+          "Milliseconds": 337
+        },
+        {
+          "Name": "Game PreInit Bootstrap",
+          "Milliseconds": 334
+        },
+        {
+          "Name": "BuiltIn Projects Init",
+          "Milliseconds": 244
+        },
+        {
+          "Name": "Load Project: PruneOrphans",
+          "Milliseconds": 181
+        },
+        {
+          "Name": "IGameMenuDll Bootstrap",
+          "Milliseconds": 168
+        },
+        {
+          "Name": "Load Project: Update ProjectFilesystem",
+          "Milliseconds": 155
+        },
+        {
+          "Name": "Load Project: Sync PackageManager",
+          "Milliseconds": 95
+        },
+        {
+          "Name": "IToolsDll Bootstrap Init",
+          "Milliseconds": 69
+        },
+        {
+          "Name": "AssetPipeline.CompileCandidates",
+          "Milliseconds": 45
+        },
+        {
+          "Name": "Menu - Fonts",
+          "Milliseconds": 33
+        },
+        {
+          "Name": "Load Project: Init Libraries",
+          "Milliseconds": 30
+        },
+        {
+          "Name": "Load Project: Generate Solution",
+          "Milliseconds": 27
+        },
+        {
+          "Name": "Shaders.Reused",
+          "Milliseconds": 19
+        },
+        {
+          "Name": "Load Project: Init FileSystem",
+          "Milliseconds": 6
+        },
+        {
+          "Name": "Load Project: Reload Project",
+          "Milliseconds": 4
+        },
+        {
+          "Name": "FilesystemInit",
+          "Milliseconds": 1
+        },
+        {
+          "Name": "Tools - Compile Base Projects",
+          "Milliseconds": 1
+        }
+      ]
+    },
+    "ready_seconds": 90.21017044600012,
+    "startup_cpu_seconds": 298.71,
+    "startup_peak_rss_MiB": 4547.7734375,
+    "idle_cpu_percent_one_core": 60.43743298747776,
+    "idle_median_VmRSS_MiB": 5684.5859375,
+    "idle_median_RssAnon_MiB": 4839.2265625,
+    "idle_median_Pss_MiB": 5482.3291015625,
+    "idle_median_Private_Clean_MiB": 191.58203125,
+    "idle_median_Private_Dirty_MiB": 5259.9609375,
+    "perf_cpu": {
+      "Window": {
+        "Frames": 61,
+        "Seconds": 2.03
+      },
+      "CpuWork": {
+        "AvgMs": 5.13,
+        "P50Ms": 4.76,
+        "P99Ms": 13.09,
+        "MaxMs": 13.09
+      },
+      "CapWait": {
+        "AvgMs": 28.2,
+        "P50Ms": 28.57,
+        "P99Ms": 29.4,
+        "MaxMs": 29.4
+      },
+      "Frame": {
+        "AvgMs": 33.33,
+        "P50Ms": 33.33,
+        "P99Ms": 33.33,
+        "MaxMs": 33.33
+      },
+      "FrameStdDevMs": 0,
+      "Hitches": {
+        "Count": 0,
+        "OverMs": 66.7,
+        "WorstMs": 0
+      },
+      "NotPresentedPercent": 0,
+      "Cap": {
+        "CappedBy": "fps_max",
+        "CapFps": 30,
+        "Display": "borderless",
+        "VSync": true,
+        "RefreshRate": 59.86,
+        "FpsMax": 30,
+        "FpsMaxMenu": 30,
+        "FpsMaxInactive": 30
+      },
+      "Categories": [
+        {
+          "Name": "Render",
+          "AvgMs": 2.97,
+          "MaxMs": 15.01
+        },
+        {
+          "Name": "Editor",
+          "AvgMs": 1.57,
+          "MaxMs": 1.88
+        },
+        {
+          "Name": "UI",
+          "AvgMs": 0.44,
+          "MaxMs": 0.55
+        },
+        {
+          "Name": "Animation",
+          "AvgMs": 0.07,
+          "MaxMs": 0.1
+        },
+        {
+          "Name": "Input",
+          "AvgMs": 0.04,
+          "MaxMs": 0.06
+        },
+        {
+          "Name": "GcPause",
+          "AvgMs": 0.04,
+          "MaxMs": 4.68
+        },
+        {
+          "Name": "NavMesh",
+          "AvgMs": 0.03,
+          "MaxMs": 0.07
+        },
+        {
+          "Name": "Audio",
+          "AvgMs": 0.03,
+          "MaxMs": 0.04
+        },
+        {
+          "Name": "Async",
+          "AvgMs": 0.01,
+          "MaxMs": 0.17
+        }
+      ],
+      "TotalScopes": 13,
+      "Scopes": [
+        {
+          "Name": "Render",
+          "AvgMs": 2.97,
+          "MaxMs": 15.01
+        },
+        {
+          "Name": "Editor",
+          "AvgMs": 1.57,
+          "MaxMs": 1.88
+        },
+        {
+          "Name": "UI",
+          "AvgMs": 0.44,
+          "MaxMs": 0.55
+        },
+        {
+          "Name": "Build Command Lists",
+          "AvgMs": 0.23,
+          "MaxMs": 0.31
+        },
+        {
+          "Name": "Tick Panels",
+          "AvgMs": 0.15,
+          "MaxMs": 0.21
+        },
+        {
+          "Name": "Animation",
+          "AvgMs": 0.07,
+          "MaxMs": 0.1
+        },
+        {
+          "Name": "GenerateMips",
+          "AvgMs": 0.04,
+          "MaxMs": 0.09
+        },
+        {
+          "Name": "Input",
+          "AvgMs": 0.04,
+          "MaxMs": 0.06
+        },
+        {
+          "Name": "GcPause",
+          "AvgMs": 0.04,
+          "MaxMs": 4.68
+        },
+        {
+          "Name": "NavMesh",
+          "AvgMs": 0.03,
+          "MaxMs": 0.07
+        },
+        {
+          "Name": "Audio",
+          "AvgMs": 0.03,
+          "MaxMs": 0.04
+        },
+        {
+          "Name": "Tool Binds",
+          "AvgMs": 0.02,
+          "MaxMs": 0.04
+        },
+        {
+          "Name": "Tick Input",
+          "AvgMs": 0.02,
+          "MaxMs": 0.04
+        }
+      ]
+    },
+    "perf_memory": {
+      "ProcessMiB": 5664.4,
+      "ManagedHeapMiB": 1802.4,
+      "AllocatedMiBPerSecond": 2.4,
+      "GcPauseMsLastSecond": 0,
+      "GcLastSecond": {
+        "Gen0": 0,
+        "Gen1": 0,
+        "Gen2": 0
+      },
+      "HeapAtLastGc": {
+        "HeapMiB": 2473,
+        "FragmentedPercent": 27.3,
+        "CommittedMiB": 2504,
+        "Gen0MiB": 5.7,
+        "Gen1MiB": 0.3,
+        "Gen2MiB": 1923,
+        "LargeObjectsMiB": 543.7,
+        "PinnedObjects": 10,
+        "PendingFinalizers": 479
+      },
+      "VideoMemory": {
+        "UsedMiB": 0,
+        "BudgetMiB": null
+      },
+      "TexturePool": {
+        "UsedMiB": 595.7,
+        "LimitMiB": 6466,
+        "PinnedMiB": 127.2,
+        "PendingStreamingRequests": 0
+      },
+      "Allocations": null,
+      "ResourceIndex": [
+        {
+          "Type": "PrefabFile",
+          "Live": 2439,
+          "Max": 2439
+        },
+        {
+          "Type": "Clothing",
+          "Live": 200,
+          "Max": 200
+        },
+        {
+          "Type": "SoundEvent",
+          "Live": 71,
+          "Max": 71
+        },
+        {
+          "Type": "CraftingRecipeResource",
+          "Live": 66,
+          "Max": 66
+        },
+        {
+          "Type": "StatDefinition",
+          "Live": 54,
+          "Max": 54
+        },
+        {
+          "Type": "DecalDefinition",
+          "Live": 47,
+          "Max": 47
+        },
+        {
+          "Type": "MeleeWeaponResource",
+          "Live": 17,
+          "Max": 17
+        },
+        {
+          "Type": "Surface",
+          "Live": 17,
+          "Max": 17
+        },
+        {
+          "Type": "AudioEvent",
+          "Live": 14,
+          "Max": 14
+        },
+        {
+          "Type": "ClutterDefinition",
+          "Live": 14,
+          "Max": 14
+        },
+        {
+          "Type": "SurvivalItemResource",
+          "Live": 14,
+          "Max": 14
+        },
+        {
+          "Type": "SceneFile",
+          "Live": 13,
+          "Max": 13
+        },
+        {
+          "Type": "TerrainMaterial",
+          "Live": 11,
+          "Max": 11
+        },
+        {
+          "Type": "AudioParameter",
+          "Live": 10,
+          "Max": 10
+        },
+        {
+          "Type": "CraftingSourceResource",
+          "Live": 9,
+          "Max": 9
+        },
+        {
+          "Type": "ArmorItemResource",
+          "Live": 9,
+          "Max": 9
+        },
+        {
+          "Type": "PerkResource",
+          "Live": 8,
+          "Max": 8
+        },
+        {
+          "Type": "MapMarkerTypeResource",
+          "Live": 8,
+          "Max": 8
+        },
+        {
+          "Type": "DamageResponseProfileResource",
+          "Live": 7,
+          "Max": 7
+        },
+        {
+          "Type": "ItemLootTableResource",
+          "Live": 7,
+          "Max": 7
+        }
+      ],
+      "WeakIndex": [
+        {
+          "Type": "Texture",
+          "Live": 244,
+          "Max": 244
+        },
+        {
+          "Type": "SoundFile",
+          "Live": 199,
+          "Max": 199
+        },
+        {
+          "Type": "Model",
+          "Live": 110,
+          "Max": 110
+        },
+        {
+          "Type": "Material",
+          "Live": 13,
+          "Max": 13
+        },
+        {
+          "Type": "PhysicsGroupDescription",
+          "Live": 1,
+          "Max": 1
+        }
+      ],
+      "NativeResourceCache": [
+        {
+          "Type": "Texture",
+          "Live": 251,
+          "Max": 251
+        },
+        {
+          "Type": "Model",
+          "Live": 110,
+          "Max": 110
+        },
+        {
+          "Type": "Material",
+          "Live": 13,
+          "Max": 13
+        },
+        {
+          "Type": "PhysicsGroupDescription",
+          "Live": 5,
+          "Max": 5
+        }
+      ]
+    },
+    "cleanup_exit": -15
+  },
+  {
+    "variant": "B",
+    "name": "prepare-B",
+    "started_utc": "2026-10-25T15:31:57.160290+00:00",
+    "revision": "ca8f176b6f55ff216e04dceedfd8b898f64a3a90",
+    "pid": 227689,
+    "editor_status": {
+      "EngineVersion": "0000000",
+      "Project": "vallark",
+      "ProjectTitle": "VallArk",
+      "ActiveScene": "minimal",
+      "ActiveScenePath": "scenes/minimal.scene",
+      "SceneHasUnsavedChanges": false,
+      "IsPlaying": false,
+      "IsPaused": false,
+      "ToolCount": 490,
+      "IsCompiling": false,
+      "LastCompileSucceeded": true,
+      "LastCompileErrors": 0,
+      "Paths": {
+        "Engine": "/home/damian/.codex/worktrees/linux-engine-comparison/sbox-public/game",
+        "Logs": "/home/damian/.codex/worktrees/linux-engine-comparison/sbox-public/game/logs",
+        "ProjectRoot": "/home/damian/.codex/worktrees/linux-engine-validation/Survive-profile",
+        "ProjectSettings": "/home/damian/.codex/worktrees/linux-engine-validation/Survive-profile/ProjectSettings"
+      }
+    },
+    "profile": {
+      "GeneratedUtc": "2026-10-25T15:33:18.966397Z",
+      "Process": "/home/damian/.codex/worktrees/linux-engine-comparison/sbox-public/game/sbox-dev",
+      "Mode": "editor",
+      "Version": "0000000",
+      "TotalMilliseconds": 80660,
+      "Stages": [
+        {
+          "Name": "Time",
+          "Milliseconds": 80660
+        },
+        {
+          "Name": "Load Project",
+          "Milliseconds": 73120
+        },
+        {
+          "Name": "Load Project: Check Compiled Projects",
+          "Milliseconds": 29422
+        },
+        {
+          "Name": "Load Project: CompileAllAssets",
+          "Milliseconds": 18682
+        },
+        {
+          "Name": "AssetPipeline.CompileMilliseconds",
+          "Milliseconds": 18039
+        },
+        {
+          "Name": "Load Project: Load Game",
+          "Milliseconds": 17218
+        },
+        {
+          "Name": "AssetPipeline.CandidateScanMilliseconds",
+          "Milliseconds": 11865
+        },
+        {
+          "Name": "Load Project: Scan Asset Dependencies",
+          "Milliseconds": 9505
+        },
+        {
+          "Name": "TimeToMenu",
+          "Milliseconds": 8100
+        },
+        {
+          "Name": "Load Project: Builtin Projects",
+          "Milliseconds": 2597
+        },
+        {
+          "Name": "Load Project: Init AssetSystem",
+          "Milliseconds": 1274
+        },
+        {
+          "Name": "Tools PreInit Bootstrap",
+          "Milliseconds": 728
+        },
+        {
+          "Name": "Menu PreInit Bootstrap",
+          "Milliseconds": 678
+        },
+        {
+          "Name": "Load Project: Register CustomAssetTypes",
+          "Milliseconds": 668
+        },
+        {
+          "Name": "Static Constructors",
+          "Milliseconds": 475
+        },
+        {
+          "Name": "Load Project: DownloadCloudAssets",
+          "Milliseconds": 407
+        },
+        {
+          "Name": "MenuBootstrap",
+          "Milliseconds": 398
+        },
+        {
+          "Name": "Game PreInit Bootstrap",
+          "Milliseconds": 338
+        },
+        {
+          "Name": "BuiltIn Projects Init",
+          "Milliseconds": 234
+        },
+        {
+          "Name": "IGameMenuDll Bootstrap",
+          "Milliseconds": 188
+        },
+        {
+          "Name": "Load Project: PruneOrphans",
+          "Milliseconds": 184
+        },
+        {
+          "Name": "Load Project: Update ProjectFilesystem",
+          "Milliseconds": 145
+        },
+        {
+          "Name": "IToolsDll Bootstrap Init",
+          "Milliseconds": 75
+        },
+        {
+          "Name": "Load Project: Sync PackageManager",
+          "Milliseconds": 45
+        },
+        {
+          "Name": "Menu - Fonts",
+          "Milliseconds": 41
+        },
+        {
+          "Name": "Load Project: Generate Solution",
+          "Milliseconds": 25
+        },
+        {
+          "Name": "Load Project: Init Libraries",
+          "Milliseconds": 19
+        },
+        {
+          "Name": "Load Project: Init FileSystem",
+          "Milliseconds": 5
+        },
+        {
+          "Name": "Load Project: Reload Project",
+          "Milliseconds": 4
+        },
+        {
+          "Name": "FilesystemInit",
+          "Milliseconds": 1
+        },
+        {
+          "Name": "Tools - Compile Base Projects",
+          "Milliseconds": 1
+        }
+      ],
+      "Metrics": {
+        "Shaders.Reused": 19,
+        "Shaders.Compiled": 0,
+        "Shaders.Failed": 0,
+        "AssetPipeline.Mode": "legacy",
+        "AssetPipeline.WarmAllThumbnails": false,
+        "AssetPipeline.CompileCandidates": 45,
+        "package.ident": "identity.vallark"
+      }
+    },
+    "ready_seconds": 83.50916173799487,
+    "startup_cpu_seconds": 302.73,
+    "startup_peak_rss_MiB": 4993.49609375,
+    "idle_cpu_percent_one_core": 59.2997796951543,
+    "idle_median_VmRSS_MiB": 6130.08984375,
+    "idle_median_RssAnon_MiB": 5270.0546875,
+    "idle_median_Pss_MiB": 5920.1943359375,
+    "idle_median_Private_Clean_MiB": 191.1640625,
+    "idle_median_Private_Dirty_MiB": 5697.984375,
+    "perf_cpu": {
+      "Window": {
+        "Frames": 61,
+        "Seconds": 2.03
+      },
+      "CpuWork": {
+        "AvgMs": 5.11,
+        "P50Ms": 4.48,
+        "P99Ms": 16.64,
+        "MaxMs": 16.64
+      },
+      "CapWait": {
+        "AvgMs": 28.22,
+        "P50Ms": 28.85,
+        "P99Ms": 29.67,
+        "MaxMs": 29.67
+      },
+      "Frame": {
+        "AvgMs": 33.33,
+        "P50Ms": 33.33,
+        "P99Ms": 33.33,
+        "MaxMs": 33.33
+      },
+      "FrameStdDevMs": 0,
+      "Hitches": {
+        "Count": 0,
+        "OverMs": 66.7,
+        "WorstMs": 0
+      },
+      "NotPresentedPercent": 0,
+      "Cap": {
+        "CappedBy": "fps_max",
+        "CapFps": 30,
+        "Display": "borderless",
+        "VSync": true,
+        "RefreshRate": 59.86,
+        "FpsMax": 30,
+        "FpsMaxMenu": 30,
+        "FpsMaxInactive": 30
+      },
+      "Categories": [
+        {
+          "Name": "Render",
+          "AvgMs": 2.78,
+          "MaxMs": 14.68
+        },
+        {
+          "Name": "Editor",
+          "AvgMs": 1.48,
+          "MaxMs": 1.88
+        },
+        {
+          "Name": "UI",
+          "AvgMs": 0.43,
+          "MaxMs": 0.59
+        },
+        {
+          "Name": "Animation",
+          "AvgMs": 0.07,
+          "MaxMs": 0.11
+        },
+        {
+          "Name": "Input",
+          "AvgMs": 0.04,
+          "MaxMs": 0.09
+        },
+        {
+          "Name": "GcPause",
+          "AvgMs": 0.03,
+          "MaxMs": 3.8
+        },
+        {
+          "Name": "NavMesh",
+          "AvgMs": 0.03,
+          "MaxMs": 0.06
+        },
+        {
+          "Name": "Audio",
+          "AvgMs": 0.03,
+          "MaxMs": 0.05
+        },
+        {
+          "Name": "Async",
+          "AvgMs": 0.01,
+          "MaxMs": 0.19
+        }
+      ],
+      "TotalScopes": 13,
+      "Scopes": [
+        {
+          "Name": "Render",
+          "AvgMs": 2.78,
+          "MaxMs": 14.68
+        },
+        {
+          "Name": "Editor",
+          "AvgMs": 1.48,
+          "MaxMs": 1.88
+        },
+        {
+          "Name": "UI",
+          "AvgMs": 0.43,
+          "MaxMs": 0.59
+        },
+        {
+          "Name": "Build Command Lists",
+          "AvgMs": 0.24,
+          "MaxMs": 0.33
+        },
+        {
+          "Name": "Tick Panels",
+          "AvgMs": 0.14,
+          "MaxMs": 0.24
+        },
+        {
+          "Name": "Animation",
+          "AvgMs": 0.07,
+          "MaxMs": 0.11
+        },
+        {
+          "Name": "GenerateMips",
+          "AvgMs": 0.05,
+          "MaxMs": 0.08
+        },
+        {
+          "Name": "Input",
+          "AvgMs": 0.04,
+          "MaxMs": 0.09
+        },
+        {
+          "Name": "GcPause",
+          "AvgMs": 0.03,
+          "MaxMs": 3.8
+        },
+        {
+          "Name": "NavMesh",
+          "AvgMs": 0.03,
+          "MaxMs": 0.06
+        },
+        {
+          "Name": "Audio",
+          "AvgMs": 0.03,
+          "MaxMs": 0.05
+        },
+        {
+          "Name": "Tool Binds",
+          "AvgMs": 0.02,
+          "MaxMs": 0.05
+        },
+        {
+          "Name": "Tick Input",
+          "AvgMs": 0.02,
+          "MaxMs": 0.03
+        }
+      ]
+    },
+    "perf_memory": {
+      "ProcessMiB": 6115.7,
+      "ManagedHeapMiB": 1830.2,
+      "AllocatedMiBPerSecond": 2.8,
+      "GcPauseMsLastSecond": 0,
+      "GcLastSecond": {
+        "Gen0": 0,
+        "Gen1": 0,
+        "Gen2": 0
+      },
+      "HeapAtLastGc": {
+        "HeapMiB": 2752.7,
+        "FragmentedPercent": 33.7,
+        "CommittedMiB": 2782.5,
+        "Gen0MiB": 3,
+        "Gen1MiB": 0.4,
+        "Gen2MiB": 2211,
+        "LargeObjectsMiB": 538,
+        "PinnedObjects": 10,
+        "PendingFinalizers": 487
+      },
+      "VideoMemory": {
+        "UsedMiB": 0,
+        "BudgetMiB": null
+      },
+      "TexturePool": {
+        "UsedMiB": 595.7,
+        "LimitMiB": 6466,
+        "PinnedMiB": 127.2,
+        "PendingStreamingRequests": 0
+      },
+      "Allocations": null,
+      "ResourceIndex": [
+        {
+          "Type": "PrefabFile",
+          "Live": 2439,
+          "Max": 2439
+        },
+        {
+          "Type": "Clothing",
+          "Live": 200,
+          "Max": 200
+        },
+        {
+          "Type": "SoundEvent",
+          "Live": 71,
+          "Max": 71
+        },
+        {
+          "Type": "CraftingRecipeResource",
+          "Live": 66,
+          "Max": 66
+        },
+        {
+          "Type": "StatDefinition",
+          "Live": 54,
+          "Max": 54
+        },
+        {
+          "Type": "DecalDefinition",
+          "Live": 47,
+          "Max": 47
+        },
+        {
+          "Type": "MeleeWeaponResource",
+          "Live": 17,
+          "Max": 17
+        },
+        {
+          "Type": "Surface",
+          "Live": 17,
+          "Max": 17
+        },
+        {
+          "Type": "AudioEvent",
+          "Live": 14,
+          "Max": 14
+        },
+        {
+          "Type": "ClutterDefinition",
+          "Live": 14,
+          "Max": 14
+        },
+        {
+          "Type": "SurvivalItemResource",
+          "Live": 14,
+          "Max": 14
+        },
+        {
+          "Type": "SceneFile",
+          "Live": 13,
+          "Max": 13
+        },
+        {
+          "Type": "TerrainMaterial",
+          "Live": 11,
+          "Max": 11
+        },
+        {
+          "Type": "AudioParameter",
+          "Live": 10,
+          "Max": 10
+        },
+        {
+          "Type": "CraftingSourceResource",
+          "Live": 9,
+          "Max": 9
+        },
+        {
+          "Type": "ArmorItemResource",
+          "Live": 9,
+          "Max": 9
+        },
+        {
+          "Type": "PerkResource",
+          "Live": 8,
+          "Max": 8
+        },
+        {
+          "Type": "MapMarkerTypeResource",
+          "Live": 8,
+          "Max": 8
+        },
+        {
+          "Type": "DamageResponseProfileResource",
+          "Live": 7,
+          "Max": 7
+        },
+        {
+          "Type": "ItemLootTableResource",
+          "Live": 7,
+          "Max": 7
+        }
+      ],
+      "WeakIndex": [
+        {
+          "Type": "Texture",
+          "Live": 244,
+          "Max": 244
+        },
+        {
+          "Type": "SoundFile",
+          "Live": 199,
+          "Max": 199
+        },
+        {
+          "Type": "Model",
+          "Live": 110,
+          "Max": 110
+        },
+        {
+          "Type": "Material",
+          "Live": 13,
+          "Max": 13
+        },
+        {
+          "Type": "PhysicsGroupDescription",
+          "Live": 1,
+          "Max": 1
+        }
+      ],
+      "NativeResourceCache": [
+        {
+          "Type": "Texture",
+          "Live": 251,
+          "Max": 251
+        },
+        {
+          "Type": "Model",
+          "Live": 110,
+          "Max": 110
+        },
+        {
+          "Type": "Material",
+          "Live": 13,
+          "Max": 13
+        },
+        {
+          "Type": "PhysicsGroupDescription",
+          "Live": 5,
+          "Max": 5
+        }
+      ]
+    },
+    "cleanup_exit": -15
+  }
+]

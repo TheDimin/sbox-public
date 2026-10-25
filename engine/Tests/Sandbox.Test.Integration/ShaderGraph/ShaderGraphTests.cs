@@ -150,7 +150,7 @@ public class ShaderGraphTest
 			Console.WriteLine( $"Wrote shader to: {shaderPath}" );
 
 			// Find shadercompiler.exe
-			var shaderCompilerPath = Path.Combine( gameDir, "bin", "managed", "shadercompiler.exe" );
+			var shaderCompilerPath = Path.Combine( gameDir, "bin", "managed", OperatingSystem.IsWindows() ? "ShaderCompiler.exe" : "ShaderCompiler" );
 			Assert.IsTrue( File.Exists( shaderCompilerPath ), $"Shader compiler not found at: {shaderCompilerPath}" );
 
 			// Run shadercompiler.exe on this specific shadershader
@@ -185,7 +185,7 @@ public class ShaderGraphTest
 		using ( var process = new Process() )
 		{
 			process.StartInfo.FileName = shaderCompilerPath;
-			process.StartInfo.Arguments = shaderFile; // Just compile this specific shader
+			process.StartInfo.ArgumentList.Add( shaderFile ); // Just compile this specific shader
 			process.StartInfo.UseShellExecute = false;
 			process.StartInfo.RedirectStandardOutput = true;
 			process.StartInfo.RedirectStandardError = true;

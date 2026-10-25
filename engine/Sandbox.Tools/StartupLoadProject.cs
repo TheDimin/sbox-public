@@ -406,7 +406,11 @@ static class StartupLoadProject
 		Bootstrap.StartupTiming?.SetValue( "AssetPipeline.Mode", useFastEditorPath ? "fast-editor" : "legacy" );
 		Bootstrap.StartupTiming?.SetValue( "AssetPipeline.WarmAllThumbnails", warmAllThumbnails );
 
+		var candidateScan = Stopwatch.StartNew();
 		var gr = AssetSystem.All.Where( x => !x.IsTrivialChild && x.CanRecompile && !x.IsCompiledAndUpToDate ).ToArray();
+		Bootstrap.StartupTiming?.SetDuration( "AssetPipeline.CandidateScanMilliseconds", (int)candidateScan.ElapsedMilliseconds );
+		if ( candidateScan.Elapsed.TotalSeconds >= 2 )
+			Log.Info( $"Asset catalog check took {candidateScan.Elapsed.TotalSeconds:0.000}s; {gr.Length:N0} compile candidates" );
 		Bootstrap.StartupTiming?.SetValue( "AssetPipeline.CompileCandidates", gr.Length );
 
 		using var progress = new StartupImportProgress( "Asset imports", gr.Length, message => Log.Info( message ) );
@@ -454,7 +458,7 @@ static class StartupLoadProject
 				? $"Compiled {gr.Length:N0} assets in {sw.Elapsed.TotalSeconds:0.000}s"
 				: $"Compiling assets took {sw.Elapsed.TotalSeconds:0.000}s" );
 
-		Bootstrap.StartupTiming?.SetValue( "AssetPipeline.CompileMilliseconds", (int)sw.ElapsedMilliseconds );
+		Bootstrap.StartupTiming?.SetDuration( "AssetPipeline.CompileMilliseconds", (int)sw.ElapsedMilliseconds );
 
 		if ( !warmAllThumbnails )
 			return;
@@ -485,7 +489,7 @@ static class StartupLoadProject
 		Log.Info( $"Generated {missingThumbnailCount:N0} missing model previews; all {thumbnailAssets.Length:N0} previews checked in {thumbnailStart.Elapsed.TotalSeconds:0.000}s" );
 		Bootstrap.StartupTiming?.SetValue( "AssetPipeline.ThumbnailCandidates", thumbnailAssets.Length );
 		Bootstrap.StartupTiming?.SetValue( "AssetPipeline.ThumbnailsGenerated", missingThumbnailCount );
-		Bootstrap.StartupTiming?.SetValue( "AssetPipeline.ThumbnailMilliseconds", (int)thumbnailStart.ElapsedMilliseconds );
+		Bootstrap.StartupTiming?.SetDuration( "AssetPipeline.ThumbnailMilliseconds", (int)thumbnailStart.ElapsedMilliseconds );
 	}
 
 	/// <summary>

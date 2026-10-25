@@ -1,0 +1,30 @@
+{
+  "platform": "Linux-7.2.11-200.fc44.x86_64-x86_64-with-glibc2.43",
+  "cpu": "AMD Ryzen 7 5800H with Radeon Graphics",
+  "logical_cpu_count": 16,
+  "page_size": 4096,
+  "clock_ticks_per_second": 100,
+  "display": "private KWin virtual compositor, Xwayland :1",
+  "fps_max": 30,
+  "idle_settle_seconds": 15,
+  "idle_measurement_seconds": "Actual elapsed time is recorded per run; 45 intervals take about 48 seconds including /proc collection overhead",
+  "sample_interval_seconds": 1,
+  "sample_order": [
+    "prepare-A",
+    "prepare-B",
+    "A-1",
+    "B-1",
+    "B-2",
+    "A-2",
+    "A-3",
+    "B-3"
+  ],
+  "main": "3a9b4eb11ddc5d0c92b6b952e5017be65f16a356",
+  "candidate": "ca8f176b6f55ff216e04dceedfd8b898f64a3a90",
+  "baseline": "Committed main only; uncommitted input/viewport changes excluded from both variants",
+  "project_revision": "9e1a231aa0a6da4400e1ba952558e92f1dbdbaf2",
+  "original_editor_left_running": "No signals or binary writes; pre-existing editor/display exited during desktop preparation through external activity",
+  "display_resolution": "1280x720",
+  "idle_target_sampling_intervals": 45,
+  "idle_nominal_sleep_interval_seconds": 1
+}

@@ -110,7 +110,7 @@ public class GraphPanelPage : GalleryPage
 			HorizontalAxis.LabelRotation = -45;
 			HorizontalAxis.Ticks = new[] { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" }
 				.Select( ( label, index ) => new GraphAxis.TickMark( index + 0.5, label ) ).ToArray();
-			VerticalAxis.Label = "Temperature (°C)";
+			VerticalAxis.Label = "Temperature (Â°C)";
 			VerticalAxis.NumberFormat = "0";
 			VerticalAxis.TickInterval = 10;
 			SetView( Vector2.Zero, new( 12, 30 ) );
