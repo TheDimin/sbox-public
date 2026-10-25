@@ -39,7 +39,7 @@ internal static class Bootstrap
 	internal static void MarkMenuReady()
 	{
 		if ( StartupClock.IsRunning )
-			StartupTiming?.SetValue( "TimeToMenu", (int)StartupClock.ElapsedMilliseconds );
+			StartupTiming?.SetDuration( "TimeToMenu", (int)StartupClock.ElapsedMilliseconds );
 	}
 
 	/// <summary>
@@ -157,7 +157,7 @@ internal static class Bootstrap
 
 			StartupTiming = new Api.Events.EventRecord( $"StartupTiming.{(Application.IsEditor ? "Editor" : (Application.IsHeadless ? "Server" : "Game"))}" );
 			if ( timeToWindow is { } windowTime )
-				StartupTiming.SetValue( "TimeToWindow", windowTime );
+				StartupTiming.SetDuration( "TimeToWindow", windowTime );
 
 			StartupTiming.StartTimer( "Time" );
 

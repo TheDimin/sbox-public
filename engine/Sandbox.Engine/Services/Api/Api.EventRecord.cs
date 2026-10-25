@@ -19,10 +19,19 @@ internal static partial class Api
 			public string Version { get; set; }
 			public string Mode { get; set; }
 			public Dictionary<string, object> Data { get; set; } = new();
+			readonly HashSet<string> durationKeys = new();
+			internal IReadOnlyCollection<string> DurationKeys => durationKeys;
 
 			public void SetValue( string key, object value )
 			{
 				Data[key] = value;
+				durationKeys.Remove( key );
+			}
+
+			internal void SetDuration( string key, int milliseconds )
+			{
+				SetValue( key, milliseconds );
+				durationKeys.Add( key );
 			}
 
 			Dictionary<string, FastTimer> timers;
@@ -37,14 +46,14 @@ internal static partial class Api
 			{
 				if ( timers.TryGetValue( name, out var sw ) )
 				{
-					SetValue( $"{name}", (int)sw.ElapsedMilliSeconds );
+					SetDuration( name, (int)sw.ElapsedMilliSeconds );
 				}
 			}
 
 			public IDisposable ScopeTimer( string name )
 			{
 				var sw = FastTimer.StartNew();
-				return new DisposeAction( () => SetValue( $"{name}", (int)sw.ElapsedMilliSeconds ) );
+				return new DisposeAction( () => SetDuration( name, (int)sw.ElapsedMilliSeconds ) );
 			}
 
 			public void Submit( bool andFlush = false )
