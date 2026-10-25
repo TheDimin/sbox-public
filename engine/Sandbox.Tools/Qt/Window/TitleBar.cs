@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Editor;
 
@@ -81,7 +82,8 @@ internal class TitleBar : Widget
 		var center = Layout.AddRow( 1 );
 		center.Alignment = TextFlag.Center;
 
-		Grabber = center.Add( new Widget(), 1 );
+		Grabber = center.Add( OperatingSystem.IsLinux() && window is EditorMainWindow
+			? new LinuxTitleBarGrabber( window, ToggleMaximized ) : new Widget(), 1 );
 		Grabber.Layout = Layout.Row();
 		Grabber.Layout.Alignment = TextFlag.Center;
 		Grabber.FixedHeight = 35;
@@ -371,5 +373,52 @@ internal class TitleBarToggle : Widget
 
 			Paint.DrawRect( r );
 		}
+	}
+}
+
+/// <summary>
+/// Delegate Linux title-bar dragging to the compositor, preserving snapping and restore-on-drag.
+/// </summary>
+internal sealed class LinuxTitleBarGrabber : Widget
+{
+	readonly Widget window;
+	readonly Action toggleMaximized;
+
+	[DllImport( "libQt5Widgets.so.5", EntryPoint = "_ZNK7QWidget12windowHandleEv" )]
+	static extern IntPtr WindowHandle( IntPtr widget );
+
+	[DllImport( "libQt5Gui.so.5", EntryPoint = "_ZN7QWindow15startSystemMoveEv" )]
+	[return: MarshalAs( UnmanagedType.I1 )]
+	static extern bool StartSystemMove( IntPtr window );
+
+	internal LinuxTitleBarGrabber( Widget window, Action toggleMaximized )
+	{
+		this.window = window;
+		this.toggleMaximized = toggleMaximized;
+	}
+
+	protected override void OnMousePress( MouseEvent e )
+	{
+		if ( e.LeftMouseButton )
+		{
+			var handle = WindowHandle( window._widget );
+			if ( handle != IntPtr.Zero && StartSystemMove( handle ) )
+			{
+				e.Accepted = true;
+				return;
+			}
+		}
+		base.OnMousePress( e );
+	}
+
+	protected override void OnDoubleClick( MouseEvent e )
+	{
+		if ( e.LeftMouseButton )
+		{
+			toggleMaximized();
+			e.Accepted = true;
+			return;
+		}
+		base.OnDoubleClick( e );
 	}
 }
