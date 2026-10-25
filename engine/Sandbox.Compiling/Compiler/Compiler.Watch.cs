@@ -9,8 +9,14 @@ partial class Compiler
 	/// </summary>
 	public void WatchForChanges()
 	{
+		foreach ( var existing in sourceWatchers ) existing.Dispose();
+		sourceWatchers.Clear();
+
 		foreach ( var fs in SourceLocations )
 		{
+			if ( fs is LocalFileSystem local )
+				local.ConfigureWatch( $"compiler:{Name}", _config.IgnoreFolders.Append( "obj" ) );
+
 			var watcher = fs.Watch( "*.*" );
 			watcher.OnChangedFile += OnFileChanged;
 			sourceWatchers.Add( watcher );
@@ -22,7 +28,8 @@ partial class Compiler
 		if ( !file.EndsWith( ".cs", StringComparison.OrdinalIgnoreCase ) && !file.EndsWith( ".razor", StringComparison.OrdinalIgnoreCase ) )
 			return;
 
-		if ( file.Contains( "/obj/", StringComparison.OrdinalIgnoreCase ) )
+		var folders = System.IO.Path.GetDirectoryName( file ).Split( new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries );
+		if ( folders.Any( x => x.Equals( "obj", StringComparison.OrdinalIgnoreCase ) || _config.IgnoreFolders.Contains( x, StringComparer.OrdinalIgnoreCase ) ) )
 			return;
 
 		MarkForRecompile();

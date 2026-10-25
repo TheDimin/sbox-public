@@ -40,6 +40,7 @@ public sealed class FileWatch : IDisposable
 	public List<string> Changes { get; private set; }
 
 	private Regex regexTest;
+	private readonly string pattern = "*";
 	public List<string> watchFiles;
 
 
@@ -47,6 +48,7 @@ public sealed class FileWatch : IDisposable
 	{
 		this.system = system;
 		Enabled = true;
+		this.pattern = path;
 
 		var pattern = Regex.Escape( path.ToLower() ).Replace( @"\*", ".*" ).Replace( @"\?", "." );
 		regexTest = new Regex( $"^{pattern}$", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled );
@@ -65,6 +67,14 @@ public sealed class FileWatch : IDisposable
 
 		system?.RemoveWatcher( this );
 		system = null;
+	}
+
+	internal string Describe()
+	{
+		var callbacks = (OnChanges?.GetInvocationList() ?? Array.Empty<Delegate>())
+			.Concat( OnChangedFile?.GetInvocationList() ?? Array.Empty<Delegate>() )
+			.Select( callback => $"{callback.Method.DeclaringType?.FullName}.{callback.Method.Name}" ).Distinct();
+		return $"{pattern}: {string.Join( ",", callbacks )}";
 	}
 
 	private bool InterestedInFile( string file )
@@ -126,6 +136,7 @@ public sealed class FileWatch : IDisposable
 	/// </summary>
 	public event Action<string> OnChangedFile;
 	internal static RealTimeSince TimeSinceLastChange;
+	internal static RealTimeSince TimeSinceFirstChange;
 
 	/// <summary>
 	/// This is used for unit tests, to assure that a change is detected
@@ -160,9 +171,10 @@ public sealed class FileWatch : IDisposable
 	// TODO - move this into BaseFileSystem
 	public static void Tick()
 	{
-		Dictionary<BaseFileSystem, List<string>> changes = null;
+		BaseFileSystem.RetryUnavailableWatchers();
+		SharedPhysicalFileWatcher.Tick();
 
-		if ( TimeSinceLastChange < 0.1f ) return;
+		Dictionary<BaseFileSystem, List<string>> changes = null;
 
 		// Don't lock and loop WithChanges 
 		// incase a callback triggers a changed file
@@ -184,6 +196,10 @@ public sealed class FileWatch : IDisposable
 				return;
 			}
 
+			// Keep the quiet-period debounce, but don't let a busy filesystem postpone
+			// hot reload indefinitely. Scoped suppression still takes precedence.
+			if ( TimeSinceLastChange < 0.1f && TimeSinceFirstChange < 0.5f )
+				return;
 
 			if ( WithChanges.Count == 0 ) return;
 
@@ -204,7 +220,9 @@ public sealed class FileWatch : IDisposable
 
 		foreach ( var filesystem in changes )
 		{
-			foreach ( var watcher in filesystem.Key.watchers.ToArray() )
+			FileWatch[] subscribers;
+			lock ( WithChanges ) subscribers = filesystem.Key.watchers.ToArray();
+			foreach ( var watcher in subscribers )
 			{
 				watcher.TriggerCallback( filesystem.Value );
 
