@@ -6,12 +6,17 @@ through a small bootstrap skill ([`bootstrap/sbox`](../../Launcher/SboxCli/boots
 also published as `Facepunch/sbox-skills`), installed for the user. The editor offers it once when
 it finds Claude Code or Codex; Editor Preferences › AI Agents and `sbox-cli --skill-install` manage it.
 
-`game/bin/managed/sbox-cli.exe` is a .NET 10 console application that keeps one MCP connection
-open over stdin/stdout, or makes a single call with `--call`. It has no engine dependencies of its own. Editors expose a local
+`game/bin/managed/sbox-cli.exe` (`sbox-cli` on Linux/macOS) is a .NET 10 console application that
+keeps one MCP connection open over stdin/stdout, or makes a single call with `--call`.
+It has no engine dependencies of its own. Editors expose a local
 named pipe by default, controlled by **Project Settings > AI > Enable MCP Communication**;
 games expose one when launched with `-mcp`. The pipe is restricted to the current
 OS user and named using the process ID and start time. On Windows the CLI also verifies the
 server's actual PID. Multiple editors and games can therefore run independently without TCP ports.
+
+Linux uses the kernel start tick count from `/proc/<pid>/stat`, avoiding wall-clock conversion
+differences between .NET processes. CLI and engine builds must agree on this endpoint identity;
+restart older Linux editors after updating both components.
 
 The preference is stored in the `.sbproj` and shared with collaborators. Saving MCP as disabled
 immediately closes connected transports and cancels pending work; already running scripts must

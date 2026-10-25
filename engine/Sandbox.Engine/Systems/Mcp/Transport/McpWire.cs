@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -17,6 +19,21 @@ internal sealed class McpWire( Stream input, int maxBytes = 8 * 1024 * 1024 )
 	static readonly UTF8Encoding Encoding = new( false, true );
 
 	internal static string PipeName( int pid, long startTime ) => $"sbox-mcp-{pid}-{startTime:x}";
+
+	internal static string PipeName( Process process )
+	{
+		if ( !OperatingSystem.IsLinux() )
+			return PipeName( process.Id, process.StartTime.ToUniversalTime().Ticks );
+
+		// Linux Process.StartTime converts the monotonic start time to wall-clock time.
+		// That conversion can differ between runtimes, so a client can derive a different
+		// pipe name from the server. Use the kernel's stable start tick count instead.
+		var stat = File.ReadAllText( $"/proc/{process.Id}/stat" );
+		// comm is parenthesized and may itself contain spaces or parentheses.
+		var fields = stat[(stat.LastIndexOf( ')' ) + 2)..].Split( ' ', StringSplitOptions.RemoveEmptyEntries );
+		var startTime = long.Parse( fields[19], CultureInfo.InvariantCulture ); // field 22, after pid and comm
+		return PipeName( process.Id, startTime );
+	}
 
 	internal async Task<string> ReadAsync( CancellationToken cancellation )
 	{

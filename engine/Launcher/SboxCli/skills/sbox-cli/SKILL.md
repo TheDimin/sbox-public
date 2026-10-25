@@ -18,7 +18,8 @@ listener and no port to configure.
 
 ## 1. Find sbox-cli
 
-It is `<engine>/bin/managed/sbox-cli.exe`, where `<engine>` is the folder containing `sbox.exe`:
+It is `<engine>/bin/managed/sbox-cli.exe` on Windows and
+`<engine>/bin/managed/sbox-cli` on Linux/macOS, where `<engine>` is the game's engine directory:
 
 1. The `FACEPUNCH_ENGINE` environment variable. The launcher sets it as a Windows **user**
    variable, so a shell started before that may lack it — check the user scope too
@@ -26,6 +27,9 @@ It is `<engine>/bin/managed/sbox-cli.exe`, where `<engine>` is the folder contai
 2. The default Steam folder, `C:\Program Files (x86)\Steam\steamapps\common\sbox`.
 3. The folder of a running `sbox-dev.exe`.
 4. Ask the user.
+
+On Linux/macOS, also check the engine checkout's `game` directory and the folder of a running
+`sbox-dev` process. The Steam library location can differ from the Windows default above.
 
 Don't hard-code the result into project files; it differs per machine.
 
