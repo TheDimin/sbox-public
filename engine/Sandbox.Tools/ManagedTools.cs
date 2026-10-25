@@ -187,6 +187,11 @@ internal static class ManagedTools
 		var ev = new KeyEvent( keyEvent );
 		KeyCode key = ev.Key;
 
+		// Consume Qt focus traversal before it reaches the native borrowed viewport.
+		// The dedicated XInput stream still delivers Tab to the game exactly once.
+		if ( Sandbox.Engine.WindowInput.UsesQtInput && GameMode.PlayWidget is { IsFocused: true }
+			&& key is KeyCode.Tab or KeyCode.Backtab ) return true;
+
 		if ( key == KeyCode.AsciiTilde || key == KeyCode.QuoteLeft )
 		{
 			EditorWindow.Focus();

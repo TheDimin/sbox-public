@@ -33,6 +33,9 @@ internal static class WindowInput
 		InputSystem.SetGameFocus( focused );
 	}
 
+	internal static bool UsesQtInput => OperatingSystem.IsLinux() && IToolsDll.Current is not null
+		&& Environment.GetEnvironmentVariable( "SBOX_LINUX_QT_INPUT" ) == "1";
+
 	internal static bool HasMouseFocus() => focused;
 	internal static bool IsAppActive() => active;
 	internal static bool GetRelativeMouseMode() => relative;
@@ -93,8 +96,13 @@ internal static class WindowInput
 
 		var window = InputWindow;
 		value &= active && focused;
-		var actual = SdlWindow.SetRelativeMouseMode( window, value );
-		if ( relative == actual ) return;
+		var actual = UsesQtInput ? value : SdlWindow.SetRelativeMouseMode( window, value );
+		if ( relative == actual )
+		{
+			// Qt may release a native grab while a popup is open; reconcile the requested mode.
+			if ( UsesQtInput ) IToolsDll.Current?.SetRelativeMouseOverride( actual );
+			return;
+		}
 		relative = actual;
 		IToolsDll.Current?.SetRelativeMouseOverride( relative );
 	}
@@ -148,6 +156,7 @@ internal static class WindowInput
 		if ( !active || !focused ) return;
 
 		if ( window == IntPtr.Zero ) window = focusWindow;
+		if ( UsesQtInput && window == focusWindow && IToolsDll.Current.TrySetGameCursorPosition( x, y ) ) return;
 		if ( window != IntPtr.Zero ) Sdl.WarpMouseInWindow( window, x, y );
 	}
 

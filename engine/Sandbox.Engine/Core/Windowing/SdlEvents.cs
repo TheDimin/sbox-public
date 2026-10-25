@@ -54,6 +54,11 @@ internal static class SdlEvents
 			return;
 		}
 
+		// The opt-in Linux Qt path owns embedded input. Owned panel windows were routed above.
+		if ( WindowInput.UsesQtInput && e.Type is Sdl.EventType.KeyDown or Sdl.EventType.KeyUp
+			or Sdl.EventType.TextInput or Sdl.EventType.TextEditing or Sdl.EventType.MouseMotion
+			or Sdl.EventType.MouseButtonDown or Sdl.EventType.MouseButtonUp or Sdl.EventType.MouseWheel ) return;
+
 		switch ( e.Type )
 		{
 			case Sdl.EventType.WindowResized:

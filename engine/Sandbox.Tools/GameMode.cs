@@ -48,6 +48,7 @@ public static class GameMode
 		g_pRenderDevice.SetSwapChainIsMainWindow( widget.SwapChain, true );
 
 		_inPlay = widget;
+		LinuxViewportInput.Start( widget );
 
 		// Starting play through automation must not activate a background or minimized editor.
 		widget.Focus( activateWindow: false );
@@ -62,6 +63,7 @@ public static class GameMode
 			return;
 
 		var widget = _inPlay;
+		LinuxViewportInput.Stop();
 		_inPlay = null;
 
 		widget.Focused -= WidgetFocused;
@@ -91,6 +93,7 @@ public static class GameMode
 		if ( _inPlay is null )
 			return;
 
+		LinuxViewportInput.FocusChanged( true );
 		Sandbox.Engine.WindowInput.OnEditorGameFocusChange( _playWindow, true );
 	}
 
@@ -102,6 +105,7 @@ public static class GameMode
 		if ( _inPlay is null )
 			return;
 
+		LinuxViewportInput.FocusChanged( false );
 		Sandbox.Engine.WindowInput.OnEditorGameFocusChange( _playWindow, false );
 	}
 

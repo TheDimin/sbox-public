@@ -56,6 +56,30 @@ public class SceneRenderingWidget : Frame
 		All.Add( this );
 	}
 
+	protected override void OnMousePress( MouseEvent e )
+	{
+		if ( LinuxViewportInput.OnButton( this, e, true ) ) return;
+		base.OnMousePress( e );
+	}
+
+	protected override void OnMouseReleased( MouseEvent e )
+	{
+		if ( LinuxViewportInput.OnButton( this, e, false ) ) return;
+		base.OnMouseReleased( e );
+	}
+
+	protected override void OnMouseMove( MouseEvent e )
+	{
+		if ( LinuxViewportInput.OnMotion( this, e ) ) return;
+		base.OnMouseMove( e );
+	}
+
+	protected override void OnMouseWheel( WheelEvent e )
+	{
+		if ( LinuxViewportInput.OnWheel( this, e ) ) return;
+		base.OnMouseWheel( e );
+	}
+
 	internal override void OnDestroyingLater()
 	{
 		ReleaseSwapChain();

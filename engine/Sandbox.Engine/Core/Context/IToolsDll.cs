@@ -29,6 +29,9 @@ internal unsafe interface IToolsDll
 	/// </summary>
 	public void SetRelativeMouseOverride( bool relative );
 
+	/// <summary>Lets an external editor input owner warp the game cursor in physical viewport pixels.</summary>
+	public bool TrySetGameCursorPosition( int x, int y ) => false;
+
 	/// <summary>
 	/// Whether the editor application is in the foreground, regardless of play-widget focus.
 	/// </summary>

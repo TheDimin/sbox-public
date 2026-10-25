@@ -20,7 +20,13 @@ internal class ToolsDll : IToolsDll
 	}
 
 	/// <inheritdoc />
-	public void SetRelativeMouseOverride( bool relative ) => g_pToolFramework2.SetOverrideCursor( relative );
+	public void SetRelativeMouseOverride( bool relative )
+	{
+		if ( WindowInput.UsesQtInput ) Editor.LinuxViewportInput.SetCapture( relative );
+		else g_pToolFramework2.SetOverrideCursor( relative );
+	}
+
+	public bool TrySetGameCursorPosition( int x, int y ) => WindowInput.UsesQtInput && Editor.LinuxViewportInput.SetCursorPosition( x, y );
 
 	/// <inheritdoc />
 	public bool IsApplicationActive => Native.QApp.IsApplicationActive();
