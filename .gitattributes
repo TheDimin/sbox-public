@@ -16,3 +16,7 @@ game/**/*.cs text=auto
 *.shader linguist-language=HLSL
 *.fxc linguist-language=HLSL
 src/thirdparty/* linguist-vendored
+
+# Match the C#/Razor line-ending policy on every checkout platform.
+*.cs text eol=crlf
+*.razor text eol=crlf
