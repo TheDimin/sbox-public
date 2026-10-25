@@ -14,6 +14,8 @@
 		<Compile Include="..\..\..\game\addons\menu\Code\MenuUI\Front\FriendPartyGrouping.cs" Link="Menu\FriendPartyGrouping.cs" />
 		<Compile Include="..\..\..\game\addons\tools\Code\Editor\AssetPicker\AssetPickerState.cs" Link="Editor\AssetPickerState.cs" />
 		<Compile Include="..\..\Launcher\SboxCli\ProjectLaunchCoordinator.cs" Link="Launcher\ProjectLaunchCoordinator.cs" />
+		<Compile Include="..\..\Tools\SboxBuild\Steps\ArtifactManifest.cs" Link="Build\ArtifactManifest.cs" />
+		<Compile Include="..\..\Tools\SboxBuild\Steps\ArtifactLinks.cs" Link="Build\ArtifactLinks.cs" />
 	</ItemGroup>
 
 	<ItemGroup>

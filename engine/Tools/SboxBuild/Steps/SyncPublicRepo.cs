@@ -5,30 +5,6 @@ using static Facepunch.Constants;
 
 namespace Facepunch.Steps;
 
-internal record ArtifactFileInfo
-{
-	[JsonPropertyName( "path" )]
-	public string Path { get; init; }
-
-	[JsonPropertyName( "sha256" )]
-	public string Sha256 { get; init; }
-
-	[JsonPropertyName( "size" )]
-	public long Size { get; init; }
-}
-
-internal record ArtifactManifest
-{
-	[JsonPropertyName( "commit" )]
-	public string Commit { get; init; }
-
-	[JsonPropertyName( "timestamp" )]
-	public string Timestamp { get; init; }
-
-	[JsonPropertyName( "files" )]
-	public List<ArtifactFileInfo> Files { get; init; }
-}
-
 /// <summary>
 /// Syncs the master branch and tags to the public repository by filtering specific paths
 /// </summary>
@@ -233,6 +209,7 @@ internal class SyncPublicRepo( bool dryRun = false )
 
 			var uploadedArtifacts = new List<ArtifactFileInfo>();
 			var uniqueArtifacts = AddToManifest( buildArtifacts.Concat( lfsArtifacts ), uploadedArtifacts );
+			_ = new ArtifactLinks( repositoryRoot, uploadedArtifacts );
 
 			if ( !TryUploadArtifacts( uniqueArtifacts, remoteBase, dryRun ) )
 			{
@@ -396,7 +373,7 @@ internal class SyncPublicRepo( bool dryRun = false )
 			.Select( path => (RepoPath: ToForwardSlash( Path.GetRelativePath( repositoryRoot, path ) ), AbsolutePath: path) )
 			.ToList();
 
-		return HashArtifacts( candidates );
+		return HashArtifacts( repositoryRoot, candidates );
 	}
 
 	private static IReadOnlyCollection<string> GetCompiledAssetFiles( string repositoryRoot )
@@ -767,7 +744,7 @@ internal class SyncPublicRepo( bool dryRun = false )
 	/// <summary>
 	/// Hashes the candidates in parallel. Returns null if any is missing or forbidden.
 	/// </summary>
-	private static List<(string SourcePath, ArtifactFileInfo Artifact)> HashArtifacts( IReadOnlyList<(string RepoPath, string AbsolutePath)> candidates )
+	private static List<(string SourcePath, ArtifactFileInfo Artifact)> HashArtifacts( string repositoryRoot, IReadOnlyList<(string RepoPath, string AbsolutePath)> candidates )
 	{
 		foreach ( var (repoPath, absolutePath) in candidates )
 		{
@@ -784,6 +761,8 @@ internal class SyncPublicRepo( bool dryRun = false )
 				return null;
 			}
 		}
+
+		var links = ArtifactLinks.Capture( repositoryRoot, candidates );
 
 		// Hashing is CPU+IO bound and benefits from concurrency
 		var results = new (string SourcePath, ArtifactFileInfo Artifact)?[candidates.Count];
@@ -809,7 +788,8 @@ internal class SyncPublicRepo( bool dryRun = false )
 			{
 				Path = repoPath,
 				Sha256 = Utility.CalculateSha256( resolvedPath ),
-				Size = fileInfo.Length
+				Size = fileInfo.Length,
+				LinkTarget = links[i].LinkTarget
 			});
 		} );
 

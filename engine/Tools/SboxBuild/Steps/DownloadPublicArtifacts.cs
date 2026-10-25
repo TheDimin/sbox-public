@@ -146,8 +146,6 @@ internal class DownloadPublicArtifacts( bool nativeBinariesOnly = false, bool sh
 			return ExitCode.Failure;
 		}
 		repoRoot = Path.TrimEndingDirectorySeparator( Path.GetFullPath( repoRoot ) );
-		var rootPrefix = Path.EndsInDirectorySeparator( repoRoot ) ? repoRoot : repoRoot + Path.DirectorySeparatorChar;
-		var pathComparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 		var pending = new ConcurrentBag<(ArtifactFileInfo Entry, string Destination)>();
 		var progress = new DownloadProgress();
 		var skippedCount = 0;
@@ -160,6 +158,13 @@ internal class DownloadPublicArtifacts( bool nativeBinariesOnly = false, bool sh
 			.Where( candidate => !candidate.DirectoryName.Equals( platform, StringComparison.OrdinalIgnoreCase ) )
 			.Select( candidate => $"game/bin/{candidate.DirectoryName}/" )
 			.ToArray();
+		var selected = manifest.Files.Where( entry =>
+		{
+			var path = ArtifactLinks.Normalize( entry.Path );
+			return !otherPlatformPrefixes.Any( prefix => path.StartsWith( prefix, StringComparison.OrdinalIgnoreCase ) ) && isWanted( path );
+		} ).ToArray();
+		// Validate all selected paths and link chains before any download or replacement.
+		var links = new ArtifactLinks( repoRoot, selected );
 		Log.Detail( $"Restoring public artifacts for {platform}." );
 
 		BuildDisplay.Status( "Checking local artifacts" );
@@ -178,10 +183,10 @@ internal class DownloadPublicArtifacts( bool nativeBinariesOnly = false, bool sh
 					return;
 				}
 
-				var relative = entry.Path.Replace( '/', Path.DirectorySeparatorChar ).Replace( '\\', Path.DirectorySeparatorChar );
-				var destination = Path.GetFullPath( Path.Combine( repoRoot, relative ) );
-				if ( Path.IsPathRooted( relative ) || relative.Contains( ':' ) || !destination.StartsWith( rootPrefix, pathComparison ) )
-					throw new InvalidOperationException( $"Artifact path is outside the repository: '{entry.Path}'." );
+				if ( entry.LinkTarget is not null )
+					return; // Restored after all regular payloads have been verified.
+
+				var destination = links.Destination( entry.Path );
 
 				if ( knownState.TryGetValue( entry.Path, out var known ) && IsUnchanged( destination, known, entry ) )
 				{
@@ -191,7 +196,7 @@ internal class DownloadPublicArtifacts( bool nativeBinariesOnly = false, bool sh
 					return;
 				}
 
-				if ( FileMatchesHash( destination, entry.Sha256, message => progress.Messages.Enqueue( (true, message) ) )
+				if ( new FileInfo( destination ).LinkTarget is null && FileMatchesHash( destination, entry.Sha256, message => progress.Messages.Enqueue( (true, message) ) )
 					&& (entry.Size <= 0 || new FileInfo( destination ).Length == entry.Size) )
 				{
 					newState[entry.Path] = Snapshot( entry, destination );
@@ -219,6 +224,7 @@ internal class DownloadPublicArtifacts( bool nativeBinariesOnly = false, bool sh
 		if ( pending.IsEmpty )
 		{
 			BuildDisplay.Progress( manifest.Files.Count, manifest.Files.Count, "Local verification complete" );
+			links.Restore();
 			SaveState( repoRoot, manifest.Commit, newState.Values );
 			Log.Summary( $"Public artifacts up to date: no downloads needed ({skippedCount} current or filtered, {cachedCount} unchanged since the last run)." );
 			return ExitCode.Success;
@@ -288,6 +294,8 @@ internal class DownloadPublicArtifacts( bool nativeBinariesOnly = false, bool sh
 			Log.Summary( $"Public artifacts: {progress.Verified} updated, {skippedCount} current or filtered, {progress.Failed} failed." );
 			return ExitCode.Failure;
 		}
+
+		links.Restore();
 
 		Log.Summary( $"Public artifacts restored: {progress.Verified} updated, {skippedCount} current or filtered; " +
 			$"{Utility.FormatSize( progress.UsefulBytes )} useful, {Utility.FormatSize( progress.TransferredBytes )} transferred in {clock.Elapsed.TotalSeconds:0.0}s." );
@@ -560,7 +568,7 @@ internal class DownloadPublicArtifacts( bool nativeBinariesOnly = false, bool sh
 			return false;
 
 		var info = new FileInfo( destination );
-		if ( !info.Exists || info.Length != known.Size )
+		if ( info.LinkTarget is not null || !info.Exists || info.Length != known.Size )
 			return false;
 		if ( entry.Size > 0 && info.Length != entry.Size )
 			return false;
