@@ -1,0 +1,12 @@
+{
+  "linux-engine-baseline": {
+    "libengine2.so": "d007d16658daae64a879761ee17a77ae40e087be9d93bbdae3aa62896243a433",
+    "libtier0.so": "5f3ae1e20805ca59d5af3d95c95df0cec7f488ae17c64d75b9bf602c9d3c331f",
+    "libSDL3.so.0.4.14": "93ca94040384ab27db123f4e2697695c5eb57d1d0b876c9d944e52a579e9ee6b"
+  },
+  "linux-engine-comparison": {
+    "libengine2.so": "d007d16658daae64a879761ee17a77ae40e087be9d93bbdae3aa62896243a433",
+    "libtier0.so": "5f3ae1e20805ca59d5af3d95c95df0cec7f488ae17c64d75b9bf602c9d3c331f",
+    "libSDL3.so.0.4.14": "93ca94040384ab27db123f4e2697695c5eb57d1d0b876c9d944e52a579e9ee6b"
+  }
+}
