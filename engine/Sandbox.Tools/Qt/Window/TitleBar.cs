@@ -186,6 +186,20 @@ internal class TitleBar : Widget
 			MaximizeButton._widget,
 			CloseButton._widget
 		);
+
+		if ( OperatingSystem.IsLinux() && Window is EditorMainWindow )
+		{
+			// Linux otherwise shows both the compositor decoration and this title bar.
+			// Preserve visibility when Qt recreates the native window for new flags.
+			if ( (Window.WindowFlags & WindowFlags.FramelessWindowHint) == 0 )
+			{
+				var visible = Window.Visible;
+				Window.WindowFlags |= WindowFlags.FramelessWindowHint;
+				Window.Visible = visible;
+			}
+			MinimizeButton.FixedSize = MaximizeButton.FixedSize = CloseButton.FixedSize = new Vector2( 40, 32 );
+			MinimizeButton.Visible = MaximizeButton.Visible = CloseButton.Visible = true;
+		}
 	}
 }
 

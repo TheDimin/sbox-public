@@ -65,6 +65,18 @@ internal class WindowControlButton : Widget
 		if ( !Enabled )
 			Paint.SetPen( Theme.Text.WithAlpha( 0.5f ) );
 
-		Paint.DrawText( LocalRect, new string( (char)Icon, 1 ) );
+		if ( OperatingSystem.IsLinux() )
+		{
+			// Segoe window-control glyphs are only installed on Windows.
+			Paint.DrawIcon( LocalRect, Icon switch
+			{
+				WindowControlIcon.Minimize => "remove",
+				WindowControlIcon.Maximize => "crop_square",
+				WindowControlIcon.Restore => "filter_none",
+				_ => "close"
+			}, 14.0f );
+		}
+		else
+			Paint.DrawText( LocalRect, new string( (char)Icon, 1 ) );
 	}
 }
