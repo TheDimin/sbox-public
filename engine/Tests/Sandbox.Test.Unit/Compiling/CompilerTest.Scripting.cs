@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 
 namespace CompilingTests;
 
@@ -10,7 +10,7 @@ public partial class CompilerTest
 		using var access = new AccessControl();
 		using var group = new CompileGroup( "SandboxScript" ) { AccessControl = access };
 		var settings = new Compiler.Configuration { Whitelist = true };
-		group.CreateCompiler( "script-test", Path.GetFullPath( "data/code/scripting" ), settings );
+		group.CreateCompiler( "script-test", Path.GetFullPath( "Data/code/scripting" ), settings );
 		await group.BuildAsync();
 		Assert.IsTrue( group.BuildResult.Success, group.BuildResult.BuildDiagnosticsString() );
 	}
@@ -24,7 +24,7 @@ public partial class CompilerTest
 		using var metadata = access.TrustUnsafe( File.ReadAllBytes( typeof( Breen.Script ).Assembly.Location ) );
 		using var group = new CompileGroup( "BreenAccess" ) { AccessControl = access };
 		var settings = new Compiler.Configuration { Whitelist = false };
-		var compiler = group.CreateCompiler( "breen-access", Path.GetFullPath( "data/code/breen-access" ), settings );
+		var compiler = group.CreateCompiler( "breen-access", Path.GetFullPath( "Data/code/breen-access" ), settings );
 		compiler.AddReference( "Breen" );
 		await group.BuildAsync();
 		Assert.IsTrue( group.BuildResult.Success, group.BuildResult.BuildDiagnosticsString() );

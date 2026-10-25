@@ -50,7 +50,7 @@ public class DeferredSceneManifestTests
 		public SceneFile CreateScene()
 		{
 			var assetsPath = Path.GetFullPath( "unittest/addons/resources/Assets" );
-			NativeEngine.FullFileSystem.AddProjectPath( "unittest", assetsPath.ToLowerInvariant() );
+			NativeEngine.FullFileSystem.AddProjectPath( "unittest", assetsPath );
 			var file = (SceneFile)GameResource.GetPromise( typeof( SceneFile ), "test.scene" );
 			resources.Add( file );
 			file.Id = Guid.NewGuid();

@@ -81,9 +81,19 @@ internal partial class Test( bool noBuild = true, string filter = null )
 			if ( !noBuild && !Utility.RunDotnetCommand( engineDir, "build -c Release Sandbox-Engine.slnx -p:TreatWarningsAsErrors=true" ) )
 				return ExitCode.Failure;
 
-			Log.Info( $"Running {Projects.Length} test processes at the same time..." );
+			// Legacy artifact manifests do not carry Unix modes. As with BuildContent,
+			// make the bundled compiler executable before resource fixtures invoke it.
+			if ( !OperatingSystem.IsWindows() )
+			{
+				var compiler = Path.Combine( gameDir, "bin", NativePlatform.Current.DirectoryName, "resourcecompiler" );
+				if ( File.Exists( compiler ) )
+					File.SetUnixFileMode( compiler, File.GetUnixFileMode( compiler ) | UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute );
+			}
+
+			Log.Info( $"Running {Projects.Count( project => !project.Isolated )} test processes concurrently; allocation checks follow serially." );
 
 			var tasks = Projects
+				.Where( project => !project.Isolated )
 				.Select( project => Task.Factory.StartNew( () => RunTestProject( project, engineDir, gameDir ), TaskCreationOptions.LongRunning ) )
 				.ToArray();
 
@@ -100,6 +110,15 @@ internal partial class Test( bool noBuild = true, string filter = null )
 			}
 
 			Log.Info( "" );
+			// Allocation convergence depends on worker-pool warmup and prompt draining of
+			// background work. Do not run these measurements under the other shards' load.
+			foreach ( var project in Projects.Where( project => project.Isolated ) )
+			{
+				var result = RunTestProject( project, engineDir, gameDir );
+				results.Add( result );
+				PrintResult( result );
+			}
+
 			Log.Info( "Test summary:" );
 			foreach ( var result in results.OrderBy( x => Array.IndexOf( Projects, x.Project ) ) )
 			{
@@ -141,6 +160,13 @@ internal partial class Test( bool noBuild = true, string filter = null )
 		var isolatedFlag = project.Isolated ? " -- MSTest.Parallelize.Workers=1" : string.Empty;
 		var testArgs = $"test {csproj} --logger \"console;verbosity=normal;consoleLoggerParameters=ErrorsOnly\" -c Release{noBuildFlag}{filterFlag}{isolatedFlag}";
 
+		string NativeSearchPath( string variable )
+		{
+			var native = Path.Combine( gameDir, "bin", NativePlatform.Current.DirectoryName );
+			var existing = Environment.GetEnvironmentVariable( variable );
+			return string.IsNullOrEmpty( existing ) ? native : native + Path.PathSeparator + existing;
+		}
+
 		var output = new List<string>();
 		var failedTests = new List<string>();
 		var timings = new List<(string, double)>();
@@ -156,6 +182,10 @@ internal partial class Test( bool noBuild = true, string filter = null )
 			{
 				{ "FACEPUNCH_ENGINE", project.NeedsEngine ? gameDir : null },
 				{ "DOTNET_TieredCompilation", project.Isolated ? "0" : null },
+				// CPU text shaping also needs the bundled Skia/HarfBuzz libraries in tiers
+				// that intentionally do not initialize engine interop or FACEPUNCH_ENGINE.
+				{ "LD_LIBRARY_PATH", OperatingSystem.IsLinux() ? NativeSearchPath( "LD_LIBRARY_PATH" ) : Environment.GetEnvironmentVariable( "LD_LIBRARY_PATH" ) },
+				{ "DYLD_LIBRARY_PATH", OperatingSystem.IsMacOS() ? NativeSearchPath( "DYLD_LIBRARY_PATH" ) : Environment.GetEnvironmentVariable( "DYLD_LIBRARY_PATH" ) },
 			},
 			onDataReceived: ( sender, e ) =>
 			{
