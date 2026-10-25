@@ -76,7 +76,8 @@ internal class BuildManaged( bool clean = false )
 					"SboxDev/Sbox-Dev.csproj",
 					"StandaloneTest/Sbox-Launcher.csproj",
 					"SboxServer/Sbox-Server.csproj",
-					"SboxBench/SboxBench.csproj"
+					"SboxBench/SboxBench.csproj",
+					"SboxCli/Sbox-Cli.csproj"
 				};
 				BuildDisplay.Progress( completedLaunchers, launcherProjects.Length );
 
@@ -93,7 +94,9 @@ internal class BuildManaged( bool clean = false )
 					// survives PublishSingleFile, though it has to be on the restore too: publish
 					// runs --no-restore, and if only one of the pair sets it the single file
 					// bundler is handed no apphost and fails with "Must specify the host binary".
-					var relativeDotnet = OperatingSystem.IsLinux() ? " -p:AppHostRelativeDotNet=bin/dotnet" : "";
+					var managedLauncher = project == "SboxCli/Sbox-Cli.csproj";
+					var runtimePath = managedLauncher ? "../dotnet" : "bin/dotnet";
+					var relativeDotnet = OperatingSystem.IsLinux() ? $" -p:AppHostRelativeDotNet={runtimePath}" : "";
 
 					if ( !Utility.RunDotnetCommand( launcherDir,
 						$"restore {project} -r {launcherRid} -p:Configuration=Release -p:SelfContained=false -p:RestoreRecursive=false{relativeDotnet}" ) )
@@ -110,10 +113,12 @@ internal class BuildManaged( bool clean = false )
 						"SboxDev/Sbox-Dev.csproj" => "sbox-dev",
 						"StandaloneTest/Sbox-Launcher.csproj" => "sbox-launcher",
 						"SboxServer/Sbox-Server.csproj" => "sbox-server",
+						"SboxCli/Sbox-Cli.csproj" => "sbox-cli",
 						_ => "benchmark"
 					};
 					var extension = OperatingSystem.IsWindows() ? ".exe" : "";
-					File.Copy( Path.Combine( output, name + extension ), Path.Combine( rootDir, "game", name + extension ), true );
+					var destination = managedLauncher ? Path.Combine( rootDir, "game", "bin", "managed" ) : Path.Combine( rootDir, "game" );
+					File.Copy( Path.Combine( output, name + extension ), Path.Combine( destination, name + extension ), true );
 					BuildDisplay.Progress( ++completedLaunchers, launcherProjects.Length );
 				}
 
