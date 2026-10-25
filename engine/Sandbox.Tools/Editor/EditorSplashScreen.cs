@@ -22,6 +22,26 @@ internal sealed class EditorSplashScreen : PanelWindow
 	bool IsPumping;
 	EditorMainWindow BlockedEditor;
 	bool EditorWasEnabled;
+	static Func<string> trackedMessage;
+
+	sealed class MessageScope( Func<string> message ) : IDisposable
+	{
+		readonly Func<string> previous = trackedMessage;
+		bool disposed;
+		public void Dispose()
+		{
+			if ( disposed ) return;
+			disposed = true;
+			if ( trackedMessage == message ) trackedMessage = previous;
+		}
+	}
+
+	internal static IDisposable TrackMessage( Func<string> message )
+	{
+		var scope = new MessageScope( message );
+		trackedMessage = message;
+		return scope;
+	}
 
 	public EditorSplashScreen() : base( "Opening s&box Editor", new Vector2( SplashWidth, 438 ), EditorCookie.Get<Vector2?>( "splash.position", null ), borderless: true )
 	{
@@ -207,6 +227,7 @@ internal sealed class EditorSplashScreen : PanelWindow
 			if ( !splash.IsVisible && splash.IsShown ) return;
 
 			var projectTitle = Project.Current?.Config?.Title;
+			if ( trackedMessage is { } message ) splash.MessageLabel.Text = message();
 			splash.TitleLabel.Text = string.IsNullOrEmpty( projectTitle ) ? "s&box Editor" : $"s&box Editor — {projectTitle}";
 			if ( splash.Frame() ) PanelWindows.FrameEnd();
 			RestoreStallMonitor();

@@ -370,13 +370,17 @@ static class StartupLoadProject
 		options.SingleThreaded = false;
 		options.ConsoleOutput = false;
 
+		using var progress = new StartupImportProgress( "Shader checks", gr.Length, message => Log.Info( message ) );
+		using var splashProgress = EditorSplashScreen.TrackMessage( () => progress.Message );
 		int reused = 0, compiled = 0, failed = 0;
 		for ( int i = 0; i < gr.Length; i++ )
 		{
+			progress.Begin( gr[i].RelativePath, reportStart: true );
 			EditorSplashScreen.SetMessage( $"Checking shader {i + 1}/{gr.Length} {gr[i].RelativePath}" );
 			StepProgress( (float)i / gr.Length );
 
 			var result = await ShaderCompile.Compile( gr[i].AbsolutePath, gr[i].RelativePath, options, default );
+			progress.Complete( !result.Success ? "failed" : result.Skipped ? "reused" : "compiled" );
 			if ( !result.Success ) failed++;
 			else if ( result.Skipped ) reused++;
 			else compiled++;
@@ -405,6 +409,9 @@ static class StartupLoadProject
 		var gr = AssetSystem.All.Where( x => !x.IsTrivialChild && x.CanRecompile && !x.IsCompiledAndUpToDate ).ToArray();
 		Bootstrap.StartupTiming?.SetValue( "AssetPipeline.CompileCandidates", gr.Length );
 
+		using var progress = new StartupImportProgress( "Asset imports", gr.Length, message => Log.Info( message ) );
+		using var splashProgress = EditorSplashScreen.TrackMessage( () => progress.Message );
+
 		if ( useFastEditorPath )
 		{
 			var orderedAssets = gr
@@ -414,6 +421,7 @@ static class StartupLoadProject
 
 			for ( int i = 0; i < orderedAssets.Length; i++ )
 			{
+				progress.Begin( orderedAssets[i].Path );
 				if ( i % 128 == 0 )
 				{
 					EditorSplashScreen.SetMessage( $"Compiling asset {i + 1:N0}/{orderedAssets.Length:N0}" );
@@ -421,7 +429,7 @@ static class StartupLoadProject
 					IToolsDll.Current?.Spin();
 				}
 
-				orderedAssets[i].Compile( false );
+				progress.Complete( orderedAssets[i].Compile( false ) ? "compile returned true" : "compile returned false" );
 			}
 		}
 		else
@@ -430,12 +438,16 @@ static class StartupLoadProject
 			// every compile. Publishing and the default editor configuration use this path.
 			for ( int i = 0; i < gr.Length; i++ )
 			{
+				progress.Begin( gr[i].Path );
 				EditorSplashScreen.SetMessage( $"Compiling asset {i + 1}/{gr.Length} {gr[i].Path}" );
 				StepProgress( (float)i / gr.Length );
 				IToolsDll.Current?.Spin();
-				gr[i].Compile( false );
+				progress.Complete( gr[i].Compile( false ) ? "compile returned true" : "compile returned false" );
 			}
 		}
+
+		progress.Dispose();
+		splashProgress.Dispose();
 
 		if ( sw.Elapsed.TotalSeconds > 2 )
 			Log.Info( useFastEditorPath
