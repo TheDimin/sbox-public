@@ -10,6 +10,7 @@ internal class TitleBar : Widget
 	private Widget Grabber { get; set; }
 	private LinuxWindowGrip[] ResizeHandles;
 	private int ResizeBorder = -1;
+	private Vector2 ResizeSize;
 	private WindowControlButton MinimizeButton { get; set; }
 	private WindowControlButton MaximizeButton { get; set; }
 	private WindowControlButton CloseButton { get; set; }
@@ -134,6 +135,8 @@ internal class TitleBar : Widget
 
 	protected override void OnPaint()
 	{
+		// A maximized restore can change state without a resize event.
+		UpdateResizeHandles();
 		Paint.ClearPen();
 		Paint.ClearBrush();
 
@@ -225,13 +228,16 @@ internal class TitleBar : Widget
 		if ( ResizeHandles is null ) return;
 		var enabled = !Window.IsMaximized && !Window._widget.isFullScreen();
 		var border = enabled ? LinuxWindowGrip.Border : 0;
+		var size = Window.Size;
+		if ( ResizeBorder == border && ResizeSize == size ) return;
+		ResizeSize = size;
 		// This client frame owns its border; change padding only when its state changes.
 		if ( ResizeBorder != border )
 		{
 			ResizeBorder = border;
 			Window.ContentMargins = border;
+			UpdateMaximizeIcon();
 		}
-		var size = Window.Size;
 		foreach ( var handle in ResizeHandles ) handle.UpdateBounds( size, enabled );
 	}
 }
