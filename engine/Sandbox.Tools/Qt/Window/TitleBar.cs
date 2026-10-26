@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Sandbox.UI;
 
 namespace Editor;
 
@@ -9,6 +10,8 @@ internal class TitleBar : Widget
 	private Button IconWidget { get; set; }
 	private Label TitleLabel { get; set; }
 	private Widget Grabber { get; set; }
+	private LinuxWindowResizeHandle[] ResizeHandles;
+	private Margin ResizeBaseMargins;
 	private WindowControlButton MinimizeButton { get; set; }
 	private WindowControlButton MaximizeButton { get; set; }
 	private WindowControlButton CloseButton { get; set; }
@@ -161,6 +164,7 @@ internal class TitleBar : Widget
 	{
 		base.Update();
 		UpdateMaximizeIcon();
+		UpdateResizeHandles();
 	}
 
 	[Event( "refresh" )]
@@ -201,7 +205,34 @@ internal class TitleBar : Widget
 			}
 			MinimizeButton.FixedSize = MaximizeButton.FixedSize = CloseButton.FixedSize = new Vector2( 40, 32 );
 			MinimizeButton.Visible = MaximizeButton.Visible = CloseButton.Visible = true;
+			if ( ResizeHandles is null )
+			{
+				ResizeBaseMargins = Window.ContentMargins;
+				ResizeHandles = new[]
+				{
+					new LinuxWindowResizeHandle( Window, LinuxWindowEdge.Top ),
+					new LinuxWindowResizeHandle( Window, LinuxWindowEdge.Bottom ),
+					new LinuxWindowResizeHandle( Window, LinuxWindowEdge.Left ),
+					new LinuxWindowResizeHandle( Window, LinuxWindowEdge.Right ),
+					new LinuxWindowResizeHandle( Window, LinuxWindowEdge.Top | LinuxWindowEdge.Left ),
+					new LinuxWindowResizeHandle( Window, LinuxWindowEdge.Top | LinuxWindowEdge.Right ),
+					new LinuxWindowResizeHandle( Window, LinuxWindowEdge.Bottom | LinuxWindowEdge.Left ),
+					new LinuxWindowResizeHandle( Window, LinuxWindowEdge.Bottom | LinuxWindowEdge.Right )
+				};
+			}
+			UpdateResizeHandles();
 		}
+	}
+	void UpdateResizeHandles()
+	{
+		if ( ResizeHandles is null ) return;
+		var enabled = !Window.IsMaximized && !Window._widget.isFullScreen();
+		var border = enabled ? LinuxWindowResizeHandle.Border : 0;
+		var margins = new Margin( ResizeBaseMargins.Left + border, ResizeBaseMargins.Top + border,
+			ResizeBaseMargins.Right + border, ResizeBaseMargins.Bottom + border );
+		// Reserve the hit area rather than covering menus, docks or the game viewport.
+		if ( !Window.ContentMargins.Equals( margins ) ) Window.ContentMargins = margins;
+		foreach ( var handle in ResizeHandles ) handle.UpdateBounds( enabled );
 	}
 }
 
@@ -384,12 +415,6 @@ internal sealed class LinuxTitleBarGrabber : Widget
 	readonly Widget window;
 	readonly Action toggleMaximized;
 
-	[DllImport( "libQt5Widgets.so.5", EntryPoint = "_ZNK7QWidget12windowHandleEv" )]
-	static extern IntPtr WindowHandle( IntPtr widget );
-
-	[DllImport( "libQt5Gui.so.5", EntryPoint = "_ZN7QWindow15startSystemMoveEv" )]
-	[return: MarshalAs( UnmanagedType.I1 )]
-	static extern bool StartSystemMove( IntPtr window );
 
 	internal LinuxTitleBarGrabber( Widget window, Action toggleMaximized )
 	{
@@ -401,8 +426,7 @@ internal sealed class LinuxTitleBarGrabber : Widget
 	{
 		if ( e.LeftMouseButton )
 		{
-			var handle = WindowHandle( window._widget );
-			if ( handle != IntPtr.Zero && StartSystemMove( handle ) )
+			if ( LinuxWindowOperations.Move( window ) )
 			{
 				e.Accepted = true;
 				return;
@@ -420,5 +444,86 @@ internal sealed class LinuxTitleBarGrabber : Widget
 			return;
 		}
 		base.OnDoubleClick( e );
+	}
+}
+
+[Flags]
+internal enum LinuxWindowEdge
+{
+	Top = 1, Left = 2, Right = 4, Bottom = 8 // Qt::Edge values, combined for corners.
+}
+
+/// <summary>
+/// A logical-pixel border hit area that delegates resizing to the compositor.
+/// </summary>
+internal sealed class LinuxWindowResizeHandle : Widget
+{
+	internal const int Border = 6;
+	readonly Widget window;
+	readonly LinuxWindowEdge edges;
+
+	internal LinuxWindowResizeHandle( Widget window, LinuxWindowEdge edges ) : base( window )
+	{
+		this.window = window;
+		this.edges = edges;
+		FocusMode = FocusMode.None;
+		Cursor = edges switch
+		{
+			LinuxWindowEdge.Top or LinuxWindowEdge.Bottom => CursorShape.SizeV,
+			LinuxWindowEdge.Left or LinuxWindowEdge.Right => CursorShape.SizeH,
+			(LinuxWindowEdge.Top | LinuxWindowEdge.Left) or (LinuxWindowEdge.Bottom | LinuxWindowEdge.Right) => CursorShape.SizeFDiag,
+			_ => CursorShape.SizeBDiag
+		};
+	}
+
+	internal void UpdateBounds( bool enabled )
+	{
+		Visible = enabled;
+		if ( !enabled ) return;
+		var size = window.Size;
+		var horizontal = (edges & (LinuxWindowEdge.Left | LinuxWindowEdge.Right)) != 0;
+		var vertical = (edges & (LinuxWindowEdge.Top | LinuxWindowEdge.Bottom)) != 0;
+		Position = new Vector2( edges.HasFlag( LinuxWindowEdge.Right ) ? size.x - Border : horizontal ? 0 : Border,
+			edges.HasFlag( LinuxWindowEdge.Bottom ) ? size.y - Border : vertical ? 0 : Border );
+		Size = new Vector2( horizontal ? Border : Math.Max( 0, size.x - 2 * Border ),
+			vertical ? Border : Math.Max( 0, size.y - 2 * Border ) );
+		Raise();
+	}
+
+	protected override void OnMousePress( MouseEvent e )
+	{
+		if ( e.LeftMouseButton && !window.IsMaximized && !window._widget.isFullScreen()
+			&& LinuxWindowOperations.Resize( window, edges ) )
+		{
+			e.Accepted = true;
+			return;
+		}
+		base.OnMousePress( e );
+	}
+}
+
+internal static class LinuxWindowOperations
+{
+	[DllImport( "libQt5Widgets.so.5", EntryPoint = "_ZNK7QWidget12windowHandleEv" )]
+	static extern IntPtr WindowHandle( IntPtr widget );
+
+	[DllImport( "libQt5Gui.so.5", EntryPoint = "_ZN7QWindow15startSystemMoveEv" )]
+	[return: MarshalAs( UnmanagedType.I1 )]
+	static extern bool StartSystemMove( IntPtr window );
+
+	[DllImport( "libQt5Gui.so.5", EntryPoint = "_ZN7QWindow17startSystemResizeE6QFlagsIN2Qt4EdgeEE" )]
+	[return: MarshalAs( UnmanagedType.I1 )]
+	static extern bool StartSystemResize( IntPtr window, LinuxWindowEdge edges );
+
+	internal static bool Move( Widget window )
+	{
+		var handle = WindowHandle( window._widget );
+		return handle != IntPtr.Zero && StartSystemMove( handle );
+	}
+
+	internal static bool Resize( Widget window, LinuxWindowEdge edges )
+	{
+		var handle = WindowHandle( window._widget );
+		return handle != IntPtr.Zero && StartSystemResize( handle, edges );
 	}
 }
