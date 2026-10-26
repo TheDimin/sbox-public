@@ -12,13 +12,16 @@ public class TestAppSystem : AppSystem
 		var gameFolder = Environment.GetEnvironmentVariable( "FACEPUNCH_ENGINE", EnvironmentVariableTarget.Process );
 		if ( gameFolder is null ) throw new Exception( "FACEPUNCH_ENGINE not found" );
 
-		var nativeDllPath = Path.Combine( gameFolder, "bin", "win64" ) + Path.DirectorySeparatorChar;
+		var nativeDllPath = Path.Combine( gameFolder, NetCore.NativeDllPath );
+		var engineLibrary = OperatingSystem.IsWindows() ? "engine2.dll"
+			: OperatingSystem.IsMacOS() ? "libengine2.dylib" : "libengine2.so";
+		var engineLibraryPath = Path.Combine( nativeDllPath, engineLibrary );
 
 		// Some tests would set FACEPUNCH_ENGINE to a temp dir that got deleted, make it really clear if that happened
 
-		if ( !File.Exists( Path.Combine( nativeDllPath, "engine2.dll" ) ) )
+		if ( !File.Exists( engineLibraryPath ) )
 		{
-			throw new Exception( $"FACEPUNCH_ENGINE ({gameFolder}) doesn't contain bin/win64/engine2.dll" );
+			throw new Exception( $"FACEPUNCH_ENGINE ({gameFolder}) doesn't contain {engineLibraryPath}" );
 		}
 
 		NetCore.InitializeInterop( gameFolder );
@@ -28,7 +31,7 @@ public class TestAppSystem : AppSystem
 		// always use the ones from our folder first
 		//
 		var path = Environment.GetEnvironmentVariable( "PATH" );
-		path = $"{nativeDllPath};{path}";
+		path = $"{nativeDllPath}{Path.PathSeparator}{path}";
 		Environment.SetEnvironmentVariable( "PATH", path );
 
 		CreateGame();

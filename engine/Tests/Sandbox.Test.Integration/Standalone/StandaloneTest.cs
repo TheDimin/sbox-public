@@ -29,6 +29,9 @@ public class StandaloneTest
 	[TestCategory( "Slow" )]
 	public async Task ExportAndRun()
 	{
+		if ( !OperatingSystem.IsWindows() )
+			Assert.Inconclusive( "Standalone export currently writes Windows PE resources and requires a Windows apphost." );
+
 		var config = new ExportConfig();
 		var tempFolderName = Guid.NewGuid().ToString();
 		config.TargetDir = Path.Combine( Path.GetTempPath(), tempFolderName, "sboxexportest" );

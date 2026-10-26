@@ -272,7 +272,7 @@ public class GuidTests
 					}
 				}
 				""" );
-			var start = new ProcessStartInfo( Path.Combine( engine, "bin", "win64", "resourcecompiler.exe" ) )
+			var start = new ProcessStartInfo( Path.Combine( engine, NetCore.NativeDllPath, OperatingSystem.IsWindows() ? "resourcecompiler.exe" : "resourcecompiler" ) )
 			{
 				UseShellExecute = false,
 				CreateNoWindow = true,

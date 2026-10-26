@@ -32,4 +32,10 @@
 		</PackageReference>
 	</ItemGroup>
 
+	<!-- CPU text tests need native shaping libraries even without the engine runtime. -->
+	<ItemGroup Condition="'$(IsTestProject)' == 'true' and $([MSBuild]::IsOSPlatform('Linux'))">
+		<PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />
+		<PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" />
+	</ItemGroup>
+
 </Project>
