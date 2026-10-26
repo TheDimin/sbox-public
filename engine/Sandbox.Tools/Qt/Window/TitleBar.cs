@@ -164,7 +164,6 @@ internal class TitleBar : Widget
 	{
 		base.Update();
 		UpdateMaximizeIcon();
-		UpdateResizeHandles();
 	}
 
 	[Event( "refresh" )]
@@ -223,7 +222,8 @@ internal class TitleBar : Widget
 			UpdateResizeHandles();
 		}
 	}
-	void UpdateResizeHandles()
+
+	internal void UpdateResizeHandles()
 	{
 		if ( ResizeHandles is null ) return;
 		var enabled = !Window.IsMaximized && !Window._widget.isFullScreen();
@@ -231,8 +231,12 @@ internal class TitleBar : Widget
 		var margins = new Margin( ResizeBaseMargins.Left + border, ResizeBaseMargins.Top + border,
 			ResizeBaseMargins.Right + border, ResizeBaseMargins.Bottom + border );
 		// Reserve the hit area rather than covering menus, docks or the game viewport.
-		if ( !Window.ContentMargins.Equals( margins ) ) Window.ContentMargins = margins;
-		foreach ( var handle in ResizeHandles ) handle.UpdateBounds( enabled );
+		var current = Window.ContentMargins;
+		if ( current.Left != margins.Left || current.Top != margins.Top
+			|| current.Right != margins.Right || current.Bottom != margins.Bottom )
+			Window.ContentMargins = margins;
+		var size = Window.Size;
+		foreach ( var handle in ResizeHandles ) handle.UpdateBounds( size, enabled );
 	}
 }
 
@@ -415,7 +419,6 @@ internal sealed class LinuxTitleBarGrabber : Widget
 	readonly Widget window;
 	readonly Action toggleMaximized;
 
-
 	internal LinuxTitleBarGrabber( Widget window, Action toggleMaximized )
 	{
 		this.window = window;
@@ -424,13 +427,10 @@ internal sealed class LinuxTitleBarGrabber : Widget
 
 	protected override void OnMousePress( MouseEvent e )
 	{
-		if ( e.LeftMouseButton )
+		if ( e.LeftMouseButton && LinuxWindowOperations.Move( window ) )
 		{
-			if ( LinuxWindowOperations.Move( window ) )
-			{
-				e.Accepted = true;
-				return;
-			}
+			e.Accepted = true;
+			return;
 		}
 		base.OnMousePress( e );
 	}
@@ -476,18 +476,16 @@ internal sealed class LinuxWindowResizeHandle : Widget
 		};
 	}
 
-	internal void UpdateBounds( bool enabled )
+	internal void UpdateBounds( Vector2 size, bool enabled )
 	{
 		Visible = enabled;
 		if ( !enabled ) return;
-		var size = window.Size;
 		var horizontal = (edges & (LinuxWindowEdge.Left | LinuxWindowEdge.Right)) != 0;
 		var vertical = (edges & (LinuxWindowEdge.Top | LinuxWindowEdge.Bottom)) != 0;
-		Position = new Vector2( edges.HasFlag( LinuxWindowEdge.Right ) ? size.x - Border : horizontal ? 0 : Border,
-			edges.HasFlag( LinuxWindowEdge.Bottom ) ? size.y - Border : vertical ? 0 : Border );
+		Position = new Vector2( (edges & LinuxWindowEdge.Right) != 0 ? size.x - Border : horizontal ? 0 : Border,
+			(edges & LinuxWindowEdge.Bottom) != 0 ? size.y - Border : vertical ? 0 : Border );
 		Size = new Vector2( horizontal ? Border : Math.Max( 0, size.x - 2 * Border ),
 			vertical ? Border : Math.Max( 0, size.y - 2 * Border ) );
-		Raise();
 	}
 
 	protected override void OnMousePress( MouseEvent e )

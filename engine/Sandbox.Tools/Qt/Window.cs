@@ -138,6 +138,7 @@ namespace Editor
 			if ( MenuWidget is TitleBar tb )
 			{
 				tb.Update();
+				tb.UpdateResizeHandles();
 			}
 		}
 

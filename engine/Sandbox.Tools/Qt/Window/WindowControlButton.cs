@@ -59,7 +59,6 @@ internal class WindowControlButton : Widget
 		}
 
 		Paint.ClearBrush();
-		Paint.SetFont( SymbolFont, 7.0f );
 		Paint.SetPen( Theme.Text );
 
 		if ( !Enabled )
@@ -77,6 +76,9 @@ internal class WindowControlButton : Widget
 			}, 14.0f );
 		}
 		else
+		{
+			Paint.SetFont( SymbolFont, 7.0f );
 			Paint.DrawText( LocalRect, new string( (char)Icon, 1 ) );
+		}
 	}
 }
