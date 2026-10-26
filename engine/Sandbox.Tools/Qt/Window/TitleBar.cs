@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using Sandbox.UI;
 
 namespace Editor;
 
@@ -10,8 +8,8 @@ internal class TitleBar : Widget
 	private Button IconWidget { get; set; }
 	private Label TitleLabel { get; set; }
 	private Widget Grabber { get; set; }
-	private LinuxWindowResizeHandle[] ResizeHandles;
-	private Margin ResizeBaseMargins;
+	private LinuxWindowGrip[] ResizeHandles;
+	private int ResizeBorder = -1;
 	private WindowControlButton MinimizeButton { get; set; }
 	private WindowControlButton MaximizeButton { get; set; }
 	private WindowControlButton CloseButton { get; set; }
@@ -86,7 +84,7 @@ internal class TitleBar : Widget
 		center.Alignment = TextFlag.Center;
 
 		Grabber = center.Add( OperatingSystem.IsLinux() && window is EditorMainWindow
-			? new LinuxTitleBarGrabber( window, ToggleMaximized ) : new Widget(), 1 );
+			? new LinuxWindowGrip( window, LinuxWindowEdge.None, ToggleMaximized ) : new Widget(), 1 );
 		Grabber.Layout = Layout.Row();
 		Grabber.Layout.Alignment = TextFlag.Center;
 		Grabber.FixedHeight = 35;
@@ -202,23 +200,22 @@ internal class TitleBar : Widget
 				Window.WindowFlags |= WindowFlags.FramelessWindowHint;
 				Window.Visible = visible;
 			}
-			MinimizeButton.FixedSize = MaximizeButton.FixedSize = CloseButton.FixedSize = new Vector2( 40, 32 );
 			MinimizeButton.Visible = MaximizeButton.Visible = CloseButton.Visible = true;
 			if ( ResizeHandles is null )
 			{
-				ResizeBaseMargins = Window.ContentMargins;
 				ResizeHandles = new[]
 				{
-					new LinuxWindowResizeHandle( Window, LinuxWindowEdge.Top ),
-					new LinuxWindowResizeHandle( Window, LinuxWindowEdge.Bottom ),
-					new LinuxWindowResizeHandle( Window, LinuxWindowEdge.Left ),
-					new LinuxWindowResizeHandle( Window, LinuxWindowEdge.Right ),
-					new LinuxWindowResizeHandle( Window, LinuxWindowEdge.Top | LinuxWindowEdge.Left ),
-					new LinuxWindowResizeHandle( Window, LinuxWindowEdge.Top | LinuxWindowEdge.Right ),
-					new LinuxWindowResizeHandle( Window, LinuxWindowEdge.Bottom | LinuxWindowEdge.Left ),
-					new LinuxWindowResizeHandle( Window, LinuxWindowEdge.Bottom | LinuxWindowEdge.Right )
+					new LinuxWindowGrip( Window, LinuxWindowEdge.Top ),
+					new LinuxWindowGrip( Window, LinuxWindowEdge.Bottom ),
+					new LinuxWindowGrip( Window, LinuxWindowEdge.Left ),
+					new LinuxWindowGrip( Window, LinuxWindowEdge.Right ),
+					new LinuxWindowGrip( Window, LinuxWindowEdge.Top | LinuxWindowEdge.Left ),
+					new LinuxWindowGrip( Window, LinuxWindowEdge.Top | LinuxWindowEdge.Right ),
+					new LinuxWindowGrip( Window, LinuxWindowEdge.Bottom | LinuxWindowEdge.Left ),
+					new LinuxWindowGrip( Window, LinuxWindowEdge.Bottom | LinuxWindowEdge.Right )
 				};
 			}
+			ResizeBorder = -1;
 			UpdateResizeHandles();
 		}
 	}
@@ -227,14 +224,13 @@ internal class TitleBar : Widget
 	{
 		if ( ResizeHandles is null ) return;
 		var enabled = !Window.IsMaximized && !Window._widget.isFullScreen();
-		var border = enabled ? LinuxWindowResizeHandle.Border : 0;
-		var margins = new Margin( ResizeBaseMargins.Left + border, ResizeBaseMargins.Top + border,
-			ResizeBaseMargins.Right + border, ResizeBaseMargins.Bottom + border );
-		// Reserve the hit area rather than covering menus, docks or the game viewport.
-		var current = Window.ContentMargins;
-		if ( current.Left != margins.Left || current.Top != margins.Top
-			|| current.Right != margins.Right || current.Bottom != margins.Bottom )
-			Window.ContentMargins = margins;
+		var border = enabled ? LinuxWindowGrip.Border : 0;
+		// This client frame owns its border; change padding only when its state changes.
+		if ( ResizeBorder != border )
+		{
+			ResizeBorder = border;
+			Window.ContentMargins = border;
+		}
 		var size = Window.Size;
 		foreach ( var handle in ResizeHandles ) handle.UpdateBounds( size, enabled );
 	}
@@ -408,120 +404,5 @@ internal class TitleBarToggle : Widget
 
 			Paint.DrawRect( r );
 		}
-	}
-}
-
-/// <summary>
-/// Delegate Linux title-bar dragging to the compositor, preserving snapping and restore-on-drag.
-/// </summary>
-internal sealed class LinuxTitleBarGrabber : Widget
-{
-	readonly Widget window;
-	readonly Action toggleMaximized;
-
-	internal LinuxTitleBarGrabber( Widget window, Action toggleMaximized )
-	{
-		this.window = window;
-		this.toggleMaximized = toggleMaximized;
-	}
-
-	protected override void OnMousePress( MouseEvent e )
-	{
-		if ( e.LeftMouseButton && LinuxWindowOperations.Move( window ) )
-		{
-			e.Accepted = true;
-			return;
-		}
-		base.OnMousePress( e );
-	}
-
-	protected override void OnDoubleClick( MouseEvent e )
-	{
-		if ( e.LeftMouseButton )
-		{
-			toggleMaximized();
-			e.Accepted = true;
-			return;
-		}
-		base.OnDoubleClick( e );
-	}
-}
-
-[Flags]
-internal enum LinuxWindowEdge
-{
-	Top = 1, Left = 2, Right = 4, Bottom = 8 // Qt::Edge values, combined for corners.
-}
-
-/// <summary>
-/// A logical-pixel border hit area that delegates resizing to the compositor.
-/// </summary>
-internal sealed class LinuxWindowResizeHandle : Widget
-{
-	internal const int Border = 6;
-	readonly Widget window;
-	readonly LinuxWindowEdge edges;
-
-	internal LinuxWindowResizeHandle( Widget window, LinuxWindowEdge edges ) : base( window )
-	{
-		this.window = window;
-		this.edges = edges;
-		FocusMode = FocusMode.None;
-		Cursor = edges switch
-		{
-			LinuxWindowEdge.Top or LinuxWindowEdge.Bottom => CursorShape.SizeV,
-			LinuxWindowEdge.Left or LinuxWindowEdge.Right => CursorShape.SizeH,
-			(LinuxWindowEdge.Top | LinuxWindowEdge.Left) or (LinuxWindowEdge.Bottom | LinuxWindowEdge.Right) => CursorShape.SizeFDiag,
-			_ => CursorShape.SizeBDiag
-		};
-	}
-
-	internal void UpdateBounds( Vector2 size, bool enabled )
-	{
-		Visible = enabled;
-		if ( !enabled ) return;
-		var horizontal = (edges & (LinuxWindowEdge.Left | LinuxWindowEdge.Right)) != 0;
-		var vertical = (edges & (LinuxWindowEdge.Top | LinuxWindowEdge.Bottom)) != 0;
-		Position = new Vector2( (edges & LinuxWindowEdge.Right) != 0 ? size.x - Border : horizontal ? 0 : Border,
-			(edges & LinuxWindowEdge.Bottom) != 0 ? size.y - Border : vertical ? 0 : Border );
-		Size = new Vector2( horizontal ? Border : Math.Max( 0, size.x - 2 * Border ),
-			vertical ? Border : Math.Max( 0, size.y - 2 * Border ) );
-	}
-
-	protected override void OnMousePress( MouseEvent e )
-	{
-		if ( e.LeftMouseButton && !window.IsMaximized && !window._widget.isFullScreen()
-			&& LinuxWindowOperations.Resize( window, edges ) )
-		{
-			e.Accepted = true;
-			return;
-		}
-		base.OnMousePress( e );
-	}
-}
-
-internal static class LinuxWindowOperations
-{
-	[DllImport( "libQt5Widgets.so.5", EntryPoint = "_ZNK7QWidget12windowHandleEv" )]
-	static extern IntPtr WindowHandle( IntPtr widget );
-
-	[DllImport( "libQt5Gui.so.5", EntryPoint = "_ZN7QWindow15startSystemMoveEv" )]
-	[return: MarshalAs( UnmanagedType.I1 )]
-	static extern bool StartSystemMove( IntPtr window );
-
-	[DllImport( "libQt5Gui.so.5", EntryPoint = "_ZN7QWindow17startSystemResizeE6QFlagsIN2Qt4EdgeEE" )]
-	[return: MarshalAs( UnmanagedType.I1 )]
-	static extern bool StartSystemResize( IntPtr window, LinuxWindowEdge edges );
-
-	internal static bool Move( Widget window )
-	{
-		var handle = WindowHandle( window._widget );
-		return handle != IntPtr.Zero && StartSystemMove( handle );
-	}
-
-	internal static bool Resize( Widget window, LinuxWindowEdge edges )
-	{
-		var handle = WindowHandle( window._widget );
-		return handle != IntPtr.Zero && StartSystemResize( handle, edges );
 	}
 }
