@@ -50,6 +50,9 @@ public static class GameMode
 		_inPlay = widget;
 		LinuxViewportInput.Start( widget );
 
+		// Screen otherwise only refreshes in SimulateUI, after the first OnStart/OnUpdate have run
+		Screen.UpdateFromEngine();
+
 		// Starting play through automation must not activate a background or minimized editor.
 		widget.Focus( activateWindow: false );
 	}

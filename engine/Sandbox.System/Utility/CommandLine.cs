@@ -35,8 +35,22 @@ internal static class CommandLine
 		switches.Clear();
 		commandLine = CommandLineString ?? Environment.CommandLine;
 
+		foreach ( var (key, value) in Parse( commandLine ) )
+		{
+			switches[key] = value;
+		}
+	}
+
+	/// <summary>
+	/// Parses a command line into a new dictionary of switches and values, without touching the
+	/// process command line.
+	/// </summary>
+	internal static Dictionary<string, string> Parse( string commandLine )
+	{
+		var switches = new Dictionary<string, string>( StringComparer.OrdinalIgnoreCase );
+
 		if ( string.IsNullOrEmpty( commandLine ) )
-			return;
+			return switches;
 
 		var currentKey = "";
 		var inQuotes = false;
@@ -102,6 +116,8 @@ internal static class CommandLine
 		{
 			switches[currentKey] = currentValue.ToString().Trim();
 		}
+
+		return switches;
 	}
 
 	/// <summary>
