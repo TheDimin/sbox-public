@@ -9,6 +9,7 @@ namespace UITests;
 public class InlineParagraphTests
 {
 	private bool _renderText;
+	private MemoryFileSystem _fontFixture;
 	[TestInitialize]
 	public void Initialize()
 	{
@@ -20,6 +21,11 @@ public class InlineParagraphTests
 	public void Cleanup()
 	{
 		GlobalContext.Current.UISystem.Clear();
+		if ( _fontFixture is not null )
+		{
+			FontManager.Instance.Clear( true );
+			_fontFixture.Dispose();
+		}
 		TextBlock.ui_rendertext = _renderText;
 	}
 
@@ -584,11 +590,20 @@ public class InlineParagraphTests
 	}
 
 	[TestMethod]
-	[DataRow( "office tail", "Calibri" )]
+	[DataRow( "office tail", "Roboto" )]
 	[DataRow( "\u0644\u0627 tail", "Arial" )]
 	[DataRow( "A\U0001F600e\u0301 tail", "Arial" )]
 	public void SelectionUsesShapedCaretsForCopyAndPaint( string value, string font )
 	{
+		// Use the bundled face so the ligature case does not depend on installed Windows fonts.
+		if ( font == "Roboto" )
+		{
+			_fontFixture = new MemoryFileSystem();
+			_fontFixture.CreateDirectory( "fonts" );
+			_fontFixture.WriteAllBytes( "fonts/Roboto-Regular.ttf", System.IO.File.ReadAllBytes( "core/fonts/Roboto-Regular.ttf" ) );
+			FontManager.Instance.LoadAll( _fontFixture );
+		}
+
 		var root = Root();
 		var p = Paragraph( root, 400 );
 		p.Style.FontFamily = font;
@@ -597,7 +612,7 @@ public class InlineParagraphTests
 		var shaped = new Topten.RichTextKit.TextBlock { FontMapper = FontManager.Instance };
 		shaped.AddText( value, label._textBlock.InlineStyle );
 		var carets = shaped.CaretIndicies;
-		if ( font == "Calibri" )
+		if ( font == "Roboto" )
 			Assert.IsTrue( carets.Count - 1 < value.Length, "Regression requires a shaped ligature" );
 		for ( int i = 0; i < carets.Count - 1; i++ )
 		{
@@ -607,7 +622,7 @@ public class InlineParagraphTests
 			Assert.AreEqual( value[from..to], p.GetClipboardValue( false ) );
 		}
 		p.LayoutTree.InlineContext.Select( p.LayoutTree.InlineContext.Origin, p.LayoutTree.InlineContext.Origin + new Vector2( 390, 40 ) );
-		if ( font == "Calibri" ) Assert.AreEqual( value, p.GetClipboardValue( false ) );
+		if ( font == "Roboto" ) Assert.AreEqual( value, p.GetClipboardValue( false ) );
 		p.SelectAllInChildren();
 		Assert.AreEqual( value, p.GetClipboardValue( false ) );
 		Assert.AreEqual( carets.Count - 1, p.LayoutTree.InlineContext.Text.SelectionEnd );

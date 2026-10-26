@@ -1,0 +1,187 @@
+Linux file-watching changes — validation record
+2026-10-25; base commit 63eab6ae
+
+Delivery and boundaries
+
+Implementation is in the managed linux-file-watchers worktree. Validation used
+linked-source projects under /tmp/sbox-watch-final and read-only references to
+existing engine binaries and generated Interop sources. No generated Interop
+source was edited. No editor restart, watcher-limit change, shader rebuild, or
+build into the active editor's output directory was performed by this validation.
+The separate setup chat has its own changes in the original checkout; those were
+not reverted or overwritten.
+
+All six requested improvements
+
+1. Diagnostics
+   fs_watch_status (protected editor command) reports process descriptors,
+   inotify descriptors and watch entries from /proc; per-user instance/watch
+   limits; and the process open-file limit. It then lists logical filesystem
+   subscriptions, glob filters, callback declaring types, physical canonical
+   roots, aggregate/compiler owners, per-consumer exclusions, effective kernel
+   exclusions, lifecycle counters, events, recovery events, failures, overflows
+   and retry state. Dynamic mounts carry the aggregate owner context too.
+   File descriptors are labelled as descriptors, not an exact distinct-instance
+   census: duplicated descriptors can refer to one instance.
+
+2. Physical watcher sharing
+   SharedPhysicalFileWatcher keeps one reference-counted Linux backend per
+   canonical physical root, including explicitly watched symlink aliases.
+   Consumers with different exclusions share the coverage they collectively
+   require: only unanimously excluded directories are omitted from the kernel.
+   Each consumer retains its own exclusions, filesystem mapping and file glob.
+   Removing a consumer can prune coverage again. Generation checks reject events
+   from replaced backends. Subscriber arrays are cached outside event handling.
+   Final release cancels the worker through eventfd; the worker closes its own
+   descriptors, avoiding a close/read race or a blocking disposal deadlock.
+
+3. Stylesheets
+   ManagedTools watches the addons/tools/assets/styles subsystem instead of
+   recursively watching game/ just to filter stylesheet events afterwards.
+
+4. Editor watcher lifetime and batching
+   FolderNode's shipped watcher helper coalesces dirty folders on editor frames,
+   sweeps weak references every five seconds, releases unused roots, replaces
+   redundant child roots, retains listeners after failed creation, and rebuilds
+   interrupted/missing roots. AssetBrowser refreshes at most once per frame for
+   external changes and rebuilds failed coverage with a five-second retry. A
+   periodic health check handles roots that disappear without an error event.
+
+5. Bounded delivery and recovery
+   FileWatch keeps its 100ms quiet-period debounce with a 500ms maximum batch
+   delay. Scoped suppression still defers changes; timed suppression discards
+   them. Last-subscriber disposal clears stale pending batches. Failed creation
+   retains subscriptions and retries; disposing and resubscribing does not lose
+   that retry. Queue overflows and unmount records produce visible failures and
+   recovery. Rescans invalidate current entries and known deletions. Directory
+   moves out of a tree invalidate known children for file-only subscriptions.
+
+6. Source directory pruning
+   Compiler.WatchForChanges configures obj and the compiler's IgnoreFolders as
+   backend directory exclusions. The Linux traversal skips those trees when
+   registering watches. An unrestricted consumer can still require that coverage
+   on the same root; compiler callbacks remain filtered. Repeated WatchForChanges
+   replaces its subscriptions rather than duplicating them. Filename globs still
+   filter delivered paths; they do not themselves reduce directory watches.
+
+Verification
+
+38 focused MSTest test methods passed in a standalone linked-source runner,
+including their initialize/cleanup methods and asynchronous completion. The
+runner executed the actual production filesystem sources against Zio 0.23.0
+and real Linux inotify, without booting the engine. Test groups:
+
+- FileWatchBatchTests: debounce, deadline, suppression, stale-batch disposal,
+  failed creation, replacement subscriptions, diagnostic filters/owners/counts.
+- LinuxDirectoryWatcherTests: directory exclusions, new-directory registration
+  races, nested coverage, rename cookies and paths, moves out, root deletion,
+  symlinks, descriptor cleanup, overflow/unmount records and malformed input.
+- SharedPhysicalFileWatcherTests: aggregates, aliases, mixed exclusion profiles,
+  exclusion-boundary renames, reference counts, interrupted-root rescan/deletion
+  recovery, extensionless files, file-only subscriptions and dynamic mount owners.
+- FolderNodeWatcherTests: actual shipped watcher partial with a small node
+  stand-in recording Dirty calls; batching, ancestor-root sharing, weak-reference
+  cleanup, failed creation, overflow, missing-root recovery.
+
+Isolated builds of Sandbox.Filesystem, the full Sandbox.Compiling sources, the
+full Sandbox.Tools sources, and the shipped tools addon succeeded with zero
+warnings and zero errors. Tools compilation read existing generated Interop
+bindings without modifying them. Targeted dotnet whitespace formatting and
+verification passed; git diff whitespace checking passed (accounting for the
+repository's CRLF content convention).
+
+The standard full SboxBuild build/test/format CI gates were not run against the
+active editor checkout. Run the prescribed repository gates before pushing.
+
+Measurements
+
+Raw samples and the normalized filesystem-source hash are saved beside this
+report in linux-file-watching-benchmark.json. Each mode ran in three fresh
+processes against a temporary fixture: 67 directories, 256 files, two logical
+*.cs subscriptions, 128 source edits and 128 ignored obj edits. Both modes used
+the same FileWatch filtering/batching layer. The baseline used Zio's normal
+PhysicalFileSystem watchers; the new mode used shared LocalFileSystem watchers
+excluding obj. /proc/self/fdinfo supplied actual kernel watch-entry counts.
+
+Resource results were consistent across all samples:
+
+                         Baseline          Shared
+Inotify descriptors      2                 1
+Directory watch entries  134               34
+Watcher threads          2                 1
+Idle watcher CPU ticks   0                 0
+Logical callbacks        512               256
+Unique source files      128               128
+
+Three-run medians (same fixture, not a full editor benchmark):
+
+Retained managed heap: 97,744 -> 146,520 bytes.
+Cold watcher startup: 19.96 -> 22.36 ms.
+Cold edit-burst CPU: 53.12 -> 63.21 ms.
+Cold edit-burst allocations: 503,424 -> 256,528 bytes.
+Warmed edit-burst CPU: 45.94 -> 40.39 ms.
+Warmed edit-burst allocations: 745,200 -> 315,880 bytes.
+
+Warm runs exercised one notification and drained for 300ms before the measured
+burst to separate first-use JIT costs from subsequent event processing. Both
+modes delivered every source file; ignored edits caused no new-mode callbacks.
+Kernel coalescing can vary the raw record count with reader scheduling, so it is
+not used as an exact count of user file operations.
+
+Sharing/pruning therefore reduces the instance and watch pressure in this
+fixture, without claiming one instance per file. Recovery buffers/metadata retain
+additional managed memory. Cold event handling also has additional managed/JIT
+work; the measurements do not establish a universal CPU-speed improvement.
+Private-memory deltas include JIT/GC noise and do not measure per-watch kernel
+memory. Results from this small fixture must not be extrapolated into an editor
+RSS estimate. Warm-event samples are separately labelled in the JSON.
+
+The earlier live-editor investigation (historical snapshot, not a fresh census)
+found 66 inotify descriptors, 6,106 watch entries and 1,794 distinct directory
+inodes, with 4,312 repeated entries. Core and citizen content had fivefold
+coverage including the broad game/ watch. Watcher threads were idle during the
+sample; shader compiler threads and the main thread accounted for most CPU.
+
+Scope and deferred checks
+
+Sharing is keyed by equal canonical roots; distinct ancestor/descendant roots
+can still overlap. Direct asset-browser FileSystemWatchers are managed by their
+editor helpers rather than the engine's physical-root pool. Kernel diagnostics
+include those watchers as well. Exclusions preserve source collection semantics:
+obj plus configured IgnoreFolders, rather than silently excluding arbitrary
+folders that could contain valid source.
+
+No intrusive queue-saturation test or filesystem unmount was performed. Those
+kernel records were tested deterministically, and rescan/retry behavior was
+tested with real temporary directory changes. These checks do not validate
+visual Qt behavior or native asset/compiler interactions in the running editor.
+
+After a later authorised rebuild/restart, exercise stylesheet changes, C# and
+Razor edits, asset creation/deletion/renaming, local library loading, browser
+navigation/closing, and project switching. Use fs_watch_status to inspect actual
+project counts and verify that root/subscription counts fall after release.
+The current running editor has not loaded these isolated implementation changes.
+
+Review before commit (2026-10-25)
+
+Three regressions were reproduced with failing tests and corrected:
+
+- Directory swaps/atomic replacement could retain descriptors for old inodes at
+  unchanged path names. Reconciliation now refreshes descriptors by inode and
+  rebases renamed directory paths before processing later queued events. Moved
+  trees retain catch-up notifications for subscribers matching only the new path.
+- An unreadable child directory could disable the whole readable tree. Child
+  access failures are skipped, and directory attribute changes retry traversal
+  when permissions are restored. Root-level failures still use visible retries.
+- Watching an already disposed filesystem could register a logical subscription
+  that could never start or retry. Such subscriptions now fail immediately.
+
+The final focused suite contains 38 methods and passes. The isolated filesystem,
+compiler, tools and tools-addon build reports zero warnings/errors. Targeted
+whitespace verification and git whitespace checking pass. No editor restart or
+shared-output build was performed for the review.
+
+Benchmark samples are historical measurements of the pre-review implementation;
+their recorded source hash deliberately remains unchanged. They were not rerun
+for the reviewed inode/permissions/disposal fixes, so they are not new performance
+claims about this commit.

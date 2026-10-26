@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Editor;
 
@@ -10,9 +11,12 @@ partial class FolderNode
 	/// Tells folder nodes when the contents of their folder change.
 	///
 	/// This exists so we don't spam FileSystemWatcher and shit our pants.
-	/// This is the only place we use FileSystemWatcher, we should really try to use Zio instead.
+	/// Events are coalesced and delivered on the editor thread.
 	/// </summary>
-	static class DirectoryWatcher
+	[EditorEvent.Frame]
+	private static void UpdateDirectoryWatchers() => DirectoryWatcher.Tick();
+
+	static partial class DirectoryWatcher
 	{
 		/// <summary>
 		/// A recursive watcher over one tree, shared by every folder inside it.
@@ -34,6 +38,49 @@ partial class FolderNode
 			OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
 
 		static readonly List<Root> Roots = new();
+		static readonly HashSet<string> PendingFolders = new( PathComparer );
+		static Sandbox.RealTimeSince timeSinceSweep;
+
+		public static int RootCount
+		{
+			get { lock ( Nodes ) return Roots.Count; }
+		}
+
+		public static void Sweep()
+		{
+			lock ( Nodes )
+			{
+				timeSinceSweep = 0;
+				foreach ( var path in Nodes.Keys.ToArray() )
+				{
+					Nodes[path].RemoveAll( x => !x.TryGetTarget( out _ ) );
+					if ( Nodes[path].Count == 0 ) Nodes.Remove( path );
+				}
+
+				Roots.RemoveAll( root =>
+				{
+					if ( root.Watcher.EnableRaisingEvents && Directory.Exists( root.Path ) && Nodes.Keys.Any( path => Covers( root.Path, path ) ) ) return false;
+					root.Watcher.Dispose();
+					return true;
+				} );
+
+				// Parents first so a surviving tree needs only one recursive watcher.
+				foreach ( var path in Nodes.Keys.OrderBy( x => x.Length ) ) EnsureRootFor( path );
+			}
+		}
+
+		public static void Tick()
+		{
+			if ( timeSinceSweep > 5 ) Sweep();
+			List<string> pending;
+			lock ( Nodes )
+			{
+				pending = PendingFolders.ToList();
+				PendingFolders.Clear();
+			}
+
+			foreach ( var folder in pending ) NotifyFolder( folder );
+		}
 
 		/// <summary>
 		/// Keyed by folder, because roots watch subfolders too - a build touching thousands of
@@ -54,16 +101,15 @@ partial class FolderNode
 
 			lock ( Nodes )
 			{
-				if ( !EnsureRootFor( path ) )
-					return;
-
 				if ( !Nodes.TryGetValue( path, out var forFolder ) )
 				{
 					forFolder = new List<WeakReference<FolderNode>>();
 					Nodes[path] = forFolder;
 				}
 
-				forFolder.Add( new WeakReference<FolderNode>( node ) );
+				if ( !forFolder.Any( x => x.TryGetTarget( out var existing ) && ReferenceEquals( existing, node ) ) )
+					forFolder.Add( new WeakReference<FolderNode>( node ) );
+				EnsureRootFor( path );
 			}
 		}
 
@@ -79,13 +125,15 @@ partial class FolderNode
 					return true;
 			}
 
+			FileSystemWatcher watcher = null;
 			try
 			{
-				var watcher = new FileSystemWatcher( path ) { IncludeSubdirectories = true };
+				watcher = new FileSystemWatcher( path ) { IncludeSubdirectories = true };
 
 				watcher.Created += OnChanged;
 				watcher.Deleted += OnChanged;
 				watcher.Renamed += OnRenamed;
+				watcher.Error += OnError;
 				watcher.EnableRaisingEvents = true;
 
 				// Anything we were already watching that sits under this is now covered twice over
@@ -104,10 +152,11 @@ partial class FolderNode
 			}
 			catch ( Exception e )
 			{
+				watcher?.Dispose();
 				// Out of inotify instances, or the folder went away between us being asked and
 				// getting here. Neither is worth taking the asset browser down for - the folder
 				// just won't notice changes made outside the editor.
-				Log.Warning( $"Couldn't watch {path} for changes ({e.Message})" );
+				Sandbox.Internal.GlobalGameNamespace.Log.Warning( $"Couldn't watch {path} for changes ({e.Message})" );
 				return false;
 			}
 		}
@@ -119,7 +168,20 @@ partial class FolderNode
 
 			return path.StartsWith( root, PathComparison )
 				&& path.Length > root.Length
-				&& (path[root.Length] == '/' || path[root.Length] == '\\');
+				&& (root.EndsWith( '/' ) || path[root.Length] == '/' || path[root.Length] == '\\');
+		}
+
+		static void OnError( object sender, ErrorEventArgs e )
+		{
+			lock ( Nodes )
+			{
+				var root = Roots.FirstOrDefault( x => ReferenceEquals( x.Watcher, sender ) );
+				if ( root is null ) return;
+				foreach ( var path in Nodes.Keys.Where( path => Covers( root.Path, path ) ) ) PendingFolders.Add( path );
+				Roots.Remove( root );
+				root.Watcher.Dispose();
+				Sandbox.Internal.GlobalGameNamespace.Log.Warning( $"Folder watching interrupted for {root.Path}; retrying on the next sweep ({e.GetException().Message})" );
+			}
 		}
 
 		static void OnChanged( object sender, FileSystemEventArgs e ) => NotifyFolderOf( e.FullPath );
@@ -145,6 +207,14 @@ partial class FolderNode
 
 			folder = Normalize( folder );
 
+			lock ( Nodes )
+			{
+				if ( Nodes.ContainsKey( folder ) ) PendingFolders.Add( folder );
+			}
+		}
+
+		static void NotifyFolder( string folder )
+		{
 			List<FolderNode> listening = null;
 
 			lock ( Nodes )
@@ -183,7 +253,7 @@ partial class FolderNode
 
 		static string Normalize( string path )
 		{
-			path = path.Replace( '\\', '/' );
+			path = Path.GetFullPath( path ).Replace( '\\', '/' );
 
 			return path.Length > 1 && path.EndsWith( '/' )
 				? path.TrimEnd( '/' )

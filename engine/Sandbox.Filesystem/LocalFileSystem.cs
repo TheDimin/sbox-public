@@ -14,7 +14,7 @@ internal class LocalFileSystem : BaseFileSystem
 		// we wrap our highest filesystem and resolve it there
 		if ( OperatingSystem.IsLinux() )
 		{
-			Physical = new CaseInsensitivePhysicalFileSystem();
+			Physical = new CaseInsensitivePhysicalFileSystem { WatchOwner = rootFolder };
 		}
 		// on sane operating systems with case insensitive filesystems
 		// windows + macos do the normal path
@@ -38,6 +38,13 @@ internal class LocalFileSystem : BaseFileSystem
 			system = new Zio.FileSystems.ReadOnlyFileSystem( system );
 			SuppressZioFinalizer( system );
 		}
+	}
+
+	internal void ConfigureWatch( string owner, IEnumerable<string> excludedFolders )
+	{
+		if ( Physical is not CaseInsensitivePhysicalFileSystem physical ) return;
+		physical.WatchOwner = owner;
+		physical.WatchExclusions = excludedFolders.ToArray();
 	}
 
 	internal override void Dispose()

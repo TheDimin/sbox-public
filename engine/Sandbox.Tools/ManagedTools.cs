@@ -71,10 +71,14 @@ internal static class ManagedTools
 	}
 
 	private static FileWatch stylesWatcher;
+	private static BaseFileSystem stylesFileSystem;
 
 	public static void InitFinish()
 	{
-		stylesWatcher = FileSystem.Root.Watch( "/addons/tools/assets/styles/*" );
+		stylesWatcher?.Dispose();
+		stylesFileSystem?.Dispose();
+		stylesFileSystem = FileSystem.Root.CreateSubSystem( "/addons/tools/assets/styles" );
+		stylesWatcher = stylesFileSystem.Watch();
 		stylesWatcher.OnChangedFile += ( x ) => Application.ReloadStyles();
 
 		//

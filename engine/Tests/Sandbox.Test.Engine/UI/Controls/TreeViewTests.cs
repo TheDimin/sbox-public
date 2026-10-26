@@ -548,7 +548,7 @@ public class TreeViewTests
 			tree.Comparer = new PathComparer();
 			tree.Roots = temp.GetFileSystemInfos().OrderBy( item => item.Name, System.StringComparer.Ordinal ).ToArray();
 			tree.CanExpand = f => f is System.IO.DirectoryInfo;
-			tree.GetChildren = f => f is System.IO.DirectoryInfo d ? d.GetFileSystemInfos() : null;
+			tree.GetChildren = f => f is System.IO.DirectoryInfo d ? d.GetFileSystemInfos().OrderBy( child => child.Name, System.StringComparer.Ordinal ) : null;
 			tree.GetParent = f => f is System.IO.DirectoryInfo d ? d.Parent : ((System.IO.FileInfo)f).Directory;
 			tree.OnRow = ( r, f ) => r.Text = f.Name;
 

@@ -215,7 +215,8 @@ public partial class CompilerTest
 		//
 		{
 			int editorFolderId = 0;
-			var editorFolders = System.IO.Directory.EnumerateDirectories( codePath, "Editor", SearchOption.AllDirectories ).ToArray();
+			var editorFolders = System.IO.Directory.EnumerateDirectories( codePath, "*", SearchOption.AllDirectories )
+				.Where( path => string.Equals( System.IO.Path.GetFileName( path ), "editor", System.StringComparison.OrdinalIgnoreCase ) ).ToArray();
 			if ( editorFolders.Count() > 0 )
 			{
 				var compilerSettings = new Compiler.Configuration();

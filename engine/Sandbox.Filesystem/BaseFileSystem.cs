@@ -56,6 +56,8 @@ public class BaseFileSystem
 			watchers.Clear();
 
 			changedFiles.Clear();
+			watchSystems.Remove( this );
+			watchRetries.Remove( this );
 		}
 	}
 
@@ -533,20 +535,59 @@ public class BaseFileSystem
 		return (int)FindFile( path, recursive: recursive ).Sum( x => system.GetFileLength( Path.Combine( path, x ) ) );
 	}
 
-	bool watchUnavailable;
+	static readonly HashSet<BaseFileSystem> watchSystems = new();
+	static readonly HashSet<BaseFileSystem> watchRetries = new();
+	static long nextWatchId;
+	readonly long watchId = System.Threading.Interlocked.Increment( ref nextWatchId );
+	double watchRetryAt;
+
+	internal static string[] GetWatchDiagnostics()
+	{
+		lock ( FileWatch.WithChanges )
+			return watchSystems.Select( fs => $"{fs.GetType().Name}#{fs.watchId}: subscriptions={fs.watchers.Count}, state={(fs.watcher is null ? "retry pending" : "watching")}, callbacks=[{string.Join( ";", fs.watchers.Select( x => x.Describe() ) )}]" ).ToArray();
+	}
+
+	internal static void RetryUnavailableWatchers()
+	{
+		lock ( FileWatch.WithChanges )
+		{
+			foreach ( var filesystem in watchRetries.ToArray() )
+				filesystem.EnsureWatcher();
+		}
+	}
 
 	internal FileWatch Watch( string pathglob = null )
 	{
-		// One watcher for the whole filesystem, shared by every FileWatch handed out. It used
-		// to be disposed and rebuilt on each call, which the null check below was clearly not
-		// expecting: on Linux that means a fresh set of inotify instances per call - one per
-		// mounted filesystem in the aggregate - and the editor watches a stylesheet at a time
-		// until it hits the 128 instance limit and the whole thing falls over.
-		if ( watcher == null && !watchUnavailable )
+		lock ( FileWatch.WithChanges )
+		{
+			ObjectDisposedException.ThrowIf( system is null, this );
+			var subscription = pathglob != null ? new FileWatch( this, pathglob ) : new FileWatch( this );
+			watchers.Add( subscription );
+			watchSystems.Add( this );
+			EnsureWatcher();
+			return subscription;
+		}
+	}
+
+	void EnsureWatcher()
+	{
+		// Share one Zio watcher across this filesystem's logical subscriptions. Linux
+		// physical children also share reference-counted backends by canonical root.
+		if ( watcher == null && system != null && RealTime.NowDouble >= watchRetryAt )
 		{
 			try
 			{
-				watcher = system.Watch( "/" );
+				var previousOwner = SharedPhysicalFileWatcher.OwnerContext.Value;
+				try
+				{
+					SharedPhysicalFileWatcher.OwnerContext.Value = $"{GetType().Name}#{watchId}";
+					watcher = system.Watch( "/" );
+				}
+				finally
+				{
+					SharedPhysicalFileWatcher.OwnerContext.Value = previousOwner;
+				}
+				if ( watcher is null ) throw new NotSupportedException( "Filesystem returned no watcher" );
 				watcher.NotifyFilter = Zio.NotifyFilters.Attributes | Zio.NotifyFilters.Size | Zio.NotifyFilters.CreationTime | Zio.NotifyFilters.LastWrite | Zio.NotifyFilters.FileName | Zio.NotifyFilters.DirectoryName | Zio.NotifyFilters.Security;
 				watcher.IncludeSubdirectories = true;
 
@@ -557,31 +598,42 @@ public class BaseFileSystem
 				watcher.Error += OnDirectoryContentsError;
 
 				watcher.EnableRaisingEvents = true;
+				watchRetries.Remove( this );
+				if ( watchRetryAt > 0 )
+				{
+					foreach ( var file in FindFile( "/", recursive: true ) ) AddChangedFile( FixPath( file ) );
+					watchRetryAt = 0;
+				}
 			}
-			catch ( System.IO.IOException e )
+			catch ( Exception e ) when ( e is IOException or UnauthorizedAccessException or NotSupportedException )
 			{
-				// Linux gives every filesystem watch its own inotify instance and caps how many
-				// of those a user can have - 128 out of the box, which the editor can exhaust
-				// across all the filesystems it mounts. Watching is what makes assets hot
-				// reload, so losing it is worth a warning, but it isn't worth refusing to boot.
+				// Preserve subscriptions while capacity is unavailable. Instance, watch and
+				// process descriptor limits are separate; fs_watch_status reports their usage.
 				watcher?.Dispose();
 				watcher = null;
-				watchUnavailable = true;
+				watchRetryAt = RealTime.NowDouble + 5;
+				watchRetries.Add( this );
 
-				Log.Warning( $"Couldn't watch {this} for changes, so nothing under it will hot reload ({e.Message})" );
+				Log.Warning( $"Couldn't watch {GetType().Name}#{watchId}; retrying in five seconds ({e.Message})" );
 			}
 		}
 
-		FileWatch w = (pathglob != null) ? new FileWatch( this, pathglob ) : new FileWatch( this );
-
-		watchers.Add( w );
-
-		return w;
 	}
 
 	internal void RemoveWatcher( FileWatch watcher )
 	{
-		watchers?.Remove( watcher );
+		lock ( FileWatch.WithChanges )
+		{
+			watchers.Remove( watcher );
+			if ( watchers.Count != 0 ) return;
+			watchSystems.Remove( this );
+			watchRetries.Remove( this );
+			watchRetryAt = 0;
+			this.watcher?.Dispose();
+			this.watcher = null;
+			changedFiles.Clear();
+			FileWatch.WithChanges.Remove( this );
+		}
 	}
 
 	internal void AddChangedFile( string path )
@@ -600,6 +652,9 @@ public class BaseFileSystem
 
 		lock ( FileWatch.WithChanges )
 		{
+			if ( FileWatch.WithChanges.Count == 0 )
+				FileWatch.TimeSinceFirstChange = 0;
+
 			if ( changedFiles.Contains( path ) )
 				return;
 
@@ -717,7 +772,16 @@ public class BaseFileSystem
 
 			try
 			{
-				fs.AddFileSystem( filesystem.system );
+				var previousOwner = SharedPhysicalFileWatcher.OwnerContext.Value;
+				try
+				{
+					SharedPhysicalFileWatcher.OwnerContext.Value = $"{GetType().Name}#{watchId}";
+					fs.AddFileSystem( filesystem.system );
+				}
+				finally
+				{
+					SharedPhysicalFileWatcher.OwnerContext.Value = previousOwner;
+				}
 			}
 			catch ( System.IO.IOException e )
 			{

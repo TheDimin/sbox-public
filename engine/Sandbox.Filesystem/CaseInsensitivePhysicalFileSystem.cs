@@ -23,6 +23,16 @@ internal sealed class CaseInsensitivePhysicalFileSystem : PhysicalFileSystem
 	/// </summary>
 	private readonly ConcurrentDictionary<string, string> _resolvedPathCache = new( StringComparer.Ordinal );
 
+	internal string[] WatchExclusions { get; set; } = Array.Empty<string>();
+	internal string WatchOwner { get; set; } = "filesystem";
+
+	// A missing directory can return later (project checkout, removable mount, etc.).
+	// Retain the subscription so the shared backend can retry without recreating callers.
+	protected override bool CanWatchImpl( UPath path ) => !File.Exists( ConvertPathToInternal( path ) );
+
+	protected override IFileSystemWatcher WatchImpl( UPath path ) =>
+		new SharedPhysicalFileWatcher( this, path, WatchExclusions, WatchOwner );
+
 	protected override string ConvertPathToInternalImpl( UPath path )
 	{
 		return ResolvePathCasing( base.ConvertPathToInternalImpl( path ) );
