@@ -64,10 +64,8 @@ internal static class SceneSource
 		{
 			if ( !editor.IsMounted && FindAsset( source ) is { } asset )
 			{
-				var path = asset.GetCompiledFile( true );
-				if ( string.IsNullOrEmpty( path ) )
-					throw new FileNotFoundException( $"No compiled file exists for '{asset.Path}'." );
-				return SceneFile.FromCompiled( asset.Path, asset.Guid, File.ReadAllBytes( path ) );
+				return LoadCompiledScene( asset.Path, asset.Guid, asset.GetCompiledFile( true ),
+					asset.GetSourceFile( true ), System.OperatingSystem.IsLinux() );
 			}
 
 			var file = SceneFile.Load( source.ResourcePath );
@@ -80,5 +78,31 @@ internal static class SceneSource
 			Log.Error( e, $"Could not load compiled scene '{source.ResourcePath}'." );
 			return null;
 		}
+	}
+
+	/// <summary>
+	/// Linux's native directory watcher can leave the compiled-file catalog stale. For a local
+	/// scene only, accept the adjacent compiled output after decoding it through the normal loader.
+	/// This does not register assets, recompile source, or alter the native resource cache.
+	/// </summary>
+	internal static SceneFile LoadCompiledScene( string resourcePath, System.Guid guid, string compiledPath, string sourcePath, bool allowDiskFallback )
+	{
+		var usedDiskFallback = false;
+		if ( allowDiskFallback && !File.Exists( compiledPath )
+			&& !string.IsNullOrEmpty( sourcePath ) && Path.IsPathFullyQualified( sourcePath )
+			&& string.Equals( Path.GetExtension( sourcePath ), ".scene", System.StringComparison.OrdinalIgnoreCase )
+			&& File.Exists( sourcePath ) && File.Exists( sourcePath + "_c" ) )
+		{
+			compiledPath = sourcePath + "_c";
+			usedDiskFallback = true;
+		}
+
+		if ( string.IsNullOrEmpty( compiledPath ) )
+			throw new FileNotFoundException( $"No compiled file exists for '{resourcePath}'." );
+
+		var file = SceneFile.FromCompiled( resourcePath, guid, File.ReadAllBytes( compiledPath ) );
+		if ( usedDiskFallback )
+			Log.Warning( $"Loaded compiled scene '{resourcePath}' from disk because the native asset catalog did not expose its compiled file. Native directory watching is unavailable on Linux." );
+		return file;
 	}
 }

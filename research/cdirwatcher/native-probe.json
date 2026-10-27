@@ -1,0 +1,28 @@
+{
+  "library": "/home/damian/projects/sbox-public/game/bin/linuxsteamrt64/libtier0.so",
+  "events": [
+    {
+      "operation": "create",
+      "native_reported": false,
+      "kernel_event_bytes": 128
+    },
+    {
+      "operation": "modify",
+      "native_reported": false,
+      "kernel_event_bytes": 96
+    },
+    {
+      "operation": "rename",
+      "native_reported": false,
+      "kernel_event_bytes": 64
+    },
+    {
+      "operation": "delete",
+      "native_reported": false,
+      "kernel_event_bytes": 32
+    }
+  ],
+  "set_dir_returned": true,
+  "manual_feed_reported": true,
+  "manual_feed_path": "manually-fed.scene_c"
+}

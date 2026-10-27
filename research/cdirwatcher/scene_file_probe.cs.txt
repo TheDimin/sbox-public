@@ -1,0 +1,15 @@
+using Editor;
+using Sandbox;
+using System.Text.Json;
+Environment.CurrentDirectory = Environment.GetEnvironmentVariable("FACEPUNCH_ENGINE")!;
+var app = new TestAppSystem();
+app.Init();
+try
+{
+    var source = "/home/damian/projects/Sbox_BlenderEngine/Assets/scenes/minimal.scene";
+    using var metadata = JsonDocument.Parse(File.ReadAllText(source + ".meta"));
+    var guid = metadata.RootElement.GetProperty("guid").GetGuid();
+    var scene = SceneSource.LoadCompiledScene("scenes/minimal.scene", guid, null, source, true);
+    Console.WriteLine(JsonSerializer.Serialize(new { Success = scene is not null, scene.ResourcePath, scene.Id, GameObjects = scene.GameObjects?.Length, CompiledBytes = new FileInfo(source + "_c").Length }));
+}
+finally { app.Shutdown(); }
