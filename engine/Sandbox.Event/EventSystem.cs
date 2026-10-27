@@ -190,7 +190,7 @@ internal class EventSystem : IDisposable
 					Priority = attr.Priority,
 					Class = classEvent,
 					Group = group,
-					Delegate = BuildDelegate( m ),
+					Delegate = BuildDelegate( m, attr.EventName ),
 					IsStatic = m.IsStatic
 				};
 
@@ -206,8 +206,9 @@ internal class EventSystem : IDisposable
 			AddEventsForType( t.BaseType, rootType ?? t );
 	}
 
-	EventDelegate BuildDelegate( MethodInfo info )
+	EventDelegate BuildDelegate( MethodInfo info, string eventName )
 	{
+		var reloadedMethods = new ConditionalWeakTable<Type, MethodInfo>();
 		// TODO - handle arguments
 
 		var parameters = info.GetParameters();
@@ -238,7 +239,30 @@ internal class EventSystem : IDisposable
 					throw new ArgumentException( $"Event passed {p.Length} arguments but {info.Name} expects none" );
 			}
 
-			info?.Invoke( o, args );
+			var method = info;
+			if ( !info.IsStatic && o != null && !info.DeclaringType.IsInstanceOfType( o ) )
+			{
+				// Hotload can leave a live object from another version of the same assembly.
+				// Resolve its own handler so the object keeps receiving events.
+				var targetType = o.GetType();
+				if ( !reloadedMethods.TryGetValue( targetType, out method ) )
+				{
+					var declaringType = targetType;
+					while ( declaringType != null && (declaringType.FullName != info.DeclaringType.FullName || declaringType.Assembly.GetName().Name != info.DeclaringType.Assembly.GetName().Name) )
+						declaringType = declaringType.BaseType;
+
+					method = declaringType?.GetMethods( BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic )
+						.SingleOrDefault( candidate => candidate.Name == info.Name
+							&& candidate.GetParameters().Select( p => p.ParameterType.AssemblyQualifiedName ).SequenceEqual( parameters.Select( p => p.ParameterType.AssemblyQualifiedName ) )
+							&& candidate.GetCustomAttributes<EventAttribute>( true ).Any( attr => string.Equals( attr.EventName, eventName, StringComparison.OrdinalIgnoreCase ) ) );
+					if ( method == null )
+						throw new TargetException( $"Cannot resolve event handler {info} for runtime type {targetType}" );
+
+					reloadedMethods.Add( targetType, method );
+				}
+			}
+
+			method?.Invoke( o, args );
 		};
 
 		return d;
@@ -383,6 +407,7 @@ internal class EventSystem : IDisposable
 		if ( !Classes.TryGetValue( TypeKey( obj.GetType() ), out var type ) )
 			return;
 
+		OrphanedInstances.Remove( obj );
 		type.Targets.Add( obj );
 	}
 
