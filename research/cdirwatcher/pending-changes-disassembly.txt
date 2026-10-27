@@ -1,0 +1,12 @@
+
+/home/damian/projects/sbox-public/game/bin/linuxsteamrt64/libtier0.so:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000063a90 <CDirTreeWatchManager::CheckForPendingChanges()@@Base>:
+   63a90:	c3                   	ret
+   63a91:	90                   	nop
+   63a92:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+   63a99:	00 00 00 00 
+   63a9d:	0f 1f 00             	nopl   (%rax)

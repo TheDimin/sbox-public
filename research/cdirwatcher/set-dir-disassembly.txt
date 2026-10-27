@@ -1,0 +1,61 @@
+
+/home/damian/projects/sbox-public/game/bin/linuxsteamrt64/libtier0.so:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000063960 <CDirWatcher::SetDirToWatch(char const*, unsigned int, bool)@@Base>:
+   63960:	48 85 f6             	test   %rsi,%rsi
+   63963:	0f 84 a7 00 00 00    	je     63a10 <CDirWatcher::SetDirToWatch(char const*, unsigned int, bool)@@Base+0xb0>
+   63969:	41 55                	push   %r13
+   6396b:	31 c0                	xor    %eax,%eax
+   6396d:	41 54                	push   %r12
+   6396f:	55                   	push   %rbp
+   63970:	53                   	push   %rbx
+   63971:	48 89 f3             	mov    %rsi,%rbx
+   63974:	48 81 ec 18 10 00 00 	sub    $0x1018,%rsp
+   6397b:	80 3e 00             	cmpb   $0x0,(%rsi)
+   6397e:	75 10                	jne    63990 <CDirWatcher::SetDirToWatch(char const*, unsigned int, bool)@@Base+0x30>
+   63980:	48 81 c4 18 10 00 00 	add    $0x1018,%rsp
+   63987:	5b                   	pop    %rbx
+   63988:	5d                   	pop    %rbp
+   63989:	41 5c                	pop    %r12
+   6398b:	41 5d                	pop    %r13
+   6398d:	c3                   	ret
+   6398e:	66 90                	xchg   %ax,%ax
+   63990:	88 4f 54             	mov    %cl,0x54(%rdi)
+   63993:	c5 f9 ef c0          	vpxor  %xmm0,%xmm0,%xmm0
+   63997:	48 89 fd             	mov    %rdi,%rbp
+   6399a:	48 89 e7             	mov    %rsp,%rdi
+   6399d:	c5 f9 7f 04 24       	vmovdqa %xmm0,(%rsp)
+   639a2:	49 89 e4             	mov    %rsp,%r12
+   639a5:	e8 16 0a fd ff       	call   343c0 <CPathString::Set(char const*)@plt>
+   639aa:	80 3d 0f 98 0f 00 00 	cmpb   $0x0,0xf980f(%rip)        # 15d1c0 <g_pFiberJobPool@@Base+0x380>
+   639b1:	75 15                	jne    639c8 <CDirWatcher::SetDirToWatch(char const*, unsigned int, bool)@@Base+0x68>
+   639b3:	48 8d 3d 4e 60 0a 00 	lea    0xa604e(%rip),%rdi        # 109a08 <CreateInterface@@Base+0x5388>
+   639ba:	31 c0                	xor    %eax,%eax
+   639bc:	c6 05 fd 97 0f 00 01 	movb   $0x1,0xf97fd(%rip)        # 15d1c0 <g_pFiberJobPool@@Base+0x380>
+   639c3:	e8 98 36 fd ff       	call   37060 <DevWarning(char const*, ...)@plt>
+   639c8:	4c 8d 6c 24 10       	lea    0x10(%rsp),%r13
+   639cd:	45 31 c0             	xor    %r8d,%r8d
+   639d0:	31 c9                	xor    %ecx,%ecx
+   639d2:	48 89 da             	mov    %rbx,%rdx
+   639d5:	be 00 10 00 00       	mov    $0x1000,%esi
+   639da:	4c 89 ef             	mov    %r13,%rdi
+   639dd:	e8 1e 3f fd ff       	call   37900 <_V_MakeAbsolutePath@plt>
+   639e2:	4c 89 ee             	mov    %r13,%rsi
+   639e5:	48 89 ef             	mov    %rbp,%rdi
+   639e8:	e8 33 42 fd ff       	call   37c20 <CUtlString::Set(char const*)@plt>
+   639ed:	4c 89 e7             	mov    %r12,%rdi
+   639f0:	e8 7b 42 fd ff       	call   37c70 <CPathString::~CPathString()@plt>
+   639f5:	48 81 c4 18 10 00 00 	add    $0x1018,%rsp
+   639fc:	b8 01 00 00 00       	mov    $0x1,%eax
+   63a01:	5b                   	pop    %rbx
+   63a02:	5d                   	pop    %rbp
+   63a03:	41 5c                	pop    %r12
+   63a05:	41 5d                	pop    %r13
+   63a07:	c3                   	ret
+   63a08:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+   63a0f:	00 
+   63a10:	31 c0                	xor    %eax,%eax
+   63a12:	c3                   	ret
