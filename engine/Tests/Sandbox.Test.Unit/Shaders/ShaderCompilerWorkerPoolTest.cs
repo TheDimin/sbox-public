@@ -21,13 +21,11 @@ public class ShaderCompilerWorkerPoolTest
 	[TestMethod]
 	public void OptionsCannotExceedTheLifetimeThreadBound()
 	{
-		Assert.AreEqual( 2, ShaderCompilerWorkers.Concurrency( default, 32, null ) );
-		Assert.AreEqual( 1, ShaderCompilerWorkers.Concurrency( new() { SingleThreaded = true, MaxThreads = 32 }, 32, long.MaxValue ) );
-		Assert.AreEqual( 1, ShaderCompilerWorkers.Concurrency( new() { MaxThreads = 1 }, 32, long.MaxValue ) );
-		Assert.AreEqual( 2, ShaderCompilerWorkers.Concurrency( new() { MaxThreads = 32 }, 32, long.MaxValue ) );
-		Assert.AreEqual( 1, ShaderCompilerWorkers.Concurrency( new() { MaxThreads = 32 }, 32, ShaderCompilerWorkers.MemoryPerWorker ) );
-		Assert.AreEqual( 1, ShaderCompilerWorkers.Concurrency( default, 32, 0 ) );
-		Assert.AreEqual( 1, ShaderCompilerWorkers.Concurrency( default, 1, long.MaxValue ) );
+		Assert.AreEqual( 2, ShaderCompilerWorkers.Concurrency( default, 32 ) );
+		Assert.AreEqual( 1, ShaderCompilerWorkers.Concurrency( new() { SingleThreaded = true, MaxThreads = 32 }, 32 ) );
+		Assert.AreEqual( 1, ShaderCompilerWorkers.Concurrency( new() { MaxThreads = 1 }, 32 ) );
+		Assert.AreEqual( 2, ShaderCompilerWorkers.Concurrency( new() { MaxThreads = 32 }, 32 ) );
+		Assert.AreEqual( 1, ShaderCompilerWorkers.Concurrency( default, 1 ) );
 	}
 
 	[TestMethod]

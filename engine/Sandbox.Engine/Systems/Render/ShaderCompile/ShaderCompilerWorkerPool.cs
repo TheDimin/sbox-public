@@ -158,17 +158,15 @@ internal sealed class ShaderCompilerWorkerPool : IDisposable
 internal static class ShaderCompilerWorkers
 {
 	internal const int MaximumWorkers = 2;
-	internal const long MemoryPerWorker = 768L * 1024 * 1024;
 	static readonly object gate = new();
 	static ShaderCompilerWorkerPool pool;
 	static bool stopped;
 
-	internal static int Concurrency( ShaderCompileOptions options, int processors, long? availableMemory )
+	internal static int Concurrency( ShaderCompileOptions options, int processors )
 	{
 		if ( options.SingleThreaded ) return 1;
 		var count = Math.Min( MaximumWorkers, processors );
 		if ( options.MaxThreads > 0 ) count = Math.Min( count, options.MaxThreads );
-		if ( availableMemory is long available ) count = (int)Math.Min( count, available / MemoryPerWorker );
 		return Math.Max( 1, count );
 	}
 

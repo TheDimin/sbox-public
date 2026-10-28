@@ -306,12 +306,12 @@ public static class ShaderCompile
 	}
 
 	/// <summary>
-	/// Batch concurrency, bounded by the process-lifetime worker count and available memory.
+	/// Batch concurrency, bounded by the process-lifetime worker count.
 	/// Explicit options can reduce this limit, but cannot create more native compiler sessions.
 	/// </summary>
 	internal static int ComboThreads( ShaderCompileOptions options )
 	{
-		return ShaderCompilerWorkers.Concurrency( options, Environment.ProcessorCount, SystemMemory.AvailablePhysicalBytes() );
+		return ShaderCompilerWorkers.Concurrency( options, Environment.ProcessorCount );
 	}
 
 	internal static ShaderCompileContext GetSharedContext( ShaderProgramType programType )
