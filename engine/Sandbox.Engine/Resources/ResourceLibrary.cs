@@ -490,6 +490,8 @@ public class ResourceSystem
 	/// <param name="id">GUID of the resource.</param>
 	public T Get<T>( Guid id ) where T : Resource
 	{
+		if ( id == Guid.Empty ) return default;
+
 		if ( GuidIndex.TryGetValue( id, out var resource ) )
 			return resource as T;
 
@@ -904,6 +906,13 @@ public static class ResourceLibrary
 	public static T Get<T>( string filepath ) where T : Resource => Game.Resources.Get<T>( filepath );
 
 	/// <summary>
+	/// Get a currently indexed resource by its GUID. This does not load or mount an asset.
+	/// Returns null for an empty, unknown, unindexed, or wrong-type GUID. A cached
+	/// game-resource promise may still be awaiting its data. Use on the main thread.
+	/// </summary>
+	public static T Get<T>( Guid id ) where T : Resource => Game.Resources.Get<T>( id );
+
+	/// <summary>
 	/// Get a cached resource
 	/// </summary>
 	internal static T Get<T>( ResourceId id ) where T : Resource => Game.Resources.Get<T>( id );
@@ -916,6 +925,13 @@ public static class ResourceLibrary
 	/// <param name="resource">The retrieved resource, if any.</param>
 	/// <returns>True if resource was retrieved successfully.</returns>
 	public static bool TryGet<T>( string filepath, out T resource ) where T : Resource => Game.Resources.TryGet<T>( filepath, out resource );
+
+	/// <summary>
+	/// Try to get a currently indexed resource by GUID. Like <see cref="Get{T}(Guid)"/>,
+	/// this does not load or mount the asset and may return a game-resource promise.
+	/// Use on the main thread.
+	/// </summary>
+	public static bool TryGet<T>( Guid id, out T resource ) where T : Resource => Game.Resources.TryGet<T>( id, out resource );
 
 	/// <summary>
 	/// Get all cached resources of given type.

@@ -20,9 +20,13 @@ public abstract partial class Resource : IValid, IJsonConvert, BytePack.ISeriali
 	internal ulong ResourceIdLong { get; set; }
 
 	/// <summary>
-	/// GUID for this resource, if any.
+	/// The asset's GUID, or <see cref="System.Guid.Empty"/> when no GUID is known. A GUID
+	/// can become known after loading. Procedural, embedded, missing, or conflicting assets
+	/// may not have a persistent identity. A move or rename preserves the identity only
+	/// when the asset's GUID is preserved.
 	/// </summary>
-	internal Guid Guid { get; set; }
+	[Hide, JsonIgnore]
+	public Guid Guid { get; internal set; }
 
 	/// <summary>
 	/// Path to this resource.
