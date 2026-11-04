@@ -344,6 +344,31 @@ AnimatedTriangle. It records fractional and boundary-adjacent times, local/world
 bones and mixed-channel reference errors. This is a measurement probe with no
 approved approximation tolerance, and remains unrun.
 
+`GltfSkinningPalette` now stages full matrices in original skin-joint order from
+an immutable snapshot of joints and inverse binds. It changes coordinate basis
+after multiplying inverse bind by the joint scene transform, then applies an
+optional engine-space object placement once. Its reusable destination API
+validates before writing and does not require an array allocation per update.
+This helper has not been connected to a renderer or `Model.Load`.
+
+[editor_skinning_palette.csx](editor_skinning_palette.csx) is the unrun editor
+runner for its new unit tests. It compiles the worktree helper/test sources with
+one renamed type identifier and records original/compiled hashes and module
+identities. Cases cover valid TRS hierarchies producing shear, independent
+analytic point transforms, inverse-bind/joint order, ignored skinned mesh-node
+transforms, noncommuting object placement, source/compiled parity, immutable
+snapshots and safe destination reuse/failures. These are CPU staging checks,
+not GPU deformation or native playback proof.
+
+The managed renderer already has full `Matrix3x4` palette storage. Its existing
+scene bridge first obtains `Transform` bone values, and `WriteBones` then
+multiplies native inverse binds. A glTF full-matrix bridge must preserve affine
+data through that boundary and avoid applying the inverse binds a second time.
+Keep instance palettes out of shared mesh/material state and preserve legacy
+model behavior. Native draw metadata, influence packing, bounds, shadows,
+multiview updates and native-camera rendering still need independent proof;
+the reflected managed capture route alone cannot establish them.
+
 ### Core geometry regression checks
 
 [editor_primitive_modes.csx](editor_primitive_modes.csx) prepares 42 cases across
