@@ -6,4 +6,6 @@
 !editor_material_channels.csx
 !editor_scene.csx
 !editor_metalness_lighting.csx
+!editor_model_lifetime.csx
 !editor_vertex_frame.csx
+!editor_model_load.csx

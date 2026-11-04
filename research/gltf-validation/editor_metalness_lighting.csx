@@ -10,7 +10,8 @@ var sourceDirectory = System.IO.Path.Combine( corpus, "Models", "Triangle", "glT
 var diagnosticClear = Environment.GetEnvironmentVariable( "SBOX_GLTF_CAMERA_CLEAR" ) == "1";
 var controlsOnly = Environment.GetEnvironmentVariable( "SBOX_GLTF_LIGHTING_CONTROLS_ONLY" ) == "1";
 var managedCapture = Environment.GetEnvironmentVariable( "SBOX_GLTF_CAPTURE_RENDERER" ) == "managed";
-var output = System.IO.Path.Combine( root.FullName, "Temp", "gltf-validation", (controlsOnly ? (diagnosticClear ? "editor-lighting-controls-camera-clear-tangents" : "editor-lighting-controls-tangents") : (diagnosticClear ? "editor-metalness-lighting-camera-clear" : "editor-metalness-lighting")) + (managedCapture ? "-managed" : "") );
+var validFrameFixture = Environment.GetEnvironmentVariable( "SBOX_GLTF_VALID_VERTEX_FRAME" ) == "1";
+var output = System.IO.Path.Combine( root.FullName, "Temp", "gltf-validation", (controlsOnly ? (diagnosticClear ? "editor-lighting-controls-camera-clear-tangents" : "editor-lighting-controls-tangents") : (diagnosticClear ? "editor-metalness-lighting-camera-clear" : "editor-metalness-lighting")) + (managedCapture ? "-managed" : "") + (validFrameFixture ? "-valid-frame" : "") );
 System.IO.Directory.CreateDirectory( output );
 var receiptPath = System.IO.Path.Combine( output, "receipt.json" );
 var suffix = Guid.NewGuid().ToString( "N" );
@@ -50,7 +51,7 @@ object Receipt( bool passed, string error = null ) => new
 {
     passed, phase, error, completed, failures, captures, channel_results = channelResults, texture_evidence = textureEvidence,
     scope = "exploratory stock complex lit metalness sensitivity, not glTF material fidelity or PBR equivalence",
-    diagnostic_camera_clear = diagnosticClear, lighting_controls_only = controlsOnly, capture_renderer = managedCapture ? "managed SceneBridge.RenderToTexture" : "native CameraComponent.RenderToTexture", managed_viewport_enabled = managedViewportEnabled, editor = Application.IsEditor, engine_location = engineLocation,
+    diagnostic_camera_clear = diagnosticClear, explicit_valid_frame_fixture = validFrameFixture, lighting_controls_only = controlsOnly, capture_renderer = managedCapture ? "managed SceneBridge.RenderToTexture" : "native CameraComponent.RenderToTexture", managed_viewport_enabled = managedViewportEnabled, editor = Application.IsEditor, engine_location = engineLocation,
     engine_mvid = engine.ManifestModule.ModuleVersionId.ToString(), gltf_mvid = typeof( Sandbox.Gltf.GltfReader ).Assembly.ManifestModule.ModuleVersionId.ToString(),
     source_sha256 = sourceHash, starting_frame = startFrame, final_frame = Application.FrameCount, output
 };
@@ -71,6 +72,15 @@ try
     byte[] Resolve( string uri ) => System.IO.File.ReadAllBytes( System.IO.Path.Combine( sourceDirectory, uri ) );
     using var doc = Sandbox.Gltf.GltfReader.Read( source, Resolve );
     var data = doc.CreateDrawData( 0, 0 );
+    // The deployed builder predates the source-verified tangent-frame fix.
+    // This explicit fixture isolates material equations from that known defect.
+    if ( validFrameFixture ) data = new Sandbox.Gltf.GltfDrawData
+    {
+        Mode = data.Mode, Material = data.Material, Positions = data.Positions, Indices = data.Indices,
+        Normals = Enumerable.Repeat( new System.Numerics.Vector3( 1, 0, 0 ), data.Positions.Length ).ToArray(),
+        Tangents = Enumerable.Repeat( new System.Numerics.Vector4( 0, 1, 0, 1 ), data.Positions.Length ).ToArray(),
+        Colors = data.Colors, TexCoords = data.TexCoords
+    };
     var stock = Material.Load( "materials/default/white.vmat" );
     if ( stock is null || !stock.IsValid || stock.IsError || !stock.ShaderName.Contains( "complex", StringComparison.OrdinalIgnoreCase ) ) throw new InvalidOperationException( "Stock complex material unavailable." );
     var build = engine.GetType( "Sandbox.GltfModelPrimitiveBuilder", true ).GetMethod( "Build", flags );

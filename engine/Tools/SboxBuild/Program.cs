@@ -22,6 +22,7 @@ internal class Program
 
 		// Individual step commands
 		AddBuildContentCommand( rootCommand );
+		AddBuildManagedStageCommand( rootCommand );
 		AddTestCommand( rootCommand );
 		AddGltfCorpusCommand( rootCommand );
 		AddGltfNativeMaterialCommand( rootCommand );
@@ -141,6 +142,15 @@ internal class Program
 	{
 		var cmd = new Command( "build-content", "Build game content" );
 		cmd.SetHandler( () => { Environment.ExitCode = (int)new BuildContent().Run(); } );
+		rootCommand.Add( cmd );
+	}
+
+	private static void AddBuildManagedStageCommand( RootCommand rootCommand )
+	{
+		var cmd = new Command( "build-managed-stage", "Build selected managed projects into a separate temporary stage without deploying" );
+		var project = new Option<string[]>( "--project", "Allowlisted project name; repeatable (defaults to Sandbox.Gltf and Sandbox.Engine)" ) { AllowMultipleArgumentsPerToken = true };
+		cmd.AddOption( project );
+		cmd.SetHandler( ( string[] projects ) => Environment.ExitCode = (int)new BuildManagedStage().Run( projects ), project );
 		rootCommand.Add( cmd );
 	}
 

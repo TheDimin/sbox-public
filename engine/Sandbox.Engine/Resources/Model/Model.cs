@@ -11,6 +11,13 @@ public sealed partial class Model : Resource
 {
 	internal IModel native;
 	internal bool procedural;
+	private GltfModelLifetime gltfLifetime;
+
+	internal void SetGltfLifetime( GlobalContext context, List<GltfMaterialLease<Material>> leases, List<Mesh> meshes )
+	{
+		if ( gltfLifetime is not null ) throw new InvalidOperationException( "glTF model lifetime has already been assigned." );
+		gltfLifetime = new GltfModelLifetime( context, leases, meshes );
+	}
 
 	public override bool IsValid => native.IsValid;
 
@@ -30,6 +37,48 @@ public sealed partial class Model : Resource
 
 	internal override void Destroy()
 	{
+		var gltf = System.Threading.Interlocked.Exchange( ref gltfLifetime, null );
+		if ( gltf is not null )
+		{
+			var handle = native;
+			native = default;
+			using var ownerScope = new GlobalContext.GlobalContextScope( gltf.Context );
+			MainThread.Queue( () =>
+			{
+				void Release()
+				{
+					using var scope = new GlobalContext.GlobalContextScope( gltf.Context );
+					try
+					{
+						if ( !handle.IsNull )
+						{
+							var key = handle.GetBindingPtr().ToInt64();
+							if ( NativeResourceCache.TryPeek<Model>( key, out var indexed ) && ReferenceEquals( indexed, this ) )
+								NativeResourceCache.Remove( key );
+							handle.DestroyStrongHandle();
+						}
+					}
+					finally
+					{
+						try { GltfModelLoader.ReleaseMeshes( gltf.Meshes ); }
+						finally
+						{
+							foreach ( var lease in gltf.Leases )
+							{
+								try { lease.Dispose(); }
+								catch ( Exception e ) { Log.Warning( e, e.Message ); }
+							}
+						}
+					}
+				}
+
+				if ( Graphics.IsActive ) EngineLoop.DisposeAtFrameEnd( Sandbox.Utility.DisposeAction.Create( Release ) );
+				else Release();
+			} );
+			base.Destroy();
+			return;
+		}
+
 		if ( !native.IsNull )
 		{
 			var path = ResourcePath;
@@ -159,6 +208,9 @@ public sealed partial class Model : Resource
 		set;
 	}
 }
+
+/// <summary>Native mesh and shared material ownership attached to a glTF model.</summary>
+internal sealed record GltfModelLifetime( GlobalContext Context, List<GltfMaterialLease<Material>> Leases, List<Mesh> Meshes );
 
 internal interface IHasModel
 {

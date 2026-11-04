@@ -169,11 +169,94 @@ The same four tests and lighting comparisons also passed through the native
 capture path with the scoped clear diagnostic, in
 `editor-vertex-frame-camera-clear`.
 
-These source-compilation proofs execute new production code in the real editor
-but do not replace the deployed engine assembly. A staged engine build and
-coordinated editor restart are still needed before claiming that ordinary engine
-call sites use these changes. `Model.Load` dispatch, material mapping beyond
-the proven inputs and full corpus appearance remain incomplete.
+Those source-compilation proofs alone do not establish deployment into ordinary
+engine call sites. The subsequent rebuilt-engine results below do exercise
+`Model.Load`; material coverage and full corpus appearance remain incomplete.
+
+### Rebuilt-engine resource loading
+
+`GltfModelLoader` now handles explicit `.gltf`, `.glb` and `.glb_c` paths through
+`Model.Load` and `Model.LoadAsync`, using the mounted filesystem and the static
+scene assembler. It creates one model containing all selected node/primitive
+instances, with transformed bounds, stock complex materials and shared leases.
+Opaque base-color RGB factors are supported; authored alpha is ignored for
+OPAQUE and retained in the source. Distinct effective colors get distinct
+cached materials. Default metallic/roughness inputs map to the experimentally
+verified stock parameters. Nondefault factors, textures, vertex colors,
+nonopaque/unlit/emissive materials and deformation remain unsupported by this
+initial adapter and report errors. This is not complete core support.
+
+The first actual API test failed on the old engine because native loading
+expected `.vmdl` (`editor-model-load/667675e6611a4a9692c605f12f8c3e3b`). A later
+regression caught cold canonical `.glb` references failing when only `.glb_c`
+was shipped (`editor-model-load/f1179af85c1949c08610bf0fd9dcc05d`). The loader now
+resolves that compiled file while preserving the logical `.glb` identity.
+The separate nonwhite-factor positive test also failed before RGB support was
+added. These are real API failures, not assertions against an invented stub.
+
+[editor_model_load.csx](editor_model_load.csx) mounts private fixtures, verifies
+their bytes and exercises the actual resource API. `SBOX_GLTF_MODEL_CASE=all`
+passed all 13 current cases with 42 loads on the rebuilt engine. It covers both
+untouched Khronos Triangle variants, source GLB, direct compiled-file loading,
+cold compiled-reference loading without source siblings, multi-node geometry,
+RGB factors, distinct material slots and opaque alpha, optional-extension
+warnings, required-extension rejection, missing dependencies and URI resolution.
+Repeated, equivalent-path and async loads share a model with a stable path/name;
+the temporary procedural alias and native GUID are not published as its managed
+identity. GUID-only cold loading is not established. Current matrix evidence:
+`editor-model-load/4283e26f40c042f8bf87750e100a5cbe/receipt.json`.
+
+With `SBOX_GLTF_MODEL_RENDER=1` and `SBOX_GLTF_CAPTURE_RENDERER=managed`, the loaded
+models passed independent stock-material references in albedo, world normals,
+no-light, front-light and back-light specular views. All comparisons had zero
+pixels exceeding the 0.03 RGB tolerance; no-light, back-light and empty controls
+were black. Triangle coverage was 1,225 pixels. The two-color scene covered 320
+pixels and omitting each of its four reference primitives changed 80 pixels.
+The original embedded variant was tested without an external Triangle buffer.
+Receipts beneath `Temp/gltf-validation/editor-model-load-render-managed`:
+
+| Case | Receipt directory |
+| --- | --- |
+| Cold compiled reference | `25109013245e4fe58dfdeedc0b078246` |
+| RGB factor | `594bed55b34a4416bc58e6d3da041a98` |
+| Two materials and repeated instances | `b1713ffeb36243639d6aa407a913642f` |
+| Original Khronos Triangle | `475cd3bf0b3641cba6aa0ae7c66ccccc` |
+| Original embedded Triangle | `c6e93595558d4ab980504c7f31817dde` |
+| Direct `.glb_c`, no source sibling | `b23e4b48d9524f9c9d35ce6aaf93fc83` |
+
+The loaded two-color scene also passed the same references and omission controls
+through the native capture pipeline with its scoped color-clear diagnostic:
+`editor-model-load-render-camera-clear/6d7c219285e545c5bef76147d95d9951`.
+
+[editor_model_lifetime.csx](editor_model_lifetime.csx) additionally proved that
+two distinct loaded models share a material, explicit destruction decrements its
+lease count 2→1→0, the surviving model remains valid, the last wrapper becomes
+invalid, and repeated destruction is harmless. A separate no-inline weak-model
+test allowed the normal 5–10 second native-cache retention to expire; after
+about 9.4 seconds the model was collected, its last lease released and its
+material invalidated. The existing vmdl sphere remained valid. Evidence:
+`editor-model-lifetime/ace3a902502543e985d0553fc8520233` on the current modules
+(about 9.6 seconds and seven collections). The earlier build's independent run
+is retained at `editor-model-lifetime/74b8f2a5f43a4a3ebbf48954a54f919f`.
+This establishes managed ownership/finalizer behavior, not GPU deallocation
+timing or measured runtime-memory parity.
+
+`SboxBuild build-managed-stage --project Sandbox.Gltf Sandbox.Engine` builds
+selected projects serially into a new ignored `Temp` directory, records baseline
+dependency and source/output hashes, and leaves the live managed deployment
+untouched. It updates shared build intermediates and does not automatically
+deploy, restart or validate an editor. The current successful stage is
+`staged-build/80092d916c4a414baf5dd011d55ab779`; after a coordinated restart its
+Engine module `57b9fe73-4ec9-46fe-bdac-bfc019e3b260` and glTF module
+`6fa5ef0a-784e-4311-b6dd-9b6375716f88` were confirmed in the virtual editor.
+All current render receipts above use those modules.
+
+The `.glb_c` fixtures remain valid packaging-only GLBs, not GPU-optimized
+resources. Source `.gltf` references in compiled-only builds still need an agreed
+compiler/asset-identity mapping; no filename collision or automatic build/hot
+reload policy is claimed here. Native texture integration, complete materials,
+deformation, selected extensions, editor workflows, Windows and the matched
+vmdl load/memory benchmark remain requirements of the full goal.
 
 This tool inventories every model variant in the pinned [Khronos sample assets repository](https://github.com/KhronosGroup/glTF-Sample-Assets) and aggregates independently produced evidence. The pin is [90d7ede14c7e280af263824604b427a1ca02cb66](https://github.com/KhronosGroup/glTF-Sample-Assets/commit/90d7ede14c7e280af263824604b427a1ca02cb66), a dated upstream commit, not a claim about current HEAD. It is recorded in `coverage.json`. No model assets are included in this repository.
 
