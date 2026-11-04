@@ -1,5 +1,50 @@
 # glTF sample validation scaffold
 
+Rendering acceptance runs in the real s&box editor, using its virtual display when
+requested. The user chose editor-only validation on 2026-11-04; do not substitute
+a standalone `TestAppSystem` render or manually pump engine frames for this proof.
+Reuse an existing authorized editor and confirm its project with `editor_status`.
+Use [editor_render.csx](editor_render.csx) through the discovered `run_csharp`
+tool. It creates its own `SceneRenderingWidget`, waits for real editor frames,
+and writes PNGs plus a scoped receipt under `Temp/gltf-validation/editor-render`.
+It checks the pinned Triangle's source and packaged geometry, both windings and
+camera sides, single/double-sided stock materials, shared material leases and
+empty-frame controls. This is one geometry fixture, not full corpus parity.
+
+[editor_texture.csx](editor_texture.csx) compiles and packages the pinned
+BoxTextured sample inside the editor, compiles its PNG into a native RGBA texture,
+and renders through the shared material cache and stock complex shader. It checks
+all native texture texels, source/package render agreement, an untextured control,
+and black initial/disabled frames. Its receipt and PNGs are under
+`Temp/gltf-validation/editor-texture`. This covers a static base-color fixture,
+not complete PBR, sampling, mip or material conformance.
+
+[editor_cache.csx](editor_cache.csx) checks the actual registered
+`GltfMaterialSceneSystem` in two private editor scenes, an asset lease that
+outlives both, isolated edits, rejection after disposal and final material-wrapper
+invalidation. It writes `Temp/gltf-validation/editor-cache/receipt.json` and does
+not clear the shared cache. GPU release timing and game-context teardown remain
+separate requirements.
+
+The preview does not edit the open project scene. Confirm editor/compile state
+and read new console output after running it. Engine and glTF module identities,
+input and image hashes, frames, failures and the precise tested scope belong in
+the receipt. Wait for the preview widget's actual `OnPreFrame` callbacks before
+and after render submission, rather than only counting global application-loop
+iterations. The receipt records callback counts, visibility, widget/camera sizes
+and frame numbers. Readback in the editor's active view batch must follow the
+render submission's completion.
+
+The current Triangle geometry, winding and sharing cells pass, but deleting the
+last visible model and rendering a fresh empty scene can retain the prior image.
+Keep this baseline failing. An opt-in `SBOX_GLTF_CAMERA_CLEAR=1` diagnostic adds a
+color-only command to the two private cameras at `AfterDepthPrepass`; it passes
+the same strict empty-view controls. This is evidence for a managed clear-path
+fix, not a production fix or permission to mark full parity complete. Default
+and diagnostic captures use separate `editor-render` and
+`editor-render-camera-clear` output directories. The process-local diagnostic
+flag must be restored after use.
+
 This tool inventories every model variant in the pinned [Khronos sample assets repository](https://github.com/KhronosGroup/glTF-Sample-Assets) and aggregates independently produced evidence. The pin is [90d7ede14c7e280af263824604b427a1ca02cb66](https://github.com/KhronosGroup/glTF-Sample-Assets/commit/90d7ede14c7e280af263824604b427a1ca02cb66), a dated upstream commit, not a claim about current HEAD. It is recorded in `coverage.json`. No model assets are included in this repository.
 
 This is scaffolding, **not an s&box adapter, glTF conformance validator, reference evaluator, image comparison or performance benchmark**. It checks enough of a `.glb` to read its JSON chunk, but does not validate the rest of the GLB or glTF specification. Artifact hashes establish file integrity, not that a claimed adapter ran or that its assertions are correct. Consequently even a well-formed, hash-matching evidence record reports `adapter-integration-pending` and cannot pass. No engine capability is established by running this tool alone.

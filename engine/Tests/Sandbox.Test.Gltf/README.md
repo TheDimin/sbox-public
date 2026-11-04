@@ -1,5 +1,14 @@
 # glTF tests-first implementation
 
+Current validation direction: use the running s&box editor and its actual preview
+renderer, on the authorized virtual display, for rendering acceptance. See the
+[editor validation workflow](../../../research/gltf-validation/README.md) and its
+real-frame capture scripts. The earlier windowless test host produced stale
+captures and is not a substitute for this evidence. Keep its failures separate
+from supported or unsupported glTF features; do not change mesh winding to fit
+those captures. The standalone test commands below describe the existing test
+projects, not permission to resume that validation route in this conversation.
+
 This MSTest project exercises `Sandbox.Gltf` without initializing s&box engine
 interop. Container/accessor reading, geometry, materials, scenes, animation and
 lossless GLB packaging now have managed implementations. Meshopt uses the pinned

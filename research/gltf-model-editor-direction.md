@@ -158,6 +158,12 @@ parsing, preparation, caching and authoring in C#. Direct GPU buffers remain
 available for proven compatibility gaps and tests; a custom production glTF
 shader is not a prerequisite. Test bind matrices, bone scale, influence formats,
 interpolation, negative morph weights and tangent deltas before claiming parity.
+
+Rendering validation must use the real s&box editor, with its virtual display
+when requested. Reuse the editor's actual frame loop and an isolated preview
+widget. Standalone test-host captures and manually pumped frames do not replace
+that evidence. The editor-only scripts and bounded proof scope are documented in
+[the validation workflow](gltf-validation/README.md).
 Bring proven limitations back for a decision; this direction does not silently
 waive core behavior or the portable `.glb_c` load/memory requirements.
 
