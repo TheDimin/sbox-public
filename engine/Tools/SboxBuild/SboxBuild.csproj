@@ -40,6 +40,7 @@
 	</ItemGroup>
 
   <ItemGroup>
+	<ProjectReference Include="..\..\Sandbox.Gltf\Sandbox.Gltf.csproj" />
 	<ProjectReference Include="..\InteropGen\InteropGen.csproj" />
 	<ProjectReference Include="..\ShaderProc\ShaderProc.csproj" />
   </ItemGroup>

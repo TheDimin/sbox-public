@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "completion_platform": "linux",
+  "renderer_target": "managed-first",
+  "corpus": {
+    "repository": "https://github.com/KhronosGroup/glTF-Sample-Assets.git",
+    "commit": "90d7ede14c7e280af263824604b427a1ca02cb66",
+    "commit_source": "https://github.com/KhronosGroup/glTF-Sample-Assets/commit/90d7ede14c7e280af263824604b427a1ca02cb66",
+    "index": "Models/model-index.json",
+    "license_policy": "Retain each model's upstream README, metadata and license information; do not assume a common corpus license."
+  },
+  "provisional_extensions": [
+    "KHR_texture_transform",
+    "KHR_materials_unlit",
+    "KHR_materials_variants",
+    "KHR_draco_mesh_compression",
+    "EXT_meshopt_compression",
+    "KHR_meshopt_compression",
+    "KHR_mesh_quantization",
+    "KHR_texture_basisu",
+    "KHR_lights_punctual",
+    "EXT_mesh_gpu_instancing"
+  ],
+  "extension_specifications": {
+    "KHR_meshopt_compression": {
+      "status_at_pin": "Release Candidate",
+      "commit": "3e9dfff91d52cd79fa0169e8453b7fdaca663fd8",
+      "specification": "https://github.com/KhronosGroup/glTF/blob/3e9dfff91d52cd79fa0169e8453b7fdaca663fd8/extensions/2.0/Khronos/KHR_meshopt_compression/README.md",
+      "note": "Pin the audited release candidate; assess any later changes before updating."
+    }
+  },
+  "required_coverage": [
+    "core-accessors-sparse-interleaved-normalized",
+    "core-primitive-modes-index-formats-and-nonindexed",
+    "core-scenes-transforms-and-cameras",
+    "core-mesh-attributes-uv-colors-tangents",
+    "core-pbr-alpha-textures-color-space-samplers",
+    "core-skins-inverse-bind-poses-and-multiple-influences",
+    "core-morph-targets-including-tangents",
+    "core-animation-step-linear-cubicspline",
+    "core-gltf-external-embedded-and-glb",
+    "extension-KHR_texture_transform",
+    "extension-KHR_materials_unlit",
+    "extension-KHR_materials_variants",
+    "extension-KHR_draco_mesh_compression",
+    "extension-EXT_meshopt_compression",
+    "extension-KHR_meshopt_compression",
+    "extension-KHR_mesh_quantization",
+    "extension-KHR_texture_basisu",
+    "extension-KHR_lights_punctual",
+    "extension-EXT_mesh_gpu_instancing",
+    "editor-author-save-undo-reimport-conflicts",
+    "model-parity-physics-ragdoll-lods-bodygroups-attachments-game-data",
+    "compiled-portable-valid-glb-dependency-packaging",
+    "managed-renderer-visual-reference-review",
+    "performance-matched-vmdl-static-and-animated",
+    "linux"
+  ]
+}

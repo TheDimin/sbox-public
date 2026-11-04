@@ -6,7 +6,7 @@ using static Facepunch.Constants;
 
 namespace Facepunch.Steps;
 
-internal partial class Test( bool noBuild = true, string filter = null )
+internal partial class Test( bool noBuild = true, string filter = null, string projectName = null )
 {
 	/// <summary>
 	/// Filter for pull request runs: everything except tests that talk to the live backend, so a
@@ -50,6 +50,7 @@ internal partial class Test( bool noBuild = true, string filter = null )
 	/// </summary>
 	private static readonly TestProject[] Projects =
 	[
+		new( "Sandbox.Test.Gltf", NeedsEngine: false ),
 		new( "Sandbox.Test.Integration", NeedsEngine: true, Shard: "most", ShardFilter: $"{IntegrationOtherTests}&{NotAllocationTests}" ),
 		new( "Sandbox.Test.Integration", NeedsEngine: true, Shard: "compiles and exports", ShardFilter: IntegrationCompileTests ),
 		new( "Sandbox.Test.Integration", NeedsEngine: true, Shard: "allocations", ShardFilter: AllocationTests, Isolated: true ),
@@ -75,10 +76,18 @@ internal partial class Test( bool noBuild = true, string filter = null )
 			string rootDir = Directory.GetCurrentDirectory();
 			string engineDir = Path.Combine( rootDir, "engine" );
 			string gameDir = Path.Combine( rootDir, "game" );
+			var selectedProjects = Projects.Where( x => projectName is null || x.Name == projectName ).ToArray();
+			if ( selectedProjects.Length == 0 )
+			{
+				Log.Error( $"Unknown test project: {projectName}" );
+				return ExitCode.Failure;
+			}
 
 			// Test shards share project references and intermediate files. Build once before
 			// starting them, otherwise concurrent compilers can overwrite the same assembly.
-			if ( !noBuild && !Utility.RunDotnetCommand( engineDir, "build -c Release Sandbox-Engine.slnx -p:TreatWarningsAsErrors=true" ) )
+			var buildTarget = projectName is null ? "Sandbox-Engine.slnx" : $"Tests/{projectName}/{projectName}.csproj";
+			var workerOptions = projectName is null ? "" : " -m:1 -p:BuildInParallel=false";
+			if ( !noBuild && !Utility.RunDotnetCommand( engineDir, $"build -c Release {buildTarget}{workerOptions} -p:TreatWarningsAsErrors=true" ) )
 				return ExitCode.Failure;
 
 			// Legacy artifact manifests do not carry Unix modes. As with BuildContent,
@@ -90,9 +99,9 @@ internal partial class Test( bool noBuild = true, string filter = null )
 					File.SetUnixFileMode( compiler, File.GetUnixFileMode( compiler ) | UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute );
 			}
 
-			Log.Info( $"Running {Projects.Count( project => !project.Isolated )} test processes concurrently; allocation checks follow serially." );
+			Log.Info( $"Running {selectedProjects.Count( project => !project.Isolated )} test processes concurrently; allocation checks follow serially." );
 
-			var tasks = Projects
+			var tasks = selectedProjects
 				.Where( project => !project.Isolated )
 				.Select( project => Task.Factory.StartNew( () => RunTestProject( project, engineDir, gameDir ), TaskCreationOptions.LongRunning ) )
 				.ToArray();
@@ -112,7 +121,7 @@ internal partial class Test( bool noBuild = true, string filter = null )
 			Log.Info( "" );
 			// Allocation convergence depends on worker-pool warmup and prompt draining of
 			// background work. Do not run these measurements under the other shards' load.
-			foreach ( var project in Projects.Where( project => project.Isolated ) )
+			foreach ( var project in selectedProjects.Where( project => project.Isolated ) )
 			{
 				var result = RunTestProject( project, engineDir, gameDir );
 				results.Add( result );

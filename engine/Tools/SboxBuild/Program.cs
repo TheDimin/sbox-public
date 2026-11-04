@@ -23,6 +23,7 @@ internal class Program
 		// Individual step commands
 		AddBuildContentCommand( rootCommand );
 		AddTestCommand( rootCommand );
+		AddGltfCorpusCommand( rootCommand );
 		AddBuildShadersCommand( rootCommand );
 		AddShaderStatsCommand( rootCommand );
 		AddGenerateSolutionsCommand( rootCommand );
@@ -142,6 +143,24 @@ internal class Program
 		rootCommand.Add( cmd );
 	}
 
+	private static void AddGltfCorpusCommand( RootCommand rootCommand )
+	{
+		var cmd = new Command( "gltf-corpus", "Exercise managed readers on the pinned sample inventory; does not prove rendering parity" );
+		var corpus = new Option<string>( "--corpus" ) { IsRequired = true };
+		var output = new Option<string>( "--output" ) { IsRequired = true };
+		var selection = new Option<string>( "--case", "Optional case ID prefix for a focused diagnostic run" );
+		var compile = new Option<bool>( "--compile", "Also exercise lossless GLB packaging and read the result" );
+		cmd.AddOption( corpus );
+		cmd.AddOption( output );
+		cmd.AddOption( selection );
+		cmd.AddOption( compile );
+		cmd.SetHandler( ( string corpusPath, string outputPath, string prefix, bool compileGlb ) =>
+		{
+			Environment.ExitCode = (int)new TestGltfCorpus().Run( corpusPath, outputPath, prefix, compileGlb );
+		}, corpus, output, selection, compile );
+		rootCommand.Add( cmd );
+	}
+
 	private static void AddTestCommand( RootCommand rootCommand )
 	{
 		var cmd = new Command( "test", "Run tests" );
@@ -151,12 +170,16 @@ internal class Program
 		var filterOption = new Option<string>( "--filter",
 			description: "dotnet test filter expression, e.g. TestCategory!=LiveBackend",
 			getDefaultValue: () => null );
+		var projectOption = new Option<string>( "--project",
+			description: "Run only the named test project, e.g. Sandbox.Test.Gltf",
+			getDefaultValue: () => null );
 		cmd.AddOption( noBuildOption );
 		cmd.AddOption( filterOption );
-		cmd.SetHandler( ( bool noBuild, string filter ) =>
+		cmd.AddOption( projectOption );
+		cmd.SetHandler( ( bool noBuild, string filter, string project ) =>
 		{
-			Environment.ExitCode = (int)new Test( noBuild, filter ).Run();
-		}, noBuildOption, filterOption );
+			Environment.ExitCode = (int)new Test( noBuild, filter, project ).Run();
+		}, noBuildOption, filterOption, projectOption );
 		rootCommand.Add( cmd );
 	}
 
