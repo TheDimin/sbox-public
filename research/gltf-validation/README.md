@@ -45,6 +45,50 @@ and diagnostic captures use separate `editor-render` and
 `editor-render-camera-clear` output directories. The process-local diagnostic
 flag must be restored after use.
 
+The `SBOX_GLTF_CAMERA_CLEAR=noop` control registers an action-only command at the
+same camera stage, records execution on both cameras, and writes
+`editor-render-camera-noop`. It still fails the two empty-view checks by 1,275
+pixels in the current editor. Merely registering a custom command therefore does
+not explain the explicit-clear diagnostic's success. Preserve this failing
+control when investigating the renderer; no global pipeline change is included.
+
+[editor_morph.csx](editor_morph.csx) constructs a pinned, self-contained glTF with
+one animated position target, builds stock-shader native morphs and independent
+CPU-evaluated reference models, and captures 0/+1/−1 weights. It records actual
+controller names, requested and native-reported weights, preview updates and
+strict empty controls. The default path currently fails for empty images and
+negative weights. With the private camera-clear diagnostic enabled, 0/+1 match
+exactly; −1 is clamped to zero by the public managed setter. The separate
+`SBOX_GLTF_SIGNED_MORPH_OVERRIDE=1` diagnostic calls the existing generated native
+setter without that clamp: readback reports −1 but the image still matches zero.
+That rules out fixing only the managed clamp as a sufficient solution.
+
+`SBOX_GLTF_PAIRED_MORPH=1` instead creates positive and negative delta targets and
+drives both through the public API, explicitly zeroing the inactive partner. With
+the private clear diagnostic, this passed all five 0/±1/±2 reference comparisons
+with zero differing pixels and the +1→−1→0 transition on a single scene model.
+The ±2 references use separately pinned static-weight glTF variants. The receipt
+is under `editor-morph-camera-clear-paired`; other diagnostic combinations have
+distinct output directories. This proves a position-morph construction option,
+not production loader integration, normal/tangent morphs, combined targets,
+skinning, memory efficiency or full deformation conformance. Pairing duplicates
+target data and controllers; quantify that cost before selecting the compiled
+representation. The baseline remains failing.
+
+[editor_material_schema.csx](editor_material_schema.csx) reads the actual loaded
+stock complex shader's 159 variables and 20 combos in the current editor and
+writes `editor-material-schema/receipt.json`. It does not mutate the shader or
+material. Metadata supplies candidates for subsequent controlled render tests;
+it does not prove material equations, packing, per-texture UV/sampler behavior or
+color space. The cache's scalar isolation check uses the exposed
+`g_flRoughnessScaleFactor` and establishes parameter readback, not shading fidelity.
+
+These editor observations used Engine module ID
+`aa9884de-2db1-4752-aac1-d13ad9ea8d36` and glTF module ID
+`b2fb1c46-6cba-4256-b064-6d56daae5acb`. Re-run against rebuilt modules; retain the
+module IDs and diagnostic flags in every receipt. No standalone graphics host
+was used for these observations, and the project's open scene was not modified.
+
 This tool inventories every model variant in the pinned [Khronos sample assets repository](https://github.com/KhronosGroup/glTF-Sample-Assets) and aggregates independently produced evidence. The pin is [90d7ede14c7e280af263824604b427a1ca02cb66](https://github.com/KhronosGroup/glTF-Sample-Assets/commit/90d7ede14c7e280af263824604b427a1ca02cb66), a dated upstream commit, not a claim about current HEAD. It is recorded in `coverage.json`. No model assets are included in this repository.
 
 This is scaffolding, **not an s&box adapter, glTF conformance validator, reference evaluator, image comparison or performance benchmark**. It checks enough of a `.glb` to read its JSON chunk, but does not validate the rest of the GLB or glTF specification. Artifact hashes establish file integrity, not that a claimed adapter ran or that its assertions are correct. Consequently even a well-formed, hash-matching evidence record reports `adapter-integration-pending` and cannot pass. No engine capability is established by running this tool alone.

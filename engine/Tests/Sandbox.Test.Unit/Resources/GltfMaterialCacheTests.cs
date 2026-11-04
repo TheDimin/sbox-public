@@ -21,9 +21,9 @@ public class GltfMaterialCacheTests
 	public void ScalarAndVectorParametersHaveSeparateTypedIdentity()
 	{
 		var template = new object();
-		var scalar = new GltfMaterialKey( template, 1, [], [], [], scalars: [new( "g_flRoughness", .5f )] );
-		var same = new GltfMaterialKey( template, 1, [], [], [], scalars: [new( "g_flRoughness", .5f )] );
-		var vector = new GltfMaterialKey( template, 1, [], [new( "g_flRoughness", new Vector4( .5f, 0, 0, 0 ) )], [] );
+		var scalar = new GltfMaterialKey( template, 1, [], [], [], scalars: [new( "g_flRoughnessScaleFactor", .5f )] );
+		var same = new GltfMaterialKey( template, 1, [], [], [], scalars: [new( "g_flRoughnessScaleFactor", .5f )] );
+		var vector = new GltfMaterialKey( template, 1, [], [new( "g_flRoughnessScaleFactor", new Vector4( .5f, 0, 0, 0 ) )], [] );
 		Assert.AreEqual( scalar, same ); Assert.AreNotEqual( scalar, vector );
 		Assert.ThrowsException<ArgumentException>( () => new GltfMaterialKey( template, 1, [], [new( "p", new Vector4( 1, 0, 0, 0 ) )], [], scalars: [new( "p", 1 )] ) );
 	}

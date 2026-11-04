@@ -59,7 +59,7 @@ try
 	{
 		template, 0, Array.Empty<System.Collections.Generic.KeyValuePair<string, int>>(),
 		new[] { new System.Collections.Generic.KeyValuePair<string, Vector4>( "g_vColorTint", new Vector4( value, 0, 0, 1 ) ) },
-		Array.CreateInstance( bindingType, 0 ), new[] { new System.Collections.Generic.KeyValuePair<string, float>( "g_flRoughness", value ) }
+		Array.CreateInstance( bindingType, 0 ), new[] { new System.Collections.Generic.KeyValuePair<string, float>( "g_flRoughnessScaleFactor", value ) }
 	} );
 	object Acquire( System.Reflection.MethodInfo method, object owner, float value )
 	{
@@ -86,7 +86,7 @@ try
 	changed = Value( changedLease );
 	Require( changed.IsValid && !ReferenceEquals( shared, changed ), "Distinct descriptor did not produce an independent material." );
 	Require( Near( shared.GetVector4( "g_vColorTint" ).x, .25f ) && Near( changed.GetVector4( "g_vColorTint" ).x, .75f ), "Independent tint values did not survive." );
-	Require( Near( shared.GetVector4( "g_flRoughness" ).x, .25f ) && Near( changed.GetVector4( "g_flRoughness" ).x, .75f ), "Independent roughness values did not survive." );
+	Require( Near( shared.GetVector4( "g_flRoughnessScaleFactor" ).x, .25f ) && Near( changed.GetVector4( "g_flRoughnessScaleFactor" ).x, .75f ), "Independent roughness scale values did not survive parameter readback." );
 	Require( template.GetVector4( "g_vColorTint" ) == templateTint && stock.GetVector4( "g_vColorTint" ) == stockTint, "The template or stock material was modified." );
 	completed.Add( phase );
 

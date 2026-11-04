@@ -1,3 +1,5 @@
 !editor_render.csx
 !editor_texture.csx
 !editor_cache.csx
+!editor_morph.csx
+!editor_material_schema.csx

@@ -19,7 +19,7 @@ public class GltfMaterialCacheNativeTests
 			var template = Material.Load( "materials/default/white.vmat" );
 			Assert.IsTrue( template is { IsValid: true } );
 			var templateTint = template.GetVector4( "g_vColorTint" );
-			GltfMaterialKey Key( float value ) => new( template, 0, [], [new( "g_vColorTint", new Vector4( value, 0, 0, 1 ) )], [], scalars: [new( "g_flRoughness", value )] );
+			GltfMaterialKey Key( float value ) => new( template, 0, [], [new( "g_vColorTint", new Vector4( value, 0, 0, 1 ) )], [], scalars: [new( "g_flRoughnessScaleFactor", value )] );
 			assetLease = GltfMaterialCache.Shared.Acquire( Key( .25f ) );
 			scene = new Scene();
 			var system = scene.GetSystem<GltfMaterialSceneSystem>();
@@ -35,8 +35,8 @@ public class GltfMaterialCacheNativeTests
 			Assert.AreNotSame( assetLease.Value, replacement.Value );
 			Assert.AreEqual( .25f, assetLease.Value.GetVector4( "g_vColorTint" ).x, .0001f );
 			Assert.AreEqual( .75f, replacement.Value.GetVector4( "g_vColorTint" ).x, .0001f );
-			Assert.AreEqual( .25f, assetLease.Value.GetVector4( "g_flRoughness" ).x, .0001f );
-			Assert.AreEqual( .75f, replacement.Value.GetVector4( "g_flRoughness" ).x, .0001f );
+			Assert.AreEqual( .25f, assetLease.Value.GetVector4( "g_flRoughnessScaleFactor" ).x, .0001f );
+			Assert.AreEqual( .75f, replacement.Value.GetVector4( "g_flRoughnessScaleFactor" ).x, .0001f );
 			Assert.AreEqual( templateTint, template.GetVector4( "g_vColorTint" ), "Copy edits must not mutate the source template." );
 			var old = assetLease.Value;
 			scene.Destroy(); scene = null;

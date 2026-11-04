@@ -7,8 +7,10 @@ if ( root is null ) throw new InvalidOperationException( "Could not locate the s
 var corpusRoot = Environment.GetEnvironmentVariable( "SBOX_GLTF_CORPUS" );
 if ( string.IsNullOrWhiteSpace( corpusRoot ) ) corpusRoot = System.IO.Path.Combine( root.FullName, "Temp", "gltf-reference", "glTF-Sample-Assets" );
 var corpus = System.IO.Path.Combine( corpusRoot, "Models", "Triangle", "glTF" );
-var diagnosticCameraClear = Environment.GetEnvironmentVariable( "SBOX_GLTF_CAMERA_CLEAR" ) == "1";
-var output = System.IO.Path.Combine( root.FullName, "Temp", "gltf-validation", diagnosticCameraClear ? "editor-render-camera-clear" : "editor-render" );
+var diagnosticMode = Environment.GetEnvironmentVariable( "SBOX_GLTF_CAMERA_CLEAR" );
+var diagnosticCameraClear = diagnosticMode == "1";
+var diagnosticCameraNoop = diagnosticMode == "noop";
+var output = System.IO.Path.Combine( root.FullName, "Temp", "gltf-validation", diagnosticCameraClear ? "editor-render-camera-clear" : diagnosticCameraNoop ? "editor-render-camera-noop" : "editor-render" );
 System.IO.Directory.CreateDirectory( output );
 var receiptPath = System.IO.Path.Combine( output, "receipt.json" );
 var completed = new System.Collections.Generic.List<string>();
@@ -33,6 +35,8 @@ Action onPreviewFrame = null;
 Action onFreshPreviewFrame = null;
 var previewFrames = 0;
 var freshPreviewFrames = 0;
+var commandCallbacks = 0;
+var freshCommandCallbacks = 0;
 CameraComponent commandCamera = null;
 CameraComponent commandFreshCamera = null;
 Sandbox.Rendering.CommandList cameraClearCommands = null;
@@ -44,7 +48,7 @@ object MakeReceipt( bool passed, string error = null ) => new
     scope = "editor stock albedo geometry, winding and shared material lease; not full glTF, lighting, or material fidelity",
     engine_location = engineLocation, engine_mvid = typeof( Model ).Assembly.ManifestModule.ModuleVersionId.ToString(),
     gltf_mvid = typeof( Sandbox.Gltf.GltfReader ).Assembly.ManifestModule.ModuleVersionId.ToString(),
-    editor = Application.IsEditor, diagnostic_camera_clear = diagnosticCameraClear, capture_preview_callbacks_before_and_after = 3, starting_frame = startFrame, final_frame = Application.FrameCount, corpus_root = corpusRoot, output
+    editor = Application.IsEditor, diagnostic_camera_clear = diagnosticCameraClear, diagnostic_camera_noop = diagnosticCameraNoop, command_callbacks = commandCallbacks, fresh_command_callbacks = freshCommandCallbacks, capture_preview_callbacks_before_and_after = 3, starting_frame = startFrame, final_frame = Application.FrameCount, corpus_root = corpusRoot, output
 };
 void SaveReceipt( object receipt ) => System.IO.File.WriteAllText( receiptPath, System.Text.Json.JsonSerializer.Serialize( receipt, new System.Text.Json.JsonSerializerOptions { WriteIndented = true } ) );
 try
@@ -130,10 +134,11 @@ try
         camera.EnablePostProcessing = false;
         camera.DebugMode = SceneCameraDebugMode.Albedo;
     }
-    if ( diagnosticCameraClear )
+    if ( diagnosticCameraClear || diagnosticCameraNoop )
     {
-        cameraClearCommands = new Sandbox.Rendering.CommandList( "glTF diagnostic camera color clear" );
-        cameraClearCommands.Clear( Color.Black, true, false, false );
+        cameraClearCommands = new Sandbox.Rendering.CommandList( "glTF diagnostic camera " + diagnosticMode );
+        if ( diagnosticCameraClear ) cameraClearCommands.Clear( Color.Black, true, false, false );
+        else cameraClearCommands.AddAction( () => System.Threading.Interlocked.Increment( ref commandCallbacks ) );
         camera.AddCommandList( cameraClearCommands, Sandbox.Rendering.Stage.AfterDepthPrepass );
         commandCamera = camera;
     }
@@ -256,10 +261,11 @@ try
         freshCamera.EnablePostProcessing = camera.EnablePostProcessing;
         freshCamera.DebugMode = camera.DebugMode;
     }
-    if ( diagnosticCameraClear )
+    if ( diagnosticCameraClear || diagnosticCameraNoop )
     {
-        freshCameraClearCommands = new Sandbox.Rendering.CommandList( "glTF diagnostic fresh camera color clear" );
-        freshCameraClearCommands.Clear( Color.Black, true, false, false );
+        freshCameraClearCommands = new Sandbox.Rendering.CommandList( "glTF diagnostic fresh camera " + diagnosticMode );
+        if ( diagnosticCameraClear ) freshCameraClearCommands.Clear( Color.Black, true, false, false );
+        else freshCameraClearCommands.AddAction( () => System.Threading.Interlocked.Increment( ref freshCommandCallbacks ) );
         freshCamera.AddCommandList( freshCameraClearCommands, Sandbox.Rendering.Stage.AfterDepthPrepass );
         commandFreshCamera = freshCamera;
     }
@@ -287,6 +293,7 @@ try
     var freshDifference = Difference( lastBackground, freshPixels );
     if ( freshDifference > 5 ) failures.Add( $"Fresh empty background differs by {freshDifference} pixels" );
     finalControls = new { before_delete_coverage = beforeDeleteCoverage, before_fresh_coverage = beforeFreshCoverage, deleted_difference = deletedDifference, fresh_difference = freshDifference, worlds_distinct = worldsDistinct, targets_distinct = targetsDistinct, cameras_distinct = camerasDistinct, widgets_distinct = widgetsDistinct };
+    if ( diagnosticCameraNoop && (commandCallbacks == 0 || freshCommandCallbacks == 0) ) failures.Add( "No-op command callbacks did not execute on both cameras" );
     completed.Add( "final-controls" );
     phase = "complete";
     var receipt = MakeReceipt( failures.Count == 0 );
