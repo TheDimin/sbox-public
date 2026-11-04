@@ -1,12 +1,13 @@
-// Run as a method body inside the existing editor. Compiles the exact unbuilt
-// static-scene helper and its self-contained tests without replacing engine DLLs.
+// Run in the existing editor. Compile the worktree static-scene helper and its
+// tests under renamed type identifiers, without replacing engine DLLs.
 var engineLocation = typeof( Model ).Assembly.Location;
 var root = new System.IO.DirectoryInfo( System.IO.Path.GetDirectoryName( engineLocation ) );
 while ( root is not null && !System.IO.File.Exists( System.IO.Path.Combine( root.FullName, "engine", "Sandbox-Engine.slnx" ) ) ) root = root.Parent;
 if ( root is null ) throw new InvalidOperationException( "Cannot locate checkout from loaded engine: " + engineLocation );
 var diagnosticClear = Environment.GetEnvironmentVariable( "SBOX_GLTF_CAMERA_CLEAR" ) == "1";
 var managedCapture = Environment.GetEnvironmentVariable( "SBOX_GLTF_CAPTURE_RENDERER" ) == "managed";
-var output = System.IO.Path.Combine( root.FullName, "Temp", "gltf-validation", (diagnosticClear ? "editor-scene-camera-clear" : "editor-scene") + (managedCapture ? "-managed" : "") );
+var runId = Guid.NewGuid().ToString( "N" );
+var output = System.IO.Path.Combine( root.FullName, "Temp", "gltf-validation", (diagnosticClear ? "editor-scene-camera-clear" : "editor-scene") + (managedCapture ? "-managed" : ""), runId );
 System.IO.Directory.CreateDirectory( output );
 var receiptPath = System.IO.Path.Combine( output, "receipt.json" );
 var sourcePath = System.IO.Path.Combine( root.FullName, "engine", "Sandbox.Gltf", "GltfDocument.StaticScene.cs" );
@@ -24,7 +25,9 @@ var models = new System.Collections.Generic.List<Model>();
 var sceneObjects = new System.Collections.Generic.List<SceneModel>();
 var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
 var startFrame = Application.FrameCount;
-string error = null, sourceHash = null, testHash = null, helperMvid = null, fixtureHash = null, boxHash = null, boxBufferHash = null;
+string error = null, sourceHash = null, testHash = null, renamedSourceHash = null, renamedTestHash = null, diskGltfMvid = null, helperMvid = null, fixtureHash = null, boxHash = null, boxBufferHash = null;
+var proofSuffix = "Proof" + runId;
+var proofTypeNames = new[] { "GltfStaticScene", "GltfStaticScenePrimitive", "GltfStaticSceneAssembler" }.ToDictionary( name => name, name => name + proofSuffix, StringComparer.Ordinal );
 var unitPassed = false;
 var renderPassed = false;
 var previewFrames = 0;
@@ -49,14 +52,7 @@ try
 {
 	await MainThread.Wait();
 	Require( Application.IsEditor && !Graphics.IsActive, "Run in the editor on the main thread outside a graphics scope." );
-	var managedRenderingType = typeof( Model ).Assembly.GetType( "Sandbox.Rendering.ManagedSceneRendering", true );
-	managedViewportEnabled = (bool)managedRenderingType.GetProperty( "Enabled" ).GetValue( null );
-	if ( managedCapture )
-	{
-		managedRenderer = managedRenderingType.GetProperty( "Renderer" ).GetValue( null ) ?? throw new InvalidOperationException( "Managed renderer unavailable." );
-		managedRenderToTexture = managedRenderer.GetType().GetMethod( "RenderToTexture", new[] { typeof( CameraComponent ), typeof( Texture ) } ) ?? throw new InvalidOperationException( "Managed texture rendering API unavailable." );
-	}
-	phase = "compile-exact-source";
+	phase = "compile-identifier-renamed-source";
 	var gltfAssembly = typeof( Sandbox.Gltf.GltfDocument ).Assembly;
 	var gltfPath = gltfAssembly.Location;
 	using ( var stream = System.IO.File.OpenRead( gltfPath ) )
@@ -64,12 +60,22 @@ try
 	{
 		var metadata = System.Reflection.Metadata.PEReaderExtensions.GetMetadataReader( pe );
 		var diskMvid = metadata.GetGuid( metadata.GetModuleDefinition().Mvid );
+		diskGltfMvid = diskMvid.ToString();
 		Require( diskMvid == gltfAssembly.ManifestModule.ModuleVersionId, "Loaded glTF assembly differs from disk; use matching binaries." );
 	}
-	Require( gltfAssembly.GetType( "Sandbox.Gltf.GltfStaticSceneAssembler", false ) is null, "Loaded glTF assembly already contains the helper; this isolated proof requires the old assembly." );
 	var sourceBytes = System.IO.File.ReadAllBytes( sourcePath );
 	var testBytes = System.IO.File.ReadAllBytes( testPath );
 	sourceHash = Hash( sourceBytes ); testHash = Hash( testBytes );
+	string RenameProofTypes( byte[] bytes )
+	{
+		var original = System.Text.Encoding.UTF8.GetString( bytes );
+		return System.Text.RegularExpressions.Regex.Replace( original, @"\b(?:GltfStaticScenePrimitive|GltfStaticSceneAssembler|GltfStaticScene)\b", match => proofTypeNames[match.Value] );
+	}
+	var renamedSource = RenameProofTypes( sourceBytes );
+	var renamedTests = RenameProofTypes( testBytes );
+	renamedSourceHash = Hash( System.Text.Encoding.UTF8.GetBytes( renamedSource ) );
+	renamedTestHash = Hash( System.Text.Encoding.UTF8.GetBytes( renamedTests ) );
+	Require( renamedSource.Contains( proofTypeNames["GltfStaticSceneAssembler"], StringComparison.Ordinal ) && renamedTests.Contains( proofTypeNames["GltfStaticSceneAssembler"], StringComparison.Ordinal ), "Proof type rename did not reach source and tests." );
 	Require( System.IO.File.Exists( frameworkPath ), "The existing MSTest framework DLL is missing." );
 	var metadataPaths = new System.Collections.Generic.Dictionary<string, string>( StringComparer.OrdinalIgnoreCase );
 	foreach ( var assembly in AppDomain.CurrentDomain.GetAssemblies() )
@@ -92,8 +98,8 @@ try
 	var trees = new[]
 	{
 		Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText( implicitUsings, parseOptions, path: "SDKImplicitUsings.cs" ),
-		Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText( System.Text.Encoding.UTF8.GetString( sourceBytes ), parseOptions, path: sourcePath ),
-		Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText( System.Text.Encoding.UTF8.GetString( testBytes ), parseOptions, path: testPath )
+		Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText( renamedSource, parseOptions, path: sourcePath ),
+		Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText( renamedTests, parseOptions, path: testPath )
 	};
 	var helperName = "sbox-mcp-script-gltf-scene-" + Guid.NewGuid().ToString( "N" );
 	var options = new Microsoft.CodeAnalysis.CSharp.CSharpCompilationOptions( Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary, optimizationLevel: Microsoft.CodeAnalysis.OptimizationLevel.Release );
@@ -101,7 +107,7 @@ try
 	using var image = new System.IO.MemoryStream();
 	var emitted = compilation.Emit( image );
 	compilerDiagnostics.AddRange( emitted.Diagnostics.Select( x => x.ToString() ) );
-	Require( emitted.Success, "Exact helper/test source did not compile; inspect compiler diagnostics." );
+	Require( emitted.Success, "Identifier-renamed helper/test source did not compile; inspect compiler diagnostics." );
 	helperContext = new System.Runtime.Loader.AssemblyLoadContext( helperName, isCollectible: true );
 	helperContext.Resolving += ( context, requested ) =>
 	{
@@ -111,7 +117,7 @@ try
 	image.Position = 0;
 	var helper = helperContext.LoadFromStream( image );
 	helperMvid = helper.ManifestModule.ModuleVersionId.ToString();
-	var assemblerType = helper.GetType( "Sandbox.Gltf.GltfStaticSceneAssembler", true );
+	var assemblerType = helper.GetType( "Sandbox.Gltf." + proofTypeNames["GltfStaticSceneAssembler"], true );
 	var assemble = assemblerType.GetMethod( "Assemble", flags );
 	var testType = helper.GetType( "Sandbox.Tests.Gltf.GltfStaticSceneAssemblyTests", true );
 	Require( !testType.GetMethods( System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public ).Any( method => method.GetCustomAttributesData().Any( a => a.AttributeType.Name == "DataTestMethodAttribute" ) ), "Unsupported DataTestMethod; do not silently skip test cases." );
@@ -119,7 +125,7 @@ try
 		.Where( x => x.GetCustomAttributesData().Any( a => a.AttributeType.FullName == "Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute" ) ).OrderBy( x => x.Name, StringComparer.Ordinal ).ToArray();
 	Require( testMethods.Length > 0, "No test methods found." );
 	Require( !testType.GetMethods( flags ).Any( method => method.GetCustomAttributesData().Any( a => a.AttributeType.Name is "TestInitializeAttribute" or "TestCleanupAttribute" or "ClassInitializeAttribute" or "ClassCleanupAttribute" ) ), "Unsupported test lifecycle attributes." );
-	phase = "execute-exact-tests";
+	phase = "execute-identifier-renamed-tests";
 	foreach ( var test in testMethods )
 	{
 		cancellationToken.ThrowIfCancellationRequested();
@@ -133,8 +139,15 @@ try
 		if ( caseError is not null ) failures.Add( "Test " + test.Name + ": " + caseError );
 	}
 	unitPassed = failures.Count == 0;
-	completed.Add( "compile-and-execute-exact-tests" );
-	Require( unitPassed, "One or more exact-source tests failed." );
+	completed.Add( "compile-and-execute-identifier-renamed-tests" );
+	Require( unitPassed, "One or more identifier-renamed source tests failed." );
+	var managedRenderingType = typeof( Model ).Assembly.GetType( "Sandbox.Rendering.ManagedSceneRendering", true );
+	managedViewportEnabled = (bool)managedRenderingType.GetProperty( "Enabled" ).GetValue( null );
+	if ( managedCapture )
+	{
+		managedRenderer = managedRenderingType.GetProperty( "Renderer" ).GetValue( null ) ?? throw new InvalidOperationException( "Managed renderer unavailable." );
+		managedRenderToTexture = managedRenderer.GetType().GetMethod( "RenderToTexture", new[] { typeof( CameraComponent ), typeof( Texture ) } ) ?? throw new InvalidOperationException( "Managed texture rendering API unavailable." );
+	}
 	phase = "build-fixture";
 	const string fixtureJson = """{"asset":{"version":"2.0"},"buffers":[{"uri":"data:application/octet-stream;base64,MzMzv5qZmb4AAAAAzcxMvpqZmb4AAAAAZmbmvpqZmT4AAAAAzcxMPpqZmb4AAAAAMzMzP5qZmb4AAAAAZmbmPpqZmT4AAAAA","byteLength":72}],"bufferViews":[{"buffer":0,"byteOffset":0,"byteLength":36},{"buffer":0,"byteOffset":36,"byteLength":36}],"accessors":[{"bufferView":0,"componentType":5126,"count":3,"type":"VEC3","min":[-0.7,-0.3,0],"max":[-0.2,0.3,0]},{"bufferView":1,"componentType":5126,"count":3,"type":"VEC3","min":[0.2,-0.3,0],"max":[0.7,0.3,0]}],"meshes":[{"primitives":[{"attributes":{"POSITION":0}},{"attributes":{"POSITION":1}}]}],"nodes":[{"translation":[0,0.5,0],"children":[1,2]},{"mesh":0,"translation":[-0.9,0,0]},{"mesh":0,"translation":[0.9,0,0]}],"scenes":[{"nodes":[0]}],"scene":0}""";
 	var fixtureBytes = System.Text.Encoding.UTF8.GetBytes( fixtureJson );
@@ -326,10 +339,11 @@ finally
 var receipt = new
 {
 	passed = error is null && failures.Count == 0 && cleanupErrors.Count == 0 && unitPassed && renderPassed,
-	scope = "exact-source isolated static-scene tests and private editor stock-material scene rendering; no skinning, morph, scene integration or full glTF appearance claim",
+	scope = "worktree static-scene helper and tests compiled with only three proof-type names changed; private editor stock-material scene rendering; no skinning, morph, scene integration or full glTF appearance claim",
 	phase, error, failures, cleanup_errors = cleanupErrors, completed, compiler_diagnostics = compilerDiagnostics,
 	test_cases = testCases, unit_passed = unitPassed, render_passed = renderPassed, captures, comparisons,
-	helper_source_sha256 = sourceHash, test_source_sha256 = testHash, framework_sha256 = System.IO.File.Exists( frameworkPath ) ? Hash( System.IO.File.ReadAllBytes( frameworkPath ) ) : null, helper_mvid = helperMvid,
+	helper_source_sha256 = sourceHash, test_source_sha256 = testHash, renamed_helper_source_sha256 = renamedSourceHash, renamed_test_source_sha256 = renamedTestHash, proof_type_names = proofTypeNames,
+	framework_sha256 = System.IO.File.Exists( frameworkPath ) ? Hash( System.IO.File.ReadAllBytes( frameworkPath ) ) : null, helper_mvid = helperMvid, disk_gltf_mvid = diskGltfMvid,
 	fixture_sha256 = fixtureHash, box_sha256 = boxHash, box_buffer_sha256 = boxBufferHash,
 	engine_location = engineLocation, engine_mvid = typeof( Model ).Assembly.ManifestModule.ModuleVersionId.ToString(),
 	gltf_mvid = typeof( Sandbox.Gltf.GltfReader ).Assembly.ManifestModule.ModuleVersionId.ToString(),

@@ -45,12 +45,53 @@ public class GltfStaticSceneAssemblyTests
 	}
 
 	[TestMethod]
-	public void MissingDefaultSceneAndSingularTransformFailClearly()
+	public void MissingDefaultSceneFailsClearly()
 	{
 		using var missing = Fixture( "[{\"nodes\":[0]}]", "[{\"mesh\":0}]", includeDefault: false );
 		Assert.ThrowsException<GltfException>( () => GltfStaticSceneAssembler.Assemble( missing ) );
-		using var singular = Fixture( "[{\"nodes\":[0]}]", "[{\"mesh\":0,\"scale\":[0,1,1]}]" );
-		Assert.ThrowsException<GltfException>( () => GltfStaticSceneAssembler.Assemble( singular ) );
+	}
+
+	[TestMethod]
+	public void AllZeroScaleStillProducesFiniteTranslatedPositionsAndBounds()
+	{
+		// glTF permits singular transforms. The normal direction of collapsed
+		// geometry need not be defined; positions and bounds remain well defined.
+		using var collapsed = Fixture( "[{\"nodes\":[0]}]", "[{\"mesh\":0,\"translation\":[1,2,3],\"scale\":[0,0,0]}]" );
+		var allZero = GltfStaticSceneAssembler.Assemble( collapsed );
+		var origin = new NVector3( 3, 1, 2 ) / 0.0254f;
+		Assert.IsTrue( allZero.HasBounds );
+		Assert.AreEqual( 2, allZero.Primitives.Count );
+		foreach ( var primitive in allZero.Primitives )
+			foreach ( var position in primitive.Data.Positions.Span )
+			{
+				Assert.IsTrue( float.IsFinite( position.X ) && float.IsFinite( position.Y ) && float.IsFinite( position.Z ) );
+				AssertVector( origin, position );
+			}
+		AssertVector( origin, allZero.BoundsMin );
+		AssertVector( origin, allZero.BoundsMax );
+	}
+
+	[TestMethod]
+	public void RankTwoScaleStillProducesFiniteTransformedPositionsAndBounds()
+	{
+		using var flattened = Fixture( "[{\"nodes\":[0]}]", "[{\"mesh\":0,\"translation\":[1,2,3],\"scale\":[0,2,3]}]" );
+		var rankTwo = GltfStaticSceneAssembler.Assemble( flattened );
+		var origin = new NVector3( 3, 1, 2 ) / 0.0254f;
+		var expected = new[] { origin, origin, new NVector3( 3, 1, 4 ) / 0.0254f };
+		Assert.IsTrue( rankTwo.HasBounds );
+		Assert.AreEqual( 2, rankTwo.Primitives.Count );
+		foreach ( var primitive in rankTwo.Primitives )
+		{
+			Assert.AreEqual( expected.Length, primitive.Data.Positions.Length );
+			for ( var i = 0; i < expected.Length; i++ )
+			{
+				var position = primitive.Data.Positions.Span[i];
+				Assert.IsTrue( float.IsFinite( position.X ) && float.IsFinite( position.Y ) && float.IsFinite( position.Z ) );
+				AssertVector( expected[i], position );
+			}
+		}
+		AssertVector( origin, rankTwo.BoundsMin );
+		AssertVector( expected[2], rankTwo.BoundsMax );
 	}
 
 	[TestMethod]

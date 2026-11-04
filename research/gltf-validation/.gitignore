@@ -1,5 +1,7 @@
 !editor_render.csx
 !editor_texture.csx
+!editor_animation.csx
+!editor_animation_playback.csx
 !editor_cache.csx
 !editor_morph.csx
 !editor_material_schema.csx
@@ -9,3 +11,7 @@
 !editor_model_lifetime.csx
 !editor_vertex_frame.csx
 !editor_model_load.csx
+!editor_model_texture_load.csx
+!editor_skinning.csx
+!editor_primitive_modes.csx
+!editor_quantization.csx

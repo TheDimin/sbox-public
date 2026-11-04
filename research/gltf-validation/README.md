@@ -258,6 +258,124 @@ reload policy is claimed here. Native texture integration, complete materials,
 deformation, selected extensions, editor workflows, Windows and the matched
 vmdl load/memory benchmark remain requirements of the full goal.
 
+### Next loader regression: textured models
+
+The next API regression is the untouched pinned Khronos BoxTextured asset.
+The existing texture preview above bypasses `Model.Load`, which still rejects
+its base-color texture and nondefault metallic factor. Its material is opaque,
+white-tinted, metallic zero and roughness one, with untransformed UV0. Its
+sampler explicitly requests linear magnification, `NEAREST_MIPMAP_LINEAR`
+minification and repeat addressing. Merely binding its image at the base mip
+cannot establish support for that sampler or full sample parity.
+
+[editor_model_texture_load.csx](editor_model_texture_load.csx) is prepared for
+this regression but has not run. It independently calls the actual resource
+APIs for the original external, embedded and binary assets plus a labeled
+derived compiled-only GLB, retaining every failed case. Success checks geometry,
+material parameters, complete base-mip texel readback and cache identity; its
+receipt explicitly leaves rendering, mip/sampler behavior and sample parity
+unproven. It must first record the actual current loader rejection in the
+editor. The editor and installed outputs are temporarily reserved for foliage
+validation; this test has not been substituted with a standalone graphics host.
+
+Source inspection confirms that `ReadImage` already supplies external,
+data-URI and buffer-view image bytes through the same interface. The existing
+`GltfTextureCompiler` writes a native texture resource without a procedural GPU
+texture, but currently emits only one uncompressed RGBA8 mip and rejects
+16-bit PNG and KTX2. The stock shader's observed `g_tColor` binding is usable for
+the next controlled experiment; per-texture sampler attributes, minification,
+color-space multiplication and arbitrary UV mappings are not established.
+The deprecated generic material includes are not authoritative source for the
+installed compiled complex shader.
+
+Before promoting this to textured-loader support, verify precompiled resource
+lookup and packaging, all requested sampler behavior, missing-dependency errors,
+and two models sharing a texture through independent destruction. Keep authored
+PNG/JPEG information intact. Generated textures need content/settings/version
+identity and explicit ownership; unloading one model must not dispose another
+model's shared `Texture` wrapper. Shipped `.glb_c` must load its precompiled
+dependencies rather than rebuild them or resolve against an unshipped source
+tree. The source mount root remains the containment boundary; legitimate shared
+external textures must not be rejected merely for living above a model folder.
+
+No new extension or texture packaging convention is selected by this audit.
+The [glTF extension registry](https://github.com/KhronosGroup/glTF/blob/main/extensions/README.md)
+and [MSFT_texture_dds specification](https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Vendor/MSFT_texture_dds/README.md)
+were checked on 2026-11-05: DDS support defines a different image representation,
+not an existing mapping to native s&box `.vtex_c`. Investigate the established
+resource compiler's child dependencies before introducing custom metadata.
+These are pending integration checks, not a newly proven native blocker.
+
+### Skeleton and animation integration checks
+
+The current `Model.Load` adapter still rejects skinned, morphed and animated
+selected nodes. Existing CPU readers/evaluation do not establish native model
+loading or playback. [editor_animation.csx](editor_animation.csx) is a prepared,
+unrun editor check of analytic translation/rotation/scale expectations for
+STEP, LINEAR and CUBICSPLINE, including keys, intermediate times, immediate
+STEP-boundary neighbors, hierarchy and a skinned vertex. Its arithmetic epsilon
+is a CPU sanity check, not an approved native animation approximation tolerance.
+
+Native `ModelBuilder.AddAnimation` takes a frame rate and `AnimationBuilder`
+stores frames in skeleton order. `DisableInterpolation` applies to the whole
+clip. These APIs alone do not prove preservation of arbitrary glTF key times,
+mixed interpolation channels or cubic curves. Measure native seek/playback at
+fractional times before choosing any sampling policy. Also investigate exact
+managed evaluation followed by bone upload through the normal model-update
+callback; fixed-rate baking is not assumed to be the only implementation path.
+
+The skeleton path must separately prove inverse-bind matrices, parent-relative
+bones, rest transforms, weighted GPU deformation and additional influence sets
+against independently evaluated geometry. Rest scale/shear, native influence
+limits and graph interaction remain open integration checks. Treat an exposed
+API limitation as a question to investigate, not a proven native blocker.
+
+[editor_skinning.csx](editor_skinning.csx) prepares source/compiled two-joint
+fixtures with inverse-bind offsets, hierarchy and normalized weight sets. Its
+private native construction uses independent bind/posed reference geometry,
+actual preview callbacks and empty-frame controls, with an optional managed
+capture route. The separate `Model.Load` observation cannot pass merely because
+the direct native construction does. More than four nonzero influences, rest
+scale/shear and loaded-model deformation remain unproven. The probe is unrun.
+
+[editor_animation_playback.csx](editor_animation_playback.csx) prepares native
+fixed-frame seek measurements and an actual load of the pinned embedded
+AnimatedTriangle. It records fractional and boundary-adjacent times, local/world
+bones and mixed-channel reference errors. This is a measurement probe with no
+approved approximation tolerance, and remains unrun.
+
+### Core geometry regression checks
+
+[editor_primitive_modes.csx](editor_primitive_modes.csx) prepares 42 cases across
+seven primitive modes, source/cold compiled-only storage, and three authored or
+missing normal/tangent combinations. It requires independent native topology,
+visible omission controls, metadata and image comparisons, and empty frames.
+Individual mode/format/direction environment selections allow bounded runs.
+For points/lines without normals it does not invent a normal direction; the
+specification's recommended unlit material behavior needs separate verification.
+This probe is unrun; its generated GLBs do not prove optimized GPU layout.
+
+The static-scene unit tests now include positive all-zero and rank-two node
+scales, replacing an incorrect expectation that all singular transforms should
+be rejected. Zero scale is valid in the
+[core transformation rules](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#transformations).
+The production assembler still rejects these cases. Record the actual failing
+editor run before implementing the correction. The revised `editor_scene.csx`
+can compile the worktree helper even when that helper already exists in the
+loaded module: it renames three type identifiers and records both original and
+compiled source hashes. The algorithm and tests otherwise remain unchanged;
+this does not substitute for rebuilding and validating the production engine.
+
+[editor_quantization.csx](editor_quantization.csx) prepares two actual-load
+checks for a pinned synthetic `KHR_mesh_quantization` triangle with strided
+SHORT positions, normalized BYTE directions and node dequantization scale.
+The source and cold compiled-only cases verify independent native geometry
+readback, bounds, material and cache identity. Both are unrun. The current
+loader advertises no extension capability and rejects this required extension
+before rendering; that is an integration gap, not evidence of a native GPU
+limitation. The probe does not claim rendering, full extension conformance or
+approved release tolerances.
+
 This tool inventories every model variant in the pinned [Khronos sample assets repository](https://github.com/KhronosGroup/glTF-Sample-Assets) and aggregates independently produced evidence. The pin is [90d7ede14c7e280af263824604b427a1ca02cb66](https://github.com/KhronosGroup/glTF-Sample-Assets/commit/90d7ede14c7e280af263824604b427a1ca02cb66), a dated upstream commit, not a claim about current HEAD. It is recorded in `coverage.json`. No model assets are included in this repository.
 
 This is scaffolding, **not an s&box adapter, glTF conformance validator, reference evaluator, image comparison or performance benchmark**. It checks enough of a `.glb` to read its JSON chunk, but does not validate the rest of the GLB or glTF specification. Artifact hashes establish file integrity, not that a claimed adapter ran or that its assertions are correct. Consequently even a well-formed, hash-matching evidence record reports `adapter-integration-pending` and cannot pass. No engine capability is established by running this tool alone.
