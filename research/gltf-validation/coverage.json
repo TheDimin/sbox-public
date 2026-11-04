@@ -1,6 +1,7 @@
 {
   "schema": 1,
-  "completion_platform": "linux",
+  "completion_platform": "linux-and-windows",
+  "platform_order": ["linux", "windows"],
   "renderer_target": "managed-first",
   "corpus": {
     "repository": "https://github.com/KhronosGroup/glTF-Sample-Assets.git",
@@ -54,6 +55,7 @@
     "compiled-portable-valid-glb-dependency-packaging",
     "managed-renderer-visual-reference-review",
     "performance-matched-vmdl-static-and-animated",
-    "linux"
+    "linux",
+    "windows"
   ]
 }

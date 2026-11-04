@@ -11,30 +11,46 @@ namespace Sandbox.Tests.Gltf;
 public class GltfMorphConsistencyTests
 {
 	[TestMethod]
-	public void MorphWeightsUseFirstPrimitiveThatDefinesTargets()
+	public void EqualTargetCountsUseMeshOrNodeWeights()
 	{
 		using var document = Read( """
 			{"asset":{"version":"2.0"},"meshes":[{"weights":[0.25,0.75],"primitives":[
-			 {"attributes":{"POSITION":0}},{"attributes":{"POSITION":0},"targets":[{},{}]},
+			 {"attributes":{"POSITION":0},"targets":[{},{}]},{"attributes":{"POSITION":0},"targets":[{},{}]},
 			 {"attributes":{"POSITION":0},"targets":[{},{}]}]}],
 			 "accessors":[{"componentType":5126,"count":1,"type":"VEC3"}],
 			 "nodes":[{"mesh":0},{"mesh":0,"weights":[0.5,0.125]}]}
 			""" );
 		CollectionAssert.AreEqual( new[] { 0.25f, 0.75f }, document.GetMorphWeights( 0 ) );
 		CollectionAssert.AreEqual( new[] { 0.5f, 0.125f }, document.GetMorphWeights( 1 ) );
-		Assert.AreEqual( 0, document.ReadMorphTargets( 0, 0 ).Length );
+		Assert.AreEqual( 2, document.ReadMorphTargets( 0, 0 ).Length );
 		Assert.AreEqual( 2, document.ReadMorphTargets( 0, 1 ).Length );
 	}
 
 	[TestMethod]
-	public void MixedPrimitivesDefaultAllMeshWeightsToZero()
+	public void MatchingPrimitiveTargetsDefaultAllMeshWeightsToZero()
 	{
 		using var document = Read( """
 			{"asset":{"version":"2.0"},"meshes":[{"primitives":[
-			 {"attributes":{"POSITION":0}},{"attributes":{"POSITION":0},"targets":[{},{}]}]}],
+			 {"attributes":{"POSITION":0},"targets":[{},{}]},{"attributes":{"POSITION":0},"targets":[{},{}]}]}],
 			 "accessors":[{"componentType":5126,"count":1,"type":"VEC3"}],"nodes":[{"mesh":0}]}
 			""" );
 		CollectionAssert.AreEqual( new[] { 0f, 0f }, document.GetMorphWeights( 0 ) );
+	}
+
+	[TestMethod]
+	[DataRow( false )]
+	[DataRow( true )]
+	public void APrimitiveWithoutTargetsCannotShareAMeshWithMorphedPrimitives( bool missingFirst )
+	{
+		// glTF 2.0 section 3.7.2.2 requires equal target counts for every primitive.
+		var missing = "{\"attributes\":{\"POSITION\":0}}";
+		var morphed = "{\"attributes\":{\"POSITION\":0},\"targets\":[{}]}";
+		var primitives = missingFirst ? missing + "," + morphed : morphed + "," + missing;
+		using var document = Read( $$$"""
+			{"asset":{"version":"2.0"},"meshes":[{"primitives":[{{{primitives}}}]}],
+			 "accessors":[{"componentType":5126,"count":1,"type":"VEC3"}],"nodes":[{"mesh":0}]}
+			""" );
+		Assert.ThrowsException<GltfException>( () => document.GetMorphWeights( 0 ) );
 	}
 
 	[TestMethod]

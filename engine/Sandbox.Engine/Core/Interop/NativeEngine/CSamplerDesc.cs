@@ -43,7 +43,7 @@ internal struct CSamplerStateDesc
 		m_nAllowGlobalMipBiasOverride = 0;
 
 		m_nMinLod = 0;
-		m_nMaxLod = 15;
+		m_nMaxLod = samplerState.MaxLod ?? 15;
 
 		m_nBorderColor8Bit = samplerState.BorderColor.ToColor32().RawInt;
 

@@ -7,12 +7,18 @@ namespace Sandbox.Gltf;
 /// <summary>Packages glTF data losslessly into a portable GLB container.</summary>
 public static class GltfCompiler
 {
+	private const long DefaultMaxBufferBytes = 256L * 1024 * 1024;
+
 	/// <summary>
-	/// Consolidates geometry buffers while retaining original bytes and external image URIs.
+	/// Consolidates geometry buffers when safe, otherwise preserves their identities.
+	/// Buffer contents and external image URIs are retained. The budget limits
+	/// estimated cumulative packaging allocations for buffer data; it does not
+	/// limit caller-owned input, resource resolution, or arbitrary JSON metadata.
 	/// This is a lossless packaging step, not a GPU layout optimization.
 	/// </summary>
-	public static byte[] Compile( byte[] source, Func<string, byte[]> resolve = null, IReadOnlySet<string> supportedExtensions = null )
+	public static byte[] Compile( byte[] source, Func<string, byte[]> resolve = null, IReadOnlySet<string> supportedExtensions = null, long maxBufferBytes = DefaultMaxBufferBytes )
 	{
+		if ( maxBufferBytes < 0 ) throw new GltfException( "Buffer packaging budget cannot be negative." );
 		using var document = GltfReader.Read( source, resolve, supportedExtensions );
 		RejectUnknownChunks( source );
 
@@ -21,6 +27,17 @@ public static class GltfCompiler
 			var root = JsonNode.Parse( document.Root.GetRawText() )?.AsObject()
 				?? throw new GltfException( "glTF root must be an object." );
 			var bufferCount = document.CompilerBufferCount;
+			var merge = bufferCount > 1 && CanMergeBuffers( document.Root );
+			for ( var i = 0; i < bufferCount && merge; i++ )
+				if ( !document.CompilerBufferOrPlaceholder( i ).HasValue ) merge = false;
+			ValidateBufferViews( document );
+			CheckBufferBudget( document, merge, maxBufferBytes );
+			if ( !merge )
+			{
+				var preservedBinary = PreserveBuffers( root, document );
+				return WriteGlb( JsonSerializer.SerializeToUtf8Bytes( root ), preservedBinary ?? [], preservedBinary is not null );
+			}
+
 			var offsets = new int[bufferCount];
 			long bufferLength = 0;
 			for ( var i = 0; i < bufferCount; i++ )
@@ -32,7 +49,6 @@ public static class GltfCompiler
 			}
 			if ( bufferLength > Array.MaxLength ) throw new GltfException( "Merged buffers exceed the supported length." );
 
-			if ( bufferCount > 1 ) ValidateMergeSafety( document.Root );
 			var binary = new byte[(int)bufferLength];
 			for ( var i = 0; i < bufferCount; i++ )
 				document.CompilerBuffer( i ).Span.CopyTo( binary.AsSpan( offsets[i] ) );
@@ -43,7 +59,6 @@ public static class GltfCompiler
 				for ( var i = 0; i < views.Count; i++ )
 				{
 					var original = document.ElementAt( "bufferViews", i );
-					_ = document.BufferView( i );
 					var buffer = GltfJson.Int( original, "buffer" );
 					var offset = GltfJson.Int( original, "byteOffset", 0 );
 					var newOffset = checked(offsets[buffer] + offset);
@@ -70,18 +85,108 @@ public static class GltfCompiler
 		}
 	}
 
-	private static void ValidateMergeSafety( JsonElement root )
+	private static bool CanMergeBuffers( JsonElement root )
 	{
-		if ( ContainsOpaqueData( root ) )
-			throw new GltfException( "Cannot safely merge buffers with extension or extras data that may contain buffer references." );
+		if ( ContainsOpaqueData( root ) ) return false;
 		foreach ( var buffer in root.GetProperty( "buffers" ).EnumerateArray() )
 		{
 			foreach ( var property in buffer.EnumerateObject() )
 			{
-				if ( property.Name is not ("uri" or "byteLength") )
-					throw new GltfException( "Cannot merge buffers without losing their metadata." );
+				if ( property.Name is not ("uri" or "byteLength") ) return false;
 			}
 		}
+		return true;
+	}
+
+	private static void ValidateBufferViews( GltfDocument document )
+	{
+		if ( !document.Root.TryGetProperty( "bufferViews", out var views ) ) return;
+		if ( views.ValueKind != JsonValueKind.Array ) throw new GltfException( "'bufferViews' must be an array." );
+		for ( var i = 0; i < views.GetArrayLength(); i++ )
+		{
+			var view = document.ElementAt( "bufferViews", i );
+			var buffer = GltfJson.Int( view, "buffer" );
+			var offset = GltfJson.Int( view, "byteOffset", 0 );
+			var length = GltfJson.Int( view, "byteLength" );
+			if ( (uint)buffer >= (uint)document.CompilerBufferCount || offset < 0 || length < 1 ||
+				(long)offset + length > GltfJson.Int( document.ElementAt( "buffers", buffer ), "byteLength" ) )
+				throw new GltfException( $"Buffer view {i} exceeds its declared buffer." );
+		}
+	}
+
+	private static void CheckBufferBudget( GltfDocument document, bool merge, long budget )
+	{
+		long charge = 0;
+		long mergedLength = 0;
+		for ( var i = 0; i < document.CompilerBufferCount; i++ )
+		{
+			var bytes = document.CompilerBufferOrPlaceholder( i );
+			if ( merge )
+			{
+				mergedLength = checked(((mergedLength + 3) & ~3L) + bytes!.Value.Length);
+				continue;
+			}
+			if ( i == 0 )
+			{
+				var length = bytes.HasValue ? bytes.Value.Length : GltfJson.Int( document.ElementAt( "buffers", i ), "byteLength" );
+				// One temporary BIN and its later copy into the GLB.
+				charge = checked(charge + 2L * length);
+			}
+			else if ( bytes.HasValue )
+			{
+				// Base64 creation and concatenation use UTF-16, followed by JSON and
+				// GLB byte copies. Use the larger existing data URI when applicable.
+				var characters = 4L * ((bytes.Value.Length + 2L) / 3L) + 64;
+				var original = document.ElementAt( "buffers", i );
+				if ( original.TryGetProperty( "uri", out _ ) )
+				{
+					var uri = GltfJson.String( original, "uri" );
+					if ( uri.StartsWith( "data:", StringComparison.OrdinalIgnoreCase ) ) characters = Math.Max( characters, uri.Length );
+				}
+				charge = checked(charge + 6L * characters);
+			}
+			if ( charge > budget ) throw new GltfException( "Buffer packaging budget exceeded." );
+		}
+		if ( merge && (mergedLength > Array.MaxLength || mergedLength > budget / 2) )
+			throw new GltfException( "Buffer packaging budget exceeded." );
+	}
+
+	private static byte[] PreserveBuffers( JsonObject root, GltfDocument document )
+	{
+		if ( document.CompilerBufferCount == 0 ) return null;
+		var buffers = root["buffers"]!.AsArray();
+		byte[] binary = null;
+		for ( var i = 0; i < document.CompilerBufferCount; i++ )
+		{
+			var data = document.CompilerBufferOrPlaceholder( i );
+			var buffer = buffers[i]!.AsObject();
+			if ( !data.HasValue )
+			{
+				// Core GLB requires a BIN chunk when buffer zero has no URI.
+				// A required compressed fallback has no authored bytes, so materialize
+				// zero-filled placeholder storage without changing the buffer identity.
+				if ( i == 0 )
+				{
+					var length = GltfJson.Int( document.ElementAt( "buffers", i ), "byteLength" );
+					if ( length > Array.MaxLength ) throw new GltfException( "Fallback placeholder exceeds the supported GLB size." );
+					binary = new byte[length];
+				}
+				continue;
+			}
+			if ( i == 0 )
+			{
+				binary = data.Value.ToArray();
+				buffer.Remove( "uri" );
+			}
+			else
+			{
+				var original = document.ElementAt( "buffers", i );
+				var uri = original.TryGetProperty( "uri", out _ ) ? GltfJson.String( original, "uri" ) : null;
+				if ( uri is null || !uri.StartsWith( "data:", StringComparison.OrdinalIgnoreCase ) )
+					buffer["uri"] = "data:application/gltf-buffer;base64," + Convert.ToBase64String( data.Value.Span );
+			}
+		}
+		return binary;
 	}
 
 	private static bool ContainsOpaqueData( JsonElement element )

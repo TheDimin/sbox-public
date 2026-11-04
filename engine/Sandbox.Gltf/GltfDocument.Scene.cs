@@ -5,6 +5,8 @@ namespace Sandbox.Gltf;
 
 public sealed partial class GltfDocument
 {
+	private int[] nodeParents;
+
 	/// <summary>Returns the explicitly selected default scene, if present.</summary>
 	public int? GetDefaultScene()
 	{
@@ -17,48 +19,63 @@ public sealed partial class GltfDocument
 	/// <summary>Gets the node's rest-pose transform in glTF coordinates.</summary>
 	public Matrix4x4 GetWorldTransform( int node )
 	{
-		_ = SceneObject( ElementAt( "nodes", node ), "node" );
-		var nodes = Root.GetProperty( "nodes" );
-		var count = nodes.GetArrayLength();
-		var parents = new int[count];
-		Array.Fill( parents, -1 );
-		for ( var parent = 0; parent < count; parent++ )
+		lock ( jsonIndexLock )
 		{
-			var element = SceneObject( nodes[parent], "node" );
-			if ( !element.TryGetProperty( "children", out var children ) ) continue;
-			if ( children.ValueKind != JsonValueKind.Array ) throw new GltfException( "Node children must be an array." );
-			foreach ( var childValue in children.EnumerateArray() )
-			{
-				var child = SceneIndex( childValue, "node child" );
-				if ( child >= count ) throw new GltfException( "Node child index is out of range." );
-				if ( parents[child] != -1 ) throw new GltfException( "A node cannot have multiple parents or duplicate child references." );
-				parents[child] = parent;
-			}
+			_ = SceneObject( ElementAt( "nodes", node ), "node" );
+			var nodes = RootArray( "nodes" );
+			var parents = NodeParents();
+			var world = Matrix4x4.Identity;
+			for ( var current = node; current >= 0; current = parents[current] )
+				world *= SceneLocalTransform( nodes[current] );
+			return world;
 		}
+	}
 
-		// A node has at most one parent; visiting each chain once detects cycles without recursion.
-		var states = new byte[count];
-		for ( var start = 0; start < count; start++ )
+	private int[] NodeParents()
+	{
+		lock ( jsonIndexLock )
 		{
-			var current = start;
-			while ( current >= 0 && states[current] == 0 )
+			var nodes = RootArray( "nodes" );
+			if ( nodeParents is not null ) return nodeParents;
+			var count = nodes.Length;
+			var parents = new int[count];
+			Array.Fill( parents, -1 );
+			for ( var parent = 0; parent < count; parent++ )
 			{
-				states[current] = 1;
-				current = parents[current];
+				var element = SceneObject( nodes[parent], "node" );
+				if ( !element.TryGetProperty( "children", out var children ) ) continue;
+				if ( children.ValueKind != JsonValueKind.Array ) throw new GltfException( "Node children must be an array." );
+				foreach ( var childValue in children.EnumerateArray() )
+				{
+					var child = SceneIndex( childValue, "node child" );
+					if ( child >= count ) throw new GltfException( "Node child index is out of range." );
+					if ( parents[child] != -1 ) throw new GltfException( "A node cannot have multiple parents or duplicate child references." );
+					parents[child] = parent;
+				}
 			}
-			if ( current >= 0 && states[current] == 1 ) throw new GltfException( "Node hierarchy contains a cycle." );
-			current = start;
-			while ( current >= 0 && states[current] == 1 )
-			{
-				states[current] = 2;
-				current = parents[current];
-			}
-		}
 
-		var world = Matrix4x4.Identity;
-		for ( var current = node; current >= 0; current = parents[current] )
-			world *= SceneLocalTransform( nodes[current] );
-		return world;
+			// A node has at most one parent; visiting each chain once detects cycles without recursion.
+			var states = new byte[count];
+			for ( var start = 0; start < count; start++ )
+			{
+				var current = start;
+				while ( current >= 0 && states[current] == 0 )
+				{
+					states[current] = 1;
+					current = parents[current];
+				}
+				if ( current >= 0 && states[current] == 1 ) throw new GltfException( "Node hierarchy contains a cycle." );
+				current = start;
+				while ( current >= 0 && states[current] == 1 )
+				{
+					states[current] = 2;
+					current = parents[current];
+				}
+			}
+
+			nodeParents = parents;
+			return parents;
+		}
 	}
 
 	public GltfSkin ReadSkin( int index )
@@ -139,16 +156,21 @@ public sealed partial class GltfDocument
 		var mesh = SceneObject( ElementAt( "meshes", SceneIndex( meshValue, "node mesh" ) ), "mesh" );
 		if ( !mesh.TryGetProperty( "primitives", out var primitives ) || primitives.ValueKind != JsonValueKind.Array || primitives.GetArrayLength() == 0 )
 			throw new GltfException( "A mesh must contain primitives." );
-		var count = 0;
+		var count = -1;
 		foreach ( var primitive in primitives.EnumerateArray() )
 		{
 			SceneObject( primitive, "primitive" );
-			if ( !primitive.TryGetProperty( "targets", out var targets ) ) continue;
-			if ( targets.ValueKind != JsonValueKind.Array ) throw new GltfException( "Morph targets must be an array." );
-			var targetCount = targets.GetArrayLength();
-			if ( count != 0 && targetCount != 0 && count != targetCount )
-				throw new GltfException( "All primitives defining morph targets must have the same target count." );
-			count = Math.Max( count, targetCount );
+			var targetCount = 0;
+			if ( primitive.TryGetProperty( "targets", out var targets ) )
+			{
+				if ( targets.ValueKind != JsonValueKind.Array ) throw new GltfException( "Morph targets must be an array." );
+				targetCount = targets.GetArrayLength();
+			}
+			// glTF 2.0 section 3.7.2.2 applies to every primitive, including
+			// one that omits targets. Empty target objects may omit zero deltas.
+			if ( count >= 0 && count != targetCount )
+				throw new GltfException( "All primitives in a mesh must have the same morph target count." );
+			count = targetCount;
 		}
 		if ( nodeElement.TryGetProperty( "weights", out var weights ) || mesh.TryGetProperty( "weights", out weights ) )
 			return SceneFloatArray( weights, count, "morph weights" );

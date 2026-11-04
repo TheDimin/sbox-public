@@ -24,6 +24,7 @@ internal class Program
 		AddBuildContentCommand( rootCommand );
 		AddTestCommand( rootCommand );
 		AddGltfCorpusCommand( rootCommand );
+		AddGltfNativeMaterialCommand( rootCommand );
 		AddBuildShadersCommand( rootCommand );
 		AddShaderStatsCommand( rootCommand );
 		AddGenerateSolutionsCommand( rootCommand );
@@ -161,6 +162,13 @@ internal class Program
 		rootCommand.Add( cmd );
 	}
 
+	private static void AddGltfNativeMaterialCommand( RootCommand rootCommand )
+	{
+		var cmd = new Command( "gltf-native-material-probe", "Probe tools-mode in-memory material child compilation and loading" );
+		cmd.SetHandler( () => Environment.ExitCode = (int)new TestGltfNativeMaterial().Run() );
+		rootCommand.Add( cmd );
+	}
+
 	private static void AddTestCommand( RootCommand rootCommand )
 	{
 		var cmd = new Command( "test", "Run tests" );
@@ -192,12 +200,21 @@ internal class Program
 		var seedOption = new Option<bool>( "--seed",
 			description: "Start from the newest published compiled shaders, so only changed shaders compile",
 			getDefaultValue: () => false );
+		var shaderOption = new Option<string[]>( "--shader",
+			description: "Only compile these .shader files, relative to game/; repeatable",
+			getDefaultValue: () => [] )
+		{ AllowMultipleArgumentsPerToken = true };
+		var jobsOption = new Option<int?>( "--jobs",
+			description: "Maximum number of shader compile workers (positive integer)",
+			getDefaultValue: () => null );
 		cmd.AddOption( forcedOption );
 		cmd.AddOption( seedOption );
-		cmd.SetHandler( ( bool forced, bool seed ) =>
+		cmd.AddOption( shaderOption );
+		cmd.AddOption( jobsOption );
+		cmd.SetHandler( ( bool forced, bool seed, string[] shaders, int? jobs ) =>
 		{
-			Environment.ExitCode = (int)new BuildShaders( forced, seed ).Run();
-		}, forcedOption, seedOption );
+			Environment.ExitCode = (int)new BuildShaders( forced, seed, shaders, jobs ).Run();
+		}, forcedOption, seedOption, shaderOption, jobsOption );
 		rootCommand.Add( cmd );
 	}
 

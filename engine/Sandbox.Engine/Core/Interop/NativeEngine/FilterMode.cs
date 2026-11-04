@@ -13,6 +13,21 @@ public enum FilterMode : int
 	/// </summary>
 	Point = 0x0,
 
+	/// <summary>Point minification and magnification, with linear interpolation between mip levels.</summary>
+	MinMagPointMipLinear = 0x01,
+
+	/// <summary>Point minification and mip selection, with linear magnification.</summary>
+	MinPointMagLinearMipPoint = 0x04,
+
+	/// <summary>Point minification, with linear magnification and mip interpolation.</summary>
+	MinPointMagMipLinear = 0x05,
+
+	/// <summary>Linear minification, with point magnification and mip selection.</summary>
+	MinLinearMagMipPoint = 0x10,
+
+	/// <summary>Linear minification and mip interpolation, with point magnification.</summary>
+	MinLinearMagPointMipLinear = 0x11,
+
 	/// <summary>
 	/// Interpolates between the four nearest texels in the same mip level.
 	/// Smoother than point sampling but does not blend between mip levels.

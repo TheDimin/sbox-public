@@ -55,6 +55,14 @@ public record struct SamplerState
 	public float MipLodBias { get; set; } = 0;
 
 	/// <summary>
+	/// Maximum mip level the sampler may select. Null preserves the engine's default of 15;
+	/// set to zero to restrict sampling to the base mip level.
+	/// On Vulkan, zero also forces the magnification filter. Use a single-mip texture or
+	/// verified base-mip view when independent minification and magnification are needed.
+	/// </summary>
+	public byte? MaxLod { get; set; }
+
+	/// <summary>
 	/// The maximum anisotropy level used for anisotropic filtering.
 	/// Higher values improve texture quality at oblique viewing angles.
 	/// </summary>

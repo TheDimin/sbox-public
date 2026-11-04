@@ -9,13 +9,13 @@ namespace Sandbox.Tests.Gltf;
 public class GltfPoseEdgeTests
 {
 	[TestMethod]
-	public void PrimitiveWithoutMorphTargetsRemainsUndeformedWhenMeshHasWeights()
+	public void PrimitiveWithEmptyMorphTargetRetainsItsBaseAttributes()
 	{
 		var fixture = new DeformationFixture();
 		var position = fixture.Floats( "VEC3", 1, [1, 2, 3], true );
 		var delta = fixture.Floats( "VEC3", 1, [2, 0, 0], true );
 		using var document = fixture.Read( $$$"""
-			"meshes":[{"weights":[1],"primitives":[{"mode":0,"attributes":{"POSITION":{{{position}}} }},
+			"meshes":[{"weights":[1],"primitives":[{"mode":0,"attributes":{"POSITION":{{{position}}} },"targets":[{}]},
 			 {"mode":0,"attributes":{"POSITION":{{{position}}} },"targets":[{"POSITION":{{{delta}}} }]}]}],
 			"nodes":[{"mesh":0,"translation":[3,0,0]}]
 			""" );

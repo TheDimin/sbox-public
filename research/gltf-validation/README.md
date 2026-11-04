@@ -49,4 +49,4 @@ The current gate requires all four case proofs even where an asset has no visibl
 - Captures and human visual review against a documented reference renderer under matched conditions; preserve image, renderer versions and review records.
 - Actual portable `.glb_c` generation, structural validation, dependency packaging, source and compiled runtime behavior, plus editor, reimport and vmdl parity fixtures.
 - Matched vmdl and `.glb_c` static and animated benchmarks: load time, process memory, available GPU-memory evidence and package size, with agreed thresholds and hardware/run details.
-- Linux execution, a machine-readable mapping from coverage IDs to concrete tests, pinned tool versions, CI artifacts and a reviewed process for documented upstream defects and scope exclusions. Windows is a later portability target, not this completion gate.
+- Linux execution first, then Windows validation before the full goal is complete, as requested. Keep separate platform evidence, a machine-readable mapping from coverage IDs to concrete tests, pinned tool versions, CI artifacts and a reviewed process for documented upstream defects and scope exclusions.

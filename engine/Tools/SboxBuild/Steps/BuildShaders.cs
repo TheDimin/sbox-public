@@ -3,10 +3,21 @@ using static Facepunch.Constants;
 
 namespace Facepunch.Steps;
 
-internal class BuildShaders( bool forced = false, bool seed = false )
+internal class BuildShaders( bool forced = false, bool seed = false, string[] shaders = null, int? jobs = null )
 {
 	internal ExitCode Run()
 	{
+		string[] selected;
+		try
+		{
+			if ( jobs is <= 0 ) throw new ArgumentException( "Shader worker count must be positive." );
+			selected = ResolveShaders( Path.GetFullPath( Path.Combine( Directory.GetCurrentDirectory(), "game" ) ) );
+		}
+		catch ( Exception ex ) when ( ex is ArgumentException or IOException or UnauthorizedAccessException or NotSupportedException )
+		{
+			Log.Error( $"Invalid shader selection: {ex.Message}" );
+			return ExitCode.Failure;
+		}
 		// Compiled shaders aren't committed. Starting from the newest published ones means only the
 		// shaders changed since then compile; without them, everything does.
 		if ( seed )
@@ -17,10 +28,30 @@ internal class BuildShaders( bool forced = false, bool seed = false )
 				Log.Warning( "Couldn't download the published shaders, compiling them all." );
 		}
 
-		return Compile();
+		return Compile( selected );
 	}
 
-	private ExitCode Compile() => BuildDisplay.Run( "Build shaders", () =>
+	private string[] ResolveShaders( string gameDir )
+	{
+		var result = new List<string>();
+		var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+		foreach ( var shader in shaders ?? [] )
+		{
+			if ( string.IsNullOrWhiteSpace( shader ) || Path.IsPathRooted( shader ) )
+				throw new ArgumentException( "Shader paths must be non-empty and relative to game/." );
+			var full = Path.GetFullPath( Path.Combine( gameDir, shader ) );
+			var relative = Path.GetRelativePath( gameDir, full );
+			if ( relative == ".." || relative.StartsWith( ".." + Path.DirectorySeparatorChar, StringComparison.Ordinal ) || Path.IsPathRooted( relative ) )
+				throw new ArgumentException( $"Shader path escapes game/: {shader}" );
+			if ( !string.Equals( Path.GetExtension( full ), ".shader", comparison ) || !File.Exists( full ) )
+				throw new ArgumentException( $"Shader does not exist or is not a .shader file: {shader}" );
+			if ( !result.Contains( full, comparison == StringComparison.OrdinalIgnoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal ) )
+				result.Add( full );
+		}
+		return result.ToArray();
+	}
+
+	private ExitCode Compile( string[] selected ) => BuildDisplay.Run( "Build shaders", () =>
 	{
 		try
 		{
@@ -38,7 +69,7 @@ internal class BuildShaders( bool forced = false, bool seed = false )
 				return ExitCode.Failure;
 			}
 
-			return RunShaderCompiler( shaderCompilerPath, gameDir );
+			return RunShaderCompiler( shaderCompilerPath, gameDir, selected );
 		}
 		catch ( Exception ex )
 		{
@@ -47,14 +78,15 @@ internal class BuildShaders( bool forced = false, bool seed = false )
 		}
 	} );
 
-	private ExitCode RunShaderCompiler( string shaderCompilerPath, string workingDirectory )
+	private ExitCode RunShaderCompiler( string shaderCompilerPath, string workingDirectory, string[] selected )
 	{
-		// Build arguments - only include -f if forced is true
-		string arguments = "*";
+		// ShaderCompiler compares its absolute enumerated paths to these exact arguments.
+		string arguments = selected.Length == 0 ? "*" : string.Join( " ", selected.Select( QuoteArgument ) );
 		if ( forced )
 		{
 			arguments += " -f";
 		}
+		if ( jobs.HasValue ) arguments += $" -j {jobs.Value}";
 
 		var current = 0;
 		var total = 0;
@@ -98,7 +130,38 @@ internal class BuildShaders( bool forced = false, bool seed = false )
 			Log.Error( $"Shader compiler failed" );
 			return ExitCode.Failure;
 		}
+		if ( selected.Length > 0 && total != selected.Length )
+		{
+			Log.Error( $"Shader compiler enumerated {total} shaders for {selected.Length} selected files." );
+			return ExitCode.Failure;
+		}
 
 		return ExitCode.Success;
+	}
+
+	// ProcessStartInfo.Arguments uses the standard backslash-and-quote argument rules.
+	private static string QuoteArgument( string value )
+	{
+		var result = new System.Text.StringBuilder( value.Length + 2 );
+		result.Append( '"' );
+		var backslashes = 0;
+		foreach ( var character in value )
+		{
+			if ( character == '\\' ) { backslashes++; continue; }
+			if ( character == '"' )
+			{
+				result.Append( '\\', backslashes * 2 + 1 );
+				result.Append( character );
+			}
+			else
+			{
+				result.Append( '\\', backslashes );
+				result.Append( character );
+			}
+			backslashes = 0;
+		}
+		result.Append( '\\', backslashes * 2 );
+		result.Append( '"' );
+		return result.ToString();
 	}
 }

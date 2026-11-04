@@ -16,12 +16,13 @@ internal sealed class TestGltfCorpus
 		"KHR_mesh_quantization", "KHR_lights_punctual", "EXT_mesh_gpu_instancing",
 		"EXT_meshopt_compression", "KHR_meshopt_compression",
 		"KHR_draco_mesh_compression",
-		// Source selection and encoded bytes only. This adapter does not transcode or render images.
+		// Selected KTX2 images are transcoded to RGBA8 for the bounded reader exercise.
 		"KHR_texture_basisu"
 	};
 
 	private sealed record Stage( string Status, string Error = null, Dictionary<string, long> Operations = null );
-	private sealed record Case( string Id, string Path, string Scope, string SourceSha256, string[] EncodedSourceOnlyExtensions, Stage DataRead, Stage ManagedContainerRoundtrip );
+	private sealed record Case( string Id, string Path, string Scope, string SourceSha256, Stage BasisuRgbaDecode,
+		Stage DataRead, Stage ManagedContainerRoundtrip, string ArtifactSha256, Dictionary<string, string> PackagedDependencySha256 );
 	private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower };
 
 	internal ExitCode Run( string corpusPath, string outputPath, string prefix, bool compileGlb )
@@ -55,13 +56,15 @@ internal sealed class TestGltfCorpus
 				var read = new Stage( "not-run" );
 				var compiled = new Stage( "not-requested" );
 				string hash = null;
-				string[] sourceOnly = [];
+				string artifactHash = null;
+				Dictionary<string, string> dependencyHashes = null;
+				var basisuUsed = false;
 				try
 				{
 					if ( scope == "error" ) throw new InvalidDataException( item.GetProperty( "error" ).GetString() );
 					if ( scope is not ("required" or "excluded") ) throw new InvalidDataException( "Unknown inventory scope." );
 					var extensionsUsed = item.GetProperty( "extensions_used" ).EnumerateArray().Select( x => x.GetString() ).ToArray();
-					sourceOnly = extensionsUsed.Where( x => x == "KHR_texture_basisu" ).ToArray();
+					basisuUsed = extensionsUsed.Contains( "KHR_texture_basisu", StringComparer.Ordinal );
 					var asset = CorpusFile( corpus, relative );
 					var bytes = File.ReadAllBytes( asset );
 					hash = Convert.ToHexStringLower( SHA256.HashData( bytes ) );
@@ -79,21 +82,33 @@ internal sealed class TestGltfCorpus
 						try
 						{
 							var output = GltfCompiler.Compile( bytes, Resolve, ReaderCapabilities );
-							using var roundTrip = GltfReader.Read( output, Resolve, ReaderCapabilities );
-							compiled = new Stage( "pass", Operations: Inspect( roundTrip ) );
 							var artifactRoot = Path.GetFullPath( Path.Combine( Path.GetDirectoryName( reportPath ), "compiled" ) );
 							var artifact = Path.GetFullPath( Path.Combine( artifactRoot, idComponents[0], idComponents[1], "model.glb_c" ) );
 							if ( !IsWithin( artifactRoot, artifact ) || IsWithin( corpus, artifact ) )
 								throw new InvalidDataException( "Compiled artifact path escapes its output directory." );
 							RequireNoLinks( artifact );
-							Directory.CreateDirectory( Path.GetDirectoryName( artifact ) );
-							File.WriteAllBytes( artifact, output );
+							var bundle = GltfArtifactDependencies.Prepare( output, Resolve, ReaderCapabilities );
+							GltfArtifactDependencies.WritePackage( artifact, bundle.Artifact, bundle.Dependencies );
+							var packagedBytes = File.ReadAllBytes( artifact );
+							using var roundTrip = GltfReader.Read( packagedBytes,
+								uri => GltfArtifactDependencies.ResolvePackaged( artifact, uri ), ReaderCapabilities );
+							var operations = Inspect( roundTrip );
+							operations["packaged_external_images"] = bundle.Dependencies.Count;
+							var checkedDependencyHashes = new Dictionary<string, string>( StringComparer.Ordinal );
+							foreach ( var path in bundle.Dependencies.Keys.Order( StringComparer.Ordinal ) )
+								checkedDependencyHashes.Add( path, Convert.ToHexStringLower( SHA256.HashData( GltfArtifactDependencies.ResolvePackaged( artifact, path ) ) ) );
+							artifactHash = Convert.ToHexStringLower( SHA256.HashData( packagedBytes ) );
+							dependencyHashes = checkedDependencyHashes;
+							compiled = new Stage( "pass", Operations: operations );
 						}
 						catch ( Exception e ) when ( e is not OutOfMemoryException ) { compiled = new Stage( "fail", e.GetType().Name + ": " + e.Message ); }
 					}
 				}
 				catch ( Exception e ) when ( e is not OutOfMemoryException ) { read = new Stage( "fail", e.GetType().Name + ": " + e.Message ); }
-				results.Add( new Case( id, relative, scope, hash, sourceOnly, read, compiled ) );
+				var basisuDecode = !basisuUsed ? new Stage( "not-applicable" )
+					: read.Operations?.GetValueOrDefault( "basisu_texture_sources" ) > 0 ? new Stage( "pass" )
+					: new Stage( "incomplete", "No KTX2 RGBA decode was completed for this case." );
+				results.Add( new Case( id, relative, scope, hash, basisuDecode, read, compiled, artifactHash, dependencyHashes ) );
 				if ( scope == "required" && (read.Status != "pass" || compileGlb && compiled.Status != "pass") )
 					Log.Error( $"{id}: {read.Error ?? compiled.Error}" );
 			}
@@ -118,6 +133,7 @@ internal sealed class TestGltfCorpus
 				InventoryPath = inventoryPath,
 				CorpusCommit = actualCommit,
 				Platform = RuntimeInformation.RuntimeIdentifier,
+				CompileRequested = compileGlb,
 				Selection = prefix,
 				TotalIndexedCases = totalCases,
 				TotalRequiredCases = totalRequired,
@@ -126,10 +142,10 @@ internal sealed class TestGltfCorpus
 				SelectedRequiredCases = required.Length,
 				SelectedDataReadersPass = pass,
 				AllRequiredDataReadersPass = prefix is null && pass && inventoryErrors == 0,
-				BasisuTranscode = "not-tested",
-				CompiledStageMeaning = "managed-container-roundtrip-against-source-resolver",
-				IndependentCompiledValidation = "not-tested", PackagedDependencies = "not-tested",
-				ImageDecoding = "not-tested", NumericReferenceParity = "not-tested", RenderParity = "not-tested",
+				BasisuTranscode = "per-case bounded RGBA8 decode only; extension conformance and rendering not proven",
+				CompiledStageMeaning = "managed-container-roundtrip-from-packaged-artifact-and-core-image-sidecars",
+				IndependentCompiledValidation = "not-tested", PackagedDependencies = "core-image-sidecars-only; extension-specific-dependencies-not-audited",
+				ImageDecoding = "KTX2 Basis RGBA8 only; other image decoding not tested", NumericReferenceParity = "not-tested", RenderParity = "not-tested",
 				GpuLayoutOptimization = "not-tested", Performance = "not-tested", FullGoalPass = false,
 				ReaderCapabilities = ReaderCapabilities.Order( StringComparer.Ordinal ),
 				Cases = results
@@ -153,8 +169,32 @@ internal sealed class TestGltfCorpus
 		_ = document.GetDefaultScene();
 		for ( var i = 0; i < Count( "accessors" ); i++ ) { _ = document.ReadFloatAccessor( i ); Add( "accessors" ); }
 		for ( var i = 0; i < Count( "samplers" ); i++ ) { _ = document.ReadSampler( i ); Add( "samplers" ); }
-		for ( var i = 0; i < Count( "images" ); i++ ) { _ = document.ReadImage( i ); Add( "encoded_images" ); }
-		for ( var i = 0; i < Count( "textures" ); i++ ) { _ = document.ReadTexture( i ); Add( "texture_sources" ); }
+		const long maxKtxDecodedBytesPerAsset = 512L * 1024 * 1024;
+		long totalKtxDecodedBytes = 0;
+		var decodedKtxImages = new HashSet<int>();
+		for ( var i = 0; i < Count( "images" ); i++ )
+		{
+			var image = document.ReadImage( i );
+			Add( "encoded_images" );
+			if ( !string.Equals( image.MimeType, "image/ktx2", StringComparison.OrdinalIgnoreCase ) ) continue;
+			var decoded = GltfKtx.DecodeRgba32( image.Bytes, maxKtxDecodedBytesPerAsset - totalKtxDecodedBytes );
+			foreach ( var level in decoded.Levels ) totalKtxDecodedBytes += level.Pixels.Length;
+			decodedKtxImages.Add( i );
+			Add( "ktx2_rgba_images" );
+			Add( "ktx2_rgba_mip_levels", decoded.Levels.Count );
+			Add( "ktx2_rgba_bytes", decoded.Levels.Sum( level => (long)level.Pixels.Length ) );
+		}
+		for ( var i = 0; i < Count( "textures" ); i++ )
+		{
+			var texture = document.ReadTexture( i );
+			Add( "texture_sources" );
+			var value = root.GetProperty( "textures" )[i];
+			if ( !value.TryGetProperty( "extensions", out var textureExtensions ) ||
+				!textureExtensions.TryGetProperty( "KHR_texture_basisu", out _ ) ) continue;
+			if ( !texture.Image.HasValue || !decodedKtxImages.Contains( texture.Image.Value ) )
+				throw new GltfException( "Basis texture did not resolve to a decoded KTX2 image." );
+			Add( "basisu_texture_sources" );
+		}
 		for ( var i = 0; i < Count( "materials" ); i++ ) { _ = document.ReadMaterial( i ); Add( "materials" ); }
 		var variantCount = root.TryGetProperty( "extensions", out var extensions ) && extensions.TryGetProperty( "KHR_materials_variants", out var variants )
 			? variants.GetProperty( "variants" ).GetArrayLength() : 0;

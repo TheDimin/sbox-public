@@ -73,6 +73,27 @@ feature set, including specialized features, before declaring parity.
   may carry a shader or graph reference. Shared material-only glTF/GLB assets
   and optional native `.vmat` links are explicit authoring choices; automatic
   compilation deduplication must not silently link independent materials.
+- Use the provided s&box shaders by default. Map glTF material data into the
+  existing material pipeline; exact Khronos reference shading is not the design
+  priority. Native `.vmat` overrides remain explicit authoring choices.
+- Runtime material creation with a shared lookup cache is the user's approved
+  prototype direction, replacing the earlier rejection of procedural materials.
+  The source-grounded recommendation is a resource/game-context cache of
+  immutable effective material definitions, consumed by a scene's
+  `GameObjectSystem`. Models can load outside a scene and be shared across scenes,
+  so scene ownership alone does not cover their lifetime. Cache identity includes
+  shader/features, parameters, texture identities/versions and sampling state;
+  edits replace an entry or create an isolated override. The first prototype
+  is process-scoped and uses explicit leases; game-context teardown, source
+  invalidation and protection from direct public `Material` mutation still need
+  integration. The implemented internal prototype shares a stock-template copy
+  across asset owners and scene systems, isolates changed descriptors, and
+  releases it after the last lease. Focused tests cover descriptor snapshots,
+  hash collisions, revisions, failure cleanup and scene disposal. See the
+  [cache test instructions](../engine/Tests/Sandbox.Test.Gltf/README.md#shared-material-cache-prototype).
+  Runtime texture creation has not been authorized by this
+  material proposal. Native compiled material child resources remain an
+  alternative feasibility investigation, not the selected default.
 - Use `KHR_materials_variants`: one active named variant per model instance,
   with slot mappings and standard fallback behavior. Per-instance s&box
   material overrides remain supported without changing legacy vmdl behavior.
@@ -129,6 +150,16 @@ data, draw submission, and editor integration. Reuse native services when they
 provide concrete value, such as graphics-device operations, scene scheduling,
 lighting, shader compilation, or physics. A native ModelBuilder or vmdl
 conversion is not a prerequisite merely to render geometry.
+
+The user's 2026-11-04 direction makes stock s&box shaders and existing
+skinning/morph rendering the default. Prefer the managed `Mesh`/`Model.Builder`
+and native scene-model path when it supplies those existing systems. Keep glTF
+parsing, preparation, caching and authoring in C#. Direct GPU buffers remain
+available for proven compatibility gaps and tests; a custom production glTF
+shader is not a prerequisite. Test bind matrices, bone scale, influence formats,
+interpolation, negative morph weights and tangent deltas before claiming parity.
+Bring proven limitations back for a decision; this direction does not silently
+waive core behavior or the portable `.glb_c` load/memory requirements.
 
 Source inspection confirms `GpuBuffer` supports vertex, index, structured,
 byte-address, and indirect-argument buffers. `Graphics.Draw` and `CommandList`

@@ -9,6 +9,8 @@
   <ItemGroup>
     <PackageReference Include="Evergine.Bindings.Draco" Version="2025.10.14.20" />
     <PackageReference Include="Evergine.Bindings.MeshOptimizer" Version="2026.10.1.20" />
+    <PackageReference Include="Evergine.Bindings.KTX" Version="2026.6.15.8" />
     <None Update="ThirdPartyNotices.md" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="KtxThirdPartyNotices.md" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

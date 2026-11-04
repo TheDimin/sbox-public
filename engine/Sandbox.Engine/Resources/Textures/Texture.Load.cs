@@ -154,7 +154,9 @@ public partial class Texture
 
 	internal static Texture TryToLoad( BaseFileSystem filesystem, string filepath, bool warnOnMissing = true )
 	{
-		if ( Application.IsUnitTest )
+		// Empty-renderer tests must not touch native resources. Graphics-enabled
+		// integration tests need the same stock lookup textures as the real renderer.
+		if ( Application.IsUnitTest && !Graphics.IsAvailable )
 			return null;
 
 		// if no filesystem provided

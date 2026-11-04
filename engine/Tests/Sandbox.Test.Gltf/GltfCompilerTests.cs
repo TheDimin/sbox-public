@@ -123,11 +123,15 @@ public class GltfCompilerTests
 	}
 
 	[TestMethod]
-	public void UnknownExtensionBlocksBufferRemappingThatCannotBeProvenSafe()
+	public void UnknownExtensionKeepsItsBufferReferencesWithoutUnsafeRemapping()
 	{
 		var source = Encoding.UTF8.GetBytes( """
 			{"asset":{"version":"2.0"},"extensionsUsed":["EXT_unknown"],"extensions":{"EXT_unknown":{"buffer":1}},"buffers":[{"uri":"a.bin","byteLength":1},{"uri":"b.bin","byteLength":1}]}
 			""" );
-		Assert.ThrowsException<GltfException>( () => GltfCompiler.Compile( source, _ => [7] ) );
+		var output = GltfCompiler.Compile( source, _ => [7] );
+		using var document = GltfReader.Read( output );
+		Assert.AreEqual( 2, document.Root.GetProperty( "buffers" ).GetArrayLength() );
+		Assert.AreEqual( 1, document.Root.GetProperty( "extensions" ).GetProperty( "EXT_unknown" ).GetProperty( "buffer" ).GetInt32() );
+		StringAssert.StartsWith( document.Root.GetProperty( "buffers" )[1].GetProperty( "uri" ).GetString(), "data:" );
 	}
 }

@@ -5,25 +5,71 @@ namespace Sandbox.Gltf;
 
 public sealed partial class GltfDocument
 {
+	/// <summary>Evaluates a vertex under a pose sampled from this document, in glTF world coordinates.</summary>
+	public Vector3 EvaluateVertexPosition( int node, int primitive, int vertex, GltfPose pose )
+	{
+		ArgumentNullException.ThrowIfNull( pose );
+		if ( !ReferenceEquals( pose.Owner, this ) ) throw new ArgumentException( "The pose must belong to this document.", nameof( pose ) );
+		var nodeValue = SceneObject( ElementAt( "nodes", node ), "node" );
+		var mesh = SceneIndex( GltfJson.Required( nodeValue, "mesh" ), "node mesh" );
+		var geometry = ReadPrimitive( mesh, primitive );
+		if ( (uint)vertex >= (uint)geometry.VertexCount ) throw new GltfException( "Vertex index is out of range." );
+		if ( !geometry.Attributes.TryGetValue( "POSITION", out var positionAccessor ) )
+			throw new GltfException( "Vertex position evaluation requires a POSITION attribute." );
+		var positions = ReadFloatAccessor( positionAccessor );
+		var offset = vertex * 3;
+		var position = new Vector3( positions[offset], positions[offset + 1], positions[offset + 2] );
+		var targets = ReadMorphTargets( mesh, primitive );
+		var morphWeights = pose.GetMorphWeights( node );
+		if ( targets.Length != 0 && targets.Length != morphWeights.Length ) throw new GltfException( "Morph target count does not match mesh weights." );
+		for ( var i = 0; i < targets.Length; i++ )
+		{
+			var deltas = targets[i].PositionDeltas;
+			if ( deltas is null ) continue;
+			position += new Vector3( deltas[offset], deltas[offset + 1], deltas[offset + 2] ) * morphWeights[i];
+		}
+
+		// The mesh node transform does not affect skinned vertices; joint world
+		// matrices already place their result in world space.
+		if ( !nodeValue.TryGetProperty( "skin", out var skinValue ) || !geometry.Attributes.ContainsKey( "JOINTS_0" ) )
+			return Vector3.Transform( position, pose.GetWorldTransform( node ) );
+		var skin = ReadSkin( SceneIndex( skinValue, "node skin" ) );
+		var result = Vector3.Zero;
+		for ( var set = 0; geometry.Attributes.TryGetValue( "JOINTS_" + set, out var jointsAccessor ); set++ )
+		{
+			if ( !geometry.Attributes.TryGetValue( "WEIGHTS_" + set, out var weightsAccessor ) ) throw new GltfException( "Missing skinning weight set." );
+			var joints = ReadFloatAccessor( jointsAccessor );
+			var weights = ReadFloatAccessor( weightsAccessor );
+			var baseIndex = vertex * 4;
+			for ( var influence = 0; influence < 4; influence++ )
+			{
+				var joint = (int)joints[baseIndex + influence];
+				var weight = weights[baseIndex + influence];
+				if ( (uint)joint >= (uint)skin.Joints.Length ) throw new GltfException( "Skinning joint index is out of range." );
+				if ( weight < 0 || !float.IsFinite( weight ) ) throw new GltfException( "Skinning weights must be finite and non-negative." );
+				if ( weight == 0 ) continue;
+				var world = skin.InverseBindMatrices[joint] * pose.GetWorldTransform( skin.Joints[joint] );
+				result += Vector3.Transform( position, world ) * weight;
+			}
+		}
+		return result;
+	}
+
 	/// <summary>Evaluates independent rest or animation state in glTF world coordinates.</summary>
 	public GltfPose EvaluatePose( int? animation = null, float time = 0 )
 	{
 		if ( !float.IsFinite( time ) ) throw new GltfException( "Animation sample time must be finite." );
-		var nodeArray = Root.TryGetProperty( "nodes", out var nodes ) ? RequireArray( nodes, "nodes" ) : default;
-		var count = nodeArray.ValueKind == JsonValueKind.Array ? nodeArray.GetArrayLength() : 0;
+		var nodeArray = RootArray( "nodes" );
+		var count = nodeArray.Length;
 		var locals = new Matrix4x4[count];
 		var weights = new float[count][];
-		var parents = new int[count];
-		Array.Fill( parents, -1 );
-		// GetWorldTransform also validates the graph, including multiple parents and cycles.
-		if ( count > 0 ) _ = GetWorldTransform( 0 );
+		// Parent links are immutable and validated for cycles and multiple parents.
+		var parents = NodeParents();
 		for ( var i = 0; i < count; i++ )
 		{
 			var node = SceneObject( nodeArray[i], "node" );
 			locals[i] = SceneLocalTransform( node );
 			weights[i] = GetMorphWeights( i );
-			if ( node.TryGetProperty( "children", out var children ) )
-				foreach ( var child in children.EnumerateArray() ) parents[SceneIndex( child, "node child" )] = i;
 		}
 
 		if ( animation.HasValue )
@@ -86,7 +132,7 @@ public sealed partial class GltfDocument
 			for ( var current = i; current >= 0; current = parents[current] ) world *= locals[current];
 			worlds[i] = world;
 		}
-		return new GltfPose( worlds, weights );
+		return new GltfPose( this, worlds, weights );
 	}
 
 	private static float[] PoseTrs( Dictionary<(int Node, string Path), float[]> updates, int index, string name, JsonElement node, float[] defaults )
@@ -100,8 +146,9 @@ public sealed partial class GltfPose
 {
 	private readonly Matrix4x4[] poseWorlds;
 	private readonly float[][] poseWeights;
+	internal GltfDocument Owner { get; }
 
-	internal GltfPose( Matrix4x4[] worlds, float[][] weights ) => (poseWorlds, poseWeights) = (worlds, weights);
+	internal GltfPose( GltfDocument owner, Matrix4x4[] worlds, float[][] weights ) => (Owner, poseWorlds, poseWeights) = (owner, worlds, weights);
 
 	public Matrix4x4 GetWorldTransform( int node )
 	{

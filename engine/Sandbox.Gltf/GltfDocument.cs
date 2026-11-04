@@ -11,6 +11,8 @@ public sealed partial class GltfDocument
 	private Func<string, byte[]> resolver;
 	private ReadOnlyMemory<byte>[] buffers;
 	private bool disposed;
+	private readonly object jsonIndexLock = new();
+	private readonly Dictionary<string, JsonElement[]> rootArrayIndex = new( StringComparer.Ordinal );
 
 	public JsonElement Root
 	{
@@ -100,10 +102,25 @@ public sealed partial class GltfDocument
 
 	internal JsonElement ElementAt( string array, int index )
 	{
-		if ( !Root.TryGetProperty( array, out var values ) || values.ValueKind != JsonValueKind.Array || (uint)index >= (uint)values.GetArrayLength() )
+		var values = RootArray( array );
+		if ( (uint)index >= (uint)values.Length )
 			throw new GltfException( $"Invalid {array} index {index}." );
 		if ( values[index].ValueKind != JsonValueKind.Object ) throw new GltfException( $"{array}[{index}] must be an object." );
 		return values[index];
+	}
+
+	private JsonElement[] RootArray( string name )
+	{
+		lock ( jsonIndexLock )
+		{
+			var root = Root;
+			if ( rootArrayIndex.TryGetValue( name, out var cached ) ) return cached;
+			if ( !root.TryGetProperty( name, out var values ) ) return [];
+			if ( values.ValueKind != JsonValueKind.Array ) throw new GltfException( $"'{name}' must be an array." );
+			var items = values.EnumerateArray().ToArray();
+			rootArrayIndex.Add( name, items );
+			return items;
+		}
 	}
 
 	private static JsonElement RequireArray( JsonElement value, string context )
@@ -164,9 +181,14 @@ public sealed partial class GltfDocument
 
 	public void Dispose()
 	{
-		if ( disposed ) return;
-		disposed = true;
-		json.Dispose();
+		lock ( jsonIndexLock )
+		{
+			if ( disposed ) return;
+			disposed = true;
+			json.Dispose();
+			rootArrayIndex.Clear();
+			nodeParents = null;
+		}
 		ClearMeshoptCache();
 		ClearDracoCache();
 		buffers = [];

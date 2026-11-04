@@ -57,6 +57,7 @@
 		<ProjectReference Include="../Sandbox.Compiling/Sandbox.Compiling.csproj" />
 		<ProjectReference Include="../Sandbox.Event/Sandbox.Event.csproj" />
 		<ProjectReference Include="../Sandbox.Filesystem/Sandbox.Filesystem.csproj" />
+		<ProjectReference Include="../Sandbox.Gltf/Sandbox.Gltf.csproj" />
 		<ProjectReference Include="../Sandbox.Hotload/Sandbox.Hotload.csproj" />
 		<ProjectReference Include="../Sandbox.Layout/Sandbox.Layout.csproj" />
 		<ProjectReference Include="../Sandbox.Reflection/Sandbox.Reflection.csproj" />
