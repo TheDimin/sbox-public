@@ -3,3 +3,7 @@
 !editor_cache.csx
 !editor_morph.csx
 !editor_material_schema.csx
+!editor_material_channels.csx
+!editor_scene.csx
+!editor_metalness_lighting.csx
+!editor_vertex_frame.csx

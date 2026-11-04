@@ -89,6 +89,92 @@ These editor observations used Engine module ID
 module IDs and diagnostic flags in every receipt. No standalone graphics host
 was used for these observations, and the project's open scene was not modified.
 
+### Capture renderer and scene assembly
+
+`CameraComponent.RenderToTexture` uses the native camera pipeline. The widget's
+ordinary view may use the managed renderer when `r_managed_scene` is enabled.
+Record this distinction: running inside the editor alone does not establish
+coverage of both pipelines. The current editor's viewport flag is false.
+
+`editor_render.csx` additionally accepts `SBOX_GLTF_CAPTURE_RENDERER=managed` to
+call the already-registered `SceneBridge.RenderToTexture` for its private camera
+and target after the normal preview callbacks. It does not change the global
+viewport flag. In this path the complete Triangle/winding/sharing matrix and
+deleted/fresh empty controls passed without the color-clear diagnostic. The
+receipt is `editor-render-managed/receipt.json`. The native stale-frame control
+remains a separate failure.
+
+[editor_scene.csx](editor_scene.csx) compiles the exact new
+`GltfStaticSceneAssembler` source and its self-contained MSTest source inside the
+editor, in a collectible helper assembly. It records both source hashes, the
+framework hash and helper module ID, and checks that the loaded glTF assembly
+matches disk. This validates the new code without replacing loaded engine DLLs;
+it does not establish normal `Model.Load` integration or a rebuilt engine.
+
+All five scene-assembly tests passed: default scene selection, multiple meshes
+and primitives, repeated instances, nested transforms, nonuniform mirrored
+normal/tangent transforms and winding, bounds, UV preservation, and explicit
+rejection of presently unsupported deformation. A four-primitive rendered
+fixture matched independent native reference geometry with zero differing
+pixels; omitting each primitive changed 80 pixels. Khronos Box source and compiled
+geometry matched over 2,304 covered pixels. These native captures used the
+explicit color-clear diagnostic and wrote `editor-scene-camera-clear`.
+The same tests and geometry comparisons also passed through the explicit managed
+capture route without the clear diagnostic, under `editor-scene-managed`.
+Skinning, morphs, animated selected nodes, instancing and singular transforms
+remain unsupported by this static assembler, and remain requirements of the
+full implementation.
+
+### Material and lighting prerequisites
+
+[editor_material_channels.csx](editor_material_channels.csx) compiles eight
+controlled PNG channel fixtures into native linear texture resources, verifies
+their actual RGBA readback and measures stock complex debug output. Under the
+tested settings, normal-texture blue values 32/224 produced roughness output
+32/224, while its other channels did not change roughness. This identifies a
+packing candidate; it does not prove factor equations or independent UV/sampler
+support. Its metalness control was unresponsive, so the overall receipt remains
+failed at `editor-material-channels-camera-clear`.
+
+[editor_metalness_lighting.csx](editor_metalness_lighting.csx) adds direct-light
+controls and an optional short `SBOX_GLTF_LIGHTING_CONTROLS_ONLY=1` mode. Its
+`SBOX_GLTF_CAPTURE_RENDERER=managed` option keeps both capture paths separate.
+The first tests found that the stock vmdl sphere lights correctly, while both
+the glTF triangle and an independently built native triangle with a zero tangent
+produce zero world normals and no lighting. Supplying an explicit unit tangent
+restores the expected +X normal and front-light response over all 1,225 covered
+pixels; a light behind the triangle contributes zero. This isolates a runtime
+mesh vertex-frame prerequisite. Preserve the failed original controls while
+fixing primitive staging; do not infer metalness behavior from an unlit mesh.
+
+[editor_vertex_frame.csx](editor_vertex_frame.csx) compiles the exact primitive
+builder source and its new MSTest regression source inside the editor. The
+`SBOX_GLTF_EXPECT_VERTEX_FRAME_RED=1` run against the original source recorded
+three failures for missing tangent frames and one passing authored-tangent
+preservation case. These failures remain in `editor-vertex-frame-red`.
+
+The builder now supplies a stable orthonormal tangent when glTF omits one,
+including after generating flat face normals. Authored tangents and their signs
+remain unchanged. This fixes the stock complex shader's flat-normal lighting;
+UV-dependent MikkTSpace generation for normal maps is still required separately.
+All four regression tests passed against the updated exact source. Its managed
+render test then matched independently authored reference geometry in albedo,
+world normals, no-light, front-light and back-light diffuse/specular views for
+both source and compiled Triangle. Front lighting affected all 1,225 visible
+pixels in each lighting view; the no-light, back-light and empty controls were
+black. The comparison counts pixels exceeding 0.03 in any RGB channel and allows
+at most five such pixels; all source/reference and compiled/reference counts
+were zero. Evidence is in `editor-vertex-frame-managed`.
+The same four tests and lighting comparisons also passed through the native
+capture path with the scoped clear diagnostic, in
+`editor-vertex-frame-camera-clear`.
+
+These source-compilation proofs execute new production code in the real editor
+but do not replace the deployed engine assembly. A staged engine build and
+coordinated editor restart are still needed before claiming that ordinary engine
+call sites use these changes. `Model.Load` dispatch, material mapping beyond
+the proven inputs and full corpus appearance remain incomplete.
+
 This tool inventories every model variant in the pinned [Khronos sample assets repository](https://github.com/KhronosGroup/glTF-Sample-Assets) and aggregates independently produced evidence. The pin is [90d7ede14c7e280af263824604b427a1ca02cb66](https://github.com/KhronosGroup/glTF-Sample-Assets/commit/90d7ede14c7e280af263824604b427a1ca02cb66), a dated upstream commit, not a claim about current HEAD. It is recorded in `coverage.json`. No model assets are included in this repository.
 
 This is scaffolding, **not an s&box adapter, glTF conformance validator, reference evaluator, image comparison or performance benchmark**. It checks enough of a `.glb` to read its JSON chunk, but does not validate the rest of the GLB or glTF specification. Artifact hashes establish file integrity, not that a claimed adapter ran or that its assertions are correct. Consequently even a well-formed, hash-matching evidence record reports `adapter-integration-pending` and cannot pass. No engine capability is established by running this tool alone.

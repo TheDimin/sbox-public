@@ -80,6 +80,7 @@ internal static class GltfModelPrimitiveBuilder
 			var secondUv = uv1.IsEmpty ? System.Numerics.Vector2.Zero : uv1.Span[i];
 			if ( !Finite( position ) || !Finite( normal ) || !Finite( tangent ) || !Finite( color ) || !Finite( firstUv ) || !Finite( secondUv ) )
 				throw new GltfException( "Primitive vertex streams contain non-finite values." );
+			if ( !data.Normals.IsEmpty && data.Tangents.IsEmpty ) tangent = StockFrameTangent( normal );
 			sourceVertices[i] = new StockVertex { Position = position, Normal = normal, Tangent = tangent, Color = color, TexCoord0 = firstUv, TexCoord1 = secondUv };
 		}
 		var indices = new int[indexCount];
@@ -109,6 +110,7 @@ internal static class GltfModelPrimitiveBuilder
 				{
 					vertices[i + corner] = sourceVertices[indices[i + corner]];
 					vertices[i + corner].Normal = normal;
+					vertices[i + corner].Tangent = StockFrameTangent( normal );
 					indices[i + corner] = i + corner;
 				}
 			}
@@ -122,6 +124,22 @@ internal static class GltfModelPrimitiveBuilder
 			maxs = new Vector3( MathF.Max( maxs.x, position.x ), MathF.Max( maxs.y, position.y ), MathF.Max( maxs.z, position.z ) );
 		}
 		return new PreparedPrimitive { Vertices = vertices, Indices = indices, PrimitiveType = mode, Bounds = new BBox( mins, maxs ) };
+	}
+
+	// Stock shaders reconstruct their normal from the complete tangent frame even
+	// with a flat normal texture. A zero tangent makes otherwise valid geometry
+	// black under lights. This basis is sufficient without a normal map; generating
+	// UV-dependent MikkTSpace tangents for normal-mapped assets is a separate step.
+	private static System.Numerics.Vector4 StockFrameTangent( System.Numerics.Vector3 normal )
+	{
+		var length = Math.Sqrt( (double)normal.X * normal.X + (double)normal.Y * normal.Y + (double)normal.Z * normal.Z );
+		if ( length == 0 ) return new System.Numerics.Vector4( 0, 1, 0, 1 ); // Degenerate faces have no surface coverage.
+		var n = new System.Numerics.Vector3( (float)(normal.X / length), (float)(normal.Y / length), (float)(normal.Z / length) );
+		// Use the least parallel axis so the cross product stays well conditioned.
+		var axis = MathF.Abs( n.X ) <= MathF.Abs( n.Y ) && MathF.Abs( n.X ) <= MathF.Abs( n.Z )
+			? System.Numerics.Vector3.UnitX : MathF.Abs( n.Y ) <= MathF.Abs( n.Z ) ? System.Numerics.Vector3.UnitY : System.Numerics.Vector3.UnitZ;
+		var tangent = System.Numerics.Vector3.Normalize( System.Numerics.Vector3.Cross( axis, n ) );
+		return new System.Numerics.Vector4( tangent, 1 );
 	}
 
 	private static ReadOnlyMemory<System.Numerics.Vector2> TexCoords( GltfDrawData data, int set )

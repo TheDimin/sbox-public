@@ -10,7 +10,8 @@ var corpus = System.IO.Path.Combine( corpusRoot, "Models", "Triangle", "glTF" );
 var diagnosticMode = Environment.GetEnvironmentVariable( "SBOX_GLTF_CAMERA_CLEAR" );
 var diagnosticCameraClear = diagnosticMode == "1";
 var diagnosticCameraNoop = diagnosticMode == "noop";
-var output = System.IO.Path.Combine( root.FullName, "Temp", "gltf-validation", diagnosticCameraClear ? "editor-render-camera-clear" : diagnosticCameraNoop ? "editor-render-camera-noop" : "editor-render" );
+var managedCapture = Environment.GetEnvironmentVariable( "SBOX_GLTF_CAPTURE_RENDERER" ) == "managed";
+var output = System.IO.Path.Combine( root.FullName, "Temp", "gltf-validation", (diagnosticCameraClear ? "editor-render-camera-clear" : diagnosticCameraNoop ? "editor-render-camera-noop" : "editor-render") + (managedCapture ? "-managed" : "") );
 System.IO.Directory.CreateDirectory( output );
 var receiptPath = System.IO.Path.Combine( output, "receipt.json" );
 var completed = new System.Collections.Generic.List<string>();
@@ -42,13 +43,16 @@ CameraComponent commandFreshCamera = null;
 Sandbox.Rendering.CommandList cameraClearCommands = null;
 Sandbox.Rendering.CommandList freshCameraClearCommands = null;
 object finalControls = null;
+object managedRenderer = null;
+System.Reflection.MethodInfo managedRenderToTexture = null;
+bool managedViewportEnabled = false;
 object MakeReceipt( bool passed, string error = null ) => new
 {
     passed, phase, error, completed, failures, captures, cells, final_controls = finalControls, source_sha256 = digest, compiled_sha256 = compiledDigest, dependencies,
     scope = "editor stock albedo geometry, winding and shared material lease; not full glTF, lighting, or material fidelity",
     engine_location = engineLocation, engine_mvid = typeof( Model ).Assembly.ManifestModule.ModuleVersionId.ToString(),
     gltf_mvid = typeof( Sandbox.Gltf.GltfReader ).Assembly.ManifestModule.ModuleVersionId.ToString(),
-    editor = Application.IsEditor, diagnostic_camera_clear = diagnosticCameraClear, diagnostic_camera_noop = diagnosticCameraNoop, command_callbacks = commandCallbacks, fresh_command_callbacks = freshCommandCallbacks, capture_preview_callbacks_before_and_after = 3, starting_frame = startFrame, final_frame = Application.FrameCount, corpus_root = corpusRoot, output
+    editor = Application.IsEditor, capture_renderer = managedCapture ? "managed SceneBridge.RenderToTexture" : "native CameraComponent.RenderToTexture", managed_viewport_enabled = managedViewportEnabled, diagnostic_camera_clear = diagnosticCameraClear, diagnostic_camera_noop = diagnosticCameraNoop, command_callbacks = commandCallbacks, fresh_command_callbacks = freshCommandCallbacks, capture_preview_callbacks_before_and_after = 3, starting_frame = startFrame, final_frame = Application.FrameCount, corpus_root = corpusRoot, output
 };
 void SaveReceipt( object receipt ) => System.IO.File.WriteAllText( receiptPath, System.Text.Json.JsonSerializer.Serialize( receipt, new System.Text.Json.JsonSerializerOptions { WriteIndented = true } ) );
 try
@@ -70,6 +74,13 @@ try
     var sourceData = sourceDoc.CreateDrawData( 0, 0 );
     var compiledData = compiledDoc.CreateDrawData( 0, 0 );
     var engine = typeof( Model ).Assembly;
+    var managedRenderingType = engine.GetType( "Sandbox.Rendering.ManagedSceneRendering", true );
+    managedViewportEnabled = (bool)managedRenderingType.GetProperty( "Enabled" ).GetValue( null );
+    if ( managedCapture )
+    {
+        managedRenderer = managedRenderingType.GetProperty( "Renderer" ).GetValue( null ) ?? throw new InvalidOperationException( "Managed renderer unavailable." );
+        managedRenderToTexture = managedRenderer.GetType().GetMethod( "RenderToTexture", new[] { typeof( CameraComponent ), typeof( Texture ) } ) ?? throw new InvalidOperationException( "Managed texture rendering API unavailable." );
+    }
     var builderType = engine.GetType( "Sandbox.GltfModelPrimitiveBuilder", true );
     var build = builderType.GetMethod( "Build", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic ) ?? throw new InvalidOperationException( "Missing glTF primitive builder." );
     var stock = Material.Load( "materials/default/white.vmat" );
@@ -172,7 +183,8 @@ try
         using ( captureScene.Push() )
         {
             captureTarget.Clear( Color.Black );
-            if ( !captureCamera.RenderToTexture( captureTarget ) ) throw new InvalidOperationException( "Camera failed to submit " + name );
+            var submitted = managedCapture ? (bool)managedRenderToTexture.Invoke( managedRenderer, new object[] { captureCamera, captureTarget } ) : captureCamera.RenderToTexture( captureTarget );
+            if ( !submitted ) throw new InvalidOperationException( "Camera failed to submit " + name );
         }
         await WaitForPreviewFrames( capturePreview, count );
         cancellationToken.ThrowIfCancellationRequested();
