@@ -350,16 +350,6 @@ public partial class ProjectPublisher
 					await AddFile( ast.AbsolutePath, ast.RelativePath );
 				}
 
-				// Collect game-side files (data files to be packaged like navdata)
-				foreach ( var file in asset.GetAdditionalGameFiles() )
-				{
-					var absPath = FileSystem.Mounted.GetFullPath( file );
-					if ( !string.IsNullOrEmpty( absPath ) && System.IO.File.Exists( absPath ) )
-					{
-						await AddFile( absPath, file );
-					}
-				}
-
 				progress?.SetProgressMessage( $"Found {AddedAssets.Count:n0}" );
 			}
 
@@ -392,6 +382,13 @@ public partial class ProjectPublisher
 				return false;
 
 			await asset.CompileIfNeededAsync();
+			// A false return is also used when an asset was already compiled. Check
+			// actual state so a timed-out compile cannot publish stale output.
+			if ( asset.CanRecompile && !asset.IsCompiled && !asset.IsCompileFailed )
+			{
+				Errors.Add( $"Asset is not compiled after compile attempt: {asset.Path}" );
+				return false;
+			}
 
 			if ( IncludeSourceFiles )
 			{
@@ -409,6 +406,16 @@ public partial class ProjectPublisher
 				{
 					Errors.Add( $"Asset failed to compile: {asset.Path}" );
 					return false;
+				}
+
+				// Compilation can create or update game-side dependencies. Collect them
+				// from every published asset, including assets reached by reference, only
+				// after that asset compiled successfully. Some assets have no primary file.
+				foreach ( var file in asset.GetAdditionalGameFiles() )
+				{
+					var absPath = FileSystem.Mounted.GetFullPath( file );
+					if ( !string.IsNullOrEmpty( absPath ) && System.IO.File.Exists( absPath ) )
+						await AddFile( absPath, file );
 				}
 
 				//
