@@ -99,17 +99,26 @@ internal sealed partial class MeshRenderFeature
 				continue;
 			}
 
-			if ( skinScratch.Length < skin.BoneCount ) skinScratch = new Matrix3x4[Math.Max( skin.BoneCount, skinScratch.Length * 2 )];
-			for ( int b = 0; b < skin.BoneCount; b++ )
+			var palette = obj.SkinningPaletteFor( m );
+			if ( !palette.IsEmpty )
 			{
-				// Posed bones, or the bind pose at the object's transform
-				var master = skin.MasterBones[b];
-				var world = (uint)master < (uint)worldBones.Length ? worldBones[master]
-					: (uint)master < (uint)bindPose.Length ? Matrix3x4.Concat( objectMatrix, bindPose[master] ) : objectMatrix;
-				skinScratch[b] = Matrix3x4.Concat( world, skin.InverseBindPoses[b] );
+				if ( palette.Length != skin.BoneCount ) throw new InvalidOperationException( "Skinning palette no longer matches the model mesh." );
+			}
+			else
+			{
+				if ( skinScratch.Length < skin.BoneCount ) skinScratch = new Matrix3x4[Math.Max( skin.BoneCount, skinScratch.Length * 2 )];
+				for ( int b = 0; b < skin.BoneCount; b++ )
+				{
+					// Posed bones, or the bind pose at the object's transform
+					var master = skin.MasterBones[b];
+					var world = (uint)master < (uint)worldBones.Length ? worldBones[master]
+						: (uint)master < (uint)bindPose.Length ? Matrix3x4.Concat( objectMatrix, bindPose[master] ) : objectMatrix;
+					skinScratch[b] = Matrix3x4.Concat( world, skin.InverseBindPoses[b] );
+				}
+				palette = skinScratch.AsSpan( 0, skin.BoneCount );
 			}
 
-			var slot = transforms.AddSkinned( obj.Tint, skin.BlendWeightCount, skinScratch.AsSpan( 0, skin.BoneCount ) );
+			var slot = transforms.AddSkinned( obj.Tint, skin.BlendWeightCount, palette );
 			obj.SkinSlots[m] = slot;
 
 			// Deformation and morphs require compute skinning even with one weight.

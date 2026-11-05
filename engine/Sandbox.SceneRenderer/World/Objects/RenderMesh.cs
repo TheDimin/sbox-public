@@ -148,6 +148,10 @@ public sealed class RenderMesh
 	/// </summary>
 	internal MeshSkin SkinFor( int mesh ) => (uint)mesh < (uint)skins.Length ? skins[mesh] : null;
 
+	/// <summary>Draw variants can retain instance palettes only when they share the exact skinning data and model.</summary>
+	internal bool SharesSkinningWith( RenderMesh other ) => other is not null &&
+		ReferenceEquals( Model, other.Model ) && ReferenceEquals( skins, other.skins ) && ReferenceEquals( BindPose, other.BindPose );
+
 	/// <summary>
 	/// Give the mesh skinning data - what <see cref="FromModel"/> reads, and what the tests make up.
 	/// </summary>

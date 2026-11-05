@@ -3,7 +3,7 @@ namespace Sandbox.SceneRenderer;
 /// <summary>
 /// A model drawn at a transform - the managed counterpart of a native <c>CSceneObject</c> with a model.
 /// </summary>
-public sealed class MeshObject : RenderObject
+public sealed partial class MeshObject : RenderObject
 {
 	RenderMesh mesh;
 
@@ -24,6 +24,7 @@ public sealed class MeshObject : RenderObject
 		get => mesh;
 		set
 		{
+			if ( !ReferenceEquals( mesh, value ) && (mesh is null || !mesh.SharesSkinningWith( value )) ) ClearSkinningPalettes();
 			mesh = value;
 			LocalBounds = value?.Bounds ?? default;
 			WantsFrameBufferCopy = MaterialOverride is { } material ? RenderMesh.ReadsFrameBuffer( material ) : value?.ReadsFrameBufferCopy ?? false;

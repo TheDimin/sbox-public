@@ -369,6 +369,35 @@ model behavior. Native draw metadata, influence packing, bounds, shadows,
 multiview updates and native-camera rendering still need independent proof;
 the reflected managed capture route alone cannot establish them.
 
+The unbuilt managed renderer now has an internal per-instance, per-model-mesh
+direct palette hook. It copies final world-space matrices in native render-bone
+order, validates count and finite components, and sends them to the transform
+buffer without another inverse-bind or object-transform multiply. Explicit
+overrides survive material/bodygroup draw variants sharing the exact native
+model and skin metadata. Incompatible mesh replacement or removal clears them;
+clearing an override restores the latest legacy bone pose. No glTF loader or
+scene-mirror provider supplies these matrices yet.
+
+`DirectSkinningPaletteTests` covers CPU entries for one/four weight layouts,
+independent instances, shared-skin draw variants, invalid input, fallback and
+transform-buffer generations. It does not advance `Application.FrameCount` or
+claim GPU submission timing. The optional shadow-slot observation is not shadow
+coverage. The hook must be submitted before frame preparation; native compute
+metadata/weight precision and actual GPU deformation remain unproven. The
+mirror's visibility-to-null transition will need provider reapplication on show,
+along with posed bounds and ordinary component/playback integration. These
+source changes and tests are unbuilt and unrun.
+
+[editor_direct_skinning_palette.csx](editor_direct_skinning_palette.csx) queues
+those tests against the actual loaded Engine/SceneRenderer modules. It checks
+disk/loaded module identities, reports a missing producer API explicitly, and
+compiles only the test and existing fixture source in the established friend
+test-assembly identity. It runs DataRows separately, leaves unit-test mode
+unchanged and verifies that synchronous tests do not advance the editor frame
+counter. Rebuilding and restarting the renderer is still required before its
+new implementation can be tested; source compilation of tests does not replace
+that step. This runner is also unrun.
+
 ### Core geometry regression checks
 
 [editor_primitive_modes.csx](editor_primitive_modes.csx) prepares 42 cases across
