@@ -5,6 +5,8 @@ using Sentry;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 
 namespace Sandbox;
 
@@ -178,20 +180,32 @@ internal sealed partial class PackageLoader : IDisposable
 			}
 		}
 
-		foreach ( var e in Package.SortByReferences( changedPackageDlls, x => x.ap.Package ) )
-		{
-			// don't load editor dlls here unless we're in tools mode
-			if ( e.filename.EndsWith( ".editor.dll", StringComparison.OrdinalIgnoreCase ) && !ToolsMode )
-				continue;
+		// Package manifests do not contain implicit editor assembly references (notably
+		// toolbase), so order the changed DLLs by their actual metadata as well.
+		var pending = Package.SortByReferences( changedPackageDlls, x => x.ap.Package )
+			.Where( x => ToolsMode || !x.filename.EndsWith( ".editor.dll", StringComparison.OrdinalIgnoreCase ) )
+			.ToArray();
+		var orderer = new AssemblyOrderer();
+		for ( int i = 0; i < pending.Length; i++ )
+			orderer.Add( i.ToString(), pending[i].ap.AssemblyFileSystem.ReadAllBytes( pending[i].filename ).ToArray() );
 
-			var result = LoadAssemblyFromPackage( e.ap, e.filename, skipUnchanged: true );
+		var fullSwaps = IncomingThisHotload.Select( x => x.Name ).ToHashSet( StringComparer.OrdinalIgnoreCase );
+		var reboundConsumers = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
+		foreach ( var (identifier, bytes) in orderer.GetDependencyOrdered() )
+		{
+			var e = pending[int.Parse( identifier )];
+			var needsRebind = ReferencesAnyAssembly( bytes, fullSwaps );
+			var result = LoadAssemblyFromPackage( e.ap, e.filename, bytes, skipUnchanged: !needsRebind, forceFull: needsRebind );
 			if ( result is not null )
 				changedPackages.Add( e.ap );
 
 			if ( result is not null && !result.FastHotload )
 			{
 				hotloadedPackages.Add( e.ap );
+				if ( result.FullHotload ) fullSwaps.Add( result.Name );
 			}
+			if ( result is not null && needsRebind )
+				reboundConsumers.Add( result.Name );
 		}
 
 		var toolBaseHotloaded = hotloadedPackages.Any( x => x.Package.IsNamed( "local.toolbase" ) );
@@ -213,7 +227,30 @@ internal sealed partial class PackageLoader : IDisposable
 
 		foreach ( var package in Package.SortByReferences( dependentPackages, x => x.Package ) )
 		{
-			LoadAllAssembliesFromPackage( package );
+			LoadAllAssembliesFromPackage( package, fullSwaps, reboundConsumers );
+		}
+
+		// Rebind loaded editor consumers by their actual references, including
+		// transitive editor chains with no matching package-manifest edge.
+		if ( ToolsMode && fullSwaps.Count > 0 )
+		{
+			var consumers = Loaded.Where( x => x.Name.EndsWith( ".editor", StringComparison.OrdinalIgnoreCase )
+				&& x.CompiledAssemblyBytes is not null ).ToArray();
+			var consumerOrder = new AssemblyOrderer();
+			for ( int i = 0; i < consumers.Length; i++ )
+				consumerOrder.Add( i.ToString(), consumers[i].CompiledAssemblyBytes );
+			foreach ( var (identifier, bytes) in consumerOrder.GetDependencyOrdered() )
+			{
+				var consumer = consumers[int.Parse( identifier )];
+				if ( reboundConsumers.Contains( consumer.Name ) || !ReferencesAnyAssembly( bytes, fullSwaps ) ) continue;
+				var owner = loadedPackages.FirstOrDefault( x => x.Package == consumer.Package );
+				if ( owner is null ) continue;
+				var filename = owner.AssemblyFileSystem.FindFile( "", "*.dll", true )
+					.FirstOrDefault( path => Path.GetFileNameWithoutExtension( path ).Equals( consumer.Name, StringComparison.OrdinalIgnoreCase ) );
+				if ( filename is null ) continue;
+				var result = LoadAssemblyFromPackage( owner, filename, forceFull: true );
+				if ( result?.FullHotload == true ) fullSwaps.Add( result.Name );
+			}
 		}
 	}
 
@@ -256,7 +293,7 @@ internal sealed partial class PackageLoader : IDisposable
 		return assembly is not null;
 	}
 
-	private LoadedAssembly LoadAssemblyFromPackage( PackageManager.ActivePackage ap, string filename, byte[] bytes = null, bool skipUnchanged = false )
+	private LoadedAssembly LoadAssemblyFromPackage( PackageManager.ActivePackage ap, string filename, byte[] bytes = null, bool skipUnchanged = false, bool forceFull = false )
 	{
 		log.Trace( $"Loading \"{filename}\" from {ap.Package.Title}" );
 
@@ -344,7 +381,7 @@ internal sealed partial class PackageLoader : IDisposable
 			codeArchive = ap.AssemblyFileSystem.ReadAllBytes( codearchivefilename ).ToArray();
 		}
 
-		var result = AddAssembly( ap.Package, assmName, trustedDll, codeArchive );
+		var result = AddAssembly( ap.Package, assmName, trustedDll, codeArchive, forceFull );
 
 		if ( result.FastHotload && ap.Package is LocalPackage lp )
 		{
@@ -446,7 +483,15 @@ internal sealed partial class PackageLoader : IDisposable
 		return true;
 	}
 
-	private void LoadAllAssembliesFromPackage( PackageManager.ActivePackage package )
+	private static bool ReferencesAnyAssembly( byte[] bytes, HashSet<string> names )
+	{
+		if ( names.Count == 0 ) return false;
+		using var reader = new PEReader( new MemoryStream( bytes ) );
+		var metadata = reader.GetMetadataReader();
+		return metadata.AssemblyReferences.Any( handle => names.Contains( metadata.GetString( metadata.GetAssemblyReference( handle ).Name ) ) );
+	}
+
+	private void LoadAllAssembliesFromPackage( PackageManager.ActivePackage package, HashSet<string> fullSwaps = null, HashSet<string> rebound = null )
 	{
 		ArgumentNullException.ThrowIfNull( package );
 
@@ -464,14 +509,17 @@ internal sealed partial class PackageLoader : IDisposable
 
 		foreach ( var (assemblyName, bytes) in ordered.GetDependencyOrdered() )
 		{
-			var result = LoadAssemblyFromPackage( package, assemblyName, bytes );
+			var needsRebind = fullSwaps is not null && ReferencesAnyAssembly( bytes, fullSwaps );
+			var result = LoadAssemblyFromPackage( package, assemblyName, bytes, forceFull: needsRebind );
+			if ( needsRebind && result is not null ) rebound?.Add( result.Name );
+			if ( result?.FullHotload == true ) fullSwaps?.Add( result.Name );
 
 			if ( result?.Assembly == null )
 				throw new System.Exception( $"Error loading {assemblyName}" );
 		}
 	}
 
-	LoadedAssembly AddAssembly( Package package, string assemblyName, TrustedBinaryStream dllStream, byte[] codeArchive )
+	LoadedAssembly AddAssembly( Package package, string assemblyName, TrustedBinaryStream dllStream, byte[] codeArchive, bool forceFull = false )
 	{
 		LoadedAssembly loaded = new LoadedAssembly();
 		loaded.Name = assemblyName;
@@ -492,10 +540,15 @@ internal sealed partial class PackageLoader : IDisposable
 			loaded.Name = loaded.Assembly?.GetName().Name;
 		}
 
-		return AddAssembly( loaded );
+		return AddAssembly( loaded, forceFull );
 	}
 
 	internal LoadedAssembly AddAssembly( LoadedAssembly incoming )
+	{
+		return AddAssembly( incoming, false );
+	}
+
+	private LoadedAssembly AddAssembly( LoadedAssembly incoming, bool forceFull )
 	{
 		var outgoing = Loaded.FirstOrDefault( x => incoming.Name == x.Name );
 
@@ -515,7 +568,7 @@ internal sealed partial class PackageLoader : IDisposable
 			return outgoing;
 		}
 
-		if ( TryFastHotload( incoming, outgoing ) )
+		if ( !forceFull && TryFastHotload( incoming, outgoing ) )
 		{
 			log.Trace( $" - Fast Hotloaded" );
 			LoadContext?.UnloadChild( incoming!.Assembly );

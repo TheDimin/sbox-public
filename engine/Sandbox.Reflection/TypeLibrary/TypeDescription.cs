@@ -327,6 +327,7 @@ public sealed class TypeDescription : ISourceLineProvider
 
 	private void Init( Type type, bool dynamicAssembly )
 	{
+		IsValid = true;
 		TargetType = type;
 		IsDynamicAssembly = dynamicAssembly;
 		Identity = GetTypeIdentity( type );

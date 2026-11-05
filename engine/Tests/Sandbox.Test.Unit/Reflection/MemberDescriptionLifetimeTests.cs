@@ -52,6 +52,7 @@ public class MemberDescriptionLifetimeTests
 
 			library.AddAssembly( assembly, false );
 			Assert.AreSame( type, library.GetType( typeof( Child ) ) );
+			Assert.IsTrue( type.IsValid, "A reused type description must become valid again after registration." );
 			CollectionAssert.AreEquivalent( members, type.Members );
 			CollectionAssert.AreEqual( identities, members.Select( x => x.Identity ).ToArray() );
 			Assert.IsTrue( members.All( x => x.Ident is null ) );
