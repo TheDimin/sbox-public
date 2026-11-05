@@ -27,11 +27,19 @@ public static class GltfCompiler
 			var root = JsonNode.Parse( document.Root.GetRawText() )?.AsObject()
 				?? throw new GltfException( "glTF root must be an object." );
 			var bufferCount = document.CompilerBufferCount;
-			var merge = bufferCount > 1 && CanMergeBuffers( document.Root );
+			var orphanBinary = FindOrphanBinary( source, document );
+			var merge = !orphanBinary.HasValue && bufferCount > 1 && CanMergeBuffers( document.Root );
 			for ( var i = 0; i < bufferCount && merge; i++ )
 				if ( !document.CompilerBufferOrPlaceholder( i ).HasValue ) merge = false;
 			ValidateBufferViews( document );
-			CheckBufferBudget( document, merge, maxBufferBytes );
+			CheckBufferBudget( document, merge, maxBufferBytes, orphanBinary?.Length ?? -1 );
+			if ( orphanBinary.HasValue )
+			{
+				// Keep the pre-existing unreferenced chunk, and embed every core
+				// buffer by URI so no buffer begins referring to that chunk.
+				_ = PreserveBuffers( root, document, embedFirstBufferAsUri: true );
+				return WriteGlb( JsonSerializer.SerializeToUtf8Bytes( root ), orphanBinary.Value.ToArray(), true );
+			}
 			if ( !merge )
 			{
 				var preservedBinary = PreserveBuffers( root, document );
@@ -114,9 +122,11 @@ public static class GltfCompiler
 		}
 	}
 
-	private static void CheckBufferBudget( GltfDocument document, bool merge, long budget )
+	private static void CheckBufferBudget( GltfDocument document, bool merge, long budget, int orphanBinaryLength )
 	{
-		long charge = 0;
+		// An orphan BIN is copied once to a temporary array and once into output.
+		long charge = orphanBinaryLength >= 0 ? 2L * orphanBinaryLength : 0;
+		if ( charge > budget ) throw new GltfException( "Buffer packaging budget exceeded." );
 		long mergedLength = 0;
 		for ( var i = 0; i < document.CompilerBufferCount; i++ )
 		{
@@ -126,7 +136,7 @@ public static class GltfCompiler
 				mergedLength = checked(((mergedLength + 3) & ~3L) + bytes!.Value.Length);
 				continue;
 			}
-			if ( i == 0 )
+			if ( i == 0 && orphanBinaryLength < 0 )
 			{
 				var length = bytes.HasValue ? bytes.Value.Length : GltfJson.Int( document.ElementAt( "buffers", i ), "byteLength" );
 				// One temporary BIN and its later copy into the GLB.
@@ -151,7 +161,7 @@ public static class GltfCompiler
 			throw new GltfException( "Buffer packaging budget exceeded." );
 	}
 
-	private static byte[] PreserveBuffers( JsonObject root, GltfDocument document )
+	private static byte[] PreserveBuffers( JsonObject root, GltfDocument document, bool embedFirstBufferAsUri = false )
 	{
 		if ( document.CompilerBufferCount == 0 ) return null;
 		var buffers = root["buffers"]!.AsArray();
@@ -173,7 +183,7 @@ public static class GltfCompiler
 				}
 				continue;
 			}
-			if ( i == 0 )
+			if ( i == 0 && !embedFirstBufferAsUri )
 			{
 				binary = data.Value.ToArray();
 				buffer.Remove( "uri" );
@@ -187,6 +197,17 @@ public static class GltfCompiler
 			}
 		}
 		return binary;
+	}
+
+	private static ReadOnlyMemory<byte>? FindOrphanBinary( byte[] source, GltfDocument document )
+	{
+		if ( source.Length < 20 || BinaryPrimitives.ReadUInt32LittleEndian( source ) != 0x46546c67 ) return null;
+		// GltfReader and RejectUnknownChunks already validated framing and order.
+		var offset = 20 + (int)BinaryPrimitives.ReadUInt32LittleEndian( source.AsSpan( 12 ) );
+		if ( offset == source.Length || BinaryPrimitives.ReadUInt32LittleEndian( source.AsSpan( offset + 4 ) ) != 0x004e4942 ) return null;
+		if ( document.CompilerBufferCount > 0 && !document.ElementAt( "buffers", 0 ).TryGetProperty( "uri", out _ ) ) return null;
+		var length = (int)BinaryPrimitives.ReadUInt32LittleEndian( source.AsSpan( offset ) );
+		return source.AsMemory( offset + 8, length );
 	}
 
 	private static bool ContainsOpaqueData( JsonElement element )
