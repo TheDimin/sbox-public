@@ -431,6 +431,18 @@ that step. This runner is also unrun.
 
 ### Core geometry regression checks
 
+The complete feature-level implementation/test audit is in
+[FEATURE_STATUS.md](FEATURE_STATUS.md). The fixed `GltfGeometryBuffer.GltfVertex`
+and `GltfModelPrimitiveBuilder.StockVertex` paths do not meet the requirement for
+source-driven GPU layout. The new `DescribePrimitiveUpload` API records authored
+views, offsets, strides, component types/counts and normalization, plus explicit
+sparse/zero-base/codec materialization and source/decoded topology. Its tests
+cover distinct streams, interleaving, padded matrix columns, primitive-scoped
+Draco data, implicit indices and valid view-relative alignment. This is unrun
+metadata staging; the fixed renderer paths remain in use and are not replaced.
+Actual dynamic native bindings or vertex pulling, owned byte lifetimes, sparse
+materialization and stock-shader compatibility remain implementation work.
+
 [editor_primitive_modes.csx](editor_primitive_modes.csx) prepares 42 cases across
 seven primitive modes, source/cold compiled-only storage, and three authored or
 missing normal/tangent combinations. It requires independent native topology,
@@ -478,15 +490,30 @@ these declaration tests remain unrun.
 
 [editor_gltf_unit_tests.csx](editor_gltf_unit_tests.csx) queues those tests against
 the loaded glTF module, without compiling production source. Its default suite
-is `quantization-declarations`; `SBOX_GLTF_UNIT_SUITE` also selects
-`basis-fallbacks`, `primitive-reader`, `animation-sampler`,
-`animation-channels`, `texture-transform-declarations`, or `all` six.
-It executes each DataRow, records input hashes and disk/loaded module identity,
-and checks the editor frame counter without changing it. The helper references
-only the glTF library, BCL and MSTest, matching the pure test project. A fixed
-manifest version 2 checks method, DataRow and case counts: `all` currently means
-70 cases across these six classes. This is not the entire glTF test suite or corpus, and
-the runner is unrun.
+is `quantization-declarations`; `SBOX_GLTF_UNIT_SUITE` selects any alias from
+[gltf-test-manifest.json](gltf-test-manifest.json), or `all` for the complete
+`Sandbox.Test.Gltf` project. Manifest version 3 inventories 38 source classes,
+309 methods, 163 DataRows and 431 expanded cases. These are source counts, not
+execution results or a claim of complete specification coverage.
+
+The runner checks source-file inventory and fixed class/method/row/case totals,
+supports both TestMethod and DataTestMethod, and compiles selected test sources
+plus their declared source dependencies. It embeds the actual checked-in KTX
+fixtures and records their hashes with test, manifest and framework hashes.
+The helper references the glTF library, BCL and MSTest, matching the pure test
+project, and checks loaded/disk producer identity. It executes cases sequentially,
+yields between synchronous calls, honors cancellation and checks the editor
+frame counter without writing it or changing process CWD/unit-test mode.
+
+Known-good decoder tests run before any dependent codec suite. A failed
+preflight blocks its dependent cases; malformed-input tests cannot pass merely
+because a missing decoder also throws. Preflight results and module observations
+are separate from project-case totals. They prove only their sampled paths;
+the remaining codec cases still determine other modes and formats. The revised
+runner remains unrun. A complete project pass remains separate from Khronos
+corpus rendering, native component/editor behavior and performance acceptance.
+An installed module missing a newly added API must be rebuilt/restarted before
+that suite can compile; compiling test sources never substitutes for that step.
 
 `GltfTextureTransformDeclarationTests` now checks that a selected
 `KHR_texture_transform` is listed in `extensionsUsed`, while preserving valid
@@ -528,6 +555,14 @@ sampling support.
 
 ### Raw compiled-GLB asset pipeline audit
 
+The lossless compiler now preserves an input BIN chunk that no core buffer
+references, including a present empty chunk. It keeps that exact chunk and
+embeds all core buffers as data URIs on this path, retaining buffer indices and
+avoiding new external geometry dependencies. Seven new tests cover byte
+preservation, coexistence, resolver-free reads, repeat compilation and packaging
+budget boundaries. These changes/tests are unbuilt/unrun; they do not establish
+GPU layout optimization or the meaning of arbitrary opaque URI references.
+
 The managed `Editor.Asset` abstraction can override compilation and compiled
 file paths. The publisher packages bytes at that path rather than requiring a
 native resource header in managed code. A raw valid `.glb_c` primary output is
@@ -540,9 +575,13 @@ attribute declaring its extension.
 The next editor probe must establish stable IDs and aliases, source/dependency
 watching, reimport, compilation state, output ownership/deletion, and distinct
 ownership for same-stem `.gltf`/`.glb` sources. Verify actual packaged GLB magic
-and dependencies: additional game files are currently collected before the
-later asset compile, and missing additional files can be skipped. Probe the
-native compiler's `SetExtension` naming/framing separately using a throwaway
+and dependencies. The publisher source now collects additional game files
+after compilation for direct and referenced assets, preserving successful
+additional-file-only assets and existing exclusions. Regression tests cover
+generated dependencies, deduplication and compile failure/pending states.
+This change/tests remain unbuilt/unrun; missing additional files can still be
+skipped, and source/reference discovery still occurs before compilation. Probe
+the native compiler's `SetExtension` naming/framing separately using a throwaway
 fixture. These source observations do not prove a native blocker or choose a
 custom extension, filename convention or final compiler architecture.
 

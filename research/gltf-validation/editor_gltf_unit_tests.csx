@@ -1,75 +1,190 @@
-// Run inside the existing editor. Compile selected, self-contained MSTest sources
-// against the actual loaded glTF library, without compiling production sources.
+// Run in the existing s&box editor. Compile manifest-selected test sources
+// against its loaded glTF library; never compile or replace producer code.
+// Native codec preflights and project cases are recorded separately.
 var engineLocation = typeof( Model ).Assembly.Location;
 var checkout = new System.IO.DirectoryInfo( System.IO.Path.GetDirectoryName( engineLocation ) );
 while ( checkout is not null && !System.IO.File.Exists( System.IO.Path.Combine( checkout.FullName, "engine", "Sandbox-Engine.slnx" ) ) ) checkout = checkout.Parent;
 if ( checkout is null ) throw new InvalidOperationException( "Cannot locate checkout from " + engineLocation );
 var selection = Environment.GetEnvironmentVariable( "SBOX_GLTF_UNIT_SUITE" );
 if ( string.IsNullOrWhiteSpace( selection ) ) selection = "quantization-declarations";
-// Versioned inventory: update deliberately when reviewed tests are added/removed.
-var suites = new System.Collections.Generic.Dictionary<string, (string File, string Type, int Methods, int DataRows, int Cases)>( StringComparer.Ordinal ) {
-	["quantization-declarations"] = ("GltfQuantizationDeclarationTests.cs", "Sandbox.Test.Gltf.GltfQuantizationDeclarationTests", 5, 10, 12),
-	["basis-fallbacks"] = ("GltfBasisFallbackTests.cs", "Sandbox.Tests.Gltf.GltfBasisFallbackTests", 4, 4, 6),
-	["texture-transform-declarations"] = ("GltfTextureTransformDeclarationTests.cs", "Sandbox.Tests.Gltf.GltfTextureTransformDeclarationTests", 4, 4, 6),
-	["primitive-reader"] = ("GltfPrimitiveTests.cs", "Sandbox.Tests.Gltf.GltfPrimitiveTests", 8, 11, 17),
-	["animation-sampler"] = ("GltfAnimationTests.cs", "Sandbox.Test.Gltf.GltfAnimationTests", 8, 0, 8),
-	["animation-channels"] = ("GltfAnimationChannelTests.cs", "Sandbox.Tests.Gltf.GltfAnimationChannelTests", 16, 6, 21)
-};
 var runId = Guid.NewGuid().ToString( "N" );
 var output = System.IO.Path.Combine( checkout.FullName, "Temp", "gltf-validation", "editor-gltf-unit-tests", runId );
 System.IO.Directory.CreateDirectory( output );
-var frameworkPath = System.IO.Path.Combine( checkout.FullName, "engine", "Tests", "Sandbox.Test.Gltf", "bin", "Release", "net10.0", "Microsoft.VisualStudio.TestPlatform.TestFramework.dll" );
-var hashes = new System.Collections.Generic.Dictionary<string, string>();
+var receiptPath = System.IO.Path.Combine( output, "receipt.json" );
+var testRoot = System.IO.Path.Combine( checkout.FullName, "engine", "Tests", "Sandbox.Test.Gltf" );
+var manifestPath = System.IO.Path.Combine( checkout.FullName, "research", "gltf-validation", "gltf-test-manifest.json" );
+var runnerPath = System.IO.Path.Combine( checkout.FullName, "research", "gltf-validation", "editor_gltf_unit_tests.csx" );
+var frameworkPath = System.IO.Path.Combine( testRoot, "bin", "Release", "net10.0", "Microsoft.VisualStudio.TestPlatform.TestFramework.dll" );
+var suites = new System.Collections.Generic.Dictionary<string, (string File, string Type, int Methods, int Rows, int Cases, string[] Sources, string[] Resources, string[] Codecs)>( StringComparer.Ordinal );
+var codecs = new System.Collections.Generic.Dictionary<string, (string File, string Type, string Method, object[] Args, string[] Sources, string[] Resources)>( StringComparer.Ordinal );
+var inputHashes = new System.Collections.Generic.Dictionary<string, string>( StringComparer.Ordinal );
+var resourceHashes = new System.Collections.Generic.Dictionary<string, string>( StringComparer.Ordinal );
 var tests = new System.Collections.Generic.List<object>();
+var preflightResults = new System.Collections.Generic.List<object>();
+var availability = new System.Collections.Generic.Dictionary<string, bool>( StringComparer.Ordinal );
 var diagnostics = new System.Collections.Generic.List<string>();
-var referenceNames = Array.Empty<string>();
+var cleanupErrors = new System.Collections.Generic.List<string>();
+var referencesUsed = Array.Empty<string>();
+var availableSuites = Array.Empty<string>();
 var phase = "initialize";
-string error = null, helperMvid = null, diskGltfMvid = null, frameworkHash = null;
-var startingFrame = Application.FrameCount;
-var expectedCases = 0; var passedCases = 0;
+string error = null, helperMvid = null, gltfDiskMvid = null, gltfHash = null, manifestHash = null, frameworkHash = null, runnerHash = null;
+string frameworkExpectedMvid = null, frameworkLoadedMvid = null, frameworkLoadedLocation = null, frameworkLoadedContext = null, frameworkLoadedHash = null;
+int expectedCases = 0, passedCases = 0, failedCases = 0, blockedCases = 0;
+var initialFrame = Application.FrameCount;
 System.Runtime.Loader.AssemblyLoadContext context = null;
 string Hash( byte[] bytes ) => Convert.ToHexStringLower( System.Security.Cryptography.SHA256.HashData( bytes ) );
 void Require( bool condition, string message ) { if ( !condition ) throw new InvalidOperationException( message ); }
+byte[] ReadBounded( string path, long maximum = 1024 * 1024 )
+{
+	var info = new System.IO.FileInfo( path );
+	Require( info.Exists && info.Length > 0 && info.Length <= maximum, "Missing or oversized input: " + path );
+	return System.IO.File.ReadAllBytes( path );
+}
+string TopLevelSource( string file )
+{
+	Require( !string.IsNullOrEmpty( file ) && file == System.IO.Path.GetFileName( file ) && file.EndsWith( ".cs", StringComparison.Ordinal ), "Invalid test source filename: " + file );
+	return System.IO.Path.Combine( testRoot, file );
+}
+string ResourcePath( string relative )
+{
+	Require( !string.IsNullOrWhiteSpace( relative ) && !System.IO.Path.IsPathRooted( relative ) && !relative.Contains( '\\' ), "Invalid resource path: " + relative );
+	var root = System.IO.Path.GetFullPath( testRoot ) + System.IO.Path.DirectorySeparatorChar;
+	var full = System.IO.Path.GetFullPath( System.IO.Path.Combine( testRoot, relative ) );
+	Require( full.StartsWith( root, StringComparison.Ordinal ), "Resource escapes test project: " + relative );
+	return full;
+}
+string[] StringArray( System.Text.Json.JsonElement parent, string property ) => parent.GetProperty( property ).EnumerateArray().Select( item => item.GetString() ?? throw new InvalidOperationException( "Null manifest string: " + property ) ).ToArray();
+object JsonArgument( System.Text.Json.JsonElement value ) => value.ValueKind switch
+{
+	System.Text.Json.JsonValueKind.String => value.GetString(),
+	System.Text.Json.JsonValueKind.Number when value.TryGetInt32( out var number ) => number,
+	System.Text.Json.JsonValueKind.True => true,
+	System.Text.Json.JsonValueKind.False => false,
+	_ => throw new InvalidOperationException( "Unsupported manifest preflight argument." )
+};
+object Unwrap( System.Reflection.CustomAttributeTypedArgument argument )
+{
+	if ( argument.Value is System.Collections.Generic.IReadOnlyCollection<System.Reflection.CustomAttributeTypedArgument> list ) return list.Select( Unwrap ).ToArray();
+	return argument.Value;
+}
+bool IsTest( System.Reflection.MethodInfo method ) => method.GetCustomAttributesData().Any( attribute => attribute.AttributeType.FullName is "Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute" or "Microsoft.VisualStudio.TestTools.UnitTesting.DataTestMethodAttribute" );
+System.Collections.Generic.List<object[]> ArgumentsFor( System.Reflection.MethodInfo method )
+{
+	Require( method.IsPublic && !method.IsStatic && method.ReturnType == typeof( void ), "Unsupported test shape: " + method.Name );
+	var attributes = method.GetCustomAttributesData();
+	Require( attributes.Count( a => a.AttributeType.FullName is "Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute" or "Microsoft.VisualStudio.TestTools.UnitTesting.DataTestMethodAttribute" ) == 1, "Ambiguous test method attribute: " + method.Name );
+	var rows = attributes.Where( attribute => attribute.AttributeType.Name == "DataRowAttribute" ).ToArray();
+	var parameters = method.GetParameters();
+	var result = new System.Collections.Generic.List<object[]>();
+	if ( rows.Length == 0 )
+	{
+		Require( parameters.Length == 0 && !attributes.Any( a => a.AttributeType.Name == "DataTestMethodAttribute" ), "Test requires explicit DataRows: " + method.Name );
+		result.Add( Array.Empty<object>() );
+	}
+	foreach ( var row in rows )
+	{
+		Require( row.NamedArguments.Count == 0, "Named DataRow arguments are unsupported: " + method.Name );
+		var values = row.ConstructorArguments.Select( Unwrap ).ToArray();
+		if ( values.Length == 1 && values[0] is object[] array ) values = array;
+		Require( values.Length == parameters.Length, "DataRow argument count mismatch: " + method.Name );
+		for ( var i = 0; i < values.Length; i++ )
+		{
+			Require( values[i] is string or int or byte or bool, "Unsupported DataRow value: " + method.Name );
+			Require( parameters[i].ParameterType == values[i].GetType(), "DataRow type mismatch: " + method.Name );
+		}
+		result.Add( values );
+	}
+	return result;
+}
 try
 {
 	await MainThread.Wait();
-	Require( Application.IsEditor && !Graphics.IsActive, "Run in the editor on its main thread outside rendering." );
+	Require( Application.IsEditor && !Graphics.IsActive, "Run on the existing editor's main thread outside rendering." );
+	phase = "read-and-check-manifest";
+	var runnerBytes = ReadBounded( runnerPath ); runnerHash = Hash( runnerBytes );
+	var manifestBytes = ReadBounded( manifestPath ); manifestHash = Hash( manifestBytes );
+	using var manifest = System.Text.Json.JsonDocument.Parse( manifestBytes );
+	var root = manifest.RootElement;
+	Require( root.GetProperty( "version" ).GetInt32() == 3, "Expected manifest version 3." );
+	foreach ( var entry in root.GetProperty( "suites" ).EnumerateArray() )
+	{
+		var name = entry.GetProperty( "name" ).GetString(); var file = entry.GetProperty( "file" ).GetString(); var type = entry.GetProperty( "type" ).GetString();
+		Require( !string.IsNullOrWhiteSpace( name ) && !string.IsNullOrWhiteSpace( type ), "A suite has no name or type." );
+		_ = TopLevelSource( file );
+		Require( suites.TryAdd( name, (file, type, entry.GetProperty( "methods" ).GetInt32(), entry.GetProperty( "data_rows" ).GetInt32(), entry.GetProperty( "cases" ).GetInt32(), StringArray( entry, "source_dependencies" ), StringArray( entry, "resources" ), StringArray( entry, "codecs" )) ), "Duplicate suite alias: " + name );
+	}
+	foreach ( var entry in root.GetProperty( "codec_preflights" ).EnumerateArray() )
+	{
+		var name = entry.GetProperty( "name" ).GetString(); var file = entry.GetProperty( "file" ).GetString(); var type = entry.GetProperty( "type" ).GetString(); var method = entry.GetProperty( "method" ).GetString();
+		Require( !string.IsNullOrWhiteSpace( name ) && !string.IsNullOrWhiteSpace( type ) && !string.IsNullOrWhiteSpace( method ), "Invalid codec preflight." );
+		_ = TopLevelSource( file );
+		Require( codecs.TryAdd( name, (file, type, method, entry.GetProperty( "arguments" ).EnumerateArray().Select( JsonArgument ).ToArray(), StringArray( entry, "source_dependencies" ), StringArray( entry, "resources" )) ), "Duplicate codec preflight: " + name );
+	}
+	var sourceNames = suites.Values.Select( suite => suite.File ).ToArray();
+	var typeNames = suites.Values.Select( suite => suite.Type ).ToArray();
+	Require( sourceNames.Distinct( StringComparer.Ordinal ).Count() == suites.Count && typeNames.Distinct( StringComparer.Ordinal ).Count() == suites.Count, "Duplicate source file or test type in manifest." );
+	var diskNames = System.IO.Directory.EnumerateFiles( testRoot, "*.cs", System.IO.SearchOption.TopDirectoryOnly ).Select( System.IO.Path.GetFileName ).ToHashSet( StringComparer.Ordinal );
+	Require( diskNames.SetEquals( sourceNames ), "Top-level glTF test sources differ from the manifest: missing=" + string.Join( ",", sourceNames.Except( diskNames ) ) + "; unlisted=" + string.Join( ",", diskNames.Except( sourceNames ) ) );
+	Require( suites.Count == root.GetProperty( "source_class_count" ).GetInt32() && suites.Values.Sum( x => x.Methods ) == root.GetProperty( "test_method_count" ).GetInt32() && suites.Values.Sum( x => x.Rows ) == root.GetProperty( "data_row_count" ).GetInt32() && suites.Values.Sum( x => x.Cases ) == root.GetProperty( "expanded_case_count" ).GetInt32(), "Manifest totals do not equal suite entries." );
+	Require( suites.Count == 38 && suites.Values.Sum( x => x.Methods ) == 309 && suites.Values.Sum( x => x.Rows ) == 163 && suites.Values.Sum( x => x.Cases ) == 431, "Version 3 inventory changed; review the manifest." );
+	foreach ( var suite in suites.Values )
+	{
+		Require( suite.Methods > 0 && suite.Rows >= 0 && suite.Cases >= suite.Methods, "Invalid suite counts." );
+		foreach ( var dependency in suite.Sources ) Require( diskNames.Contains( dependency ), "Missing source dependency: " + dependency );
+		foreach ( var codec in suite.Codecs ) Require( codecs.ContainsKey( codec ), "Unknown codec: " + codec );
+		foreach ( var resource in suite.Resources ) _ = ResourcePath( resource );
+	}
+	foreach ( var codec in codecs.Values )
+	{
+		Require( diskNames.Contains( codec.File ), "Codec preflight source is not inventoried: " + codec.File );
+		foreach ( var dependency in codec.Sources ) Require( diskNames.Contains( dependency ), "Missing codec source dependency: " + dependency );
+		foreach ( var resource in codec.Resources ) _ = ResourcePath( resource );
+	}
+	availableSuites = suites.Keys.OrderBy( name => name, StringComparer.Ordinal ).ToArray();
 	Require( selection == "all" || suites.ContainsKey( selection ), "Unknown SBOX_GLTF_UNIT_SUITE: " + selection );
-	var selected = selection == "all" ? suites.Keys.OrderBy( name => name, StringComparer.Ordinal ).ToArray() : new[] { selection };
+	var selected = selection == "all" ? availableSuites : new[] { selection };
+	expectedCases = selected.Sum( name => suites[name].Cases );
+	var requiredCodecs = selected.SelectMany( name => suites[name].Codecs ).Distinct( StringComparer.Ordinal ).OrderBy( x => x, StringComparer.Ordinal ).ToArray();
+	var sources = selected.SelectMany( name => new[] { suites[name].File }.Concat( suites[name].Sources ) )
+		.Concat( requiredCodecs.SelectMany( name => new[] { codecs[name].File }.Concat( codecs[name].Sources ) ) ).Distinct( StringComparer.Ordinal ).OrderBy( x => x, StringComparer.Ordinal ).ToArray();
+	var resourceNames = selected.SelectMany( name => suites[name].Resources ).Concat( requiredCodecs.SelectMany( name => codecs[name].Resources ) ).Distinct( StringComparer.Ordinal ).OrderBy( x => x, StringComparer.Ordinal ).ToArray();
+
+	phase = "verify-loaded-library";
 	var gltf = typeof( Sandbox.Gltf.GltfReader ).Assembly;
-	Require( System.Runtime.Loader.AssemblyLoadContext.GetLoadContext( gltf ) == System.Runtime.Loader.AssemblyLoadContext.Default, "This proof requires the engine's default-context glTF library." );
+	Require( System.Runtime.Loader.AssemblyLoadContext.GetLoadContext( gltf ) == System.Runtime.Loader.AssemblyLoadContext.Default, "The loaded glTF library is not in the default context." );
 	using ( var stream = System.IO.File.OpenRead( gltf.Location ) )
 	using ( var pe = new System.Reflection.PortableExecutable.PEReader( stream ) )
 	{
 		var metadata = System.Reflection.Metadata.PEReaderExtensions.GetMetadataReader( pe );
-		var disk = metadata.GetGuid( metadata.GetModuleDefinition().Mvid );
-		diskGltfMvid = disk.ToString();
-		Require( disk == gltf.ManifestModule.ModuleVersionId, "The loaded glTF library differs from disk." );
+		var disk = metadata.GetGuid( metadata.GetModuleDefinition().Mvid ); gltfDiskMvid = disk.ToString();
+		Require( disk == gltf.ManifestModule.ModuleVersionId, "Loaded glTF library differs from disk." );
 	}
+	gltfHash = Hash( ReadBounded( gltf.Location, 128L * 1024 * 1024 ) );
+	frameworkHash = Hash( ReadBounded( frameworkPath ) );
 	phase = "compile-test-sources";
-	Require( System.IO.File.Exists( frameworkPath ), "Existing MSTest framework DLL is missing." );
-	frameworkHash = Hash( System.IO.File.ReadAllBytes( frameworkPath ) );
 	var parse = new Microsoft.CodeAnalysis.CSharp.CSharpParseOptions( Microsoft.CodeAnalysis.CSharp.LanguageVersion.Preview );
 	var trees = new System.Collections.Generic.List<Microsoft.CodeAnalysis.SyntaxTree> {
 		Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText( "global using System; global using System.Collections.Generic; global using System.IO; global using System.Linq; global using System.Net.Http; global using System.Threading; global using System.Threading.Tasks;", parse, path: "ImplicitUsings.cs" )
 	};
-	foreach ( var suite in selected )
+	foreach ( var file in sources )
 	{
-		var file = suites[suite].File;
-		var path = System.IO.Path.Combine( checkout.FullName, "engine", "Tests", "Sandbox.Test.Gltf", file );
-		var info = new System.IO.FileInfo( path );
-		Require( info.Exists && info.Length > 0 && info.Length <= 1024 * 1024, "Missing or oversized test source: " + path );
-		var bytes = System.IO.File.ReadAllBytes( path ); hashes[file] = Hash( bytes );
+		var path = TopLevelSource( file ); var bytes = ReadBounded( path ); inputHashes[file] = Hash( bytes );
 		trees.Add( Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText( System.Text.Encoding.UTF8.GetString( bytes ), parse, path: path ) );
 	}
-	// Match the pure glTF test project's dependencies. Engine/editor/game types
-	// are not test dependencies and must not change namespace/name resolution.
+	var resourceDescriptions = new System.Collections.Generic.List<Microsoft.CodeAnalysis.ResourceDescription>();
+	var suffixes = new System.Collections.Generic.HashSet<string>( StringComparer.Ordinal );
+	foreach ( var name in resourceNames )
+	{
+		var bytes = ReadBounded( ResourcePath( name ) ); resourceHashes[name] = Hash( bytes );
+		Require( suffixes.Add( System.IO.Path.GetFileName( name ) ), "Ambiguous embedded-resource suffix: " + name );
+		resourceDescriptions.Add( new Microsoft.CodeAnalysis.ResourceDescription( "Sandbox.Test.Gltf." + name.Replace( '/', '.' ), () => new System.IO.MemoryStream( bytes, writable: false ), true ) );
+	}
 	var references = new System.Collections.Generic.Dictionary<string, string>( StringComparer.OrdinalIgnoreCase );
 	foreach ( var assembly in AppDomain.CurrentDomain.GetAssemblies() )
 	{
 		try
 		{
-			if ( assembly.IsDynamic ) continue;
+			if ( assembly.IsDynamic || System.Runtime.Loader.AssemblyLoadContext.GetLoadContext( assembly ) != System.Runtime.Loader.AssemblyLoadContext.Default ) continue;
 			var name = assembly.GetName().Name;
 			if ( name != "mscorlib" && name != "netstandard" && name != "System" && !name.StartsWith( "System.", StringComparison.Ordinal ) ) continue;
 			if ( string.IsNullOrWhiteSpace( assembly.Location ) || !System.IO.File.Exists( assembly.Location ) ) continue;
@@ -77,80 +192,132 @@ try
 		}
 		catch ( Exception ex ) when ( ex is System.NotSupportedException || ex is System.IO.IOException || ex is BadImageFormatException || ex is UnauthorizedAccessException ) { }
 	}
-	references[gltf.GetName().Name] = gltf.Location;
-	references["Microsoft.VisualStudio.TestPlatform.TestFramework"] = frameworkPath;
-	referenceNames = references.Keys.OrderBy( name => name, StringComparer.Ordinal ).ToArray();
+	references[gltf.GetName().Name] = gltf.Location; references["Microsoft.VisualStudio.TestPlatform.TestFramework"] = frameworkPath;
+	referencesUsed = references.Keys.OrderBy( name => name, StringComparer.Ordinal ).ToArray();
 	var helperName = "sbox-mcp-script-gltf-tests-" + runId;
 	var options = new Microsoft.CodeAnalysis.CSharp.CSharpCompilationOptions( Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary, optimizationLevel: Microsoft.CodeAnalysis.OptimizationLevel.Release );
 	var compilation = Microsoft.CodeAnalysis.CSharp.CSharpCompilation.Create( helperName, trees, references.Values.Select( path => Microsoft.CodeAnalysis.MetadataReference.CreateFromFile( path ) ), options );
 	using var image = new System.IO.MemoryStream();
-	var emitted = compilation.Emit( image, cancellationToken: cancellationToken );
+	var emitted = compilation.Emit( image, manifestResources: resourceDescriptions, cancellationToken: cancellationToken );
 	diagnostics.AddRange( emitted.Diagnostics.Select( item => item.ToString() ) );
 	Require( emitted.Success, "Test sources did not compile against the loaded glTF library." );
 	context = new System.Runtime.Loader.AssemblyLoadContext( helperName, isCollectible: true );
-	context.Resolving += ( loader, requested ) => requested.Name == "Microsoft.VisualStudio.TestPlatform.TestFramework"
-		? loader.LoadFromAssemblyPath( frameworkPath )
-		: AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault( assembly => !assembly.IsDynamic && System.Runtime.Loader.AssemblyLoadContext.GetLoadContext( assembly ) == System.Runtime.Loader.AssemblyLoadContext.Default && System.Reflection.AssemblyName.ReferenceMatchesDefinition( assembly.GetName(), requested ) );
-	image.Position = 0;
-	var helper = context.LoadFromStream( image ); helperMvid = helper.ManifestModule.ModuleVersionId.ToString();
-	var planned = new System.Collections.Generic.List<(string Suite, System.Reflection.MethodInfo Test, object[] Arguments)>();
-	foreach ( var suite in selected )
+	context.Resolving += ( loader, requested ) => requested.Name == "Microsoft.VisualStudio.TestPlatform.TestFramework" ? loader.LoadFromAssemblyPath( frameworkPath ) :
+		AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault( assembly => !assembly.IsDynamic && System.Runtime.Loader.AssemblyLoadContext.GetLoadContext( assembly ) == System.Runtime.Loader.AssemblyLoadContext.Default && System.Reflection.AssemblyName.ReferenceMatchesDefinition( assembly.GetName(), requested ) );
+	image.Position = 0; var helper = context.LoadFromStream( image ); helperMvid = helper.ManifestModule.ModuleVersionId.ToString();
+	foreach ( var name in resourceNames ) Require( helper.GetManifestResourceNames().Count( x => x.EndsWith( System.IO.Path.GetFileName( name ), StringComparison.Ordinal ) ) == 1, "Expected one embedded fixture: " + name );
+
+	phase = "verify-resolved-framework";
+	using ( var stream = System.IO.File.OpenRead( frameworkPath ) )
+	using ( var pe = new System.Reflection.PortableExecutable.PEReader( stream ) )
 	{
-		var firstCase = planned.Count;
-		var type = helper.GetType( suites[suite].Type, true );
-		var all = type.GetMethods( System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static );
-		string[] unsupported = ["DataTestMethodAttribute", "DynamicDataAttribute", "TestInitializeAttribute", "TestCleanupAttribute", "ClassInitializeAttribute", "ClassCleanupAttribute", "ExpectedExceptionAttribute", "IgnoreAttribute"];
-		Require( !type.GetCustomAttributesData().Any( attribute => unsupported.Contains( attribute.AttributeType.Name ) ) && !all.Any( method => method.GetCustomAttributesData().Any( attribute => unsupported.Contains( attribute.AttributeType.Name ) ) ), "Unsupported test lifecycle/data: " + suite );
-		var methods = all.Where( method => method.GetCustomAttributesData().Any( attribute => attribute.AttributeType.FullName == "Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute" ) ).OrderBy( method => method.Name, StringComparer.Ordinal ).ToArray();
-		var discoveredRows = methods.Sum( method => method.GetCustomAttributesData().Count( attribute => attribute.AttributeType.Name == "DataRowAttribute" ) );
-		Require( methods.Length == suites[suite].Methods && discoveredRows == suites[suite].DataRows, "Test method/DataRow inventory differs from manifest version 2: " + suite );
-		foreach ( var test in methods )
-		{
-			Require( test.IsPublic && !test.IsStatic && test.ReturnType == typeof( void ), "Unsupported test shape: " + test.Name );
-			var rows = test.GetCustomAttributesData().Where( attribute => attribute.AttributeType.Name == "DataRowAttribute" ).ToArray();
-			var parameters = test.GetParameters();
-			if ( rows.Length == 0 )
-			{
-				Require( parameters.Length == 0, "Parameters without DataRows: " + test.Name );
-				planned.Add( (suite, test, Array.Empty<object>()) );
-			}
-			foreach ( var row in rows )
-			{
-				Require( row.NamedArguments.Count == 0, "Unsupported named DataRow arguments: " + test.Name );
-				var arguments = row.ConstructorArguments.Select( argument => argument.Value ).ToArray();
-				if ( arguments.Length == 1 && arguments[0] is System.Collections.Generic.IReadOnlyCollection<System.Reflection.CustomAttributeTypedArgument> values ) arguments = values.Select( value => value.Value ).ToArray();
-				Require( arguments.Length == parameters.Length, "DataRow argument count mismatch: " + test.Name );
-				for ( var i = 0; i < arguments.Length; i++ ) Require( arguments[i] is not null && parameters[i].ParameterType.IsInstanceOfType( arguments[i] ), "Unsupported DataRow value: " + test.Name );
-				planned.Add( (suite, test, arguments) );
-			}
-		}
-		Require( planned.Count - firstCase == suites[suite].Cases, "Planned case count differs from manifest version 2: " + suite );
+		var metadata = System.Reflection.Metadata.PEReaderExtensions.GetMetadataReader( pe );
+		frameworkExpectedMvid = metadata.GetGuid( metadata.GetModuleDefinition().Mvid ).ToString();
 	}
-	expectedCases = selected.Sum( suite => suites[suite].Cases );
+	var frameworkAssemblies = new System.Collections.Generic.HashSet<System.Reflection.Assembly>();
+	foreach ( var name in selected )
+	{
+		var testType = helper.GetType( suites[name].Type, true );
+		var classAttributes = testType.GetCustomAttributesData().Where( a => a.AttributeType.FullName == "Microsoft.VisualStudio.TestTools.UnitTesting.TestClassAttribute" ).ToArray();
+		Require( classAttributes.Length == 1, "Expected one TestClass attribute: " + name );
+		frameworkAssemblies.Add( classAttributes[0].AttributeType.Assembly );
+		var methodAttributes = testType.GetMethods( System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static )
+			.SelectMany( method => method.GetCustomAttributesData() )
+			.Where( a => a.AttributeType.FullName is "Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute" or "Microsoft.VisualStudio.TestTools.UnitTesting.DataTestMethodAttribute" ).ToArray();
+		Require( methodAttributes.Length > 0, "No TestMethod attributes resolved: " + name );
+		foreach ( var attribute in methodAttributes ) frameworkAssemblies.Add( attribute.AttributeType.Assembly );
+	}
+	Require( frameworkAssemblies.Count == 1, "Test attributes resolved from multiple framework assemblies." );
+	var actualFramework = frameworkAssemblies.Single();
+	frameworkLoadedMvid = actualFramework.ManifestModule.ModuleVersionId.ToString();
+	frameworkLoadedLocation = actualFramework.Location;
+	frameworkLoadedContext = System.Runtime.Loader.AssemblyLoadContext.GetLoadContext( actualFramework )?.Name ?? "<unnamed>";
+	Require( !string.IsNullOrWhiteSpace( frameworkLoadedLocation ), "Resolved test framework has no disk location for identity verification." );
+	frameworkLoadedHash = Hash( ReadBounded( frameworkLoadedLocation ) );
+	Require( frameworkHash == Hash( ReadBounded( frameworkPath ) ) && frameworkLoadedHash == frameworkHash && frameworkLoadedMvid == frameworkExpectedMvid,
+		"Resolved test framework differs from the expected framework binary or it changed during compilation." );
+
+	phase = "discover-and-verify-tests";
+	string[] unsupported = ["DynamicDataAttribute", "TestInitializeAttribute", "TestCleanupAttribute", "ClassInitializeAttribute", "ClassCleanupAttribute", "AssemblyInitializeAttribute", "AssemblyCleanupAttribute", "ExpectedExceptionAttribute", "IgnoreAttribute"];
+	var planned = new System.Collections.Generic.List<(string Suite, System.Reflection.MethodInfo Test, object[] Arguments)>();
+	foreach ( var name in selected )
+	{
+		var first = planned.Count; var suite = suites[name]; var type = helper.GetType( suite.Type, true );
+		var methods = type.GetMethods( System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static );
+		Require( !type.GetCustomAttributesData().Any( attribute => unsupported.Contains( attribute.AttributeType.Name ) ) && !methods.Any( method => method.GetCustomAttributesData().Any( attribute => unsupported.Contains( attribute.AttributeType.Name ) ) ), "Unsupported test lifecycle/data: " + name );
+		var testMethods = methods.Where( IsTest ).OrderBy( method => method.Name, StringComparer.Ordinal ).ToArray();
+		Require( testMethods.Length == suite.Methods && testMethods.Sum( method => method.GetCustomAttributesData().Count( attribute => attribute.AttributeType.Name == "DataRowAttribute" ) ) == suite.Rows, "Test method/DataRow counts differ from manifest: " + name );
+		foreach ( var method in testMethods ) foreach ( var args in ArgumentsFor( method ) ) planned.Add( (name, method, args) );
+		Require( planned.Count - first == suite.Cases, "Expanded case count differs from manifest: " + name );
+	}
+	Require( planned.Count == expectedCases, "Selected case count differs from manifest." );
+
+	phase = "codec-preflights";
+	foreach ( var name in requiredCodecs )
+	{
+		cancellationToken.ThrowIfCancellationRequested(); await Task.Delay( 1, cancellationToken ); await MainThread.Wait();
+		Require( Application.IsEditor && !Graphics.IsActive, "Preflight must run outside rendering." );
+		var spec = codecs[name];
+		var before = Application.FrameCount; string failure = null;
+		try
+		{
+			var type = helper.GetType( spec.Type, true );
+			var method = type.GetMethod( spec.Method, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance ) ?? throw new InvalidOperationException( "Missing codec preflight method: " + name );
+			Require( IsTest( method ), "Codec preflight is not an existing test: " + name );
+			var preflightArgs = ArgumentsFor( method );
+			Require( preflightArgs.Any( args => args.Length == spec.Args.Length && args.Zip( spec.Args, ( a, b ) => a?.GetType() == b?.GetType() && Equals( a, b ) ).All( x => x ) ), "Codec preflight arguments do not match a test row: " + name );
+			method.Invoke( Activator.CreateInstance( type ), spec.Args );
+		}
+		catch ( System.Reflection.TargetInvocationException ex ) { failure = (ex.InnerException ?? ex).ToString(); }
+		catch ( Exception ex ) { failure = ex.ToString(); }
+		var after = Application.FrameCount;
+		if ( before != after ) failure = (failure ?? "") + $" Synchronous preflight changed frame count: {before}->{after}.";
+		availability[name] = failure is null;
+		preflightResults.Add( new { codec = name, test = spec.Type + "." + spec.Method, arguments = spec.Args, passed = failure is null, error = failure, before_frame = before, after_frame = after } );
+	}
+
 	phase = "run-loaded-library-tests";
 	foreach ( var item in planned )
 	{
 		cancellationToken.ThrowIfCancellationRequested();
+		var unavailable = suites[item.Suite].Codecs.Where( name => !availability.GetValueOrDefault( name ) ).ToArray();
+		if ( unavailable.Length > 0 )
+		{
+			blockedCases++;
+			tests.Add( new { suite = item.Suite, name = item.Test.Name, arguments = item.Arguments, status = "blocked", error = "Codec preflight failed: " + string.Join( ", ", unavailable ), before_frame = (ulong?)null, after_frame = (ulong?)null } );
+			continue;
+		}
+		await Task.Delay( 1, cancellationToken ); await MainThread.Wait();
+		Require( Application.IsEditor && !Graphics.IsActive, "Test must run outside rendering." );
 		var before = Application.FrameCount; string failure = null;
 		try { item.Test.Invoke( Activator.CreateInstance( item.Test.DeclaringType ), item.Arguments ); }
 		catch ( System.Reflection.TargetInvocationException ex ) { failure = (ex.InnerException ?? ex).ToString(); }
 		catch ( Exception ex ) { failure = ex.ToString(); }
 		var after = Application.FrameCount;
 		if ( before != after ) failure = (failure ?? "") + $" Synchronous test changed frame count: {before}->{after}.";
-		tests.Add( new { suite = item.Suite, name = item.Test.Name, arguments = item.Arguments, passed = failure is null, error = failure, before_frame = before, after_frame = after } );
-		if ( failure is null ) passedCases++;
+		if ( failure is null ) passedCases++; else failedCases++;
+		tests.Add( new { suite = item.Suite, name = item.Test.Name, arguments = item.Arguments, status = failure is null ? "passed" : "failed", error = failure, before_frame = (ulong?)before, after_frame = (ulong?)after } );
 	}
 	phase = "complete";
 }
+catch ( OperationCanceledException ex ) { error = "Cancelled: " + ex; }
 catch ( Exception ex ) { error = ex.ToString(); }
-finally { context?.Unload(); }
-var receipt = new {
-	passed = error is null && phase == "complete" && expectedCases > 0 && passedCases == expectedCases, selection, phase, error,
-	scope = "allowlisted reader/animation MSTest sources executed in the editor against the actual loaded glTF library; not the complete glTF test project or Khronos corpus; no production source compilation, rendered appearance, GPU or performance proof",
-	complete_gltf_suite = false, manifest_version = 2, available_suites = suites.Keys.OrderBy( name => name, StringComparer.Ordinal ).ToArray(),
-	expected_cases = expectedCases, passed_cases = passedCases, tests, diagnostics, test_source_sha256 = hashes, framework_sha256 = frameworkHash, metadata_reference_names = referenceNames, helper_mvid = helperMvid,
-	gltf_loaded_mvid = typeof( Sandbox.Gltf.GltfReader ).Assembly.ManifestModule.ModuleVersionId.ToString(), gltf_disk_mvid = diskGltfMvid, engine_mvid = typeof( Model ).Assembly.ManifestModule.ModuleVersionId.ToString(),
-	is_editor = Application.IsEditor, starting_frame = startingFrame, final_frame = Application.FrameCount, output
+finally
+{
+	if ( context is not null ) try { context.Unload(); } catch ( Exception ex ) { cleanupErrors.Add( "Unload test context: " + ex ); }
+}
+var partialCases = Math.Max( 0, expectedCases - passedCases - failedCases - blockedCases );
+var selectedPassed = error is null && cleanupErrors.Count == 0 && phase == "complete" && expectedCases > 0 && passedCases == expectedCases && failedCases == 0 && blockedCases == 0 && partialCases == 0;
+var allProjectCasesPassed = selection == "all" && selectedPassed && expectedCases == 431;
+var receipt = new
+{
+	passed = selectedPassed, selection, phase, error, scope = "Manifest-selected Sandbox.Test.Gltf cases against the editor's loaded glTF library; does not prove Khronos corpus, complete glTF specification, GPU, editor features or performance.",
+	complete_gltf_suite = false, all_project_cases_passed = allProjectCasesPassed, manifest_version = 3, available_suites = availableSuites,
+	expected_cases = expectedCases, passed_cases = passedCases, failed_cases = failedCases, blocked_cases = blockedCases, partial_cases = partialCases,
+	preflights = preflightResults, tests, diagnostics, cleanup_errors = cleanupErrors, test_source_sha256 = inputHashes, resource_sha256 = resourceHashes, manifest_sha256 = manifestHash, runner_source_sha256 = runnerHash, framework_sha256 = frameworkHash, gltf_binary_sha256 = gltfHash,
+	metadata_reference_names = referencesUsed, helper_mvid = helperMvid, gltf_loaded_mvid = typeof( Sandbox.Gltf.GltfReader ).Assembly.ManifestModule.ModuleVersionId.ToString(), gltf_disk_mvid = gltfDiskMvid,
+	framework_expected_mvid = frameworkExpectedMvid, framework_loaded_mvid = frameworkLoadedMvid, framework_loaded_location = frameworkLoadedLocation, framework_loaded_context = frameworkLoadedContext, framework_loaded_sha256 = frameworkLoadedHash,
+	engine_mvid = typeof( Model ).Assembly.ManifestModule.ModuleVersionId.ToString(), is_editor = Application.IsEditor, starting_frame = initialFrame, final_frame = Application.FrameCount, output
 };
-System.IO.File.WriteAllText( System.IO.Path.Combine( output, "receipt.json" ), System.Text.Json.JsonSerializer.Serialize( receipt, new System.Text.Json.JsonSerializerOptions { WriteIndented = true } ) );
-return receipt;
+System.IO.File.WriteAllText( receiptPath, System.Text.Json.JsonSerializer.Serialize( receipt, new System.Text.Json.JsonSerializerOptions { WriteIndented = true } ) );
+return new { passed = selectedPassed, all_project_cases_passed = allProjectCasesPassed, selection, phase, error = error is null ? null : error[..Math.Min( error.Length, 512 )], expected_cases = expectedCases, passed_cases = passedCases, failed_cases = failedCases, blocked_cases = blockedCases, partial_cases = partialCases, codecs = availability.OrderBy( item => item.Key, StringComparer.Ordinal ).Select( item => new { name = item.Key, passed = item.Value } ).ToArray(), receipt_path = receiptPath };

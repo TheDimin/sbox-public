@@ -102,7 +102,7 @@ public sealed partial class GltfDocument
 			var view = ElementAt( "bufferViews", GltfJson.Int( layout.Json, "bufferView" ) );
 			var offset = GltfJson.Int( layout.Json, "byteOffset", 0 );
 			var stride = GltfJson.Int( view, "byteStride", layout.Stride );
-			if ( offset % 4 != 0 || (GltfJson.Int( view, "byteOffset", 0 ) + (long)offset) % 4 != 0 || stride % 4 != 0 )
+			if ( offset % 4 != 0 || stride % 4 != 0 )
 				throw new GltfException( "Vertex attribute offsets and strides must be aligned to four bytes." );
 		}
 	}
