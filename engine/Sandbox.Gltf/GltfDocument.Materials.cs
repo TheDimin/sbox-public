@@ -92,6 +92,8 @@ public sealed partial class GltfDocument
 			var transform = MaterialExtension( value, "KHR_texture_transform" );
 			if ( transform.ValueKind != JsonValueKind.Undefined )
 			{
+				if ( !ExtensionNames( "extensionsUsed" ).Contains( "KHR_texture_transform", StringComparer.Ordinal ) )
+					throw new GltfException( "KHR_texture_transform must be listed in extensionsUsed." );
 				MaterialRequireObject( transform, "KHR_texture_transform" );
 				offset = MaterialVector( transform, "offset", offset );
 				tiling = MaterialVector( transform, "scale", tiling );

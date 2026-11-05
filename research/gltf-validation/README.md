@@ -354,6 +354,21 @@ capture route. The separate `Model.Load` observation cannot pass merely because
 the direct native construction does. More than four nonzero influences, rest
 scale/shear and loaded-model deformation remain unproven. The probe is unrun.
 
+The probe now also records the fixture's original joint order and inverse binds,
+the built model's master-bone identities/parents, and each native mesh's render
+palette mapping, inverse binds, blend count and vertex count. It uses the
+existing renderer readback helper only after checking its loaded/disk module
+identity. Unavailable metadata is reported explicitly; matching names or counts
+does not establish a glTF-to-native mapping. These additions remain unrun.
+
+The adapter must map each native render bone through its master bone to the
+corresponding joint entry of that mesh instance's glTF skin. A vertex `JOINTS_n`
+value indexes that skin's joint list. Different skins can use the same glTF node
+with different joint order or inverse binds, and the same source mesh can be
+instanced with different skins. Nonjoint ancestors are included in the glTF pose
+hierarchy. Native vertex-index interpretation and generated master/render-bone
+order still need actual editor readback before packing can rely on them.
+
 [editor_animation_playback.csx](editor_animation_playback.csx) prepares native
 fixed-frame seek measurements and an actual load of the pinned embedded
 AnimatedTriangle. It records fractional and boundary-adjacent times, local/world
@@ -441,10 +456,15 @@ checks for a pinned synthetic `KHR_mesh_quantization` triangle with strided
 SHORT positions, normalized BYTE directions and node dequantization scale.
 The source and cold compiled-only cases verify independent native geometry
 readback, bounds, material and cache identity. Both are unrun. The current
-loader advertises no extension capability and rejects this required extension
-before rendering; that is an integration gap, not evidence of a native GPU
-limitation. The probe does not claim rendering, full extension conformance or
-approved release tolerances.
+source loader now advertises `KHR_mesh_quantization` and uses the existing
+accessor decoder before float-buffer staging. It still advertises no shader or
+codec extensions. `GltfModelDocumentTests` exercises this actual loader policy
+for source and compiled input, independent positions/directions/bounds, native
+buffer staging without allocation, undeclared quantization rejection, and
+unknown required/optional extension policy. The producer change and five test
+cases are unbuilt/unrun; rebuild and restart before the actual-load probes can
+exercise this policy. The probe does not claim rendering, full extension
+conformance or approved release tolerances.
 
 The reader's primitive validator now requires both quantization capability and
 the asset's `extensionsRequired` declaration before accepting extension-only
@@ -453,19 +473,35 @@ undeclared assets. New `GltfQuantizationDeclarationTests` cover POSITION,
 NORMAL, TANGENT and TEXCOORD declarations, unsupported required usage, and core
 FLOAT/unsigned-normalized UV inputs. The fix follows the ratified
 [KHR_mesh_quantization specification](https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_mesh_quantization/README.md).
-It does not enable that extension in `Model.Load`; its tests remain unrun.
+The separate loader-policy change above enables decoding for `Model.Load`;
+these declaration tests remain unrun.
 
 [editor_gltf_unit_tests.csx](editor_gltf_unit_tests.csx) queues those tests against
 the loaded glTF module, without compiling production source. Its default suite
 is `quantization-declarations`; `SBOX_GLTF_UNIT_SUITE` also selects
 `basis-fallbacks`, `primitive-reader`, `animation-sampler`,
-`animation-channels`, or `all` five.
+`animation-channels`, `texture-transform-declarations`, or `all` six.
 It executes each DataRow, records input hashes and disk/loaded module identity,
 and checks the editor frame counter without changing it. The helper references
 only the glTF library, BCL and MSTest, matching the pure test project. A fixed
-manifest checks method, DataRow and case counts: `all` currently means 64 cases
-across these five classes. This is not the entire glTF test suite or corpus, and
+manifest version 2 checks method, DataRow and case counts: `all` currently means
+70 cases across these six classes. This is not the entire glTF test suite or corpus, and
 the runner is unrun.
+
+`GltfTextureTransformDeclarationTests` now checks that a selected
+`KHR_texture_transform` is listed in `extensionsUsed`, while preserving valid
+used-only transforms and optional unsupported fallback. Expected UVs independently
+pin scale, rotation and offset order. This is local reader validation following
+the core [extension declaration rules](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#specifying-extensions),
+not whole-document validation or rendered UV proof. The new fix/tests are unrun.
+
+The material cache now ignores a sampler value in rendering-equivalence identity
+only when it has no bound sampler parameter, matching the actual material
+creation path. Bound sampler values/names and texture identity/revision remain
+distinct. New tests check equal hashes, one shared creation and final-lease
+release; the existing collision test now binds its sampler explicitly. These
+tests and the cache change remain unbuilt/unrun. This does not authorize ignoring
+glTF sampler semantics or establish stock-shader sampler consumption.
 
 `GltfBasisFallbackTests` covers optional Basis image selection versus core image
 fallback and required-extension rejection. The reader now rejects a Basis-only

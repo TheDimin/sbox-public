@@ -10,6 +10,15 @@ namespace Sandbox;
 /// </summary>
 internal static class GltfModelLoader
 {
+	// Quantized attributes are decoded into the same float streams as core data
+	// before native upload. Do not advertise codecs or shader extensions merely
+	// because the standalone reader knows their metadata.
+	private static readonly IReadOnlySet<string> SupportedExtensions = new HashSet<string>( StringComparer.Ordinal ) { "KHR_mesh_quantization" };
+
+	/// <summary>The loader's document policy, shared by source and compiled input.</summary>
+	internal static GltfDocument ReadDocument( byte[] source, Func<string, byte[]> resolve = null ) =>
+		GltfReader.Read( source, resolve, supportedExtensions: SupportedExtensions );
+
 	internal static bool IsGltfPath( string path ) => path is not null &&
 		(path.EndsWith( ".gltf", StringComparison.OrdinalIgnoreCase ) ||
 		 path.EndsWith( ".glb", StringComparison.OrdinalIgnoreCase ) ||
@@ -39,7 +48,7 @@ internal static class GltfModelLoader
 			return fs.ReadAllBytes( dependency ).ToArray();
 		}
 
-		using var document = GltfReader.Read( source, Resolve );
+		using var document = ReadDocument( source, Resolve );
 		if ( document.UnsupportedOptionalExtensions.Count > 0 )
 			Log.Warning( $"glTF '{mountedPath}' uses unsupported optional extensions: {string.Join( ", ", document.UnsupportedOptionalExtensions )}. The standard core fallback is used where available." );
 		var scene = GltfStaticSceneAssembler.Assemble( document );

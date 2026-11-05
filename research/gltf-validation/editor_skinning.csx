@@ -21,6 +21,10 @@ var models = new System.Collections.Generic.List<Model>();
 var meshes = new System.Collections.Generic.List<Mesh>();
 var logs = new System.Collections.Generic.List<string>();
 var fixtureHashes = new System.Collections.Generic.Dictionary<string, string>();
+var modelSkinMetadata = new System.Collections.Generic.List<object>();
+var fixtureInverseBinds = new System.Collections.Generic.List<float[]>();
+int[] fixtureJointOrder = null;
+string rendererMetadataStatus = "not attempted", rendererMetadataError = null, rendererLocation = null, rendererLoadedMvid = null, rendererDiskMvid = null;
 string phase = "initialize", error = null;
 object managedRenderer = null;
 System.Reflection.MethodInfo managedRenderToTexture = null;
@@ -61,6 +65,13 @@ try
 	Require( Application.IsEditor && !Graphics.IsActive, "Run inside the existing editor outside a Graphics scope." );
 	Require( sourceHash == "cd72e7f1963bf788edbf82a5ca1172c27ba6df9ec3fd39f28b57994f57da873c", "Fixture hash mismatch." );
 	phase = "cpu-skinning-and-multiple-sets";
+	using ( var fixtureDocument = Sandbox.Gltf.GltfReader.Read( source ) )
+	{
+		var skin = fixtureDocument.ReadSkin( 0 );
+		fixtureJointOrder = skin.Joints.ToArray();
+		foreach ( var matrix in skin.InverseBindMatrices )
+			fixtureInverseBinds.Add( [matrix.M11, matrix.M12, matrix.M13, matrix.M14, matrix.M21, matrix.M22, matrix.M23, matrix.M24, matrix.M31, matrix.M32, matrix.M33, matrix.M34, matrix.M41, matrix.M42, matrix.M43, matrix.M44] );
+	}
 	// The inverse binds negate joint world translations (0,.1,0)/(0,.3,0).
 	// Moving the child .3 along glTF X displaces vertices by exactly .3*w1.
 	// The multi-set variant keeps the same two nonzero influences but puts the
@@ -187,6 +198,76 @@ try
 	var native = BuildModel( BuildMesh( true, false ), "native", true );
 	var bindReference = BuildModel( BuildMesh( false, false ), "bind_reference", false );
 	var posedReference = BuildModel( BuildMesh( false, true ), "posed_reference", false );
+	// Read the renderer's established metadata helper; do not infer a mapping from
+	// matching counts or names. Missing metadata is an observation, not a reason
+	// to suppress the independent image comparisons below.
+	System.Reflection.MethodInfo readMeshSkin = null;
+	try
+	{
+		var rendererAssembly = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault( assembly => !assembly.IsDynamic &&
+			assembly.GetName().Name == "Sandbox.SceneRenderer" && System.Runtime.Loader.AssemblyLoadContext.GetLoadContext( assembly ) == System.Runtime.Loader.AssemblyLoadContext.Default );
+		if ( rendererAssembly is null ) rendererMetadataStatus = "renderer assembly not loaded";
+		else
+		{
+			rendererLocation = rendererAssembly.Location;
+			rendererLoadedMvid = rendererAssembly.ManifestModule.ModuleVersionId.ToString();
+			using ( var stream = System.IO.File.OpenRead( rendererLocation ) )
+			using ( var pe = new System.Reflection.PortableExecutable.PEReader( stream ) )
+			{
+				var metadata = System.Reflection.Metadata.PEReaderExtensions.GetMetadataReader( pe );
+				rendererDiskMvid = metadata.GetGuid( metadata.GetModuleDefinition().Mvid ).ToString();
+			}
+			if ( rendererLoadedMvid != rendererDiskMvid ) rendererMetadataStatus = "loaded renderer differs from disk";
+			else
+			{
+				var contextType = rendererAssembly.GetType( "Sandbox.SceneRenderer.Gpu.RenderContext", false );
+				readMeshSkin = contextType?.GetMethod( "ReadMeshSkin", flags, null, new[] { typeof( Model ), typeof( int ) }, null );
+				rendererMetadataStatus = readMeshSkin is null ? "ReadMeshSkin helper unavailable" : "helper available";
+			}
+		}
+	}
+	catch ( Exception ex ) { rendererMetadataStatus = "renderer metadata unavailable"; rendererMetadataError = ex.ToString(); }
+	void RecordSkinMetadata( Model model, string label )
+	{
+		var bones = new System.Collections.Generic.List<object>();
+		var modelMeshes = new System.Collections.Generic.List<object>();
+		string modelError = null;
+		try
+		{
+			for ( var i = 0; i < model.BoneCount; i++ ) bones.Add( new { master_index = i, name = model.GetBoneName( i ), parent_master_index = model.GetBoneParent( i ) } );
+			var info = model.MeshInfo ?? throw new InvalidOperationException( "Model mesh info unavailable." );
+			for ( var m = 0; m < info.Meshes.Length; m++ )
+			{
+				try
+				{
+					if ( readMeshSkin is null ) { modelMeshes.Add( new { model_mesh = m, status = "renderer metadata helper unavailable" } ); continue; }
+					var skin = readMeshSkin.Invoke( null, new object[] { model, m } );
+					if ( skin is null ) { modelMeshes.Add( new { model_mesh = m, status = "native helper returned no skin metadata" } ); continue; }
+					var skinType = skin.GetType();
+					var masters = (int[])(skinType.GetField( "MasterBones", flags )?.GetValue( skin ) ?? throw new InvalidOperationException( "MasterBones unavailable." ));
+					var matrices = (Matrix3x4[])(skinType.GetField( "InverseBindPoses", flags )?.GetValue( skin ) ?? throw new InvalidOperationException( "InverseBindPoses unavailable." ));
+					var count = (int)(skinType.GetProperty( "BoneCount", flags )?.GetValue( skin ) ?? throw new InvalidOperationException( "BoneCount unavailable." ));
+					var blendCount = (int)(skinType.GetField( "BlendWeightCount", flags )?.GetValue( skin ) ?? throw new InvalidOperationException( "BlendWeightCount unavailable." ));
+					var vertexCount = (int)(skinType.GetField( "VertexCount", flags )?.GetValue( skin ) ?? throw new InvalidOperationException( "VertexCount unavailable." ));
+					if ( masters.Length != count || matrices.Length != count ) throw new InvalidOperationException( "Native skin metadata arrays disagree with BoneCount." );
+					var renderBones = new System.Collections.Generic.List<object>();
+					bool FiniteRow( Vector4 row ) => float.IsFinite( row.x ) && float.IsFinite( row.y ) && float.IsFinite( row.z ) && float.IsFinite( row.w );
+					for ( var r = 0; r < count; r++ )
+					{
+						var matrix = matrices[r];
+						renderBones.Add( new { render_bone_index = r, master_bone_index = masters[r], master_index_in_range = masters[r] >= 0 && masters[r] < model.BoneCount,
+							inverse_bind_finite = FiniteRow( matrix.Row0 ) && FiniteRow( matrix.Row1 ) && FiniteRow( matrix.Row2 ), inverse_bind_rows = new[] { new[] { matrix.Row0.x, matrix.Row0.y, matrix.Row0.z, matrix.Row0.w }, new[] { matrix.Row1.x, matrix.Row1.y, matrix.Row1.z, matrix.Row1.w }, new[] { matrix.Row2.x, matrix.Row2.y, matrix.Row2.z, matrix.Row2.w } } } );
+					}
+					modelMeshes.Add( new { model_mesh = m, status = "available", bone_count = count, blend_weight_count = blendCount, vertex_count = vertexCount, render_bones = renderBones } );
+				}
+				catch ( Exception ex ) { modelMeshes.Add( new { model_mesh = m, status = "unreadable", error = ex.ToString() } ); }
+			}
+		}
+		catch ( Exception ex ) { modelError = ex.ToString(); }
+		modelSkinMetadata.Add( new { model = label, status = modelError is null ? "observed" : "unreadable", error = modelError, bones, meshes = modelMeshes } );
+	}
+	RecordSkinMetadata( native, "runtime_built_probe" );
+	if ( loadedPassed ) RecordSkinMetadata( loaded, "loaded_gltf" );
 	Require( native.BoneCount == 2 && native.GetBoneName( 0 ) == "root" && native.GetBoneName( 1 ) == "child" && native.GetBoneParent( 1 ) == 0, "Unexpected native bone order or hierarchy." );
 	var bindUpdate = typeof( SceneModel ).GetMethod( "UpdateToBindPose", flags, null, new[] { typeof( Action ) }, null ) ?? throw new InvalidOperationException( "Bind-pose callback unavailable." );
 	var setParent = typeof( SceneModel ).GetMethod( "SetParentSpaceBone", flags ) ?? throw new InvalidOperationException( "Parent-space bone setter unavailable." );
@@ -310,8 +391,11 @@ var receipt = new
 	scope = "two-joint inverse-bind/hierarchy/normalized-weight CPU checks plus independent native stock-shader bind/posed silhouette; no proof of Model.Load skinning, >4 nonzero influences, skeletal scale, animation or full glTF conformance",
 	phase, error, failures, cleanup_errors = cleanup, cases, captures, source_sha256 = sourceHash, fixture_sha256 = fixtureHashes, preview_frames = previewFrames, model_updates = modelUpdates,
 	engine_location = engineLocation, engine_mvid = typeof( Model ).Assembly.ManifestModule.ModuleVersionId.ToString(), gltf_mvid = typeof( Sandbox.Gltf.GltfReader ).Assembly.ManifestModule.ModuleVersionId.ToString(),
+	fixture_joint_node_indices = fixtureJointOrder, fixture_inverse_bind_matrices_gltf_row_vector = fixtureInverseBinds,
+	probe_builder_bone_names_in_authored_order = new[] { "root", "child" }, model_skin_metadata = modelSkinMetadata, mapping_established = false,
+	renderer_metadata_status = rendererMetadataStatus, renderer_metadata_error = rendererMetadataError, renderer_location = rendererLocation, renderer_loaded_mvid = rendererLoadedMvid, renderer_disk_mvid = rendererDiskMvid,
 	is_editor = Application.IsEditor, diagnostic_camera_clear = diagnosticClear, capture_renderer = managedCapture ? "managed SceneBridge.RenderToTexture" : "native CameraComponent.RenderToTexture", managed_viewport_enabled = managedViewportEnabled,
 	starting_frame = startFrame, final_frame = Application.FrameCount, output
 };
-System.IO.File.WriteAllText( System.IO.Path.Combine( output, "receipt.json" ), System.Text.Json.JsonSerializer.Serialize( receipt, new System.Text.Json.JsonSerializerOptions { WriteIndented = true } ) );
+System.IO.File.WriteAllText( System.IO.Path.Combine( output, "receipt.json" ), System.Text.Json.JsonSerializer.Serialize( receipt, new System.Text.Json.JsonSerializerOptions { WriteIndented = true, NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowNamedFloatingPointLiterals } ) );
 return receipt;

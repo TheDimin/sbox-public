@@ -15,7 +15,7 @@ public class GltfMaterialCacheTests
 	}
 	private static GltfMaterialKey Key( object template, int revision = 1, int feature = 2, float value = .5f, object texture = null, int textureRevision = 0, SamplerState sampler = default ) => new(
 		template, revision, [new( "F_TEST", feature )], [new( "g_vColorTint", new Vector4( value, 0, 0, 1 ) )],
-		texture is null ? [] : [new( "g_tColor", texture, textureRevision, sampler )] );
+		texture is null ? [] : [new( "g_tColor", texture, textureRevision, sampler, "g_sTestSampler" )] );
 
 	[TestMethod]
 	public void ScalarAndVectorParametersHaveSeparateTypedIdentity()

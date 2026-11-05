@@ -71,7 +71,8 @@ internal sealed class GltfMaterialKey : IEquatable<GltfMaterialKey>
 		for ( var i = 0; i < textures.Length; i++ )
 		{
 			var a = textures[i]; var b = other.textures[i];
-			if ( a.Parameter != b.Parameter || !ReferenceEquals( a.TextureIdentity, b.TextureIdentity ) || a.Revision != b.Revision || a.Sampler != b.Sampler || a.SamplerParameter != b.SamplerParameter ) return false;
+			if ( a.Parameter != b.Parameter || !ReferenceEquals( a.TextureIdentity, b.TextureIdentity ) || a.Revision != b.Revision ||
+				a.SamplerParameter != b.SamplerParameter || (a.SamplerParameter is not null && a.Sampler != b.Sampler) ) return false;
 		}
 		return true;
 	}
@@ -86,7 +87,8 @@ internal sealed class GltfMaterialKey : IEquatable<GltfMaterialKey>
 		foreach ( var texture in textures )
 		{
 			hash.Add( texture.Parameter, StringComparer.Ordinal ); hash.Add( RuntimeHelpers.GetHashCode( texture.TextureIdentity ) );
-			hash.Add( texture.Revision ); hash.Add( texture.Sampler ); hash.Add( texture.SamplerParameter, StringComparer.Ordinal );
+			hash.Add( texture.Revision ); hash.Add( texture.SamplerParameter, StringComparer.Ordinal );
+			if ( texture.SamplerParameter is not null ) hash.Add( texture.Sampler );
 		}
 		return hash.ToHashCode();
 	}

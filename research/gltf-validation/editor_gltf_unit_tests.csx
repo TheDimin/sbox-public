@@ -10,6 +10,7 @@ if ( string.IsNullOrWhiteSpace( selection ) ) selection = "quantization-declarat
 var suites = new System.Collections.Generic.Dictionary<string, (string File, string Type, int Methods, int DataRows, int Cases)>( StringComparer.Ordinal ) {
 	["quantization-declarations"] = ("GltfQuantizationDeclarationTests.cs", "Sandbox.Test.Gltf.GltfQuantizationDeclarationTests", 5, 10, 12),
 	["basis-fallbacks"] = ("GltfBasisFallbackTests.cs", "Sandbox.Tests.Gltf.GltfBasisFallbackTests", 4, 4, 6),
+	["texture-transform-declarations"] = ("GltfTextureTransformDeclarationTests.cs", "Sandbox.Tests.Gltf.GltfTextureTransformDeclarationTests", 4, 4, 6),
 	["primitive-reader"] = ("GltfPrimitiveTests.cs", "Sandbox.Tests.Gltf.GltfPrimitiveTests", 8, 11, 17),
 	["animation-sampler"] = ("GltfAnimationTests.cs", "Sandbox.Test.Gltf.GltfAnimationTests", 8, 0, 8),
 	["animation-channels"] = ("GltfAnimationChannelTests.cs", "Sandbox.Tests.Gltf.GltfAnimationChannelTests", 16, 6, 21)
@@ -102,7 +103,7 @@ try
 		Require( !type.GetCustomAttributesData().Any( attribute => unsupported.Contains( attribute.AttributeType.Name ) ) && !all.Any( method => method.GetCustomAttributesData().Any( attribute => unsupported.Contains( attribute.AttributeType.Name ) ) ), "Unsupported test lifecycle/data: " + suite );
 		var methods = all.Where( method => method.GetCustomAttributesData().Any( attribute => attribute.AttributeType.FullName == "Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute" ) ).OrderBy( method => method.Name, StringComparer.Ordinal ).ToArray();
 		var discoveredRows = methods.Sum( method => method.GetCustomAttributesData().Count( attribute => attribute.AttributeType.Name == "DataRowAttribute" ) );
-		Require( methods.Length == suites[suite].Methods && discoveredRows == suites[suite].DataRows, "Test method/DataRow inventory differs from manifest version 1: " + suite );
+		Require( methods.Length == suites[suite].Methods && discoveredRows == suites[suite].DataRows, "Test method/DataRow inventory differs from manifest version 2: " + suite );
 		foreach ( var test in methods )
 		{
 			Require( test.IsPublic && !test.IsStatic && test.ReturnType == typeof( void ), "Unsupported test shape: " + test.Name );
@@ -123,7 +124,7 @@ try
 				planned.Add( (suite, test, arguments) );
 			}
 		}
-		Require( planned.Count - firstCase == suites[suite].Cases, "Planned case count differs from manifest version 1: " + suite );
+		Require( planned.Count - firstCase == suites[suite].Cases, "Planned case count differs from manifest version 2: " + suite );
 	}
 	expectedCases = selected.Sum( suite => suites[suite].Cases );
 	phase = "run-loaded-library-tests";
@@ -146,7 +147,7 @@ finally { context?.Unload(); }
 var receipt = new {
 	passed = error is null && phase == "complete" && expectedCases > 0 && passedCases == expectedCases, selection, phase, error,
 	scope = "allowlisted reader/animation MSTest sources executed in the editor against the actual loaded glTF library; not the complete glTF test project or Khronos corpus; no production source compilation, rendered appearance, GPU or performance proof",
-	complete_gltf_suite = false, manifest_version = 1, available_suites = suites.Keys.OrderBy( name => name, StringComparer.Ordinal ).ToArray(),
+	complete_gltf_suite = false, manifest_version = 2, available_suites = suites.Keys.OrderBy( name => name, StringComparer.Ordinal ).ToArray(),
 	expected_cases = expectedCases, passed_cases = passedCases, tests, diagnostics, test_source_sha256 = hashes, framework_sha256 = frameworkHash, metadata_reference_names = referenceNames, helper_mvid = helperMvid,
 	gltf_loaded_mvid = typeof( Sandbox.Gltf.GltfReader ).Assembly.ManifestModule.ModuleVersionId.ToString(), gltf_disk_mvid = diskGltfMvid, engine_mvid = typeof( Model ).Assembly.ManifestModule.ModuleVersionId.ToString(),
 	is_editor = Application.IsEditor, starting_frame = startingFrame, final_frame = Application.FrameCount, output
