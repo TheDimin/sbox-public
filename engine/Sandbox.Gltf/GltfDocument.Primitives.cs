@@ -75,7 +75,9 @@ public sealed partial class GltfDocument
 	private void ValidateAttribute( string semantic, AccessorLayout layout, int accessorIndex )
 	{
 		var type = GltfJson.String( layout.Json, "type" );
-		var quantized = SupportsExtension( "KHR_mesh_quantization" );
+		// Capability alone does not make extension-only attribute layouts legal:
+		// the asset must declare this non-optional extension as required too.
+		var quantized = SupportsExtension( "KHR_mesh_quantization" ) && SceneRequiresQuantization();
 		var floating = layout.ComponentType == 5126;
 		var unsignedNormalized = layout.Normalized && layout.ComponentType is 5121 or 5123;
 		var signedNormalized = layout.Normalized && layout.ComponentType is 5120 or 5122;

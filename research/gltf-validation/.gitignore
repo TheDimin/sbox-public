@@ -14,6 +14,7 @@
 !editor_model_texture_load.csx
 !editor_skinning.csx
 !editor_direct_skinning_palette.csx
+!editor_gltf_unit_tests.csx
 !editor_primitive_modes.csx
 !editor_quantization.csx
 !editor_skinning_palette.csx

@@ -308,6 +308,22 @@ These are pending integration checks, not a newly proven native blocker.
 
 ### Skeleton and animation integration checks
 
+Current integration status:
+
+| Layer | Implemented | Evidence still required |
+|---|---|---|
+| glTF data and evaluation | Joint hierarchy, inverse binds, multiple influence sets, morphs, STEP/LINEAR/CUBICSPLINE channels and poses | Run the queued focused tests inside the editor against the intended module versions |
+| Full-matrix palette staging | Immutable skin definition, coordinate conversion and reusable instance destinations | Run the new analytic palette tests; these do not prove GPU deformation |
+| Managed renderer | Instance-local direct palette upload hook | Build/restart after the shared-editor handoff, then verify transform-buffer behavior and actual stock-shader deformation |
+| Model and component integration | Static untextured `Model.Load` is editor-proven | Skinned/animated `Model.Load`, normal component playback, posed bounds and animation graph references are not integrated |
+
+The next rig milestone is an actual loaded, two-joint animated model using the
+ordinary component path, with independent bind/posed geometry comparisons and
+two instances at different animation times. Before accepting that milestone,
+also establish native bone/weight metadata and interpolation behavior; do not
+silently truncate influence sets or substitute fixed-rate baking for the glTF
+sampler. Existing vmdl behavior remains a regression requirement.
+
 The current `Model.Load` adapter still rejects skinned, morphed and animated
 selected nodes. Existing CPU readers/evaluation do not establish native model
 loading or playback. [editor_animation.csx](editor_animation.csx) is a prepared,
@@ -429,6 +445,70 @@ loader advertises no extension capability and rejects this required extension
 before rendering; that is an integration gap, not evidence of a native GPU
 limitation. The probe does not claim rendering, full extension conformance or
 approved release tolerances.
+
+The reader's primitive validator now requires both quantization capability and
+the asset's `extensionsRequired` declaration before accepting extension-only
+vertex layouts. Previously the capability alone enabled those layouts even in
+undeclared assets. New `GltfQuantizationDeclarationTests` cover POSITION,
+NORMAL, TANGENT and TEXCOORD declarations, unsupported required usage, and core
+FLOAT/unsigned-normalized UV inputs. The fix follows the ratified
+[KHR_mesh_quantization specification](https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_mesh_quantization/README.md).
+It does not enable that extension in `Model.Load`; its tests remain unrun.
+
+[editor_gltf_unit_tests.csx](editor_gltf_unit_tests.csx) queues those tests against
+the loaded glTF module, without compiling production source. Its default suite
+is `quantization-declarations`; `SBOX_GLTF_UNIT_SUITE` also selects
+`basis-fallbacks`, `primitive-reader`, `animation-sampler`,
+`animation-channels`, or `all` five.
+It executes each DataRow, records input hashes and disk/loaded module identity,
+and checks the editor frame counter without changing it. The helper references
+only the glTF library, BCL and MSTest, matching the pure test project. A fixed
+manifest checks method, DataRow and case counts: `all` currently means 64 cases
+across these five classes. This is not the entire glTF test suite or corpus, and
+the runner is unrun.
+
+`GltfBasisFallbackTests` covers optional Basis image selection versus core image
+fallback and required-extension rejection. The reader now rejects a Basis-only
+texture unless `KHR_texture_basisu` is required, as specified by its ratified
+[fallback rules](https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_texture_basisu/README.md#using-without-a-fallback).
+These are metadata checks, not native Basis decoding or loader support; the
+new tests and fix are unrun.
+
+`GltfSamplerMapping` now converts explicit glTF min/mag/mip and S/T wrap choices
+to a `SamplerState`, with caller-selected policy for omitted filters. Tests
+cover all twelve filter pairs, wrapping, parsed input and invalid values. It is
+not connected to the loader or stock shader, and remains unbuilt/unrun. Modes
+without mip filtering require a single-mip texture or view; a sampler descriptor
+alone does not meet that requirement. In particular, setting Vulkan maximum LOD
+to zero can lose the requested independent min/mag behavior.
+
+The revised [editor_material_schema.csx](editor_material_schema.csx) preserves
+the native shader-properties JSON as well as the typed variables/combos schema,
+and reports mounted source/compiled filenames. Each run has a unique receipt
+and raw-metadata hash. This query loads the stock material but does not create
+samplers, choose permutations or render; the new version is unrun. Additional
+JSON fields or mounted filenames alone cannot establish independent per-texture
+sampling support.
+
+### Raw compiled-GLB asset pipeline audit
+
+The managed `Editor.Asset` abstraction can override compilation and compiled
+file paths. The publisher packages bytes at that path rather than requiring a
+native resource header in managed code. A raw valid `.glb_c` primary output is
+therefore a plausible managed route; it has not been demonstrated end to end.
+Current ordinary registration/change callbacks create `NativeAsset`, and the
+only other registry insertion path found handles mounted assets. A first-class
+managed glTF asset needs lifecycle and registry integration, not merely an
+attribute declaring its extension.
+
+The next editor probe must establish stable IDs and aliases, source/dependency
+watching, reimport, compilation state, output ownership/deletion, and distinct
+ownership for same-stem `.gltf`/`.glb` sources. Verify actual packaged GLB magic
+and dependencies: additional game files are currently collected before the
+later asset compile, and missing additional files can be skipped. Probe the
+native compiler's `SetExtension` naming/framing separately using a throwaway
+fixture. These source observations do not prove a native blocker or choose a
+custom extension, filename convention or final compiler architecture.
 
 This tool inventories every model variant in the pinned [Khronos sample assets repository](https://github.com/KhronosGroup/glTF-Sample-Assets) and aggregates independently produced evidence. The pin is [90d7ede14c7e280af263824604b427a1ca02cb66](https://github.com/KhronosGroup/glTF-Sample-Assets/commit/90d7ede14c7e280af263824604b427a1ca02cb66), a dated upstream commit, not a claim about current HEAD. It is recorded in `coverage.json`. No model assets are included in this repository.
 

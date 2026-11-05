@@ -47,6 +47,12 @@ public sealed partial class GltfDocument
 	{
 		var value = ElementAt( "textures", texture );
 		int? source = value.TryGetProperty( "source", out _ ) ? GltfJson.Int( value, "source" ) : null;
+		// KHR_texture_basisu permits omitting the core image only when the
+		// extension is required; otherwise an unsupported client needs a fallback.
+		if ( !source.HasValue && value.TryGetProperty( "extensions", out var declaredExtensions ) &&
+			declaredExtensions.ValueKind == JsonValueKind.Object && declaredExtensions.TryGetProperty( "KHR_texture_basisu", out _ ) &&
+			!ExtensionNames( "extensionsRequired" ).Contains( "KHR_texture_basisu", StringComparer.Ordinal ) )
+			throw new GltfException( "A KHR_texture_basisu texture without a core source must require KHR_texture_basisu." );
 		if ( SupportsExtension( "KHR_texture_basisu" ) && value.TryGetProperty( "extensions", out var extensions ) )
 		{
 			if ( extensions.ValueKind != JsonValueKind.Object ) throw new GltfException( "Texture extensions must be an object." );
