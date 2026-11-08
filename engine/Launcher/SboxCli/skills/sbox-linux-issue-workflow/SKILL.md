@@ -1,112 +1,66 @@
 ---
 name: sbox-linux-issue-workflow
-description: Investigate suspected Linux-specific s&box bugs, search Facepunch/sbox-public and forks for fixes, implement and validate local fixes, and prepare upstream reports for the user to submit. Use when Linux failures arise during s&box development; not for general Linux administration or unrelated game bugs.
+description: Triage sub-skill for suspected Linux-specific s&box engine bugs. Search Facepunch/sbox-public issues, PRs, newer upstream commits, and forks for an existing fix, validate or create a local fix, and prepare an upstream report for the user to submit. Use when a Linux failure appears during s&box development; not for general Linux administration or project-owned game bugs.
 ---
 
-# s&box Linux Issue Workflow
+# s&box Linux issue workflow
 
-Resolve the local problem and give the user an evidence-backed upstream handoff. Local user validation protects Facepunch from unverified or redundant reports; automated tests alone do not replace that validation.
+Fix the local problem and hand the user an evidence-backed upstream report. If the `triage` skill is installed, follow its order of work (read, check existing fixes, trace, reproduce twice, test, fix, prove) and use this skill for the s&box Linux parts.
 
-## Local autonomy and upstream boundary
+## Upstream boundary
 
-Proceed with research, reproduction, focused local fixes, and validation within the requested scope. Follow the project's branch conventions and existing s&box editor/resource-guard rules. Reuse established debugging and editor workflows rather than introducing another launch or build procedure.
+Research, reproduce, fix, and validate locally without asking for permission at each step. Follow the branch conventions and editor resource rules.
 
-Treat upstream interactions as read-only research and unsubmitted drafts. Do not submit issues, comments, reactions, PRs (including draft PRs), or other remote changes. Do not push a branch, publish a patch, or contact fork authors as part of this workflow. Opening and filling an issue/comment form is allowed; leave its submission to the user. A suggested thumbs-up is a user action too.
-
-Do not ask for permission to continue ordinary authorized local investigation. Prepare a concrete result, then explain what the user should validate before deciding whether to submit it. Do not interpret approval of the research or fix as permission to publish.
+Everything upstream is read-only or an unsubmitted draft. Never submit an issue, comment, reaction, or PR (draft PRs too), never push a branch or publish a patch, and never contact fork authors. You may open and fill an issue form. The user submits it. Approval of the research or the fix is not permission to publish.
 
 ## Establish the failure
 
-- Record a minimal reproduction, expected and actual behavior, relevant logs, and the engine revision/build and Linux environment details needed to interpret the failure.
-- Establish the failing baseline before edits where practical. If reproduction is unavailable or intermittent, state that and preserve the evidence that is available.
-- Determine whether the failure belongs to the engine, project code, or local configuration. A failure observed on Linux is not proof it is Linux-exclusive; distinguish tested platforms from assumptions.
-- Keep observations, inferred causes, and unresolved questions distinct throughout the investigation.
+- Record a minimal repro, expected and actual behavior, focused logs, the engine revision and build, and the Linux environment details that matter.
+- Get a failing baseline before edits. If the repro is intermittent or unavailable, say so and keep the evidence.
+- Decide the owner: engine, project, or local configuration. A failure seen on Linux is not proof that it is Linux-only. Say which platforms you tested.
 
-## Search upstream, then forks
+## Search for an existing fix, in this order
 
-Follow this order: (1) search upstream issues and PRs, (2) check newer Facepunch/master commits, (3) validate promising upstream fixes, (4) search forks and investigate/validate their candidates if still unresolved, and (5) create our own fix if no suitable existing fix resolves the issue. Reproduction and diagnosis can proceed alongside research; do not jump to implementing a bespoke fix before reviewing the available upstream and fork evidence.
+Track two separate questions: is there a matching report, and is there a usable fix? A matching issue without a fix does not end the search. Reproduce and diagnose in parallel with the search, but do not write your own fix before the search is done.
 
-Complete these upstream checks before starting expensive fork enumeration or spawning the fork-search subagent:
+1. **Upstream issues and PRs.** Search [Facepunch/sbox-public](https://github.com/Facepunch/sbox-public) open and closed issues and open, merged, and closed-unmerged PRs. Use symptoms, exact errors, affected files and symbols, and other terms. Read the discussions, linked commits, and patches, not only titles. A closed issue does not prove a fix landed. An unmerged PR can still hold a usable fix.
+2. **Newer Facepunch/master commits,** including commits with no issue or PR. Find the local revision, refresh the upstream tip, and inspect the commits missing locally by ancestry and merge-base, not by date. Screen messages and files, and read plausible patches, including related changes outside the failing file. Record the local SHA, the upstream tip SHA, the range, and findings. A stale tracking ref or an empty issue search does not count.
+3. **Validate the upstream candidates** against the local repro. Prefer bringing in or adapting an upstream fix. Do not upgrade the whole branch to test one. If it works, skip the fork search. If it is partial, carry that evidence forward.
+4. **Forks**, only when upstream has no usable fix (see below).
+5. **Your own fix**, when nothing above solves it. Use the partial fixes and clues you found.
 
-1. Search current [Facepunch/sbox-public](https://github.com/Facepunch/sbox-public) **open and closed issues, open PRs, merged PRs, and closed-unmerged PRs** using symptoms, exact errors, affected files/symbols, and alternative terminology. Inspect promising discussions, linked commits, and patches rather than relying on titles or status. A closed issue does not prove a fix landed, and an unmerged PR may still contain a usable complete or partial fix. Respect repository reporting instructions/templates when preparing a report.
-2. Independently check **newer commits on Facepunch/master**, including commits with no linked issue or PR. Establish the local engine's actual revision and refresh/verify the upstream master tip. Inspect upstream commits missing locally, using ancestry/merge-base rather than dates alone when the local branch has diverged. Screen commit messages and affected files and inspect plausible or uncertain patches, including related changes outside the immediately failing file. Record the local SHA, upstream tip SHA, range examined, and relevant findings. A stale tracking ref or empty issue search does not satisfy this check.
-3. Evaluate promising upstream fixes against the local reproduction before expanding the search. Prefer bringing in or adapting an existing upstream fix where appropriate, preserving project branch conventions. Do not perform a broad branch upgrade merely to test a candidate. If the fix resolves the issue, skip the fork search. If it is only partial or fails validation, carry that evidence into the fork search.
+An access failure is not a negative result. If an upstream check stays blocked, report that gate as incomplete and continue local work. Do not start the fork search on top of an incomplete upstream gate.
 
-An access failure is not a negative upstream result. Use the access-recovery procedure below for these checks too; if they remain blocked, report the upstream gate as incomplete and continue independent local investigation rather than automatically launching the expensive fork search.
+## Fork search
 
-Track two independent questions: is there a matching report, and is there a usable fix? Finding a matching issue without a fix does not end the search.
+Spawn one cheap read-only research subagent (`gpt-6-luna` with `fork_turns="none"` when available, otherwise the cheapest suitable model). Give it the symptom, repro and environment evidence, local revision, affected code and errors, upstream findings, and these rules. No builds, editor launches, remote writes, or further delegation. Continue local work while it searches, but read its report before you conclude.
 
-If upstream has no usable fix, spawn one cheap research subagent to perform the fork search below. Use `gpt-6-luna` with `fork_turns="none"` when available, or the lowest-cost available suitable model. Give it the symptom, reproduction/environment evidence, local revision, affected code and errors, upstream findings, and these search/report requirements. Keep it read-only with no builds, editor launches, remote mutations, or further delegation. The main agent can continue independent local investigation while it searches, but must examine its report before concluding the investigation.
+**Coverage rules:**
 
-### Establish access and recover from research blockers
+- Enumerate all accessible forks, with full pagination, and every accessible branch head, not only default branches.
+- Skip a fork only when no branch contains a Facepunch/master commit from the last three calendar months, judged by upstream ancestry and the upstream commit date, not the fork's push date. Fast-forwards and rebases count. If freshness is unknown, investigate instead of skipping. Report the cutoff and the excluded forks with evidence.
+- For each kept fork, list every commit reachable from any branch or tag that upstream history (all branches and tags) does not contain. Detect truncated API comparisons and use read-only fetches into a scratch repo when needed. Deduplicate SHAs across forks and keep their sources.
+- Screen every unique commit: message and files, and the patch whenever relevance is plausible. Look for full fixes, partial fixes, workarounds, diagnostics, and tests. Do not stop at the first candidate. The three-month rule filters forks, not commits.
+- Stay economical with cached inventories, shared Git objects, batched reads, and deduplication, not with caps on forks or commits.
 
-Before bulk screening, establish a working route for live fork enumeration and commit/ancestry inspection. Discover available GitHub connector capabilities first; do not assume a generic fetch tool supports arbitrary API endpoints. An unsupported endpoint rejection is a tool capability failure, not proof that GitHub is inaccessible. Use an appropriate supported connector operation or, where necessary and permitted, GitHub API/Git access through local tools. Cached web pages and keyword searches can supply leads but cannot substitute for fork enumeration.
+**Access:** first find a working route for fork enumeration and commit inspection. An unsupported connector endpoint is a tool limit, not proof that GitHub is down. On failure, the subagent reports the exact operation, error category (unsupported route, auth, rate limit, timeout, DNS), and context, and does not repeat failed requests. The main agent owns recovery: check connector capabilities and local Git remotes, and whether the failure is sandbox-specific. Use the supported approval path for a bounded host-side check where permitted. Never bypass a denial through another transport or credentials, expose tokens, or change network or security settings. When the main agent has access the subagent lacks, gather the fork and commit inventory into local files and resume the same subagent on them.
 
-If access fails, the subagent must promptly send the main agent the exact operation, error category, execution context, and missing capability. Distinguish unsupported tool routes, authentication/authorization failures, rate limits, timeouts, and DNS/network failures. Do not spend the remaining search budget repeating equivalent keyword searches or identical failed requests.
+If access stays blocked, report **fork screening blocked before enumeration** (zero screened) or **partial fork screening**, with the routes tried, the blockers, and a resumable checkpoint. That is never a completed search or a negative finding.
 
-The main agent owns recovery: inspect available connector capabilities and existing local Git remotes/caches, and determine whether the failure is specific to the subagent or sandbox. If a read-only network command fails because the sandbox restricts network access, use the supported approval/escalation mechanism for a bounded host-side API/Git check where permitted. Do not label sandbox DNS failure as a host outage without checking. Respect explicit access denials and automatic approval rejections; never bypass them through another transport or credentials. Do not expose tokens or modify DNS, networking, or security settings.
+**Subagent report:** search date, cutoff, upstream refs used, fork and ref counts, excluded and unknown forks, unique and screened commit counts, incomplete pages; ranked candidates with links, SHAs, authors, files, and the evidence that links each one to the failure, labeled full fix, partial fix, workaround, or clue; dependencies and checks for the main agent; and a coverage ledger that can resume the search.
 
-When the main agent has working access that the subagent lacks, gather the paginated fork/ref inventory and required commit metadata/patches into shared local artifacts, then resume the same cheap subagent against those artifacts. Include the upstream snapshot, provenance, coverage, and pagination state. The main agent may supply access and data while the subagent performs the exhaustive screening; lack of direct subagent network access does not end the task.
-
-If appropriate permitted routes remain unavailable, report **fork screening blocked before enumeration** when zero commits were screened, or **partial fork screening** when some were screened. Include attempted routes and concrete blockers, not only “retry when access returns.” Continue independent authorized local work, preserve a resumable checkpoint, and identify the specific access or user action needed. Do not present this as a completed fork-search step or a negative finding. Do not retry indefinitely when the blocker is unchanged.
-
-### Exhaustive commit screening in current forks
-
-The subagent must enumerate all accessible forks of Facepunch/sbox-public, completing pagination and inspecting all accessible branch heads rather than just default branches. Apply this one age exclusion: skip a fork if no branch incorporates a Facepunch/master commit from within the preceding three calendar months, relative to the search date. Determine incorporation using upstream commit ancestry; do not require a literal merge commit, since fast-forwards and rebases also incorporate upstream. Use the upstream commit's date rather than the fork's last push date. A recent unrelated fork commit does not establish synchronization. If freshness cannot be established, record it as unknown and investigate rather than silently treating it as stale. A cached page's update timestamp is neither an ancestry check nor sufficient evidence for exclusion. Report the cutoff and excluded forks with evidence. A known directly relevant patch in an excluded fork may still be inspected as an explicitly reported exception.
-
-For every qualifying fork, enumerate **all commits reachable from every accessible branch and tag that are absent from the upstream repository's accessible branch/tag history**. Compare against upstream as a whole, not only master or the fork's default branch. Complete commit-list pagination, detect truncated API comparisons, and use read-only Git fetching in a scratch repository where needed to establish complete ancestry. Deleted or inaccessible refs cannot be claimed as covered. Deduplicate commit SHAs across forks while preserving their source locations; identify equivalent patches where useful without discarding unique context.
-
-Screen every unique upstream-absent commit for possible relevance, including partial fixes, workarounds, diagnostics, tests, infrastructure changes, and clues about the underlying cause. Inspect commit messages and changed files; inspect patches whenever relevance is plausible or uncertain. Do not rely on titles or exact symptom keywords, skip old commits within qualifying forks, or stop after finding the first promising candidate. The three-month rule filters forks, not commits within them.
-
-Keep the work economical through cached inventories, shared Git objects, batched reads, and deduplication, not arbitrary limits on forks or commits. Respect resource guards for expensive operations. If rate limits, inaccessible repositories, tool limits, or resource constraints prevent completion, return a partial report with exact gaps and a resumable cursor/checkpoint; never describe that as an exhaustive search or infer that no fix exists.
-
-### Subagent report and main-agent follow-through
-
-Return a concise report containing:
-
-- Search date, three-month cutoff, upstream refs/revision used, fork and ref counts, excluded/unknown forks, unique upstream-absent commit count, screened count, and any incomplete pages or refs.
-- Ranked candidate commits with source links, SHAs, authorship, affected files, and the evidence connecting each to the failure. Label complete-fix candidates, partial fixes, workarounds, and diagnostic clues; do not claim validation from inspection.
-- Dependencies or related commit sequences, applicability risks, and concrete checks for the main agent to perform.
-- A compact coverage ledger or local artifact sufficient to resume and account for screened commits, including those judged irrelevant.
-
-The main agent must inspect promising patches and their context, assess partial fixes as useful leads even when none solves the whole issue, and validate applicable changes locally. The subagent's report is research evidence, not authority to cherry-pick blindly. Preserve attribution and report coverage honestly: “no candidate found in the screened commits” is not proof that no fix exists anywhere.
-
-Check whether a candidate applies to the local revision and addresses the same cause. Do not treat an open PR, fork patch, or similar symptom as proof of correctness. If an upstream fix already landed, assess whether bringing that fix into the local branch is sufficient.
+The main agent reads the promising patches in context and validates applicable ones locally. The report is research, not permission to cherry-pick blindly. "No candidate in the screened commits" does not prove that no fix exists.
 
 ## Fix and validate locally
 
-Apply and validate suitable discovered fixes during the upstream and fork stages. **Step 5: create our own fix** when those stages have not produced a suitable solution. Use their findings, including partial fixes and diagnostic clues, to implement a focused candidate addressing the demonstrated cause on the working branch according to project conventions. Preserve unrelated work and attribution; avoid unrelated cleanup. Keep the patch easy for a maintainer to inspect or reuse. If research is blocked, disclose the missing coverage and recover access as described above; do not quietly treat it as an exhausted search. Follow an explicit user direction to proceed with a local fix despite that gap.
+Make a focused fix at the demonstrated cause, on the working branch. Keep unrelated work and attribution. Keep the patch easy for a maintainer to read. Rerun the original repro and the regression checks, and add a focused regression test when it is practical. Report what you tested, what improved, and what is uncertain. Source reading and compilation do not prove runtime success. If the evidence cannot support a fix, name the next discriminating check. If the failure is project or configuration-owned, fix it locally and explain why no upstream report is needed.
 
-Re-run the original reproduction and relevant regression checks. Add a focused regression test when it meaningfully demonstrates the defect and is practical in the project. Use guarded heavy work and existing editor reuse rules. Report exactly what was tested, what improved, and what remains uncertain. Do not claim runtime success from source inspection or compilation alone.
+## Prepare the handoff
 
-If the evidence cannot support a fix, preserve the investigation and identify the next discriminating check rather than inventing a solution. If the failure is project/configuration-owned, resolve it locally where authorized and explain why an upstream report is not warranted.
-
-## Prepare the appropriate handoff
-
-### No matching issue
-
-When evidence supports an upstream report, open the browser to the repository's issue creation flow and prepare the title/body for the user to inspect and submit. Use the current template and leave the form unsubmitted. Verify that the draft content is present. If browser access or prefilling is unavailable, provide the complete copyable draft and creation link, explicitly stating that the browser draft was not prepared.
-
-Lead with the failure and evidence, followed by the candidate fix. Include the relevant subset of:
-
-- Concise symptom-based title, environment and revision.
-- Reproduction steps or minimal reproducer; expected versus actual behavior.
-- Focused logs and research links, with confirmed findings separated from hypotheses.
-- Suspected underlying cause and why the evidence points to it.
-- Our candidate fix, why it appears to help, before/after validation, and remaining limitations.
-
-Present the patch as a proposal, not an established definitive solution or an instruction that Facepunch must adopt it. Include a focused diff/code excerpt or an already-public, verified accessible commit link. A local/private commit link is not a usable upstream handoff; do not publish it automatically. Exclude secrets and irrelevant private project details from draft evidence.
-
-### Matching issue exists
-
-Provide the issue link and suggest that the user add a thumbs-up; do not react automatically. Read the discussion before deciding whether a comment adds value.
-
-Prepare an unsubmitted comment only when it contributes new reproduction details, environment distinctions, investigation evidence, validation, or a candidate fix. Include the accessible fix and its limitations when useful. Avoid comments that merely restate the issue or say “same here.” If the discussion already covers our findings, explain that no additional comment is needed. Do not create a duplicate issue to share a fix.
-
-### Insufficient evidence
-
-Do not manufacture a submission-ready report from a weak or unverified suspicion. Summarize the evidence gap and what local validation would resolve it. An unresolved cause does not itself prevent a useful report when the failure is reproducible and clearly described.
+- **No matching issue:** open the repo's issue form with the current template and fill it, unsubmitted, and check that the content is there. If the browser is not available, give the full draft and the creation link and say the form was not prepared. Lead with the failure and evidence: symptom title, environment and revision, repro steps, expected and actual behavior, focused logs and research links, confirmed findings apart from hypotheses, the suspected cause, then the candidate fix with before and after validation and limits. Present the fix as a proposal. Include a focused diff or an already-public commit link. A local commit link is not usable. Remove secrets and private project details.
+- **Matching issue exists:** give the link and suggest a thumbs-up. Do not react yourself. Draft an unsubmitted comment only when it adds new repro details, environment differences, evidence, validation, or a fix. Never "same here". Never a duplicate issue.
+- **Weak evidence:** do not build a report from an unverified suspicion. Name the gap and the local check that closes it. An unknown cause does not block a report when the failure is reproducible and clear.
 
 ## Completion
 
-Summarize the local change or unresolved result, validation and limitations, relevant issue/PR/fork links, and the exact draft location or copyable text. Identify any remaining user verification and suggested submission/reaction actions. Make clear that nothing was submitted remotely. If the user later provides validation results, revise the draft accordingly; the user remains the submitter.
+Summarize the local change or open result, validation and limits, issue, PR, and fork links, and the draft location or text. Name the checks and the submit or reaction steps left for the user. State that nothing was submitted.
