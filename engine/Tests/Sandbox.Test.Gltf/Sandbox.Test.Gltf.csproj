@@ -8,6 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="../../Sandbox.Gltf/Sandbox.Gltf.csproj" />
     <EmbeddedResource Include="Fixtures/Ktx/*.ktx2" />
+    <EmbeddedResource Include="Fixtures/Images/*" />
   </ItemGroup>
 
 </Project>

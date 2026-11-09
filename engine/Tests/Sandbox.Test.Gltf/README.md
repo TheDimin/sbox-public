@@ -1,7 +1,8 @@
 # glTF tests-first implementation
 
 Current validation direction: use the running s&box editor and its actual preview
-renderer, on the authorized virtual display, for rendering acceptance. See the
+renderer, visibly on the user's physical desktop, for rendering acceptance. The
+user returned to the PC and explicitly ended virtual-display use. See the
 [editor validation workflow](../../../research/gltf-validation/README.md) and its
 real-frame capture scripts. The earlier windowless test host produced stale
 captures and is not a substitute for this evidence. Keep its failures separate
@@ -13,9 +14,13 @@ This MSTest project exercises `Sandbox.Gltf` without initializing s&box engine
 interop. Container/accessor reading, geometry, materials, scenes, animation and
 lossless GLB packaging now have managed implementations. Meshopt uses the pinned
 native codec supplied by Evergine's .NET binding; it needs a native payload but
-does not need the engine. The Linux suite builds without warnings and currently
-passes 373 test cases, including native Draco and Basis decoding, meshopt buffer-view integration,
-draw-data preparation, dependency packaging and accessor regressions.
+does not need the engine. The latest actual-editor run executed 486 cases:
+483 passed, three singular-transform cases failed, and none were blocked or
+unexecuted. Positive native Draco, Basis/KTX and meshopt preflights passed.
+Additional conformance tests are being written and are not yet executed; the
+current count is not complete specification or rendering coverage. The reviewed
+singular-transform fix is newer than the loaded producer and still needs
+build/restart validation. The full evidence is recorded in the validation docs.
 Tests assert useful results or specified errors; they
 do not contain unconditional failure placeholders or skipped acceptance gates.
 
@@ -27,10 +32,10 @@ From the repository root, use the existing build tool's new project selector:
 dotnet run --project engine/Tools/SboxBuild/SboxBuild.csproj -- test --project Sandbox.Test.Gltf
 ```
 
-Follow the active session's resource policy. The user explicitly disabled the
-memory guard for this glTF task on 2026-11-04 after closing the editors; the swap
-refresh was cancelled and no swap settings were changed. This override applies
-to this task and does not alter the shared guard or other projects. The selector builds
+Follow the current AGENTS.md resource policy: inspect host guard status and run
+expensive work through the guard. Historical task requests do not override the
+newly supplied launch, memory and swap rules. Do not interrupt the user's live
+editor/play session to run tests. The selector builds
 only the selected test project and its references, with one MSBuild worker.
 The ordinary unfiltered SboxBuild test command also includes this project.
 

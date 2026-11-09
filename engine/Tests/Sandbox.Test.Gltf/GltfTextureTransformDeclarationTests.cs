@@ -60,8 +60,8 @@ public class GltfTextureTransformDeclarationTests
 		var used = declared ? "\"extensionsUsed\":[\"KHR_texture_transform\"]," :
 			anotherExtensionIsDeclared ? "\"extensionsUsed\":[\"EXT_unrelated\"]," : "";
 		var requiredField = required ? "\"extensionsRequired\":[\"KHR_texture_transform\"]," : "";
-		var json = $$$"""
-			{"asset":{"version":"2.0"},{{{used}}} {{{requiredField}}} "textures":[{}],
+		var json = $$$$$$"""
+			{"asset":{"version":"2.0"},{{{{{{used}}}}}} {{{{{{requiredField}}}}}} "textures":[{}],
 			 "materials":[{"pbrMetallicRoughness":{"baseColorTexture":{"index":0,"texCoord":0,
 			 "extensions":{"KHR_texture_transform":{"offset":[0.1,0.2],"scale":[2,3],"rotation":1.5707963267948966,"texCoord":1}}}}}]}
 			""";

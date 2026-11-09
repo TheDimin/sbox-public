@@ -52,6 +52,37 @@ public class GltfCompiledTextureTests
 	}
 
 	[TestMethod]
+	public void CompilesLinearPng16AndMetallicRoughnessWithoutQuantizingSource()
+	{
+		// Adjacent 257/258 and 32769/32770 values share their respective high
+		// bytes, so an RGBA8 intermediate cannot satisfy these expectations.
+		var png = Convert.FromBase64String( "iVBORw0KGgoAAAANSUhEUgAAAAIAAAABEAYAAACksqPJAAAAGUlEQVR4nGNgZGRkamA0sGRkYmRsYLpiCAAORAJ8hmWiZwAAAABJRU5ErkJggg==" );
+		var image = new GltfImage { MimeType = "image/png", Bytes = png };
+		var texture = GltfTextureCompiler.CompileWithMipmaps( image, false );
+		var header = DataOffset( texture );
+		Assert.AreEqual( (byte)14, texture[header + 26], "Linear PNG16 must use float32 texture storage." );
+		Assert.AreEqual( (byte)2, texture[header + 27] );
+		Assert.IsTrue( (BinaryPrimitives.ReadUInt16LittleEndian( texture.AsSpan( header + 2 ) ) & 0x0200) != 0 );
+		var offset = checked((int)BinaryPrimitives.ReadUInt32LittleEndian( texture ));
+		ushort[] source = [257, 258, 32769, 12345, 258, 257, 32770, 54321];
+		for ( var i = 0; i < source.Length; i++ )
+			Assert.AreEqual( source[i] / 65535f, BinaryPrimitives.ReadSingleLittleEndian( texture.AsSpan( offset + 16 + i * 4 ) ), 0.0000001f );
+		for ( var i = 0; i < 4; i++ )
+			Assert.AreEqual( (source[i] + source[i + 4]) / 131070f, BinaryPrimitives.ReadSingleLittleEndian( texture.AsSpan( offset + i * 4 ) ), 0.0000001f );
+
+		var packed = GltfTextureCompiler.CompileMetallicRoughness( image, .75f, .5f, true );
+		var rough = checked((int)BinaryPrimitives.ReadUInt32LittleEndian( packed.NormalRoughness ));
+		var metal = checked((int)BinaryPrimitives.ReadUInt32LittleEndian( packed.Metalness ));
+		for ( var pixel = 0; pixel < 2; pixel++ )
+		{
+			Assert.AreEqual( source[pixel * 4 + 1] / 65535f * .5f, BinaryPrimitives.ReadSingleLittleEndian( packed.NormalRoughness.AsSpan( rough + 16 + pixel * 16 + 8 ) ), 0.0000001f );
+			Assert.AreEqual( source[pixel * 4 + 2] / 65535f * .75f, BinaryPrimitives.ReadSingleLittleEndian( packed.Metalness.AsSpan( metal + 16 + pixel * 16 + 4 ) ), 0.0000001f );
+		}
+		Assert.ThrowsException<GltfException>( () => GltfTextureCompiler.Compile( image, false, maxDecodedBytes: 1 ) );
+		Assert.ThrowsException<GltfException>( () => GltfTextureCompiler.CompileMetallicRoughness( image, 1, 1, true, maxDecodedBytes: 1 ) );
+	}
+
+	[TestMethod]
 	public void CompilesJpegWithoutFurtherPixelLoss()
 	{
 		var input = Convert.FromBase64String( Jpeg );

@@ -111,7 +111,20 @@ internal sealed class DeformationFixture
 		var data = new byte[values.Length * sizeof( float )];
 		for ( var i = 0; i < values.Length; i++ )
 			BinaryPrimitives.WriteSingleLittleEndian( data.AsSpan( i * sizeof( float ), sizeof( float ) ), values[i] );
-		var bounds = includeBounds ? $",\"min\":{JsonSerializer.Serialize( values )},\"max\":{JsonSerializer.Serialize( values )}" : "";
+		var bounds = "";
+		if ( includeBounds )
+		{
+			var components = values.Length / count;
+			var minimum = new float[components]; var maximum = new float[components];
+			Array.Fill( minimum, float.PositiveInfinity ); Array.Fill( maximum, float.NegativeInfinity );
+			for ( var i = 0; i < values.Length; i++ )
+			{
+				var component = i % components;
+				minimum[component] = MathF.Min( minimum[component], values[i] );
+				maximum[component] = MathF.Max( maximum[component], values[i] );
+			}
+			bounds = $",\"min\":{JsonSerializer.Serialize( minimum )},\"max\":{JsonSerializer.Serialize( maximum )}";
+		}
 		return Add( type, count, 5126, data, bounds );
 	}
 

@@ -13,9 +13,9 @@ public class GltfUploadLayoutTests
 	[TestMethod]
 	public void InterleavedAttributesPreserveActualViewsOffsetsTypesAndStrides()
 	{
-		using var document = Read( $$$"""
-			{"asset":{"version":"2.0"},"buffers":[{"uri":"data:application/octet-stream;base64,{{{Convert.ToBase64String( new byte[92] )}}}","byteLength":92},
-			 {"uri":"data:application/octet-stream;base64,{{{Convert.ToBase64String( new byte[10] )}}}","byteLength":10}],
+		using var document = Read( $$$$$$$$"""
+			{"asset":{"version":"2.0"},"buffers":[{"uri":"data:application/octet-stream;base64,{{{{{{{{Convert.ToBase64String( new byte[92] )}}}}}}}}","byteLength":92},
+			 {"uri":"data:application/octet-stream;base64,{{{{{{{{Convert.ToBase64String( new byte[10] )}}}}}}}}","byteLength":10}],
 			 "bufferViews":[{"buffer":0,"byteOffset":8,"byteLength":84,"byteStride":28},{"buffer":1,"byteOffset":4,"byteLength":6}],
 			 "accessors":[{"bufferView":0,"componentType":5126,"count":3,"type":"VEC3","min":[0,0,0],"max":[0,0,0]},
 			 {"bufferView":0,"byteOffset":12,"componentType":5126,"count":3,"type":"VEC3"},
@@ -45,8 +45,8 @@ public class GltfUploadLayoutTests
 	[TestMethod]
 	public void SparseAndMissingBaseRequireMaterializationWithoutInventingStorage()
 	{
-		using var document = Read( $$$"""
-			{"asset":{"version":"2.0"},"buffers":[{"uri":"data:application/octet-stream;base64,{{{Convert.ToBase64String( new byte[16] )}}}","byteLength":16}],
+		using var document = Read( $$$$$$$$"""
+			{"asset":{"version":"2.0"},"buffers":[{"uri":"data:application/octet-stream;base64,{{{{{{{{Convert.ToBase64String( new byte[16] )}}}}}}}}","byteLength":16}],
 			 "bufferViews":[{"buffer":0,"byteOffset":0,"byteLength":1},{"buffer":0,"byteOffset":4,"byteLength":12}],
 			 "accessors":[{"componentType":5126,"count":3,"type":"VEC3","min":[0,0,0],"max":[0,0,0],
 			 "sparse":{"count":1,"indices":{"bufferView":0,"componentType":5121},"values":{"bufferView":1}}}],
@@ -64,9 +64,9 @@ public class GltfUploadLayoutTests
 	{
 		// Metadata-only fixture: intentionally not a valid meshopt stream. Describing
 		// the layout must not call native decode or treat fallback bytes as decoded.
-		var json = $$$"""
+		var json = $$$$$$$$"""
 			{"asset":{"version":"2.0"},"extensionsUsed":["EXT_meshopt_compression"],
-			 "buffers":[{"uri":"data:application/octet-stream;base64,{{{Convert.ToBase64String( new byte[36] )}}}","byteLength":36}],
+			 "buffers":[{"uri":"data:application/octet-stream;base64,{{{{{{{{Convert.ToBase64String( new byte[36] )}}}}}}}}","byteLength":36}],
 			 "bufferViews":[{"buffer":0,"byteLength":36,"byteStride":12,"extensions":{"EXT_meshopt_compression":{"buffer":0,"byteLength":1,"byteStride":12,"count":3,"mode":"ATTRIBUTES"}}}],
 			 "accessors":[{"bufferView":0,"componentType":5126,"count":3,"type":"VEC3","min":[0,0,0],"max":[0,0,0]}],
 			 "meshes":[{"primitives":[{"attributes":{"POSITION":0}}]}]}
@@ -114,9 +114,9 @@ public class GltfUploadLayoutTests
 	[TestMethod]
 	public void SharedAccessorUsesTheRequestedPrimitivesOwnDracoMapping()
 	{
-		var json = $$$"""
+		var json = $$$$$$$$"""
 			{"asset":{"version":"2.0"},"extensionsUsed":["KHR_draco_mesh_compression"],
-			 "buffers":[{"uri":"data:application/octet-stream;base64,{{{Convert.ToBase64String( new byte[48] )}}}","byteLength":48}],
+			 "buffers":[{"uri":"data:application/octet-stream;base64,{{{{{{{{Convert.ToBase64String( new byte[48] )}}}}}}}}","byteLength":48}],
 			 "bufferViews":[{"buffer":0,"byteLength":36,"byteStride":12},{"buffer":0,"byteOffset":36,"byteLength":12}],
 			 "accessors":[{"bufferView":0,"componentType":5126,"count":3,"type":"VEC3","min":[0,0,0],"max":[0,0,0]}],
 			 "meshes":[{"primitives":[{"attributes":{"POSITION":0}},
@@ -130,6 +130,42 @@ public class GltfUploadLayoutTests
 		Assert.IsTrue( ordinary.RequiresGeneratedIndices ); Assert.IsFalse( ordinary.RequiresDracoIndices );
 		Assert.AreEqual( GltfUploadMaterialization.Draco, compressed.Attributes["POSITION"].Materialization );
 		Assert.IsNull( compressed.Attributes["POSITION"].ByteStride ); Assert.IsTrue( compressed.RequiresDracoIndices );
+	}
+
+	[TestMethod]
+	[DataRow( 0 )]
+	[DataRow( 1 )]
+	public void UnrelatedMalformedDracoMappingDoesNotBlockRequestedPrimitive( int primitive )
+	{
+		var json = $$$$$$$$"""
+			{"asset":{"version":"2.0"},"extensionsUsed":["KHR_draco_mesh_compression"],
+			 "buffers":[{"uri":"data:application/octet-stream;base64,{{{{{{{{Convert.ToBase64String( new byte[48] )}}}}}}}}","byteLength":48}],
+			 "bufferViews":[{"buffer":0,"byteLength":36},{"buffer":0,"byteOffset":36,"byteLength":12}],
+			 "accessors":[{"bufferView":0,"componentType":5126,"count":3,"type":"VEC3","min":[0,0,0],"max":[0,0,0]}],
+			 "meshes":[{"primitives":[{"attributes":{"POSITION":0}},
+			 {"attributes":{"POSITION":0},"extensions":{"KHR_draco_mesh_compression":{"bufferView":1,"attributes":{"POSITION":0}}}},
+			 {"attributes":{"POSITION":0},"extensions":{"KHR_draco_mesh_compression":{"bufferView":1,"attributes":{"NORMAL":0}}}}]}]}
+			""";
+		using var document = Read( json, "KHR_draco_mesh_compression" );
+		var description = document.DescribePrimitiveUpload( 0, primitive );
+		Assert.AreEqual( primitive == 0 ? GltfUploadMaterialization.None : GltfUploadMaterialization.Draco, description.Attributes["POSITION"].Materialization );
+	}
+
+	[TestMethod]
+	public void SharedDracoAccessorDoesNotExcuseInvalidOrdinaryVertexAlignment()
+	{
+		var positions = Convert.ToBase64String( new byte[36] ); var colors = Convert.ToBase64String( new byte[16] );
+		var json = $$$$$$$$"""
+			{"asset":{"version":"2.0"},"extensionsUsed":["KHR_draco_mesh_compression"],
+			 "buffers":[{"uri":"data:application/octet-stream;base64,{{{{{{{{positions}}}}}}}}","byteLength":36},{"uri":"data:application/octet-stream;base64,{{{{{{{{colors}}}}}}}}","byteLength":16}],
+			 "bufferViews":[{"buffer":0,"byteLength":36},{"buffer":1,"byteOffset":3,"byteLength":13,"byteStride":4}],
+			 "accessors":[{"bufferView":0,"componentType":5126,"count":3,"type":"VEC3","min":[0,0,0],"max":[0,0,0]},
+			 {"bufferView":1,"byteOffset":1,"componentType":5121,"normalized":true,"count":3,"type":"VEC4"}],
+			 "meshes":[{"primitives":[{"attributes":{"POSITION":0,"COLOR_0":1}},
+			 {"attributes":{"POSITION":0,"COLOR_0":1},"extensions":{"KHR_draco_mesh_compression":{"bufferView":0,"attributes":{"COLOR_0":0}}}}]}]}
+			""";
+		using var document = Read( json, "KHR_draco_mesh_compression" );
+		Assert.ThrowsException<GltfException>( () => document.DescribePrimitiveUpload( 0, 0 ) );
 	}
 
 	[TestMethod]
@@ -158,15 +194,35 @@ public class GltfUploadLayoutTests
 			""";
 		using var document = Read( json, "KHR_draco_mesh_compression" );
 		var position = document.DescribePrimitiveUpload( 0, 0 ).Attributes["POSITION"];
-		Assert.AreEqual( 99, position.SourceBufferView ); Assert.IsNull( position.SourceBuffer ); Assert.IsNull( position.ByteStride );
+		Assert.IsNull( position.SourceBufferView ); Assert.IsNull( position.SourceBuffer ); Assert.IsNull( position.ByteStride ); Assert.IsNull( position.AccessorByteOffset );
 		Assert.AreEqual( GltfUploadMaterialization.Draco, position.Materialization );
+	}
+
+	[TestMethod]
+	[DataRow( "\"byteOffset\":13," )]
+	[DataRow( "\"bufferView\":99,\"byteOffset\":13," )]
+	[DataRow( "\"bufferView\":\"ignored\",\"byteOffset\":\"ignored\"," )]
+	public void SelectedDracoIgnoresItsAccessorFallbackLocationFields( string fields )
+	{
+		var json = $$$$$$$$"""
+			{"asset":{"version":"2.0"},"extensionsUsed":["KHR_draco_mesh_compression"],
+			 "buffers":[{"uri":"data:application/octet-stream;base64,AAAAAAAAAAAAAAAA","byteLength":12}],"bufferViews":[{"buffer":0,"byteLength":12}],
+			 "accessors":[{ {{{{{{{{fields}}}}}}}}"componentType":5126,"count":3,"type":"VEC3","min":[0,0,0],"max":[0,0,0]}],
+			 "meshes":[{"primitives":[{"attributes":{"POSITION":0},"extensions":{"KHR_draco_mesh_compression":{"bufferView":0,"attributes":{"POSITION":0}}}}]}]}
+			""";
+		using var selected = Read( json, "KHR_draco_mesh_compression" );
+		var position = selected.DescribePrimitiveUpload( 0, 0 ).Attributes["POSITION"];
+		Assert.AreEqual( GltfUploadMaterialization.Draco, position.Materialization );
+		Assert.IsNull( position.SourceBufferView ); Assert.IsNull( position.AccessorByteOffset );
+		using var fallback = Read( json );
+		Assert.ThrowsException<GltfException>( () => fallback.DescribePrimitiveUpload( 0, 0 ) );
 	}
 
 	[TestMethod]
 	public void CustomMatrixReportsPaddedColumnsWithoutAssumingAStructLayout()
 	{
-		using var document = Read( $$$"""
-			{"asset":{"version":"2.0"},"buffers":[{"uri":"data:application/octet-stream;base64,{{{Convert.ToBase64String( new byte[24] )}}}","byteLength":24}],
+		using var document = Read( $$$$$$$$"""
+			{"asset":{"version":"2.0"},"buffers":[{"uri":"data:application/octet-stream;base64,{{{{{{{{Convert.ToBase64String( new byte[24] )}}}}}}}}","byteLength":24}],
 			 "bufferViews":[{"buffer":0,"byteLength":12},{"buffer":0,"byteOffset":12,"byteLength":12}],
 			 "accessors":[{"bufferView":0,"componentType":5126,"count":1,"type":"VEC3","min":[0,0,0],"max":[0,0,0]},
 			 {"bufferView":1,"componentType":5121,"count":1,"type":"MAT3"}],
@@ -205,13 +261,13 @@ public class GltfUploadLayoutTests
 		var viewLength = accessorOffset + 12;
 		var extraData = Convert.ToBase64String( new byte[viewOffset + viewLength] );
 		var type = semantic == "COLOR_0" ? "VEC4" : "VEC2";
-		var json = $$$"""
-			{"asset":{"version":"2.0"},"buffers":[{"uri":"data:application/octet-stream;base64,{{{vertexData}}}","byteLength":36},
-			 {"uri":"data:application/octet-stream;base64,{{{extraData}}}","byteLength":{{{viewOffset + viewLength}}} }],
-			 "bufferViews":[{"buffer":0,"byteLength":36},{"buffer":1,"byteOffset":{{{viewOffset}}},"byteLength":{{{viewLength}}},"byteStride":4}],
+		var json = $$$$$$$$"""
+			{"asset":{"version":"2.0"},"buffers":[{"uri":"data:application/octet-stream;base64,{{{{{{{{vertexData}}}}}}}}","byteLength":36},
+			 {"uri":"data:application/octet-stream;base64,{{{{{{{{extraData}}}}}}}}","byteLength":{{{{{{{{viewOffset + viewLength}}}}}}}} }],
+			 "bufferViews":[{"buffer":0,"byteLength":36},{"buffer":1,"byteOffset":{{{{{{{{viewOffset}}}}}}}},"byteLength":{{{{{{{{viewLength}}}}}}}},"byteStride":4}],
 			 "accessors":[{"bufferView":0,"componentType":5126,"count":3,"type":"VEC3","min":[0,0,0],"max":[0,0,0]},
-			 {"bufferView":1,"byteOffset":{{{accessorOffset}}},"componentType":{{{component}}},"normalized":true,"count":3,"type":"{{{type}}}"}],
-			 "meshes":[{"primitives":[{"attributes":{"POSITION":0,"{{{semantic}}}":1}}]}]}
+			 {"bufferView":1,"byteOffset":{{{{{{{{accessorOffset}}}}}}}},"componentType":{{{{{{{{component}}}}}}}},"normalized":true,"count":3,"type":"{{{{{{{{type}}}}}}}}"}],
+			 "meshes":[{"primitives":[{"attributes":{"POSITION":0,"{{{{{{{{semantic}}}}}}}}":1}}]}]}
 			""";
 		return Read( json );
 	}

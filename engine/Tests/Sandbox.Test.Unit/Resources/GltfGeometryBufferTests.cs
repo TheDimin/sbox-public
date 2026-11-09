@@ -30,7 +30,7 @@ public class GltfGeometryBufferTests
 			NormalTexture = new GltfTextureInfo { TexCoord = 1, Tiling = System.Numerics.Vector2.One }
 		};
 		var vertices = GltfGeometryBuffer.PackVertices( Triangle(), material );
-		Assert.IsTrue( vertices[0].BaseColorUv.AlmostEqual( new Vector2( -0.5f, 2.5f ), 0.00001f ) );
+		Assert.IsTrue( vertices[0].BaseColorUv.AlmostEqual( new Vector2( 2.5f, 1.5f ), 0.00001f ) );
 		Assert.AreEqual( new Vector2( 3, 4 ), vertices[0].NormalUv );
 		Assert.AreEqual( new Vector2( 0, 1 ), vertices[0].MetallicRoughnessUv );
 	}

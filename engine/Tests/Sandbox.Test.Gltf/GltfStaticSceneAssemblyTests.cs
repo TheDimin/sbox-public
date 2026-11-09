@@ -69,6 +69,7 @@ public class GltfStaticSceneAssemblyTests
 			}
 		AssertVector( origin, allZero.BoundsMin );
 		AssertVector( origin, allZero.BoundsMax );
+		AssertFiniteFrames( allZero );
 	}
 
 	[TestMethod]
@@ -92,6 +93,29 @@ public class GltfStaticSceneAssemblyTests
 		}
 		AssertVector( origin, rankTwo.BoundsMin );
 		AssertVector( expected[2], rankTwo.BoundsMax );
+		AssertFiniteFrames( rankTwo );
+	}
+
+	[TestMethod]
+	public void RankTwoMirroredTransformPreservesSurvivingSurfaceFrame()
+	{
+		using var document = Fixture( "[{\"nodes\":[0]}]", "[{\"mesh\":0,\"scale\":[-2,3,0],\"rotation\":[0,0.70710677,0,0.70710677]}]",
+			normalValues: [0,0,1, 0,0,1, 0,0,1], tangentValues: [1,0,0,1, 1,0,0,1, 1,0,0,1] );
+		var scene = GltfStaticSceneAssembler.Assemble( document );
+		var primitive = scene.Primitives[0].Data;
+		var positions = primitive.Positions.Span;
+		var normal = NVector3.Normalize( NVector3.Cross( positions[1] - positions[0], positions[2] - positions[0] ) );
+		var tangent = NVector3.Normalize( positions[1] - positions[0] );
+
+		CollectionAssert.AreEqual( new uint[] { 0, 1, 2 }, primitive.Indices.ToArray() );
+		for ( var i = 0; i < positions.Length; i++ )
+		{
+			AssertVector( normal, primitive.Normals.Span[i] );
+			var frame = primitive.Tangents.Span[i];
+			AssertVector( tangent, new NVector3( frame.X, frame.Y, frame.Z ) );
+			Assert.AreEqual( 1f, frame.W );
+		}
+		AssertFiniteFrames( scene );
 	}
 
 	[TestMethod]
@@ -116,12 +140,30 @@ public class GltfStaticSceneAssemblyTests
 
 	private static void AssertVector( NVector3 expected, NVector3 actual ) => Assert.IsTrue( NVector3.Distance( expected, actual ) < 0.0001f, $"Expected {expected}, got {actual}." );
 
-	private static GltfDocument Fixture( string scenes, string nodes, bool includeDefault = true, int? animationTarget = null, bool morph = false, bool skin = false, bool instancing = false )
+	private static void AssertFiniteFrames( GltfStaticScene scene )
+	{
+		foreach ( var primitive in scene.Primitives )
+		{
+			foreach ( var normal in primitive.Data.Normals.Span )
+				Assert.AreEqual( 1f, normal.Length(), 0.00001f );
+			for ( var i = 0; i < primitive.Data.Tangents.Length; i++ )
+			{
+				var frame = primitive.Data.Tangents.Span[i];
+				var tangent = new NVector3( frame.X, frame.Y, frame.Z );
+				Assert.AreEqual( 1f, tangent.Length(), 0.00001f );
+				Assert.AreEqual( 1f, frame.W );
+				if ( primitive.Data.Normals.Length != 0 )
+					Assert.AreEqual( 0f, NVector3.Dot( primitive.Data.Normals.Span[i], tangent ), 0.00001f );
+			}
+		}
+	}
+
+	private static GltfDocument Fixture( string scenes, string nodes, bool includeDefault = true, int? animationTarget = null, bool morph = false, bool skin = false, bool instancing = false, float[] normalValues = null, float[] tangentValues = null )
 	{
 		var unit = MathF.Sqrt( 0.5f );
 		float[] position = [0,0,0, 1,0,0, 0,1,0];
-		float[] normal = [unit,unit,0, unit,unit,0, unit,unit,0];
-		float[] tangent = [unit,-unit,0,1, unit,-unit,0,1, unit,-unit,0,1];
+		float[] normal = normalValues ?? [unit,unit,0, unit,unit,0, unit,unit,0];
+		float[] tangent = tangentValues ?? [unit,-unit,0,1, unit,-unit,0,1, unit,-unit,0,1];
 		float[] uv = [0.25f,0.75f, 1,0, 0,1];
 		float[] weights = [1,0,0,0, 1,0,0,0, 1,0,0,0];
 		float[] times = [0,1];

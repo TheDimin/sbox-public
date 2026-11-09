@@ -1,4 +1,6 @@
 using Sandbox.Diagnostics;
+using System.Linq;
+using ModelBodygroupReadback = Editor.ModelBodygroupReadback;
 using Sandbox.Engine;
 using System;
 using System.Diagnostics;
@@ -599,4 +601,197 @@ public class GuidTests
 		Assert.AreEqual( currentPath, promise.ResourcePath, "Promise's path should have been corrected once the real resource loaded" );
 	}
 
+	[TestMethod]
+	public void BuilderMeshNamesSurviveSavingAndReloading()
+	{
+		var folder = Path.GetFileName( _testPath );
+		var path = $"{folder}/named_mesh.vmdl";
+		var mesh = new Mesh( "known_lod_mesh", Material.Load( "materials/default/white.vmat" ) );
+		var vertices = new Vertex[] { new( new Vector3( 0, 0, 0 ) ), new( new Vector3( 1, 0, 0 ) ), new( new Vector3( 0, 1, 0 ) ) };
+		mesh.CreateVertexBuffer( 3, vertices ); mesh.CreateIndexBuffer( 3, new[] { 0, 1, 2 } );
+		var temporary = Model.Builder.WithName( path ).AddMesh( mesh, 0 ).Create();
+		Assert.AreEqual( "known_lod_mesh", temporary.MeshInfo.Meshes[0].Name );
+		File.WriteAllBytes( Path.Combine( _assetsPath, path + "_c" ), temporary.SaveToVmdl() );
+		NativeEngine.g_pResourceSystem.ReloadResource( path );
+		var saved = Model.FromNative( NativeGlue.Resources.GetModel( path, Guid.Empty ) );
+		Assert.IsNotNull( saved ); Assert.IsFalse( saved.IsProcedural );
+		Assert.AreEqual( "known_lod_mesh", saved.MeshInfo.Meshes[0].Name );
+	}
+
+	[TestMethod]
+	public void BuilderAuthoredPhysicsMetadataSurvivesSavingAndReloading()
+	{
+		var folder = Path.GetFileName( _testPath );
+		var path = $"{folder}/authored_physics.vmdl";
+		using var surfaceScope = new AuthoredSurfaceScope();
+		var surface = Surface.FindByName( "default" );
+		Assert.IsNotNull( surface, "Owned default test surface must be registered." );
+		var builder = Model.Builder.WithName( path ).AddSurface( surface ).AddSurface( surface );
+		var body = builder.AddBody( 7 ).SetInertiaScale( 1.5f ).SetDamping( .2f, .3f )
+			.SetGravityScale( .4f ).SetMassCenterOverride( true, new Vector3( 1, 2, 3 ) );
+		body.AddSphere( new Sphere( Vector3.Zero, 2 ) );
+		body.AddHull( new Vector3[] { new( 0, 0, 0 ), new( 4, 0, 0 ), new( 0, 4, 0 ), new( 0, 0, 4 ) } );
+		body.SetShapeSurfaceSlot( PhysicsBodyBuilder.ShapeKind.Sphere, 0, 0 );
+		body.SetShapeSurfaceSlot( PhysicsBodyBuilder.ShapeKind.Hull, 0, 1 );
+		var temporary = builder.Create();
+		void Check( Model model )
+		{
+			Assert.IsNotNull( model.Physics ); Assert.AreEqual( 1, model.Physics.Parts.Count );
+			var part = model.Physics.Parts[0];
+			Assert.AreEqual( 7, part.Mass, .001f ); Assert.AreEqual( 1.5f, part.InertiaScale, .001f );
+			Assert.AreEqual( .2f, part.LinearDamping, .001f ); Assert.AreEqual( .3f, part.AngularDamping, .001f );
+			Assert.AreEqual( .4f, part.GravityScale, .001f ); Assert.IsTrue( part.OverrideMassCenter );
+			Assert.AreEqual( new Vector3( 1, 2, 3 ), part.MassCenterOverride );
+			Assert.AreEqual( 0U, part.native.GetSphere( 0 ).m_nSurfacePropertyIndex );
+			Assert.AreEqual( 1U, part.native.GetHull( 0 ).m_nSurfacePropertyIndex );
+		}
+		Check( temporary );
+		File.WriteAllBytes( Path.Combine( _assetsPath, path + "_c" ), temporary.SaveToVmdl() );
+		NativeEngine.g_pResourceSystem.ReloadResource( path );
+		var saved = Model.FromNative( NativeGlue.Resources.GetModel( path, Guid.Empty ) );
+		Assert.IsNotNull( saved ); Assert.IsFalse( saved.IsProcedural ); Check( saved );
+	}
+
+	[TestMethod]
+	public void ExplicitMeshGroupsRoundTripCapturedMetadata()
+	{
+		var mat = Material.Load( "materials/default/white.vmat" );
+		var mesh = new Mesh( "grouped", mat );
+		mesh.CreateVertexBuffer( 3, new Vertex[] { new() { Position = new( 0, 0, 0 ) }, new() { Position = new( 1, 0, 0 ) }, new() { Position = new( 0, 1, 0 ) } } );
+		mesh.CreateIndexBuffer( 3, new[] { 0, 1, 2 } ); mesh.Bounds = new BBox( Vector3.Zero, Vector3.One );
+		var proceduralSource = Model.Builder.AddMesh( mesh, 0, "body", 0 ).AddMesh( mesh, 0, "body", 1 ).Create();
+		var sourcePath = $"{Path.GetFileName(_testPath)}/original_groups.vmdl";
+		var sourceBytes = proceduralSource.SaveToVmdl();File.WriteAllBytes(Path.Combine(_assetsPath,sourcePath+"_c"),sourceBytes);
+		var sourceEvidence = Path.Combine(Path.GetTempPath(),"gib-original-groups-"+Guid.NewGuid().ToString("N")+".vmdl_c");File.WriteAllBytes(sourceEvidence,sourceBytes);Console.WriteLine("Original compiled group DATA evidence: "+sourceEvidence);
+		NativeEngine.g_pResourceSystem.ReloadResource(sourcePath);var source=Model.FromNative(NativeGlue.Resources.GetModel(sourcePath,Guid.Empty));
+		Assert.IsNotNull(source);Assert.IsFalse(source.IsProcedural);
+		Assert.AreEqual( ModelBodygroupReadback.Status.Success, ModelBodygroupReadback.Read( source, 64, 64, out var before ) );
+		var choices = before.Groups.SelectMany( g => g.Choices ).ToArray();
+		Assert.AreEqual( 2, choices.Length );
+		var ordered = choices.OrderBy( c => c.Mask ).ToArray();
+		Assert.AreEqual( 1UL, ordered[0].Mask ); Assert.AreEqual( 2UL, ordered[1].Mask );
+		// Choice display names are mesh names; raw tokens come from the independent authored oracle.
+		var names = new[] { "body_@0", "body_@1" };
+		var builder = Model.Builder.WithExplicitMeshGroups( names, before.DefaultMask );
+		foreach ( var info in source.MeshInfo.Meshes ) builder.AddMeshWithGroupMask( mesh, 0, info.MeshGroupMask );
+		var folder = Path.GetFileName( _testPath );
+		var path = $"{folder}/explicit_groups.vmdl";
+		var temporary = builder.WithName( path ).Create();
+		var serializedGroups = temporary.SaveToVmdl();
+		var groupEvidence = Path.Combine( Path.GetTempPath(), "gib-explicit-groups-" + Guid.NewGuid().ToString("N") + ".vmdl_c" );
+		File.WriteAllBytes( groupEvidence, serializedGroups );
+		Console.WriteLine( "Explicit mesh-group DATA evidence: " + groupEvidence );
+		File.WriteAllBytes( Path.Combine( _assetsPath, path + "_c" ), serializedGroups );
+		NativeEngine.g_pResourceSystem.ReloadResource( path );
+		var rebuilt = Model.FromNative( NativeGlue.Resources.GetModel( path, Guid.Empty ) );
+		Assert.IsNotNull( rebuilt ); Assert.IsFalse( rebuilt.IsProcedural );
+		Assert.AreEqual( ModelBodygroupReadback.Status.Success, ModelBodygroupReadback.Read( rebuilt, 64, 64, out var after ) );
+		Assert.AreEqual( before.DefaultMask, after.DefaultMask ); Assert.AreEqual( before.Groups.Length, after.Groups.Length );
+		for ( int i = 0; i < before.Groups.Length; ++i )
+		{
+			Assert.AreEqual( before.Groups[i].Name, after.Groups[i].Name ); Assert.AreEqual( before.Groups[i].Mask, after.Groups[i].Mask );
+			CollectionAssert.AreEqual( before.Groups[i].Choices.Select( c => (c.Name, c.Mask) ).ToArray(), after.Groups[i].Choices.Select( c => (c.Name, c.Mask) ).ToArray() );
+		}
+		CollectionAssert.AreEqual( source.MeshInfo.Meshes.Select( x => x.MeshGroupMask ).ToArray(), rebuilt.MeshInfo.Meshes.Select( x => x.MeshGroupMask ).ToArray() );
+		Assert.ThrowsException<ArgumentOutOfRangeException>( () => Model.Builder.WithExplicitMeshGroups( names, 4 ) );
+		Assert.ThrowsException<InvalidOperationException>( () => Model.Builder.WithExplicitMeshGroups( names, before.DefaultMask ).AddMesh( mesh, 0, "other", 0 ) );
+	}
+
+	[TestMethod]
+	public void SavedModelPreservesCompleteOriginalPhysics()
+	{
+		var folder = Path.GetFileName( _testPath );
+		var path = $"{folder}/preserved_original_physics.vmdl";
+		var original = Model.Builder.WithName( "original_physics" );
+		var body = original.AddBody( 13 ).SetInertiaScale( 2.5f ).SetDamping( .13f, .31f ).SetGravityScale( .7f ).SetMassCenterOverride( true, new Vector3( 3, 4, 5 ) );
+		body.AddSphere( new Sphere( new Vector3( 2, 3, 4 ), 7 ) );
+		body.AddCapsule( new Capsule( new Vector3( -4, 0, 0 ), new Vector3( 4, 0, 0 ), 2 ) );
+		body.AddHull( new Vector3[] { new(0,0,0), new(4,0,0), new(0,4,0), new(0,0,4) } );
+		var proceduralSource = original.Create();
+		var originalBytes = proceduralSource.SaveToVmdl();
+		var sourcePath = $"{folder}/original_physics.vmdl";
+		File.WriteAllBytes( Path.Combine( _assetsPath, sourcePath + "_c" ), originalBytes );
+		NativeEngine.g_pResourceSystem.ReloadResource( sourcePath );
+		var source = Model.FromNative( NativeGlue.Resources.GetModel( sourcePath, Guid.Empty ) );
+		Assert.IsNotNull( source ); Assert.IsFalse( source.IsProcedural );
+		var target = Model.Builder.WithName( path ).WithMass( 1 ).AddCollisionSphere( 1 ).Create();
+		var bytes = target.SaveToVmdlWithPhysicsFrom( source, PhysicsBlock(originalBytes) );
+		byte[] PhysicsBlock( byte[] resource )
+		{
+			var table = 8 + BitConverter.ToInt32( resource, 8 ); var count = BitConverter.ToInt32( resource, 12 );
+			for ( int i = 0; i < count; ++i )
+			{
+				var entry = table + i * 12;
+				if ( BitConverter.ToUInt32( resource, entry ) != 0x53594850 ) continue;
+				var start = entry + 4 + BitConverter.ToInt32( resource, entry + 4 );
+				return resource.AsSpan( start, BitConverter.ToInt32(resource, entry + 8) ).ToArray();
+			}
+			throw new Exception( "PHYS block missing" );
+		}
+		var sourceNativeBytes=source.SaveToVmdl();
+		var evidence=Path.Combine(Path.GetTempPath(), "gib-exact-physics-"+Guid.NewGuid().ToString("N")); Directory.CreateDirectory(evidence);
+		File.WriteAllBytes(Path.Combine(evidence,"raw-original.vmdl_c"),originalBytes);
+		File.WriteAllBytes(Path.Combine(evidence,"native-source.vmdl_c"),sourceNativeBytes);
+		File.WriteAllBytes(Path.Combine(evidence,"published.vmdl_c"),bytes);
+		Console.WriteLine("Exact PHYS evidence: "+evidence);
+		Console.WriteLine("Raw/source-native PHYS byte equality: "+PhysicsBlock(originalBytes).SequenceEqual(PhysicsBlock(sourceNativeBytes)));
+		CollectionAssert.AreEqual( PhysicsBlock( originalBytes ), PhysicsBlock( bytes ) );
+		File.WriteAllBytes( Path.Combine( _assetsPath, path + "_c" ), bytes );
+		NativeEngine.g_pResourceSystem.ReloadResource( path );
+		var saved = Model.FromNative( NativeGlue.Resources.GetModel( path, Guid.Empty ) );
+		Assert.IsNotNull( saved ); Assert.IsFalse( saved.IsProcedural );
+		Assert.AreEqual( 1, saved.Physics.Parts.Count );
+		Assert.AreEqual( 3, saved.Physics.Parts[0].Parts.Count() );
+		Assert.AreEqual( 13, saved.Physics.Parts[0].Mass, .001f );
+		Assert.AreEqual( .7f, saved.Physics.Parts[0].GravityScale, .001f );
+		Assert.AreEqual( new Vector3(3,4,5), saved.Physics.Parts[0].MassCenterOverride );
+		var reloadedBytes=saved.SaveToVmdl();
+		File.WriteAllBytes(Path.Combine(evidence,"native-reloaded.vmdl_c"),reloadedBytes);
+		CollectionAssert.AreEqual( PhysicsBlock( sourceNativeBytes ), PhysicsBlock( reloadedBytes ), "Normalized native source/output physics differ." );
+	}
+
+	[TestMethod]
+	public void ExplicitMeshGroupDefaultsRetainAll64BitsAfterNativeReload()
+	{
+		var names=Enumerable.Range(0,64).Select(i=>"known_group_"+i).ToArray();
+		var mesh=new Mesh("high_mask_mesh",Material.Load("materials/default/white.vmat"));
+		mesh.CreateVertexBuffer(3,new Vertex[]{new(new Vector3(0,0,0)),new(new Vector3(1,0,0)),new(new Vector3(0,1,0))});mesh.CreateIndexBuffer(3,new[]{0,1,2});mesh.Bounds=new BBox(Vector3.Zero,Vector3.One);
+		foreach(var mask in new[]{0UL,1UL<<63,ulong.MaxValue})
+		{
+			var path=$"{Path.GetFileName(_testPath)}/mask_{mask}.vmdl";
+			var source=Model.Builder.WithName(path).WithExplicitMeshGroups(names,mask).AddMeshWithGroupMask(mesh,0,ulong.MaxValue).Create();
+			Assert.AreEqual(mask,source.native.GetDefaultMeshGroupMask());
+			var bytes=source.SaveToVmdl();File.WriteAllBytes(Path.Combine(_assetsPath,path+"_c"),bytes);
+			var evidence=Path.Combine(Path.GetTempPath(),$"gib-high-mask-{mask}-{Guid.NewGuid():N}.vmdl_c");File.WriteAllBytes(evidence,bytes);Console.WriteLine("High mask DATA evidence: "+evidence);
+			NativeEngine.g_pResourceSystem.ReloadResource(path);var loaded=Model.FromNative(NativeGlue.Resources.GetModel(path,Guid.Empty));
+			Assert.IsNotNull(loaded);Assert.IsFalse(loaded.IsProcedural);Assert.AreEqual(mask,loaded.native.GetDefaultMeshGroupMask());Assert.AreEqual(ulong.MaxValue,loaded.MeshInfo.Meshes[0].MeshGroupMask);
+		}
+	}
+	[TestMethod]
+	public void AuthoredMaterialGroupsRetainNamesAndOrderedSlotsAfterNativeReload()
+	{
+		var first=Material.Load("materials/default/white.vmat");var second=Material.Load("materials/default/vertex_color.vmat");
+		Assert.IsNotNull(first);Assert.IsNotNull(second);Assert.AreNotEqual(first.ResourcePath,second.ResourcePath,"Independent materials must have distinct identities.");
+		var path=$"{Path.GetFileName(_testPath)}/authored_material_groups.vmdl";
+		var mesh=new Mesh("variant_mesh",first);mesh.CreateVertexBuffer(3,new Vertex[]{new(new Vector3(0,0,0)),new(new Vector3(1,0,0)),new(new Vector3(0,1,0))});mesh.CreateIndexBuffer(3,new[]{0,1,2});mesh.Bounds=new BBox(Vector3.Zero,Vector3.One);
+		var builder=Model.Builder.WithName(path).AddMesh(mesh,0);
+		builder.AddMaterialGroup("authored_default").AddMaterial(first).AddMaterial(first);
+		builder.AddMaterialGroup("painted").AddMaterial(first).AddMaterial(second);
+		var bytes=builder.Create().SaveToVmdl();File.WriteAllBytes(Path.Combine(_assetsPath,path+"_c"),bytes);
+		var evidence=Path.Combine(Path.GetTempPath(),$"gib-material-groups-{Guid.NewGuid():N}.vmdl_c");File.WriteAllBytes(evidence,bytes);Console.WriteLine("Material group DATA evidence: "+evidence);
+		NativeEngine.g_pResourceSystem.ReloadResource(path);var loaded=Model.FromNative(NativeGlue.Resources.GetModel(path,Guid.Empty));
+		Assert.IsNotNull(loaded);Assert.IsFalse(loaded.IsProcedural);Assert.AreEqual(2,loaded.MaterialGroupCount);Assert.AreEqual("authored_default",loaded.GetMaterialGroupName(0));Assert.AreEqual("painted",loaded.GetMaterialGroupName(1));
+		CollectionAssert.AreEqual(new[]{first.ResourcePath,first.ResourcePath},loaded.GetMaterials(0).Select(m=>m.ResourcePath).ToArray());
+		CollectionAssert.AreEqual(new[]{first.ResourcePath,second.ResourcePath},loaded.GetMaterials(1).Select(m=>m.ResourcePath).ToArray());
+	}
+	sealed class AuthoredSurfaceScope : IDisposable
+	{
+		readonly Surface previous; readonly bool installed;
+		public AuthoredSurfaceScope()
+		{
+			if(Surface.FindByName("default")!=null)return;
+			Surface.All.TryGetValue(0,out previous); var surface=new Surface(); surface.RegisterWeakResourceId("surfaces/default.surface"); Surface.All[0]=surface; installed=true;
+		}
+		public void Dispose() { if(!installed)return; if(previous!=null)Surface.All[0]=previous;else Surface.All.Remove(0); }
+	}
 }

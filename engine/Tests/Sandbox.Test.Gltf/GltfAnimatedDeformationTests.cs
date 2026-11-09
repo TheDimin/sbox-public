@@ -14,7 +14,7 @@ public class GltfAnimatedDeformationTests
 	{
 		var fixture = new DeformationFixture();
 		var position = fixture.Floats( "VEC3", 1, [1, 2, 3], true );
-		var times = fixture.Floats( "SCALAR", 2, [0, 2] );
+		var times = fixture.Floats( "SCALAR", 2, [0, 2], true );
 		var translation = fixture.Floats( "VEC3", 2, [0, 0, 0, 4, 0, 0] );
 		using var document = fixture.Read( $$$"""
 			"meshes":[{"primitives":[{"mode":0,"attributes":{"POSITION":{{{position}}} }}]}],
@@ -82,7 +82,7 @@ public class GltfAnimatedDeformationTests
 			1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
 			1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
 			1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1] );
-		var times = fixture.Floats( "SCALAR", 2, [0, 2] );
+		var times = fixture.Floats( "SCALAR", 2, [0, 2], true );
 		var translations = fixture.Floats( "VEC3", 2, [0, 0, 0, 0, 2, 0] );
 		var morphWeights = fixture.Floats( "SCALAR", 2, [0, -1] );
 		return fixture.Read( $$$"""

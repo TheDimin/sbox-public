@@ -245,6 +245,9 @@ public unsafe class WindowInputTests
 		var disableScreensaver = Sdl.__N.globalSdl_DisableScreenSaver;
 		var enableScreensaver = Sdl.__N.globalSdl_EnableScreenSaver;
 		var tools = IToolsDll.Current;
+		var qtInput = Environment.GetEnvironmentVariable( "SBOX_LINUX_QT_INPUT" );
+		// These tests exercise SDL capture, including native capture failures.
+		Environment.SetEnvironmentVariable( "SBOX_LINUX_QT_INPUT", "0" );
 		var applicationActive = Native.QApp.__N.qApp_IsApplicationActive;
 		var keyboard = Sdl.__N.globalSdl_GetKeyboardFocus;
 		IToolsDll.Current = (IToolsDll)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject( typeof( ToolsDll ) );
@@ -317,6 +320,7 @@ public unsafe class WindowInputTests
 		finally
 		{
 			WindowInput.Shutdown();
+			Environment.SetEnvironmentVariable( "SBOX_LINUX_QT_INPUT", qtInput );
 			Sdl.__N.globalSdl_DisableScreenSaver = disableScreensaver;
 			Sdl.__N.globalSdl_EnableScreenSaver = enableScreensaver;
 			InputSystem.__N.g_pInputSystem_SetGameFocus = saved0;
