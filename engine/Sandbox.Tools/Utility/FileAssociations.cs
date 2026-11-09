@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace Editor;
 
@@ -23,51 +24,68 @@ internal class FileAssociations
 		}
 	}
 
+	internal const string DesktopFileName = "sandbox-project.desktop";
+	private const string MimeType = "application/x-sbproj";
+
 	/// <summary>
-	/// Writes the shared-mime-info type and desktop entry that make .sbproj files open in the editor.
-	/// Returns the desktop entry file name. Does not run any external tool.
+	/// Writes the shared-mime-info type, icon and desktop entry that make .sbproj files open in the editor.
+	/// Returns the commands that refresh the desktop caches. The caller runs them.
 	/// </summary>
-	internal static string WriteLinuxFiles( string dataHome, string editorPath, string iconSourcePath )
+	internal static string[][] WriteLinuxFiles( string dataHome, string editorPath, string iconSourcePath )
 	{
-		var mimeDirectory = Path.Combine( dataHome, "mime", "packages" );
-		var applicationsDirectory = Path.Combine( dataHome, "applications" );
-		Directory.CreateDirectory( mimeDirectory );
-		Directory.CreateDirectory( applicationsDirectory );
+		var mimeRoot = Path.Combine( dataHome, "mime" );
+		var iconRoot = Path.Combine( dataHome, "icons", "hicolor" );
+		var mimePackages = Path.Combine( mimeRoot, "packages" );
+		var applications = Path.Combine( dataHome, "applications" );
+		var iconFolder = Path.Combine( iconRoot, "128x128", "mimetypes" );
 
-		// The file manager looks up the MIME type icon by its generic name in the hicolor theme.
-		var iconDirectory = Path.Combine( dataHome, "icons", "hicolor", "128x128", "mimetypes" );
-		Directory.CreateDirectory( iconDirectory );
-		File.Copy( iconSourcePath, Path.Combine( iconDirectory, "application-x-sbproj.png" ), true );
+		foreach ( var folder in new[] { mimePackages, applications, iconFolder } )
+			Directory.CreateDirectory( folder );
 
-		File.WriteAllText( Path.Combine( mimeDirectory, "sandbox-project.xml" ), string.Join( "\n",
-			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
-			"<mime-info xmlns=\"http://www.freedesktop.org/standards/shared-mime-info\">",
-			"  <mime-type type=\"application/x-sbproj\">",
-			"    <comment>Sandbox Project File</comment>",
-			"    <icon name=\"application-x-sbproj\"/>",
-			"    <glob pattern=\"*.sbproj\"/>",
-			"  </mime-type>",
-			"</mime-info>",
-			"" ) );
+		// The file manager finds the MIME icon by name in the hicolor theme.
+		File.Copy( iconSourcePath, Path.Combine( iconFolder, "application-x-sbproj.png" ), true );
+
+		WriteUnixText( Path.Combine( mimePackages, "sandbox-project.xml" ), """
+			<?xml version="1.0" encoding="UTF-8"?>
+			<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+			  <mime-type type="application/x-sbproj">
+			    <comment>Sandbox Project File</comment>
+			    <icon name="application-x-sbproj"/>
+			    <glob pattern="*.sbproj"/>
+			  </mime-type>
+			</mime-info>
+			""" );
 
 		// Desktop entry values are quoted with double quotes, and \ " ` $ must be escaped inside them.
 		var quotedPath = editorPath.Replace( "\\", "\\\\" ).Replace( "\"", "\\\"" ).Replace( "`", "\\`" ).Replace( "$", "\\$" );
 
-		var desktopName = "sandbox-project.desktop";
-		File.WriteAllText( Path.Combine( applicationsDirectory, desktopName ), string.Join( "\n",
-			"[Desktop Entry]",
-			"Type=Application",
-			"Name=s&box",
-			"Comment=Open a Sandbox project",
-			"Icon=application-x-sbproj",
-			$"Exec=\"{quotedPath}\" -project %f",
-			"MimeType=application/x-sbproj;",
-			"NoDisplay=true",
-			"Terminal=false",
-			"Categories=Development;Game;",
-			"" ) );
+		WriteUnixText( Path.Combine( applications, DesktopFileName ), $"""
+			[Desktop Entry]
+			Type=Application
+			Name=s&box
+			Comment=Open a Sandbox project
+			Icon=application-x-sbproj
+			Exec="{quotedPath}" -project %f
+			MimeType={MimeType};
+			NoDisplay=true
+			Terminal=false
+			Categories=Development;Game;
+			""" );
 
-		return desktopName;
+		return
+		[
+			["update-mime-database", mimeRoot],
+			["gtk-update-icon-cache", "-f", "-t", iconRoot],
+			["xdg-mime", "default", DesktopFileName, MimeType],
+		];
+	}
+
+	/// <summary>
+	/// Desktop files need LF line endings, and source files may use CRLF inside raw strings.
+	/// </summary>
+	private static void WriteUnixText( string path, string text )
+	{
+		File.WriteAllText( path, text.ReplaceLineEndings( "\n" ) + "\n" );
 	}
 
 	private static void CreateLinux()
@@ -78,12 +96,10 @@ internal class FileAssociations
 			if ( string.IsNullOrEmpty( dataHome ) )
 				dataHome = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), ".local", "share" );
 
-			var desktopName = WriteLinuxFiles( dataHome, FileSystem.Root.GetFullPath( "sbox-dev" ), FileSystem.Root.GetFullPath( "core/tools/images/logo_rounded.png" ) );
+			var commands = WriteLinuxFiles( dataHome, FileSystem.Root.GetFullPath( "sbox-dev" ), FileSystem.Root.GetFullPath( "core/tools/images/logo_rounded.png" ) );
 
-			// Both tools are optional. A desktop without them just keeps the files we wrote.
-			RunTool( "update-mime-database", Path.Combine( dataHome, "mime" ) );
-			RunTool( "gtk-update-icon-cache", "-f", "-t", Path.Combine( dataHome, "icons", "hicolor" ) );
-			RunTool( "xdg-mime", "default", desktopName, "application/x-sbproj" );
+			// Every tool is optional, and each can take seconds, so keep them off the startup path.
+			_ = Task.Run( () => Array.ForEach( commands, RunTool ) );
 		}
 		catch ( Exception ex )
 		{
@@ -91,20 +107,19 @@ internal class FileAssociations
 		}
 	}
 
-	private static void RunTool( string tool, params string[] args )
+	private static void RunTool( string[] command )
 	{
 		try
 		{
-			var info = new ProcessStartInfo( tool ) { UseShellExecute = false, RedirectStandardError = true };
-			foreach ( var arg in args ) info.ArgumentList.Add( arg );
+			using var process = Process.Start( new ProcessStartInfo( command[0], command[1..] ) { UseShellExecute = false } );
+			if ( process is null || process.WaitForExit( 5000 ) ) return;
 
-			using var process = Process.Start( info );
-			if ( process is null ) return;
-			if ( !process.WaitForExit( 5000 ) ) process.Kill();
+			process.Kill();
+			process.WaitForExit();
 		}
 		catch ( Exception ex )
 		{
-			Log.Info( $"Could not run {tool}: {ex.Message}" );
+			Log.Info( $"Could not run {command[0]}: {ex.Message}" );
 		}
 	}
 
