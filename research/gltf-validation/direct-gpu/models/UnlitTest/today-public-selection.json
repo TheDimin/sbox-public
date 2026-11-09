@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "engine_sha256": "cd87f30b2c2024dedf073d394e47c4412a4df28018846e17728f52e635845771",
+  "gltf_sha256": "b86cb72e0c0e0f3c23af45bd115f68760655d1754d663f41df62a45e136f9e8b",
+  "tools_sha256": "f015bd68d6bae3573b2476e1d8ac27f65e5b245bb825828cb8a1011929b724c6",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestReference.cs",
+      "sha256": "5ecbd8a1f577b7b62865a283f70a939553ec4fa9a1dc6bc9d23e0661a6511204"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestLiteralGeometry.cs",
+      "sha256": "35d7af0f850dc89c6a59369e14610462fa45dae85180b8791797b9862c36128b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestCoreTests.cs",
+      "sha256": "f8e894fb1b70a5fd87174b7b52e7567fc445d5a25ceeb6df74d16cce45b83283"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestGpuChecks.cs",
+      "sha256": "8b9084e38b34f83fe9abfdd09c99f5b3615bcc7c6f698b06a5f9ca94432327f9"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestImageChecks.cs",
+      "sha256": "ea580576180b9fff2d32d985d1d4966a469c85834a65c7f0035dd4492078f24d"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestGraphCandidateGate.cs",
+      "sha256": "4f5a5cf718e9def577e86f57458f4c11cb979123c8d278b6d4df41c2ee3eaafb"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestGpuProbe.cs",
+      "sha256": "0515e16702edd41bd507efeb687db177a8e10422e907fa3711c8c1835b439aeb"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitFeatureFixtures.cs",
+      "sha256": "0513bd0a7f8aea1e9db6f19056c67a9bd818aaee205e086f607d0c577045837d"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitFeatureRenderingTests.cs",
+      "sha256": "4f461d7ff64fd6ed3890259fe0883876078878359bba88bf257b2dc863542b87"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitFocusedFeatureExecution.cs",
+      "sha256": "1526257f4d932e7f401e56cf216e2261fdcdd0a9d19b848a79c9341e10647255"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitPublicMount.cs",
+      "sha256": "7b9b9499827ebbcf449f5676e756f4776cfdf7774c6f73b75fe522e523094692"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitPublicRenderingTests.cs",
+      "sha256": "b5b98a40ee35849e31daa7a0e1b8891a42fb47cba5cea27935affdcb662f7640"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestPublicLoadTests.cs",
+      "sha256": "df5f26a7cff53b8672d7a42f6b90ac92bc2b75693fea1636e51929b6039aae04"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitPublicSelectionTests.cs",
+      "sha256": "718b0cf3f5a9f83d2f2849bd0732218ecd75710a1eb942cbc2ff8ecb3ead2631"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.UnlitTestValidation.UnlitPublicCaptureExecution",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout",
+            "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/UnlitTest/today-public-config.json"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.UnlitTestValidation.UnlitFocusedFeatureExecution",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout",
+            "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/UnlitTest/today-public-config.json"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.UnlitTestValidation.UnlitTestPublicLoadTests",
+      "kind": "mstest",
+      "expected_cases": 4,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.UnlitTestValidation.UnlitPublicSelectionTests",
+      "kind": "mstest",
+      "expected_cases": 6,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ]
+    }
+  ]
+}

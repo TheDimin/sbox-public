@@ -1,0 +1,220 @@
+{
+  "model": "Fox",
+  "owner": "/root/gpu_fox",
+  "coordinator": "/root/gpu_validation",
+  "shared_backend_owner": "/root/gpu_fox",
+  "corpus_revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/FoxChannelArithmeticAudit.cs",
+      "sha256": "2235ac60f4c9e78e31e5ba16de6dd24cc285087ceb1db2adc3da58cee180d3e7"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/FoxCoreTests.cs",
+      "sha256": "1216e6bb82039c837b231cfdc50a935bc232dc651cbc703064306b21fa970ffe"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/FoxDiagnostics.cs",
+      "sha256": "61041d7c2b77e869e5907a7f6cdf169f97ebda1d8671843081311cb700e7ee23"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/FoxGpuChecks.cs",
+      "sha256": "17cdc3fea4e9d23a8d57d2afeb334d351745c1cff80e72640aa1de13a57a730c"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/FoxGpuProbe.cs",
+      "sha256": "df1f62eef54558582fcb15910cb6391663c046ddef333c91bcb6ee9277801444"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/FoxGpuSmokeProbe.cs",
+      "sha256": "08c8a61fc6c21d57f8ad715b5b38677711227dec822d4ebd313fc39f90ff7ea4"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/FoxReference.cs",
+      "sha256": "74b7945ded180d54d3efc39ef2a6984709bb9d1004e8d01fae4cc0be06f3fc73"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/FoxReferenceSelectionTests.cs",
+      "sha256": "61ab6b080ce1c757caba6236bb09d4bd3e7fae3855b4d621a2f94ad60abe8538"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfAnimationMidpointPrecisionTests.cs",
+      "sha256": "e0e2b27fbdf79c2b16d2600347fd5fc893d548a5506fe7a6d2e981ae6c64b822"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuAssetDefinitionTests.cs",
+      "sha256": "0d62ab4724a3cdacd07413143df786c5e693ddf46d9f6fc16aaf7378c472af74"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuEmptyDefinitionTests.cs",
+      "sha256": "e55b5eb0f304ac7ea6403c90bd157b10791f22dcdff1a33a1864fb7848def39d"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuInstanceStateTests.cs",
+      "sha256": "ecd2d964ca0e3c10b48c98999ccc520427243c8cb7ae77ab32652bd78463cc54"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRetiredOwnerTests.cs",
+      "sha256": "537a7cb0b3fc83956558d7b5fea2a4b9367a55c4fcb234fed78e14642f0c1bb6"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/ACCEPTANCE.md",
+      "sha256": "b3b196165573bcfa18b5206d4db1a944482b519000da3500e56eb1772f993e0a"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/ARITHMETIC_AUDIT.md",
+      "sha256": "146e7f8a5df136c951b62d9c30f8cb493c2187cff4ca7a4ab43806a27893918d"
+    }
+  ],
+  "producer_sources_next_generation": [
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs",
+      "sha256": "1e8017cc6d4252329f2883bd393c328fb30ff809cea91eca8facaf118595937f"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuRig.cs",
+      "sha256": "8e1cc351f5563d626d3464370b3a96bda4dc07cfef79479acfd1c0abfeed2de3"
+    },
+    {
+      "path": "engine/Sandbox.Gltf/GltfDocument.PoseOwnership.cs",
+      "sha256": "42e5c136556ea0827c9ebd42b79fb03a71f5eebfecc538292dcea1f136646fdc"
+    }
+  ],
+  "producer_rule": "Use the actual installed Engine/Gltf assemblies. Never compile these producer sources into a helper. The immutable fee5 build is earlier than the current instancing/provenance/retirement sources.",
+  "suites": [
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.Tests.FoxCoreTests.RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 20,
+      "scope": "in-engine CPU source+compiled, keys/midpoints/clamps/rest/pose isolation",
+      "last_actual": "8 pass/12 fail; original thresholds unchanged"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.Tests.FoxReferenceSelectionTests.RunAll",
+      "arguments": [],
+      "expected_cases": 3,
+      "scope": "independent reference exact/held quaternion bits and antipodal interior",
+      "last_actual": "3 pass after test-first reference correction"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.GltfGpuAssetDefinitionTests.RunAll",
+      "arguments": [],
+      "expected_cases": 5,
+      "requires": "first extracted Engine or later",
+      "last_actual": "5 expected red before extraction; post-install pending"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.GltfGpuEmptyDefinitionTests.RunAll",
+      "arguments": [],
+      "expected_cases": 2,
+      "requires": "first extracted Engine or later",
+      "last_actual": "2 expected red before extraction; post-install pending"
+    },
+    {
+      "entry": "Sandbox.Tests.Gltf.GltfAnimationMidpointPrecisionTests",
+      "kind": "MSTest",
+      "expected_cases": 9,
+      "requires": "public GltfAnimationSampler only",
+      "last_actual": "unrun; analytic precision target baseline requested before any sampler change"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.GltfGpuRetiredOwnerTests",
+      "kind": "MSTest",
+      "expected_cases": 1,
+      "requires": "extracted Engine, source set includes GltfGpuBackendContractTests fixture",
+      "last_actual": "unrun; expected retirement failure on first fee5 before later fix"
+    },
+    {
+      "entry": "Sandbox.Tests.GltfGpuCleanupTests",
+      "kind": "MSTest",
+      "source": "engine/Tests/Sandbox.Test.Unit/Resources/GltfGpuCleanupTests.cs",
+      "expected_cases": 3,
+      "requires": "first extracted Engine or later",
+      "last_actual": "unrun"
+    },
+    {
+      "entry": "Sandbox.Tests.GltfGpuSourceOwnershipTests",
+      "kind": "MSTest",
+      "source": "engine/Tests/Sandbox.Test.Unit/Resources/GltfGpuSourceOwnershipTests.cs",
+      "expected_cases": 5,
+      "requires": "NEXT Engine containing RequireSourceOwnership API; not fee5",
+      "last_actual": "unrun; tests written before producer seam"
+    },
+    {
+      "entry": "Sandbox.Tests.Gltf.GltfPoseOwnershipTests",
+      "kind": "MSTest",
+      "source": "engine/Tests/Sandbox.Test.Gltf/GltfPoseOwnershipTests.cs",
+      "expected_cases": 4,
+      "requires": "first extracted Gltf or later",
+      "last_actual": "unrun; tests written before parser method"
+    }
+  ],
+  "diagnostics": [
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.Tests.FoxDiagnostics.AuditArithmetic",
+      "scope": "already executed; preserves original failed thresholds"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.Tests.FoxChannelArithmeticAudit.Run",
+      "arguments": [
+        "FoxReference"
+      ],
+      "scope": "unrun channel bits/sign-independent physical angle at four observed times; no acceptance threshold change"
+    }
+  ],
+  "gpu_probes": [
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.Tests.FoxGpuSmokeProbe.Run",
+      "measurements": 9,
+      "capture_poses": 6,
+      "last_actual_receipt": "79e57fbdfd955db7333b4294601beb8af7921cbe81a5cdfa404e8445c06c96e6",
+      "scope": "bounded actual source-material/white diagnosis, instance independence/survivor; full matrix pending"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.Tests.FoxGpuProbe.Run",
+      "scope": "full source/compiled keys/midpoints/affine matrix, unrun"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.GltfGpuInstanceStateTests.PlacementFailureKeepsLastValidState",
+      "arguments": [
+        "SceneWorld",
+        "borrowedComputeMaterial",
+        "Func<Task>framewait"
+      ],
+      "scope": "finite-overflow placement preflight retains actual GPU output/bounds/revision; unrun"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.GltfGpuInstanceStateTests.RetainedInstanceSurvivesOwnerAndSiblingRelease",
+      "arguments": [
+        "SceneWorld",
+        "Func<Task>framewait"
+      ],
+      "scope": "compiled shader, two instances/owner release/live CPU retention/final retirement; unrun, first fee5 expected retirement failure"
+    }
+  ],
+  "unapplied_accuracy_proposal": {
+    "path": "research/gltf-validation/direct-gpu/models/Fox/slerp-final-rounding.patch",
+    "sha256": "f85882a4cc26fa3f2e489c324f9a7a63a107a3e226ed76347663059b50c70333"
+  },
+  "unimplemented_or_unproven": [
+    "full Fox GPU matrix",
+    "source-vs-Khronos image acceptance",
+    "high cadence+wall-clock playback",
+    "all public skeleton/sequence parity",
+    "compiled GPU layout/load-memory targets",
+    "Windows",
+    "selected material/extension fidelity"
+  ],
+  "license": "PixelMannen model CC0; tomkranis rigging/animation and AsoboStudio/scurest conversion CC BY 4.0, pinned README attribution required with published media",
+  "execution_owner_only": "/root/gpu_validation; no worker builds/editor/shader/capture execution"
+}

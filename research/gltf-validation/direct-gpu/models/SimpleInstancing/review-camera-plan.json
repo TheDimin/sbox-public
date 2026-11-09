@@ -1,0 +1,150 @@
+{
+  "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/SimpleInstancing/review-camera-lit",
+  "driver_sha256": "cb7e42fc5bcc3f20f2fdedb1cf77618a96fb2d1222499a18fa70a241654f6396",
+  "recipes_sha256": "93bfc3040378b2111310d764dedbb8341b8807287b74b44971fa7062adc5c6ce",
+  "cases": [
+    {
+      "id": "SimpleInstancing/glTF",
+      "inputs": [
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/SimpleInstancing/glTF/SimpleInstancing.gltf",
+          "sha256": "a01695630e6459c945826c7ff8dde74784de8279f60b9b62604980dc7486340e"
+        },
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/SimpleInstancing/glTF/SimpleInstancing.bin",
+          "sha256": "29d38705c2a619f30374e80413be61f2e855dd9ec59c499201000aa53715a73c"
+        }
+      ],
+      "request": {
+        "schemaVersion": 1,
+        "id": "SimpleInstancing/glTF",
+        "sourcePath": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/SimpleInstancing/glTF/SimpleInstancing.gltf",
+        "corpusRoot": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets",
+        "inputPath": "Models/SimpleInstancing/glTF/SimpleInstancing.gltf",
+        "recipe": {
+          "id": "SimpleInstancing/glTF",
+          "input": {
+            "path": "Models/SimpleInstancing/glTF/SimpleInstancing.gltf",
+            "sha256": "a01695630e6459c945826c7ff8dde74784de8279f60b9b62604980dc7486340e"
+          },
+          "reference": {
+            "path": "Models/SimpleInstancing/screenshot/screenshot.png",
+            "url": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/90d7ede14c7e280af263824604b427a1ca02cb66/Models/SimpleInstancing/screenshot/screenshot.png",
+            "kind": "image",
+            "sha256": "7301d0fd145de5c561d604d4fb646eddab69b22b34cad6d28f82fd0b470cfcb9",
+            "format": "png",
+            "width": 128,
+            "height": 128,
+            "frames": 1,
+            "animated": false,
+            "frameDurationsMs": [
+              0
+            ],
+            "durationMs": 0
+          },
+          "camera": {
+            "space": "gltf-metres",
+            "position": [
+              -20,
+              9,
+              30
+            ],
+            "target": [
+              5.532520325203252,
+              5.532520325203252,
+              5.532520325203252
+            ],
+            "up": [
+              0,
+              1,
+              0
+            ],
+            "projection": "perspective",
+            "verticalFov": 45,
+            "orthographicHeight": 25.562183168370677,
+            "preset": "review-negative-x-positive-z-low-elevation"
+          },
+          "presentation": {
+            "background": {
+              "type": "solid",
+              "color": [
+                0.35,
+                0.35,
+                0.35,
+                1
+              ]
+            },
+            "environment": {
+              "type": "engine-default",
+              "sourceReferenceEnvironment": "unknown"
+            },
+            "lights": [
+              {
+                "type": "directional",
+                "direction": [
+                  0.7185589704037579,
+                  -0.09758490714128412,
+                  -0.6885856460532112
+                ],
+                "color": [
+                  1,
+                  1,
+                  1
+                ],
+                "intensity": 2
+              }
+            ],
+            "exposure": 1,
+            "resolution": {
+              "width": 512,
+              "height": 512
+            }
+          },
+          "animation": {
+            "clip": null,
+            "name": null,
+            "time": 0,
+            "rate": 1,
+            "duration": 0,
+            "loop": false,
+            "captureTimes": [
+              0
+            ],
+            "recording": {
+              "kind": "image",
+              "fps": null,
+              "frameCount": 1,
+              "duration": 0,
+              "sampleTimes": [
+                0
+              ],
+              "frameDurationsSeconds": [],
+              "timingProvenance": "static reference: one selected pose"
+            },
+            "clips": [],
+            "referenceDuration": 0.0,
+            "timingRelationship": "authored rate retained; reference correspondence needs tuning"
+          },
+          "provenance": {
+            "camera": "inferred from reference: negative X positive Z low-elevation view, preserve source transforms",
+            "presentation": "same native directional light intensity and default materials; direction tracks new camera so visible faces are illuminated",
+            "animation": "static",
+            "inspectedReference": true,
+            "reviewMethod": "all150 pinned previews and all15 animated preview phase strips visually inspected",
+            "bounds": "existing independent SimpleInstancing reference.json: bounds of all125 instance rows",
+            "notes": [
+              "Authored-camera selection is inferred even when its numeric parameters are exact source values."
+            ]
+          },
+          "matchStatus": "needs-tuning",
+          "limitations": [
+            "Upstream preview renderer, exact camera selection, environment, exposure and tone mapping are not documented; this is not an exact matched-reference claim.",
+            "Reference appearance is accepted only by the user; recipe inference does not approve a model.",
+            "Camera inferred from inspected source preview; declared-rest bounds framing may need model-specific tuning for deformation or instancing."
+          ]
+        },
+        "timeoutSeconds": 90
+      }
+    }
+  ]
+}

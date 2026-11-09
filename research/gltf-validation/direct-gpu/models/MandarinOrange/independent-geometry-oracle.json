@@ -1,0 +1,25 @@
+{
+  "provenance": "Python stdlib struct float32 source buffer decode; literal source parent rotation -60 degrees about X; (z,x,y)/0.0254. Independent of GltfDocument pose/backend evaluator.",
+  "source_binary_sha256": "15bc58559ab4b60e6e1a94449940911e1c5ebc4c021004b7f4fac54323063cfd",
+  "positions": 24138,
+  "source_stride": 32,
+  "indices": 122508,
+  "index_byte_offset": 772416,
+  "index_component_type": 5125,
+  "scene": 0,
+  "scene_roots": [
+    1
+  ],
+  "mesh_node": 0,
+  "bounds_min_inches": [
+    -0.09897061174952243,
+    -0.3318894859843367,
+    -0.317570399565167
+  ],
+  "bounds_max_inches": [
+    0.3711223537166184,
+    0.28795337187140946,
+    0.3657412926204643
+  ],
+  "reference_camera_status": "inferred diagnostic fit; upstream screenshot uses undocumented lighting/camera and optional transmission extension"
+}

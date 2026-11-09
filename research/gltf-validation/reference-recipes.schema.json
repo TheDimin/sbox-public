@@ -1,0 +1,341 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Pinned Khronos source-reference capture recipes",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "corpusPin",
+    "corpusRoot",
+    "cases"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "corpusPin": {
+      "const": "90d7ede14c7e280af263824604b427a1ca02cb66"
+    },
+    "corpusRoot": {
+      "type": "string"
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 337,
+      "maxItems": 337,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "input",
+          "reference",
+          "camera",
+          "presentation",
+          "animation",
+          "provenance",
+          "matchStatus",
+          "limitations"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[^/]+/[^/]+$"
+          },
+          "input": {
+            "type": "object",
+            "required": [
+              "path",
+              "sha256"
+            ],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          },
+          "reference": {
+            "type": "object",
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "image",
+                  "apng",
+                  "video",
+                  "unavailable"
+                ]
+              },
+              "path": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "reason": {
+                "type": "string"
+              },
+              "animated": {
+                "type": "boolean"
+              },
+              "frames": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "frameDurationsMs": {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "durationMs": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "kind": {
+                      "const": "unavailable"
+                    }
+                  }
+                },
+                "then": {
+                  "required": [
+                    "reason"
+                  ]
+                },
+                "else": {
+                  "required": [
+                    "path",
+                    "url",
+                    "sha256"
+                  ]
+                }
+              }
+            ]
+          },
+          "camera": {
+            "type": "object",
+            "required": [
+              "space",
+              "position",
+              "target",
+              "up",
+              "projection",
+              "verticalFov",
+              "orthographicHeight",
+              "preset"
+            ],
+            "properties": {
+              "space": {
+                "const": "gltf-metres"
+              },
+              "position": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "number"
+                }
+              },
+              "target": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "number"
+                }
+              },
+              "up": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "number"
+                }
+              },
+              "projection": {
+                "enum": [
+                  "perspective",
+                  "orthographic"
+                ]
+              },
+              "verticalFov": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "exclusiveMaximum": 179,
+                "description": "Vertical field of view in degrees; driver sets FovAxis.Vertical."
+              },
+              "orthographicHeight": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "preset": {
+                "type": "string"
+              }
+            }
+          },
+          "presentation": {
+            "type": "object",
+            "required": [
+              "background",
+              "environment",
+              "lights",
+              "exposure",
+              "resolution"
+            ],
+            "properties": {
+              "resolution": {
+                "type": "object",
+                "required": [
+                  "width",
+                  "height"
+                ],
+                "properties": {
+                  "width": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "height": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          },
+          "animation": {
+            "type": "object",
+            "required": [
+              "clip",
+              "name",
+              "time",
+              "rate",
+              "duration",
+              "loop",
+              "recording"
+            ],
+            "properties": {
+              "clip": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "time": {
+                "type": "number",
+                "minimum": 0
+              },
+              "rate": {
+                "type": "number"
+              },
+              "duration": {
+                "type": "number",
+                "minimum": 0
+              },
+              "loop": {
+                "type": "boolean"
+              },
+              "recording": {
+                "type": "object",
+                "required": [
+                  "kind",
+                  "fps",
+                  "frameCount",
+                  "duration",
+                  "sampleTimes",
+                  "frameDurationsSeconds",
+                  "timingProvenance"
+                ],
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "image",
+                      "apng",
+                      "video"
+                    ]
+                  },
+                  "fps": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "frameCount": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "duration": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "sampleTimes": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "frameDurationsSeconds": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  },
+                  "timingProvenance": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "provenance": {
+            "type": "object",
+            "required": [
+              "camera",
+              "presentation",
+              "animation",
+              "inspectedReference"
+            ]
+          },
+          "matchStatus": {
+            "enum": [
+              "needs-tuning",
+              "unknown",
+              "matched"
+            ]
+          },
+          "limitations": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "description": "Source-reference recipes, not automatic visual approvals. Python inventory tests also enforce ID completeness, local hashes, finite vectors, nonparallel camera up and timing relationships."
+}

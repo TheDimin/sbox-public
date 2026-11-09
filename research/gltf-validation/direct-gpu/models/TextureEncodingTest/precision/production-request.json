@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "engine_sha256": "60bc2b51bbd70c40a000f8b29f420714aff4e3dbda723794b18fdfc43b571396",
+  "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedReference.cs",
+      "sha256": "c8c3c1a83ca0889ff9bb46b40106feca93d371bd520df5f6767331d89e78dcd8"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/PngTexelReference.cs",
+      "sha256": "9c9b6bc95031449befd2e6e169722eca2d676abe52e5a017b076ccfb4cb0c6f9"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/Png16ProductionTests.cs",
+      "sha256": "cf9e97e87a846ec2d3a8f97af44bddf69959366eabb2e46eae6ab0d52c7a9c79"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/Png16ProductionMatrixTests.cs",
+      "sha256": "61c2b131571170b114a21d3e566d8f75303b80e732ab65a46a5776e33206cbbd"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/Png16ProductionBoundaryTests.cs",
+      "sha256": "bcec429d858054f0fd3f0b07298552297d34659848447b3b28e2603560b8a618"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/Png16GpuProducerTests.cs",
+      "sha256": "1f10ed10583564e2ffa364fd40cac989e8b7035c3366048b5b5a14f612ae2f61"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/Png16PublicModelTests.cs",
+      "sha256": "2e4c685ab2070bccf74c6c3e8421929cdcbeeefd45ba869a7e99dd2516c6b401"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/Png16MetadataTests.cs",
+      "sha256": "271626bcdd58d4704f7c0f90473b88791a8bade15acb6e7c95fa166f8dfa03ac"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/CoreImageMatrixTests.cs",
+      "sha256": "015b7537921908c9064927dfbc1d6069da3841bbfa0337a7a7bc8a17c184dbbc"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.Png16ProductionMatrixTests",
+      "kind": "static_results",
+      "method": "Run",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 46
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.Png16ProductionTests",
+      "kind": "static_results",
+      "method": "Run",
+      "arguments": [],
+      "expected_cases": 5
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.Png16ProductionTests",
+      "kind": "static_results",
+      "method": "RunProducerMip",
+      "arguments": [],
+      "expected_cases": 2
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.Png16ProductionBoundaryTests",
+      "kind": "mstest",
+      "expected_cases": 2,
+      "setup": []
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.Png16GpuProducerTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": []
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.Png16PublicModelTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": []
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.Png16MetadataTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.CoreImageMatrixTests",
+      "kind": "static_results",
+      "method": "Run",
+      "arguments": [],
+      "expected_cases": 3
+    }
+  ]
+}

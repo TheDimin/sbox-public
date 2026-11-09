@@ -1,0 +1,3264 @@
+{
+  "model": "UnlitTest",
+  "owner": "/root/model_unlit",
+  "state": "public_model_and_mixed_legacy_lit_subset_pass",
+  "producer": {
+    "engine_mvid": "a7a46583-fd03-4f19-8e65-63cfa5a020c8",
+    "engine_sha256": "cd87f30b2c2024dedf073d394e47c4412a4df28018846e17728f52e635845771",
+    "gltf_mvid": "88f89cfc-81b4-4744-9888-ec746058a6de",
+    "gltf_sha256": "b86cb72e0c0e0f3c23af45bd115f68760655d1754d663f41df62a45e136f9e8b",
+    "tools_mvid": "13d9c5ce-7da7-41a1-a11a-c028e244bcfe",
+    "tools_sha256": "f015bd68d6bae3573b2476e1d8ac27f65e5b245bb825828cb8a1011929b724c6",
+    "stage": "01459",
+    "pid": 238644,
+    "pid_start": "1417157"
+  },
+  "reference": {
+    "repository": "https://github.com/KhronosGroup/glTF-Sample-Assets",
+    "commit": "90d7ede14c7e280af263824604b427a1ca02cb66",
+    "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/UnlitTest/screenshot/screenshot_large.jpg",
+    "sha256": "8be592842b37765080fe43b2424066ad1801e32e90d35a5121c17f65f473be13",
+    "purpose": "Required KHR_materials_unlit: both authored orange/blue objects must have uniform respective colors, no lighting calculations or visible panels/edges. Factors are linear (1,.217637640824031,0,1) and (0,.217637640824031,1,1).",
+    "license": "CC-BY-4.0; Ed Mackey, Analytical Graphics, Inc., 2019",
+    "comparison": "Upstream renderer camera/exposure not known. Engine camera is a recorded validation recipe; independent literal numerical controls supply exact RGB assertions."
+  },
+  "shader": {
+    "source": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/UnlitTest/gltf_unlit_five_uv.shader",
+    "source_sha256": "9b6d5b8b4e0f3992ff2af7d62072b598893e6c6629818d2059b96458ed097f7f",
+    "installed_resource": "shaders/gltf_unlit_five_uv.shader",
+    "installed_compiled_path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_unlit_five_uv.shader_c",
+    "installed_compiled_sha256": "e494af0983bd7ab5c00c9ee8c78c3fc3cbd406eb9c63c86c466f9396ebf5251d",
+    "scope": "Actual public materials identify the named shader. Compiled-byte hash is disk identity; native opaque/mask/blend/cull pixels and material flags were measured."
+  },
+  "actual_feature_measurements": 34,
+  "actual_gpu_measurements": 4,
+  "actual_stock_vmat_restore_measurements": 6,
+  "gpu_max_position_error_inches": 1.9073486e-06,
+  "gpu_max_normal_error": 8.4293696e-08,
+  "public": {
+    "planned": 4,
+    "passed": 4,
+    "failed": 0,
+    "baseline_receipt": "Temp/gltf-validation/direct-gpu/today-unlit-baseline-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "baseline_receipt_sha256": "9d167f9c484cebefa0d5b622d13adfa897f4d6eefd38803a46497b0cd669e47f",
+    "baseline_public_failed": 4,
+    "baseline_error": "Unsupported required glTF extension KHR_materials_unlit",
+    "after_fix": "All four actual source/compiled forms now load and render through public Model.Load and ordinary ModelRenderer with the named shipped shader.",
+    "mixed_after_followup": "Public default mixed unlit +legacy-supported opaque lit scenes now load/render; independently compared against unchanged standalone lit baselines on e12. Earlier01459blanket rejection is superseded."
+  },
+  "limits": [
+    "Primary UnlitTest source/compiled captures and34public feature controls were executed on01459; changed mixed behavior was separately impact-tested on e12, without rerunning unchanged model families. Each receipt/capture retains its actual producer identity.",
+    "Public KHR_materials_variants remains unsupported and uses the standard authored-default fallback. The6variant poses enable the extension only in an explicitly scoped reader/asset test.",
+    "Mixed lit slots retain the existing legacy-supported opaque base-color/metallic-roughness subset. Its existing normal/occlusion/emissive/non-opaque lit limits remain explicit, so this is not complete glTF core/material conformance.",
+    "Windows, model-editor parity and vmdl load/memory performance are global untested gates.",
+    "The recorded camera differs from the upstream screenshot; user source-vs-engine appearance approval remains pending.",
+    "The source-feature receipt retains older source_adapter scope boilerplate; each of34current rows explicitly has public_path=true and the executed code creates public Model.Load+ModelRenderer."
+  ],
+  "history": [
+    {
+      "run": "today-unlit-source-02",
+      "kind": "real shader defect",
+      "failure": "doubleSided requested F_RENDER_BACKFACES=1 but produced empty backface image; explicit material-controlled CullMode fixed and source04 passed front/back."
+    },
+    {
+      "run": "today-unlit-source-03",
+      "kind": "test fixture correction",
+      "failure": "TEXCOORD_9-only derived fixture was invalid because UV sets must be contiguous; corrected to 0..9 and source04 passed transform/selection."
+    },
+    {
+      "run": "today-unlit-mixed-01",
+      "kind": "harness correction",
+      "failure": "Reference isolation attempted unsupported KHR_node_visibility overrides. Corrected by capturing independent references in the empty scene before instances exist; e12producer and thresholds unchanged; mixed02passed."
+    }
+  ],
+  "input_sources": [
+    {
+      "variant": "glTF",
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/UnlitTest/glTF/UnlitTest.gltf",
+      "sha256": "b611ca0892cb1a0118e92b72ff52b3afed3e4903c15378daa72c4c252a0334e1"
+    },
+    {
+      "variant": "glTF",
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/UnlitTest/glTF/UnlitTest.bin",
+      "sha256": "a6a81ec57560242f29ee2c2a94f452a923b5548bf256b6529b0c07dea3f5c907"
+    },
+    {
+      "variant": "glTF-Binary",
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/UnlitTest/glTF-Binary/UnlitTest.glb",
+      "sha256": "e07b68c6fd9fbf73d372c610a681b89d6b013bdd1a506e46a411df82210a2481"
+    }
+  ],
+  "prior_evidence": {
+    "receipts": [
+      {
+        "kind": "baseline",
+        "path": "Temp/gltf-validation/direct-gpu/today-unlit-baseline-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "9d167f9c484cebefa0d5b622d13adfa897f4d6eefd38803a46497b0cd669e47f",
+        "producer_engine_mvid": "b5b66ab1-06f5-4aee-b816-92b6b197666e",
+        "producer_gltf_mvid": "88f89cfc-81b4-4744-9888-ec746058a6de",
+        "planned": 57,
+        "passed": 49,
+        "failed": 8,
+        "incomplete": 0
+      },
+      {
+        "kind": "base_source_material",
+        "path": "Temp/gltf-validation/direct-gpu/today-unlit-source-03/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "9bc45efe2fd381006d9eee71e971b902191238c76d412d9f6f6992c7ea0c5eaa",
+        "producer_engine_mvid": "b5b66ab1-06f5-4aee-b816-92b6b197666e",
+        "producer_gltf_mvid": "88f89cfc-81b4-4744-9888-ec746058a6de",
+        "planned": 2,
+        "passed": 1,
+        "failed": 1,
+        "incomplete": 0
+      },
+      {
+        "kind": "source_feature_and_gpu",
+        "path": "Temp/gltf-validation/direct-gpu/today-unlit-source-04/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "865eba71ca26bad5e76184d9c68ff2ca9cc9c36237083f4cd257c2e21c2791dc",
+        "producer_engine_mvid": "b5b66ab1-06f5-4aee-b816-92b6b197666e",
+        "producer_gltf_mvid": "88f89cfc-81b4-4744-9888-ec746058a6de",
+        "planned": 1,
+        "passed": 1,
+        "failed": 0,
+        "incomplete": 0
+      }
+    ],
+    "anonymous_candidate_forms": [
+      {
+        "form": "glTF/source",
+        "derived": false,
+        "scope": "actual installed unlit source adapter + projected materials; public loader pending",
+        "image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-source-images-03/glTF_source_white_candidate_bright.png",
+        "image_sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc",
+        "dark_image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-source-images-03/glTF_source_white_candidate_dark.png",
+        "dark_sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc",
+        "reference_image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-source-images-03/white_literal_reference.png",
+        "reference_sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc",
+        "lighting_and_color": [
+          {
+            "Material": 0,
+            "InteriorPixels": 3664,
+            "MeanReferenceErrorBytes": 0,
+            "MaximumReferenceErrorBytes": 0,
+            "MeanLightingChangeBytes": 0,
+            "MaximumLightingChangeBytes": 0,
+            "MeanLitControlChangeBytes": 162.08624454148472
+          },
+          {
+            "Material": 1,
+            "InteriorPixels": 3664,
+            "MeanReferenceErrorBytes": 0,
+            "MaximumReferenceErrorBytes": 0,
+            "MeanLightingChangeBytes": 0,
+            "MaximumLightingChangeBytes": 0,
+            "MeanLitControlChangeBytes": 142.122634643377
+          }
+        ],
+        "gpu": {
+          "Nodes": 2,
+          "Vertices": 192,
+          "Indices": 264,
+          "Finite": true,
+          "TopologyMatches": true,
+          "MaximumPositionErrorInches": 1.9073486e-06,
+          "MaximumNormalError": 8.4293696e-08,
+          "MaximumGeneratedColorError": 0,
+          "MaximumGeneratedUvError": 0
+        }
+      },
+      {
+        "form": "glTF/compiled_glb",
+        "derived": false,
+        "scope": "actual installed unlit source adapter + projected materials; public loader pending",
+        "image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-source-images-03/glTF_compiled_glb_white_candidate_bright.png",
+        "image_sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc",
+        "dark_image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-source-images-03/glTF_compiled_glb_white_candidate_dark.png",
+        "dark_sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc",
+        "reference_image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-source-images-03/white_literal_reference.png",
+        "reference_sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc",
+        "lighting_and_color": [
+          {
+            "Material": 0,
+            "InteriorPixels": 3664,
+            "MeanReferenceErrorBytes": 0,
+            "MaximumReferenceErrorBytes": 0,
+            "MeanLightingChangeBytes": 0,
+            "MaximumLightingChangeBytes": 0,
+            "MeanLitControlChangeBytes": 162.08624454148472
+          },
+          {
+            "Material": 1,
+            "InteriorPixels": 3664,
+            "MeanReferenceErrorBytes": 0,
+            "MaximumReferenceErrorBytes": 0,
+            "MeanLightingChangeBytes": 0,
+            "MaximumLightingChangeBytes": 0,
+            "MeanLitControlChangeBytes": 142.122634643377
+          }
+        ],
+        "gpu": {
+          "Nodes": 2,
+          "Vertices": 192,
+          "Indices": 264,
+          "Finite": true,
+          "TopologyMatches": true,
+          "MaximumPositionErrorInches": 1.9073486e-06,
+          "MaximumNormalError": 8.4293696e-08,
+          "MaximumGeneratedColorError": 0,
+          "MaximumGeneratedUvError": 0
+        }
+      },
+      {
+        "form": "glTF-Binary/source",
+        "derived": false,
+        "scope": "actual installed unlit source adapter + projected materials; public loader pending",
+        "image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-source-images-03/glTF-Binary_source_white_candidate_bright.png",
+        "image_sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc",
+        "dark_image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-source-images-03/glTF-Binary_source_white_candidate_dark.png",
+        "dark_sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc",
+        "reference_image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-source-images-03/white_literal_reference.png",
+        "reference_sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc",
+        "lighting_and_color": [
+          {
+            "Material": 0,
+            "InteriorPixels": 3664,
+            "MeanReferenceErrorBytes": 0,
+            "MaximumReferenceErrorBytes": 0,
+            "MeanLightingChangeBytes": 0,
+            "MaximumLightingChangeBytes": 0,
+            "MeanLitControlChangeBytes": 162.08624454148472
+          },
+          {
+            "Material": 1,
+            "InteriorPixels": 3664,
+            "MeanReferenceErrorBytes": 0,
+            "MaximumReferenceErrorBytes": 0,
+            "MeanLightingChangeBytes": 0,
+            "MaximumLightingChangeBytes": 0,
+            "MeanLitControlChangeBytes": 142.122634643377
+          }
+        ],
+        "gpu": {
+          "Nodes": 2,
+          "Vertices": 192,
+          "Indices": 264,
+          "Finite": true,
+          "TopologyMatches": true,
+          "MaximumPositionErrorInches": 1.9073486e-06,
+          "MaximumNormalError": 8.4293696e-08,
+          "MaximumGeneratedColorError": 0,
+          "MaximumGeneratedUvError": 0
+        }
+      },
+      {
+        "form": "glTF-Binary/compiled_glb",
+        "derived": false,
+        "scope": "actual installed unlit source adapter + projected materials; public loader pending",
+        "image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-source-images-03/glTF-Binary_compiled_glb_white_candidate_bright.png",
+        "image_sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc",
+        "dark_image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-source-images-03/glTF-Binary_compiled_glb_white_candidate_dark.png",
+        "dark_sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc",
+        "reference_image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-source-images-03/white_literal_reference.png",
+        "reference_sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc",
+        "lighting_and_color": [
+          {
+            "Material": 0,
+            "InteriorPixels": 3664,
+            "MeanReferenceErrorBytes": 0,
+            "MaximumReferenceErrorBytes": 0,
+            "MeanLightingChangeBytes": 0,
+            "MaximumLightingChangeBytes": 0,
+            "MeanLitControlChangeBytes": 162.08624454148472
+          },
+          {
+            "Material": 1,
+            "InteriorPixels": 3664,
+            "MeanReferenceErrorBytes": 0,
+            "MaximumReferenceErrorBytes": 0,
+            "MeanLightingChangeBytes": 0,
+            "MaximumLightingChangeBytes": 0,
+            "MeanLitControlChangeBytes": 142.122634643377
+          }
+        ],
+        "gpu": {
+          "Nodes": 2,
+          "Vertices": 192,
+          "Indices": 264,
+          "Finite": true,
+          "TopologyMatches": true,
+          "MaximumPositionErrorInches": 1.9073486e-06,
+          "MaximumNormalError": 8.4293696e-08,
+          "MaximumGeneratedColorError": 0,
+          "MaximumGeneratedUvError": 0
+        }
+      },
+      {
+        "form": "derived_nonwhite_COLOR_0/source",
+        "derived": true,
+        "scope": "actual installed unlit source adapter + projected materials; public loader pending",
+        "image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-source-images-03/derived_nonwhite_COLOR_0_source_nonwhite_u8_candidate_bright.png",
+        "image_sha256": "6410fb61a8649452f001559dc45eb14be315d8569cbb38549b977713381e6f95",
+        "dark_image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-source-images-03/derived_nonwhite_COLOR_0_source_nonwhite_u8_candidate_dark.png",
+        "dark_sha256": "6410fb61a8649452f001559dc45eb14be315d8569cbb38549b977713381e6f95",
+        "reference_image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-source-images-03/nonwhite_u8_literal_reference.png",
+        "reference_sha256": "6410fb61a8649452f001559dc45eb14be315d8569cbb38549b977713381e6f95",
+        "lighting_and_color": [
+          {
+            "Material": 0,
+            "InteriorPixels": 3664,
+            "MeanReferenceErrorBytes": 0,
+            "MaximumReferenceErrorBytes": 0,
+            "MeanLightingChangeBytes": 0,
+            "MaximumLightingChangeBytes": 0,
+            "MeanLitControlChangeBytes": 162.08624454148472
+          },
+          {
+            "Material": 1,
+            "InteriorPixels": 3664,
+            "MeanReferenceErrorBytes": 0,
+            "MaximumReferenceErrorBytes": 0,
+            "MeanLightingChangeBytes": 0,
+            "MaximumLightingChangeBytes": 0,
+            "MeanLitControlChangeBytes": 142.122634643377
+          }
+        ],
+        "gpu": {
+          "Nodes": 2,
+          "Vertices": 192,
+          "Indices": 264,
+          "Finite": true,
+          "TopologyMatches": true,
+          "MaximumPositionErrorInches": 1.9073486e-06,
+          "MaximumNormalError": 8.4293696e-08,
+          "MaximumGeneratedColorError": 0.7490196,
+          "MaximumGeneratedUvError": 0
+        }
+      },
+      {
+        "form": "derived_nonwhite_COLOR_0/compiled_glb",
+        "derived": true,
+        "scope": "actual installed unlit source adapter + projected materials; public loader pending",
+        "image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-source-images-03/derived_nonwhite_COLOR_0_compiled_glb_nonwhite_u8_candidate_bright.png",
+        "image_sha256": "6410fb61a8649452f001559dc45eb14be315d8569cbb38549b977713381e6f95",
+        "dark_image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-source-images-03/derived_nonwhite_COLOR_0_compiled_glb_nonwhite_u8_candidate_dark.png",
+        "dark_sha256": "6410fb61a8649452f001559dc45eb14be315d8569cbb38549b977713381e6f95",
+        "reference_image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-source-images-03/nonwhite_u8_literal_reference.png",
+        "reference_sha256": "6410fb61a8649452f001559dc45eb14be315d8569cbb38549b977713381e6f95",
+        "lighting_and_color": [
+          {
+            "Material": 0,
+            "InteriorPixels": 3664,
+            "MeanReferenceErrorBytes": 0,
+            "MaximumReferenceErrorBytes": 0,
+            "MeanLightingChangeBytes": 0,
+            "MaximumLightingChangeBytes": 0,
+            "MeanLitControlChangeBytes": 162.08624454148472
+          },
+          {
+            "Material": 1,
+            "InteriorPixels": 3664,
+            "MeanReferenceErrorBytes": 0,
+            "MaximumReferenceErrorBytes": 0,
+            "MeanLightingChangeBytes": 0,
+            "MaximumLightingChangeBytes": 0,
+            "MeanLitControlChangeBytes": 142.122634643377
+          }
+        ],
+        "gpu": {
+          "Nodes": 2,
+          "Vertices": 192,
+          "Indices": 264,
+          "Finite": true,
+          "TopologyMatches": true,
+          "MaximumPositionErrorInches": 1.9073486e-06,
+          "MaximumNormalError": 8.4293696e-08,
+          "MaximumGeneratedColorError": 0.7490196,
+          "MaximumGeneratedUvError": 0
+        }
+      }
+    ],
+    "source_feature_measurements": 34,
+    "source_gpu_pose_measurements": 20,
+    "source_gpu_max_position_error_inches": 7.6293945e-06,
+    "source_gpu_max_normal_error": 8.940697e-08,
+    "scope": "Earlier producer9b9f anonymous candidate/source-adapter proofs; not current public-stage counts."
+  },
+  "status": "passed",
+  "corpus_revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "forms": [
+    "glTF/source",
+    "glTF/compiled_glb",
+    "glTF-Binary/source",
+    "glTF-Binary/compiled_glb"
+  ],
+  "executed_suite": {
+    "expected": 12,
+    "passed": 12,
+    "failed": 0,
+    "incomplete": 0,
+    "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-public-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "sha256": "5569df0a667cb9b8201bf9bc08ff44a9e8a35351f81e0be0f84cff72d1066902",
+    "cleanup_errors": [],
+    "planned_test_cases": "4 public loads,6 scene/mixed-limit cases,1four-form public render orchestration,1public34-feature orchestration",
+    "stage": "01459",
+    "scope": "Primary four actual model forms and34 public supplemental source/compiled feature measurements. Includes6selection cases from the then-explicit mixed-rejection increment; that mixed rejection is superseded by separately impact-tested e12."
+  },
+  "receipts": [
+    {
+      "expected": 12,
+      "passed": 12,
+      "failed": 0,
+      "incomplete": 0,
+      "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-public-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "5569df0a667cb9b8201bf9bc08ff44a9e8a35351f81e0be0f84cff72d1066902",
+      "cleanup_errors": [],
+      "planned_test_cases": "4 public loads,6 scene/mixed-limit cases,1four-form public render orchestration,1public34-feature orchestration",
+      "stage": "01459",
+      "scope": "Primary four actual model forms and34 public supplemental source/compiled feature measurements. Includes6selection cases from the then-explicit mixed-rejection increment; that mixed rejection is superseded by separately impact-tested e12."
+    },
+    {
+      "expected": 1,
+      "passed": 1,
+      "failed": 0,
+      "incomplete": 0,
+      "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-02/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "267dcdfc54e223f807aad3db8e2477b18a43baca0eaed71500be6e085067d26b",
+      "cleanup_errors": []
+    },
+    {
+      "expected": 2,
+      "passed": 2,
+      "failed": 0,
+      "incomplete": 0,
+      "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-scenes-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "78fc17d0202f8ec2dc8d0dd3f0a8e8b6727ac57509f4ed17916f714cea3289a4",
+      "producer_engine_mvid": "dbdf65e7-d6b5-4587-b777-843a09d62f96",
+      "stage": "e12",
+      "scope": "Only the2changed active public scene assertions rerun after replacing the obsolete mixed-rejection expectation with positive independent lit/unlit slots. Unchanged12families not rerun.",
+      "cleanup_errors": []
+    }
+  ],
+  "variants": [
+    {
+      "form": "glTF/source",
+      "derived": false,
+      "input_sha256": "b611ca0892cb1a0118e92b72ff52b3afed3e4903c15378daa72c4c252a0334e1",
+      "public_resource": "unlit_capture_fd34ffe1227c489381b7544c50acd51d.gltf",
+      "passed": true,
+      "engine_image": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF_source_public_bright.png",
+        "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+      },
+      "image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF_source_public_bright.png",
+      "image_sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc",
+      "dark_image": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF_source_public_dark.png",
+        "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+      },
+      "independent_reference": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/public_literal_reference.png",
+        "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+      },
+      "vmat_override": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF_source_public_stock_vmat_override.png",
+        "sha256": "d3557d692318da304ac76737c78c368cfd581ca7cc26cb5ddebc354e973f70dc"
+      },
+      "source_restored": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF_source_public_source_restored.png",
+        "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+      },
+      "lighting_and_color": [
+        {
+          "Material": 0,
+          "InteriorPixels": 3664,
+          "MeanReferenceErrorBytes": 0,
+          "MaximumReferenceErrorBytes": 0,
+          "MeanLightingChangeBytes": 0,
+          "MaximumLightingChangeBytes": 0,
+          "MeanLitControlChangeBytes": 162.08624454148472
+        },
+        {
+          "Material": 1,
+          "InteriorPixels": 3664,
+          "MeanReferenceErrorBytes": 0,
+          "MaximumReferenceErrorBytes": 0,
+          "MeanLightingChangeBytes": 0,
+          "MaximumLightingChangeBytes": 0,
+          "MeanLitControlChangeBytes": 142.122634643377
+        }
+      ],
+      "gpu": {
+        "Nodes": 2,
+        "Vertices": 192,
+        "Indices": 264,
+        "Finite": true,
+        "TopologyMatches": true,
+        "MaximumPositionErrorInches": 1.9073486e-06,
+        "MaximumNormalError": 8.4293696e-08,
+        "MaximumGeneratedColorError": 0,
+        "MaximumGeneratedUvError": 0
+      },
+      "submitted_index_origins": [
+        "gpu-readback",
+        "gpu-readback"
+      ],
+      "native_model": false,
+      "shaders": [
+        "shaders/gltf_unlit_five_uv.shader",
+        "shaders/gltf_unlit_five_uv.shader"
+      ],
+      "scope": "Public Model.Load and ordinary ModelRenderer, source materials from shipped shader, exact linear colors and lighting independence, raw stock-vmat overrides, disable/reenable and deletion. Linux."
+    },
+    {
+      "form": "glTF/compiled_glb",
+      "derived": true,
+      "input_sha256": "e07b68c6fd9fbf73d372c610a681b89d6b013bdd1a506e46a411df82210a2481",
+      "public_resource": "unlit_capture_b0ee37463b65407a88fb665c51fc477f.glb",
+      "passed": true,
+      "engine_image": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF_compiled_glb_public_bright.png",
+        "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+      },
+      "image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF_compiled_glb_public_bright.png",
+      "image_sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc",
+      "dark_image": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF_compiled_glb_public_dark.png",
+        "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+      },
+      "independent_reference": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/public_literal_reference.png",
+        "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+      },
+      "vmat_override": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF_compiled_glb_public_stock_vmat_override.png",
+        "sha256": "d3557d692318da304ac76737c78c368cfd581ca7cc26cb5ddebc354e973f70dc"
+      },
+      "source_restored": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF_compiled_glb_public_source_restored.png",
+        "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+      },
+      "lighting_and_color": [
+        {
+          "Material": 0,
+          "InteriorPixels": 3664,
+          "MeanReferenceErrorBytes": 0,
+          "MaximumReferenceErrorBytes": 0,
+          "MeanLightingChangeBytes": 0,
+          "MaximumLightingChangeBytes": 0,
+          "MeanLitControlChangeBytes": 162.08624454148472
+        },
+        {
+          "Material": 1,
+          "InteriorPixels": 3664,
+          "MeanReferenceErrorBytes": 0,
+          "MaximumReferenceErrorBytes": 0,
+          "MeanLightingChangeBytes": 0,
+          "MaximumLightingChangeBytes": 0,
+          "MeanLitControlChangeBytes": 142.122634643377
+        }
+      ],
+      "gpu": {
+        "Nodes": 2,
+        "Vertices": 192,
+        "Indices": 264,
+        "Finite": true,
+        "TopologyMatches": true,
+        "MaximumPositionErrorInches": 1.9073486e-06,
+        "MaximumNormalError": 8.4293696e-08,
+        "MaximumGeneratedColorError": 0,
+        "MaximumGeneratedUvError": 0
+      },
+      "submitted_index_origins": [
+        "gpu-readback",
+        "gpu-readback"
+      ],
+      "native_model": false,
+      "shaders": [
+        "shaders/gltf_unlit_five_uv.shader",
+        "shaders/gltf_unlit_five_uv.shader"
+      ],
+      "scope": "Public Model.Load and ordinary ModelRenderer, source materials from shipped shader, exact linear colors and lighting independence, raw stock-vmat overrides, disable/reenable and deletion. Linux."
+    },
+    {
+      "form": "glTF-Binary/source",
+      "derived": false,
+      "input_sha256": "e07b68c6fd9fbf73d372c610a681b89d6b013bdd1a506e46a411df82210a2481",
+      "public_resource": "unlit_capture_f7e125f40a3c497782cc955593f1777b.glb",
+      "passed": true,
+      "engine_image": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF-Binary_source_public_bright.png",
+        "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+      },
+      "image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF-Binary_source_public_bright.png",
+      "image_sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc",
+      "dark_image": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF-Binary_source_public_dark.png",
+        "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+      },
+      "independent_reference": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/public_literal_reference.png",
+        "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+      },
+      "vmat_override": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF-Binary_source_public_stock_vmat_override.png",
+        "sha256": "d3557d692318da304ac76737c78c368cfd581ca7cc26cb5ddebc354e973f70dc"
+      },
+      "source_restored": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF-Binary_source_public_source_restored.png",
+        "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+      },
+      "lighting_and_color": [
+        {
+          "Material": 0,
+          "InteriorPixels": 3664,
+          "MeanReferenceErrorBytes": 0,
+          "MaximumReferenceErrorBytes": 0,
+          "MeanLightingChangeBytes": 0,
+          "MaximumLightingChangeBytes": 0,
+          "MeanLitControlChangeBytes": 162.08624454148472
+        },
+        {
+          "Material": 1,
+          "InteriorPixels": 3664,
+          "MeanReferenceErrorBytes": 0,
+          "MaximumReferenceErrorBytes": 0,
+          "MeanLightingChangeBytes": 0,
+          "MaximumLightingChangeBytes": 0,
+          "MeanLitControlChangeBytes": 142.122634643377
+        }
+      ],
+      "gpu": {
+        "Nodes": 2,
+        "Vertices": 192,
+        "Indices": 264,
+        "Finite": true,
+        "TopologyMatches": true,
+        "MaximumPositionErrorInches": 1.9073486e-06,
+        "MaximumNormalError": 8.4293696e-08,
+        "MaximumGeneratedColorError": 0,
+        "MaximumGeneratedUvError": 0
+      },
+      "submitted_index_origins": [
+        "gpu-readback",
+        "gpu-readback"
+      ],
+      "native_model": false,
+      "shaders": [
+        "shaders/gltf_unlit_five_uv.shader",
+        "shaders/gltf_unlit_five_uv.shader"
+      ],
+      "scope": "Public Model.Load and ordinary ModelRenderer, source materials from shipped shader, exact linear colors and lighting independence, raw stock-vmat overrides, disable/reenable and deletion. Linux."
+    },
+    {
+      "form": "glTF-Binary/compiled_glb",
+      "derived": true,
+      "input_sha256": "e07b68c6fd9fbf73d372c610a681b89d6b013bdd1a506e46a411df82210a2481",
+      "public_resource": "unlit_capture_ce25e3d9a6dc449b968f5413c224fabf.glb",
+      "passed": true,
+      "engine_image": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF-Binary_compiled_glb_public_bright.png",
+        "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+      },
+      "image": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF-Binary_compiled_glb_public_bright.png",
+      "image_sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc",
+      "dark_image": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF-Binary_compiled_glb_public_dark.png",
+        "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+      },
+      "independent_reference": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/public_literal_reference.png",
+        "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+      },
+      "vmat_override": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF-Binary_compiled_glb_public_stock_vmat_override.png",
+        "sha256": "d3557d692318da304ac76737c78c368cfd581ca7cc26cb5ddebc354e973f70dc"
+      },
+      "source_restored": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF-Binary_compiled_glb_public_source_restored.png",
+        "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+      },
+      "lighting_and_color": [
+        {
+          "Material": 0,
+          "InteriorPixels": 3664,
+          "MeanReferenceErrorBytes": 0,
+          "MaximumReferenceErrorBytes": 0,
+          "MeanLightingChangeBytes": 0,
+          "MaximumLightingChangeBytes": 0,
+          "MeanLitControlChangeBytes": 162.08624454148472
+        },
+        {
+          "Material": 1,
+          "InteriorPixels": 3664,
+          "MeanReferenceErrorBytes": 0,
+          "MaximumReferenceErrorBytes": 0,
+          "MeanLightingChangeBytes": 0,
+          "MaximumLightingChangeBytes": 0,
+          "MeanLitControlChangeBytes": 142.122634643377
+        }
+      ],
+      "gpu": {
+        "Nodes": 2,
+        "Vertices": 192,
+        "Indices": 264,
+        "Finite": true,
+        "TopologyMatches": true,
+        "MaximumPositionErrorInches": 1.9073486e-06,
+        "MaximumNormalError": 8.4293696e-08,
+        "MaximumGeneratedColorError": 0,
+        "MaximumGeneratedUvError": 0
+      },
+      "submitted_index_origins": [
+        "gpu-readback",
+        "gpu-readback"
+      ],
+      "native_model": false,
+      "shaders": [
+        "shaders/gltf_unlit_five_uv.shader",
+        "shaders/gltf_unlit_five_uv.shader"
+      ],
+      "scope": "Public Model.Load and ordinary ModelRenderer, source materials from shipped shader, exact linear colors and lighting independence, raw stock-vmat overrides, disable/reenable and deletion. Linux."
+    }
+  ],
+  "captures": [
+    {
+      "form": "glTF/source",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF_source_public_bright.png",
+      "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+    },
+    {
+      "form": "glTF/compiled_glb",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF_compiled_glb_public_bright.png",
+      "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+    },
+    {
+      "form": "glTF-Binary/source",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF-Binary_source_public_bright.png",
+      "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+    },
+    {
+      "form": "glTF-Binary/compiled_glb",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF-Binary_compiled_glb_public_bright.png",
+      "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+    }
+  ],
+  "capture": {
+    "form": "glTF/source",
+    "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-public/glTF_source_public_bright.png",
+    "sha256": "16722bdf295200076ea526531d3cf71ef0d5fe934513644596ad465e294552fc"
+  },
+  "actual_public_model_forms": 4,
+  "feature_measurements": [
+    {
+      "name": "opaque_ignores_alpha",
+      "compiled": false,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/opaque_ignores_alpha_source.png",
+        "sha256": "7f6c9bc95706913da090f7628dc4603c4f50a284b5d1eb5faffba3bd62dd69cb"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/opaque_ignores_alpha_reference.png",
+      "expected_linear_rgb": [
+        1,
+        0.25,
+        0,
+        1
+      ],
+      "source_sha256": "e8cad70c597804f2f267adfa8ef634842b5332101dec440a7c1295a2bb853d27",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "opaque_ignores_alpha",
+      "compiled": true,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/opaque_ignores_alpha_compiled.png",
+        "sha256": "7f6c9bc95706913da090f7628dc4603c4f50a284b5d1eb5faffba3bd62dd69cb"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/opaque_ignores_alpha_reference.png",
+      "expected_linear_rgb": [
+        1,
+        0.25,
+        0,
+        1
+      ],
+      "source_sha256": "e8cad70c597804f2f267adfa8ef634842b5332101dec440a7c1295a2bb853d27",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "mask_below",
+      "compiled": false,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": true,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/mask_below_source.png",
+        "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+      },
+      "expected_reference": null,
+      "expected_linear_rgb": [
+        1,
+        0.25,
+        0,
+        1
+      ],
+      "source_sha256": "f39e318e95aa25b889c08cd13d32c3c436ac062d1108bf87c6484da4911e5886",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": true,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "mask_below",
+      "compiled": true,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": true,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/mask_below_compiled.png",
+        "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+      },
+      "expected_reference": null,
+      "expected_linear_rgb": [
+        1,
+        0.25,
+        0,
+        1
+      ],
+      "source_sha256": "f39e318e95aa25b889c08cd13d32c3c436ac062d1108bf87c6484da4911e5886",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": true,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "mask_equality",
+      "compiled": false,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/mask_equality_source.png",
+        "sha256": "7f6c9bc95706913da090f7628dc4603c4f50a284b5d1eb5faffba3bd62dd69cb"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/mask_equality_reference.png",
+      "expected_linear_rgb": [
+        1,
+        0.25,
+        0,
+        1
+      ],
+      "source_sha256": "859b37d93371616834ef2a7e6af07f93b0c9c7924cb901c430aa15d812aaab68",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": true,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "mask_equality",
+      "compiled": true,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/mask_equality_compiled.png",
+        "sha256": "7f6c9bc95706913da090f7628dc4603c4f50a284b5d1eb5faffba3bd62dd69cb"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/mask_equality_reference.png",
+      "expected_linear_rgb": [
+        1,
+        0.25,
+        0,
+        1
+      ],
+      "source_sha256": "859b37d93371616834ef2a7e6af07f93b0c9c7924cb901c430aa15d812aaab68",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": true,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "mask_zero_equality",
+      "compiled": false,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/mask_zero_equality_source.png",
+        "sha256": "7f6c9bc95706913da090f7628dc4603c4f50a284b5d1eb5faffba3bd62dd69cb"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/mask_zero_equality_reference.png",
+      "expected_linear_rgb": [
+        1,
+        0.25,
+        0,
+        1
+      ],
+      "source_sha256": "161e2726ac127245eff01faf25bab6ff1208742e0eb7b2131c8e6cd69d5f32c3",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": true,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "mask_zero_equality",
+      "compiled": true,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/mask_zero_equality_compiled.png",
+        "sha256": "7f6c9bc95706913da090f7628dc4603c4f50a284b5d1eb5faffba3bd62dd69cb"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/mask_zero_equality_reference.png",
+      "expected_linear_rgb": [
+        1,
+        0.25,
+        0,
+        1
+      ],
+      "source_sha256": "161e2726ac127245eff01faf25bab6ff1208742e0eb7b2131c8e6cd69d5f32c3",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": true,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "mask_cutoff_above_one",
+      "compiled": false,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": true,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/mask_cutoff_above_one_source.png",
+        "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+      },
+      "expected_reference": null,
+      "expected_linear_rgb": [
+        1,
+        0.25,
+        0,
+        1
+      ],
+      "source_sha256": "04b7ab0a43512524242e2b464418191742dbbb55fcbba6d4d2e986c35658e51d",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": true,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "mask_cutoff_above_one",
+      "compiled": true,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": true,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/mask_cutoff_above_one_compiled.png",
+        "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+      },
+      "expected_reference": null,
+      "expected_linear_rgb": [
+        1,
+        0.25,
+        0,
+        1
+      ],
+      "source_sha256": "04b7ab0a43512524242e2b464418191742dbbb55fcbba6d4d2e986c35658e51d",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": true,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "blend_straight_alpha_product",
+      "compiled": false,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/blend_straight_alpha_product_source.png",
+        "sha256": "43b29f93e502c5da0f62066ad0ed7de67c123210853a62c9e1c0cf7f71622ab7"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/blend_straight_alpha_product_reference.png",
+      "expected_linear_rgb": [
+        0.125,
+        0.125,
+        0.03125,
+        1
+      ],
+      "source_sha256": "172b2a57cf3be3b99f7e83209cbd45ea22db94f689ea34b3389c149de35127da",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": true,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "blend_straight_alpha_product",
+      "compiled": true,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/blend_straight_alpha_product_compiled.png",
+        "sha256": "43b29f93e502c5da0f62066ad0ed7de67c123210853a62c9e1c0cf7f71622ab7"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/blend_straight_alpha_product_reference.png",
+      "expected_linear_rgb": [
+        0.125,
+        0.125,
+        0.03125,
+        1
+      ],
+      "source_sha256": "172b2a57cf3be3b99f7e83209cbd45ea22db94f689ea34b3389c149de35127da",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": true,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "single_sided_back_empty",
+      "compiled": false,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": true,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/single_sided_back_empty_source.png",
+        "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+      },
+      "expected_reference": null,
+      "expected_linear_rgb": [
+        1,
+        0.25,
+        0,
+        1
+      ],
+      "source_sha256": "10670ce329ea10e419c5a7ccb12700bdbedf4f08d878b4f0717dc39c2dd85bb6",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "single_sided_back_empty",
+      "compiled": true,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": true,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/single_sided_back_empty_compiled.png",
+        "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+      },
+      "expected_reference": null,
+      "expected_linear_rgb": [
+        1,
+        0.25,
+        0,
+        1
+      ],
+      "source_sha256": "10670ce329ea10e419c5a7ccb12700bdbedf4f08d878b4f0717dc39c2dd85bb6",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "double_sided_front_visible",
+      "compiled": false,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/double_sided_front_visible_source.png",
+        "sha256": "7f6c9bc95706913da090f7628dc4603c4f50a284b5d1eb5faffba3bd62dd69cb"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/double_sided_front_visible_reference.png",
+      "expected_linear_rgb": [
+        1,
+        0.25,
+        0,
+        1
+      ],
+      "source_sha256": "a5f10fdf446f4a8b03d9b3b858b6ff960a5774fd470a706c35536c6ac9fc6fdd",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 1
+        }
+      ]
+    },
+    {
+      "name": "double_sided_front_visible",
+      "compiled": true,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/double_sided_front_visible_compiled.png",
+        "sha256": "7f6c9bc95706913da090f7628dc4603c4f50a284b5d1eb5faffba3bd62dd69cb"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/double_sided_front_visible_reference.png",
+      "expected_linear_rgb": [
+        1,
+        0.25,
+        0,
+        1
+      ],
+      "source_sha256": "a5f10fdf446f4a8b03d9b3b858b6ff960a5774fd470a706c35536c6ac9fc6fdd",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 1
+        }
+      ]
+    },
+    {
+      "name": "double_sided_back_visible",
+      "compiled": false,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/double_sided_back_visible_source.png",
+        "sha256": "7f6c9bc95706913da090f7628dc4603c4f50a284b5d1eb5faffba3bd62dd69cb"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/double_sided_back_visible_reference.png",
+      "expected_linear_rgb": [
+        1,
+        0.25,
+        0,
+        1
+      ],
+      "source_sha256": "34ad77b3d8863e222c43de6edb44ffadfd0c8cf0587a51ee644d69c79196215c",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 1
+        }
+      ]
+    },
+    {
+      "name": "double_sided_back_visible",
+      "compiled": true,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/double_sided_back_visible_compiled.png",
+        "sha256": "7f6c9bc95706913da090f7628dc4603c4f50a284b5d1eb5faffba3bd62dd69cb"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/double_sided_back_visible_reference.png",
+      "expected_linear_rgb": [
+        1,
+        0.25,
+        0,
+        1
+      ],
+      "source_sha256": "34ad77b3d8863e222c43de6edb44ffadfd0c8cf0587a51ee644d69c79196215c",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 1
+        }
+      ]
+    },
+    {
+      "name": "texture_factor_vertex_linear",
+      "compiled": false,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_factor_vertex_linear_source.png",
+        "sha256": "950ac52832417a443f69188c1f2b93942c12de871faf0d3b42a6d1d49b596ed2"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_factor_vertex_linear_reference.png",
+      "expected_linear_rgb": [
+        0.08634421,
+        0.025634734,
+        0.003610961,
+        1
+      ],
+      "source_sha256": "c3fcb5744da00095c3eba931e8bee51c31fb0a0384957477c5e6ab7454e3d174",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "texture_factor_vertex_linear",
+      "compiled": true,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_factor_vertex_linear_compiled.png",
+        "sha256": "950ac52832417a443f69188c1f2b93942c12de871faf0d3b42a6d1d49b596ed2"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_factor_vertex_linear_reference.png",
+      "expected_linear_rgb": [
+        0.08634421,
+        0.025634734,
+        0.003610961,
+        1
+      ],
+      "source_sha256": "c3fcb5744da00095c3eba931e8bee51c31fb0a0384957477c5e6ab7454e3d174",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "texture_alpha_factor_vertex_product",
+      "compiled": false,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_alpha_factor_vertex_product_source.png",
+        "sha256": "4c909cce1c596a81df9b9c12613037405b20ed0dc9ce518b8b72edd0166d15bd"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_alpha_factor_vertex_product_reference.png",
+      "expected_linear_rgb": [
+        0.01625303,
+        0.004825362,
+        0.00067971036,
+        1
+      ],
+      "source_sha256": "fcd686a8b60a5a5617d5f2a5c0fb5e945e97f91605ef11a1c02ef6f0dccce23e",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": true,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "texture_alpha_factor_vertex_product",
+      "compiled": true,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_alpha_factor_vertex_product_compiled.png",
+        "sha256": "4c909cce1c596a81df9b9c12613037405b20ed0dc9ce518b8b72edd0166d15bd"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_alpha_factor_vertex_product_reference.png",
+      "expected_linear_rgb": [
+        0.01625303,
+        0.004825362,
+        0.00067971036,
+        1
+      ],
+      "source_sha256": "fcd686a8b60a5a5617d5f2a5c0fb5e945e97f91605ef11a1c02ef6f0dccce23e",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": true,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "texture_nearest_second_texel",
+      "compiled": false,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_nearest_second_texel_source.png",
+        "sha256": "a351658b547be49bcfafb7babb94b49d9b5380b910375912dfe65fbf81093c4e"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_nearest_second_texel_reference.png",
+      "expected_linear_rgb": [
+        0.014443844,
+        0.21586053,
+        0.051269468,
+        1
+      ],
+      "source_sha256": "22bb0a85082d9f5d76549aa32f8d5893686e697b2f46a818e0e7ee427c1c4921",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "texture_nearest_second_texel",
+      "compiled": true,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_nearest_second_texel_compiled.png",
+        "sha256": "a351658b547be49bcfafb7babb94b49d9b5380b910375912dfe65fbf81093c4e"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_nearest_second_texel_reference.png",
+      "expected_linear_rgb": [
+        0.014443844,
+        0.21586053,
+        0.051269468,
+        1
+      ],
+      "source_sha256": "22bb0a85082d9f5d76549aa32f8d5893686e697b2f46a818e0e7ee427c1c4921",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "texture_nearest_offcenter",
+      "compiled": false,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_nearest_offcenter_source.png",
+        "sha256": "f3aff4dff5a293897a94c438ccd2720e0db86d1b2c09a35645bdad6dadcb89be"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_nearest_offcenter_reference.png",
+      "expected_linear_rgb": [
+        0.21586053,
+        0.051269468,
+        0.014443844,
+        1
+      ],
+      "source_sha256": "ec9b714eef33cc50c1ea85f7f52d792199131cdf6c6ef46e0e7d01758495dcb5",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "texture_nearest_offcenter",
+      "compiled": true,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_nearest_offcenter_compiled.png",
+        "sha256": "f3aff4dff5a293897a94c438ccd2720e0db86d1b2c09a35645bdad6dadcb89be"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_nearest_offcenter_reference.png",
+      "expected_linear_rgb": [
+        0.21586053,
+        0.051269468,
+        0.014443844,
+        1
+      ],
+      "source_sha256": "ec9b714eef33cc50c1ea85f7f52d792199131cdf6c6ef46e0e7d01758495dcb5",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "texture_bilinear_offcenter",
+      "compiled": false,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_bilinear_offcenter_source.png",
+        "sha256": "90f2a2f6b5e41e1079538124766e8703e9da85092511fbd439b8dca0bf849428"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_bilinear_offcenter_reference.png",
+      "expected_linear_rgb": [
+        0.15543552,
+        0.10064679,
+        0.025491532,
+        1
+      ],
+      "source_sha256": "783d0a30ada9e133cd2e73b27328e81dd0a7fddf960dd8b9de4b45296d12df4a",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "texture_bilinear_offcenter",
+      "compiled": true,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_bilinear_offcenter_compiled.png",
+        "sha256": "90f2a2f6b5e41e1079538124766e8703e9da85092511fbd439b8dca0bf849428"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_bilinear_offcenter_reference.png",
+      "expected_linear_rgb": [
+        0.15543552,
+        0.10064679,
+        0.025491532,
+        1
+      ],
+      "source_sha256": "783d0a30ada9e133cd2e73b27328e81dd0a7fddf960dd8b9de4b45296d12df4a",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "texture_clamp_outside",
+      "compiled": false,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_clamp_outside_source.png",
+        "sha256": "a351658b547be49bcfafb7babb94b49d9b5380b910375912dfe65fbf81093c4e"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_clamp_outside_reference.png",
+      "expected_linear_rgb": [
+        0.014443844,
+        0.21586053,
+        0.051269468,
+        1
+      ],
+      "source_sha256": "17b44fbda4b39f71cd298e93c242f1d9cd824d39d572a6899ca23926d47eb71b",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "texture_clamp_outside",
+      "compiled": true,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_clamp_outside_compiled.png",
+        "sha256": "a351658b547be49bcfafb7babb94b49d9b5380b910375912dfe65fbf81093c4e"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_clamp_outside_reference.png",
+      "expected_linear_rgb": [
+        0.014443844,
+        0.21586053,
+        0.051269468,
+        1
+      ],
+      "source_sha256": "17b44fbda4b39f71cd298e93c242f1d9cd824d39d572a6899ca23926d47eb71b",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "texture_repeat_outside",
+      "compiled": false,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_repeat_outside_source.png",
+        "sha256": "f3aff4dff5a293897a94c438ccd2720e0db86d1b2c09a35645bdad6dadcb89be"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_repeat_outside_reference.png",
+      "expected_linear_rgb": [
+        0.21586053,
+        0.051269468,
+        0.014443844,
+        1
+      ],
+      "source_sha256": "54860284bf4db02414af08dcdcba37dcd83766860510f3c22e881fe9cec0b899",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "texture_repeat_outside",
+      "compiled": true,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_repeat_outside_compiled.png",
+        "sha256": "f3aff4dff5a293897a94c438ccd2720e0db86d1b2c09a35645bdad6dadcb89be"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_repeat_outside_reference.png",
+      "expected_linear_rgb": [
+        0.21586053,
+        0.051269468,
+        0.014443844,
+        1
+      ],
+      "source_sha256": "54860284bf4db02414af08dcdcba37dcd83766860510f3c22e881fe9cec0b899",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "texture_transform_texcoord9",
+      "compiled": false,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_transform_texcoord9_source.png",
+        "sha256": "a351658b547be49bcfafb7babb94b49d9b5380b910375912dfe65fbf81093c4e"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_transform_texcoord9_reference.png",
+      "expected_linear_rgb": [
+        0.014443844,
+        0.21586053,
+        0.051269468,
+        1
+      ],
+      "source_sha256": "1ac9b5ecf940b0e2edc53b8b3d98a3da5e1f1e7f9f596f2fdf5f58ec68c20a83",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    },
+    {
+      "name": "texture_transform_texcoord9",
+      "compiled": true,
+      "public_path": true,
+      "passed": true,
+      "expected_empty": false,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_transform_texcoord9_compiled.png",
+        "sha256": "a351658b547be49bcfafb7babb94b49d9b5380b910375912dfe65fbf81093c4e"
+      },
+      "expected_reference": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-installed-images-01-features/texture_transform_texcoord9_reference.png",
+      "expected_linear_rgb": [
+        0.014443844,
+        0.21586053,
+        0.051269468,
+        1
+      ],
+      "source_sha256": "1ac9b5ecf940b0e2edc53b8b3d98a3da5e1f1e7f9f596f2fdf5f58ec68c20a83",
+      "material": [
+        {
+          "ShaderName": "shaders/gltf_unlit_five_uv.shader",
+          "IsTranslucent": false,
+          "IsAlphaTest": false,
+          "backfaces": 0
+        }
+      ]
+    }
+  ],
+  "recipe": {
+    "size": [
+      192,
+      192
+    ],
+    "projection": "orthographic",
+    "position_engine_inches": [
+      200,
+      0,
+      0
+    ],
+    "yaw_degrees": 180,
+    "orthographic_height": 220,
+    "near": 1,
+    "far": 1000,
+    "background": "black",
+    "auto_exposure": false,
+    "native_tonemap": false,
+    "lights": "Point light at (200,-30,60), white intensity0 versus8. Independent ordinary lit controls must respond by >=8meanRGBbytes; measured162.086/142.123."
+  },
+  "scope": "Linux UnlitTest passed through public Model.Load and ordinary ModelRenderer for both upstream formats and both derived compiled forms. Exact linear source colors/light independence, real GPU geometry/index/color readback, shipped shader, public alpha/texture/sampler/sidedness fixtures, stock-vmat restoration and lifecycle controls verified. No native Model/Mesh placeholders. Counts distinguish 12 tests,4 real model forms and34 supplemental public source/compiled feature measurements. A targeted e12follow-up additionally passed public default mixed legacy-lit/unlit rendering with independent transformed/raw UV, baseline pixels, explicit-reader variants, raw overrides and instance/deletion controls; public variants remain a separate unsupported capability.",
+  "known_limits": [
+    "Primary UnlitTest source/compiled captures and34public feature controls were executed on01459; changed mixed behavior was separately impact-tested on e12, without rerunning unchanged model families. Each receipt/capture retains its actual producer identity.",
+    "Public KHR_materials_variants remains unsupported and uses the standard authored-default fallback. The6variant poses enable the extension only in an explicitly scoped reader/asset test.",
+    "Mixed lit slots retain the existing legacy-supported opaque base-color/metallic-roughness subset. Its existing normal/occlusion/emissive/non-opaque lit limits remain explicit, so this is not complete glTF core/material conformance.",
+    "Windows, model-editor parity and vmdl load/memory performance are global untested gates.",
+    "The recorded camera differs from the upstream screenshot; user source-vs-engine appearance approval remains pending.",
+    "The source-feature receipt retains older source_adapter scope boilerplate; each of34current rows explicitly has public_path=true and the executed code creates public Model.Load+ModelRenderer."
+  ],
+  "visual_review": {
+    "owner_viewed_current_public_capture": true,
+    "observation": "Uniform orange and blue shapes with no face lighting, matching sample purpose.",
+    "final_user_appearance_approval": "pending",
+    "owner_viewed_mixed_public_capture": true,
+    "mixed_observation": "Left unlit triangle stays uniform orange while separate right lit triangle matches the preexisting legacy textured-lit baseline."
+  },
+  "mixed_material_followup": {
+    "producer": {
+      "engine_mvid": "dbdf65e7-d6b5-4587-b777-843a09d62f96",
+      "engine_sha256": "e5906175d954defcc9d9bc758f0d717317254d8f61e03c007490c72e9c02d93e",
+      "gltf_mvid": "88f89cfc-81b4-4744-9888-ec746058a6de",
+      "gltf_sha256": "b86cb72e0c0e0f3c23af45bd115f68760655d1754d663f41df62a45e136f9e8b",
+      "stage": "e12c0eea74234f09ab1bef23bcbd8e93",
+      "pid": 249901,
+      "pid_start": "1495189",
+      "scope": "Latest mixed-path controls only. Primary model captures retain their actual01459producer."
+    },
+    "executed_suite": {
+      "expected": 1,
+      "passed": 1,
+      "failed": 0,
+      "incomplete": 0,
+      "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-02/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "267dcdfc54e223f807aad3db8e2477b18a43baca0eaed71500be6e085067d26b",
+      "cleanup_errors": []
+    },
+    "public_default_forms": 2,
+    "explicit_reader_forms": 2,
+    "explicit_reader_variant_pose_measurements": 6,
+    "stock_raw_override_restore_measurements": 2,
+    "preexisting_lit_only_baselines": 4,
+    "image_comparisons": 20,
+    "maximum_mean_rgb_error_bytes": 0,
+    "maximum_rgb_error_bytes": 0,
+    "maximum_position_error_inches": 7.6293945e-06,
+    "maximum_uv_error": 0,
+    "independent_instance_bytes_and_variant_state": "passed",
+    "captures": [
+      {
+        "compiled": false,
+        "candidate_reader": false,
+        "public_load": true,
+        "variant": null,
+        "transition_step": 0,
+        "input_sha256": "5f93b3095f591019e69ddd112725804cd692a0c4814c23734f3cc6963d316d43",
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_source_public_default_step_0_variant_default.png",
+        "sha256": "28e905a995ee9f120638bd5a8315fb26f7b3fb61fd83c7bb5cc4c7fd0e3d1f6e",
+        "independent_unlit_reference": {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_independent_unlit_reference_0.png",
+          "sha256": "183a0aa14f081053bcda1df0cb6a9db38041b654703faf069d2a28ec157db319"
+        },
+        "preexisting_legacy_lit_baseline": {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_source_legacy_lit_baseline_0.png",
+          "sha256": "461632d2b4be3a545f7227676c1247a9d2ba6a5350119d7347bde9aa2e28456e"
+        },
+        "gpu": {
+          "max_position_error_inches": 7.6293945e-06,
+          "max_uv_error": 0,
+          "rows": [
+            {
+              "Node": 0,
+              "VertexCount": 3,
+              "VertexStride": 96,
+              "Fields": [
+                {
+                  "Semantic": "POSITION",
+                  "SemanticIndex": 0,
+                  "Offset": 0,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "NORMAL",
+                  "SemanticIndex": 0,
+                  "Offset": 12,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TANGENT",
+                  "SemanticIndex": 0,
+                  "Offset": 24,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "COLOR",
+                  "SemanticIndex": 0,
+                  "Offset": 40,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 0,
+                  "Offset": 56,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 1,
+                  "Offset": 64,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 4,
+                  "Offset": 72,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 5,
+                  "Offset": 80,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 6,
+                  "Offset": 88,
+                  "Components": 2,
+                  "ComponentType": 5126
+                }
+              ],
+              "Indices": [
+                0,
+                1,
+                2
+              ],
+              "IndexDataOrigin": "gpu-readback",
+              "SubmittedMaterialIndex": 0,
+              "SubmittedMaterialOverride": false,
+              "bytes_sha256": "6612df4c8ad4d59139dc7c80579b7f0226873e3cf70fc034c29f5a244e97fd48"
+            },
+            {
+              "Node": 1,
+              "VertexCount": 3,
+              "VertexStride": 96,
+              "Fields": [
+                {
+                  "Semantic": "POSITION",
+                  "SemanticIndex": 0,
+                  "Offset": 0,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "NORMAL",
+                  "SemanticIndex": 0,
+                  "Offset": 12,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TANGENT",
+                  "SemanticIndex": 0,
+                  "Offset": 24,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "COLOR",
+                  "SemanticIndex": 0,
+                  "Offset": 40,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 0,
+                  "Offset": 56,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 1,
+                  "Offset": 64,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 4,
+                  "Offset": 72,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 5,
+                  "Offset": 80,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 6,
+                  "Offset": 88,
+                  "Components": 2,
+                  "ComponentType": 5126
+                }
+              ],
+              "Indices": [
+                0,
+                1,
+                2
+              ],
+              "IndexDataOrigin": "gpu-readback",
+              "SubmittedMaterialIndex": 1,
+              "SubmittedMaterialOverride": false,
+              "bytes_sha256": "e9f89dac5b6cf2145bf395d8041fd388215a23552db73a3d4a8d1e987de92077"
+            }
+          ]
+        },
+        "scope": "Public Model.Load+ordinaryModelRenderer default mixed path; optional variants retain default fallback."
+      },
+      {
+        "compiled": false,
+        "candidate_reader": true,
+        "public_load": false,
+        "variant": null,
+        "transition_step": 0,
+        "input_sha256": "5f93b3095f591019e69ddd112725804cd692a0c4814c23734f3cc6963d316d43",
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_source_explicit_variant_reader_step_0_variant_default.png",
+        "sha256": "28e905a995ee9f120638bd5a8315fb26f7b3fb61fd83c7bb5cc4c7fd0e3d1f6e",
+        "independent_unlit_reference": {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_independent_unlit_reference_0.png",
+          "sha256": "183a0aa14f081053bcda1df0cb6a9db38041b654703faf069d2a28ec157db319"
+        },
+        "preexisting_legacy_lit_baseline": {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_source_legacy_lit_baseline_0.png",
+          "sha256": "461632d2b4be3a545f7227676c1247a9d2ba6a5350119d7347bde9aa2e28456e"
+        },
+        "gpu": {
+          "max_position_error_inches": 7.6293945e-06,
+          "max_uv_error": 0,
+          "rows": [
+            {
+              "Node": 0,
+              "VertexCount": 3,
+              "VertexStride": 96,
+              "Fields": [
+                {
+                  "Semantic": "POSITION",
+                  "SemanticIndex": 0,
+                  "Offset": 0,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "NORMAL",
+                  "SemanticIndex": 0,
+                  "Offset": 12,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TANGENT",
+                  "SemanticIndex": 0,
+                  "Offset": 24,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "COLOR",
+                  "SemanticIndex": 0,
+                  "Offset": 40,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 0,
+                  "Offset": 56,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 1,
+                  "Offset": 64,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 4,
+                  "Offset": 72,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 5,
+                  "Offset": 80,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 6,
+                  "Offset": 88,
+                  "Components": 2,
+                  "ComponentType": 5126
+                }
+              ],
+              "Indices": [
+                0,
+                1,
+                2
+              ],
+              "IndexDataOrigin": "gpu-readback",
+              "SubmittedMaterialIndex": 0,
+              "SubmittedMaterialOverride": false,
+              "bytes_sha256": "6612df4c8ad4d59139dc7c80579b7f0226873e3cf70fc034c29f5a244e97fd48"
+            },
+            {
+              "Node": 1,
+              "VertexCount": 3,
+              "VertexStride": 96,
+              "Fields": [
+                {
+                  "Semantic": "POSITION",
+                  "SemanticIndex": 0,
+                  "Offset": 0,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "NORMAL",
+                  "SemanticIndex": 0,
+                  "Offset": 12,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TANGENT",
+                  "SemanticIndex": 0,
+                  "Offset": 24,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "COLOR",
+                  "SemanticIndex": 0,
+                  "Offset": 40,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 0,
+                  "Offset": 56,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 1,
+                  "Offset": 64,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 4,
+                  "Offset": 72,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 5,
+                  "Offset": 80,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 6,
+                  "Offset": 88,
+                  "Components": 2,
+                  "ComponentType": 5126
+                }
+              ],
+              "Indices": [
+                0,
+                1,
+                2
+              ],
+              "IndexDataOrigin": "gpu-readback",
+              "SubmittedMaterialIndex": 1,
+              "SubmittedMaterialOverride": false,
+              "bytes_sha256": "e9f89dac5b6cf2145bf395d8041fd388215a23552db73a3d4a8d1e987de92077"
+            }
+          ]
+        },
+        "scope": "Explicit reader enables material variants; not public variant support."
+      },
+      {
+        "compiled": false,
+        "candidate_reader": true,
+        "public_load": false,
+        "variant": 0,
+        "transition_step": 1,
+        "input_sha256": "5f93b3095f591019e69ddd112725804cd692a0c4814c23734f3cc6963d316d43",
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_source_explicit_variant_reader_step_1_variant_alternate.png",
+        "sha256": "0d52ff4bb31463ebdbf362ffc9a3501eeee35360deff6107dc3b296fde5e388b",
+        "independent_unlit_reference": {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_independent_unlit_reference_1.png",
+          "sha256": "ddabeb73a5c623de24719b2dc61f45a9ae6ff5697d65b6b43e8dbdf86e4a48e0"
+        },
+        "preexisting_legacy_lit_baseline": {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_source_legacy_lit_baseline_1.png",
+          "sha256": "44e88735715621bb4fa190632a95e1f317baac51a630ff8ae239444501755ead"
+        },
+        "gpu": {
+          "max_position_error_inches": 7.6293945e-06,
+          "max_uv_error": 0,
+          "rows": [
+            {
+              "Node": 0,
+              "VertexCount": 3,
+              "VertexStride": 96,
+              "Fields": [
+                {
+                  "Semantic": "POSITION",
+                  "SemanticIndex": 0,
+                  "Offset": 0,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "NORMAL",
+                  "SemanticIndex": 0,
+                  "Offset": 12,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TANGENT",
+                  "SemanticIndex": 0,
+                  "Offset": 24,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "COLOR",
+                  "SemanticIndex": 0,
+                  "Offset": 40,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 0,
+                  "Offset": 56,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 1,
+                  "Offset": 64,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 4,
+                  "Offset": 72,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 5,
+                  "Offset": 80,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 6,
+                  "Offset": 88,
+                  "Components": 2,
+                  "ComponentType": 5126
+                }
+              ],
+              "Indices": [
+                0,
+                1,
+                2
+              ],
+              "IndexDataOrigin": "gpu-readback",
+              "SubmittedMaterialIndex": 2,
+              "SubmittedMaterialOverride": false,
+              "bytes_sha256": "6612df4c8ad4d59139dc7c80579b7f0226873e3cf70fc034c29f5a244e97fd48"
+            },
+            {
+              "Node": 1,
+              "VertexCount": 3,
+              "VertexStride": 96,
+              "Fields": [
+                {
+                  "Semantic": "POSITION",
+                  "SemanticIndex": 0,
+                  "Offset": 0,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "NORMAL",
+                  "SemanticIndex": 0,
+                  "Offset": 12,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TANGENT",
+                  "SemanticIndex": 0,
+                  "Offset": 24,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "COLOR",
+                  "SemanticIndex": 0,
+                  "Offset": 40,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 0,
+                  "Offset": 56,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 1,
+                  "Offset": 64,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 4,
+                  "Offset": 72,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 5,
+                  "Offset": 80,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 6,
+                  "Offset": 88,
+                  "Components": 2,
+                  "ComponentType": 5126
+                }
+              ],
+              "Indices": [
+                0,
+                1,
+                2
+              ],
+              "IndexDataOrigin": "gpu-readback",
+              "SubmittedMaterialIndex": 3,
+              "SubmittedMaterialOverride": false,
+              "bytes_sha256": "e019c353f6f1c2f805b412f613e125d7b26a3553aab56de8ae8dfa787c76a4ff"
+            }
+          ]
+        },
+        "scope": "Explicit reader enables material variants; not public variant support."
+      },
+      {
+        "compiled": false,
+        "candidate_reader": true,
+        "public_load": false,
+        "variant": null,
+        "transition_step": 2,
+        "input_sha256": "5f93b3095f591019e69ddd112725804cd692a0c4814c23734f3cc6963d316d43",
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_source_explicit_variant_reader_step_2_variant_default.png",
+        "sha256": "28e905a995ee9f120638bd5a8315fb26f7b3fb61fd83c7bb5cc4c7fd0e3d1f6e",
+        "independent_unlit_reference": {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_independent_unlit_reference_0.png",
+          "sha256": "183a0aa14f081053bcda1df0cb6a9db38041b654703faf069d2a28ec157db319"
+        },
+        "preexisting_legacy_lit_baseline": {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_source_legacy_lit_baseline_0.png",
+          "sha256": "461632d2b4be3a545f7227676c1247a9d2ba6a5350119d7347bde9aa2e28456e"
+        },
+        "gpu": {
+          "max_position_error_inches": 7.6293945e-06,
+          "max_uv_error": 0,
+          "rows": [
+            {
+              "Node": 0,
+              "VertexCount": 3,
+              "VertexStride": 96,
+              "Fields": [
+                {
+                  "Semantic": "POSITION",
+                  "SemanticIndex": 0,
+                  "Offset": 0,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "NORMAL",
+                  "SemanticIndex": 0,
+                  "Offset": 12,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TANGENT",
+                  "SemanticIndex": 0,
+                  "Offset": 24,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "COLOR",
+                  "SemanticIndex": 0,
+                  "Offset": 40,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 0,
+                  "Offset": 56,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 1,
+                  "Offset": 64,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 4,
+                  "Offset": 72,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 5,
+                  "Offset": 80,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 6,
+                  "Offset": 88,
+                  "Components": 2,
+                  "ComponentType": 5126
+                }
+              ],
+              "Indices": [
+                0,
+                1,
+                2
+              ],
+              "IndexDataOrigin": "gpu-readback",
+              "SubmittedMaterialIndex": 0,
+              "SubmittedMaterialOverride": false,
+              "bytes_sha256": "6612df4c8ad4d59139dc7c80579b7f0226873e3cf70fc034c29f5a244e97fd48"
+            },
+            {
+              "Node": 1,
+              "VertexCount": 3,
+              "VertexStride": 96,
+              "Fields": [
+                {
+                  "Semantic": "POSITION",
+                  "SemanticIndex": 0,
+                  "Offset": 0,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "NORMAL",
+                  "SemanticIndex": 0,
+                  "Offset": 12,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TANGENT",
+                  "SemanticIndex": 0,
+                  "Offset": 24,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "COLOR",
+                  "SemanticIndex": 0,
+                  "Offset": 40,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 0,
+                  "Offset": 56,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 1,
+                  "Offset": 64,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 4,
+                  "Offset": 72,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 5,
+                  "Offset": 80,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 6,
+                  "Offset": 88,
+                  "Components": 2,
+                  "ComponentType": 5126
+                }
+              ],
+              "Indices": [
+                0,
+                1,
+                2
+              ],
+              "IndexDataOrigin": "gpu-readback",
+              "SubmittedMaterialIndex": 1,
+              "SubmittedMaterialOverride": false,
+              "bytes_sha256": "e9f89dac5b6cf2145bf395d8041fd388215a23552db73a3d4a8d1e987de92077"
+            }
+          ]
+        },
+        "scope": "Explicit reader enables material variants; not public variant support."
+      },
+      {
+        "compiled": true,
+        "candidate_reader": false,
+        "public_load": true,
+        "variant": null,
+        "transition_step": 0,
+        "input_sha256": "48c2124d1549f2e257d2ff93289fbcd63e75fb8db94b94fed16cb9173f6bc027",
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_compiled_public_default_step_0_variant_default.png",
+        "sha256": "28e905a995ee9f120638bd5a8315fb26f7b3fb61fd83c7bb5cc4c7fd0e3d1f6e",
+        "independent_unlit_reference": {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_independent_unlit_reference_0.png",
+          "sha256": "183a0aa14f081053bcda1df0cb6a9db38041b654703faf069d2a28ec157db319"
+        },
+        "preexisting_legacy_lit_baseline": {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_compiled_legacy_lit_baseline_0.png",
+          "sha256": "461632d2b4be3a545f7227676c1247a9d2ba6a5350119d7347bde9aa2e28456e"
+        },
+        "gpu": {
+          "max_position_error_inches": 7.6293945e-06,
+          "max_uv_error": 0,
+          "rows": [
+            {
+              "Node": 0,
+              "VertexCount": 3,
+              "VertexStride": 96,
+              "Fields": [
+                {
+                  "Semantic": "POSITION",
+                  "SemanticIndex": 0,
+                  "Offset": 0,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "NORMAL",
+                  "SemanticIndex": 0,
+                  "Offset": 12,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TANGENT",
+                  "SemanticIndex": 0,
+                  "Offset": 24,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "COLOR",
+                  "SemanticIndex": 0,
+                  "Offset": 40,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 0,
+                  "Offset": 56,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 1,
+                  "Offset": 64,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 4,
+                  "Offset": 72,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 5,
+                  "Offset": 80,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 6,
+                  "Offset": 88,
+                  "Components": 2,
+                  "ComponentType": 5126
+                }
+              ],
+              "Indices": [
+                0,
+                1,
+                2
+              ],
+              "IndexDataOrigin": "gpu-readback",
+              "SubmittedMaterialIndex": 0,
+              "SubmittedMaterialOverride": false,
+              "bytes_sha256": "6612df4c8ad4d59139dc7c80579b7f0226873e3cf70fc034c29f5a244e97fd48"
+            },
+            {
+              "Node": 1,
+              "VertexCount": 3,
+              "VertexStride": 96,
+              "Fields": [
+                {
+                  "Semantic": "POSITION",
+                  "SemanticIndex": 0,
+                  "Offset": 0,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "NORMAL",
+                  "SemanticIndex": 0,
+                  "Offset": 12,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TANGENT",
+                  "SemanticIndex": 0,
+                  "Offset": 24,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "COLOR",
+                  "SemanticIndex": 0,
+                  "Offset": 40,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 0,
+                  "Offset": 56,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 1,
+                  "Offset": 64,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 4,
+                  "Offset": 72,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 5,
+                  "Offset": 80,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 6,
+                  "Offset": 88,
+                  "Components": 2,
+                  "ComponentType": 5126
+                }
+              ],
+              "Indices": [
+                0,
+                1,
+                2
+              ],
+              "IndexDataOrigin": "gpu-readback",
+              "SubmittedMaterialIndex": 1,
+              "SubmittedMaterialOverride": false,
+              "bytes_sha256": "e9f89dac5b6cf2145bf395d8041fd388215a23552db73a3d4a8d1e987de92077"
+            }
+          ]
+        },
+        "scope": "Public Model.Load+ordinaryModelRenderer default mixed path; optional variants retain default fallback."
+      },
+      {
+        "compiled": true,
+        "candidate_reader": true,
+        "public_load": false,
+        "variant": null,
+        "transition_step": 0,
+        "input_sha256": "48c2124d1549f2e257d2ff93289fbcd63e75fb8db94b94fed16cb9173f6bc027",
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_compiled_explicit_variant_reader_step_0_variant_default.png",
+        "sha256": "28e905a995ee9f120638bd5a8315fb26f7b3fb61fd83c7bb5cc4c7fd0e3d1f6e",
+        "independent_unlit_reference": {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_independent_unlit_reference_0.png",
+          "sha256": "183a0aa14f081053bcda1df0cb6a9db38041b654703faf069d2a28ec157db319"
+        },
+        "preexisting_legacy_lit_baseline": {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_compiled_legacy_lit_baseline_0.png",
+          "sha256": "461632d2b4be3a545f7227676c1247a9d2ba6a5350119d7347bde9aa2e28456e"
+        },
+        "gpu": {
+          "max_position_error_inches": 7.6293945e-06,
+          "max_uv_error": 0,
+          "rows": [
+            {
+              "Node": 0,
+              "VertexCount": 3,
+              "VertexStride": 96,
+              "Fields": [
+                {
+                  "Semantic": "POSITION",
+                  "SemanticIndex": 0,
+                  "Offset": 0,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "NORMAL",
+                  "SemanticIndex": 0,
+                  "Offset": 12,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TANGENT",
+                  "SemanticIndex": 0,
+                  "Offset": 24,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "COLOR",
+                  "SemanticIndex": 0,
+                  "Offset": 40,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 0,
+                  "Offset": 56,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 1,
+                  "Offset": 64,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 4,
+                  "Offset": 72,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 5,
+                  "Offset": 80,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 6,
+                  "Offset": 88,
+                  "Components": 2,
+                  "ComponentType": 5126
+                }
+              ],
+              "Indices": [
+                0,
+                1,
+                2
+              ],
+              "IndexDataOrigin": "gpu-readback",
+              "SubmittedMaterialIndex": 0,
+              "SubmittedMaterialOverride": false,
+              "bytes_sha256": "6612df4c8ad4d59139dc7c80579b7f0226873e3cf70fc034c29f5a244e97fd48"
+            },
+            {
+              "Node": 1,
+              "VertexCount": 3,
+              "VertexStride": 96,
+              "Fields": [
+                {
+                  "Semantic": "POSITION",
+                  "SemanticIndex": 0,
+                  "Offset": 0,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "NORMAL",
+                  "SemanticIndex": 0,
+                  "Offset": 12,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TANGENT",
+                  "SemanticIndex": 0,
+                  "Offset": 24,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "COLOR",
+                  "SemanticIndex": 0,
+                  "Offset": 40,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 0,
+                  "Offset": 56,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 1,
+                  "Offset": 64,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 4,
+                  "Offset": 72,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 5,
+                  "Offset": 80,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 6,
+                  "Offset": 88,
+                  "Components": 2,
+                  "ComponentType": 5126
+                }
+              ],
+              "Indices": [
+                0,
+                1,
+                2
+              ],
+              "IndexDataOrigin": "gpu-readback",
+              "SubmittedMaterialIndex": 1,
+              "SubmittedMaterialOverride": false,
+              "bytes_sha256": "e9f89dac5b6cf2145bf395d8041fd388215a23552db73a3d4a8d1e987de92077"
+            }
+          ]
+        },
+        "scope": "Explicit reader enables material variants; not public variant support."
+      },
+      {
+        "compiled": true,
+        "candidate_reader": true,
+        "public_load": false,
+        "variant": 0,
+        "transition_step": 1,
+        "input_sha256": "48c2124d1549f2e257d2ff93289fbcd63e75fb8db94b94fed16cb9173f6bc027",
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_compiled_explicit_variant_reader_step_1_variant_alternate.png",
+        "sha256": "0d52ff4bb31463ebdbf362ffc9a3501eeee35360deff6107dc3b296fde5e388b",
+        "independent_unlit_reference": {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_independent_unlit_reference_1.png",
+          "sha256": "ddabeb73a5c623de24719b2dc61f45a9ae6ff5697d65b6b43e8dbdf86e4a48e0"
+        },
+        "preexisting_legacy_lit_baseline": {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_compiled_legacy_lit_baseline_1.png",
+          "sha256": "44e88735715621bb4fa190632a95e1f317baac51a630ff8ae239444501755ead"
+        },
+        "gpu": {
+          "max_position_error_inches": 7.6293945e-06,
+          "max_uv_error": 0,
+          "rows": [
+            {
+              "Node": 0,
+              "VertexCount": 3,
+              "VertexStride": 96,
+              "Fields": [
+                {
+                  "Semantic": "POSITION",
+                  "SemanticIndex": 0,
+                  "Offset": 0,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "NORMAL",
+                  "SemanticIndex": 0,
+                  "Offset": 12,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TANGENT",
+                  "SemanticIndex": 0,
+                  "Offset": 24,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "COLOR",
+                  "SemanticIndex": 0,
+                  "Offset": 40,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 0,
+                  "Offset": 56,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 1,
+                  "Offset": 64,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 4,
+                  "Offset": 72,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 5,
+                  "Offset": 80,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 6,
+                  "Offset": 88,
+                  "Components": 2,
+                  "ComponentType": 5126
+                }
+              ],
+              "Indices": [
+                0,
+                1,
+                2
+              ],
+              "IndexDataOrigin": "gpu-readback",
+              "SubmittedMaterialIndex": 2,
+              "SubmittedMaterialOverride": false,
+              "bytes_sha256": "6612df4c8ad4d59139dc7c80579b7f0226873e3cf70fc034c29f5a244e97fd48"
+            },
+            {
+              "Node": 1,
+              "VertexCount": 3,
+              "VertexStride": 96,
+              "Fields": [
+                {
+                  "Semantic": "POSITION",
+                  "SemanticIndex": 0,
+                  "Offset": 0,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "NORMAL",
+                  "SemanticIndex": 0,
+                  "Offset": 12,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TANGENT",
+                  "SemanticIndex": 0,
+                  "Offset": 24,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "COLOR",
+                  "SemanticIndex": 0,
+                  "Offset": 40,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 0,
+                  "Offset": 56,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 1,
+                  "Offset": 64,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 4,
+                  "Offset": 72,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 5,
+                  "Offset": 80,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 6,
+                  "Offset": 88,
+                  "Components": 2,
+                  "ComponentType": 5126
+                }
+              ],
+              "Indices": [
+                0,
+                1,
+                2
+              ],
+              "IndexDataOrigin": "gpu-readback",
+              "SubmittedMaterialIndex": 3,
+              "SubmittedMaterialOverride": false,
+              "bytes_sha256": "e019c353f6f1c2f805b412f613e125d7b26a3553aab56de8ae8dfa787c76a4ff"
+            }
+          ]
+        },
+        "scope": "Explicit reader enables material variants; not public variant support."
+      },
+      {
+        "compiled": true,
+        "candidate_reader": true,
+        "public_load": false,
+        "variant": null,
+        "transition_step": 2,
+        "input_sha256": "48c2124d1549f2e257d2ff93289fbcd63e75fb8db94b94fed16cb9173f6bc027",
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_compiled_explicit_variant_reader_step_2_variant_default.png",
+        "sha256": "28e905a995ee9f120638bd5a8315fb26f7b3fb61fd83c7bb5cc4c7fd0e3d1f6e",
+        "independent_unlit_reference": {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_independent_unlit_reference_0.png",
+          "sha256": "183a0aa14f081053bcda1df0cb6a9db38041b654703faf069d2a28ec157db319"
+        },
+        "preexisting_legacy_lit_baseline": {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02-mixed/mixed_compiled_legacy_lit_baseline_0.png",
+          "sha256": "461632d2b4be3a545f7227676c1247a9d2ba6a5350119d7347bde9aa2e28456e"
+        },
+        "gpu": {
+          "max_position_error_inches": 7.6293945e-06,
+          "max_uv_error": 0,
+          "rows": [
+            {
+              "Node": 0,
+              "VertexCount": 3,
+              "VertexStride": 96,
+              "Fields": [
+                {
+                  "Semantic": "POSITION",
+                  "SemanticIndex": 0,
+                  "Offset": 0,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "NORMAL",
+                  "SemanticIndex": 0,
+                  "Offset": 12,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TANGENT",
+                  "SemanticIndex": 0,
+                  "Offset": 24,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "COLOR",
+                  "SemanticIndex": 0,
+                  "Offset": 40,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 0,
+                  "Offset": 56,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 1,
+                  "Offset": 64,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 4,
+                  "Offset": 72,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 5,
+                  "Offset": 80,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 6,
+                  "Offset": 88,
+                  "Components": 2,
+                  "ComponentType": 5126
+                }
+              ],
+              "Indices": [
+                0,
+                1,
+                2
+              ],
+              "IndexDataOrigin": "gpu-readback",
+              "SubmittedMaterialIndex": 0,
+              "SubmittedMaterialOverride": false,
+              "bytes_sha256": "6612df4c8ad4d59139dc7c80579b7f0226873e3cf70fc034c29f5a244e97fd48"
+            },
+            {
+              "Node": 1,
+              "VertexCount": 3,
+              "VertexStride": 96,
+              "Fields": [
+                {
+                  "Semantic": "POSITION",
+                  "SemanticIndex": 0,
+                  "Offset": 0,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "NORMAL",
+                  "SemanticIndex": 0,
+                  "Offset": 12,
+                  "Components": 3,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TANGENT",
+                  "SemanticIndex": 0,
+                  "Offset": 24,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "COLOR",
+                  "SemanticIndex": 0,
+                  "Offset": 40,
+                  "Components": 4,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 0,
+                  "Offset": 56,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 1,
+                  "Offset": 64,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 4,
+                  "Offset": 72,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 5,
+                  "Offset": 80,
+                  "Components": 2,
+                  "ComponentType": 5126
+                },
+                {
+                  "Semantic": "TEXCOORD",
+                  "SemanticIndex": 6,
+                  "Offset": 88,
+                  "Components": 2,
+                  "ComponentType": 5126
+                }
+              ],
+              "Indices": [
+                0,
+                1,
+                2
+              ],
+              "IndexDataOrigin": "gpu-readback",
+              "SubmittedMaterialIndex": 1,
+              "SubmittedMaterialOverride": false,
+              "bytes_sha256": "e9f89dac5b6cf2145bf395d8041fd388215a23552db73a3d4a8d1e987de92077"
+            }
+          ]
+        },
+        "scope": "Explicit reader enables material variants; not public variant support."
+      }
+    ],
+    "scope": "Two supplemental source/compiled public default mixed fixtures preserve the preexisting legacy-supported opaque lit path alongside source unlit. Separately6explicit-reader variant poses test selected material packets/UVs, raw stock override and independent instances. These explicit-reader poses do not establish public material-variant extension support. These are synthetic fixtures, not additional upstream model variants.",
+    "changed_scene_cases": {
+      "expected": 2,
+      "passed": 2,
+      "failed": 0,
+      "incomplete": 0,
+      "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-scenes-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "78fc17d0202f8ec2dc8d0dd3f0a8e8b6727ac57509f4ed17916f714cea3289a4",
+      "producer_engine_mvid": "dbdf65e7-d6b5-4587-b777-843a09d62f96",
+      "stage": "e12",
+      "scope": "Only the2changed active public scene assertions rerun after replacing the obsolete mixed-rejection expectation with positive independent lit/unlit slots. Unchanged12families not rerun.",
+      "cleanup_errors": []
+    }
+  },
+  "latest_checked_producer": {
+    "engine_mvid": "dbdf65e7-d6b5-4587-b777-843a09d62f96",
+    "engine_sha256": "e5906175d954defcc9d9bc758f0d717317254d8f61e03c007490c72e9c02d93e",
+    "gltf_mvid": "88f89cfc-81b4-4744-9888-ec746058a6de",
+    "gltf_sha256": "b86cb72e0c0e0f3c23af45bd115f68760655d1754d663f41df62a45e136f9e8b",
+    "stage": "e12c0eea74234f09ab1bef23bcbd8e93",
+    "pid": 249901,
+    "pid_start": "1495189",
+    "scope": "Latest mixed-path controls only. Primary model captures retain their actual01459producer."
+  },
+  "executed_suites": [
+    {
+      "expected": 12,
+      "passed": 12,
+      "failed": 0,
+      "incomplete": 0,
+      "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-public-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "5569df0a667cb9b8201bf9bc08ff44a9e8a35351f81e0be0f84cff72d1066902",
+      "cleanup_errors": [],
+      "planned_test_cases": "4 public loads,6 scene/mixed-limit cases,1four-form public render orchestration,1public34-feature orchestration",
+      "stage": "01459",
+      "scope": "Primary four actual model forms and34 public supplemental source/compiled feature measurements. Includes6selection cases from the then-explicit mixed-rejection increment; that mixed rejection is superseded by separately impact-tested e12."
+    },
+    {
+      "expected": 1,
+      "passed": 1,
+      "failed": 0,
+      "incomplete": 0,
+      "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-02/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "267dcdfc54e223f807aad3db8e2477b18a43baca0eaed71500be6e085067d26b",
+      "cleanup_errors": []
+    },
+    {
+      "expected": 2,
+      "passed": 2,
+      "failed": 0,
+      "incomplete": 0,
+      "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-scenes-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "78fc17d0202f8ec2dc8d0dd3f0a8e8b6727ac57509f4ed17916f714cea3289a4",
+      "producer_engine_mvid": "dbdf65e7-d6b5-4587-b777-843a09d62f96",
+      "stage": "e12",
+      "scope": "Only the2changed active public scene assertions rerun after replacing the obsolete mixed-rejection expectation with positive independent lit/unlit slots. Unchanged12families not rerun.",
+      "cleanup_errors": []
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "AdapterRedReceiptPath": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-baseline-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+  "AdapterRedReceiptSha256": "9d167f9c484cebefa0d5b622d13adfa897f4d6eefd38803a46497b0cd669e47f",
+  "GenerationManifestPath": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-generation/generation.json",
+  "GenerationManifestSha256": "78ff2447430d1f8e9c841a5854718593dfea9b6a9109384a69d894fd1f2da727",
+  "CandidateSourceSha256": "086b15fd2057cae7784b11ea9290bd88f45d0a27e0ad643edc38fb04fe3cbf66",
+  "ReferenceSourceSha256": "bf7fb12b62ed825c71e5ae1f7b88ed97dd6f52d587c73c9b6123be563ecd96c8",
+  "ComputeSourceSha256": "43101e5f4c4ae9727f5a21c2aecc6e391bf16b303099395a703babb490006e47",
+  "OutputDirectory": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-unlit-mixed-images-02",
+  "MeanRgbToleranceBytes": 1,
+  "MaximumRgbToleranceBytes": 3,
+  "MinimumLitLightingChangeBytes": 8,
+  "MaximumPositionErrorInches": 0.0002,
+  "MaximumNormalError": 1e-05,
+  "SourceShaderPath": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/UnlitTest/gltf_unlit_five_uv.shader",
+  "SourceShaderSha256": "9b6d5b8b4e0f3992ff2af7d62072b598893e6c6629818d2059b96458ed097f7f",
+  "PublicSource": true
+}

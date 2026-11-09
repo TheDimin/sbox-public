@@ -1,0 +1,116 @@
+{
+  "model": "SimpleInstancing",
+  "owner": "/root/gpu_simple_instancing",
+  "coordinator": "/root/gpu_validation",
+  "files": [
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuInstancingPlan.cs",
+      "sha256": "f5dbf4836a675cb45ef7a24ba7203b67ad5e29d4e8f0e9a9039a80e18a688975"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingExpansionTests.cs",
+      "sha256": "2c868f9d8bc8ee4828b5b146d2a1e727645bcf41b07a00ba7b0e044234995483"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingBackendTests.cs",
+      "sha256": "d3409b0ff5eb9b00b7dbc224377d79b4b804fce8d2b74135d713c77c47ae76bf"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingAffineReference.cs",
+      "sha256": "ea0b46ae1d0d0a0d70bf3cd5603edc50360b3fe4e0cb0499ee342c8315cd3836"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingRigLocalTests.cs",
+      "sha256": "a46bd1622b7470969c02cea21b327e9cf9bfed915006707e4d10768ad8ec0c7f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingAffineProbe.cs",
+      "sha256": "7f932eec20b7c940822d46991756a78ed0a42d8925d234314bafe02bcf57d032"
+    }
+  ],
+  "producer_dependencies": [
+    "Actual compiled/loaded Engine includes GltfGpuInstancingPlan; no replacement production source in runtime helper",
+    "Existing Sandbox.Gltf ReadInstances and compiler APIs; frozen SimpleInstancingReference/CoreTests from prior submission",
+    "Fox-owned actual GltfGpuAsset.Prepare instancing wiring: old explicit rejection remains expectedfailure until implemented; no helper producer replacement"
+  ],
+  "shared_backend_contract": "Sandbox.Gltf.DirectGpu.GltfGpuInstancingPlan.Create(document,node), Instances of GltfGpuInstancingRow(Node,int?InstanceIndex,LocalTransform), Compose(nodeWorld)=LocalTransform*nodeWorld; Fox owns draw-row/rig/snapshot integration",
+  "entry": "Sandbox.Gltf.DirectGpu.SimpleInstancingValidation.SimpleInstancingExpansionTests.RunAll(checkoutRoot)",
+  "expected_cases": 65,
+  "forms": [
+    "glTF/source",
+    "glTF/compiled_glb_c",
+    "glTF-Binary/source",
+    "glTF-Binary/compiled_glb_c",
+    "9 explicit synthetic/capability fixtures"
+  ],
+  "scope": "CPU immutable instance expansion/provenance plus actual Engine asset preparation integration; no GPU instance-stream upload or draw-call efficiency claim",
+  "acceptance": "5 cases per4 real forms plus9 focused fixtures: exact125 ordered IDs/no base, all raw geometry transforms, full-affine node-before-basis-before-placement, cloned provenance lifetime, FLOAT descriptor values, default semantics, selected-invalid rejection, optional malformed fallback, custom count-only distinction, numeric/object mesh validation, interleaved normalizedSHORT nonzero offsets; additional12 integration rows require actual prepared125 source IDs/no base, one canonical shared primitive, zero realizedGPUbuffers inCPUpreparation, single defaultmaterialslot and independently computed rotated all-instance restbounds (.0005in/component candidate bound).; new12Riglocal testscoverall125palettes,reflection/tiny/zerowindings andprojective/nonfiniteguards. Independent12doubleframecontrols plusactual6-measurementauthored-tangentGPUfixture exercise full-affinenormalinverse-transpose,tangentforwardorthogonalization,andhandedness;zeroexactsingularnormaldirectionexplicitlyundefinedbutpositionsandfiniteoutputremainchecked.",
+  "execution_needs": "Coordinator admitted engine/source compile and test batch, actual Engine stage/restart before installed-producer evidence; integrate via Fox owned backend. Current files reviewed but uncompiled/unexecuted. Existing63-case freeze remains unchanged.",
+  "review": "Independent source reviewer checked compositions, provenance lifetime, source loop inventory and SHORT offsets. Numeric/object mesh validation robustness fixed; verifier precondition outside Reject was already fixed in prior freeze.",
+  "status": "Executed current coherent stage: expansion29/backend12/rig12/affineOracle12 pass within154; syntheticAffine6 GPU states pass. See ACCEPTANCE.md for actual receipts and limits.",
+  "visibility": "Plan,row and attribute are internal Engine implementation types; Sandbox.Test.Unit IVT provides test access. Public reflection entry methods remain on model helpers.",
+  "previous_freeze": {
+    "submission_sha256": "d3c33a08a9e5437ac4a6bdbf2b1666d88b881f8d39bcf6ddfe90ea8b9c10d9b7",
+    "source_backup": "/tmp/gltf-simpleinstancing-pre-migration",
+    "reason": "No public Engine API widening solely for helper access; root/Fox confirmed visibility migration."
+  },
+  "suites": [
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.SimpleInstancingValidation.SimpleInstancingExpansionTests.RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 29,
+      "scope": "CPU immutable source instance plan/provenance"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.SimpleInstancingValidation.SimpleInstancingBackendTests.RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 12,
+      "scope": "actual loaded Engine CPU GltfGpuAsset.Prepare row expansion/sharing/bounds; no GPU allocation"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.SimpleInstancingValidation.SimpleInstancingRigLocalTests.RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 12,
+      "scope": "actualEngineRig local palette/winding/affinevalidation CPU; APIabsentfailsoutsideexpectedrejections"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.SimpleInstancingValidation.SimpleInstancingAffineReference.RunOracleControls",
+      "arguments": [],
+      "expected_cases": 12,
+      "scope": "independentdoubleposition/normal/tangent/handedness oracle controls only; notGPUevidence"
+    }
+  ],
+  "index_resource_instrumentation": "Updated to extracted ownership: immutable topology stays in canonical Primitive.Plan; only bound winding indices are per-runtime GPU buffers. No unused shared Primitive.Indices resource is required.",
+  "gpu_probes": [
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.SimpleInstancingValidation.SimpleInstancingAffineProbe.Run",
+      "expected_measurements": 6,
+      "arguments": [
+        "checkoutRoot",
+        "SceneWorld",
+        "computeMaterial",
+        "waitForActualFrames",
+        "optionalmaterialResolver"
+      ],
+      "scope": "actualGPUreadback only; explicitsyntheticrequiredEXTfixture source+compiledGLB;3placements;6instances includesuniformtiny1e-30,anisotropictinyreflection,rank2zero,allzero",
+      "per_measurement": {
+        "positions": 144,
+        "defined_normal_tangent_frames": 96,
+        "singular_frames_finite_but_direction_unspecified": 48
+      },
+      "candidate_thresholds": {
+        "position_component_inches": 0.0005,
+        "normal_component": 3e-06,
+        "tangent_component": 3e-06,
+        "handedness": 1e-06
+      },
+      "threshold_review": "pendingruntimeevidence; notautowidened"
+    }
+  ]
+}

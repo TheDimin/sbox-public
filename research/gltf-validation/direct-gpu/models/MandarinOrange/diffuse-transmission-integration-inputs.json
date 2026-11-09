@@ -1,0 +1,60 @@
+{
+  "status": "all_ten_shared_files_applied_frozen_not_built_not_enabled",
+  "capability_list": "GltfModelLoader.SupportedExtensions deliberately unchanged until actual shader acceptance",
+  "files": [
+    {
+      "path": "engine/Sandbox.Gltf/GltfContracts.cs",
+      "before_sha256": "06fa81517a5fb900c2abb0393c02b7530861975913052ae918db78415dc70815",
+      "after_sha256": "5387e56a0d91238c8011bc3d6b88f89a236552278e191a19bc5c00da0d3bd2d4"
+    },
+    {
+      "path": "engine/Sandbox.Gltf/GltfDocument.Materials.cs",
+      "before_sha256": "9c7759a74bb84f4b3a576041a7819c62668bba94b5d0e218259ddc589b334c60",
+      "after_sha256": "43c4f1257b55aa1d3e6ba9f7a227859c4c6d8e35f63424cf589122cb2703c3a4"
+    },
+    {
+      "path": "engine/Sandbox.Gltf/GltfDocument.DiffuseTransmission.cs",
+      "before_sha256": null,
+      "after_sha256": "ba8a1aea082adf16fe93f836deb9f97c394cf3f889526a8287ad236f9ccc467e"
+    },
+    {
+      "path": "engine/Sandbox.Gltf/GltfDocument.MaterialImages.cs",
+      "before_sha256": "9c2ba93ac2cbf4f40beb515de67616eb67a894fb2a95b89590f73e1ccd0e36a3",
+      "after_sha256": "e0711106f32a7c76a8c75e7d62a447aef43ff42e454216cb7dd079681a5c7971"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/Materials/GltfMaterialUvPlan.cs",
+      "before_sha256": "526c08ca813ee501f3663b52ca56354436af1e5999ae9f865113772984e3adf9",
+      "after_sha256": "7bf77924dccd038e1591e86034476604ed849c92c59fb3be56b0bc19d02df5a2"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/Materials/GltfMaterialTextureEncodingPlan.cs",
+      "before_sha256": "55123499cb8154e7deb36e6be858b777872dcf7e23e85c8f90200dfcb91a6b1b",
+      "after_sha256": "aba4e8daa6597c2cc466e397c3f32cb159039dc65cef6318ddc3fe6d6f66c81a"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfStockMaterialAdapter.cs",
+      "before_sha256": "f6dd64d0567dd9da7e24cdc22c7b15cc70e1d1145400dcc64d966cbce3e241ea",
+      "after_sha256": "8d13a5ef063826820155d3385214eefba776b279b12c97e6ee6f1ccfb4132ab4"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfPublicMaterialRoute.cs",
+      "before_sha256": "9bf2ffa301b88efc56b90d61d20e812fec977e8bfe67383d3b39f84c8ce55446",
+      "after_sha256": "35edac4bce1c3ee45cdeffa91c45223b5e2651caa3f467da75cc0df25f536b23"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuAsset.Variants.cs",
+      "before_sha256": "bd8268b175a67d37337af35ad2e75bee43e56c597baf66599275bb8d7cc2f3e6",
+      "after_sha256": "5f9942f0719b4b608b62468143bb47cc306cc2e02fc0009dd4a57f5a3977be5e"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs",
+      "before_sha256": "7282546a03e4242d1d376767c2c32c99f444043bf027c0f66be5e7bcd1afa970",
+      "after_sha256": "38b7995f4faf4cc3f49a3caed3ca095238dd518fceba2d0339ab930cb63172f7"
+    }
+  ],
+  "hash_policy": "Proposal diff input/output text hashes normalize LF; exact applied raw-byte hashes are in diffuse-parser-freeze.json",
+  "applied_freeze": "diffuse-parser-freeze.json",
+  "pending_patch": "historical proposal now applied; use freeze manifests for actual build inputs",
+  "render_freeze": "diffuse-render-freeze.json"
+}

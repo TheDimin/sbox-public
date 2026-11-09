@@ -1,0 +1,188 @@
+{
+  "model": "MorphStressTest",
+  "owner": "/root/gpu_morph_stress",
+  "coordinator": "/root/gpu_validation",
+  "shared_backend_owner": "/root/gpu_fox",
+  "clock_morph_owner": "/root/gpu_morph_cube",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphStressTest/.gitignore",
+      "sha256": "32dae3052f331ee34d628ef535709b301259a45df7c7522c4d35dcf49873f00b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphStressTest/ACCEPTANCE.md",
+      "sha256": "ff67a395c39273e318df80daacf06e4a6291a7f63f258284c8329a49f612d14b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphStressTest/MorphStressTestCoreTests.cs",
+      "sha256": "eca41f9e84d4da63229a8caaf6e9a7c41ecaca2982678e01456e1656c68a2b0a"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphStressTest/MorphStressTestCpuMeasurements.cs",
+      "sha256": "c2559b75d005150c2e9c1bdb48b61bda4ce77d6b56809c66d24235d9ab5423c4"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphStressTest/MorphStressTestGpuChecks.cs",
+      "sha256": "f29852152fc81fc6d6d2dd3185d9df18c40e8c9718ae6e7b5d85987c9ccf2cd5"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphStressTest/MorphStressTestGpuProbe.cs",
+      "sha256": "c8d8d3334b76eda0e95558045fe45f4422d0e74b6659e7362656d5d31bccfb21"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphStressTest/MorphStressTestGpuVerifierTests.cs",
+      "sha256": "59c03b7a6c4038bfbbc9463e4548f5160a257f2f3ef39c93f658d480fbc867af"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphStressTest/MorphStressTestImageChecks.cs",
+      "sha256": "687a568a8c94f9d07208a78b80a475c460071463199891b18e3b4412e9e8196b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphStressTest/MorphStressTestImageProbe.cs",
+      "sha256": "cd68cc5425176e72931b013864ec0bbcfb8455008de1f8f1ed294b8c07cc8a8f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphStressTest/MorphStressTestImageVerifierTests.cs",
+      "sha256": "163e7ac3037ef669bf490cc30b91a57cdfe8ac6c3a9166fe091751547e48e407"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphStressTest/MorphStressTestPlanTests.cs",
+      "sha256": "155b6b37d3d4d62a4d40cf9638abd555eb369491d379d9f9cf4b0bfc8063a909"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphStressTest/MorphStressTestReference.cs",
+      "sha256": "021bbf5ebc756eec383025ddd4453f7c16966f5f9927426f79f1621feaed4898"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphStressTest/MorphStressTestReferenceScene.cs",
+      "sha256": "3c96790da5c751605111ef14a5cea78391c71f8c4c953d471c0a0cba4ec2abeb"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphStressTest/audit_source.py",
+      "sha256": "41cdf7cb5636549fbe29533695963004d4ea3e53554030fe74c5bca9ad4f1c96"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphStressTest/author_reference.py",
+      "sha256": "e7294310ebc77ea2f4b1f0a89fd9df99948dd51d274ce943ec1aecc2a90346cd"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphStressTest/reference.json",
+      "sha256": "a40cd88dfca344355e83a39b63a57b41398b77145b7f248e2efe8d2b3a6c617d"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphStressTest/source-audit.json",
+      "sha256": "f221f03d0126a09fa293847a7be39bbf4380b452150dad26308e1f693b722b7a"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphStressTest/test_reference.py",
+      "sha256": "bdf2db3a4e07426eba46c597fb81205a74dbd193de6921b49dc63efb21250759"
+    }
+  ],
+  "producer_dependencies": [
+    "Actually loaded Sandbox.Gltf with MaterializeMorphTargetsUpload/MaterializePrimitiveUpload/EvaluatePose/GltfCompiler APIs",
+    "Actually loaded production Sandbox.Engine internal DirectGpu backend and authorized Sandbox.Test.Unit friend helper; do not compile replacement backend/producer source",
+    "GltfGpuMorphs ResolveWeights helper; no animation-player source dependency"
+  ],
+  "shared_backend_contract": "research/gltf-validation/direct-gpu/CONTRACT.md; current canonical production engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs; coordinator freezes actual producer and shader identities",
+  "entry": "Sandbox.Gltf.DirectGpu.MorphStressTestValidation.MorphStressTestCoreTests.RunAll(checkoutRoot)",
+  "expected_cases": 60,
+  "forms": [
+    "glTF/source",
+    "glTF/compiled_glb_c",
+    "glTF-Binary/source",
+    "glTF-Binary/compiled_glb_c"
+  ],
+  "suites": [
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.MorphStressTestValidation.MorphStressTestCoreTests.RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 28,
+      "scope": "CPU/data; all531 keys/528 interiors/6 clamp samples per actual/derived form and8 signed/default/ninth-target fixture cases"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.MorphStressTestValidation.MorphStressTestPlanTests.RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 18,
+      "scope": "Pure source-derived staging descriptors and arena/output layout; no device execution"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.MorphStressTestValidation.MorphStressTestGpuVerifierTests.RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 10,
+      "scope": "Synthetic GPU checker sensitivity; no device execution"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.MorphStressTestValidation.MorphStressTestImageVerifierTests.RunAll",
+      "arguments": [],
+      "expected_cases": 4,
+      "scope": "Synthetic image checker sensitivity; no native capture"
+    }
+  ],
+  "cpu_measurements": {
+    "entry": "Sandbox.Gltf.DirectGpu.MorphStressTestValidation.MorphStressTestCpuMeasurements.Run",
+    "arguments": [
+      "$checkout"
+    ],
+    "expected_measurements": 4,
+    "scope": "Bounded current-thread CPU load/stage/all1065 pose sample times and logical buffer bytes; no resident-memory/kernel-GPU/parity claim"
+  },
+  "gpu_probe": {
+    "entry": "Sandbox.Gltf.DirectGpu.MorphStressTestValidation.MorphStressTestGpuProbe.Run",
+    "expected_measurements": 48,
+    "arguments": [
+      "checkoutRoot",
+      "SceneWorld",
+      "compiled compute Material",
+      "Func<Task> waitForActualFrames",
+      "optional afterSample callback",
+      "optional material resolver",
+      "explicit reviewed position/normal/tangent limits"
+    ],
+    "scope": "All1528 actual completed GPU vertices +7236 bound indices per measurement; three clips/interiors/eighth-target/affine independent instance/lifetime and8 synthetic signed/default/ninth states"
+  },
+  "image_probe": {
+    "entry": "Sandbox.Gltf.DirectGpu.MorphStressTestValidation.MorphStressTestImageProbe.Run",
+    "expected_cases": 16,
+    "expected_captures": 112,
+    "arguments": [
+      "checkoutRoot",
+      "private Scene",
+      "CameraComponent",
+      "compiled compute Material",
+      "Func<Task> waitForActualFrames",
+      "Func<string,Task<Color[]>> capture",
+      "explicit reviewed image limits"
+    ],
+    "scope": "Native default-lit geometry/normal response comparison only, same source-adapter material leases. Every case owns empty/actual/deleted-empty/independent-reference/deleted-empty/unmorphed-negative/deleted-empty captures; no source PBR fidelity claim"
+  },
+  "acceptance": "Independent pinned JSON/BIN numeric arrays and hashes; no producer evaluator expected data. Eight actual targets, explicit synthetic ninth preserving all weights; no clamp/normalization/truncation. Exact source formats/offsets/strides/UV sets and runtime field lookup; shuffled padded sensitivity control. Defined authored normals vs explicit undefined-count fallback; no authored tangent XYZ exists, finite unit/orthogonality/W remain strict. Candidate .0005inch component,2e-6 normal/tangent; pixelIoU>=.99 meanRGB<=.003 changed<=max(12,.015*coverage),coverage>128,negative>=64 require coordinator review.",
+  "local_evidence": {
+    "command": "python3 -m unittest -v test_reference.py",
+    "cwd": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/MorphStressTest",
+    "executed_cases": 7,
+    "passed_cases": 7,
+    "scope": "Independent standard-library oracle controls only",
+    "source_audit": "source-audit.json regenerated by audit_source.py",
+    "review": "Read-only delegated source/API/inventory review; Numerics Vector3 aliases fixed and Normal camera route correctly labeled default-lit",
+    "csharp_compiled": false,
+    "csharp_executed_cases": 0,
+    "gpu_executed_measurements": 0,
+    "native_image_executed_cases": 0
+  },
+  "execution_needs": "Coordinator-owned canonical Engine helper friend build/install/restart, actual Gltf and shader identities, guarded CPU/device/capture work. GPU-signature helper classes internal with public static reflection entry methods. No worker editor/build/shader/heavy job performed. Current sources frozen pending receipt; original failures retained and corrections require new freeze.",
+  "remaining_gates": [
+    "C# compile and60 focused cases",
+    "Actual48 GPU states",
+    "Actual16 matched image cases/threshold review",
+    "Four bounded CPU measurements; real GPU kernel/performance and matched vmdl load/memory benchmarks",
+    "Real wall-clock/high-cadence animation",
+    "Public Model.Load integration, Windows and complete PBR fidelity"
+  ],
+  "status": "frozen_for_coordinator_review; C# and all runtime gates unrun"
+}

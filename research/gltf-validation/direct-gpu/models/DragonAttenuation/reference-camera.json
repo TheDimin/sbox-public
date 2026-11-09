@@ -1,0 +1,27 @@
+{
+  "space": "gltf-metres",
+  "position": [
+    -0.9865593249460515,
+    1.8807601582621016,
+    5.051767362601059
+  ],
+  "target": [
+    -0.34719515848176774,
+    0.778015391486728,
+    1.2603075590437331
+  ],
+  "up": [
+    0,
+    1,
+    0
+  ],
+  "projection": "perspective",
+  "verticalFov": 32.40755133744156,
+  "referenceDimensions": [
+    1101,
+    871
+  ],
+  "initialSilhouetteSupportRmsPixels": 159.03557559382438,
+  "fittedSilhouetteSupportRmsPixels": 1.0986664998945797,
+  "scope": "Inferred from outer silhouette support; native camera and appearance need separate verification."
+}

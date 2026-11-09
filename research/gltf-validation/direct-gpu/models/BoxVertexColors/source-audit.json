@@ -1,0 +1,137 @@
+[
+  {
+    "path": "glTF/BoxVertexColors.gltf",
+    "sha256": "53d15f2357d410d0cc9e798065709054474db25ba52274f012bb7fb96a2eaddf",
+    "binary_sha256": "b508427bea091cc29cbe68d8b08e75db27e33559f72104a37343c7e808e72d26",
+    "attributes": {
+      "POSITION": {
+        "accessor": 1,
+        "component_type": 5126,
+        "type": "VEC3",
+        "count": 24,
+        "normalized": false,
+        "view": 1,
+        "view_offset": 72,
+        "accessor_offset": 0,
+        "stride": 12
+      },
+      "NORMAL": {
+        "accessor": 2,
+        "component_type": 5126,
+        "type": "VEC3",
+        "count": 24,
+        "normalized": false,
+        "view": 1,
+        "view_offset": 72,
+        "accessor_offset": 288,
+        "stride": 12
+      },
+      "COLOR_0": {
+        "accessor": 3,
+        "component_type": 5126,
+        "type": "VEC3",
+        "count": 24,
+        "normalized": false,
+        "view": 1,
+        "view_offset": 72,
+        "accessor_offset": 576,
+        "stride": 12
+      }
+    },
+    "indices": 36,
+    "source_material": null,
+    "default_scene": 0,
+    "source_colors_equal_positions": true,
+    "scope": "independent_stdlib_source_audit_not_rendered_evidence"
+  },
+  {
+    "path": "glTF-Binary/BoxVertexColors.glb",
+    "sha256": "9c48227f33b0ba2fbcf23b98ebf60d1c8ae0c6e6c5281e0aa3cc58affee10382",
+    "binary_sha256": "b508427bea091cc29cbe68d8b08e75db27e33559f72104a37343c7e808e72d26",
+    "attributes": {
+      "POSITION": {
+        "accessor": 1,
+        "component_type": 5126,
+        "type": "VEC3",
+        "count": 24,
+        "normalized": false,
+        "view": 1,
+        "view_offset": 72,
+        "accessor_offset": 0,
+        "stride": 12
+      },
+      "NORMAL": {
+        "accessor": 2,
+        "component_type": 5126,
+        "type": "VEC3",
+        "count": 24,
+        "normalized": false,
+        "view": 1,
+        "view_offset": 72,
+        "accessor_offset": 288,
+        "stride": 12
+      },
+      "COLOR_0": {
+        "accessor": 3,
+        "component_type": 5126,
+        "type": "VEC3",
+        "count": 24,
+        "normalized": false,
+        "view": 1,
+        "view_offset": 72,
+        "accessor_offset": 576,
+        "stride": 12
+      }
+    },
+    "indices": 36,
+    "source_material": null,
+    "default_scene": 0,
+    "source_colors_equal_positions": true,
+    "scope": "independent_stdlib_source_audit_not_rendered_evidence"
+  },
+  {
+    "path": "glTF-Embedded/BoxVertexColors.gltf",
+    "sha256": "245e793ceea921ef3117b7d0c44d9e5640dd81b626ab0b6ff870fc0c0b582511",
+    "binary_sha256": "b508427bea091cc29cbe68d8b08e75db27e33559f72104a37343c7e808e72d26",
+    "attributes": {
+      "POSITION": {
+        "accessor": 1,
+        "component_type": 5126,
+        "type": "VEC3",
+        "count": 24,
+        "normalized": false,
+        "view": 1,
+        "view_offset": 72,
+        "accessor_offset": 0,
+        "stride": 12
+      },
+      "NORMAL": {
+        "accessor": 2,
+        "component_type": 5126,
+        "type": "VEC3",
+        "count": 24,
+        "normalized": false,
+        "view": 1,
+        "view_offset": 72,
+        "accessor_offset": 288,
+        "stride": 12
+      },
+      "COLOR_0": {
+        "accessor": 3,
+        "component_type": 5126,
+        "type": "VEC3",
+        "count": 24,
+        "normalized": false,
+        "view": 1,
+        "view_offset": 72,
+        "accessor_offset": 576,
+        "stride": 12
+      }
+    },
+    "indices": 36,
+    "source_material": null,
+    "default_scene": 0,
+    "source_colors_equal_positions": true,
+    "scope": "independent_stdlib_source_audit_not_rendered_evidence"
+  }
+]

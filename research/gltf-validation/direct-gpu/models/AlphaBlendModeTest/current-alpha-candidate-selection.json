@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "engine_sha256": "e05cc4da9851ad2c3306e16ef3af317c8b398516dd6f8bf2bcd902687b5f7215",
+  "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaCurrentCoverageTests.cs",
+      "sha256": "7e356c111b10d57db88a0a6f0ed5e34c8f16d3e57f79fb4012e3fd696c63735d"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaCurrentSortingTests.cs",
+      "sha256": "29f842cdb0df4d7fc1c1ef2835a5dcd39504df532c76e6241e587657a82eb460"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaCurrentBackfaceTests.cs",
+      "sha256": "b19e0a5a90300ca21ad6f9ad71cca937cd4cf9e82371bd68eb0cf3b48e5772b0"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaControlFixtures.cs",
+      "sha256": "07b5c4ed3e67354fd156d252940a947545e2472dd4b70d833741abf2dc80080b"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaCurrentCoverageTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "ShaderSha256",
+          "arguments": [
+            "1a65f5c77ab9424972754e2d4c1a88a94ba16b56d76a9f7e138b639d2c5ce8f1"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "OutputDirectory",
+          "arguments": [
+            "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/alpha-current-AlphaCurrentCoverageTests-01"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaCurrentSortingTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "ShaderSha256",
+          "arguments": [
+            "1a65f5c77ab9424972754e2d4c1a88a94ba16b56d76a9f7e138b639d2c5ce8f1"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "OutputDirectory",
+          "arguments": [
+            "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/alpha-current-AlphaCurrentSortingTests-01"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaCurrentBackfaceTests",
+      "kind": "mstest",
+      "expected_cases": 2,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ]
+}

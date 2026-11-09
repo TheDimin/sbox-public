@@ -1,0 +1,72 @@
+{
+  "model": "MaterialsVariantsShoe/production-variant-state",
+  "owner": "/root/gpu_material_variants",
+  "status": "root-reviewed isolated implementation; Fox owns common backend wiring; focused C# cases unexecuted",
+  "files": [
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfMaterialVariantState.cs",
+      "sha256": "f0d23cc3ad283eed71f6cbe7fdc91c7a8b2e76eec8abca6096f9fbe2c6151546"
+    },
+    {
+      "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfMaterialVariantStateTests.cs",
+      "sha256": "e1460ed044a6d5cbde4f203ec6e82a024c848ac168e9cb8c853fd580ad9fe251"
+    }
+  ],
+  "test_suite": "Sandbox.Tests.GltfMaterialVariantStateTests",
+  "expected_cases": 27,
+  "case_names": [
+    "DefaultAcquisitionIsLazyAndSharedByTwoIndependentInstances",
+    "MappedUnmappedAndNullSelectionUseEachPrimitivesCoreFallback",
+    "EveryRowIsResolvedBeforeAnyNewMaterialAcquisition",
+    "LateAcquisitionFailureReleasesStagedOwnedLeaseAndPublishesNothing",
+    "ValidationFailureReleasesTheJustReturnedLease",
+    "InvalidMaterialDoesNotReplaceValidPublishedBindings",
+    "PerPrimitiveBindingFailureRollsBackEveryNewLeaseBeforePublication",
+    "EveryPrimitiveBindingIsValidatedEvenWhenItsMaterialIsAlreadyShared",
+    "CreationFailureDoesNotRetainPartialCacheOrLiveState",
+    "FailedCreationReleasesEarlierDefaultAndCanDisposeOwner",
+    "RollbackAttemptsEveryStagedReleaseAndRetainsOriginalFailure",
+    "BorrowedResourcesSurviveFailedTransactionAndOwnerDisposal",
+    "AssetDisposalRefusesLiveStatesWithoutPartiallyReleasingAnything",
+    "FinalDisposalAttemptsAllOwnedReleasesEvenWhenOneThrows",
+    "ThreadGuardRejectsChangesAndDisposalBeforeMutatingState",
+    "RecursiveSelectionCannotPublishDuringAnAcquisitionCallback",
+    "RecursiveDisposalCannotRetireOwnerDuringAcquisition",
+    "SnapshotAndSlotInputsCannotBeMutatedByTheCaller",
+    "RepeatedSameSelectionReusesThePublishedSnapshotAndFiniteCache",
+    "ImplicitDefaultMaterialHasItsOwnNullableIdentity",
+    "InvalidRequestedIndicesLeavePublishedStateAndCacheUnchanged",
+    "UnsupportedOptionalExtensionUsesCoreMaterials",
+    "UnsupportedOptionalExtensionDoesNotCreateAnOutOfRangeActiveVariant",
+    "CoreAssetWithoutVariantsRejectsNonNullSelection",
+    "EmptySelectedSceneStillValidatesGlobalVariantIndicesWithoutAcquiringMaterials",
+    "SelectionDoesNotRewriteSourceUvsPoseOrDocument",
+    "DisposedStateAndAssetRejectLaterUseButDoNotOwnTheDocument"
+  ],
+  "producer_dependencies": [
+    "real combined Sandbox.Engine producer with GltfMaterialVariantState.cs and existing GltfMaterialLease<T>",
+    "actual Sandbox.Gltf reader GetMaterialForVariant and controlled implicit-zero stream/pose APIs"
+  ],
+  "interface": {
+    "namespace": "Sandbox.Gltf.DirectGpu",
+    "asset": "internal GltfMaterialVariantAsset<T>(GltfDocument,IReadOnlyList<GltfMaterialVariantSlot>,Func<int?,GltfMaterialLease<T>>,Func<T,bool>,Action verifyThread=null,Action<GltfMaterialVariantBinding<T>> validateBinding=null), where T:class",
+    "state": "asset.CreateState(); state.Current => immutable snapshot(ActiveVariant,Revision,Bindings); state.SetVariant(int?); state.Dispose()",
+    "binding": "Slot(Node,Mesh,Primitive), MaterialIndex nullable, Material T",
+    "lifetime": "document borrowed; variant asset owns cached leases; outer GPU asset calls Dispose only after every instance state disposed. Borrowed material acquisitions supply no-op-release leases.",
+    "publish": "all primitive indices resolved then deduplicated acquisitions and per-row validation; all allocations and validation complete before cache and single immutable snapshot publication; draw captures snapshot once"
+  },
+  "evidence": {
+    "original_59": "57 passed, two actual missing SetVariant/ActiveVariant API failures",
+    "receipt_sha256": "0da83949e97504dcc493158bf7f912d928b288827ebf3b5f8653ff35c74d59d2",
+    "new_focused_cases": "authored before implementation, source checked only; no C# execution by owner"
+  },
+  "execution_needs": "Coordinator builds/stages actual combined producer, then runs focused unit suite under guard. Do not compile replacement engine implementation into a helper against old installed EngineD. Original59 rerun only after actual backend wiring/stage; preserve prior2red receipt.",
+  "remaining_gates": [
+    "Fox real backend SetVariant/ActiveVariant and actual draw snapshot wiring",
+    "native override precedence before whole/slot public picker policy",
+    "owned runtime cache/material releases with native resources",
+    "full material role/UV plan atomic draw binding",
+    "Shoe source normal/AO support and final PBR images",
+    "actual GPU/source-compiled forms, public APIs, Windows/model-editor/cache parity"
+  ]
+}

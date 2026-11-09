@@ -1,0 +1,135 @@
+{
+  "model": "NegativeScaleTest",
+  "owner": "/root/gpu_negative_scale",
+  "status": "refrozen after canonical rig/shader review; Python controls8/8; C# and GPU/image unexecuted",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NegativeScaleTest/.gitignore",
+      "sha256": "32dae3052f331ee34d628ef535709b301259a45df7c7522c4d35dcf49873f00b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NegativeScaleTest/ACCEPTANCE.md",
+      "sha256": "abcd4a8d15191efa41d4d146a991592d5fe4afc041cfef928b197bb7a154bf28"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NegativeScaleTest/NegativeScaleCheckerTests.cs",
+      "sha256": "7f954c4757d368d140a089a7267cce71ada3d480fe392c2b8a143fd6e867523f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NegativeScaleTest/NegativeScaleCoreTests.cs",
+      "sha256": "9483d727f60ae3b096b8682360f8ccb8f707bdd777891d468ca32a6f2efe3fa7"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NegativeScaleTest/NegativeScaleGpuChecks.cs",
+      "sha256": "8fb67c3ebdadc0bc46dbea5f25c1a13ea3a69df9ee862e6cc57cbfd8f5aeee90"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NegativeScaleTest/NegativeScaleGpuProbe.cs",
+      "sha256": "6bdd4d0da7abf901c61193f71223cb1ceb7ae25e9b912eafc3edb342e1f2e3f0"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NegativeScaleTest/NegativeScaleImageChecks.cs",
+      "sha256": "15e2a6a11661d782955d6355db3c4086b8dfe694294983a9e792207f08257b2d"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NegativeScaleTest/NegativeScaleImageProbe.cs",
+      "sha256": "af75df9ff2f0a5dd8dadb2783718c46ff39a4aab412e284cd4cc5a45d8c6852a"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NegativeScaleTest/NegativeScalePlanTests.cs",
+      "sha256": "ba73060b05d276f3d755fa4e5d3e2b546501706bdb3481d24142e568c5ee7898"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NegativeScaleTest/NegativeScaleReference.cs",
+      "sha256": "b46aac4aa609351d75806354be57434373e1e007230166813437a8bf82eca8d2"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NegativeScaleTest/NegativeScaleReferenceScene.cs",
+      "sha256": "256afeafcdc19470368fa58a5c172caf5950c26a869658dd1ca47f51ea213bb9"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NegativeScaleTest/affine-tangent-fixture.gltf",
+      "sha256": "f51e6eb4587cdab782923a6ee2e1bc7c376c06138b834a051d472d511c9d3e52"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NegativeScaleTest/author_reference.py",
+      "sha256": "8e26dacfa3b44f07e2e4461c0b6ec8a37a2b89d3682ab3a880040d0f56eaa57a"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NegativeScaleTest/reference.json",
+      "sha256": "635c1ab037d077ea682a27ade442f4007b7fcc1d4423b9a0e5f926297442b864"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NegativeScaleTest/test_source_oracle.py",
+      "sha256": "7827a6193411f8c311973dd83ff5a684095fae28626e894404a58072a0ffd42d"
+    }
+  ],
+  "producer_dependencies": [
+    "actual loaded Sandbox.Gltf reader/compiler/pose/upload",
+    "actual loaded Sandbox.Engine containing internal Sandbox.Gltf.DirectGpu production backend; actual Sandbox.Test.Unit friend helper",
+    "GltfGpuAsset MaterialSlotSourceIndices/GetMaterials production extraction for image probe"
+  ],
+  "shared_backend_contract": "CONTRACT.md; shared owner gpu_fox and execution coordinator gpu_validation determine actual producer freeze",
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.NegativeScaleValidation.NegativeScaleCoreTests",
+      "kind": "static_results",
+      "method": "RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 38,
+      "scope": "CPU/data"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.NegativeScaleValidation.NegativeScalePlanTests",
+      "kind": "static_results",
+      "method": "RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 22,
+      "scope": "pure staging plan"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.NegativeScaleValidation.NegativeScaleCheckerTests",
+      "kind": "static_results",
+      "method": "RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 11,
+      "scope": "manufactured verifier sensitivity controls"
+    }
+  ],
+  "expected_cases": 71,
+  "forms": [
+    "glTF/source",
+    "glTF/compiled_glb_c",
+    "glTF-Binary/source",
+    "glTF-Binary/compiled_glb_c",
+    "independent_affine_tangent_fixture/source",
+    "independent_affine_tangent_fixture/compiled_glb_c"
+  ],
+  "gpu_entry": "Sandbox.Gltf.DirectGpu.NegativeScaleValidation.NegativeScaleGpuProbe.Run(checkoutRoot, world, compute, waitForActualFrames, resolver = null)",
+  "expected_gpu_measurements": 60,
+  "image_entry": "Sandbox.Gltf.DirectGpu.NegativeScaleValidation.NegativeScaleImageProbe.Run(checkoutRoot, scene, camera, compute, waitForActualFrames, capture)",
+  "expected_image_cases": 12,
+  "expected_image_captures": 84,
+  "acceptance": "ACCEPTANCE.md and independent source reference.json; exact singular normals explicitly undefined, finite position collapse and recovery strict; determinant winding without double-sided workaround",
+  "execution_needs": "CPU-first coordinator compilation against actual staged canonical production backend; no producer-source substitute. Shader anisotropic determinant/normal consistency remains a known unresolved GPU gate; real frames and native captures under guard.",
+  "executed": [
+    {
+      "suite": "test_source_oracle.py",
+      "cases": 8,
+      "passed": 8,
+      "scope": "independent stdlib oracle controls only"
+    }
+  ],
+  "previous_prepared_unrun_submission_sha256": "e7fc39357826c392b789e13c6d351ba2421abddfbeb72537ed4dfaf2ccbf7ab0",
+  "review": {
+    "canonical_rig": "normalized-double Orientation sign comparison now fixes float determinant underflow and avoids multiplying determinant magnitudes; staging tests invoke actual rig",
+    "shader_pending": "single global-max float normalization still underflows anisotropic determinants; diag(-1e-30,1e-30,1) reproducer and source-negative/tiny-positive or negative placement cases distinguish winding/normal/tangentW consistency",
+    "singular": "undefined normal directions counted separately; finite position collapse/fallback, index reset, independent instance and recovery checks remain strict"
+  }
+}

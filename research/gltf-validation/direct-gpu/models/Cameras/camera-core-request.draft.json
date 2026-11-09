@@ -1,0 +1,139 @@
+{
+  "version": 1,
+  "engine_sha256": "pending-camera-core-stage",
+  "gltf_sha256": "pending-camera-core-stage",
+  "tools_sha256": "pending-camera-core-stage",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraReaderTests.cs",
+      "sha256": "42e891f939d80fe7512b295d8124193c80ae2731baa5f59dba5ec4873e291984"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraCapture.cs",
+      "sha256": "3494b025558b9b97bae17fe3ccd20ae0390c6bab971f368e629745a1984e2edc"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraNativeApiTests.cs",
+      "sha256": "07e085cfb10a07dbcb5008b0278c78cc7c8be3fa379105a308545ed07a71ade4"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraIntegrationTests.cs",
+      "sha256": "6272c4052df859f079420efb08cf4a7b19d2a6a60af394bce91c7cc7ec93e7d3"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraFrustumTests.cs",
+      "sha256": "a6b312f932d3b075a38305f9208643f12c5b6dfef7841e159f869482ac3a3acf"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraInfiniteFarTests.cs",
+      "sha256": "15d4929d51bc809a36c1d1dbfcf0da5ea31a66ba7a960344385b7f0a5c257d09"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraPersistentFlipTests.cs",
+      "sha256": "329370d6d7ca36e9ed74f47745d61df1da5cb239b82fec743b481c37131869eb"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraSignedProjectionTests.cs",
+      "sha256": "f82c837f6f102ce3622c3fc10eae08145270e61302244f29032a500178d4fe3c"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraTransformTests.cs",
+      "sha256": "be70ca9da765ca889fcc8ac18098eabf985137cc7723bf2d12415cb669af63b1"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.CamerasValidation.CameraIntegrationTests",
+      "kind": "mstest",
+      "expected_cases": 4,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.CamerasValidation.CameraFrustumTests",
+      "kind": "mstest",
+      "expected_cases": 2
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.CamerasValidation.CameraInfiniteFarTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.CamerasValidation.CameraPersistentFlipTests",
+      "kind": "mstest",
+      "expected_cases": 5,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.CamerasValidation.CameraSignedProjectionTests",
+      "kind": "mstest",
+      "expected_cases": 6,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.CamerasValidation.CameraTransformTests",
+      "kind": "mstest",
+      "expected_cases": 4,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ]
+}

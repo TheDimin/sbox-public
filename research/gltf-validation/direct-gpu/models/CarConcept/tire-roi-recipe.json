@@ -1,0 +1,24 @@
+{
+  "status": "proposed-unrun",
+  "source": "glTF/CarConcept.gltf and derived compiled GLB; pin all source-audit.json inputs",
+  "purpose": "Resolve near front-right wheel and distinguish changes in illumination from authored material/UV/sampler binding; does not declare a cause or image parity.",
+  "reference": "Models/CarConcept/screenshot/screenshot_Large.jpg; Sample Viewer Wide Street, original camera/environment rotation/exposure unknown",
+  "camera": {
+    "coordinates": "sbox inches, +X=glTF +Z, +Y=glTF +X, +Z=glTF +Y",
+    "frontRightWheelCenter": [58.424, -38.452, 15.108],
+    "centerDerivation": "Authored WheelFrontR node matrix translation (-0.9766749144,-1.4839684963,0.3837589622), then root BodyUnderside basis and metres-to-inches; no inferred wheel displacement.",
+    "overallCandidate": {"position": [123.0, -76.0, 95.0], "target": [9.39, -0.205, 19.47], "verticalFov": 45, "size": [800, 620]},
+    "tireRoiCandidate": {"position": [100.0, -85.0, 40.0], "target": [58.424, -38.452, 15.108], "verticalFov": 35, "size": [800, 620]},
+    "qualification": "Coordinates are initial inferred camera candidates; verify actual render and revise if wheel is occluded or clipping. Full view and tire ROI are distinct captures. Never call exact reference fit."
+  },
+  "illumination": {
+    "reference": "Wide Street HDR environment recorded by model author; actual HDR bytes, orientation and exposure are not available in workspace and must be verified before claiming a matched lighting comparison.",
+    "control": "Use an identified, recorded environment plus a second explicitly labelled diagnostic light level or direction, with unchanged camera and material; never change source textures or silently substitute material. Record environment asset SHA, yaw, exposure, tone map, color and positions.",
+    "required": "Sample ordinary lit shading, preserve normal and base texture colorspaces and sampler; do not infer physical material fault from differences when IBL differs."
+  },
+  "restorationDiagnostic": {
+    "states": ["empty", "default", "pearl", "graphite", "default restored", "empty after deletion"],
+    "settling": "At each state, perform bounded successive actual RenderToTexture/readback operations on one persistent render target. Record each RGB max and mean difference and require four consecutive full-image zero-delta pairs for a settled state; stop at an explicit bounded maximum and report incomplete if not converged.",
+    "assertions": "Capture both default images, settled differences and material binding indices before and after switching; preserve source 68-pixel failure. Separate exact binding reset from image convergence, do not widen the original threshold. Verify empty-before/after and destroyed callback controls."
+  }
+}

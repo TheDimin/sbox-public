@@ -1,0 +1,124 @@
+{
+  "model": "PointLightIntensityTest",
+  "owner": "/root/light_resume",
+  "patch": {
+    "path": "research/gltf-validation/direct-gpu/models/PointLightIntensityTest/public-finite-point.proposed.patch",
+    "sha256": "590f173cb25489f14a1e4083811a0f24c7a288add256f0eea809883adbf0526f"
+  },
+  "patch_base": [
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfModelLoader.cs",
+      "sha256": "2c3fd141666c847c601a946b0f4bc57640d7fa65ccce0234e67137fb376655f0"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs",
+      "sha256": "bdc156b27532ffdf0469ae7743fb21d4dbb61f6bd136c9b45f689910ffbbae71"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs",
+      "sha256": "6ea746ef42adc94dca8eae980c0505346448a28bc374ed82f5c5386e02743839"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.Gltf.cs",
+      "sha256": "37cdce9105a632925fe7c5db0e8d492463da502a4e1c28e16b1e58391b99172d"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.GltfReload.cs",
+      "sha256": "f56e925eb487e04cf7460987f5652408969eaab151fef9c18a70c439652e3cd1"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/Lighting/GltfPunctualLightInstances.cs",
+      "sha256": "900fb5faca4fbac1104f45ad030c2973dc91c2c49e422fda101bea62c8c426f5"
+    },
+    {
+      "path": "game/core/shaders/gltf_stock_sampler.shader",
+      "sha256": "f6796331fc5b4d941b767c389581b72a07a9d30617106d2629e27d20cec46cf8"
+    },
+    {
+      "path": "game/core/shaders/gltf_surface_five_uv.shader",
+      "sha256": "bf6c5e6f16c801a9892a485a53bc4c6b6bef85d4a86c98232af8139187630ed9"
+    },
+    {
+      "path": "game/core/shaders/gltf_diffuse_transmission.shader",
+      "sha256": "f6d955b7927642f37c639bb49ebaee7831597f52fd430e080cc2666628647d48"
+    },
+    {
+      "path": "game/core/shaders/vr_lighting.fxc",
+      "sha256": "7d05e4fe71dc41325bdef419244de0c54557f66461911b168de2eea05f7471c5"
+    },
+    {
+      "path": "game/core/shaders/common/classes/Light.hlsl",
+      "sha256": "69bf6314f2c36f2478e45215fe3374a3eb8439cccfda879e97efb2072b511695"
+    }
+  ],
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/PointLightIntensityTest/PointPublicProductionTests.cs",
+      "sha256": "02143dce84884b0d1871f6817efb23793b18fa6648ce7a42367804c8c0ba14c3"
+    }
+  ],
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "expected_cases": 6,
+  "cases": [
+    {
+      "method": "PinnedAssetUsesDefaultMaterialsAndOwnsNativeLights",
+      "forms": [
+        "pinned glTF",
+        "derived canonical .glb_c"
+      ]
+    },
+    {
+      "method": "RequiredUnboundedRejectsAndOptionalUnboundedFallsBack",
+      "forms": [
+        "synthetic source glTF",
+        "derived canonical .glb_c"
+      ]
+    },
+    {
+      "method": "LightOnlyModelUsesStockGltfShaderWithoutChangingNativeVmdl",
+      "forms": [
+        "synthetic source glTF"
+      ]
+    },
+    {
+      "method": "OrdinaryNativePointStillCastsShadowsOnDefaultGltfMaterial",
+      "forms": [
+        "synthetic source glTF"
+      ]
+    }
+  ],
+  "runtime_suite": {
+    "type": "Sandbox.Gltf.DirectGpu.PointLightIntensityValidation.PointPublicProductionTests",
+    "kind": "mstest",
+    "expected_cases": 6,
+    "setup": [
+      {
+        "kind": "property",
+        "name": "CheckoutRoot",
+        "arguments": [
+          "$checkout"
+        ]
+      }
+    ],
+    "measurements_property": "Measurements"
+  },
+  "candidate_shaders": [
+    "gltf_stock_sampler.shader",
+    "gltf_surface_five_uv.shader",
+    "gltf_diffuse_transmission.shader"
+  ],
+  "state": "Proposed. Patch application dry-run and public helper compile passed. Candidate Engine build, named shader compilation and native six-case execution are pending.",
+  "execution_needs": "Apply in an isolated overlay, guarded serialized managed build and named shader compiles, review artifacts. Native cases require a coordinator-approved coherent installed stage, verified editor identity, and guarded native lease."
+}

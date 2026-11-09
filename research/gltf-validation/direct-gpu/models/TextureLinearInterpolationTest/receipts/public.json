@@ -1,0 +1,663 @@
+{
+  "passed": true,
+  "phase": "complete",
+  "error": null,
+  "expected_cases": 2,
+  "passed_cases": 2,
+  "failed_cases": 0,
+  "incomplete_cases": 0,
+  "tests": [
+    {
+      "suite": "Sandbox.Gltf.DirectGpu.TextureLinearValidation.TextureLinearPublicTests",
+      "method": "ActualSourceEmissiveInterpolationPublicRendererAndCleanup",
+      "arguments": [
+        false
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "suite": "Sandbox.Gltf.DirectGpu.TextureLinearValidation.TextureLinearPublicTests",
+      "method": "ActualSourceEmissiveInterpolationPublicRendererAndCleanup",
+      "arguments": [
+        true
+      ],
+      "passed": true,
+      "error": null
+    }
+  ],
+  "measurements": [
+    {
+      "suite": "Sandbox.Gltf.DirectGpu.TextureLinearValidation.TextureLinearPublicTests",
+      "property": "Measurements",
+      "value": [
+        {
+          "name": "actual_bound_emissive_sampler",
+          "expected": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "actual": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "tolerance": 0.002,
+          "error": 0,
+          "request": {
+            "footprint": 0.125,
+            "u": 0.5
+          }
+        },
+        {
+          "name": "actual_bound_emissive_sampler",
+          "expected": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "actual": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "tolerance": 0.002,
+          "error": 0,
+          "request": {
+            "footprint": 0.125,
+            "u": 1.5
+          }
+        },
+        {
+          "name": "actual_bound_emissive_sampler",
+          "expected": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "actual": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "tolerance": 0.002,
+          "error": 0,
+          "request": {
+            "footprint": 0.125,
+            "u": -0.5
+          }
+        },
+        {
+          "name": "actual_bound_emissive_sampler",
+          "expected": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "actual": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "tolerance": 0.002,
+          "error": 0,
+          "request": {
+            "footprint": 4,
+            "u": 0.5
+          }
+        },
+        {
+          "name": "actual_bound_emissive_sampler",
+          "expected": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "actual": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "tolerance": 0.002,
+          "error": 0,
+          "request": {
+            "footprint": 4,
+            "u": 1.5
+          }
+        },
+        {
+          "name": "actual_bound_emissive_sampler",
+          "expected": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "actual": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "tolerance": 0.002,
+          "error": 0,
+          "request": {
+            "footprint": 4,
+            "u": -0.5
+          }
+        },
+        {
+          "name": "wrong_filter_then_decode_negative",
+          "expected": [
+            0,
+            0.21404114,
+            0,
+            1
+          ],
+          "actual": [
+            0,
+            0.21404819,
+            0,
+            1
+          ],
+          "tolerance": 0.002,
+          "error": 7.0482492E-06,
+          "request": null
+        },
+        {
+          "form": "upstream GLB",
+          "source_sha256": "5a7d79bb138f9f732002a988298b5ba44f614064330e94f6ea8c17e38b998440",
+          "input_sha256": "5a7d79bb138f9f732002a988298b5ba44f614064330e94f6ea8c17e38b998440",
+          "canonical_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/canonical/TextureLinearInterpolationTest.glb_c",
+          "canonical_sha256": "5a7d79bb138f9f732002a988298b5ba44f614064330e94f6ea8c17e38b998440",
+          "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/public/f82447749ba346d4b81dc3df9bc3eb45",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/public/f82447749ba346d4b81dc3df9bc3eb45/actual_public_source_material.png",
+          "Sha256": "cb42ac81ad03434bdd46dfe8fd03ffc89415f1c1b1185fef77ff318333f9c377",
+          "CameraStateJson": "{\u0022position\u0022:\u0022350,0,10\u0022,\u0022rotation\u0022:\u00220,0,1,0\u0022,\u0022custom_size\u0022:\u0022192,192\u0022,\u0022scene_size\u0022:\u0022192,192\u0022,\u0022viewport\u0022:\u00220,0,1,1\u0022,\u0022debug_mode\u0022:\u0022Normal\u0022,\u0022EnablePostProcessing\u0022:false,\u0022Orthographic\u0022:true,\u0022OrthographicHeight\u0022:270,\u0022ZNear\u0022:1,\u0022ZFar\u0022:1000,\u0022point_light_position\u0022:\u0022200,-30,60\u0022,\u0022point_light_radius\u0022:1000,\u0022point_light_color\u0022:\u00224.00, 4.00, 4.00, 1.00\u0022}",
+          "texture_dimensions": [
+            2,
+            1,
+            1,
+            1
+          ],
+          "texture_pixels": "AAAA/wD/AP8=",
+          "numeric_probe_shader_sha256": "84cfa8a5af1db55f5ac054ef6595c59fc7e42d3010dacc6a9500134784077dba",
+          "wrong_transfer": [
+            0,
+            0.21404819,
+            0,
+            1
+          ],
+          "wrong_point": [
+            0,
+            1,
+            0,
+            1
+          ],
+          "sphere_green_means": [
+            0.7372549,
+            0.7372549
+          ],
+          "vertices": 416,
+          "indices": 1926,
+          "max_position_error_inches": 7.6293945E-06,
+          "max_uv_error": 0,
+          "material_shaders": [
+            "shaders/gltf_surface_five_uv.shader",
+            "shaders/gltf_surface_five_uv.shader",
+            "shaders/gltf_surface_five_uv.shader"
+          ],
+          "scope": "Actual public Model.Load/ModelRenderer default source materials, bound sampler and native texture float readback. Inferred native camera; final upstream visual approval is separate."
+        },
+        {
+          "compiled": false,
+          "captures": [
+            {
+              "phase": "capture",
+              "name": "empty_before",
+              "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/public/f82447749ba346d4b81dc3df9bc3eb45/empty_before.png",
+              "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+              "width": 192,
+              "height": 192,
+              "coverage": 0,
+              "engine_frame": 22225,
+              "widget_frames": 6,
+              "elapsed_seconds": 0.5772196,
+              "camera_position": "350,0,10",
+              "camera_rotation": "0,0,1,0",
+              "custom_size": "192,192",
+              "scene_camera_size": "192,192",
+              "screen_rect": "0,0,192,192",
+              "viewport": "0,0,1,1",
+              "DebugMode": 0,
+              "EnablePostProcessing": false,
+              "Orthographic": true,
+              "OrthographicHeight": 270,
+              "ZNear": 1,
+              "ZFar": 1000,
+              "point_light_position": "200,-30,60",
+              "point_light_radius": 1000,
+              "point_light_color": "4.00, 4.00, 4.00, 1.00",
+              "scope": "Fresh192px diagnostic native camera capture; not a1080p performance benchmark."
+            },
+            {
+              "phase": "capture",
+              "name": "actual_public_source_material",
+              "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/public/f82447749ba346d4b81dc3df9bc3eb45/actual_public_source_material.png",
+              "sha256": "cb42ac81ad03434bdd46dfe8fd03ffc89415f1c1b1185fef77ff318333f9c377",
+              "width": 192,
+              "height": 192,
+              "coverage": 11094,
+              "engine_frame": 22237,
+              "widget_frames": 18,
+              "elapsed_seconds": 9.8990146,
+              "camera_position": "350,0,10",
+              "camera_rotation": "0,0,1,0",
+              "custom_size": "192,192",
+              "scene_camera_size": "192,192",
+              "screen_rect": "0,0,192,192",
+              "viewport": "0,0,1,1",
+              "DebugMode": 0,
+              "EnablePostProcessing": false,
+              "Orthographic": true,
+              "OrthographicHeight": 270,
+              "ZNear": 1,
+              "ZFar": 1000,
+              "point_light_position": "200,-30,60",
+              "point_light_radius": 1000,
+              "point_light_color": "4.00, 4.00, 4.00, 1.00",
+              "scope": "Fresh192px diagnostic native camera capture; not a1080p performance benchmark."
+            },
+            {
+              "phase": "capture",
+              "name": "empty_after_delete",
+              "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/public/f82447749ba346d4b81dc3df9bc3eb45/empty_after_delete.png",
+              "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+              "width": 192,
+              "height": 192,
+              "coverage": 0,
+              "engine_frame": 22243,
+              "widget_frames": 24,
+              "elapsed_seconds": 10.4996663,
+              "camera_position": "350,0,10",
+              "camera_rotation": "0,0,1,0",
+              "custom_size": "192,192",
+              "scene_camera_size": "192,192",
+              "screen_rect": "0,0,192,192",
+              "viewport": "0,0,1,1",
+              "DebugMode": 0,
+              "EnablePostProcessing": false,
+              "Orthographic": true,
+              "OrthographicHeight": 270,
+              "ZNear": 1,
+              "ZFar": 1000,
+              "point_light_position": "200,-30,60",
+              "point_light_radius": 1000,
+              "point_light_color": "4.00, 4.00, 4.00, 1.00",
+              "scope": "Fresh192px diagnostic native camera capture; not a1080p performance benchmark."
+            }
+          ]
+        },
+        {
+          "name": "actual_bound_emissive_sampler",
+          "expected": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "actual": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "tolerance": 0.002,
+          "error": 0,
+          "request": {
+            "footprint": 0.125,
+            "u": 0.5
+          }
+        },
+        {
+          "name": "actual_bound_emissive_sampler",
+          "expected": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "actual": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "tolerance": 0.002,
+          "error": 0,
+          "request": {
+            "footprint": 0.125,
+            "u": 1.5
+          }
+        },
+        {
+          "name": "actual_bound_emissive_sampler",
+          "expected": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "actual": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "tolerance": 0.002,
+          "error": 0,
+          "request": {
+            "footprint": 0.125,
+            "u": -0.5
+          }
+        },
+        {
+          "name": "actual_bound_emissive_sampler",
+          "expected": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "actual": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "tolerance": 0.002,
+          "error": 0,
+          "request": {
+            "footprint": 4,
+            "u": 0.5
+          }
+        },
+        {
+          "name": "actual_bound_emissive_sampler",
+          "expected": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "actual": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "tolerance": 0.002,
+          "error": 0,
+          "request": {
+            "footprint": 4,
+            "u": 1.5
+          }
+        },
+        {
+          "name": "actual_bound_emissive_sampler",
+          "expected": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "actual": [
+            0,
+            0.5,
+            0,
+            1
+          ],
+          "tolerance": 0.002,
+          "error": 0,
+          "request": {
+            "footprint": 4,
+            "u": -0.5
+          }
+        },
+        {
+          "name": "wrong_filter_then_decode_negative",
+          "expected": [
+            0,
+            0.21404114,
+            0,
+            1
+          ],
+          "actual": [
+            0,
+            0.21404819,
+            0,
+            1
+          ],
+          "tolerance": 0.002,
+          "error": 7.0482492E-06,
+          "request": null
+        },
+        {
+          "form": "canonical glb_c",
+          "source_sha256": "5a7d79bb138f9f732002a988298b5ba44f614064330e94f6ea8c17e38b998440",
+          "input_sha256": "5a7d79bb138f9f732002a988298b5ba44f614064330e94f6ea8c17e38b998440",
+          "canonical_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/canonical/TextureLinearInterpolationTest.glb_c",
+          "canonical_sha256": "5a7d79bb138f9f732002a988298b5ba44f614064330e94f6ea8c17e38b998440",
+          "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/public/dae79609b54a434f9434d2d7567e6cc0",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/public/dae79609b54a434f9434d2d7567e6cc0/actual_public_source_material.png",
+          "Sha256": "cb42ac81ad03434bdd46dfe8fd03ffc89415f1c1b1185fef77ff318333f9c377",
+          "CameraStateJson": "{\u0022position\u0022:\u0022350,0,10\u0022,\u0022rotation\u0022:\u00220,0,1,0\u0022,\u0022custom_size\u0022:\u0022192,192\u0022,\u0022scene_size\u0022:\u0022192,192\u0022,\u0022viewport\u0022:\u00220,0,1,1\u0022,\u0022debug_mode\u0022:\u0022Normal\u0022,\u0022EnablePostProcessing\u0022:false,\u0022Orthographic\u0022:true,\u0022OrthographicHeight\u0022:270,\u0022ZNear\u0022:1,\u0022ZFar\u0022:1000,\u0022point_light_position\u0022:\u0022200,-30,60\u0022,\u0022point_light_radius\u0022:1000,\u0022point_light_color\u0022:\u00224.00, 4.00, 4.00, 1.00\u0022}",
+          "texture_dimensions": [
+            2,
+            1,
+            1,
+            1
+          ],
+          "texture_pixels": "AAAA/wD/AP8=",
+          "numeric_probe_shader_sha256": "84cfa8a5af1db55f5ac054ef6595c59fc7e42d3010dacc6a9500134784077dba",
+          "wrong_transfer": [
+            0,
+            0.21404819,
+            0,
+            1
+          ],
+          "wrong_point": [
+            0,
+            1,
+            0,
+            1
+          ],
+          "sphere_green_means": [
+            0.7372549,
+            0.7372549
+          ],
+          "vertices": 416,
+          "indices": 1926,
+          "max_position_error_inches": 7.6293945E-06,
+          "max_uv_error": 0,
+          "material_shaders": [
+            "shaders/gltf_surface_five_uv.shader",
+            "shaders/gltf_surface_five_uv.shader",
+            "shaders/gltf_surface_five_uv.shader"
+          ],
+          "scope": "Actual public Model.Load/ModelRenderer default source materials, bound sampler and native texture float readback. Inferred native camera; final upstream visual approval is separate."
+        },
+        {
+          "compiled": true,
+          "captures": [
+            {
+              "phase": "capture",
+              "name": "empty_before",
+              "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/public/dae79609b54a434f9434d2d7567e6cc0/empty_before.png",
+              "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+              "width": 192,
+              "height": 192,
+              "coverage": 0,
+              "engine_frame": 22253,
+              "widget_frames": 9,
+              "elapsed_seconds": 0.1975936,
+              "camera_position": "350,0,10",
+              "camera_rotation": "0,0,1,0",
+              "custom_size": "192,192",
+              "scene_camera_size": "192,192",
+              "screen_rect": "0,0,192,192",
+              "viewport": "0,0,1,1",
+              "DebugMode": 0,
+              "EnablePostProcessing": false,
+              "Orthographic": true,
+              "OrthographicHeight": 270,
+              "ZNear": 1,
+              "ZFar": 1000,
+              "point_light_position": "200,-30,60",
+              "point_light_radius": 1000,
+              "point_light_color": "4.00, 4.00, 4.00, 1.00",
+              "scope": "Fresh192px diagnostic native camera capture; not a1080p performance benchmark."
+            },
+            {
+              "phase": "capture",
+              "name": "actual_public_source_material",
+              "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/public/dae79609b54a434f9434d2d7567e6cc0/actual_public_source_material.png",
+              "sha256": "cb42ac81ad03434bdd46dfe8fd03ffc89415f1c1b1185fef77ff318333f9c377",
+              "width": 192,
+              "height": 192,
+              "coverage": 11094,
+              "engine_frame": 22305,
+              "widget_frames": 62,
+              "elapsed_seconds": 3.765158,
+              "camera_position": "350,0,10",
+              "camera_rotation": "0,0,1,0",
+              "custom_size": "192,192",
+              "scene_camera_size": "192,192",
+              "screen_rect": "0,0,192,192",
+              "viewport": "0,0,1,1",
+              "DebugMode": 0,
+              "EnablePostProcessing": false,
+              "Orthographic": true,
+              "OrthographicHeight": 270,
+              "ZNear": 1,
+              "ZFar": 1000,
+              "point_light_position": "200,-30,60",
+              "point_light_radius": 1000,
+              "point_light_color": "4.00, 4.00, 4.00, 1.00",
+              "scope": "Fresh192px diagnostic native camera capture; not a1080p performance benchmark."
+            },
+            {
+              "phase": "capture",
+              "name": "empty_after_delete",
+              "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/public/dae79609b54a434f9434d2d7567e6cc0/empty_after_delete.png",
+              "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+              "width": 192,
+              "height": 192,
+              "coverage": 0,
+              "engine_frame": 22313,
+              "widget_frames": 70,
+              "elapsed_seconds": 3.8760406,
+              "camera_position": "350,0,10",
+              "camera_rotation": "0,0,1,0",
+              "custom_size": "192,192",
+              "scene_camera_size": "192,192",
+              "screen_rect": "0,0,192,192",
+              "viewport": "0,0,1,1",
+              "DebugMode": 0,
+              "EnablePostProcessing": false,
+              "Orthographic": true,
+              "OrthographicHeight": 270,
+              "ZNear": 1,
+              "ZFar": 1000,
+              "point_light_position": "200,-30,60",
+              "point_light_radius": 1000,
+              "point_light_color": "4.00, 4.00, 4.00, 1.00",
+              "scope": "Fresh192px diagnostic native camera capture; not a1080p performance benchmark."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "diagnostics": [
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearReference.cs(1,7): hidden CS8933: The using directive for \u0027System\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearReference.cs(3,7): hidden CS8933: The using directive for \u0027System.Linq\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs(1,7): hidden CS8933: The using directive for \u0027System\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs(3,7): hidden CS8933: The using directive for \u0027System.Linq\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs(4,7): hidden CS8933: The using directive for \u0027Microsoft.VisualStudio.TestTools.UnitTesting\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs(1,7): hidden CS8933: The using directive for \u0027System\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs(5,7): hidden CS8933: The using directive for \u0027System.Linq\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs(7,7): hidden CS8933: The using directive for \u0027System.Threading.Tasks\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs(8,7): hidden CS8933: The using directive for \u0027Microsoft.VisualStudio.TestTools.UnitTesting\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs(1,7): hidden CS8933: The using directive for \u0027System\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs(6,7): hidden CS8933: The using directive for \u0027System.Linq\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs(10,7): hidden CS8933: The using directive for \u0027System.Threading.Tasks\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs(11,7): hidden CS8933: The using directive for \u0027Microsoft.VisualStudio.TestTools.UnitTesting\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs(1,7): hidden CS8933: The using directive for \u0027System\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs(4,7): hidden CS8933: The using directive for \u0027System.Linq\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs(1,7): hidden CS8933: The using directive for \u0027System\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs(4,7): hidden CS8933: The using directive for \u0027System.Linq\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs(2,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs(4,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs(1,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs(1,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs(11,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs(1,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs(4,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearReference.cs(3,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs(1,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs(7,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs(6,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs(3,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs(6,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs(4,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs(5,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs(1,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearReference.cs(1,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs(10,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs(3,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs(8,1): hidden CS8019: Unnecessary using directive."
+  ],
+  "cleanup_errors": [],
+  "scope": "Model-local assertions against the actual loaded producer; CPU/data rows alone do not establish directGPU rendered parity.",
+  "source_sha256": {
+    "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearReference.cs": "20620636cfbca8040888a085dd21ec148380e0e70603a4ad3213051b13807caa",
+    "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs": "0fd08c9c1aad28ec153779f823b497831442c5040035917292d2fffada0bf37e",
+    "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs": "2ee192e374d58eef3eca0441c2cfede2501b542137e274ead18e9cc78d40ffb9",
+    "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161",
+    "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544",
+    "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+  },
+  "source_read_paths": {
+    "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearReference.cs": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearReference.cs",
+    "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs",
+    "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs",
+    "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+    "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+    "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs"
+  },
+  "test_snapshot_manifests": {},
+  "request_sha256": "c014f2babc168afa281241e3f08488bbeaf1ea17b0ee97b5c0f00fa80fc90bec",
+  "runner_sha256": "fc29bce8cf60316725df5cc2b56cf203572bce143137d035f809d90fbfeb8983",
+  "helper_mvid": "a209d18a-616e-4ce0-97d4-dbc63c33f97c",
+  "engine_location": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.Engine.dll",
+  "engine_mvid": "5a07f228-dff8-4d6b-b4ef-890b32a80299",
+  "gltf_location": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.Gltf.dll",
+  "gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "framework_mvid": "ea501b1a-9500-43b9-9f3d-f638f1824d61",
+  "is_editor": true,
+  "is_unit_test": false,
+  "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/model-tests/fc26aa4b5f114031aac11e1d7f529126"
+}

@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "engine_sha256": "60bc2b51bbd70c40a000f8b29f420714aff4e3dbda723794b18fdfc43b571396",
+  "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/PointLightIntensityTest/NativeCookieProbe.cs",
+      "sha256": "72137c26533131c2b88715548384ef2870c9d955d9a935392ecce3f56d342598"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.PointLightIntensityValidation.NativeCookieProbe",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "measurements_property": "Measurements"
+    }
+  ]
+}

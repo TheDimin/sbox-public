@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "engine_sha256": "ed5f8073e45d3a4f90e5140323cc5c5a0dddf9707be71ee375966ca0f05403f0",
+  "gltf_sha256": "7638a855ba21fd9c079a22cbc8b834d4169112fe08cb9a5fd788e63cf90866e1",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/InterpolationTest/InterpolationReference.cs",
+      "sha256": "eaf49cd66848d5c130093d61246a931e30b025240984d33077888175ae925380"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/InterpolationTest/InterpolationConformanceTests.cs",
+      "sha256": "33f64d552b126fe97ab83f25ea4a16c5120e24f4671248b7f3adde68e65d7a83"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/InterpolationTest/InterpolationGpuChecks.cs",
+      "sha256": "6a129daa0859b66af53a3f7cc7591550d4587a7a9eb59c674c566444c4a8d59f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/InterpolationTest/InterpolationGpuCheckContractTests.cs",
+      "sha256": "f891b78253a454ed98bc9dcb6653d1d78839b6d082035228821bc43cf295a5c4"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/InterpolationTest/InterpolationPublicGpuTests.cs",
+      "sha256": "9e10e709cab0cd4481d9526b4738778b99263476cac3b8659491f57d2ff79447"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.InterpolationTestValidation.InterpolationGpuCheckContractTests",
+      "kind": "mstest",
+      "expected_cases": 2
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.InterpolationTestValidation.InterpolationPublicGpuTests",
+      "kind": "mstest",
+      "expected_cases": 2,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ]
+}

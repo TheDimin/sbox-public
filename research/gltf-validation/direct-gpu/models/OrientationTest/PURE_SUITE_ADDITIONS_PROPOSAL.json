@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "proposal_only": true,
+  "execution_status": "not_executed",
+  "scope": "Additive three-reader-class cohort only; no codec/nativeEngine/GPU work and no claim of whole-project execution.",
+  "source_class_count": 3,
+  "test_method_count": 31,
+  "data_row_count": 28,
+  "expanded_case_count": 52,
+  "suites": [
+    {
+      "name": "morph-upload-data",
+      "file": "GltfMorphUploadDataTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfMorphUploadDataTests",
+      "methods": 10,
+      "data_rows": 16,
+      "cases": 23,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "6ccd193c93d2d6780b8663013da3e5eb980cebb243dc5d821c90bdf4fe03537e"
+    },
+    {
+      "name": "pose-morph-overrides",
+      "file": "GltfPoseMorphOverrideTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfPoseMorphOverrideTests",
+      "methods": 17,
+      "data_rows": 12,
+      "cases": 25,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "2dee32444a3d1643ccb00003d30020f65489e3c1863b7d57e60caf1022b2b377"
+    },
+    {
+      "name": "pose-ownership",
+      "file": "GltfPoseOwnershipTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfPoseOwnershipTests",
+      "methods": 4,
+      "data_rows": 0,
+      "cases": 4,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "93427453276e148dcc1a02f90f2b6735ea4e023ce698124dbb6858795a0f2b49"
+    }
+  ],
+  "codec_preflights": [],
+  "resource_sha256": {},
+  "historical_manifest_sha256": "e2682e555098cbe81dcb67c92cb46ef2ca47394b665f4aa480c3c9463657d2b0",
+  "required_producer": "Bind exact actually loaded Sandbox.Gltf hash/MVID and fresh frozen test snapshots at coordinator dispatch. Do not attribute legacy green counts to c5c0.",
+  "metadata_reference_policy": "For full pure project preserve legacy runner BCL + loaded Sandbox.Gltf + MSTest references, avoiding unrelated Engine/global vector types. Additive52 uses only public glTF APIs and needs no native Engine service.",
+  "execution_owner": "/root/gpu_validation",
+  "runner_admission_required": "Root approved exact GltfPoseOwnershipTests.cs source allowlist addition; coordinator applies it. Existing two paths remain unchanged. No relocation or source substitution."
+}

@@ -1,0 +1,167 @@
+{
+  "model": "AnimatedColorsCube",
+  "owner": "/root/animated_resume",
+  "sourceFreeze": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AnimatedColorsCube/candidate/engine/GltfGpuBackend.cs",
+      "sha256": "72dcdb7c7f767bfe137527870570424e925c0c026706c7128b9d491d609684e8"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AnimatedColorsCube/candidate/engine/GltfGpuInstance.PartialMaterialColorAnimation.cs",
+      "sha256": "6787fdbf815cad3389ce3019c8657c6aa1b394b4388d324ee6e094354bf9b5d8"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AnimatedColorsCube/candidate/engine/GltfGpuInstance.Variants.cs",
+      "sha256": "43152ceaf879e0391475dfa5c92761b0b8f09aecf40cd2622f60dac40c31565a"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AnimatedColorsCube/candidate/engine/GltfModelLoader.cs",
+      "sha256": "e2aa45b82d4639967798a68f5d94df3c1a885ba99128b55ec90ed8ea52ce9f42"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AnimatedColorsCube/candidate/gltf/GltfDocument.PartialMaterialColorAnimation.cs",
+      "sha256": "95d1418fe7755eec2992b865a4d923edf89e01f4c3f05bede6ec8de16d9be940"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AnimatedColorsCube/candidate/gltf/GltfDocument.Pose.cs",
+      "sha256": "90ab1d6c62a8817c85b545f1add3d72be8f2de67af08c2d2aefccb39fc4de698"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AnimatedColorsCube/candidate/gltf/GltfDocument.cs",
+      "sha256": "9ace15748a26d4f0629f21d53538fba95a9e8ce7639ba1dc57583b9775c4ecf3"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AnimatedColorsCube/candidate/gltf/GltfPose.MorphOverrides.cs",
+      "sha256": "6c145e7f1c16717ae28b04c097ad4cc091de29ce79d0dd10308223d5058ee613"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AnimatedColorsCube/candidate/gltf/GltfReader.cs",
+      "sha256": "7edbb0601a69f956863e02dfa0f95b6d73abc1966558e5c183524592982da18a"
+    }
+  ],
+  "helperFreeze": [
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AnimatedColorsCube/AnimatedColorsCubePublicGpuTests.cs",
+      "sha256": "2917e911e3e00f57375534b7f1c16cbe19692c41efce321e2f9e1726e6c9fd14"
+    }
+  ],
+  "cohesivePatch": {
+    "path": "research/gltf-validation/direct-gpu/models/AnimatedColorsCube/candidate/current-cohesive-candidate.patch",
+    "sha256": "082e5ec1a4ec236ade86eb291c5cca17f65e98ce0c2ec5ed9b64850d7354de7f"
+  },
+  "sharedBase": "e3add5529c274e3b8ee1a10058803574; all selected source inputs verified before isolated copy overlay",
+  "isolationRoot": "/home/damian/projects/sbox-public/Temp/gltf-validation/animated-colors-isolated-1fsdnrej",
+  "parserEvidence": {
+    "status": "prior isolated terminal observation reused",
+    "receipt": "research/gltf-validation/direct-gpu/models/AnimatedColorsCube/isolated-parser-revision-observation.json",
+    "printedAssertions": [
+      18,
+      8
+    ]
+  },
+  "sourceAudit": {
+    "status": "passed in current turn",
+    "checks": [
+      "pinned source JSON/BIN hashes, six colour keys, between-key sample and core TRS endpoints",
+      "upstream GLB JSON semantic and binary buffer byte equality against source"
+    ]
+  },
+  "compile": {
+    "status": "passed corrected isolated stage",
+    "additionalBudgetGiB": 5,
+    "scope": "isolated selected Sandbox.Gltf+Sandbox.Engine",
+    "firstAttempt": {
+      "stage": "0a3fc7fcffa44392a6a4a04b1f098788",
+      "Gltf": "passed",
+      "Engine": "CS0246 GlobalContext namespace missing in new partial; corrected using Sandbox.Engine",
+      "wallSeconds": 40.9,
+      "maxRssKiB": 1733932
+    },
+    "stage": "/home/damian/projects/sbox-public/Temp/gltf-validation/animated-colors-isolated-1fsdnrej/Temp/gltf-validation/staged-build/45fccb95a33242ee961ad05b18929d58",
+    "manifestSha256": "e7c63faf611070ad5ad1aa539a745298f58e336755716c36169363c68e6d877e",
+    "wallSeconds": 46.62,
+    "maxRssKiB": 1881908,
+    "measurementScope": "terminal /usr/bin/time -v maximum child RSS, not aggregate job peak",
+    "projects": [
+      {
+        "project": "Sandbox.Gltf",
+        "exit_code": 0,
+        "seconds": 1.1089168,
+        "output_sha256": "a0c1a6211ef9684f7a94a4f2ac0e1345ddd3b008801c743c2b01a346871c2287",
+        "output_mvid": "b36a121a-1fc3-42ab-ae27-51603738c613"
+      },
+      {
+        "project": "Sandbox.Engine",
+        "exit_code": 0,
+        "seconds": 44.3294442,
+        "output_sha256": "e7c3961710beaaef2b6412905f5e859341b160d81821173dd6e861ab3707a674",
+        "output_mvid": "8a6c0746-5df5-4d8b-a672-eaba11608922"
+      }
+    ],
+    "verifiedProjectInputs": 2057,
+    "verifiedOutputFiles": 186
+  },
+  "gpuTests": {
+    "status": "offline helper compilation passed against candidate stage; zero runtime/GPU cases executed",
+    "entry": "Sandbox.Gltf.DirectGpu.Validation.AnimatedColorsCubePublicGpuTests",
+    "setup": "Configure($checkout)",
+    "expectedCases": 5,
+    "methods": [
+      "Source",
+      "UpstreamBinary",
+      "CanonicalCompiled",
+      "VariantRetirementCycles",
+      "OpaqueAnimatedAlphaIgnored"
+    ],
+    "forms": [
+      "glTF/source",
+      "glTF-Binary/source",
+      "derived canonical .glb_c",
+      "synthetic variant fixture",
+      "synthetic OPAQUE alpha fixture"
+    ],
+    "assertions": [
+      "literal geometry position GPU readback across six phases and two independent instances",
+      "stock/projected tint parameter, persistent private native copies, cached material immutability",
+      "independent literal material raster match and wrong-colour raster negative control",
+      "injected material-write rollback preserves pose revision, GPU bytes, binding and tint",
+      "120 updates retain same native material-copy count",
+      "component override precedence, reset and recovery",
+      "32 optional variant switches retire actual prior copies by frame end",
+      "OPAQUE animated alpha0 versus alpha1 raster comparison on stock and projected routes",
+      "empty and deletion controls, retained model validity, private-copy release"
+    ],
+    "compileReceipt": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/animated-colors-isolated-1fsdnrej/native-helper-compile/receipt.json",
+      "sha256": "3284d6f9a7ed216cece4bc54e9127b4c9e9909b0b7772aaeb4dd8ca9471bdb75",
+      "helperSha256": "263907c6fc925bce5ec8a152cbfbace6580e00a0c2c8182adc4b0a7827ee5ac2",
+      "wallSeconds": 1.07,
+      "maxRssKiB": 159840,
+      "warnings": [
+        "CS1701 MSTest framework reference System.Runtime8 assumed compatible with .NET10"
+      ],
+      "errors": 0
+    }
+  },
+  "remaining": [
+    "candidate deliberate shared source merge, stage/install/restart by integration owner",
+    "actual runtime cases, source material media and real-time cadence",
+    "textured animated material lifetime proof",
+    "general pointer targets and MASK/BLEND animated colour",
+    "CUBICSPLINE stock-route overshoot policy",
+    "user visual review",
+    "Windows"
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "status": "draft_only_not_applied",
+  "files": [
+    {
+      "target": "engine/Sandbox.Engine/Scene/Components/Camera/CameraComponent.cs",
+      "source": "research/gltf-validation/direct-gpu/models/Cameras/draft/source/engine/Sandbox.Engine/Scene/Components/Camera/CameraComponent.cs",
+      "base_sha256": "649d60c07dddd368063e330a5cf6931aa9d4ef19b8b62aac9bfc21487d9c379e",
+      "sha256": "6b32fbc80ce9efc5001ef2ecbd361803a3148bd401245decf6cb42a9d72f7e61"
+    },
+    {
+      "target": "engine/Sandbox.Engine/Systems/SceneSystem/SceneCamera.cs",
+      "source": "research/gltf-validation/direct-gpu/models/Cameras/draft/source/engine/Sandbox.Engine/Systems/SceneSystem/SceneCamera.cs",
+      "base_sha256": "bc891501b36c8c8cd93bf9a7568ee4977c294c28016b63dbaf1baeec1dfa14c0",
+      "sha256": "556151b389c5023e9770575fdd8d53ebc9ad0aa75fd1b5a90f51a805296dd3c1"
+    },
+    {
+      "target": "engine/Sandbox.Engine/Systems/Render/CameraRenderer.cs",
+      "source": "research/gltf-validation/direct-gpu/models/Cameras/draft/source/engine/Sandbox.Engine/Systems/Render/CameraRenderer.cs",
+      "base_sha256": "9eb52d268350bf2c49a5a50df6e9d389b0c557a20958ce883ce0a4b5ad621959",
+      "sha256": "2f2d7420a8c468932680f3e23837f1d35c91f0cf43b145146fe946de4704455b"
+    },
+    {
+      "target": "engine/Sandbox.Engine/Scene/Components/Camera/CameraComponent.ProjectionFlips.cs",
+      "source": "research/gltf-validation/direct-gpu/models/Cameras/draft/source/engine/Sandbox.Engine/Scene/Components/Camera/CameraComponent.ProjectionFlips.cs",
+      "base_sha256": null,
+      "sha256": "6333da6b867e6306e905d378724eed5a2f986b22060924824ac52e741f26826c"
+    },
+    {
+      "target": "engine/Sandbox.Engine/Systems/SceneSystem/SceneCamera.ProjectionFlips.cs",
+      "source": "research/gltf-validation/direct-gpu/models/Cameras/draft/source/engine/Sandbox.Engine/Systems/SceneSystem/SceneCamera.ProjectionFlips.cs",
+      "base_sha256": null,
+      "sha256": "78008522b79ad2ca5e9564223557e53e55639a1de7fa3cb61bc887fc0c356a9b"
+    },
+    {
+      "target": "engine/Sandbox.System/Math/Frustum.cs",
+      "source": "research/gltf-validation/direct-gpu/models/Cameras/draft/source/engine/Sandbox.System/Math/Frustum.cs",
+      "base_sha256": "6d7fdd59bd52cc7545c10a6e86b8d8021a5027acb0c1c4f1c407635239caadca",
+      "sha256": "122c6fa32dd33cc4f20d58391075c4d135b41996e8c7a18175539938e82ea059"
+    },
+    {
+      "target": "engine/Sandbox.Engine/Resources/Model/Gltf/Model.GltfCameras.cs",
+      "source": "research/gltf-validation/direct-gpu/models/Cameras/draft/source/engine/Sandbox.Engine/Resources/Model/Gltf/Model.GltfCameras.cs",
+      "base_sha256": null,
+      "sha256": "78baa196abbedb471000ad55208681e9fd6bac77b2ac73291372095144a03d49"
+    },
+    {
+      "target": "engine/Sandbox.Engine/Resources/Model/Gltf/Cameras/GltfCameraImport.cs",
+      "source": "research/gltf-validation/direct-gpu/models/Cameras/draft/source/engine/Sandbox.Engine/Resources/Model/Gltf/Cameras/GltfCameraImport.cs",
+      "base_sha256": null,
+      "sha256": "13d3cf8359b9036fd955af0a45a3ca9d3c04216a8c84bf2aa9ebc200a0cb87f5"
+    }
+  ],
+  "patch_sha256": "2bb09852ed3c4d0c6b5160e8860c3cd70758323407dc44d91bb7579d91233b64"
+}

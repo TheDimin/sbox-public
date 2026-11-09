@@ -1,0 +1,18 @@
+{
+  "status": "staged_registration_only_not_installed_or_accepted",
+  "root_review_receipt": "710bdec85f756188d2238255621ee25e0a8812d75d7c0fb9249d7d3e25a12071",
+  "files": [
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfModelLoader.cs",
+      "before_sha256": "2c38f7e6dfe1fbae5fdbd60277578038980e4b962766d549adf8106d053c03b2",
+      "after_sha256": "2c3fd141666c847c601a946b0f4bc57640d7fa65ccce0234e67137fb376655f0"
+    }
+  ],
+  "named_shader_install": {
+    "source": "research/gltf-validation/direct-gpu/models/MandarinOrange/gltf_diffuse_transmission_candidate.shader",
+    "destination": "game/core/shaders/gltf_diffuse_transmission.shader",
+    "sha256": "dfbc59486512cab43579aa7e6a12ed14cf10d2667d50ab9e54346e2a655d24e9",
+    "owner": "/root/today_integration offline copy/compile after audited editor close"
+  },
+  "remaining": "Actual public source+one canonical compiled2/captures and factor0-core roughness compatibility control; no Alpha/Primitive7UV edits."
+}

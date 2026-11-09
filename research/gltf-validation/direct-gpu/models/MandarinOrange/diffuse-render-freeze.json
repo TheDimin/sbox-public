@@ -1,0 +1,79 @@
+{
+  "status": "applied_not_built_not_enabled",
+  "files": [
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfStockMaterialAdapter.cs",
+      "before_sha256": "da02236bb9f654c0ba3432233ccf96d6cad3de5bb6cbdbc2e31aa060c257fd5e",
+      "after_sha256": "d0199de6de8d573eb41c5aa75d8addb8b3dcfc1588cd2ab1d68e52a791c1b336",
+      "diffuse_only_sha256": "50a543a66673a8faa95a95c296be063315dd67f52a978ec7daafa8657a5e33a9",
+      "combined_owner_change": "MetalRough owner: neutral linear AO resource and legacy Acquire binding only; source methods unchanged"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfPublicMaterialRoute.cs",
+      "before_sha256": "9bf2ffa301b88efc56b90d61d20e812fec977e8bfe67383d3b39f84c8ce55446",
+      "after_sha256": "fb7a5374e5b3323d17257ac631cf5c46ea88f5ca5ed7e76bd38e2da322a2dec3"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuAsset.Variants.cs",
+      "before_sha256": "bd8268b175a67d37337af35ad2e75bee43e56c597baf66599275bb8d7cc2f3e6",
+      "after_sha256": "b1b44fa6700907f161d79d92fccc9dd778c5a461145fc15bf33840827952d17a"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs",
+      "before_sha256": "44a47c7fb0a4b6d51de439bb0346ea55477b7cdb9d488c65633a5fc638f40e3e",
+      "after_sha256": "741690507c1f5de3958243636aa2370c33037e55cf388847d1ec176bc9b81bda"
+    }
+  ],
+  "source_shader": {
+    "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/gltf_diffuse_transmission_candidate.shader",
+    "sha256": "dfbc59486512cab43579aa7e6a12ed14cf10d2667d50ab9e54346e2a655d24e9"
+  },
+  "default_capability_unchanged": true,
+  "tests": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/DiffuseTransmissionReaderTests.cs",
+      "sha256": "145b89bd573bde9e5e02fc29cdb9fe0f716897a8dffd4e72fa520cb18912618b",
+      "expected_cases": 17,
+      "status": "prepared_not_executed"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/DiffuseTransmissionCandidateTests.cs",
+      "sha256": "241443b04159e50bdcd450eb571d030b356f85b8511a2672350f473489b1b61d",
+      "expected_cases": 1,
+      "status": "prepared_not_executed"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/DiffuseTransmissionPublicTests.cs",
+      "sha256": "34d29100923a6bce7b0a032ed43d999e87f98cbf8cecd28c985732fe7fe1b2e3",
+      "expected_cases": 2,
+      "status": "prepared_not_executed"
+    }
+  ],
+  "candidate_artifacts": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-native-lambert-reference.shader",
+      "sha256": "1b4febae07e2d474cb27b8f62f8ddb5ebe6b23069ba2c3416884a41e635eb65b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-transmission-plane.gltf",
+      "sha256": "d83fbbde05a3071d54ceabf4aac34901a2a79bb52165ec5cd22404dbc5e0543f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-transmission-seven-uv-samplers.gltf",
+      "sha256": "1ee9e3cac844c364e97780db58e4bc9d95e81668a9f5060a1c24c21ac379e166"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-transmission-role-control.png",
+      "sha256": "0d56394cd9d08679d1c9758c5af2bdf45209ac8e82d92b7c32634b2b88983357"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-transmission-oracle.json",
+      "sha256": "4f4fff025557a1ed4a5891de52e27f5c25633d50272b6e0fd71527b5359e9d46"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-fixture-audit.json",
+      "sha256": "7ff92d1743479ea5f2a095a11198f9bfbb6662b275ca3cd607e635c9f101b379"
+    }
+  ],
+  "producer_source_status": "Frozen source history for installed0bf stage; subsequent lease-transfer methods delegated to texture owner, combined source hash must be reconciled by integration before next batch."
+}

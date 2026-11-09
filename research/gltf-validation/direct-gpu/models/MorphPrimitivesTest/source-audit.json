@@ -1,0 +1,35 @@
+{
+  "pin": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "files": [
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MorphPrimitivesTest/glTF/MorphPrimitivesTest.gltf",
+      "sha256": "a51388b330a49586388e052dc66f74e95cdbc1efcdddea4248f65e200e1d335a",
+      "bytes": 5610
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MorphPrimitivesTest/glTF/MorphPrimitivesTest.bin",
+      "sha256": "59ec1d7ca5c8d7605b69aa57cee3da2994384831a290e5271ecd963002c31c76",
+      "bytes": 1512
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MorphPrimitivesTest/glTF/uv_texture.jpg",
+      "sha256": "d498c54b30f096b663b161f37ee64397253d6fa15ee4f8c03082c890f6065031",
+      "bytes": 49535
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MorphPrimitivesTest/screenshot/screenshot.jpg",
+      "sha256": "2084accd18ea5bc71f394acc1ddae765e8e01652b8f1ecdae18481556721505f",
+      "bytes": 16224
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MorphPrimitivesTest/LICENSE.md",
+      "sha256": "6719654d7a4fd68eb671661a465c2262dbeb080c3addedac26fefba59b6c96ed",
+      "bytes": 939
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphPrimitivesTest/reference.json",
+      "sha256": "b4ffe5f9d018d43dcd995e1d3e4b4eca096f394bf6c7003f94cac1a947983e0c",
+      "bytes": 15216
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "engine_sha256": "10bf7867d04b8b6428c0ec9ecf377d80cb10745099b1ddd81c6b2c9e78819f77",
+  "gltf_sha256": "7638a855ba21fd9c079a22cbc8b834d4169112fe08cb9a5fd788e63cf90866e1",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "tools_sha256": "24f1c1f71037b811ae1be462945279e10a54ede908842e143848194cc4e94e1c",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaMaskDepthTests.cs",
+      "sha256": "775ed5e6cd19fe4765ccf2f168c16a1b32f2662fd898322ba79f4178abfedf28"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaMaskCoverageTests.cs",
+      "sha256": "f3a00e0594731ee9e00eb1aaddf7b50dd525be5d60b41cb15bc54e122f648110"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaControlFixtures.cs",
+      "sha256": "07b5c4ed3e67354fd156d252940a947545e2472dd4b70d833741abf2dc80080b"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaMaskDepthTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "ShaderSha256",
+          "arguments": [
+            "37a1a426d847e94b6f57a46c8bb8f372133a79b00e8c45e2cd572ce91d534993"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "OutputDirectory",
+          "arguments": [
+            "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/alpha-mask-depth-01"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaMaskCoverageTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "ShaderSha256",
+          "arguments": [
+            "37a1a426d847e94b6f57a46c8bb8f372133a79b00e8c45e2cd572ce91d534993"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "OutputDirectory",
+          "arguments": [
+            "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/alpha-mask-coverage-01"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ]
+}

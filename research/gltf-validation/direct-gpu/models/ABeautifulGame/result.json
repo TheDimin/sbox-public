@@ -1,0 +1,460 @@
+{
+  "model": "ABeautifulGame",
+  "status": "partial",
+  "corpus_commit": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "attribution": "A Beautiful Game: original model MaterialX Project / ASWF (2020), conversion Ed Mackey (2022), CC-BY-4.0; preserve original LICENSE.md and metadata.json. Asset metadata also credits original assets by Moeen Sayed and Mujtaba Sayed for SideFX.",
+  "reference": [
+    "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/screenshot/screenshot.jpg",
+    "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/screenshot/screenshot-babylonjs.jpg",
+    "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/screenshot/screenshot-threejs.jpg"
+  ],
+  "source_forms": [
+    {
+      "form": "glTF",
+      "sha256": "2e1b63ae34173c6e3251f749b1b8b97a32e92517aab2cfd4bfffd9158f4dd278"
+    },
+    {
+      "form": "glTF-Binary",
+      "sha256": "bd7133b4b322aae97c589b8839dae8155ad2546acb35ae32a127e722a959d007"
+    },
+    {
+      "form": "glTF-Binary-KTX-ETC1S-Draco",
+      "sha256": "d950162d41e0064be9dfac0c09d80c7a23719a37af37f08cd79385b8af0af0c1"
+    }
+  ],
+  "producer": {
+    "engine_mvid": "b5b66ab1-06f5-4aee-b816-92b6b197666e",
+    "gltf_mvid": "88f89cfc-81b4-4744-9888-ec746058a6de",
+    "stage": "9b9f"
+  },
+  "evidence": [
+    {
+      "purpose": "Pinned inventory, core material/image role declarations, actual materialized primitive uploads for three source variants and actual public compressed Model.Load",
+      "passed": 9,
+      "failed": 1,
+      "incomplete": 0,
+      "receipt": "Temp/gltf-validation/direct-gpu/beautiful-9b9f-first/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "488683b68690924937f58687cd13529be5a9f903b055347af9438249f77622cf",
+      "failure": "Public compressed load rejects required KHR_texture_basisu."
+    },
+    {
+      "purpose": "All 33 ETC1S source metadata/role transfer/mips, native texture resource compilation for three representative image roles and wrong-transfer rejection",
+      "passed": 37,
+      "failed": 0,
+      "incomplete": 0,
+      "receipt": "Temp/gltf-validation/direct-gpu/beautiful-9b9f-basis/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "806be448227a4fbb95061569d4ead2b0cf09715fc42c32fca085f7d8549cd605"
+    },
+    {
+      "purpose": "Actual public Model.Load and ModelRenderer with authored source-lit materials, 49 GPU readback rows, empty/white-override/deletion controls for ordinary source and derived forms",
+      "passed": 4,
+      "failed": 0,
+      "incomplete": 0,
+      "receipt": "Temp/gltf-validation/direct-gpu/beautiful-8fc-public/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "b144934e298bcd02e9524a7305953c2ba093b685b95c4c0c828d1af24c983846",
+      "producer_engine_mvid": "0ce2dfa5-c98c-45e4-ad3a-6c810a17a6ef",
+      "producer_gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c"
+    },
+    {
+      "purpose": "GPU readback of every authored mip for normal, ORM and base ETC1S native resources versus decoded source; independently decoded upstream JPEG landmark diagnostics",
+      "passed": 2,
+      "failed": 1,
+      "incomplete": 0,
+      "receipt": "Temp/gltf-validation/direct-gpu/beautiful-8fc-basis-gpu/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "1d9026a1afae2adc6b8624460f6fede20e297fed81d15b36446c425f910cae4b",
+      "failure": "ORM initial residency returned 256 square instead of 2048 square after three frames; later settled state not yet tested."
+    },
+    {
+      "purpose": "Bounded ORM GPU mip residency correction and 640x480 source/compiled inferred presentation",
+      "passed": 1,
+      "failed": 1,
+      "incomplete": 0,
+      "receipt": "Temp/gltf-validation/direct-gpu/beautiful-8fc-residency-presentation/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "1cb4d162b66a716ca1df923580ff8da05af95e8159783e26cc132fa30016c777",
+      "outcomes": "ORM reached full resolution after 5 attempts / 0.191s; all 12 GPU mip levels bit-identical to native decoded bytes. Presentation failed exact source/compiled image comparison: 39262 pixels changed, mean RGB error 0.49/255 and maximum 117/255. Lighting also overexposed; captures are diagnostic only."
+    },
+    {
+      "purpose": "Changed public loader document policy and actual diagnostic GPU point sampling of ETC1S normal, ORM and sRGB base textures",
+      "passed": 8,
+      "failed": 0,
+      "incomplete": 0,
+      "receipt": "Temp/gltf-validation/direct-gpu/beautiful-7eb-policy-sampling/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "a0a39c9effe1d6b5609fba5931a30d2cb6b9917d13189cdff74fdc064359ff76",
+      "producer_engine_mvid": "6052e3c3-0a6d-48c9-a5d5-9fcd93459514",
+      "details": "Seven selected/unsupported required, optional fallback and corrupt required image controls. 16 GPU point samples each for normal, ORM, base against native decoded texels and analytic role transfer. sRGB maximum error 0.0008776; wrong-transfer separation 0.2871. Diagnostic shader; codec expected bytes are not independent."
+    },
+    {
+      "purpose": "640x480 readable inferred camera and light, actual public source and canonical derived compiled comparison",
+      "passed": 1,
+      "failed": 0,
+      "incomplete": 0,
+      "receipt": "Temp/gltf-validation/direct-gpu/beautiful-7eb-presentation-lighting/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "7cccd06e0a4b8d1031c9137ea3d3f0095a1150432a2216464e4efd23b7e9d48b",
+      "producer_engine_mvid": "6052e3c3-0a6d-48c9-a5d5-9fcd93459514",
+      "details": "Exact source/compiled capture identity after bounded settling; empty and white-material controls passed. 3 ambient levels sampled. Camera and lights inferred, output is user-reviewable but not exact screenshot parity."
+    },
+    {
+      "purpose": "Actual public required BasisU+Draco source material, 49 GPU geometry/index rows, empty/white/deletion controls and 640x480 inferred view",
+      "passed": 1,
+      "failed": 0,
+      "incomplete": 0,
+      "receipt": "Temp/gltf-validation/direct-gpu/beautiful-7eb-basis-source/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "251cfbfedaf1b0de994ac420d95dcbcd4fe3a33b5d86911e564bdec117b8485a",
+      "producer_engine_mvid": "6052e3c3-0a6d-48c9-a5d5-9fcd93459514",
+      "producer_gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+      "capture_sha256": "bbcfbd4809c7abee62a4d363061fc8152f6ece192199a5747b7977b276952fe5"
+    }
+  ],
+  "captures": [],
+  "limitations": [
+    "All three representative GPU resources match native codec output across 12 mips; diagnostic point samples also match analytical transfer. This is not independent codec validation or final source-lit shading. ORM initially lacked full residency but passed after a bounded wait.",
+    "Optional KHR_materials_transmission and KHR_materials_volume on pawn tops are outside this core-material slice and affect reference appearance.",
+    "No independent sampler, occlusion lighting, normal mapping or emissive pixel fidelity pass follows from these controls.",
+    "640x480 review captures use inferred camera and constant ambient/directional/point lighting; no equivalent HDRI, ACES or +2EV reproduction, and human visual approval remains pending.",
+    "The compressed source was accepted and rendered publicly on 7eb. Only one canonical compiled representation is required by current scope; the prior compressed public rejection remains historical evidence."
+  ],
+  "diagnostic_captures": [
+    {
+      "form": "glTF/source",
+      "input_sha256": "2e1b63ae34173c6e3251f749b1b8b97a32e92517aab2cfd4bfffd9158f4dd278",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/ABeautifulGame/public/aef58aa7c95040809ed4f86e73a77a7d/actual_public_source_material.png",
+      "sha256": "4f58e790bec8cdc6ec1e2e300c03493b59cb8d81fd885fcb43024fb3dacfded1",
+      "Coverage": 7656,
+      "white_negative_changed_pixels": 7991
+    },
+    {
+      "form": "glTF/compiled_glb_c",
+      "input_sha256": "aa0e45833d5d39e5c9a81658d19588ce91d88356509bfb9755dce88599eeca33",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/ABeautifulGame/public/26468cd2f6e94caea54ef25c9d4b7ff6/actual_public_source_material.png",
+      "sha256": "4f58e790bec8cdc6ec1e2e300c03493b59cb8d81fd885fcb43024fb3dacfded1",
+      "Coverage": 7656,
+      "white_negative_changed_pixels": 7991
+    },
+    {
+      "form": "glTF-Binary/source",
+      "input_sha256": "bd7133b4b322aae97c589b8839dae8155ad2546acb35ae32a127e722a959d007",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/ABeautifulGame/public/5fddde5b9325482584f58594ad29d500/actual_public_source_material.png",
+      "sha256": "f12704e698f8ae8ca74e1ea52c8e4c0284dc66ad1324fd474f4d7f7b834fa518",
+      "Coverage": 7696,
+      "white_negative_changed_pixels": 8021
+    },
+    {
+      "form": "glTF-Binary/compiled_glb_c",
+      "input_sha256": "bd7133b4b322aae97c589b8839dae8155ad2546acb35ae32a127e722a959d007",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/ABeautifulGame/public/abcdd86d181d408094e84094fcaded8d/actual_public_source_material.png",
+      "sha256": "f12704e698f8ae8ca74e1ea52c8e4c0284dc66ad1324fd474f4d7f7b834fa518",
+      "Coverage": 7696,
+      "white_negative_changed_pixels": 8020
+    }
+  ],
+  "reference_presentation": {
+    "source": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/README.body.md",
+    "babylonjs": "Aerodynamics Workshop HDRI, ACES tone mapping, exposure +2EV, per upstream",
+    "threejs": "Default view settings and neutral lighting, per upstream",
+    "camera": "No camera or punctual light authored in glTF; screenshots have no recoverable exact camera pose in sample."
+  },
+  "schema_version": 1,
+  "corpus_revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "actual_upstream_variants": [
+    "glTF",
+    "glTF-Binary",
+    "glTF-Binary-KTX-ETC1S-Draco"
+  ],
+  "acceptance_scope": "Linux public original glTF source, one canonical derived compiled form, and distinct required BasisU+Draco source through Model.Load/ModelRenderer; real GPU rows and inferred source-lit captures. Reader, role transfer, and representative mip diagnostics separately recorded. Human visual review, independent complete material/shading parity, optional transmission/volume and Windows remain open.",
+  "forms": [
+    {
+      "name": "glTF/source",
+      "input_sha256": "2e1b63ae34173c6e3251f749b1b8b97a32e92517aab2cfd4bfffd9158f4dd278",
+      "actual_upstream_variant": "glTF",
+      "derived": false,
+      "public_material_and_gpu": "passed 7eb",
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/ABeautifulGame/presentation-lighting/2553961aead9442ab5fad14f12226d20/source_after_compiled_prepare.png",
+        "sha256": "68add3eb1269db8aed36764308a4c60bac99dadc96263cd00ad6dc2ff3ed343e",
+        "width": 640,
+        "height": 480,
+        "coverage": 174998
+      },
+      "purpose": "Public original source-lit material, ordinary ModelRenderer, inferred reference-inspired close view; no HDRI/ACES/+2EV; optional optical extension fallback."
+    },
+    {
+      "name": "glTF/derived-glb_c",
+      "input_sha256": "aa0e45833d5d39e5c9a81658d19588ce91d88356509bfb9755dce88599eeca33",
+      "actual_upstream_variant": "glTF",
+      "derived": true,
+      "public_material_and_gpu": "passed 7eb",
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/ABeautifulGame/presentation-lighting/2553961aead9442ab5fad14f12226d20/compiled_reference_inspired.png",
+        "sha256": "68add3eb1269db8aed36764308a4c60bac99dadc96263cd00ad6dc2ff3ed343e",
+        "width": 640,
+        "height": 480,
+        "coverage": 174998
+      },
+      "purpose": "Public original source-lit material, ordinary ModelRenderer, inferred reference-inspired close view; no HDRI/ACES/+2EV; optional optical extension fallback."
+    },
+    {
+      "name": "glTF-Binary-KTX-ETC1S-Draco/source",
+      "input_sha256": "d950162d41e0064be9dfac0c09d80c7a23719a37af37f08cd79385b8af0af0c1",
+      "actual_upstream_variant": "glTF-Binary-KTX-ETC1S-Draco",
+      "derived": false,
+      "public_material_and_gpu": "passed 7eb",
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/ABeautifulGame/basis-source-presentation/6723fb7ea68943aab69b5b81e0848ad4/source_basis_draco_public.png",
+        "sha256": "bbcfbd4809c7abee62a4d363061fc8152f6ece192199a5747b7977b276952fe5",
+        "width": 640,
+        "height": 480,
+        "coverage": 175868
+      },
+      "purpose": "Actual public Model.Load and ordinary ModelRenderer using required BasisU+Draco source with actual index/GPU rows, source materials and negative controls. Camera and lighting inferred; no original HDRI, ACES or +2EV; optional transmission/volume core fallback, no independent optical pixel oracle or user approval."
+    }
+  ],
+  "ordinary_vs_compressed_diagnostic": {
+    "mean_absolute_rgb_bytes": 2.0308854166666666,
+    "maximum_rgb_byte_error": 255,
+    "changed_pixels": 173878,
+    "interpretation": "Descriptive same-camera comparison only; independently lossy JPEG/ETC1S and Draco encodings are not pixel-identical or acceptance oracle."
+  },
+  "inputs": [
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/ABeautifulGame.bin",
+      "sha256": "727eea28752b2b0c35cad89e726f0bc6a1800c3fa8696867ccf3d0c39933f5fb",
+      "length": 10829440
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/ABeautifulGame.gltf",
+      "sha256": "2e1b63ae34173c6e3251f749b1b8b97a32e92517aab2cfd4bfffd9158f4dd278",
+      "length": 46214
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Bishop_black_ORM.jpg",
+      "sha256": "2e02bf8975c9d0585b1b0a4fbb0448b99a20ce888b8065d37d71d2a6bb26a869",
+      "length": 630950
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Bishop_black_base_color.jpg",
+      "sha256": "3ebe3fe7859d6ae50327033fd4cb61253e81f2441baa3ae752edf309b7491973",
+      "length": 403990
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Bishop_black_normal.jpg",
+      "sha256": "243ed45b4e752f1dd6aa67673239afc8d54ce821ce081d1c8f8d8b877f4c5a3c",
+      "length": 850400
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Bishop_white_ORM.jpg",
+      "sha256": "08fa51b364f6a4484bec3c9e1e3ce8cd0371d0959f38799acbde06e9b910806d",
+      "length": 622771
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Bishop_white_base_color.jpg",
+      "sha256": "f1df1e4b755e95741a4170c73281fb5532394026f2683e5bd5478af053a4c40a",
+      "length": 361127
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Bishop_white_normal.jpg",
+      "sha256": "ffe7997b80f831d099d386483fe195beeee1ff37a11e5e95dad5a830975ec312",
+      "length": 673915
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Castle_ORM.jpg",
+      "sha256": "1e00bd2b6cc122da8fb77f4bf5db590ec10cea609719a334518b6cae7f416d0c",
+      "length": 1371413
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Castle_black_base_color.jpg",
+      "sha256": "025fdde8ae3a97c8d430e1ca2539acc36d071886ed4ff7c0396751094031b479",
+      "length": 394527
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Castle_normal.jpg",
+      "sha256": "91342101f6e3fdced973c247165d4e244c4410e647a524d23a763b122e9881ed",
+      "length": 491396
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Castle_white_base_color.jpg",
+      "sha256": "56aa97849639f9e5def51dd55edd1550038ec31cdd3a362060258ffa526b60ca",
+      "length": 334252
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Chessboard_ORM.jpg",
+      "sha256": "18c357a7aa4beac43c604ebd73dca129e0db505adc74c19dfd3767f8df3d51c5",
+      "length": 582751
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Chessboard_base_color.jpg",
+      "sha256": "31a0a9e3d82958f310ec6c817f13968bdddab4efe5b612d471b1c6177156a0a6",
+      "length": 529405
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Chessboard_normal.jpg",
+      "sha256": "b496ad48f281a4ccbcf2b08378ac4693f21c3942e34340e9cbcd8bec18765bc1",
+      "length": 727372
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/King_black_ORM.jpg",
+      "sha256": "e77a83078879b7068420d2f7ad76a02c3fc78bcf752e82e037754a242895f3da",
+      "length": 782417
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/King_black_base_color.jpg",
+      "sha256": "68d65ffad3ddae474e17a7c028c0ec65af0a15b0a46a5fb03b856eb40f8fe725",
+      "length": 366216
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/King_black_normal.jpg",
+      "sha256": "2fdf5d40f38cac95175f2e685476e28f12c7e0555fb4345df34cc05420cef66e",
+      "length": 764089
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/King_white_ORM.jpg",
+      "sha256": "a9b0bde70cc75d7763dd658a2d5f26f9edb2739f453a88291071e20111b4581c",
+      "length": 822486
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/King_white_base_color.jpg",
+      "sha256": "f64a03112150d2e55bf716b11467a18cf30cab799f9081c2236b8f4ff668fa53",
+      "length": 395138
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/King_white_normal.jpg",
+      "sha256": "9e9630daee38e7eb3e7188540a1a7be1f49187a13cd4b72588ec709f53ce0cea",
+      "length": 961725
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Knight_ORM.jpg",
+      "sha256": "64db87cfd2c2b31400248035817da7fc6e88e58f27ee02b540283e3aa38afc8e",
+      "length": 350946
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Knight_black_base_color.jpg",
+      "sha256": "68db3a457ad7d7e2c6ef19320614cb0976038a9b5d10dc596ef9fa8e0efe71ff",
+      "length": 244999
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Knight_normal.jpg",
+      "sha256": "28d817c0e3179b1bd76c99a8b634ab17cbdd55b9594ef4ec5843ff8cb2811f9f",
+      "length": 215780
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Knight_white_base_color.jpg",
+      "sha256": "89ab1100fce0e724249e433cdf4089a3edfdcd4d9aec9f14ba44f83b7284181e",
+      "length": 395645
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Pawn_ORM.jpg",
+      "sha256": "bb7ac27d4b650cf533e398e0477c9fbf129846d566e706d76146cdb947c3f17a",
+      "length": 792174
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Pawn_black_base_color.jpg",
+      "sha256": "e3a42ac61d090cf23b5722e20b8b993f087ca09689500b74dde61c8a28899e26",
+      "length": 315179
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Pawn_normal.jpg",
+      "sha256": "c1e2e201efcdc9184da793f6fe98bc54dace592274842dd7e42427a9294277c3",
+      "length": 750313
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Pawn_white_base_color.jpg",
+      "sha256": "46153b809dfcc35f1a3c3508310a25dc423062204e95b328dddd420cb3d60952",
+      "length": 303807
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Queen_black_ORM.jpg",
+      "sha256": "4df982f977eae6da3239e9e7a02534633f07473010025cd742d55ad4d85976ca",
+      "length": 741172
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Queen_black_base_color.jpg",
+      "sha256": "26132e8fb23808295c7d77fedf1e760730d097d138e66a5947e0cc3a7f9302ed",
+      "length": 295346
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Queen_black_normal.jpg",
+      "sha256": "b2dfb93933b47ff4589eca6acd8c96b9b17521e024060e7e0fca1a7f95a9401e",
+      "length": 777060
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Queen_white_ORM.jpg",
+      "sha256": "07fba609ee23a02ea22a3d1f6d76df87a0cfa8eca5bc38ddbe7a1258d7448b33",
+      "length": 709227
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Queen_white_base_color.jpg",
+      "sha256": "2cc4b5295ff58d920cc23c13ee089821e193f6006c966af395824fc1c94ce4e0",
+      "length": 309191
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Queen_white_normal.jpg",
+      "sha256": "5270859cd49784272da97b92d9aeef4d6008033d654014b34328c7ea961cb282",
+      "length": 662916
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF-Binary/ABeautifulGame.glb",
+      "sha256": "bd7133b4b322aae97c589b8839dae8155ad2546acb35ae32a127e722a959d007",
+      "length": 42977928
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF-Binary-KTX-ETC1S-Draco/ABeautifulGame.glb",
+      "sha256": "d950162d41e0064be9dfac0c09d80c7a23719a37af37f08cd79385b8af0af0c1",
+      "length": 12105252
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/LICENSE.md",
+      "sha256": "0ccef603d6b9d7e7575b69c5594f86ec8825ddff9ac3d7a4ed58fec4968a8e27",
+      "length": 934
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/metadata.json",
+      "sha256": "80070530e19cba44b46bc0655ec94a2c67683d773697c9f17e3e5f5faffc4a91",
+      "length": 1065
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/README.body.md",
+      "sha256": "3a5d508cb531773a212e35b5a805dc1c244768bf716b5bc6d259e3f4b47e396a",
+      "length": 2630
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/screenshot/screenshot-babylonjs.jpg",
+      "sha256": "aaa2a3ed449e067c57117e8b324fb3be89a6ac9e4730ba2b6c21afd9b735d472",
+      "length": 448248
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/screenshot/screenshot-threejs.jpg",
+      "sha256": "d6cff003082c186639ac21df34ea12b402a1a906cf8059384a867b0166031237",
+      "length": 419052
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/screenshot/screenshot.jpg",
+      "sha256": "03da38faeddee145e21a9e2f539f5879c725db7b8ebdf730d6d77345111d4baf",
+      "length": 37625
+    }
+  ],
+  "source_classification": {
+    "required_extensions_compressed": [
+      "KHR_draco_mesh_compression",
+      "KHR_texture_basisu"
+    ],
+    "optional_fallback": [
+      "KHR_materials_transmission",
+      "KHR_materials_volume"
+    ],
+    "normal_materials": 15,
+    "metallic_roughness_materials": 15,
+    "occlusion_materials": 13,
+    "base_color_textures": 13,
+    "emissive_textures": 0,
+    "default_scene_mesh_instances": 49,
+    "unique_mesh_primitives": 15
+  },
+  "additional_historical_source_evidence": [
+    {
+      "name": "glTF-Binary/source",
+      "input_sha256": "bd7133b4b322aae97c589b8839dae8155ad2546acb35ae32a127e722a959d007",
+      "scope": "Embedded binary source public Model.Load/ModelRenderer and 49 GPU row/index readbacks on 8fc; old 192px capture is diagnostic, not current review image. No extra compiled form selected.",
+      "receipt": "Temp/gltf-validation/direct-gpu/beautiful-8fc-public/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "b144934e298bcd02e9524a7305953c2ba093b685b95c4c0c828d1af24c983846"
+    }
+  ]
+}

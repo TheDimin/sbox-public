@@ -1,0 +1,71 @@
+{
+  "model": "SimpleInstancing",
+  "status": "partial",
+  "corpus_commit": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "attribution": "Marco Hutter, 2023; CC0-1.0, preserve upstream metadata.json.",
+  "source": "Temp/gltf-reference/glTF-Sample-Assets/Models/SimpleInstancing/glTF/SimpleInstancing.gltf",
+  "source_sha256": "a01695630e6459c945826c7ff8dde74784de8279f60b9b62604980dc7486340e",
+  "buffer_sha256": "29d38705c2a619f30374e80413be61f2e855dd9ec59c499201000aa53715a73c",
+  "compiled_sha256": "847746120eac0b37aa6f9865b05206b15e97e4f9ca293f157687c31cf6128504",
+  "reference": "Temp/gltf-reference/glTF-Sample-Assets/Models/SimpleInstancing/screenshot/screenshot.png",
+  "reference_sha256": "7301d0fd145de5c561d604d4fb646eddab69b22b34cad6d28f82fd0b470cfcb9",
+  "producer": {
+    "engine_sha256": "ed5f8073e45d3a4f90e5140323cc5c5a0dddf9707be71ee375966ca0f05403f0",
+    "engine_mvid": "5a07f228-dff8-4d6b-b4ef-890b32a80299",
+    "gltf_sha256": "7638a855ba21fd9c079a22cbc8b834d4169112fe08cb9a5fd788e63cf90866e1",
+    "gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+    "deform_shader_sha256": "4e5f9c9da78a82fcdef7ae72d0280a454697a0bf1eea6e46a83ca5a94c259c65"
+  },
+  "evidence": [
+    {
+      "scope": "2 actual editor wrappers: 6 synthetic affine GPU states and 2 public source/derived compiled GPU states; all 125 identities, 3000 positions and normals, 4500 actual bound indices per public state; source material, empty and deletion controls",
+      "passed": 2,
+      "failed": 0,
+      "receipt": "Temp/gltf-validation/direct-gpu/SimpleInstancing/canonical-current-gpu/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "d120b7141b6fd336bd46765ecacc4416de708c5e1b3494cdeef0afff1536b708",
+      "request_sha256": "a75b657b2e6e4840ad1590fe28ac85b8a06661ef1061eb094492f02301df283c"
+    },
+    {
+      "scope": "One source-material recipe capture, public Model.Load and ModelRenderer, 125 rows, 2625 draw submissions, cleanup confirmed",
+      "receipt": "Temp/gltf-validation/direct-gpu/SimpleInstancing/canonical-recipe-capture/cases/SimpleInstancing/glTF/result.json",
+      "receipt_sha256": "ff928579be77017619b5f14d11cab2d7caf6f0f1d5abb457d9137c91a6f79068",
+      "capture": "Temp/gltf-validation/direct-gpu/SimpleInstancing/canonical-recipe-capture/cases/SimpleInstancing/glTF/capture.png",
+      "capture_sha256": "e50dbb40121335c6347f073ebadb5114c3cb74e685898355bea2afaf0869817d"
+    },
+    {
+      "scope": "User-feedback revised source camera and directional light, public Model.Load and ModelRenderer, 125 mesh rows and cumulative 2625 draw calls, cleanup confirmed; no per-frame timing claim.",
+      "receipt": "Temp/gltf-validation/direct-gpu/SimpleInstancing/review-camera-lit/cases/SimpleInstancing/glTF/result.json",
+      "receipt_sha256": "1711250ee4ffbfbc3e0656730219dc81f02a28e1980ce39b1489088ae1df190c",
+      "capture": "Temp/gltf-validation/direct-gpu/SimpleInstancing/review-camera-lit/cases/SimpleInstancing/glTF/capture.png",
+      "capture_sha256": "091c80051b90f367f0215e6e5bab41af33658c0a6f71941ab84d15878488a777",
+      "producer_engine_sha256": "6ed99fa9d59d5083ef45e17be80b36a2c086bd72748dad733693e5a25f8fd85b",
+      "producer_engine_mvid": "5832b742-ded3-46b8-94f2-1f62c65d5bd8",
+      "gltf_sha256": "7638a855ba21fd9c079a22cbc8b834d4169112fe08cb9a5fd788e63cf90866e1",
+      "prior_rejected_fingerprint": "9949c59e41c91baf38c41c5ca4b3af3308a298054951feffab83d39ddbf878b6",
+      "camera": "glTF position (-20,9,30), target (5.53252,5.53252,5.53252), 45 degree vertical FOV",
+      "light": "direction (0.71856,-0.09758,-0.68859), intensity 2, source material",
+      "limitations": "Inferred camera, unknown reference lighting, exposure lock unverified, no exact image parity; source-only image, user review pending."
+    },
+    {
+      "scope": "User-feedback revised canonical compiled source camera and directional light, public Model.Load and ModelRenderer; 125 mesh rows and 2625 cumulative draws, cleanup confirmed.",
+      "receipt": "Temp/gltf-validation/direct-gpu/SimpleInstancing/review-camera-compiled-final/cases/SimpleInstancing/compiled_glb_c/result.json",
+      "receipt_sha256": "8b21f2ae88a4ac582126318e6d7f82faf6d9d3b995149ca18f77e5e6f09423d3",
+      "capture": "Temp/gltf-validation/direct-gpu/SimpleInstancing/review-camera-compiled-final/cases/SimpleInstancing/compiled_glb_c/capture.png",
+      "capture_sha256": "091c80051b90f367f0215e6e5bab41af33658c0a6f71941ab84d15878488a777",
+      "compiled_sha256": "847746120eac0b37aa6f9865b05206b15e97e4f9ca293f157687c31cf6128504",
+      "compile_receipt": "Temp/gltf-validation/direct-gpu/SimpleInstancing/review-compiled-build/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "compile_receipt_sha256": "7400bbce8209246a3235f05c95eb3160bf42aab0c773f96be8d0faa880cff6c0",
+      "producer_engine_sha256": "6ed99fa9d59d5083ef45e17be80b36a2c086bd72748dad733693e5a25f8fd85b",
+      "producer_engine_mvid": "5832b742-ded3-46b8-94f2-1f62c65d5bd8",
+      "limitations": "PNG bytes match source at same recipe; inferred camera, unknown reference lighting, exposure lock unverified, user visual approval pending."
+    }
+  ],
+  "coverage_policy": "Use one glTF source and one compiled package. The upstream GLB carries equivalent JSON apart from URI and identical BIN; generic GLB/container checks cover encoding. Historical 4-form evidence remains valid within original scope.",
+  "limitations": [
+    "Reference and capture have visibly different viewpoint, framing, background and lighting; inferred camera and unverified exposure lock, user visual approval pending.",
+    "GPU output is correct for tested states but hardware instancing efficiency, material parity, performance and platform comparisons remain open.",
+    "Valid skin plus instancing remains unsupported; no claim that reject policy is support.",
+    "The prior native SIGSEGV exact cause is unproven despite a verified concurrency fix and one successful bounded original suffix.",
+    "Recipe image is source only; compiled public GPU image is diagnostic rather than recipe capture."
+  ]
+}

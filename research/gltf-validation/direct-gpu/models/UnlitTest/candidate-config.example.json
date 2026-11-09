@@ -1,0 +1,15 @@
+{
+  "AdapterRedReceiptPath": "<actual current-producer UnlitTest receipt path>",
+  "AdapterRedReceiptSha256": "<complete SHA-256 of that retained receipt>",
+  "GenerationManifestPath": "<fresh generation output>/generation.json",
+  "GenerationManifestSha256": "<complete SHA-256 of generation.json>",
+  "CandidateSourceSha256": "<reviewed generated candidate source SHA-256>",
+  "ReferenceSourceSha256": "<reviewed generated independent reference source SHA-256>",
+  "ComputeSourceSha256": "<frozen shared deformation shader SHA-256>",
+  "OutputDirectory": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/unlit-candidate-runtime/<unique run id>",
+  "MeanRgbToleranceBytes": 1,
+  "MaximumRgbToleranceBytes": 3,
+  "MinimumLitLightingChangeBytes": 8,
+  "MaximumPositionErrorInches": 0.0002,
+  "MaximumNormalError": 0.00001
+}

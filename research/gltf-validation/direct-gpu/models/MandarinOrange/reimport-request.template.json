@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "engine_sha256": "10bf7867d04b8b6428c0ec9ecf377d80cb10745099b1ddd81c6b2c9e78819f77",
+  "gltf_sha256": "7638a855ba21fd9c079a22cbc8b834d4169112fe08cb9a5fd788e63cf90866e1",
+  "tools_sha256": "24f1c1f71037b811ae1be462945279e10a54ede908842e143848194cc4e94e1c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/SceneResourceTests.cs",
+      "sha256": "6dc00160743d91dcc7196df3611d2c9512b2dc156ea67b874a79ed41bc36fe93"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/SceneReimportTests.cs",
+      "sha256": "38b2ee1d4c8bfa6e438d1c1a066cdd0e7460ed620c91515c391a911f0b9cf37c"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MandarinOrangeValidation.SceneReimportTests",
+      "kind": "mstest",
+      "expected_cases": 6
+    }
+  ]
+}

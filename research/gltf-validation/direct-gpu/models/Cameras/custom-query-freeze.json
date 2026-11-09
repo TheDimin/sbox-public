@@ -1,0 +1,268 @@
+{
+  "model": "Cameras",
+  "status": "isolated_system_engine_and_27_case_helper_compile_passed_not_installed",
+  "patch": "research/gltf-validation/direct-gpu/models/Cameras/draft/custom-query-camera.patch",
+  "patch_sha256": "b8cc4121e67bcd43197ec3f62be6c0bd70bdf3b63763a4324f056ca40739f138",
+  "producer_files": [
+    {
+      "target": "engine/Sandbox.Engine/Scene/Components/Camera/CameraComponent.cs",
+      "source": "Temp/gltf-validation/cameras-custom-queries-Va4f18Uv/engine/Sandbox.Engine/Scene/Components/Camera/CameraComponent.cs",
+      "base_sha256": "649d60c07dddd368063e330a5cf6931aa9d4ef19b8b62aac9bfc21487d9c379e",
+      "sha256": "91a03013fb5145c2edb0586486db0c0f85ba189a132dbd7d05db310af397fe78"
+    },
+    {
+      "target": "engine/Sandbox.Engine/Systems/SceneSystem/SceneCamera.cs",
+      "source": "Temp/gltf-validation/cameras-custom-queries-Va4f18Uv/engine/Sandbox.Engine/Systems/SceneSystem/SceneCamera.cs",
+      "base_sha256": "bc891501b36c8c8cd93bf9a7568ee4977c294c28016b63dbaf1baeec1dfa14c0",
+      "sha256": "8e03d6b891f2536c4a117c89fccf04abf9c3588ada1d5ed212aaebe4aa31861f"
+    },
+    {
+      "target": "engine/Sandbox.Engine/Systems/Render/CameraRenderer.cs",
+      "source": "Temp/gltf-validation/cameras-custom-queries-Va4f18Uv/engine/Sandbox.Engine/Systems/Render/CameraRenderer.cs",
+      "base_sha256": "9eb52d268350bf2c49a5a50df6e9d389b0c557a20958ce883ce0a4b5ad621959",
+      "sha256": "2f2d7420a8c468932680f3e23837f1d35c91f0cf43b145146fe946de4704455b"
+    },
+    {
+      "target": "engine/Sandbox.Engine/Scene/Components/Camera/CameraComponent.ProjectionFlips.cs",
+      "source": "Temp/gltf-validation/cameras-custom-queries-Va4f18Uv/engine/Sandbox.Engine/Scene/Components/Camera/CameraComponent.ProjectionFlips.cs",
+      "base_sha256": null,
+      "sha256": "6333da6b867e6306e905d378724eed5a2f986b22060924824ac52e741f26826c"
+    },
+    {
+      "target": "engine/Sandbox.Engine/Systems/SceneSystem/SceneCamera.ProjectionFlips.cs",
+      "source": "Temp/gltf-validation/cameras-custom-queries-Va4f18Uv/engine/Sandbox.Engine/Systems/SceneSystem/SceneCamera.ProjectionFlips.cs",
+      "base_sha256": null,
+      "sha256": "78008522b79ad2ca5e9564223557e53e55639a1de7fa3cb61bc887fc0c356a9b"
+    },
+    {
+      "target": "engine/Sandbox.System/Math/Frustum.cs",
+      "source": "Temp/gltf-validation/cameras-custom-queries-Va4f18Uv/engine/Sandbox.System/Math/Frustum.cs",
+      "base_sha256": "6d7fdd59bd52cc7545c10a6e86b8d8021a5027acb0c1c4f1c407635239caadca",
+      "sha256": "122c6fa32dd33cc4f20d58391075c4d135b41996e8c7a18175539938e82ea059"
+    },
+    {
+      "target": "engine/Sandbox.Engine/Resources/Model/Gltf/Model.GltfCameras.cs",
+      "source": "Temp/gltf-validation/cameras-custom-queries-Va4f18Uv/engine/Sandbox.Engine/Resources/Model/Gltf/Model.GltfCameras.cs",
+      "base_sha256": null,
+      "sha256": "78baa196abbedb471000ad55208681e9fd6bac77b2ac73291372095144a03d49"
+    },
+    {
+      "target": "engine/Sandbox.Engine/Resources/Model/Gltf/Cameras/GltfCameraImport.cs",
+      "source": "Temp/gltf-validation/cameras-custom-queries-Va4f18Uv/engine/Sandbox.Engine/Resources/Model/Gltf/Cameras/GltfCameraImport.cs",
+      "base_sha256": null,
+      "sha256": "dcf987d555cb2f1542e70e290e36d3e60262c6275abe44e4b59a3d9c0c6a8252"
+    },
+    {
+      "target": "engine/Sandbox.Engine/Systems/SceneSystem/SceneCamera.CustomProjectionQueries.cs",
+      "base_sha256": null,
+      "source": "Temp/gltf-validation/cameras-custom-queries-Va4f18Uv/engine/Sandbox.Engine/Systems/SceneSystem/SceneCamera.CustomProjectionQueries.cs",
+      "sha256": "adc305cd6cf68e6956a10fca1260d372813b69db62173d1ec46f3459b5cb1f3b"
+    }
+  ],
+  "test_request": "research/gltf-validation/direct-gpu/models/Cameras/custom-query-request.draft.json",
+  "test_request_sha256": "5405c34155bb20e35a9a74867692e34f050f21a0d0222667cd8be5ad7efd4060",
+  "test_sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraReaderTests.cs",
+      "sha256": "42e891f939d80fe7512b295d8124193c80ae2731baa5f59dba5ec4873e291984"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraCapture.cs",
+      "sha256": "3494b025558b9b97bae17fe3ccd20ae0390c6bab971f368e629745a1984e2edc"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraNativeApiTests.cs",
+      "sha256": "07e085cfb10a07dbcb5008b0278c78cc7c8be3fa379105a308545ed07a71ade4"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/draft/compile-ready-tests/CameraIntegrationTests.cs",
+      "sha256": "6755ddaa52a810539bc52c8cb7663f741948cc4510a2507884082b3a5d2bcfe4"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraFrustumTests.cs",
+      "sha256": "a6b312f932d3b075a38305f9208643f12c5b6dfef7841e159f869482ac3a3acf"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraInfiniteFarTests.cs",
+      "sha256": "15d4929d51bc809a36c1d1dbfcf0da5ea31a66ba7a960344385b7f0a5c257d09"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraPersistentFlipTests.cs",
+      "sha256": "329370d6d7ca36e9ed74f47745d61df1da5cb239b82fec743b481c37131869eb"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraSignedProjectionTests.cs",
+      "sha256": "f82c837f6f102ce3622c3fc10eae08145270e61302244f29032a500178d4fe3c"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/draft/compile-ready-tests/CameraTransformTests.cs",
+      "sha256": "823ff1aa4ad3e2525d2869063e1df06822438676ec5728afb4859da2c9bb6d17"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraNearPiNativeTests.cs",
+      "sha256": "aa5b81bc24d261581a431e38d5d06c696dd48111c6fe3c1379de3b71599810fe"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraCustomProjectionQueryTests.cs",
+      "sha256": "c2a96d8ce44f65de5731b631c9b3f2c2a33eaf1d2ec7f92fcf9f8397df910826"
+    }
+  ],
+  "cases": 27,
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.CamerasValidation.CameraIntegrationTests",
+      "kind": "mstest",
+      "expected_cases": 4,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.CamerasValidation.CameraFrustumTests",
+      "kind": "mstest",
+      "expected_cases": 2
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.CamerasValidation.CameraInfiniteFarTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.CamerasValidation.CameraPersistentFlipTests",
+      "kind": "mstest",
+      "expected_cases": 5,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.CamerasValidation.CameraSignedProjectionTests",
+      "kind": "mstest",
+      "expected_cases": 6,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.CamerasValidation.CameraTransformTests",
+      "kind": "mstest",
+      "expected_cases": 4,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.CamerasValidation.CameraNearPiNativeTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.CamerasValidation.CameraCustomProjectionQueryTests",
+      "kind": "mstest",
+      "expected_cases": 4
+    }
+  ],
+  "native_preflight_receipt_sha256": "e885d551ac44f2b4b401796174f72d738faff021ba81456a658d489e56848232",
+  "native_preflight_engine_sha256": "e05cc4da9851ad2c3306e16ef3af317c8b398516dd6f8bf2bcd902687b5f7215",
+  "public_api_contract": [
+    "FlipX/FlipY defaultfalse; existing ProjectionMatrix remains explicitlyunflipped/native/oblique. NewScreenProjectionMatrix composes resolvedcustom/default with persistentimageflips and is neverfedto native automatically.",
+    "ViewSetup explicitfalse overrides persistenttrue; null inherits persistentvalue; temporaryoverrides preserve componentquery state.",
+    "Point/pixel/ray/ToWorld/subfrustum areviewportlocal. FullnoargumentGetFrustum useslocalrectinstead ofabsoluteviewportoffset.",
+    "Defaultfalse/fullviewport paths preserve calculations; theexistingnonfullviewport noargumentfrustum offset bug is deliberately corrected.",
+    "Source signedorthographic/extremepositiveyfov are notexcluded. Orthographicabs magnitudes+imageflips; positiveprincipalperspective plus signflips, exactreverseZ custom projection forwide/infinite source. No geometry,winding,sourcepose changes or far sentinel."
+  ],
+  "scope_limits": [
+    "Positive decomposable non-reflected global camera transforms only: nonuniform axis-permuting positiveTRS/equivalent localmatrix tested; validglobalshear andreflected hierarchy are explicitunsupported imports, resources stayvalid, applicablecore pending.",
+    "Defaultfalse/fullviewport paths preserved; existingnonfullviewport noargumentfrustum offset bug deliberately corrected and independentlychecked in fourflipcases.",
+    "Sceneauthoring/reload, alternativeManagedSceneRenderer,VR,Windows remain unproved.",
+    "Reflected/sheared camera views retain their frozen diagnostics. Published2.0.1 ambiguity and current draft undefined-view semantics are documented in SPEC_AUDIT.md.",
+    "The actual existing-API near-pi red 81014eae is the regression target. No installed validation of arbitrary custom projections or near-pi rendering on the candidate."
+  ],
+  "canonical": "Temp/gltf-validation/direct-gpu/Cameras/canonical/Cameras.glb_c; onefromoriginalupstreamglTF",
+  "review_note": "Original2bb and corrected dbce5e41 compile stages are retained as separate evidence. The 22 public candidate cases, 4 projection/query regressions and 1 existing-API near-pi red replay have not executed against this candidate.",
+  "case_inventory_notes": [
+    "4transformregressions include2positivefeaturecases +2clearunsupportedtransactional regressions. Frameworkpass for unsupporteddiagnostic isnot featureconformance or corpus exclusion.",
+    "PI probe is not presumedgreen; ordinary4rad/7rad and originalsource/canonical gates remain separately attributable.",
+    "Four new cases cover forward/reverse finite perspective, reverse infinite perspective and reverse finite orthographic projections, each with flipped point/near/ray/frustum controls. One existing native near-pi test is also selected against the candidate."
+  ],
+  "supersedes_patch_sha256": "2bb09852ed3c4d0c6b5160e8860c3cd70758323407dc44d91bb7579d91233b64",
+  "initial_failed_stage": "Temp/gltf-validation/cameras-isolated-xsyDUzPf/Temp/gltf-validation/staged-build/f283ed198a4a459b8ff5a47c924b8ca9/manifest.json",
+  "correction": "Rename inner custom-projection aspect local to projectionAspect to avoid C# pattern-variable scope collision CS0136. No behavior change.",
+  "test_compile_correction": "Replace six invalid using declarations with finally cleanup. LocalFileSystem has internal Dispose; Scene uses Destroy. Preserve all22 case assertions.",
+  "predecessor_freeze_sha256": "76346addf0abee6d34a80dc4c22c0db56f66f9805795c18196764b81c6e5600a",
+  "isolated_stage_manifest": "Temp/gltf-validation/cameras-custom-queries-Va4f18Uv/Temp/gltf-validation/staged-build/d9e508e948b04161bd4eae2d95535846/manifest.json",
+  "isolated_stage_manifest_sha256": "abd124fc628ae09d7d62e630e701a2f351ac8b2ae9febbb11f81b693466af3f5",
+  "producer_engine_sha256": "95728a1feefd063027726671ae1ffcd3c5d7c43ae4520c0945164a49fc08fd03",
+  "producer_engine_mvid": "84441f9c-3b46-484d-82f9-26c950c247de",
+  "producer_system_sha256": "170b4dcc0c356b2b0d5e3ee4754fc9643144a2619f69f76b9a653d382f0a3ddc",
+  "producer_system_mvid": "dedd0996-7280-4ee5-8ea3-d4c749e79b88",
+  "helper_compile_sha256": "26be1166e8e9c09eed99b1724415e1b07067db9bf1b87d05ed3240d2c0342c17",
+  "helper_compile_log": "Temp/gltf-validation/cameras-custom-queries-Va4f18Uv/helper-compile/compile.log",
+  "compile_warning": "CS1701 from MSTest framework System.Runtime8 binding to net10 reference assemblies",
+  "engine_compile_seconds": 47.94,
+  "engine_compile_max_rss_kib": 1871552,
+  "system_compile_max_rss_kib": 360220,
+  "standalone_frustum_receipt": "Temp/gltf-validation/cameras-custom-queries-Va4f18Uv/frustum-check/receipt.json",
+  "standalone_frustum_receipt_sha256": "451cd6f6426c14b0e53761ce044fd4d0605f5310f6471cf24dfa84e91103e676",
+  "standalone_frustum_passed": 2
+}

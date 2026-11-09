@@ -1,0 +1,42 @@
+{
+  "model": "UnlitTest",
+  "owner": "/root/gpu_unlit",
+  "scope": "actual CPU-only unlit source/binding implementation and independent focused unit/model checks; no default shader support claim",
+  "owned_files": [
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/Materials/GltfUnlitMaterialPlan.cs",
+      "sha256": "48e9d1305fd81bfdcbade6136ea37ff5f9aa4ae46204b198d5619f84f714bc18"
+    },
+    {
+      "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfUnlitMaterialPlanTests.cs",
+      "sha256": "13c99781036bc0aec38dee3affcb9a7c2a41199611fa61d0ba4c52e57d89a261"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestMaterialPlanChecks.cs",
+      "sha256": "30262dddaf2ee6df0b02cb4a69592af45e9841734749e9c11f350b0a12430bea"
+    }
+  ],
+  "producer_dependencies": [
+    "NEW real Engine stage containing GltfUnlitMaterialPlan and canonical GltfMaterialUvPlan/GltfMaterialTextureEncodingPlan",
+    "current Sandbox.Gltf producer; no replacement producer compiled in a model helper"
+  ],
+  "unit_suite": {
+    "project": "engine/Tests/Sandbox.Test.Unit/Sandbox.Test.Unit.csproj",
+    "type": "Sandbox.Tests.GltfUnlitMaterialPlanTests",
+    "expected_cases": 33,
+    "execution": "coordinator guarded focused managed test/build through established build workflow"
+  },
+  "model_suite": {
+    "type": "Sandbox.Gltf.DirectGpu.UnlitTestValidation.UnlitTestMaterialPlanChecks",
+    "kind": "static_results",
+    "method": "RunAll",
+    "arguments": [
+      "$checkout"
+    ],
+    "expected_cases": 4,
+    "additional_helper_dependencies": "existing original six model-local sources/shared source freeze; producer plan comes only from actually installed Engine"
+  },
+  "acceptance": "exact linear factor, opaque alpha ignore, MASK >=cutoff including legal cutoff>1, straight blend alpha, source slot/context separation, canonical base-only UV/image-transfer/sampler plan, ignored-role no image I/O, explicit template capabilities/missing image blockers",
+  "default_material_red_receipt_sha256": "0da83949e97504dcc493158bf7f912d928b288827ebf3b5f8653ff35c74d59d2",
+  "status": "implementation and tests written, C# uncompiled/unrun; original49 receipt 45pass4fail0incomplete retained"
+}

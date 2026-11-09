@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "engine_sha256": "ad6a78a7e4f2664fe1f74b1567dde6d15d1519ad78dbd1e21efbb21ebfa2ebd1",
+  "gltf_sha256": "b86cb72e0c0e0f3c23af45bd115f68760655d1754d663f41df62a45e136f9e8b",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "tools_sha256": "539c10536c6df8a769eb4f91488ebfe9a048fdf1bd7cd589d0383479b2641b4d",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaSurfaceCandidateGate.cs",
+      "sha256": "87dd3dac6537b17634f0f4620b9da8776709d3bbc024b1a52eeaeee70c847839"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaBlendModeCoreTests.cs",
+      "sha256": "de35d87bc2c2130f4fce24a82bf2c091f05ef5bf1b4e8eb996b7df28415628be"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaBlendModeReference.cs",
+      "sha256": "a3e8f35189e89554a5382bcdbc1a385417aaa6b06bce9fa658b83790fa0a8e9d"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/SurfaceOrmCandidateGate.cs",
+      "sha256": "5dd9b46f56543ebb43169b615ad206b751ba5bd455ac2b5db5d97ff71862b197"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaSurfaceCandidateGate",
+      "kind": "static_results",
+      "method": "GenerateForReview",
+      "arguments": [
+        "$checkout",
+        "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-generated-02",
+        "bf9c2c65-ca5f-4bdd-913b-c35482b52902"
+      ],
+      "expected_cases": 1
+    }
+  ]
+}

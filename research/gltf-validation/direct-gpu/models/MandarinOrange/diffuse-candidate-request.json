@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "engine_sha256": "0bf3e5dcdf4481d070b6a1f89b0cf298a003ca05bcbf52772f308a6cf3e34ba9",
+  "gltf_sha256": "e2099978d14a3059ef8fbbd6c45f8e9116724d5ab861f7782bcea4e4779c920b",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MandarinOrangeValidation.DiffuseTransmissionReaderTests",
+      "kind": "mstest",
+      "expected_cases": 17,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MandarinOrangeValidation.DiffuseTransmissionCandidateTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ],
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/DiffuseTransmissionReaderTests.cs",
+      "sha256": "145b89bd573bde9e5e02fc29cdb9fe0f716897a8dffd4e72fa520cb18912618b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/DiffuseTransmissionCandidateTests.cs",
+      "sha256": "ef635eea9927b8d029fe4b91b1177b3d843d4d17a623cbcbb5b9da3dbab5c6cd"
+    }
+  ],
+  "frozen_artifacts": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/gltf_diffuse_transmission_candidate.shader",
+      "sha256": "dfbc59486512cab43579aa7e6a12ed14cf10d2667d50ab9e54346e2a655d24e9"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-native-lambert-reference.shader",
+      "sha256": "f5dd82885f64329726906d9124c4b8bc940a830cd2f43482d0862bfa19fee4f2"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-transmission-plane.gltf",
+      "sha256": "d83fbbde05a3071d54ceabf4aac34901a2a79bb52165ec5cd22404dbc5e0543f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-transmission-role-control.png",
+      "sha256": "0d56394cd9d08679d1c9758c5af2bdf45209ac8e82d92b7c32634b2b88983357"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-transmission-seven-uv-samplers.gltf",
+      "sha256": "1ee9e3cac844c364e97780db58e4bc9d95e81668a9f5060a1c24c21ac379e166"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-transmission-oracle.json",
+      "sha256": "4f4fff025557a1ed4a5891de52e27f5c25633d50272b6e0fd71527b5359e9d46"
+    }
+  ]
+}

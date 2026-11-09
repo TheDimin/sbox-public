@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "engine_sha256": "c0a520f534f2ae93ab4f22c9088fca0277519fd9a97f032c80cf2744c6181171",
+  "gltf_sha256": "7638a855ba21fd9c079a22cbc8b834d4169112fe08cb9a5fd788e63cf90866e1",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaMaskAdapterTests.cs",
+      "sha256": "bebf3a7d55907ee27956ca9c9b472217db0cb7989480240a24208bac7516534e"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaMaskAdapterGpuTests.cs",
+      "sha256": "69fff6d7064340064bf9635302b4759ffefd7b766f2d8f705ee114d9a419e7c8"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaMaskFeatureTests.cs",
+      "sha256": "7e2501e36e637fa220b6a5f94411b23d0bbca580e2a4d73aaa3ea3c00be75492"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaControlFixtures.cs",
+      "sha256": "07b5c4ed3e67354fd156d252940a947545e2472dd4b70d833741abf2dc80080b"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaMaskAdapterTests",
+      "kind": "mstest",
+      "expected_cases": 2
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaMaskAdapterGpuTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "ShaderSha256",
+          "arguments": [
+            "37a1a426d847e94b6f57a46c8bb8f372133a79b00e8c45e2cd572ce91d534993"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "OutputDirectory",
+          "arguments": [
+            "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mask-adapter-gpu-captures-01"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaMaskFeatureTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "ShaderSha256",
+          "arguments": [
+            "37a1a426d847e94b6f57a46c8bb8f372133a79b00e8c45e2cd572ce91d534993"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ]
+}

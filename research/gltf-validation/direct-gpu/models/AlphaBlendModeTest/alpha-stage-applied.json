@@ -1,0 +1,56 @@
+{
+  "files": {
+    "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs": {
+      "before_sha256": "7f16f6fb13086b646e75b14d8e61ef2edf60546f821dc37ba34d30938a411fde",
+      "after_sha256": "bcc5a9ad72973183ba73b44cbf343471a47cf2966007226ae1a7f4092a73d37f",
+      "backup": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/alpha-coherent-stage-backup/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs"
+    },
+    "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuInstance.Variants.cs": {
+      "before_sha256": "f42bf638b9de96ae6aacd33b0977f5c19c77d9bb727e76a1b2f07c2ab4290008",
+      "after_sha256": "ca590063837d5be75b3c317176f147dc92c6e4f230f19668b92bf95ca0f6bf11",
+      "backup": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/alpha-coherent-stage-backup/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuInstance.Variants.cs"
+    },
+    "engine/Sandbox.Engine/Systems/SceneSystem/SceneObject.cs": {
+      "before_sha256": "c79f2d2fd4cc4280ebe8cbafe196a10b3867922b2315ccce3c181f0d47122ca3",
+      "after_sha256": "d36c651d2ec3e401995db2dd5f57acae8e27bc8f73567465dddc6496feefc40b",
+      "backup": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/alpha-coherent-stage-backup/engine/Sandbox.Engine/Systems/SceneSystem/SceneObject.cs"
+    },
+    "engine/Sandbox.Engine/Systems/SceneSystem/SceneObject.Callbacks.cs": {
+      "before_sha256": "2d1d120f856067c40f8e17a0463a23dda9e29dea972f6db2ab01eb9b068b88c8",
+      "after_sha256": "e3646330e06fe2e5bc27249558827877c4bfee1ba681b894901123d079460496",
+      "backup": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/alpha-coherent-stage-backup/engine/Sandbox.Engine/Systems/SceneSystem/SceneObject.Callbacks.cs"
+    },
+    "engine/Sandbox.Engine/Systems/Render/Graphics.Draw.cs": {
+      "before_sha256": "4fd3ed85486dffecea3ffd290d128001264602ad04a04801c49334a68b070f33",
+      "after_sha256": "32f03868887aa3802d99064057304355f1b38667da057a0529e3b4ab1779662b",
+      "backup": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/alpha-coherent-stage-backup/engine/Sandbox.Engine/Systems/Render/Graphics.Draw.cs"
+    },
+    "engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.cs": {
+      "before_sha256": "1c49bfaa290d0c8a225ed4855405f441f60ff2e5e67235b06132df2dfd085daf",
+      "after_sha256": "f5e43675880c3425fbb6417399e7aa817576ec2b3e3ac8ed5131059d9cfa06ec",
+      "backup": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/alpha-coherent-stage-backup/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.cs"
+    },
+    "engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.Gltf.cs": {
+      "before_sha256": "240fd12bb926c0f40fe90c73c232c84b28707d556c5e12823da8d8a768a45dbb",
+      "after_sha256": "37cdce9105a632925fe7c5db0e8d492463da502a4e1c28e16b1e58391b99172d",
+      "backup": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/alpha-coherent-stage-backup/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.Gltf.cs"
+    },
+    "engine/Sandbox.Engine/Resources/Model/Gltf/GltfPublicMaterialRoute.cs": {
+      "before_sha256": "fb7a5374e5b3323d17257ac631cf5c46ea88f5ca5ed7e76bd38e2da322a2dec3",
+      "after_sha256": "58880c3ec51b4d8572f3198fd0e5bb6d65e9165686b3cb0b2764518c8982fc06",
+      "backup": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/alpha-coherent-stage-backup/engine/Sandbox.Engine/Resources/Model/Gltf/GltfPublicMaterialRoute.cs"
+    },
+    "engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs": {
+      "before_sha256": "741690507c1f5de3958243636aa2370c33037e55cf388847d1ec176bc9b81bda",
+      "after_sha256": "bdc156b27532ffdf0469ae7743fb21d4dbb61f6bd136c9b45f689910ffbbae71",
+      "backup": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/alpha-coherent-stage-backup/engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs"
+    },
+    "engine/Sandbox.Engine/Resources/Model/Gltf/GltfStockMaterialAdapter.cs": {
+      "before_sha256": "d0199de6de8d573eb41c5aa75d8addb8b3dcfc1588cd2ab1d68e52a791c1b336",
+      "after_sha256": "6054bc097a580ac6f4df88b3ef30393641fa24fe73071c2b9de02a6b70cef33b",
+      "backup": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/alpha-coherent-stage-backup/engine/Sandbox.Engine/Resources/Model/Gltf/GltfStockMaterialAdapter.cs"
+    }
+  },
+  "sort_patch_sha256": "3d789b2747688f19030e80920d560c4b9a56da50c4c324496d0d192125875e19",
+  "adapter_patch_sha256": "cd48548af160b39cb0f902e52432f4e211ad5acd40d8b9fe8a772467810fde57"
+}

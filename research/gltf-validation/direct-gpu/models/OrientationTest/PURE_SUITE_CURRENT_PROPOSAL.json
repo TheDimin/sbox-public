@@ -1,0 +1,644 @@
+{
+  "version": 8,
+  "proposal_only": true,
+  "execution_status": "not_executed",
+  "scope": "Current Sandbox.Test.Gltf CPU/data/codec regression inventory; no GPU/editor/performance/API-parity claim.",
+  "source_class_count": 47,
+  "test_method_count": 463,
+  "data_row_count": 460,
+  "expanded_case_count": 816,
+  "suites": [
+    {
+      "name": "accessor",
+      "file": "GltfAccessorTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfAccessorTests",
+      "methods": 14,
+      "data_rows": 2,
+      "cases": 15,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "f580e144e2fb95aafd2b7c1e9114d041f7190afddca262d9ae8a29edbe396d14"
+    },
+    {
+      "name": "animated-deformation",
+      "file": "GltfAnimatedDeformationTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfAnimatedDeformationTests",
+      "methods": 4,
+      "data_rows": 0,
+      "cases": 4,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "aa6a80621f7a9f02d35183b846f8c9d85ae00609a073f3a4f58288dbac1fa9ef"
+    },
+    {
+      "name": "animation-channels",
+      "file": "GltfAnimationChannelTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfAnimationChannelTests",
+      "methods": 16,
+      "data_rows": 6,
+      "cases": 21,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "3ae97384e6e0b841e5d9418c5917b2498f448a7485afb5eece10d1de429e8f78"
+    },
+    {
+      "name": "animation-sampler",
+      "file": "GltfAnimationTests.cs",
+      "type": "Sandbox.Test.Gltf.GltfAnimationTests",
+      "methods": 8,
+      "data_rows": 0,
+      "cases": 8,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "83167ad0133c38528c16c853080c4c8931e2ba5204bcbaac985c987d10038600"
+    },
+    {
+      "name": "artifact-dependencies",
+      "file": "GltfArtifactDependenciesTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfArtifactDependenciesTests",
+      "methods": 10,
+      "data_rows": 10,
+      "cases": 19,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "78f06e6461151adfeab77eb691c34246a84dea59bd90218ed24c4113b8223ceb"
+    },
+    {
+      "name": "basis-fallbacks",
+      "file": "GltfBasisFallbackTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfBasisFallbackTests",
+      "methods": 4,
+      "data_rows": 4,
+      "cases": 6,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "abc5c770657f0226929285f52a1bd21d9d6fd777ec09c2cc539c8f0e4ba43418"
+    },
+    {
+      "name": "compiler-orphan-binary",
+      "file": "GltfCompilerOrphanBinaryTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfCompilerOrphanBinaryTests",
+      "methods": 7,
+      "data_rows": 0,
+      "cases": 7,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "3b78b90aec1e7443a19da2e2c0a32ac1a161ba41dcfc74e756f0fd10f62cab75"
+    },
+    {
+      "name": "compiler-safety",
+      "file": "GltfCompilerSafetyTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfCompilerSafetyTests",
+      "methods": 7,
+      "data_rows": 4,
+      "cases": 10,
+      "source_dependencies": [
+        "GltfMeshoptTests.cs"
+      ],
+      "resources": [],
+      "codecs": [
+        "meshopt"
+      ],
+      "source_sha256": "e43aff8bdf8932033996189081fb1f72dfbe40e3f13ab721e777a21163ca8e08"
+    },
+    {
+      "name": "compiler",
+      "file": "GltfCompilerTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfCompilerTests",
+      "methods": 10,
+      "data_rows": 0,
+      "cases": 10,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "a7c842747236f945a3351c876984b1e938d3a31a8eccae42a8bcb49631b321f4"
+    },
+    {
+      "name": "container",
+      "file": "GltfContainerTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfContainerTests",
+      "methods": 10,
+      "data_rows": 8,
+      "cases": 17,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "22bb095af443fcf896b3f3dc72819af4640b77c26bf33251ac2227e67947660f"
+    },
+    {
+      "name": "core-animation-conformance",
+      "file": "GltfCoreAnimationConformanceTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfCoreAnimationConformanceTests",
+      "methods": 25,
+      "data_rows": 43,
+      "cases": 54,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "2cedc41110ddb72aa72e6ffb183906de2b41b55ff0ae39ebe7154797ce38e114"
+    },
+    {
+      "name": "core-data-conformance",
+      "file": "GltfCoreDataConformanceTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfCoreDataConformanceTests",
+      "methods": 15,
+      "data_rows": 54,
+      "cases": 59,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "88c8b050ea12f5a737c9c99b36ad7d96cf8f3e394a8de9bd39de2684e35a3d5c"
+    },
+    {
+      "name": "core-material-conformance",
+      "file": "GltfCoreMaterialConformanceTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfCoreMaterialConformanceTests",
+      "methods": 4,
+      "data_rows": 18,
+      "cases": 18,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "4ac3e62db1445b8b8a722cee8ab1006e066cd821594d48e8096006abb27554d7"
+    },
+    {
+      "name": "core-scene-conformance",
+      "file": "GltfCoreSceneConformanceTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfCoreSceneConformanceTests",
+      "methods": 40,
+      "data_rows": 130,
+      "cases": 147,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "798dde4a5117c5412d754fabad4efeeb2c0e4dbdf7218c56568df316f59cf5da"
+    },
+    {
+      "name": "deformation",
+      "file": "GltfDeformationTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfDeformationTests",
+      "methods": 5,
+      "data_rows": 0,
+      "cases": 5,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "2a789f913f58762bd1a9adb022e3395b7b3bea17deb9c4af0cc3484703f9c9f2"
+    },
+    {
+      "name": "draco-accessor",
+      "file": "GltfDracoAccessorTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfDracoAccessorTests",
+      "methods": 1,
+      "data_rows": 0,
+      "cases": 1,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [
+        "draco"
+      ],
+      "source_sha256": "5480a04eca3a8f6917fe30da857b396c9008a2631928b3d5663f6b8f726ed161"
+    },
+    {
+      "name": "draco-primitive-data",
+      "file": "GltfDracoPrimitiveDataTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfDracoPrimitiveDataTests",
+      "methods": 17,
+      "data_rows": 14,
+      "cases": 27,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [
+        "draco"
+      ],
+      "source_sha256": "fc29bc5c09835776b7f588ad323df5b563d0cb653d1b1225eba8efb7037e420a"
+    },
+    {
+      "name": "draco",
+      "file": "GltfDracoTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfDracoTests",
+      "methods": 9,
+      "data_rows": 2,
+      "cases": 10,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [
+        "draco"
+      ],
+      "source_sha256": "1fd53e2d055f9a0d8f3dfabf9238faa5eb77454bc792c00568117f6776689218"
+    },
+    {
+      "name": "draw-data",
+      "file": "GltfDrawDataTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfDrawDataTests",
+      "methods": 5,
+      "data_rows": 7,
+      "cases": 11,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "d6a9a81f9d79782678f7a8ad0244e18c9161563fc4e5e108c35a1fb59285d6d2"
+    },
+    {
+      "name": "evaluation-edge",
+      "file": "GltfEvaluationEdgeTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfEvaluationEdgeTests",
+      "methods": 13,
+      "data_rows": 11,
+      "cases": 22,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "ca11870328a346097aae43fffca1a00095a7890bfcb150ec9c1b170536593068"
+    },
+    {
+      "name": "evaluation-robustness",
+      "file": "GltfEvaluationRobustnessTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfEvaluationRobustnessTests",
+      "methods": 4,
+      "data_rows": 0,
+      "cases": 4,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "a800fd722544751cdaf7c6f702a9adac524a2a62bc2976caaf198949e7241a13"
+    },
+    {
+      "name": "features-edge",
+      "file": "GltfFeaturesEdgeTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfFeaturesEdgeTests",
+      "methods": 8,
+      "data_rows": 0,
+      "cases": 8,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "f7177ffc3107772b7569924f7e3e59473d6f88ce8de5fa7baf636e84b4cf7318"
+    },
+    {
+      "name": "geometry",
+      "file": "GltfGeometryTests.cs",
+      "type": "Sandbox.Test.Gltf.GltfGeometryTests",
+      "methods": 9,
+      "data_rows": 0,
+      "cases": 9,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "cd5bda87baaeda63791a809b9fae3d00b7f55e2608af3b4bc1f6cf1a3abb8cc0"
+    },
+    {
+      "name": "hierarchy-cache",
+      "file": "GltfHierarchyCacheTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfHierarchyCacheTests",
+      "methods": 4,
+      "data_rows": 3,
+      "cases": 6,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "d8d3a7fe09c5e087886ede5a4ac2f637c1a605847cb592286ad84b384c293947"
+    },
+    {
+      "name": "image",
+      "file": "GltfImageTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfImageTests",
+      "methods": 7,
+      "data_rows": 4,
+      "cases": 10,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "44f37f27a607b66eae6bc7c9b3f03eff66718972b75b6ac36fcd55602603d57f"
+    },
+    {
+      "name": "instancing",
+      "file": "GltfInstancingTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfInstancingTests",
+      "methods": 5,
+      "data_rows": 0,
+      "cases": 5,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "bace509ba9b94790ee5699e0ef0355768c490b4a2c9a51f26fa9046128d34c09"
+    },
+    {
+      "name": "ktx",
+      "file": "GltfKtxTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfKtxTests",
+      "methods": 9,
+      "data_rows": 6,
+      "cases": 13,
+      "source_dependencies": [],
+      "resources": [
+        "Fixtures/Ktx/gltf-ktx-alpha-simple.ktx2",
+        "Fixtures/Ktx/gltf-ktx-cyan_rgb_reference_basis.ktx2",
+        "Fixtures/Ktx/gltf-ktx-cyan_rgb_reference_uastc.ktx2",
+        "Fixtures/Ktx/gltf-ktx-rgba-mipmap-reference-basis.ktx2"
+      ],
+      "codecs": [
+        "ktx"
+      ],
+      "source_sha256": "84f87074055c8f90faa00c6b011da79f53aa37a5e802e8fd12ac7fc266fa50a1"
+    },
+    {
+      "name": "material-edge",
+      "file": "GltfMaterialEdgeTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfMaterialEdgeTests",
+      "methods": 13,
+      "data_rows": 21,
+      "cases": 28,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "d37fb910524fd95adc0c747ead1c7e7494c7f2bccc18757835ce2e08ba1252b4"
+    },
+    {
+      "name": "material",
+      "file": "GltfMaterialTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfMaterialTests",
+      "methods": 7,
+      "data_rows": 0,
+      "cases": 7,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "1b4c8e22c66430eebf1e1508bd55c67662eb9e81c8d6b8d26eaf135bbf949c41"
+    },
+    {
+      "name": "meshopt-integration",
+      "file": "GltfMeshoptIntegrationTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfMeshoptIntegrationTests",
+      "methods": 13,
+      "data_rows": 9,
+      "cases": 18,
+      "source_dependencies": [
+        "GltfMeshoptTests.cs"
+      ],
+      "resources": [],
+      "codecs": [
+        "meshopt"
+      ],
+      "source_sha256": "5640c30e6de9670cd56fafed81f6068191326cdcc9e86a09073baa62b7eb7a6a"
+    },
+    {
+      "name": "meshopt",
+      "file": "GltfMeshoptTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfMeshoptTests",
+      "methods": 8,
+      "data_rows": 10,
+      "cases": 17,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [
+        "meshopt"
+      ],
+      "source_sha256": "2a1420075d0d268f53adeac1b92f7798151cdae22073022251ab2cba75458a81"
+    },
+    {
+      "name": "morph-consistency",
+      "file": "GltfMorphConsistencyTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfMorphConsistencyTests",
+      "methods": 7,
+      "data_rows": 13,
+      "cases": 17,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "8cb8c66ec8ab99a83497e29f295fa273d71156de62b6e992cf10e66b807232c7"
+    },
+    {
+      "name": "morph-upload-data",
+      "file": "GltfMorphUploadDataTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfMorphUploadDataTests",
+      "methods": 10,
+      "data_rows": 16,
+      "cases": 23,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "6ccd193c93d2d6780b8663013da3e5eb980cebb243dc5d821c90bdf4fe03537e"
+    },
+    {
+      "name": "pose-edge",
+      "file": "GltfPoseEdgeTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfPoseEdgeTests",
+      "methods": 3,
+      "data_rows": 0,
+      "cases": 3,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "ad8ed23b9610e234786205620e85123fd826e3c896dec24a18e386ea9acac051"
+    },
+    {
+      "name": "pose-morph-overrides",
+      "file": "GltfPoseMorphOverrideTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfPoseMorphOverrideTests",
+      "methods": 17,
+      "data_rows": 12,
+      "cases": 25,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "2dee32444a3d1643ccb00003d30020f65489e3c1863b7d57e60caf1022b2b377"
+    },
+    {
+      "name": "pose-ownership",
+      "file": "GltfPoseOwnershipTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfPoseOwnershipTests",
+      "methods": 4,
+      "data_rows": 0,
+      "cases": 4,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "93427453276e148dcc1a02f90f2b6735ea4e023ce698124dbb6858795a0f2b49"
+    },
+    {
+      "name": "primitive-reader",
+      "file": "GltfPrimitiveTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfPrimitiveTests",
+      "methods": 8,
+      "data_rows": 11,
+      "cases": 17,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "84ab0ef2297a1d4bb54374a30ee0c4d10422e8797aba0e62437032ea39ab446b"
+    },
+    {
+      "name": "quantization-declarations",
+      "file": "GltfQuantizationDeclarationTests.cs",
+      "type": "Sandbox.Test.Gltf.GltfQuantizationDeclarationTests",
+      "methods": 5,
+      "data_rows": 10,
+      "cases": 12,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "5fe2d58f0c0716415f7929493e630b7a553ab268ec4f5fa7a20a368fd648f392"
+    },
+    {
+      "name": "reader-robustness",
+      "file": "GltfReaderRobustnessTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfReaderRobustnessTests",
+      "methods": 10,
+      "data_rows": 6,
+      "cases": 14,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "7b45ec77ca2372c6ee6b92c9420f56d81d6510453735d32bb5008e07fbf2dec1"
+    },
+    {
+      "name": "scene-feature",
+      "file": "GltfSceneFeatureTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfSceneFeatureTests",
+      "methods": 13,
+      "data_rows": 10,
+      "cases": 21,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "43791ebda3ac7adb876218fdc9c6a7af627852993205e12bafc31c4d71b8e9dd"
+    },
+    {
+      "name": "scene",
+      "file": "GltfSceneTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfSceneTests",
+      "methods": 8,
+      "data_rows": 0,
+      "cases": 8,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "ff60a5c9461f3c55eb9f14051712127e8198d4139f24c507c9d7220664f11e27"
+    },
+    {
+      "name": "skinning-palette",
+      "file": "GltfSkinningPaletteTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfSkinningPaletteTests",
+      "methods": 8,
+      "data_rows": 0,
+      "cases": 8,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "fb907dcdae4ee4382de41e4ea9ba56eedfc223bff6a8f013b430734866ec8ed0"
+    },
+    {
+      "name": "static-scene-assembly",
+      "file": "GltfStaticSceneAssemblyTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfStaticSceneAssemblyTests",
+      "methods": 8,
+      "data_rows": 0,
+      "cases": 8,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "13731bdff17cad5003034c938c89ed443fa85f12296e4b4020097164562aff68"
+    },
+    {
+      "name": "texture-transform-declarations",
+      "file": "GltfTextureTransformDeclarationTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfTextureTransformDeclarationTests",
+      "methods": 4,
+      "data_rows": 4,
+      "cases": 6,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "5bce7f4b15841eee13168320fd01a3e8109445ab10e12c97cba4619573afac4b"
+    },
+    {
+      "name": "upload-data",
+      "file": "GltfUploadDataTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfUploadDataTests",
+      "methods": 18,
+      "data_rows": 5,
+      "cases": 21,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [
+        "meshopt"
+      ],
+      "source_sha256": "ae103131040e56fd9a7d5f2ab074300a3ebdc86ba170e9ea630388420c86eec5"
+    },
+    {
+      "name": "upload-layout",
+      "file": "GltfUploadLayoutTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfUploadLayoutTests",
+      "methods": 14,
+      "data_rows": 7,
+      "cases": 18,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "2b434891efa1afbc7ce789c47b85803a816f4c628104a26f74be58b26d7c20f7"
+    },
+    {
+      "name": "validation-edge",
+      "file": "GltfValidationEdgeTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfValidationEdgeTests",
+      "methods": 15,
+      "data_rows": 0,
+      "cases": 15,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [],
+      "source_sha256": "11299c8766150b500680eb377a62c43ac1300e0672124360ed9df7dabd73ac5a"
+    }
+  ],
+  "codec_preflights": [
+    {
+      "name": "draco",
+      "file": "GltfDracoPrimitiveDataTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfDracoPrimitiveDataTests",
+      "method": "NativeBoxDecodeSuppliesRawFloatAttributesAndDecodedTopology",
+      "arguments": [],
+      "source_dependencies": [],
+      "resources": []
+    },
+    {
+      "name": "meshopt",
+      "file": "GltfMeshoptTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfMeshoptTests",
+      "method": "DecodesUpstreamAttributeStreamsV0AndV1",
+      "arguments": [],
+      "source_dependencies": [],
+      "resources": []
+    },
+    {
+      "name": "ktx",
+      "file": "GltfKtxTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfKtxTests",
+      "method": "TranscodesKhronosEtc1sAndUastcColor",
+      "arguments": [
+        "gltf-ktx-cyan_rgb_reference_basis.ktx2"
+      ],
+      "source_dependencies": [],
+      "resources": [
+        "Fixtures/Ktx/gltf-ktx-cyan_rgb_reference_basis.ktx2"
+      ]
+    }
+  ],
+  "resource_sha256": {
+    "Fixtures/Ktx/gltf-ktx-alpha-simple.ktx2": "fc21f2c39480383c7943733a18c5a543e89ecb7f035e9f97d501982a4948c8dd",
+    "Fixtures/Ktx/gltf-ktx-cyan_rgb_reference_basis.ktx2": "2b2ceb5627e3f70969c7d99d5c75d462d156c0df0a431c747e43c9307d6cb131",
+    "Fixtures/Ktx/gltf-ktx-cyan_rgb_reference_uastc.ktx2": "fdca34518a64017fc7c8e266c1fcb92f85cc5f2fb13605ea6c816455c4921c94",
+    "Fixtures/Ktx/gltf-ktx-rgba-mipmap-reference-basis.ktx2": "267b18c4badb42fb9739ef42b5e5cd9c2d95872e55ae298a82000fb402c33958"
+  },
+  "historical_manifest_sha256": "e2682e555098cbe81dcb67c92cb46ef2ca47394b665f4aa480c3c9463657d2b0",
+  "required_producer": "Bind exact actually loaded Sandbox.Gltf hash/MVID and fresh frozen test snapshots at coordinator dispatch. Do not attribute legacy green counts to c5c0.",
+  "metadata_reference_policy": "For full pure project preserve legacy runner BCL + loaded Sandbox.Gltf + MSTest references, avoiding unrelated Engine/global vector types. Additive52 uses only public glTF APIs and needs no native Engine service.",
+  "execution_owner": "/root/gpu_validation"
+}

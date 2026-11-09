@@ -1,0 +1,109 @@
+{
+  "model": "LightsPunctualLamp",
+  "owner": "/root/gpu_punctual_lamp",
+  "coordinator": "/root/gpu_validation",
+  "shared_backend_owner": "/root/gpu_fox",
+  "files": [
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/Lighting/GltfPunctualLightPlan.cs",
+      "sha256": "de77e4b8e94bca4367d1835fd2c3c84907ce5de492e6ab71dc47179bdeafe56b"
+    },
+    {
+      "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfPunctualLightPlanTests.cs",
+      "sha256": "e7d8d3768f42419b48701e8f599c5506da2ad06e2a17208d68836fae69dfce7b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/LightsPunctualLamp/ACCEPTANCE.md",
+      "sha256": "aa6064d8cfb7ac76c0dce74e4302b92638165a96e94f9898e14d005ad4e9831f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/LightsPunctualLamp/LightsPunctualLampCoreTests.cs",
+      "sha256": "81da61f52afa93c973cde8553eab6e3ef8eaf18074eb2d693170097122a4e914"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/LightsPunctualLamp/LightsPunctualLampNativeLightAudit.cs",
+      "sha256": "c902e6361fccf067f689d1cf71083f8af1c2233ebde85f57b95350ab533ad8ec"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/LightsPunctualLamp/LightsPunctualLampReference.cs",
+      "sha256": "414f9f4185b0ed8b69817f3dc7da1af0355fbdff64acb373ca68ae3167bfe257"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/LightsPunctualLamp/NATIVE_PACK_FINDINGS.md",
+      "sha256": "75767193853772ea2028fc3f5e6422b8328b36082970c3ab7605b34549b8e995"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/LightsPunctualLamp/author_reference.py",
+      "sha256": "0d6fdeb48c7121c12473dece1f0bc3029cd293e67b03ad7b765af21c65791775"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/LightsPunctualLamp/reference.json",
+      "sha256": "d57c9282a8e775aa659cd0b178fb70b344576f740733568aaeeb3e1feba9514b"
+    }
+  ],
+  "producer_dependencies": [
+    "Actually installed/loaded Sandbox.Gltf with existing ReadLight and new ValidatePoseOwnership; do not compile producer replacement source into helper",
+    "Actually staged Engine including NEW internal Sandbox.Gltf.DirectGpu.Lighting.GltfPunctualLightPlan",
+    "Native audit also requires actual loaded Sandbox.SceneRenderer RenderContext.PackSceneLight; helper assembly is Sandbox.Test.Unit to use established InternalsVisibleTo"
+  ],
+  "shared_backend_contract": "CONTRACT.md; immutable resource plan borrows the document retained by the asset; each renderer instance evaluates the same geometry pose plus affine Placement; realization and lifetime belong to /root/gpu_fox after root handoff",
+  "entry": "Sandbox.Gltf.DirectGpu.LightsPunctualLampValidation.LightsPunctualLampCoreTests.RunAll(checkoutRoot)",
+  "expected_cases": 51,
+  "forms": [
+    "glTF/source",
+    "glTF/compiled_glb_c",
+    "glTF-Binary/source",
+    "glTF-Binary/compiled_glb_c"
+  ],
+  "suites": [
+    {
+      "entry": "MSTest filter FullyQualifiedName~Sandbox.Tests.GltfPunctualLightPlanTests",
+      "expected_cases": 21,
+      "scope": "CPU definitions/physical units/defaults/selected nodes/affine pose, no GPU allocation"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.LightsPunctualLampValidation.LightsPunctualLampCoreTests.RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 30,
+      "scope": "CPU/data/model light plan across four actual forms"
+    }
+  ],
+  "native_audit": {
+    "entry": "Sandbox.Gltf.DirectGpu.LightsPunctualLampValidation.LightsPunctualLampNativeLightAudit.Run",
+    "arguments": [
+      "owned private SceneWorld"
+    ],
+    "expected_measurements": 6,
+    "scope": "Actual native packed light state only, no frame/pixel/lux assertion; can compile/run separately from new Engine plan; all temporary scene lights deleted",
+    "actual_evidence": {
+      "receipt": "Temp/gltf-validation/direct-gpu/native-light-pack-observations/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "f7cc4844ec96d8c1da6d9ba94208cd8157705f663253e2204cca528e2227d9ad",
+      "actual_observations": 6,
+      "wrapper_cases": 1,
+      "wrapper_passed": 1,
+      "cleanup_errors": [],
+      "engine_mvid": "04b86c2e-4406-422e-a466-b61ec13f1f86",
+      "renderer_mvid": "c22b305b-109d-4166-a212-a7d4bc301e40",
+      "scope": "Actual packed native state and cleanup/identity only, no rendered irradiance or source material/pixel pass"
+    }
+  },
+  "scope": "Implemented internal CPU light plan and prepared focused/model tests/native packing probe. Not runtime-light rendering, lifetime, GPU, image, material fidelity, public loading or performance proof.",
+  "acceptance": "Independent pinned raw source JSON/GLB and double scalar hierarchy arithmetic; literal five point lights, candela [15,1.5,80,80,180], linear RGB, infinite range, distinct nodes 3..7. CPU position tolerance 0.00002 inch identity /0.00005 affine; no raised thresholds. Synthetic fixtures cover all types, units, cones, range, animated/full-affine/reflected/collapsed transforms and negatives. No implicit intensity multiplier or finite cutoff.",
+  "local_evidence": {
+    "source_author_executed": true,
+    "corpus_revision_verified": "90d7ede14c7e280af263824604b427a1ca02cb66",
+    "pinned_files": 10,
+    "upstream_variants": 2,
+    "csharp_compiled": false,
+    "csharp_executed_cases": 0,
+    "native_audit_measurements": 6,
+    "gpu_measurements": 0,
+    "csharp_compiled_scope": "New Engine plan and 51 CPU model/focused cases remain uncompiled/unrun; separate native audit was compiled and executed by coordinator"
+  },
+  "execution_needs": "Coordinator stages Engine/Gltf, compiles focused tests/model helper against actual producer and runs 51 CPU cases. Separate six-measurement native audit completed on actual loaded Engine/Renderer; see actual evidence. Runtime light creation/lifetime/physical mapping integration with backend owner, followed by GPU/pixel acceptance. No worker editor/build/shader jobs performed.",
+  "status": "refrozen_for_coordinator_review; new Engine plan and 51 CPU cases pending; actual native packing audit complete; runtime physical light realization, pixels and public API remain pending",
+  "superseded_unexecuted_submission_sha256": "d39aa8bb100eaa016c8474cbcef4129b95d643aaba26730040d63945adaa5af8",
+  "refreeze_reason": "Coordinator confirmed no Engine-lighting stage or CPU capture started. Source review added live-document check for cached poses/empty optional fallback and ignored directional translation; original native audit source stays unchanged."
+}

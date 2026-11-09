@@ -1,0 +1,100 @@
+{
+  "model": "PrimitiveModeNormalsTest",
+  "owner": "/root/gpu_primitive_normals",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/PrimitiveModeNormalsTest/ACCEPTANCE.md",
+      "sha256": "c7830d61203b7ecc58a6ebc4a97acc78f167bbea41c2552625411c7a28bc8898"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/PrimitiveModeNormalsTest/PrimitiveModeNormalsCoreTests.cs",
+      "sha256": "a0aeba4b95dc80c6d30a8f31158152b799727f5eafcc11fcb9780bfbd39baf1f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/PrimitiveModeNormalsTest/PrimitiveModeNormalsGpuChecks.cs",
+      "sha256": "6290ae15fd97b1c83c3dc88d9294ad681b93afe47e103c4eeb18ae75090f2f4f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/PrimitiveModeNormalsTest/PrimitiveModeNormalsGpuProbe.cs",
+      "sha256": "9b7db8d2001cc94aec28b511df8600ddb9066fbd5bd9f7825156e0e98ce28f8d"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/PrimitiveModeNormalsTest/PrimitiveModeNormalsReference.cs",
+      "sha256": "c86fbe8da77b545f040e7f6498364aa6cfe1607022ff8638ebb114e102445d6b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/PrimitiveModeNormalsTest/PrimitiveModeNormalsReferenceScene.cs",
+      "sha256": "37b437cced40092153bab07c4672991cfe08de781d09b4eba98ed7f82217c745"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/PrimitiveModeNormalsTest/audit_source.py",
+      "sha256": "0c4cd6b328a36a2554a2556437976d416f68748e67a804eb5d07f3ede02ff081"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/PrimitiveModeNormalsTest/source-audit.json",
+      "sha256": "8967ef7f1621c6420b9566ce99c7bce462511d0aed42c7f2cbb93df195dc993d"
+    }
+  ],
+  "producer_dependencies": [
+    "actual loaded Sandbox.Engine and Sandbox.Gltf; no replacement producer source",
+    "agreed shared GltfGpuBackend.cs/GltfGpuRig.cs/GltfGpuMorphs.cs and compute shader freeze"
+  ],
+  "shared_backend_contract": "research/gltf-validation/direct-gpu/CONTRACT.md; coordinator identifies current source freeze",
+  "entry": "Sandbox.Gltf.DirectGpu.PrimitiveModeNormalsValidation.PrimitiveModeNormalsCoreTests.RunAll($checkout); Sandbox.Gltf.DirectGpu.PrimitiveModeNormalsValidation.PrimitiveModeNormalsGpuVerifierTests.RunAll($checkout)",
+  "expected_cases": 117,
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.PrimitiveModeNormalsValidation.PrimitiveModeNormalsCoreTests",
+      "kind": "static_results",
+      "method": "RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 104
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.PrimitiveModeNormalsValidation.PrimitiveModeNormalsGpuVerifierTests",
+      "kind": "static_results",
+      "method": "RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 13
+    }
+  ],
+  "forms": [
+    "glTF/source",
+    "glTF/derived_compiled_glb"
+  ],
+  "scope": "117 planned CPU/reader/staging/checker-control cases; C# unrun. Python pinned-source audit executed. Eight actual GPU measurements planned (200 primitive rows), submitted mode diagnostics separate, rendered visibility/images pending. No Model.Load/public API/Windows claim.",
+  "gpu_entry": "Sandbox.Gltf.DirectGpu.PrimitiveModeNormalsValidation.PrimitiveModeNormalsGpuProbe.Run(checkoutRoot, world, computeMaterial, waitForActualFrames, diagnosticMaterialResolver = null, requireSubmittedModeEvidence = false)",
+  "gpu_expected_measurements": 8,
+  "gpu_expected_primitive_rows": 200,
+  "gpu_thresholds": {
+    "position_maximum_component_inches": 0.002,
+    "defined_normal_maximum_component": 5e-05,
+    "normalized_color_maximum_component": 1e-06,
+    "uv_and_topology": "exact",
+    "missing_normal_points_lines": "finite placeholder only; no direction assertion"
+  },
+  "submitted_mode_gate": {
+    "entry": "Sandbox.Gltf.DirectGpu.PrimitiveModeNormalsValidation.PrimitiveModeNormalsGpuChecks.RequireSubmittedModes(rows, revision)",
+    "probe_option": "requireSubmittedModeEvidence: true",
+    "dependency": "agreed future additive SourceMode (authored0..6), SubmittedPrimitiveType (Graphics.PrimitiveType? from successful DrawIndexed parameter), DrawCalls and SubmittedRevision per snapshot",
+    "scope": "CPU submission evidence only; not GPU topology query or image visibility"
+  },
+  "independent_render_reference": "Sandbox.Gltf.DirectGpu.PrimitiveModeNormalsValidation.PrimitiveModeNormalsReferenceScene(reference, world, placement, materialForPrimitiveContext, selectedMeshes = null, deliberatelyWrongPrimitiveTypes = false)",
+  "acceptance": "ACCEPTANCE.md; all 25 primitives retained, actual native Points/Lines/Triangles required; independent source geometry, literal hierarchy, exact topology, authored/generated normal checks, arbitrary-layout positive and eight corruption negative controls. Point/line lighting convention is SHOULD; no invented normal-direction or shader-style core failure.",
+  "execution_needs": "Coordinator compiles helper sources against actually loaded producers/shared freeze; guarded real GPU/editor/shader work only coordinator. Numerical probe uses existing API. Optional submitted-mode gate needs agreed backend diagnostics after current freeze. Native captures require matched empty-before/positive/deleted-empty and per-group visible controls/material/camera/threshold contract. Source-material default plus override per topology/HasAuthoredNormal context remains separately pending.",
+  "independent_reference_audit": {
+    "command": "python3 research/gltf-validation/direct-gpu/models/PrimitiveModeNormalsTest/audit_source.py --checkout /home/damian/projects/sbox-public --output research/gltf-validation/direct-gpu/models/PrimitiveModeNormalsTest/source-audit.json",
+    "status": "passed",
+    "scope": "pinned revision/file hashes, one actual variant, all25 topology inventory, no degenerate sphere flat normals, near-unit authored normals and independent hierarchy endpoint formulas; not producer/parser/GPU evidence"
+  },
+  "known_limits": [
+    "Labels.png is an external dependency retained by derived GLB packaging, not embedded image optimization",
+    "opaque diagnostic label plane may obscure sphere silhouettes; aggregate foreground count alone cannot prove all primitive groups visible",
+    "no C# compilation or runtime execution performed by model worker",
+    "source-material context implementation owned by shared backend/material owners; recommendations are separate from required actual geometry/modes/visibility"
+  ]
+}

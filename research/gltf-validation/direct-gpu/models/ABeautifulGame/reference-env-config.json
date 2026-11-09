@@ -1,0 +1,22 @@
+{
+  "attribution": {
+    "author": "Oliksiy Yakovlyev",
+    "licenseUrl": "https://polyhaven.com/license",
+    "sourceUrl": "https://polyhaven.com/a/aerodynamics_workshop"
+  },
+  "compiledPath": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/aerodynamics_workshop.vtex_c",
+  "compiledSha256": "740fce93832d41943ad30d3585b2e04c9804296b05e71b5b7a02e4731bcfb7e8",
+  "sizeInches": 100000,
+  "sourcePath": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/aerodynamics_workshop.exr",
+  "sourceProvenance": "Poly Haven Aerodynamics Workshop CC0; pinned ABeautifulGame README documents Babylon ACES +2EV screenshot; original EXR bytes preserved",
+  "sourceSha256": "8294e1425aecde72d188ac003eb46a4dd1a79877a1431e4c3979cfc49b3c5c76",
+  "texturePath": "materials/gltf_reference_environment/aerodynamics_workshop.vtex",
+  "tint": [
+    1,
+    1,
+    1,
+    1
+  ],
+  "type": "cubemap",
+  "yawDegrees": 0
+}

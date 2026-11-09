@@ -1,0 +1,232 @@
+{
+  "revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "upstream_forms": [
+    "glTF/MorphStressTest.gltf",
+    "glTF-Binary/MorphStressTest.glb"
+  ],
+  "mesh": 0,
+  "node": 0,
+  "target_count": 8,
+  "target_names": [
+    "Key 1",
+    "Key 2",
+    "Key 3",
+    "Key 4",
+    "Key 5",
+    "Key 6",
+    "Key 7",
+    "Key 8"
+  ],
+  "mesh_weights": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "node_weights": null,
+  "sparse_accessors": 0,
+  "interleaved_accessors": 0,
+  "authored_tangents": false,
+  "attributes": [
+    "POSITION",
+    "NORMAL",
+    "TEXCOORD_0",
+    "TEXCOORD_1"
+  ],
+  "primitives": [
+    {
+      "primitive": 0,
+      "vertices": 24,
+      "indices": 36,
+      "material": 0,
+      "targets": [
+        {
+          "target": 0,
+          "POSITION_accessor": 5,
+          "NORMAL_accessor": 6,
+          "nonzero_position_vertices": 0,
+          "nonzero_normal_vertices": 0
+        },
+        {
+          "target": 1,
+          "POSITION_accessor": 7,
+          "NORMAL_accessor": 8,
+          "nonzero_position_vertices": 0,
+          "nonzero_normal_vertices": 0
+        },
+        {
+          "target": 2,
+          "POSITION_accessor": 9,
+          "NORMAL_accessor": 10,
+          "nonzero_position_vertices": 0,
+          "nonzero_normal_vertices": 0
+        },
+        {
+          "target": 3,
+          "POSITION_accessor": 11,
+          "NORMAL_accessor": 12,
+          "nonzero_position_vertices": 0,
+          "nonzero_normal_vertices": 0
+        },
+        {
+          "target": 4,
+          "POSITION_accessor": 13,
+          "NORMAL_accessor": 14,
+          "nonzero_position_vertices": 0,
+          "nonzero_normal_vertices": 0
+        },
+        {
+          "target": 5,
+          "POSITION_accessor": 15,
+          "NORMAL_accessor": 16,
+          "nonzero_position_vertices": 0,
+          "nonzero_normal_vertices": 0
+        },
+        {
+          "target": 6,
+          "POSITION_accessor": 17,
+          "NORMAL_accessor": 18,
+          "nonzero_position_vertices": 0,
+          "nonzero_normal_vertices": 0
+        },
+        {
+          "target": 7,
+          "POSITION_accessor": 19,
+          "NORMAL_accessor": 20,
+          "nonzero_position_vertices": 0,
+          "nonzero_normal_vertices": 0
+        }
+      ]
+    },
+    {
+      "primitive": 1,
+      "vertices": 1504,
+      "indices": 7200,
+      "material": 1,
+      "targets": [
+        {
+          "target": 0,
+          "POSITION_accessor": 26,
+          "NORMAL_accessor": 27,
+          "nonzero_position_vertices": 94,
+          "nonzero_normal_vertices": 115
+        },
+        {
+          "target": 1,
+          "POSITION_accessor": 28,
+          "NORMAL_accessor": 29,
+          "nonzero_position_vertices": 94,
+          "nonzero_normal_vertices": 115
+        },
+        {
+          "target": 2,
+          "POSITION_accessor": 30,
+          "NORMAL_accessor": 31,
+          "nonzero_position_vertices": 94,
+          "nonzero_normal_vertices": 115
+        },
+        {
+          "target": 3,
+          "POSITION_accessor": 32,
+          "NORMAL_accessor": 33,
+          "nonzero_position_vertices": 94,
+          "nonzero_normal_vertices": 115
+        },
+        {
+          "target": 4,
+          "POSITION_accessor": 34,
+          "NORMAL_accessor": 35,
+          "nonzero_position_vertices": 94,
+          "nonzero_normal_vertices": 115
+        },
+        {
+          "target": 5,
+          "POSITION_accessor": 36,
+          "NORMAL_accessor": 37,
+          "nonzero_position_vertices": 94,
+          "nonzero_normal_vertices": 115
+        },
+        {
+          "target": 6,
+          "POSITION_accessor": 38,
+          "NORMAL_accessor": 39,
+          "nonzero_position_vertices": 94,
+          "nonzero_normal_vertices": 115
+        },
+        {
+          "target": 7,
+          "POSITION_accessor": 40,
+          "NORMAL_accessor": 41,
+          "nonzero_position_vertices": 94,
+          "nonzero_normal_vertices": 115
+        }
+      ]
+    }
+  ],
+  "clips": [
+    {
+      "name": "Individuals",
+      "key_count": 281,
+      "first_key": 0.03333333507180214,
+      "last_key": 9.366666793823242,
+      "interpolation": "LINEAR",
+      "minimum_weight": 0.0,
+      "maximum_weight": 1.0
+    },
+    {
+      "name": "TheWave",
+      "key_count": 59,
+      "first_key": 0.03333333507180214,
+      "last_key": 1.9666666984558105,
+      "interpolation": "LINEAR",
+      "minimum_weight": 0.0,
+      "maximum_weight": 1.0
+    },
+    {
+      "name": "Pulse",
+      "key_count": 191,
+      "first_key": 0.03333333507180214,
+      "last_key": 6.366666793823242,
+      "interpolation": "LINEAR",
+      "minimum_weight": 0.0,
+      "maximum_weight": 1.0
+    }
+  ],
+  "normal_definedness": [
+    {
+      "state": "rest",
+      "vertices": 1528,
+      "minimum_morphed_normal_length": 0.9999998615187129,
+      "zero_normal_directions": 0
+    },
+    {
+      "state": "all_one",
+      "vertices": 1528,
+      "minimum_morphed_normal_length": 0.9999998665226647,
+      "zero_normal_directions": 0
+    },
+    {
+      "state": "signed_eight",
+      "vertices": 1528,
+      "minimum_morphed_normal_length": 0.9999997928767068,
+      "zero_normal_directions": 0
+    },
+    {
+      "state": "ninth_mesh_default",
+      "vertices": 1528,
+      "minimum_morphed_normal_length": 0.9999998615187129,
+      "zero_normal_directions": 0
+    },
+    {
+      "state": "ninth_signed_override",
+      "vertices": 1528,
+      "minimum_morphed_normal_length": 0.9999997928767068,
+      "zero_normal_directions": 0
+    }
+  ],
+  "evidence_scope": "Independent standard-library source audit only; compiled producer data, C# assertions, device readback, image, wall-clock and performance gates unrun."
+}

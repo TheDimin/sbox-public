@@ -1,0 +1,71 @@
+{
+  "model": "AnisotropyBarnLamp",
+  "owner": "/root/gpu_basis_lamp",
+  "files": [
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/Textures/GltfBasisTexturePlan.cs",
+      "sha256": "aa7aaa2e1b1f15a61094a88b76679ccb58a86bb259b0748ae6a0fb0342dbd0fe"
+    },
+    {
+      "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfBasisTexturePlanTests.cs",
+      "sha256": "5c9853b098100b5e04b5d257aeab17bdcae7df60bfe2a545ba1fc65b8fbc3952"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AnisotropyBarnLamp/ACCEPTANCE.md",
+      "sha256": "103603787a7521cf1dac5fa77332978233582ce86ad9f4c0e5141c5993075390"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AnisotropyBarnLamp/AnisotropyBarnLampTests.cs",
+      "sha256": "25e238116e81f3c5513fc3edd717d4c4e960945b7601950320640cde49e93700"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AnisotropyBarnLamp/CODEC_AUDIT.md",
+      "sha256": "f13c0ef552eb9aaa1a029d8a1f01001554ba2a57e012849594d8b9e54c6d1ced"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AnisotropyBarnLamp/audit_source.py",
+      "sha256": "a8defc4eec1bab8e990e36d460e4c7b80a76be00374184482b69d6ad222c0673"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AnisotropyBarnLamp/source-audit.json",
+      "sha256": "7671c3053dae9c9ecba06eb5f66ff15c1a84cf4cd835e7cd44460450c488c995"
+    }
+  ],
+  "producer_dependencies": [
+    "Rebuilt/staged actual Sandbox.Engine containing GltfBasisTexturePlan",
+    "Actual loaded Sandbox.Gltf with existing GltfKtx.DecodeRgba32",
+    "Pinned Evergine.Bindings.KTX 2026.6.15.8 exact requested-RID native payload",
+    "Existing GltfTextureCompiler.Downsample and VTexWriter/ResourceWriter"
+  ],
+  "shared_backend_contract": "CONTRACT.md; no copied producer source in helper; compiler/material routing remains with shared owners",
+  "entry": [
+    {
+      "kind": "MSTest",
+      "suite": "Sandbox.Tests.GltfBasisTexturePlanTests",
+      "expected_cases": 15,
+      "scope": "pure CPU metadata/codec selection and literal mip colors"
+    },
+    {
+      "kind": "static_result_array",
+      "method": "Sandbox.Gltf.DirectGpu.AnisotropyBarnLampValidation.AnisotropyBarnLampTests.RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 43,
+      "scope": "CPU source+portable packaging+material fallback+native KTX/VTEX resource integration"
+    }
+  ],
+  "expected_cases": 58,
+  "forms": [
+    "glTF/source",
+    "glTF/derived-compiled-glb_c",
+    "glTF-Binary/source",
+    "glTF-Binary/derived-compiled-glb_c",
+    "glTF-KTX-BasisU/source",
+    "glTF-KTX-BasisU/derived-compiled-glb_c"
+  ],
+  "scope": "Prepared/unrun. 15 pure CPU planning controls and 43 model rows. Actual codec uses native library but no editor/GPU allocation in the plan. No rendered/image/API/performance claim.",
+  "acceptance": "Independent pinned source logical stream/image/container hashes; explicit five optional material core fallbacks; exact DFD/KVD bytes; role/codec metadata and mip fixture negative controls; CPU native resource framing/flags/length. No producer self-comparison used as image-fidelity oracle.",
+  "execution_needs": "Coordinator only: guarded focused rebuild, native content stage and actual producer installation/restart as needed; run 15 unit cases+43 helper rows plus existing GltfKtxTests. Rendering/public Model.Load remains pending shared compiler/material wiring.",
+  "status": "frozen-pending-coordinator"
+}

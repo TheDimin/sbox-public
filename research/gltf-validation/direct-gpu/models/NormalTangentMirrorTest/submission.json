@@ -1,0 +1,144 @@
+{
+  "model": "NormalTangentMirrorTest",
+  "owner": "/root/gpu_normal_tangent_mirror",
+  "status": "refrozen explicit Numerics Vector2 alias after coordinator confirmed no execution; Python18/18 pass; all C#/GPU/image unrun",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/.gitignore",
+      "sha256": "32dae3052f331ee34d628ef535709b301259a45df7c7522c4d35dcf49873f00b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/ACCEPTANCE.md",
+      "sha256": "b754233c5e7b2f856032eba6a61a96b9d117ae1f8de07f96ed12dbc26240890e"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/IMAGE_HANDOFF.md",
+      "sha256": "7268bfa309e549ab15ea321d5c4de1f8913637fbb197a64c23965af83c59c176"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/NormalTangentMirrorCheckerTests.cs",
+      "sha256": "d2c223d9da5c17587d7f1824ed1323082546e2e0773f581e9b1eea572355c2de"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/NormalTangentMirrorFixtureProbe.cs",
+      "sha256": "6289fcb1cd5a010f1f1183c09962334ae8ac133bf6ba310bd1492ddf8ebe7420"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/NormalTangentMirrorGpuProbe.cs",
+      "sha256": "ad5a5a2f203142e6e395c1799b40f2f4c5b03ada49915a8e48d5ae628162c5d6"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/NormalTangentMirrorImageProbe.cs",
+      "sha256": "31fc6e8c66a0d528f3ea0c0200352d0acd0be151c7f0d3a13b44779cd4fdfac3"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/NormalTangentMirrorReference.cs",
+      "sha256": "1b23aa17c88ab31d6c55ca7e7db11c542f217c4b89828183478bdcf6975eb662"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/NormalTangentMirrorTests.cs",
+      "sha256": "b652c1673c64f8d9674a712c6181d9045ee959c3a950fc9023159f8a8527e5cf"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/asymmetric-baked-normal-reference.gltf",
+      "sha256": "80e0dc7470d11472433e96fd7d21224842dc3d3d8a2e3444956a8eeed32eaeda"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/asymmetric-normal-uv-fixture.gltf",
+      "sha256": "9fcabb44c8471390ca4b9bb6c29e173d7fe525e827f5bdfdc8085f8dc62d023e"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/asymmetric-normal-uv-reference.json",
+      "sha256": "1db39b0cd4dbae38d66651bd1072a3169d5e73a307a09d23343071a938e7bd67"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/author_normal_fixture.py",
+      "sha256": "3b774b329cb5eb4e9a899eef77a9a06807df28a39d170dff5d28debb72b73788"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/author_normal_graph.py",
+      "sha256": "d3b9273a47dad703b1405b139c9352703a14fe7f0ffb934b81199aa740488776"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/author_reference.py",
+      "sha256": "5011e08b06f1672ce21006d6f3107b619f213b8cfdebbc345e6386a57774e570"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/reference.json",
+      "sha256": "d4f3ef4f73ff38b96d1f87fe6f55fcc376c79060e75de0bb98c8635241e8161e"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/surface_normal_candidate.shdrgrph",
+      "sha256": "1cfa3b27287eda715af3d316fc3cc67efd187fcf106c2da2a473156e78ab566e"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/test_normal_fixture.py",
+      "sha256": "fc5533066cbb2e811539dbef891c0872bc10ac45649f34ab6b0939a6c8957c9d"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/test_normal_graph.py",
+      "sha256": "85676011850c0a4a8c7b51e25b8e3cefc5c9aedb60a19616fc966f73dd30f85e"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/NormalTangentMirrorTest/test_source_oracle.py",
+      "sha256": "834278bf4467f01a186273a775676ec80918f79a29604cef13456da79059fbfd"
+    }
+  ],
+  "producer_dependencies": [
+    "actual loaded Sandbox.Gltf reader/compiler/upload",
+    "actual loaded Sandbox.Engine internal GltfGpu backend and GltfMaterialUvPlan",
+    "Sandbox.Test.Unit friend helper; internal classes with public reflection methods"
+  ],
+  "shared_backend_contract": "CONTRACT.md; no shared edits",
+  "entries": [
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.NormalTangentMirrorValidation.NormalTangentMirrorTests.RunAll",
+      "args": [
+        "checkoutRoot"
+      ],
+      "expected_cases": 24,
+      "scope": "CPU/data/staging"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.NormalTangentMirrorValidation.NormalTangentMirrorCheckerTests.RunAll",
+      "args": [
+        "checkoutRoot"
+      ],
+      "expected_cases": 10,
+      "scope": "synthetic acceptance-checker controls, not GPU"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.NormalTangentMirrorValidation.NormalTangentMirrorGpuProbe.Run",
+      "args": [
+        "checkoutRoot",
+        "SceneWorld",
+        "compute Material",
+        "Func<Task> frameWait",
+        "optional diagnostic resolver"
+      ],
+      "expected_cases": 16,
+      "scope": "actual bound GPU output/index readback; image/material separate"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.NormalTangentMirrorValidation.NormalTangentMirrorImageProbe.Run",
+      "expected_cases": 16,
+      "scope": "native images of actual GPU frame vs independent raw source; shared material not material-equation proof"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.NormalTangentMirrorValidation.NormalTangentMirrorFixtureProbe.Run",
+      "expected_cases": 4,
+      "scope": "native material normal-debug images actual asymmetric normal/UV fixture vs independent baked normals with no normal texture; wrongV and empty/deletes"
+    }
+  ],
+  "forms": [
+    "glTF/source",
+    "glTF/compiled_glb_c",
+    "glTF-Binary/source",
+    "glTF-Binary/compiled_glb_c",
+    "derived_normal_scale_transform/source CPU only",
+    "derived_normal_scale_transform/compiled_glb_c CPU only"
+  ],
+  "acceptance": "Every raw/source attribute, supplied W populations, double cofactor affine frame oracle; source/compiled forms; 10 checker controls. GPU P<=.001 inch,N/T<=.00002,B<=.00004,UV/W/indices exact. Actual materials unsupported; normal graph contribution pending generation/GPU.",
+  "execution_needs": "coordinator helper compile/CPU run first; no current editor work while user playing. Graph uses actual provided compiler with future normal role contract; source material rejects normals/doubleSided until proven. Image probes require support and native coordinator capture.",
+  "previous_submission_sha256": "edb24209bc034fc68967ac429b9b54535b4c9e08934f4105bc56122a702752af"
+}

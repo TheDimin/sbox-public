@@ -1,0 +1,66 @@
+{
+  "purpose": "Independent literal test data, not a replacement model or public screenshot",
+  "rgba8": [
+    128,
+    64,
+    192,
+    64
+  ],
+  "linear_rgb": [
+    0.21586050011389926,
+    0.05126945837404324,
+    0.5271151257058131
+  ],
+  "linear_alpha": 0.25098039215686274,
+  "factor": 0.5,
+  "color_factor": [
+    0.5,
+    0.75,
+    0.25
+  ],
+  "expected_strength": 0.12549019607843137,
+  "expected_color": [
+    0.10793025005694963,
+    0.03845209378053243,
+    0.13177878142645327
+  ],
+  "wrong_linear_rgb": [
+    0.5019607843137255,
+    0.25098039215686274,
+    0.7529411764705882
+  ],
+  "plane_normal_source": [
+    0,
+    0,
+    1
+  ],
+  "plane_normal_engine": [
+    1,
+    0,
+    0
+  ],
+  "equal_radius_60_degree_lambert_fresnel_ratio": 0.4999784184671149,
+  "native_roughness_exponent_negative_ratio": 0.6597539553864471,
+  "seven_uv_fixture": {
+    "sha256": "3afdc9e602ed95f007e26b053905b7382bb76828c53862904c75f47f0d15f549",
+    "strength_texcoord": 41,
+    "color_texcoord": 49,
+    "strength_format": "USHORT normalized,byteOffset4,byteStride8",
+    "color_format": "FLOAT,byteOffset4,byteStride12",
+    "strength_sampling": "nearest,repeat U;transform offset(1,0),scale(.5,1)",
+    "color_sampling": "nearest,mirror U;transform offset(-1,0),scale(.5,1)",
+    "expected_strength": 0.03137254901960784,
+    "expected_color": [
+      0.10793025005694963,
+      0.3953363442793598,
+      0.01281736459351081
+    ],
+    "authored_tangent_source": [
+      1,
+      0,
+      0,
+      1
+    ],
+    "applicability": "All TEXCOORD_0..49 declared contiguously; seven nonconsecutive consumed sets projected to seven shader slots"
+  }
+}

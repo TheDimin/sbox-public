@@ -1,0 +1,381 @@
+{
+  "corpusCommit": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "license": "CC-BY-4.0",
+  "credit": "Eric Chadwick; Copyright 2023 Wayfair, LLC",
+  "variants": [
+    {
+      "variant": "glTF",
+      "file": "AnisotropyBarnLamp.gltf",
+      "sha256": "a9cd85ee50b263cee9a8bd5436cb2af1bb0759d6c20e24c1d698b2ad9743dffc",
+      "primitives": [
+        {
+          "material": 0,
+          "streams": {
+            "POSITION": {
+              "count": 6803,
+              "components": 3,
+              "componentType": 5126,
+              "sha256": "403be4433c0556345a638a432b2e5eb1276b9b02134365f7c57295813cfa5c56"
+            },
+            "TANGENT": {
+              "count": 6803,
+              "components": 4,
+              "componentType": 5126,
+              "sha256": "29053fe084b805b4a6329d2628c50d4e867f28fb10d66315bb2edd1ca0c5214c"
+            },
+            "NORMAL": {
+              "count": 6803,
+              "components": 3,
+              "componentType": 5126,
+              "sha256": "1148981f56ae1522e6f1f00f82badc95a6bfdf8d9bd810edcdd3ddab77caeba5"
+            },
+            "TEXCOORD_0": {
+              "count": 6803,
+              "components": 2,
+              "componentType": 5126,
+              "sha256": "6291055cfd9e31c6212958118c039e731a1b4cc9b7fb3aa74a3e149a16352059"
+            },
+            "INDICES": {
+              "count": 25257,
+              "components": 1,
+              "componentType": 5123,
+              "sha256": "1a080e52fbb329ff6b0ec9cacce3aa940620d62838922524330cbfd809a957d0"
+            }
+          }
+        },
+        {
+          "material": 1,
+          "streams": {
+            "POSITION": {
+              "count": 140,
+              "components": 3,
+              "componentType": 5126,
+              "sha256": "f67ad8247ee02ed1dc7f9b51934717b6c369cb35886a37eb159db64eed4e4e61"
+            },
+            "NORMAL": {
+              "count": 140,
+              "components": 3,
+              "componentType": 5126,
+              "sha256": "a1851f5ce78abdbe8498c9e07c6db21cf58da12e5cf6e08570a08b0835d308f4"
+            },
+            "INDICES": {
+              "count": 840,
+              "components": 1,
+              "componentType": 5123,
+              "sha256": "57f31288c9c57c06f8cd8265c770d87eb4cd569794e12a9fe7c688a197855e06"
+            }
+          }
+        },
+        {
+          "material": 2,
+          "streams": {
+            "POSITION": {
+              "count": 769,
+              "components": 3,
+              "componentType": 5126,
+              "sha256": "59a1f282c0369040e5fb30e3bdbf5bb6570ea627c3dadaa46fc662bade277da5"
+            },
+            "NORMAL": {
+              "count": 769,
+              "components": 3,
+              "componentType": 5126,
+              "sha256": "82674e39bf53590d36a160282fbe40f6a0f04fb2eea3fb7b33f7b8c7df19d0f5"
+            },
+            "INDICES": {
+              "count": 4512,
+              "components": 1,
+              "componentType": 5123,
+              "sha256": "dea71a2028ab39859b2bfdf51c809f598f1f385c26aaf027583013b53eba6c39"
+            }
+          }
+        }
+      ],
+      "images": [
+        {
+          "sha256": "30749a9c852e8179164678e315657f5da37e60e4915f6000fb9dca8f42fd10c7",
+          "length": 177708,
+          "mimeType": "image/png"
+        },
+        {
+          "sha256": "b70aef816e86ec7c2867e7babbaa94d818d9fd587dd2fcd447fc8af0a8055577",
+          "length": 2369841,
+          "mimeType": "image/png"
+        },
+        {
+          "sha256": "3827208d4de41289a1f698b0153778b14e713b00dd05ba3c5be55f2e19c5a264",
+          "length": 3634673,
+          "mimeType": "image/png"
+        },
+        {
+          "sha256": "a6984933a23e9b01be337e22944abd332300c3f87a0db7debf2d96dd067cb393",
+          "length": 1237273,
+          "mimeType": "image/png"
+        }
+      ]
+    },
+    {
+      "variant": "glTF-Binary",
+      "file": "AnisotropyBarnLamp.glb",
+      "sha256": "0e728826c30bd6f3a18a0911db9f5f9ddc2dafa8e20bf9c3312c9625d1e32a24",
+      "primitives": [
+        {
+          "material": 0,
+          "streams": {
+            "POSITION": {
+              "count": 6803,
+              "components": 3,
+              "componentType": 5126,
+              "sha256": "403be4433c0556345a638a432b2e5eb1276b9b02134365f7c57295813cfa5c56"
+            },
+            "TANGENT": {
+              "count": 6803,
+              "components": 4,
+              "componentType": 5126,
+              "sha256": "29053fe084b805b4a6329d2628c50d4e867f28fb10d66315bb2edd1ca0c5214c"
+            },
+            "NORMAL": {
+              "count": 6803,
+              "components": 3,
+              "componentType": 5126,
+              "sha256": "1148981f56ae1522e6f1f00f82badc95a6bfdf8d9bd810edcdd3ddab77caeba5"
+            },
+            "TEXCOORD_0": {
+              "count": 6803,
+              "components": 2,
+              "componentType": 5126,
+              "sha256": "6291055cfd9e31c6212958118c039e731a1b4cc9b7fb3aa74a3e149a16352059"
+            },
+            "INDICES": {
+              "count": 25257,
+              "components": 1,
+              "componentType": 5123,
+              "sha256": "1a080e52fbb329ff6b0ec9cacce3aa940620d62838922524330cbfd809a957d0"
+            }
+          }
+        },
+        {
+          "material": 1,
+          "streams": {
+            "POSITION": {
+              "count": 140,
+              "components": 3,
+              "componentType": 5126,
+              "sha256": "f67ad8247ee02ed1dc7f9b51934717b6c369cb35886a37eb159db64eed4e4e61"
+            },
+            "NORMAL": {
+              "count": 140,
+              "components": 3,
+              "componentType": 5126,
+              "sha256": "a1851f5ce78abdbe8498c9e07c6db21cf58da12e5cf6e08570a08b0835d308f4"
+            },
+            "INDICES": {
+              "count": 840,
+              "components": 1,
+              "componentType": 5123,
+              "sha256": "57f31288c9c57c06f8cd8265c770d87eb4cd569794e12a9fe7c688a197855e06"
+            }
+          }
+        },
+        {
+          "material": 2,
+          "streams": {
+            "POSITION": {
+              "count": 769,
+              "components": 3,
+              "componentType": 5126,
+              "sha256": "59a1f282c0369040e5fb30e3bdbf5bb6570ea627c3dadaa46fc662bade277da5"
+            },
+            "NORMAL": {
+              "count": 769,
+              "components": 3,
+              "componentType": 5126,
+              "sha256": "82674e39bf53590d36a160282fbe40f6a0f04fb2eea3fb7b33f7b8c7df19d0f5"
+            },
+            "INDICES": {
+              "count": 4512,
+              "components": 1,
+              "componentType": 5123,
+              "sha256": "dea71a2028ab39859b2bfdf51c809f598f1f385c26aaf027583013b53eba6c39"
+            }
+          }
+        }
+      ],
+      "images": [
+        {
+          "sha256": "30749a9c852e8179164678e315657f5da37e60e4915f6000fb9dca8f42fd10c7",
+          "length": 177708,
+          "mimeType": "image/png"
+        },
+        {
+          "sha256": "b70aef816e86ec7c2867e7babbaa94d818d9fd587dd2fcd447fc8af0a8055577",
+          "length": 2369841,
+          "mimeType": "image/png"
+        },
+        {
+          "sha256": "3827208d4de41289a1f698b0153778b14e713b00dd05ba3c5be55f2e19c5a264",
+          "length": 3634673,
+          "mimeType": "image/png"
+        },
+        {
+          "sha256": "a6984933a23e9b01be337e22944abd332300c3f87a0db7debf2d96dd067cb393",
+          "length": 1237273,
+          "mimeType": "image/png"
+        }
+      ]
+    },
+    {
+      "variant": "glTF-KTX-BasisU",
+      "file": "AnisotropyBarnLamp.gltf",
+      "sha256": "71a528dfc329c6df9f3651d2fdbaf4ea5ee5e8dab668596f126bc7c2425c4543",
+      "primitives": [
+        {
+          "material": 0,
+          "streams": {
+            "POSITION": {
+              "count": 6803,
+              "components": 3,
+              "componentType": 5126,
+              "sha256": "403be4433c0556345a638a432b2e5eb1276b9b02134365f7c57295813cfa5c56"
+            },
+            "TANGENT": {
+              "count": 6803,
+              "components": 4,
+              "componentType": 5126,
+              "sha256": "29053fe084b805b4a6329d2628c50d4e867f28fb10d66315bb2edd1ca0c5214c"
+            },
+            "NORMAL": {
+              "count": 6803,
+              "components": 3,
+              "componentType": 5126,
+              "sha256": "1148981f56ae1522e6f1f00f82badc95a6bfdf8d9bd810edcdd3ddab77caeba5"
+            },
+            "TEXCOORD_0": {
+              "count": 6803,
+              "components": 2,
+              "componentType": 5126,
+              "sha256": "6291055cfd9e31c6212958118c039e731a1b4cc9b7fb3aa74a3e149a16352059"
+            },
+            "INDICES": {
+              "count": 25257,
+              "components": 1,
+              "componentType": 5123,
+              "sha256": "1a080e52fbb329ff6b0ec9cacce3aa940620d62838922524330cbfd809a957d0"
+            }
+          }
+        },
+        {
+          "material": 1,
+          "streams": {
+            "POSITION": {
+              "count": 140,
+              "components": 3,
+              "componentType": 5126,
+              "sha256": "f67ad8247ee02ed1dc7f9b51934717b6c369cb35886a37eb159db64eed4e4e61"
+            },
+            "NORMAL": {
+              "count": 140,
+              "components": 3,
+              "componentType": 5126,
+              "sha256": "a1851f5ce78abdbe8498c9e07c6db21cf58da12e5cf6e08570a08b0835d308f4"
+            },
+            "INDICES": {
+              "count": 840,
+              "components": 1,
+              "componentType": 5123,
+              "sha256": "57f31288c9c57c06f8cd8265c770d87eb4cd569794e12a9fe7c688a197855e06"
+            }
+          }
+        },
+        {
+          "material": 2,
+          "streams": {
+            "POSITION": {
+              "count": 769,
+              "components": 3,
+              "componentType": 5126,
+              "sha256": "59a1f282c0369040e5fb30e3bdbf5bb6570ea627c3dadaa46fc662bade277da5"
+            },
+            "NORMAL": {
+              "count": 769,
+              "components": 3,
+              "componentType": 5126,
+              "sha256": "82674e39bf53590d36a160282fbe40f6a0f04fb2eea3fb7b33f7b8c7df19d0f5"
+            },
+            "INDICES": {
+              "count": 4512,
+              "components": 1,
+              "componentType": 5123,
+              "sha256": "dea71a2028ab39859b2bfdf51c809f598f1f385c26aaf027583013b53eba6c39"
+            }
+          }
+        }
+      ],
+      "images": [
+        {
+          "sha256": "c04db9be21ca5f2d57c86854b9608c240e13b47e7d7329b696b62a79b262f839",
+          "length": 91214,
+          "mimeType": "image/ktx2",
+          "ktx": {
+            "width": 2048,
+            "height": 2048,
+            "levels": 1,
+            "supercompression": 2,
+            "dfdSha256": "882667f21199708b1de55fdfed8f2756914cd464206a59a22fd1a56b445eaa3b",
+            "kvdSha256": "187bd89859b5014e558dd01a1772820a05fcdd2812941324d3743286634e4d2e",
+            "colorModel": 166,
+            "primaries": 1,
+            "transfer": 1
+          }
+        },
+        {
+          "sha256": "73a1ba6dfa0fbf1b1edc158b119623acbff894d62ce5ac3edaa20bedfe812383",
+          "length": 1572895,
+          "mimeType": "image/ktx2",
+          "ktx": {
+            "width": 2048,
+            "height": 2048,
+            "levels": 1,
+            "supercompression": 2,
+            "dfdSha256": "882667f21199708b1de55fdfed8f2756914cd464206a59a22fd1a56b445eaa3b",
+            "kvdSha256": "187bd89859b5014e558dd01a1772820a05fcdd2812941324d3743286634e4d2e",
+            "colorModel": 166,
+            "primaries": 1,
+            "transfer": 1
+          }
+        },
+        {
+          "sha256": "9887c98d487f2415f9221f37c14f185edfded7c9438e83ce75a753ae27a4ae53",
+          "length": 2127072,
+          "mimeType": "image/ktx2",
+          "ktx": {
+            "width": 2048,
+            "height": 2048,
+            "levels": 1,
+            "supercompression": 2,
+            "dfdSha256": "d8c1528f20ba52a35059c89ec8ced790d558220c321c1b07f7b6ec92b4c4cfcf",
+            "kvdSha256": "187bd89859b5014e558dd01a1772820a05fcdd2812941324d3743286634e4d2e",
+            "colorModel": 166,
+            "primaries": 1,
+            "transfer": 2
+          }
+        },
+        {
+          "sha256": "4f2ee6ad27b50eb1497c73369d42154234c23d06292d4163cb61c0e65a02c68a",
+          "length": 1017986,
+          "mimeType": "image/ktx2",
+          "ktx": {
+            "width": 2048,
+            "height": 2048,
+            "levels": 1,
+            "supercompression": 2,
+            "dfdSha256": "882667f21199708b1de55fdfed8f2756914cd464206a59a22fd1a56b445eaa3b",
+            "kvdSha256": "187bd89859b5014e558dd01a1772820a05fcdd2812941324d3743286634e4d2e",
+            "colorModel": 166,
+            "primaries": 1,
+            "transfer": 1
+          }
+        }
+      ]
+    }
+  ]
+}

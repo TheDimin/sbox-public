@@ -1,0 +1,30 @@
+{
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/Png16StreamRejectionTests.cs",
+      "sha256": "aa3459e501f637cab54f848c70d4411a224ef294b1222493ef7bd75f2decb02c"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/Png16GpuPrecisionNegativeControls.cs",
+      "sha256": "6109ab53d20e2d4e1b514cba8c1031878ac6a16dc07588da8afd3775f534d3b2"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/Png16BudgetBoundaryTests.cs",
+      "sha256": "38b91c6bf28b7d68c05dff977270bb30c459af7c53b2750f6ca6f21aeec340d4"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/invalid-stream-fixtures.json",
+      "sha256": "0c483d0c1bdd64faa5c435ee50ae98718d2149be0f0031c7db0500a73831cc84"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfTextureCompiler.cs",
+      "sha256": "c5ccf28e307dce7ef60e38a773ccfe8c85fa27cdd1147c81ca7eee0a0c4e150f"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfPng16Decoder.cs",
+      "sha256": "90e7c72dc16ac72d9f19e4e16e5e68ae97372265026d637b2b0d9ed073723041"
+    }
+  ]
+}

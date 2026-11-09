@@ -1,0 +1,113 @@
+{
+  "model": "TextureEncodingTest/source-ORM-integration",
+  "owner": "/root/gpu_texture_encoding",
+  "coordinator": "/root/gpu_validation",
+  "files": [
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfStockMaterialAdapter.cs",
+      "sha256": "4e096821eba13a2a079e9824d961883d1288b6d33eee19ee4905d936f9561b99"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfMaterialCache.cs",
+      "sha256": "d673de7478b1b479b03f03b6bf21e24d8d8f82c9077259a629ccf0e779b2d884"
+    },
+    {
+      "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfStockSourceMaterialTests.cs",
+      "sha256": "2faf70d549512bc98469ad4c7285b2c6195835869e833697eee72872cb1c1089"
+    },
+    {
+      "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfMaterialCacheFailureTests.cs",
+      "sha256": "bf48bde2be1e8aaa43239d0a10eef2eb3c764c10db7f8a016631a248a8e9c3f2"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/SourceOrmResourceTests.cs",
+      "sha256": "ca1080c4fdde092f66e55b5544adeeb75e9605cb25c4888e3182dc75d90568d1"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/SourceOrmTemplateBindingTests.cs",
+      "sha256": "328b2458d87a0b1d5a20c17c0fe49570686eb68cc5e60a76a9d1e9b9f8ee26d0"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/SurfaceOrmCandidateGate.cs",
+      "sha256": "57fef79b59a933c146c62d9460b2cd0fa9c893c234903e98c71017c206f17015"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedReference.cs",
+      "sha256": "c8c3c1a83ca0889ff9bb46b40106feca93d371bd520df5f6767331d89e78dcd8"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/PngTexelReference.cs",
+      "sha256": "9c9b6bc95031449befd2e6e169722eca2d676abe52e5a017b076ccfb4cb0c6f9"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/TextureEncodingReference.cs",
+      "sha256": "0d8e6d40bdc5fca76e8d604d281100a4b22e44dd2d1ed0e5aebdcc18335ba16b"
+    }
+  ],
+  "producer_files": [
+    "engine/Sandbox.Engine/Resources/Model/Gltf/GltfStockMaterialAdapter.cs",
+    "engine/Sandbox.Engine/Resources/Model/Gltf/GltfMaterialCache.cs"
+  ],
+  "producer_dependencies": [
+    "Actually loaded later-stage Engine containing explicit PrepareSource/AcquireSource and lower-cache exception preservation; never compile producer source into helper",
+    "Actually loaded canonical UV/encoding plan + general PNG/JPEG/KTX texture compiler",
+    "Reviewed actual generated provided Surface/Lit source + Tools MVID for native template cases; named typed sampler feature stage required"
+  ],
+  "expected_cases": 12,
+  "suites": [
+    {
+      "type": "Sandbox.Tests.GltfMaterialCacheFailureTests",
+      "expected_cases": 3,
+      "source_paths": [
+        "engine/Tests/Sandbox.Test.Unit/Resources/GltfMaterialCacheFailureTests.cs"
+      ],
+      "scope": "CPU fault-injection; can retain original loaded old-Engine red baseline before next-stage fix"
+    },
+    {
+      "type": "Sandbox.Tests.GltfStockSourceMaterialTests",
+      "expected_cases": 3,
+      "source_paths": [
+        "engine/Tests/Sandbox.Test.Unit/Resources/GltfStockSourceMaterialTests.cs"
+      ],
+      "scope": "CPU preparation; actual later-stage Engine required"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.SourceOrmResourceTests.RunAll",
+      "arguments": [],
+      "expected_cases": 4,
+      "source_paths": [
+        "research/gltf-validation/direct-gpu/models/TextureEncodingTest/SourceOrmResourceTests.cs",
+        "research/gltf-validation/direct-gpu/models/TextureEncodingTest/TextureEncodingReference.cs",
+        "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedReference.cs",
+        "research/gltf-validation/direct-gpu/models/BoxTextured/PngTexelReference.cs"
+      ],
+      "scope": "Independent direct RGBA8 resource payload/factor/mip/role-dedup checks; actual later-stage Engine required"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.SourceOrmTemplateBindingTests",
+      "setup": "Configure",
+      "setup_arguments": [
+        "$actual_generation_manifest_path",
+        "$actual_generation_manifest_sha256",
+        "$reviewed_source_sha256"
+      ],
+      "expected_cases": 2,
+      "source_paths": [
+        "research/gltf-validation/direct-gpu/models/TextureEncodingTest/SourceOrmTemplateBindingTests.cs",
+        "research/gltf-validation/direct-gpu/models/TextureEncodingTest/SurfaceOrmCandidateGate.cs"
+      ],
+      "scope": "Actual compiled template default texture GPU bytes + material uniform/cache/lease controls; no final shader/PBR sample claim"
+    }
+  ],
+  "baseline_evidence": {
+    "original_texture_core_28": "passed ca0c3292debc880375790d87e546d9a1c9a6999cd9ad2584d21960bd9e0612db",
+    "original_transfer_gpu_1": "shader grammar failure before samples, preserved; corrected e68b4f42 queued separately",
+    "cache_failure_3_red": "fee5 09d6ac599e15dddea81b0ef1b13024c25f1a846f222fee8f44424d9a40cfe914",
+    "cache_failure_3_green": "c5c0 2a00ccf3fb6374ce901d4029c614fbaf45e509dbe06cd6013a7a9fd2a02f768d",
+    "native_template_2_original_red": "c5c0 98e4f877ab989a58d1579b2636c27a137883c6c074e003046a443f9442d459c0; compile/create succeeded, GetTexture visibility failed before samples"
+  },
+  "status": "all12 new cases unrun; default Prepare/Acquire/white selection unchanged; next-stage producer required; user playing defers editor work",
+  "acceptance": "Exhaustive error-preserving rollback; invalid-created resources cannot leak or retire live peers. Source images remain RGBA8 and distinct color/data transfer, role samplers independent, image/transfer/mip dedup exact; factors never baked. Native absent-role defaults neutral white with authored metallic/roughness and zero emission; final source-ORM shader imagery remains separate pending gate.",
+  "previous_request_sha256": "bbb3ab317a6423a3dda61865c2068f53715eafcd28e5f6436fe474a85238a6dc",
+  "refreeze_reason": "Actual c5c0 d988 template compiled; original native binding2 introspection reds retained in98e4. Released test-only diagnostics record native schema+both lookup names+borrowed native white control before unchanged handle assertion; no producer/resource/shader edit."
+}

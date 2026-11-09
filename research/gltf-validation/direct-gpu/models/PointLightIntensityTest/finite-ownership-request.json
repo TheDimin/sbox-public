@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "engine_sha256": "041e2e0094b4f34539f236e323a0033a2d540f3b4f47efac31b38e4414e03330",
+  "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/PointLightIntensityTest/FinitePointFactoryCandidate.cs",
+      "sha256": "b5070ff135bf36ad209f272202b819f7d525d0f3bae36dc54f0bc2f4ba03394a"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/PointLightIntensityTest/FinitePointOwnershipTests.cs",
+      "sha256": "fe770eae8ef54a81727c69af8528c8e45133d8b4185411222f4c1323cca0c802"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.PointLightIntensityValidation.FinitePointOwnershipTests",
+      "kind": "mstest",
+      "expected_cases": 2,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ]
+}

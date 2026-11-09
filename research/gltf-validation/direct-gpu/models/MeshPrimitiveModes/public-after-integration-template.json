@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "engine_sha256": "REPLACE_WITH_VERIFIED_ENGINE_SHA256",
+  "gltf_sha256": "REPLACE_WITH_VERIFIED_GLTF_SHA256",
+  "tools_sha256": "REPLACE_WITH_VERIFIED_TOOLS_SHA256",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MeshPrimitiveModesReference.cs",
+      "sha256": "19fad7a82bc48f0a6a393edbe2fcf7f9e7a7bfea5da33ed9e823dc52ef982639"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/PublicPointLineMaterialTests.cs",
+      "sha256": "e738d493eeb9aba855213841d34892aab0e5dafc5c0042ac5062c5ee3fead9ac"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MixedSlotCombinedPublicTests.cs",
+      "sha256": "9444000a1583e9717a6a577acb2fba3d9368b4103537e137bdec99f28cc8599a"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MixedSlotTexturePublicTests.cs",
+      "sha256": "4ad18d37761c19e0fdc2fa9c53f8e9880c3c832c0f36d657ca0ebfdf741a9c7b"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MeshPrimitiveModesValidation.PublicPointLineMaterialTests",
+      "kind": "mstest",
+      "expected_cases": 2,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MeshPrimitiveModesValidation.MixedSlotCombinedPublicTests",
+      "kind": "mstest",
+      "expected_cases": 2,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MeshPrimitiveModesValidation.MixedSlotTexturePublicTests",
+      "kind": "mstest",
+      "expected_cases": 2,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ]
+}

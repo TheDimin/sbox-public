@@ -1,0 +1,88 @@
+{
+  "model": "TextureEncodingTest/stage485-absence-regression",
+  "owner": "/root/gpu_texture_encoding",
+  "coordinator": "/root/gpu_validation",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/SourceOrmEmissionGpuTests.cs",
+      "sha256": "698fbd9a0c5d29c5bded5d7385c8d4172216d229a0e04091073f1acc76f5f3bc"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/SurfaceOrmCandidateGate.cs",
+      "sha256": "5dd9b46f56543ebb43169b615ad206b751ba5bd455ac2b5db5d97ff71862b197"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/TextureEncodingReference.cs",
+      "sha256": "0d8e6d40bdc5fca76e8d604d281100a4b22e44dd2d1ed0e5aebdcc18335ba16b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedReference.cs",
+      "sha256": "c8c3c1a83ca0889ff9bb46b40106feca93d371bd520df5f6767331d89e78dcd8"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/PngTexelReference.cs",
+      "sha256": "9c9b6bc95031449befd2e6e169722eca2d676abe52e5a017b076ccfb4cb0c6f9"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestCoreTests.cs",
+      "sha256": "f8e894fb1b70a5fd87174b7b52e7567fc445d5a25ceeb6df74d16cce45b83283"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestGpuChecks.cs",
+      "sha256": "8b9084e38b34f83fe9abfdd09c99f5b3615bcc7c6f698b06a5f9ca94432327f9"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestImageChecks.cs",
+      "sha256": "ea580576180b9fff2d32d985d1d4966a469c85834a65c7f0035dd4492078f24d"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestLiteralGeometry.cs",
+      "sha256": "35d7af0f850dc89c6a59369e14610462fa45dae85180b8791797b9862c36128b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestReference.cs",
+      "sha256": "5ecbd8a1f577b7b62865a283f70a939553ec4fa9a1dc6bc9d23e0661a6511204"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestGraphCandidateGate.cs",
+      "sha256": "1aaaf26476052d5d1a4523fbb097a2c2dc3364618cef5942309282a7f6b2e292"
+    }
+  ],
+  "data_files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/source-orm-emission-stage485-config.json",
+      "sha256": "58c63a78dd8bdb6aa747300626ab3c82c15e11aac5ce7c399c699b4072ffe9f5"
+    }
+  ],
+  "producer_dependencies": [
+    "Actual stage485 Engine4181538e-896c-467c-966f-c8fcbf4f3282 and Gltfdf511f06-1c72-424c-a957-16a3fda208f6; real installed adapter642886c5, no replacement producer",
+    "Actual current Toolsd7a9163f-8542-45c9-b8d3-b453802fd8f5 generated and reviewed Lit6648ccfa (67nodes), independently regenerated Unlit literalbf7fb12b byte-identical reviewed route",
+    "Existing unchanged Unlit CandidateCapture1aaaf264 borrowed for native presentation; no copied renderer"
+  ],
+  "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.SourceOrmEmissionGpuTests",
+  "kind": "mstest",
+  "expected_cases": 1,
+  "setup": [
+    {
+      "kind": "method",
+      "name": "Configure",
+      "arguments": [
+        "/home/damian/projects/sbox-public",
+        "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureEncodingTest/source-orm-emission-stage485-config.json"
+      ]
+    }
+  ],
+  "method_inventory": [
+    "ReviewedLitShaderSamplesDefaultAndSourceEmissionAgainstIndependentLiteralRgb"
+  ],
+  "measurements_property": "Measurements",
+  "model_form_measurements": 8,
+  "scope": "Actual explicit source-template emission and omitted-emissive-texture default sampling on raw GPU triangle. Factor-only plus three exact pinned PNG profiles, source-derived and portable compiled minimal fixtures. No full PBR, source whole-model, Model.Load, alpha/normal or production default switch claim.",
+  "acceptance": "Separately generated Unlit raw FLOAT32 literal vertex-RGB reference, no source factor uniform/texture. Eroded expected interior >=64 pixels, mean RGB <=1 byte, max <=3 bytes, coverage IoU>=.99. Empty-before/deleted-empty and retired callback controls. Wrong encoded-space green reference must differ >8 mean or max bytes. All eight image comparisons retained before parity assertions. Original GetTexture introspection failures remain unchanged; no fallback textures created.",
+  "execution_needs": "Coordinator-only guarded idle native visible capture, helper and two anonymous shaders. Hash-gated reviewed generation manifests and source; no graph re-generation or production edits.",
+  "status": "frozen/ready for coordinator execution; current emitted conditional review and actual presence12 passed, images unrun",
+  "supersedes_prepared_request_sha256": "357d687bfd6367987fc1d3489305fc92fd2261610eda698db5c372c22ad1e8f7",
+  "receipt_change": "Same emission helper698f, expectations/thresholds/controls. Current-stage graph/Gate and current-Tools literal provenance; fresh config/output, preserving historical52ba/proof01/abd553 red.",
+  "retained_red_receipt_sha256": "abd55378afb65e4263454cf010a286927bdfa04561ca91c31ba8fbc206b38712",
+  "prerequisite_actual_presence_receipt_sha256": "e493fcdc57f219f5dd313142bf11b95bacb68a31ab8ffc767a7ce32e4880e4fa"
+}

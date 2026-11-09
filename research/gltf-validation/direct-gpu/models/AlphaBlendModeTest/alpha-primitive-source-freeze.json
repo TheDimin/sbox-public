@@ -1,0 +1,19 @@
+{
+  "scope": "alpha and primitive combined source prior to integration-owned shader install/build; not loaded",
+  "files": {
+    "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs": "6ea746ef42adc94dca8eae980c0505346448a28bc374ed82f5c5386e02743839",
+    "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuInstance.Variants.cs": "ca590063837d5be75b3c317176f147dc92c6e4f230f19668b92bf95ca0f6bf11",
+    "engine/Sandbox.Engine/Systems/SceneSystem/SceneObject.cs": "d36c651d2ec3e401995db2dd5f57acae8e27bc8f73567465dddc6496feefc40b",
+    "engine/Sandbox.Engine/Systems/SceneSystem/SceneObject.Callbacks.cs": "e3646330e06fe2e5bc27249558827877c4bfee1ba681b894901123d079460496",
+    "engine/Sandbox.Engine/Systems/Render/Graphics.Draw.cs": "32f03868887aa3802d99064057304355f1b38667da057a0529e3b4ab1779662b",
+    "engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.cs": "f5e43675880c3425fbb6417399e7aa817576ec2b3e3ac8ed5131059d9cfa06ec",
+    "engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.Gltf.cs": "37cdce9105a632925fe7c5db0e8d492463da502a4e1c28e16b1e58391b99172d",
+    "engine/Sandbox.Engine/Resources/Model/Gltf/GltfPublicMaterialRoute.cs": "58880c3ec51b4d8572f3198fd0e5bb6d65e9165686b3cb0b2764518c8982fc06",
+    "engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs": "bdc156b27532ffdf0469ae7743fb21d4dbb61f6bd136c9b45f689910ffbbae71",
+    "engine/Sandbox.Engine/Resources/Model/Gltf/GltfStockMaterialAdapter.cs": "6054bc097a580ac6f4df88b3ef30393641fa24fe73071c2b9de02a6b70cef33b"
+  },
+  "overlap": "GltfGpuBackend includes Primitive per-draw attribute insertion after alpha stage",
+  "test_dispatch_sha256": "dd14aa6632b7edc5cfee9a4170c2d3dc3f307760b92b9791ff91d522e1e2e97a",
+  "public_cross_dispatch_sha256": "a0398f531294e607e1ac95bf19a5e62fdbb6be5f95813fd4c92f209820cddfc8",
+  "canonical_public_dispatch_sha256": "03afbda0be33faadac8d31572611f635587567918fdece257369d3ac88efbca8"
+}

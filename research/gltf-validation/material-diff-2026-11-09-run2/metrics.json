@@ -1,0 +1,119 @@
+{
+ "AnimationPointerUVs/glTF-Binary": {
+  "size": [
+   512,
+   273
+  ],
+  "foregroundPct": 98.4,
+  "maeForeground": 0.2496,
+  "maeForegroundPerChannel": [
+   0.21,
+   0.2326,
+   0.3063
+  ],
+  "linearLumaRatio_capture_over_reference": 0.374,
+  "silhouetteIoU": 0.394,
+  "reference": {
+   "meanRGB": [
+    0.5017,
+    0.5306,
+    0.5199
+   ],
+   "meanLuma": 0.5237,
+   "p95Luma": 0.9179,
+   "stdLuma": 0.2026,
+   "clippedPct": 0.16,
+   "saturation": 0.0483
+  },
+  "capture": {
+   "meanRGB": [
+    0.3097,
+    0.3105,
+    0.2265
+   ],
+   "meanLuma": 0.3042,
+   "p95Luma": 0.7255,
+   "stdLuma": 0.1687,
+   "clippedPct": 0.0,
+   "saturation": 0.1173
+  }
+ },
+ "BoxVertexColors/glTF-Binary": {
+  "size": [
+   512,
+   512
+  ],
+  "foregroundPct": 90.1,
+  "maeForeground": 0.174,
+  "maeForegroundPerChannel": [
+   0.1602,
+   0.1581,
+   0.2037
+  ],
+  "linearLumaRatio_capture_over_reference": 0.501,
+  "silhouetteIoU": 0.652,
+  "reference": {
+   "meanRGB": [
+    0.5009,
+    0.4892,
+    0.5161
+   ],
+   "meanLuma": 0.4936,
+   "p95Luma": 0.59,
+   "stdLuma": 0.1082,
+   "clippedPct": 0.0,
+   "saturation": 0.1522
+  },
+  "capture": {
+   "meanRGB": [
+    0.358,
+    0.3396,
+    0.327
+   ],
+   "meanLuma": 0.3426,
+   "p95Luma": 0.5665,
+   "stdLuma": 0.1195,
+   "clippedPct": 0.0,
+   "saturation": 0.1393
+  }
+ },
+ "Avocado/glTF-Binary": {
+  "size": [
+   512,
+   512
+  ],
+  "foregroundPct": 96.9,
+  "maeForeground": 0.2301,
+  "maeForegroundPerChannel": [
+   0.1896,
+   0.2187,
+   0.282
+  ],
+  "linearLumaRatio_capture_over_reference": 0.469,
+  "silhouetteIoU": 0.683,
+  "reference": {
+   "meanRGB": [
+    0.5506,
+    0.5644,
+    0.5077
+   ],
+   "meanLuma": 0.5574,
+   "p95Luma": 0.6372,
+   "stdLuma": 0.0682,
+   "clippedPct": 0.0,
+   "saturation": 0.0817
+  },
+  "capture": {
+   "meanRGB": [
+    0.3786,
+    0.3631,
+    0.2426
+   ],
+   "meanLuma": 0.3577,
+   "p95Luma": 0.7149,
+   "stdLuma": 0.146,
+   "clippedPct": 0.0,
+   "saturation": 0.1559
+  }
+ }
+}

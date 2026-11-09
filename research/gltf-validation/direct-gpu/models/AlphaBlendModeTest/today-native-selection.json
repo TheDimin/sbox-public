@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "engine_sha256": "ad6a78a7e4f2664fe1f74b1567dde6d15d1519ad78dbd1e21efbb21ebfa2ebd1",
+  "gltf_sha256": "b86cb72e0c0e0f3c23af45bd115f68760655d1754d663f41df62a45e136f9e8b",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "tools_sha256": "539c10536c6df8a769eb4f91488ebfe9a048fdf1bd7cd589d0383479b2641b4d",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaNativePassExecutionTests.cs",
+      "sha256": "97629992baa5c003933e0a9bdef2591bae760a74958e662a7098b26e7d7c1349"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaNativePassProbe.cs",
+      "sha256": "b43e0382489e16167986547bc1d0028802223b94a91a43ff29835d478620fe9f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaMaterialRoutingProbe.cs",
+      "sha256": "63d894c1ba079958345631d7858c650a587fa6baa94546b3491020af94b306fa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaControlFixtures.cs",
+      "sha256": "07b5c4ed3e67354fd156d252940a947545e2472dd4b70d833741abf2dc80080b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaMixedPassProbe.cs",
+      "sha256": "0117e493b53b92cf656024a3a0d95ce8d23d8900d433e8e5eeba466dd847ae33"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaNativePassExecutionTests",
+      "kind": "mstest",
+      "expected_cases": 4,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout",
+            "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02",
+            "shaders/gltf_deform_cs.shader"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ]
+}

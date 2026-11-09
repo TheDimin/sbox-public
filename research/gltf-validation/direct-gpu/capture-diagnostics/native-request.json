@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "engine_sha256": "60bc2b51bbd70c40a000f8b29f420714aff4e3dbda723794b18fdfc43b571396",
+  "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/capture-diagnostics/GltfGpuTriangleGateTests.cs",
+      "sha256": "df236e10d08f44c61e663c426a0f2cea564e0a430b2e2299a059c92ce18e98e1"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/capture-diagnostics/CaptureShaderBatch.cs",
+      "sha256": "fd4ea4e454afd796d731a46fbb3ec9448ab83bd6c33a0c24d440f355e934f051"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/capture-diagnostics/RemainingControlsBatch.cs",
+      "sha256": "c2dd7f739b52b8d4cc8726c2f1771db72f8ea03b03a61f66138cdfdddb83db00"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/capture-diagnostics/MergedDrawAttributeTests.cs",
+      "sha256": "560bc5fb6aa12c598c8b4720a5879c1b065bd13c0d4cc2ca6cfde076649323a9"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/capture-diagnostics/MergedLineBlendTests.cs",
+      "sha256": "d2df9d9d481cc5fe03efeace345052783791ec1bcc6eef2be4f2b4c51565c086"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MeshPrimitiveModesReference.cs",
+      "sha256": "19fad7a82bc48f0a6a393edbe2fcf7f9e7a7bfea5da33ed9e823dc52ef982639"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MeshPrimitiveModesValidation.RemainingControlsBatch",
+      "kind": "static_results",
+      "method": "Run",
+      "arguments": [
+        "$checkout",
+        "$cancellationToken"
+      ],
+      "expected_cases": 2,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "JournalPath",
+          "arguments": [
+            "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/capture-diagnostics/journal-5d94830b1752438495c57694a48bfe15.json"
+          ]
+        }
+      ]
+    }
+  ]
+}

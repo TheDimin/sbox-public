@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "model": "ABeautifulGame",
+  "owner": "/root/model_beautiful_game",
+  "status": "reference-inspired-candidate-for-review-optics-incomplete",
+  "visualApproval": "pending",
+  "addressedFeedback": {
+    "caseId": "ABeautifulGame/glTF::canonical-compiled",
+    "fingerprint": "7c78a36664eb81e78a61e35e27d666b8321606c6e66979c8d7dba373f6f30ef8",
+    "status": "rejected",
+    "notes": "material,camera,lighting don\u2019t match yet. For this model focus on getting the visual to be a 90% match before it will be accepted"
+  },
+  "preserveHistoricalRejection": true,
+  "currentNative": {
+    "producerSession": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/beautiful-e05-reference-proof/producer-session-ready.json",
+      "sha256": "7fb4260130bdf57097ec2e0b74d089b178bb7d11c1703c37d29b734e9152bbf3"
+    },
+    "receipt": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/beautiful-e05-reference-framing-convergence/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "05eb573ba9a4bd045d53cab65f595cfee59b69c485203b77a995c99d1ffe90d0"
+    },
+    "sourceAudit": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/beautiful-e05-reference-framing-convergence/model-source-audit.json",
+      "sha256": "9092a04b4e99bbf089e0250b08bc15652dd5c8d2e2c8d43cb2059e33333670c5"
+    },
+    "request": {
+      "path": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/ABeautifulGame/reference-framing-convergence-request.json",
+      "sha256": "bef5126a91b06cd63c7e1ac3659e4483e0bb9a3171147cb5f829303388170072"
+    },
+    "canonicalCompiled": {
+      "proposedComparisonId": "ABeautifulGame/glTF::canonical-compiled",
+      "inputSha256": "aa0e45833d5d39e5c9a81658d19588ce91d88356509bfb9755dce88599eeca33",
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/ABeautifulGame/reference-framing-convergence/dad0d48260184bce961b963269477fc6/fitted_candidate.png",
+        "sha256": "73380a7b952ba93ac4a74ac0ee81efae4eedd610560be5cf5fdb8e8fc316eece"
+      }
+    },
+    "reference": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/screenshot/screenshot.jpg",
+      "sha256": "03da38faeddee145e21a9e2f539f5879c725db7b8ebdf730d6d77345111d4baf"
+    },
+    "referenceProvenance": {
+      "path": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/ABeautifulGame/reference-crop-evidence.json",
+      "sha256": "abb8475a82bb42e40c0067859cf3ec83a56534283c2c4a9da5c47df657c0d922"
+    },
+    "testCounts": {
+      "passed": 1,
+      "expected": 1,
+      "cleanupErrors": 0
+    },
+    "controls": {
+      "environmentChangedForegroundPixels": 384546,
+      "plus2EvChangedForegroundPixels": 384466,
+      "deletion": "scene object invalid, drawing stopped, independently uniform background"
+    },
+    "priorLightingProofReceipt": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/beautiful-e05-reference-proof/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "1035a45799b58fee58928fa665bd9ecd0ddb341d4a910c885986e4481389b336"
+    },
+    "cameraProjectionReceipt": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/beautiful-e05-reference-framing/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "28b67c2e1a6777b7d9b84d41ef2d129cac04076609d0bb1074a41402af51b066"
+    },
+    "convergence": {
+      "renderCount": 17,
+      "luma8bit": [
+        95.328,
+        135.302,
+        151.26,
+        154.824,
+        155.557,
+        155.78
+      ],
+      "sampledRenderNumbers": [
+        1,
+        4,
+        8,
+        12,
+        16,
+        17
+      ],
+      "lastTwoMeanAbsoluteRgbDelta8bit": 0.13868,
+      "lastTwoMaxChannelDelta8bit": 1,
+      "lastTwoPixelsChangedAtLeast3": 0,
+      "scope": "Consecutive native 8-bit rendered captures; stable to at most 1 RGB level, no claim of photometric Babylon equivalence."
+    }
+  },
+  "recipe": {
+    "cameraPositionInches": [
+      -15.74548,
+      -12.19278,
+      4.9047
+    ],
+    "cameraTargetInches": [
+      1.22496,
+      -2.72452,
+      0.17646
+    ],
+    "verticalFovDegrees": 38.54507,
+    "size": [
+      800,
+      620
+    ],
+    "environment": "Aerodynamics Workshop 1K CC0, compiled cube 256 square, yaw inferred 270 degrees",
+    "environmentCompiledSha256": "740fce93832d41943ad30d3585b2e04c9804296b05e71b5b7a02e4731bcfb7e8",
+    "tonemapping": "engine ACES; exposure compensation +2 EV",
+    "cameraProvenance": "Eight approximate mesh-derived top/base landmarks, including bishop and far rook; native projection checked at all eight points within 2 reference-scale pixels. Reference itself clips left bishop base."
+  },
+  "limitations": [
+    "Approximate fitted camera and inferred environment orientation; original setup not fully known.",
+    "Actual engine exposure control changes model pixels, but this does not prove photometric equivalence to Babylon ACES.",
+    "Pawn top transmission and volume remain unsupported optional core fallback: opaque surfaces differ visibly from reference. Native glass diagnostic and optical implementation remain open.",
+    "Solid background differs from reference gradient. No numerical visual acceptance claim; user review remains pending.",
+    "Source model and textures preserved byte-identical.",
+    "Final two warm renders differ by up to one 8-bit RGB level; earlier frames were materially darker and are retained separately."
+  ]
+}

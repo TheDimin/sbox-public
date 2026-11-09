@@ -1,0 +1,42 @@
+{
+  "model": "MaterialsVariantsShoe/variant-transactions",
+  "owner": "/root/gpu_material_variants",
+  "status": "proposed additive source tests; not part of original59; no shared implementation or runtime observer yet",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MaterialsVariantsShoe/MaterialsVariantsShoeVariantTransactions.cs",
+      "sha256": "a22925eb0b78781214f4d76727c027cf1723b86a5cea24f01f1e44d59b61244e"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MaterialsVariantsShoe/VARIANT_DESIGN.md",
+      "sha256": "09d2c14443806e1f1c46915fef15baabd66f043f4e08110ab3cbda42358b7f51"
+    }
+  ],
+  "entries": [
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.MaterialsVariantsShoeValidation.MaterialsVariantsShoeVariantTransactions.RunFixtureCases",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 4,
+      "scope": "CPU derived-fixture mappings"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.MaterialsVariantsShoeValidation.MaterialsVariantsShoeVariantTransactions.RunVerifierControls",
+      "arguments": [],
+      "expected_cases": 6,
+      "scope": "synthetic completed-binding checker sensitivity only"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.MaterialsVariantsShoeValidation.MaterialsVariantsShoeVariantTransactions.RunBorrowedRuntime",
+      "expected_cases": 8,
+      "scope": "future actual native/GPU draw-submission observations and borrowed lifetime; root policy review and missing API/observer implementation required"
+    }
+  ],
+  "dependencies": [
+    "original MaterialsVariantsShoeReference.cs freeze; actual loaded Sandbox.Gltf and engine",
+    "current shared direct GPU helper contract for runtime only; no replacement producer"
+  ],
+  "acceptance": "VARIANT_DESIGN.md. Requires lazy acquisition, whole-vector transaction, rollback without publication, per-instance state and immutable shared materials. Observer must derive exact identity from completed SetRenderState draw submission; neither ActiveVariant nor reader mappings suffice. Owned stock-lease final release remains a separate unimplemented seam/gate.",
+  "execution_needs": "Coordinator compiles/runs only after root review; no runtime native/frame work allowed from model owner. New8-case runtime probe is not executable against currently missing SetVariant/ActiveVariant and observer. Keep original missing-API red evidence."
+}

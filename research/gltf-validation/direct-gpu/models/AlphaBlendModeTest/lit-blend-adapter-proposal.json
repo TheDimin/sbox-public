@@ -1,0 +1,10 @@
+{
+  "status": "isolated review proposal; no shared edits",
+  "patch_sha256": "cd48548af160b39cb0f902e52432f4e211ad5acd40d8b9fe8a772467810fde57",
+  "source_base_sha256": {
+    "engine/Sandbox.Engine/Resources/Model/Gltf/GltfPublicMaterialRoute.cs": "fb7a5374e5b3323d17257ac631cf5c46ea88f5ca5ed7e76bd38e2da322a2dec3",
+    "engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs": "741690507c1f5de3958243636aa2370c33037e55cf388847d1ec176bc9b81bda",
+    "engine/Sandbox.Engine/Resources/Model/Gltf/GltfStockMaterialAdapter.cs": "d0199de6de8d573eb41c5aa75d8addb8b3dcfc1588cd2ab1d68e52a791c1b336"
+  },
+  "rollback": "Before apply, preserve exact original bytes for each verified source; reverse only verified owned hunks after checking no concurrent drift, then compare exact byte hashes. LF-normalized patch must not normalize unrelated source lines."
+}

@@ -1,0 +1,3071 @@
+{
+  "schema_version": 1,
+  "model": "MandarinOrange",
+  "status": "passed",
+  "acceptance_scope": "Bounded Linux MandarinOrange core plus standard KHR_materials_diffuse_transmission technical acceptance: actual public Model.Load/ordinary ModelRenderer, unchanged source textures, source+one portable canonical compiled GPU/captures and instance/lifetime controls. Human appearance approval pending. Historical resource/reimport proofs retain their original producers; no complete-format/platform/performance claim.",
+  "corpus_revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "actual_upstream_variants": [
+    "glTF"
+  ],
+  "forms": [
+    {
+      "name": "glTF/source",
+      "input_sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091",
+      "actual_upstream_variant": "glTF",
+      "derived": false,
+      "unselected_asset_load": "retained original01459 no-default asset proof",
+      "explicit_public_scene_load": "passed current named DT stage",
+      "public_material_and_gpu": "passed current named DT stage",
+      "capture": {
+        "form": "glTF/source",
+        "input_sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091",
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/a46a115ee4b24c4ebfe1b54c7b370cb6/actual_public_diffuse_transmission.png",
+        "sha256": "4d78bd230389157509188e7db36596cac4edb24e81122ac65a5997ef81d373ff",
+        "width": 192,
+        "height": 192,
+        "kind": "image",
+        "mime_type": "image/png",
+        "Coverage": 6457,
+        "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/a46a115ee4b24c4ebfe1b54c7b370cb6",
+        "selected_scene": 0,
+        "authored_default": null,
+        "source_material_shader_names": [
+          "shaders/gltf_diffuse_transmission.shader"
+        ],
+        "compute_shader": "shaders/gltf_deform_cs.shader",
+        "source_vertex_count": 24138,
+        "index_count": 122508,
+        "maximum_targeted_position_error_inches": 1.0726392607462998e-08,
+        "changed_factor_zero_pixels": 6390,
+        "scope": "Actual public Model.Load/ModelRenderer, original textures and standard diffuse transmission; independently overridden instance and surviving original. Inferred matched camera/front+rear point-light recipe; user appearance approval pending.",
+        "receipt_sha256": "40e408ee3a8956744516ba508d6504dd5ceba6023292886b8a0e9ccf032089fc",
+        "producer_engine_mvid": "e66560df-8eba-4c30-998a-a0296a91e4af"
+      }
+    },
+    {
+      "name": "glTF/canonical-compiled",
+      "input_sha256": "60373e48dd9216b020590a16fd0c7d3005dc489646b60f0abb129e90132d422f",
+      "actual_upstream_variant": "glTF",
+      "derived": true,
+      "unselected_asset_load": "retained original01459 no-default asset proof",
+      "explicit_public_scene_load": "passed current named DT stage",
+      "public_material_and_gpu": "passed current named DT stage",
+      "capture": {
+        "form": "glTF/canonical-compiled",
+        "input_sha256": "60373e48dd9216b020590a16fd0c7d3005dc489646b60f0abb129e90132d422f",
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/e4925c926d5846208616b80252467ebe/actual_public_diffuse_transmission.png",
+        "sha256": "4d78bd230389157509188e7db36596cac4edb24e81122ac65a5997ef81d373ff",
+        "width": 192,
+        "height": 192,
+        "kind": "image",
+        "mime_type": "image/png",
+        "Coverage": 6457,
+        "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/e4925c926d5846208616b80252467ebe",
+        "selected_scene": 0,
+        "authored_default": null,
+        "source_material_shader_names": [
+          "shaders/gltf_diffuse_transmission.shader"
+        ],
+        "compute_shader": "shaders/gltf_deform_cs.shader",
+        "source_vertex_count": 24138,
+        "index_count": 122508,
+        "maximum_targeted_position_error_inches": 1.0726392607462998e-08,
+        "changed_factor_zero_pixels": 6390,
+        "scope": "Actual public Model.Load/ModelRenderer, original textures and standard diffuse transmission; independently overridden instance and surviving original. Inferred matched camera/front+rear point-light recipe; user appearance approval pending.",
+        "receipt_sha256": "40e408ee3a8956744516ba508d6504dd5ceba6023292886b8a0e9ccf032089fc",
+        "producer_engine_mvid": "e66560df-8eba-4c30-998a-a0296a91e4af"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/LICENSE.md",
+      "sha256": "6b9b29412a00de3b36534c7dd071863b0f3d3b2641064d3c90e5db51a6a43d5c"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/README.body.md",
+      "sha256": "b53a72951bbd904c141de3d267989763c348c4957e87d3744057b384bed6529b"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/README.md",
+      "sha256": "201714cb3c45417c164e90f79f3234419e77548448af9dd2d900822a21d776fd"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/metadata.json",
+      "sha256": "0e4cc86876f714aaf90dd3d839ff8cf837668518ce1ddd224b07e4979ca1c104"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/glTF/MandarinOrange.bin",
+      "sha256": "15bc58559ab4b60e6e1a94449940911e1c5ebc4c021004b7f4fac54323063cfd"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/glTF/MandarinOrange.gltf",
+      "sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/glTF/MandarinOrange_Basecolor.jpg",
+      "sha256": "a652724500c853d1470cf2c37d97ea3741f2f1bd206322fe8e9a3b99f9cdaedd"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/glTF/MandarinOrange_DiffuseTransmission.png",
+      "sha256": "6ccaa5a695cf3916d66f7a13565fd0b4a672b2d99f11327b9e36451f5ca49842"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/glTF/MandarinOrange_Normal.png",
+      "sha256": "45fe254d98974f3dadc161100b9175c7f8f3377ab3881a5b9835503e1f0a1dd5"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/glTF/MandarinOrange_OcclusionRough.jpg",
+      "sha256": "08a87a3a66198992988ea98adf69c0d6d787b0b863b5a0f56921178f03152c34"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/screenshot/screenshot-large.jpg",
+      "sha256": "6ad73b4594c28493bd77397da3631eee48859ddc42e31d3fbf90119ca9c58c33"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/screenshot/screenshot.jpg",
+      "sha256": "dd665adb32c6bf5c140352f214d5397caa81cc3d95619ccdb3adb34bdde2558b"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/screenshot/textures.jpg",
+      "sha256": "83ee8dbb0e13298bc92fe94c729c3752cb3fce552381918c2feffadbca74eb93"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/screenshot/with-without.jpg",
+      "sha256": "f970686d93a2156a9a6110971854c70c748892dc9ec2c6403db1c7fac0c3c6c4"
+    }
+  ],
+  "source_classification": {
+    "valid_glTF": true,
+    "default_scene": null,
+    "authored_scenes": 1,
+    "required_extensions": [],
+    "supported_optional_extensions": [
+      "KHR_materials_diffuse_transmission"
+    ],
+    "unsupported_optional_extensions": [],
+    "material_mapping": "Original authored diffuse-transmission factor/color/alpha texture mapped through named7UV standard thin diffuse shader; no fallback selected for this extension.",
+    "required_extension_policy": "Typed reader required-supported control passed. Unknown unsupported required extensions retain clear rejection; malformed supported material data fails rather than silently falling back.",
+    "specification": "https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#scenes"
+  },
+  "producer": {
+    "stage": "PNG16+diffuse-transmission named stage",
+    "pid": 533781,
+    "start": "3180312",
+    "engine_mvid": "e66560df-8eba-4c30-998a-a0296a91e4af",
+    "engine_sha256": "60bc2b51bbd70c40a000f8b29f420714aff4e3dbda723794b18fdfc43b571396",
+    "gltf_mvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+    "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+    "tools_mvid": "50c531e4-8369-4849-a4b6-dd939a8f8e16",
+    "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+    "discovery_sha256": "6dd4e72fcaca5ce9e9e59d6a3a10ddc59852989ca43b592724165754b4e2aac4",
+    "scope": "Actual named public3 receipt; original reader17, candidate1 and older core/resource/reimport evidence retain their producer scopes."
+  },
+  "producer_modules": [
+    {
+      "diskMvid": "e66560df-8eba-4c30-998a-a0296a91e4af",
+      "loadedMvid": "e66560df-8eba-4c30-998a-a0296a91e4af",
+      "name": "Sandbox.Engine",
+      "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.Engine.dll",
+      "sha256": "60bc2b51bbd70c40a000f8b29f420714aff4e3dbda723794b18fdfc43b571396"
+    },
+    {
+      "diskMvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+      "loadedMvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+      "name": "Sandbox.Gltf",
+      "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.Gltf.dll",
+      "sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3"
+    },
+    {
+      "diskMvid": "c22b305b-109d-4166-a212-a7d4bc301e40",
+      "loadedMvid": "c22b305b-109d-4166-a212-a7d4bc301e40",
+      "name": "Sandbox.SceneRenderer",
+      "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.SceneRenderer.dll",
+      "sha256": "b5c8196be0f3c6bcca5cbae5f11e3ec4d3013fde98afffec99cd0e68fd11e7a1"
+    },
+    {
+      "diskMvid": "50c531e4-8369-4849-a4b6-dd939a8f8e16",
+      "loadedMvid": "50c531e4-8369-4849-a4b6-dd939a8f8e16",
+      "name": "Sandbox.Tools",
+      "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.Tools.dll",
+      "sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c"
+    }
+  ],
+  "compiled_shaders": {
+    "gltf_diffuse_transmission.shader_c": {
+      "path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_diffuse_transmission.shader_c",
+      "sha256": "cf871317a3ecbaf99b9c85b71219c1e6050534d46ab0cab3bd6149b6bcc08260",
+      "scope": "Compiled disk bytes verified with coordinator loaded-stage marker and actual named rendering; compiler bytes alone are not acceptance."
+    },
+    "gltf_surface_five_uv.shader_c": {
+      "path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_surface_five_uv.shader_c",
+      "sha256": "56c3158328d44eb11a7e795eb667415b22442abea22058c4a710ac9fc009e01c",
+      "scope": "Compiled disk bytes verified with coordinator loaded-stage marker and actual named rendering; compiler bytes alone are not acceptance."
+    },
+    "gltf_deform_cs.shader_c": {
+      "path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_deform_cs.shader_c",
+      "sha256": "4e5f9c9da78a82fcdef7ae72d0280a454697a0bf1eea6e46a83ca5a94c259c65",
+      "scope": "Compiled disk bytes verified with coordinator loaded-stage marker and actual named rendering; compiler bytes alone are not acceptance."
+    }
+  },
+  "executed_suite": {
+    "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-diffuse-named-public3/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "sha256": "40e408ee3a8956744516ba508d6504dd5ceba6023292886b8a0e9ccf032089fc",
+    "expected": 3,
+    "passed": 3,
+    "failed": 0,
+    "incomplete": 0,
+    "cleanup_errors": [],
+    "engine_mvid": "e66560df-8eba-4c30-998a-a0296a91e4af",
+    "gltf_mvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+    "request_sha256": "1502fa030e504a3fd28c081f26c7104852142997660a7c50bd687860015fdaaf",
+    "scope": "Current public source+canonical2 and independent roughness compatibility1; real GPU data/captures, original material, per-instance override/restoration/survival/deletion."
+  },
+  "receipts": {
+    "current_public_source_material": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-8fc-public-lazy-captures/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "1ca782cfb82f47dc6ca0ecdda60716d39076ce3e0f3c7ec402bd2d48f3794dbe",
+      "expected": 2,
+      "passed": 2,
+      "failed": 0,
+      "incomplete": 0,
+      "cleanup_errors": [],
+      "engine_mvid": "0ce2dfa5-c98c-45e4-ad3a-6c810a17a6ef",
+      "gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+      "request_sha256": "1d9dc338473a04d4ef100bfb99c28fc41b7e30ae2b90575e74f65a8711723c20",
+      "scope": "8fc actual source/compiled public Model.Load(path,0), ordinary renderer with lazy material realization, every output position/source-normal and index mapping, material-only negative, restore and deletion."
+    },
+    "current_reimport": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-e12-reimport/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "380c7c994c6f411ce62eec7da72e99e74b65ccc680816c1aefaf715477ed4def",
+      "expected": 6,
+      "passed": 6,
+      "failed": 0,
+      "incomplete": 0,
+      "cleanup_errors": [],
+      "engine_mvid": "dbdf65e7-d6b5-4587-b777-843a09d62f96",
+      "gltf_mvid": "88f89cfc-81b4-4744-9888-ec746058a6de",
+      "request_sha256": "5dd67f990aeff9a92c85bad08566937401a135b64b42b93c72dc8afaccfefbc4",
+      "scope": "e12 six affected real .gltf/.glb Reimport tests including compiled-alias-origin view, removed scene/late apply rollback, all-view finalization before first callback and independent old-generation instance lease."
+    },
+    "retained_01459_core_and_geometry": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-01459-acceptance/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "33dcf0abdda60a2ae01d7275be5a34e06f508f7fd889043aed9f875a59a88171",
+      "expected": 40,
+      "passed": 38,
+      "failed": 2,
+      "incomplete": 0,
+      "cleanup_errors": [],
+      "engine_mvid": "a7a46583-fd03-4f19-8e65-63cfa5a020c8",
+      "gltf_mvid": "88f89cfc-81b4-4744-9888-ec746058a6de",
+      "request_sha256": "d116034c5450fb71414ed392d05b6d7531bc61255bbe4e03e35913b5da81adce",
+      "scope": "Historical 01459 actual 40: 30 reader/resource cases and 2 geometry diagnostics passed; 6 reimport cases superseded by stronger e12 pass; 2 source-material load failures resolved by stronger 8fc public captures. Retain actual original producer labels."
+    },
+    "observer_red": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-01459-observer-red/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "b79ee5d63d4c914cc1862690a15af6821bb731fac2c2893d08b72481225359ea",
+      "expected": 1,
+      "passed": 0,
+      "failed": 1,
+      "incomplete": 0,
+      "cleanup_errors": [],
+      "engine_mvid": "a7a46583-fd03-4f19-8e65-63cfa5a020c8",
+      "gltf_mvid": "88f89cfc-81b4-4744-9888-ec746058a6de",
+      "request_sha256": "2a458483452fda1e60cdb1a8f43df5a18432c0570882473555bd5d7ae09f408e",
+      "scope": "Historical strict observer regression failed on 01459 and was fixed/validated by e12 six-case pass."
+    },
+    "initial_public_material": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-8fc-public-captures/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "cc763d92414fc0c96d28f867ce09634a3a984e23f14d495c2a32c81bde6d6670",
+      "expected": 2,
+      "passed": 2,
+      "failed": 0,
+      "incomplete": 0,
+      "cleanup_errors": [],
+      "engine_mvid": "0ce2dfa5-c98c-45e4-ad3a-6c810a17a6ef",
+      "gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+      "request_sha256": "9c14ceddc5448023a12d0e52303174047c5aa7654e28eb62480da7674dcbed14",
+      "scope": "8fc first successful two public captures pre-read model.Materials; stronger current run proves renderer lazy realization and yields identical pixels."
+    },
+    "baseline_characterization": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-9b9f-baseline/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "daa30da2f18e3e484956c0311a2763a5f7ce3406605309b2840ab4d076fc54a5",
+      "expected": 11,
+      "passed": 11,
+      "failed": 0,
+      "incomplete": 0,
+      "cleanup_errors": [],
+      "engine_mvid": "b5b66ab1-06f5-4aee-b816-92b6b197666e",
+      "gltf_mvid": "88f89cfc-81b4-4744-9888-ec746058a6de",
+      "request_sha256": "d3b812e32d2949191e5bed12a9265454768bd9dde5aa6c9d5d76600bb68ac3ad",
+      "scope": "Historical 9b9f characterization: valid reader/data and actual previous public missing-default error reproduced before policy fix. This 11-case characterization is not desired-policy acceptance."
+    },
+    "current_diffuse_public3": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-diffuse-named-public3/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "40e408ee3a8956744516ba508d6504dd5ceba6023292886b8a0e9ccf032089fc",
+      "expected": 3,
+      "passed": 3,
+      "failed": 0,
+      "incomplete": 0,
+      "cleanup_errors": [],
+      "engine_mvid": "e66560df-8eba-4c30-998a-a0296a91e4af",
+      "gltf_mvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+      "request_sha256": "1502fa030e504a3fd28c081f26c7104852142997660a7c50bd687860015fdaaf",
+      "scope": "Current public source+canonical2 and independent roughness compatibility1; real GPU data/captures, original material, per-instance override/restoration/survival/deletion."
+    },
+    "presentation_convergence1": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-diffuse-source-convergence1/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "3a470c3d656481c1624c62f66ea3c7ff157290bea620a0f82ed0e7fdc47d7179",
+      "passed": 1,
+      "expected": 1,
+      "failed": 0,
+      "incomplete": 0,
+      "cleanup_errors": [],
+      "engine_mvid": "e66560df-8eba-4c30-998a-a0296a91e4af",
+      "gltf_mvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+      "request_sha256": "c185641eda7966114f4bce5f9d4aeeac8a8a66108becffc53f9a96b07ac5e5bc",
+      "scope": "One presentation-only source convergence capture. Original accepted public3 unchanged; no functional suite rerun."
+    },
+    "hdri_lighting_correction1": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-source-field-sky-lighting1-metadata/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "00ead190e6f7049b42210039ca9b6f8bcff0d1a77e6badb1a1795b9a13d30995",
+      "expected": 1,
+      "passed": 1,
+      "failed": 0,
+      "incomplete": 0,
+      "cleanup_errors": [],
+      "engine_mvid": "e66560df-8eba-4c30-998a-a0296a91e4af",
+      "gltf_mvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+      "request_sha256": "a41531e75a1f31abf3ea9d56ed0a327fad8c7a1a774348195767b2d748988b4b",
+      "scope": "One new HDRI lighting/visible sky presentation control; unchanged accepted feature3 and canonical192 proof not rerun."
+    }
+  },
+  "effective_acceptance_gate_inventory": {
+    "current_public_bundle": {
+      "passed": 3,
+      "expected": 3,
+      "scope": "Two actual model forms plus measured compatibility diagnostic"
+    },
+    "candidate_gate": {
+      "reader_passed": 17,
+      "reader_receipt_sha256": "66bc20f08320d03be1d1765f9fe10e17043725af957242d215e8e3b544e3b735",
+      "native_passed": 1,
+      "native_receipt_sha256": "710bdec85f756188d2238255621ee25e0a8812d75d7c0fb9249d7d3e25a12071"
+    },
+    "historical_core_inventory": {
+      "gates": 40,
+      "passed": 40,
+      "failed": 0,
+      "incomplete": 0,
+      "scope": "30 retained reader/resource gates on 01459;6 affected reimport gates rerun e12; 2 historical diagnostic geometry gates on 01459;2 previously failing public material gates superseded by stronger current 8fc public capture cases. This is a proof composition, not a claimed40-case current-producer run."
+    },
+    "scope": "Proof composition with each original producer retained; not one summed current-producer test run.",
+    "presentation_followup": {
+      "passed": 1,
+      "expected": 1,
+      "scope": "Source-only settled visual, original feature3 not rerun"
+    },
+    "hdri_lighting_followup": {
+      "passed": 1,
+      "expected": 1,
+      "scope": "New source-only native HDRI+sky controls/convergence; no feature3 rerun."
+    }
+  },
+  "gates": {
+    "valid_unselected_resource": "passed; no implicit/rewritten scene and native IModel null",
+    "authored_scene_selection": "passed explicit scene0; GltfDefaultScene remains null",
+    "empty_library_core": "passed valid empty default scenes, positionless primitives and scene-less geometry libraries",
+    "identity_and_lifetime": "passed resource/JSON/ResourceId/async/cold and compiled alias roundtrips, invalid selections and independent resource lifetimes",
+    "editable_source_reimport": "passed actual .gltf/.glb change, exact source identity/compiled aliases, removed-scene and apply failure last-valid rollback, grouped notification ordering and retained old instance lease",
+    "public_source_material": "passed current source+canonical named diffuse transmission, original textures, ordinary lazy renderer realization",
+    "actual_gpu": "passed current targeted geometry/index count and actual callbacks; original exhaustive core geometry proof reused with original producer",
+    "source_compiled_capture": "passed identical source/canonical PNG bytes, original restoration and surviving instance",
+    "diffuse_transmission": "passed reader17+anonymous candidate1+current public2; per-role alpha/sRGB/UV/sampler/factor and independent physics/IBL controls",
+    "zero_factor_compatibility": "quantified difference from native core BRDF across roughness; no pixel-identity claim"
+  },
+  "capture": {
+    "form": "glTF/source",
+    "input_sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091",
+    "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/settled_actual_source_field_hdri_sky.png",
+    "sha256": "ba635d35cc0d8c03e5bb853d6a107b17470ab8a0a1de8939d029cda45505491d",
+    "width": 1151,
+    "height": 1309,
+    "kind": "image",
+    "mime_type": "image/png",
+    "foreground_pixels": 311280,
+    "selected_scene": 0,
+    "authored_default": null,
+    "source_material_shader_names": [
+      "shaders/gltf_diffuse_transmission.shader"
+    ],
+    "compute_shader": "shaders/gltf_deform_cs.shader",
+    "receipt_sha256": "00ead190e6f7049b42210039ca9b6f8bcff0d1a77e6badb1a1795b9a13d30995",
+    "scope": "SOURCE ONLY highres actual Field HDRI+visible Field sky, no point lighting/ambient override, unchanged source material; ACES fixedEV0 and perspective18\u00b0/environmentorientation/intensity inferred. Canonical192 accepted feature proof separate, no highrescompiled claim."
+  },
+  "captures": [
+    {
+      "form": "glTF/source",
+      "input_sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/a46a115ee4b24c4ebfe1b54c7b370cb6/actual_public_diffuse_transmission.png",
+      "sha256": "4d78bd230389157509188e7db36596cac4edb24e81122ac65a5997ef81d373ff",
+      "width": 192,
+      "height": 192,
+      "kind": "image",
+      "mime_type": "image/png",
+      "Coverage": 6457,
+      "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/a46a115ee4b24c4ebfe1b54c7b370cb6",
+      "selected_scene": 0,
+      "authored_default": null,
+      "source_material_shader_names": [
+        "shaders/gltf_diffuse_transmission.shader"
+      ],
+      "compute_shader": "shaders/gltf_deform_cs.shader",
+      "source_vertex_count": 24138,
+      "index_count": 122508,
+      "maximum_targeted_position_error_inches": 1.0726392607462998e-08,
+      "changed_factor_zero_pixels": 6390,
+      "scope": "Actual public Model.Load/ModelRenderer, original textures and standard diffuse transmission; independently overridden instance and surviving original. Inferred matched camera/front+rear point-light recipe; user appearance approval pending.",
+      "receipt_sha256": "40e408ee3a8956744516ba508d6504dd5ceba6023292886b8a0e9ccf032089fc",
+      "producer_engine_mvid": "e66560df-8eba-4c30-998a-a0296a91e4af"
+    },
+    {
+      "form": "glTF/canonical-compiled",
+      "input_sha256": "60373e48dd9216b020590a16fd0c7d3005dc489646b60f0abb129e90132d422f",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/e4925c926d5846208616b80252467ebe/actual_public_diffuse_transmission.png",
+      "sha256": "4d78bd230389157509188e7db36596cac4edb24e81122ac65a5997ef81d373ff",
+      "width": 192,
+      "height": 192,
+      "kind": "image",
+      "mime_type": "image/png",
+      "Coverage": 6457,
+      "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/e4925c926d5846208616b80252467ebe",
+      "selected_scene": 0,
+      "authored_default": null,
+      "source_material_shader_names": [
+        "shaders/gltf_diffuse_transmission.shader"
+      ],
+      "compute_shader": "shaders/gltf_deform_cs.shader",
+      "source_vertex_count": 24138,
+      "index_count": 122508,
+      "maximum_targeted_position_error_inches": 1.0726392607462998e-08,
+      "changed_factor_zero_pixels": 6390,
+      "scope": "Actual public Model.Load/ModelRenderer, original textures and standard diffuse transmission; independently overridden instance and surviving original. Inferred matched camera/front+rear point-light recipe; user appearance approval pending.",
+      "receipt_sha256": "40e408ee3a8956744516ba508d6504dd5ceba6023292886b8a0e9ccf032089fc",
+      "producer_engine_mvid": "e66560df-8eba-4c30-998a-a0296a91e4af"
+    }
+  ],
+  "capture_controls": [
+    {
+      "form": "glTF/source",
+      "captures": [
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/a46a115ee4b24c4ebfe1b54c7b370cb6/actual_public_diffuse_transmission.png",
+          "sha256": "4d78bd230389157509188e7db36596cac4edb24e81122ac65a5997ef81d373ff",
+          "width": 192,
+          "height": 192,
+          "purpose": "actual_public_diffuse_transmission",
+          "scope": "Actual private native widget capture; control acceptance comes from source-pinned public case assertions."
+        },
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/a46a115ee4b24c4ebfe1b54c7b370cb6/empty_after_delete.png",
+          "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+          "width": 192,
+          "height": 192,
+          "purpose": "empty_after_delete",
+          "scope": "Actual private native widget capture; control acceptance comes from source-pinned public case assertions."
+        },
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/a46a115ee4b24c4ebfe1b54c7b370cb6/empty_before.png",
+          "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+          "width": 192,
+          "height": 192,
+          "purpose": "empty_before",
+          "scope": "Actual private native widget capture; control acceptance comes from source-pinned public case assertions."
+        },
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/a46a115ee4b24c4ebfe1b54c7b370cb6/independent_instance_material_submission_control.png",
+          "sha256": "4d78bd230389157509188e7db36596cac4edb24e81122ac65a5997ef81d373ff",
+          "width": 192,
+          "height": 192,
+          "purpose": "independent_instance_material_submission_control",
+          "scope": "Actual private native widget capture; control acceptance comes from source-pinned public case assertions."
+        },
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/a46a115ee4b24c4ebfe1b54c7b370cb6/restored_original_diffuse_material.png",
+          "sha256": "4d78bd230389157509188e7db36596cac4edb24e81122ac65a5997ef81d373ff",
+          "width": 192,
+          "height": 192,
+          "purpose": "restored_original_diffuse_material",
+          "scope": "Actual private native widget capture; control acceptance comes from source-pinned public case assertions."
+        },
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/a46a115ee4b24c4ebfe1b54c7b370cb6/same_shader_factor_zero_control.png",
+          "sha256": "26ce61bdb5894aa6df565ad12b015dddce48fecc7f20dbbfb058b6469d87e6d7",
+          "width": 192,
+          "height": 192,
+          "purpose": "same_shader_factor_zero_control",
+          "scope": "Actual private native widget capture; control acceptance comes from source-pinned public case assertions."
+        },
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/a46a115ee4b24c4ebfe1b54c7b370cb6/second_instance_survives_first_override_and_delete.png",
+          "sha256": "4d78bd230389157509188e7db36596cac4edb24e81122ac65a5997ef81d373ff",
+          "width": 192,
+          "height": 192,
+          "purpose": "second_instance_survives_first_override_and_delete",
+          "scope": "Actual private native widget capture; control acceptance comes from source-pinned public case assertions."
+        }
+      ]
+    },
+    {
+      "form": "glTF/canonical-compiled",
+      "captures": [
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/e4925c926d5846208616b80252467ebe/actual_public_diffuse_transmission.png",
+          "sha256": "4d78bd230389157509188e7db36596cac4edb24e81122ac65a5997ef81d373ff",
+          "width": 192,
+          "height": 192,
+          "purpose": "actual_public_diffuse_transmission",
+          "scope": "Actual private native widget capture; control acceptance comes from source-pinned public case assertions."
+        },
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/e4925c926d5846208616b80252467ebe/empty_after_delete.png",
+          "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+          "width": 192,
+          "height": 192,
+          "purpose": "empty_after_delete",
+          "scope": "Actual private native widget capture; control acceptance comes from source-pinned public case assertions."
+        },
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/e4925c926d5846208616b80252467ebe/empty_before.png",
+          "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+          "width": 192,
+          "height": 192,
+          "purpose": "empty_before",
+          "scope": "Actual private native widget capture; control acceptance comes from source-pinned public case assertions."
+        },
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/e4925c926d5846208616b80252467ebe/independent_instance_material_submission_control.png",
+          "sha256": "4d78bd230389157509188e7db36596cac4edb24e81122ac65a5997ef81d373ff",
+          "width": 192,
+          "height": 192,
+          "purpose": "independent_instance_material_submission_control",
+          "scope": "Actual private native widget capture; control acceptance comes from source-pinned public case assertions."
+        },
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/e4925c926d5846208616b80252467ebe/restored_original_diffuse_material.png",
+          "sha256": "4d78bd230389157509188e7db36596cac4edb24e81122ac65a5997ef81d373ff",
+          "width": 192,
+          "height": 192,
+          "purpose": "restored_original_diffuse_material",
+          "scope": "Actual private native widget capture; control acceptance comes from source-pinned public case assertions."
+        },
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/e4925c926d5846208616b80252467ebe/same_shader_factor_zero_control.png",
+          "sha256": "26ce61bdb5894aa6df565ad12b015dddce48fecc7f20dbbfb058b6469d87e6d7",
+          "width": 192,
+          "height": 192,
+          "purpose": "same_shader_factor_zero_control",
+          "scope": "Actual private native widget capture; control acceptance comes from source-pinned public case assertions."
+        },
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/e4925c926d5846208616b80252467ebe/second_instance_survives_first_override_and_delete.png",
+          "sha256": "4d78bd230389157509188e7db36596cac4edb24e81122ac65a5997ef81d373ff",
+          "width": 192,
+          "height": 192,
+          "purpose": "second_instance_survives_first_override_and_delete",
+          "scope": "Actual private native widget capture; control acceptance comes from source-pinned public case assertions."
+        }
+      ]
+    },
+    {
+      "form": "glTF/source",
+      "scope": "Presentation-only reference-size convergence",
+      "captures": [
+        {
+          "purpose": "first actual RTT",
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-convergence/8a470e404eea46918535792a30e57905/first_actual_render.png",
+          "sha256": "d2ef1d57919fead0e0880b50f773b0e4c02567cf405b1260119166a7e7986a5b",
+          "width": 1151,
+          "height": 1309
+        },
+        {
+          "purpose": "settled actual RTT",
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-convergence/8a470e404eea46918535792a30e57905/settled_actual_source_diffuse_transmission.png",
+          "sha256": "d2ef1d57919fead0e0880b50f773b0e4c02567cf405b1260119166a7e7986a5b",
+          "width": 1151,
+          "height": 1309
+        }
+      ]
+    },
+    {
+      "form": "glTF/source",
+      "scope": "New HDRI+visible-sky lighting correction",
+      "captures": [
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/actual_field_sky_only.png",
+          "sha256": "fb9ba53f9340c43e8ad1f0324d2d3883bc8e78cc434e390d393a8935e172ba3d",
+          "width": 1151,
+          "height": 1309,
+          "purpose": "actual_field_sky_only"
+        },
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/settled_actual_source_field_hdri_sky.png",
+          "sha256": "ba635d35cc0d8c03e5bb853d6a107b17470ab8a0a1de8939d029cda45505491d",
+          "width": 1151,
+          "height": 1309,
+          "purpose": "settled_actual_source_field_hdri_sky"
+        },
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/same_sky_without_ibl_probe_control.png",
+          "sha256": "5e6e73100c1e4d1190a15d61d3f47b0f96a90c00d55a77fbb4e60e05d28b6c7e",
+          "width": 1151,
+          "height": 1309,
+          "purpose": "same_sky_without_ibl_probe_control"
+        },
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/empty_after_sky_model_probe_delete.png",
+          "sha256": "47078170a8a4c558c70554480d4f67e4c6d7c3d58271413c6f86afa52a5ce42c",
+          "width": 1151,
+          "height": 1309,
+          "purpose": "empty_after_sky_model_probe_delete"
+        }
+      ]
+    }
+  ],
+  "public_gpu_summary": {
+    "current_public_cases": 2,
+    "passed": 2,
+    "index_count": 122508,
+    "maximum_targeted_position_error_inches": 1.0726392607462998e-08,
+    "scope": "Current7UV layout targeted literal positions and topology count; historical exhaustive geometry/index/source-normal checks retained separately on original producers. Both forms native IModel null and actual draw callbacks verified."
+  },
+  "historical_diagnostic_captures": [
+    {
+      "form": "glTF/source",
+      "input_sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091",
+      "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diagnostic/13b487bc2c5e4a9ab6fc4992af8564fa",
+      "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diagnostic/13b487bc2c5e4a9ab6fc4992af8564fa/actual_scene0_diagnostic_normal.png",
+      "Sha256": "a403e73d366c5b29ee52a6bd41146625414149945d3168d9ae1638d54d57198d",
+      "Coverage": 6350,
+      "selected_scene": 0,
+      "vertex_count": 24138,
+      "index_count": 122508,
+      "position_samples": 72414,
+      "maximum_position_error_inches": 2.9802322e-08,
+      "wrong_stride_error_inches": 53.01223,
+      "omitted_parent_rotation_error_inches": 0.43822995,
+      "draws": 14,
+      "scope": "Actual source geometry GPU readback and borrowed-white material in Lit camera mode (SceneCameraDebugMode.Normal), inferred camera. Not public source-material appearance.",
+      "producer_stage": "01459"
+    },
+    {
+      "form": "glTF/derived-glb_c",
+      "input_sha256": "a7f2ea695570d6c20077f553e0fd5b2736c03899dd474f873e5cd1e966c952d2",
+      "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diagnostic/e832ce30ba9a4aa39eb7adf1e240e04b",
+      "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diagnostic/e832ce30ba9a4aa39eb7adf1e240e04b/actual_scene0_diagnostic_normal.png",
+      "Sha256": "a403e73d366c5b29ee52a6bd41146625414149945d3168d9ae1638d54d57198d",
+      "Coverage": 6350,
+      "selected_scene": 0,
+      "vertex_count": 24138,
+      "index_count": 122508,
+      "position_samples": 72414,
+      "maximum_position_error_inches": 2.9802322e-08,
+      "wrong_stride_error_inches": 53.01223,
+      "omitted_parent_rotation_error_inches": 0.43822995,
+      "draws": 16,
+      "scope": "Actual source geometry GPU readback and borrowed-white material in Lit camera mode (SceneCameraDebugMode.Normal), inferred camera. Not public source-material appearance.",
+      "producer_stage": "01459"
+    }
+  ],
+  "reference": {
+    "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/screenshot/with-without.jpg",
+    "sha256": "f970686d93a2156a9a6110971854c70c748892dc9ec2c6403db1c7fac0c3c6c4",
+    "purpose": "Full authored comparison: LEFT=diffuse-transmission enabled, RIGHT=core fallback. Current implementation enables extension; LEFT is relevant. Inspected. Unknown authored camera/lighting/exposure; not calibrated pixel oracle."
+  },
+  "additional_reference": {
+    "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/screenshot/screenshot-large.jpg",
+    "sha256": "6ad73b4594c28493bd77397da3631eee48859ddc42e31d3fbf90119ca9c58c33",
+    "purpose": "Additional upstream extension-enabled human appearance reference; unknown camera/light/exposure."
+  },
+  "presentation_recipe": {
+    "camera_position_inches": [
+      4,
+      0,
+      0
+    ],
+    "camera_target_inches": [
+      0,
+      0,
+      0
+    ],
+    "projection": "perspective",
+    "vertical_fov_degrees": 18,
+    "near": 0.1,
+    "far": 1000,
+    "width": 1151,
+    "height": 1309,
+    "original_functional_capture_size": [
+      192,
+      192
+    ],
+    "camera_mode": "Lit(SceneCameraDebugMode.Normal)",
+    "post_processing": true,
+    "tonemap": "ACES",
+    "auto_exposure_enabled": true,
+    "minimum_exposure": 1,
+    "maximum_exposure": 1,
+    "exposure_compensation_ev": 0,
+    "point_lights": "Former bright point lights disabled; no added rear/fill light",
+    "ambient_rgba": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "environment": {
+      "type": "native SceneCubemap plus matching SceneSkyBox",
+      "texture": "materials/gltf_reference_environment/field.vtex",
+      "source_exr_sha256": "a9ad16a6d516171e425d0fc22cdde643b2116ed544578945899958cea21e1e7f",
+      "compiled_disk_sha256": "01cc0d0f0f69aa856b6650c71d5a4c8528667f61444b35b7c9bc382cda98fc55",
+      "intensity": 0.75,
+      "yaw_degrees": 0,
+      "background": "Actual same-Field skybox, not composited image",
+      "identity_limit": "Actual sky/IBL pixel response verified; current compiled diskhash recorded. Resident HDR texel-byte identity not newly proven."
+    },
+    "settled": "Each of four states passed5 actual RTTs/four successive full-image pairs with max/meanRGBdelta0. No widget-wait-only convergence claim.",
+    "authored_or_inferred": "Source scene/parent transform/material authored; Field choice/yaw/intensity, ACES/fixedEV0 and perspective framing inferred. Camera pose kept; orthographic changed to approximate same vertical framing via18\u00b0 perspective for visible sky."
+  },
+  "producer_impact": {
+    "scope": "Current new named shader/parser/material integration verified by public3; prior resource/reimport and full geometry suites reused with original producer scopes. Generated-tangent correction retained from NormalTangent12/12receipt a392f5cd3cfd211e8ee4d38a5ea02123390fffa42266397f314f41a8526f0a13. No old suite rerun or broad promotion inferred."
+  },
+  "blockers": [],
+  "visual_approval": "pending_new_hdri_lighting_capture",
+  "limitations": [
+    "User appearance approval pending new diffuse-transmission captures; prior core-fallback review was rejected.",
+    "Main source-only1151x1309 uses inferred Field HDRI+visible sky intensity.75/yaw0, ACES fixedEV0, perspective18degreecamera. Upstream environment/camera/exposure unknown; user appearance review pending. Current Field live HDR resident byte identity not newly proven; diskidentity and actual nativeIBL/sky response recorded.",
+    "The extension shader uses standard Lambert diffuse, while ordinary native core source shader has a different roughness-dependent BRDF. At60degree light and roughness0/.5/1 measured max absolute linear RGB differences are .023681640625/.019287109375/.0390625 even at DTfactor0. No zero-factor pixel-identity claim.",
+    "Explicit one canonical embedded-image artifact passed portable decoding/all4encoded-image checks and official core validator (zeroerrors, extensionunsupported notice). Automatic native asset-graph packaging is not established.",
+    "Native candidate physics controls cover point-light and literal opposite-hemisphere cubemap services. No broad directional/baked/volume/optical-transmission claim; unrelated BLEND and no-normal point/line work stays separate.",
+    "No editorUI parity, Windows, performance benchmark or complete-format acceptance claim."
+  ],
+  "visual_comparison": {
+    "group": "MandarinOrange",
+    "forms_grouped_as_one_comparison": true,
+    "variants": [
+      {
+        "form": "glTF/source",
+        "input_sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091",
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/a46a115ee4b24c4ebfe1b54c7b370cb6/actual_public_diffuse_transmission.png",
+        "sha256": "4d78bd230389157509188e7db36596cac4edb24e81122ac65a5997ef81d373ff",
+        "width": 192,
+        "height": 192,
+        "kind": "image",
+        "mime_type": "image/png",
+        "Coverage": 6457,
+        "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/a46a115ee4b24c4ebfe1b54c7b370cb6",
+        "selected_scene": 0,
+        "authored_default": null,
+        "source_material_shader_names": [
+          "shaders/gltf_diffuse_transmission.shader"
+        ],
+        "compute_shader": "shaders/gltf_deform_cs.shader",
+        "source_vertex_count": 24138,
+        "index_count": 122508,
+        "maximum_targeted_position_error_inches": 1.0726392607462998e-08,
+        "changed_factor_zero_pixels": 6390,
+        "scope": "Actual public Model.Load/ModelRenderer, original textures and standard diffuse transmission; independently overridden instance and surviving original. Inferred matched camera/front+rear point-light recipe; user appearance approval pending.",
+        "receipt_sha256": "40e408ee3a8956744516ba508d6504dd5ceba6023292886b8a0e9ccf032089fc",
+        "producer_engine_mvid": "e66560df-8eba-4c30-998a-a0296a91e4af"
+      },
+      {
+        "form": "glTF/canonical-compiled",
+        "input_sha256": "60373e48dd9216b020590a16fd0c7d3005dc489646b60f0abb129e90132d422f",
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/e4925c926d5846208616b80252467ebe/actual_public_diffuse_transmission.png",
+        "sha256": "4d78bd230389157509188e7db36596cac4edb24e81122ac65a5997ef81d373ff",
+        "width": 192,
+        "height": 192,
+        "kind": "image",
+        "mime_type": "image/png",
+        "Coverage": 6457,
+        "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-public/e4925c926d5846208616b80252467ebe",
+        "selected_scene": 0,
+        "authored_default": null,
+        "source_material_shader_names": [
+          "shaders/gltf_diffuse_transmission.shader"
+        ],
+        "compute_shader": "shaders/gltf_deform_cs.shader",
+        "source_vertex_count": 24138,
+        "index_count": 122508,
+        "maximum_targeted_position_error_inches": 1.0726392607462998e-08,
+        "changed_factor_zero_pixels": 6390,
+        "scope": "Actual public Model.Load/ModelRenderer, original textures and standard diffuse transmission; independently overridden instance and surviving original. Inferred matched camera/front+rear point-light recipe; user appearance approval pending.",
+        "receipt_sha256": "40e408ee3a8956744516ba508d6504dd5ceba6023292886b8a0e9ccf032089fc",
+        "producer_engine_mvid": "e66560df-8eba-4c30-998a-a0296a91e4af"
+      }
+    ],
+    "reference": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/screenshot/with-without.jpg",
+      "sha256": "f970686d93a2156a9a6110971854c70c748892dc9ec2c6403db1c7fac0c3c6c4",
+      "purpose": "Full authored comparison: LEFT=diffuse-transmission enabled, RIGHT=core fallback. Current implementation enables extension; LEFT is relevant. Inspected. Unknown authored camera/lighting/exposure; not calibrated pixel oracle."
+    },
+    "additional_reference": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/screenshot/screenshot-large.jpg",
+      "sha256": "6ad73b4594c28493bd77397da3631eee48859ddc42e31d3fbf90119ca9c58c33",
+      "purpose": "Additional upstream extension-enabled human appearance reference; unknown camera/light/exposure."
+    },
+    "approval": "pending_new_hdri_lighting_capture",
+    "purpose": "One grouped model comparison: new actual source-only HDRI+sky visual correcting user-reported washed-out point lighting. Existing source/canonical192 technical proofs retained separately; new user appearance review required.",
+    "main_capture": {
+      "form": "glTF/source",
+      "input_sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/settled_actual_source_field_hdri_sky.png",
+      "sha256": "ba635d35cc0d8c03e5bb853d6a107b17470ab8a0a1de8939d029cda45505491d",
+      "width": 1151,
+      "height": 1309,
+      "kind": "image",
+      "mime_type": "image/png",
+      "foreground_pixels": 311280,
+      "selected_scene": 0,
+      "authored_default": null,
+      "source_material_shader_names": [
+        "shaders/gltf_diffuse_transmission.shader"
+      ],
+      "compute_shader": "shaders/gltf_deform_cs.shader",
+      "receipt_sha256": "00ead190e6f7049b42210039ca9b6f8bcff0d1a77e6badb1a1795b9a13d30995",
+      "scope": "SOURCE ONLY highres actual Field HDRI+visible Field sky, no point lighting/ambient override, unchanged source material; ACES fixedEV0 and perspective18\u00b0/environmentorientation/intensity inferred. Canonical192 accepted feature proof separate, no highrescompiled claim."
+    },
+    "main_capture_form": "glTF/source",
+    "variants_scope": "Both original source/canonical192px functional captures remain variants; main highres is source-only, not a new highres compiled capture."
+  },
+  "feedback_followup": {
+    "status": "public_passed_pending_user_visual_approval",
+    "feature": "KHR_materials_diffuse_transmission",
+    "review_fingerprint": "aa31f2083c8721fda05499dcd9ba26d889b4f01d783c5525f482dd80805a5737",
+    "reviewed_at": "2026-11-06T16:51:54.355Z",
+    "review_status": "rejected",
+    "user_request": "We should add support for diffuse transmission.",
+    "evidence_scope": "Existing passed status and receipts describe the previous bounded core-fallback route only. They do not satisfy this feature request or establish appearance approval.",
+    "candidate": "DIFFUSE_TRANSMISSION.md",
+    "new_native_execution": true,
+    "applied_slice": "Parser/material/UV/template selection installed for gated anonymous candidate; public capability remains disabled. Historical initial freezes preserved; delegated cache changes require current producer receipt.",
+    "default_capability_enabled": true,
+    "test_plan": {
+      "reader": "DiffuseTransmissionReaderTests.cs",
+      "reader_cases": 17,
+      "native": "DiffuseTransmissionCandidateTests.cs",
+      "native_cases": 1,
+      "public": "DiffuseTransmissionPublicTests.cs",
+      "public_forms": [
+        "actual upstream glTF source",
+        "one canonical embedded-image .glb_c supplied by packaging owner"
+      ],
+      "public_cases": 2,
+      "executed": "Original reader17/17, anonymous candidate1/1, current public2/2 + compatibility1/1 passed. Historical failed attempts remain retained.",
+      "native_next": "No further native work planned after root visual review. Publish new HDRI lighting correction; unchanged accepted feature3 and canonical192 proof retained.",
+      "compatibility": "One native diagnostic: DTfactor0 versus ordinary source fiveUV at roughness0/.5/1 and60degree light, measured linearHDR difference; no zero-factor pixelidentity assumption.",
+      "public_bundle_cases": 3,
+      "compatibility_positive_core_inputs": 6
+    },
+    "candidate_shader": "gltf_diffuse_transmission_candidate.shader",
+    "pending_render_patch": "diffuse-render-integration-pending.patch",
+    "candidate_shader_sha256": "dfbc59486512cab43579aa7e6a12ed14cf10d2667d50ab9e54346e2a655d24e9",
+    "validation_receipts": [
+      {
+        "path": "Temp/gltf-validation/direct-gpu/mandarin-diffuse-e209-candidate18/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "287b60003ff83150c7bf93bb58afa9f22aae1b5b1e991c6aac1ac7b22d3b3f3f",
+        "engine_mvid": "87f823c3-45fc-4903-a136-2b62d86ee251",
+        "gltf_mvid": "b083757d-e24c-4b5f-8e04-dd3861b36960",
+        "passed": 16,
+        "failed": 2,
+        "expected": 18,
+        "incomplete": 0,
+        "cleanup_errors": []
+      },
+      {
+        "path": "Temp/gltf-validation/direct-gpu/mandarin-diffuse-e209-valid-uv-hdr18/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "66bc20f08320d03be1d1765f9fe10e17043725af957242d215e8e3b544e3b735",
+        "engine_mvid": "87f823c3-45fc-4903-a136-2b62d86ee251",
+        "gltf_mvid": "b083757d-e24c-4b5f-8e04-dd3861b36960",
+        "passed": 17,
+        "failed": 1,
+        "expected": 18,
+        "incomplete": 0,
+        "cleanup_errors": []
+      },
+      {
+        "path": "Temp/gltf-validation/direct-gpu/mandarin-diffuse-0bc-native1/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "d998f638da28e36bbdd7c38e01089ddada4381854f9e979e16201847d1aff37c",
+        "engine_mvid": "123f2cf1-6081-4d93-810b-333342cb20ee",
+        "gltf_mvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+        "passed": 0,
+        "failed": 1,
+        "expected": 1,
+        "incomplete": 0,
+        "cleanup_errors": []
+      },
+      {
+        "path": "Temp/gltf-validation/direct-gpu/mandarin-diffuse-0bc-half-native1/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "cb72f22bdd2c935315026d560e4185a047c01514c0fd270e31331d823d70c30c",
+        "scope": "Failed/incomplete candidate attempt retained; consult actual receipt for test totals and measured partial controls. No public acceptance."
+      },
+      {
+        "path": "Temp/gltf-validation/direct-gpu/mandarin-diffuse-0bc-literal-half-native1/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "b94598cb1468deb99535ffe79ee72801e0c853b003cf8db882ffbc6b98b684de",
+        "scope": "Failed/incomplete candidate attempt retained; consult actual receipt for test totals and measured partial controls. No public acceptance."
+      },
+      {
+        "path": "Temp/gltf-validation/direct-gpu/mandarin-diffuse-0bc-quantizer-native1/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "4b42c3521cd2754f99573c7ec78535752bbf0c84637c90eb29594f76d8e5973c",
+        "scope": "Failed/incomplete candidate attempt retained; consult actual receipt for test totals and measured partial controls. No public acceptance."
+      },
+      {
+        "path": "Temp/gltf-validation/direct-gpu/mandarin-diffuse-0bc-validated-native1/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "710bdec85f756188d2238255621ee25e0a8812d75d7c0fb9249d7d3e25a12071",
+        "engine_mvid": "123f2cf1-6081-4d93-810b-333342cb20ee",
+        "gltf_mvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+        "passed": 1,
+        "failed": 0,
+        "expected": 1,
+        "incomplete": 0,
+        "cleanup_errors": [],
+        "scope": "Complete anonymous candidate controls, no public capability or real model appearance acceptance."
+      },
+      {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-diffuse-named-public3/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "40e408ee3a8956744516ba508d6504dd5ceba6023292886b8a0e9ccf032089fc",
+        "expected": 3,
+        "passed": 3,
+        "failed": 0,
+        "incomplete": 0,
+        "cleanup_errors": [],
+        "engine_mvid": "e66560df-8eba-4c30-998a-a0296a91e4af",
+        "gltf_mvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+        "request_sha256": "1502fa030e504a3fd28c081f26c7104852142997660a7c50bd687860015fdaaf",
+        "scope": "Current public source+canonical2 and independent roughness compatibility1; real GPU data/captures, original material, per-instance override/restoration/survival/deletion."
+      }
+    ],
+    "observed_native_limits": [
+      "First adversarial UV fixture lacked mandatory contiguous intermediate TEXCOORD declarations; fixed test input only, reader17/17 now passed.",
+      "Native Texture.Clear quantizes fractional colors to 8-bit values on a float target; (.125,.25,.5) read (31,63,127)/255. Exact endpoint positive control prepared; no BSDF/PI/Fresnel/IBL gate passed yet.",
+      "Exact endpoint RT clear positive passes. Native PI/Fresnel ratio .959816887 vs .96 hit strict pre-quantization assertion; all actual destination RGB values are exactly float16 (center .92138671875/native Lambert .9599609375). Independent literal HDR/non8bit precision control and per-value half-ULP interval checks are prepared but not executed; expected physics remains .96.",
+      "Native1 receipt4b42 overall failed correctly rejecting U16 vertex UV byteOffset2. Fixture alone corrected to byteOffset4/stride8, padding preserves wrong-offset sensitivity. All27 positives now official-core-validated before another native job."
+    ],
+    "core_fixture_preflight": {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures-validation.json",
+      "sha256": "1a4bc849b8543ceba4b7c635ba4cb7d2cb1ced5c7e0aed977244295b92b263e8",
+      "validator_version": "2.0.0-dev.3.10",
+      "validator_sha256": "5cba1e097935c9efd929d24a49610824259b030f0ae45672273bfbcbb5b87a62",
+      "positive_fixtures": 27,
+      "core_errors": 0,
+      "extension_limit": "Unsupported diffuse-transmission notices preserved. Not extension validation or native acceptance."
+    },
+    "pipeline_precision": {
+      "receipt_sha256": "4b42c3521cd2754f99573c7ec78535752bbf0c84637c90eb29594f76d8e5973c",
+      "observed": "Independent constant HDR fragment RGB(.12345,2.3456,.4568) gives (.1234130859375,2.34375,.456787109375), exact positive FP16 truncation before RGBA32F target; AA off, postprocessing off. HDR>1/non8bit verified.",
+      "scope": "Output pipeline quantizer proven; exact internal attachment/pass location not exposed. Per-value adjacent-half intervals enclose positive truncation, no blanket epsilon.",
+      "native_pi_fresnel_expected": 0.96,
+      "observed_ratio_interval": [
+        0.9593289273004576,
+        0.960325534079349
+      ],
+      "angular_expected": 0.4999784184671149,
+      "angular_interval": [
+        0.4996027542372881,
+        0.500132485426603
+      ],
+      "other_passed_partial_controls": [
+        "factor 0/.25/1 energy",
+        "metallic suppression",
+        "linear alpha and sRGB color versus literal uniform",
+        "wrong-transfer/wrong-alpha sensitivity"
+      ],
+      "remaining": [
+        "user visual approval"
+      ]
+    },
+    "candidate_gate": {
+      "passed": true,
+      "reader_cases_reused": 17,
+      "native_cases": 1,
+      "native_receipt_sha256": "710bdec85f756188d2238255621ee25e0a8812d75d7c0fb9249d7d3e25a12071",
+      "shader_sha256": "dfbc59486512cab43579aa7e6a12ed14cf10d2667d50ab9e54346e2a655d24e9",
+      "native_artifacts": "Temp/gltf-validation/direct-gpu/mandarin-diffuse-candidate/310f3107ae974875994bf8521037a9ef",
+      "scope": [
+        "positive endpoint float readback and independent HDR quantizer",
+        "native Lambert PI/Fresnel literal.96 + wrongPI/Fresnel controls",
+        "factor and metallic suppression",
+        "linear-alpha/sRGB-color and wrongtransfer/wrongalpha controls",
+        "seven consumed arbitrary UV sets, normalized stride/offset GPUreadback, separate transforms and repeat/mirror negatives",
+        "front diffuse energy reduction and retained specular",
+        "literal cube24face/mip native exactreadback and opposite-normal IBL energy"
+      ],
+      "opposite_hemisphere_ibl": {
+        "front_red": 0.44384765625,
+        "front_green": 0.030853271484375,
+        "transmitted_red": 0.147705078125,
+        "transmitted_green": 3.951171875
+      },
+      "limits": "Anonymous candidate on literal fixtures; point-light/native IBL service calibration. Does not establish real model public loading, broad directional/baked lighting, matched upstream photometry or user appearance approval."
+    },
+    "promotion": {
+      "root_review": "Accepted exact710b candidate gate plus originalreader17; approved exactdfbc namedshader and defaultregistration as staged feature only.",
+      "freeze": "diffuse-public-promotion-freeze.json",
+      "loader_source_sha256": "2c3fd141666c847c601a946b0f4bc57640d7fa65ccce0234e67137fb376655f0",
+      "installed": true,
+      "public_accepted": "actual tests passed; root review and user appearance approval separate",
+      "alpha_primitive_seven_uv_merge": false
+    },
+    "public_receipt": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-diffuse-named-public3/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "40e408ee3a8956744516ba508d6504dd5ceba6023292886b8a0e9ccf032089fc",
+      "expected": 3,
+      "passed": 3,
+      "failed": 0,
+      "incomplete": 0,
+      "cleanup_errors": [],
+      "engine_mvid": "e66560df-8eba-4c30-998a-a0296a91e4af",
+      "gltf_mvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+      "request_sha256": "1502fa030e504a3fd28c081f26c7104852142997660a7c50bd687860015fdaaf",
+      "scope": "Current public source+canonical2 and independent roughness compatibility1; real GPU data/captures, original material, per-instance override/restoration/survival/deletion."
+    },
+    "canonical_compiled": {
+      "phase": "single_canonical_compile",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/MandarinOrange.glb_c",
+      "previous_sha256": "a7f2ea695570d6c20077f553e0fd5b2736c03899dd474f873e5cd1e966c952d2",
+      "sha256": "60373e48dd9216b020590a16fd0c7d3005dc489646b60f0abb129e90132d422f",
+      "bytes": 4146980,
+      "source_sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091",
+      "compiler": "actual installed GltfCompiler.CompileWithEmbeddedImages",
+      "gltf_mvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+      "encoded_images_preserved": 4,
+      "scope": "One stable explicit derived artifact, source dependency and all embedded image bytes checked. This does not establish automatic native asset-graph packaging."
+    },
+    "zero_factor_core_compatibility": [
+      {
+        "phase": "zero_factor_core_compatibility",
+        "roughness": 0,
+        "light_incidence_degrees": 60,
+        "core_center_rgb": [
+          0.04364013671875,
+          0.13092041015625,
+          0.34912109375
+        ],
+        "transmission_zero_center_rgb": [
+          0.0460662841796875,
+          0.13818359375,
+          0.3685302734375
+        ],
+        "maximum_absolute_linear_difference": 0.023681640625,
+        "mean_absolute_linear_difference": 0.009402771790822348,
+        "changed_values": 12288,
+        "checked_values": 12288,
+        "scope": "Measured native core BRDF versus extension Lambert-reflection difference, including their shared native specular service. Diagnostic, not a pixel-identity or glTF core conformance assertion. No percentage tolerance used."
+      },
+      {
+        "phase": "zero_factor_core_compatibility",
+        "roughness": 0.5,
+        "light_incidence_degrees": 60,
+        "core_center_rgb": [
+          0.053314208984375,
+          0.14923095703125,
+          0.3892822265625
+        ],
+        "transmission_zero_center_rgb": [
+          0.0513763427734375,
+          0.14349365234375,
+          0.3739013671875
+        ],
+        "maximum_absolute_linear_difference": 0.019287109375,
+        "mean_absolute_linear_difference": 0.0077340975403785706,
+        "changed_values": 12288,
+        "checked_values": 12288,
+        "scope": "Measured native core BRDF versus extension Lambert-reflection difference, including their shared native specular service. Diagnostic, not a pixel-identity or glTF core conformance assertion. No percentage tolerance used."
+      },
+      {
+        "phase": "zero_factor_core_compatibility",
+        "roughness": 1,
+        "light_incidence_degrees": 60,
+        "core_center_rgb": [
+          0.0570526123046875,
+          0.1583251953125,
+          0.41162109375
+        ],
+        "transmission_zero_center_rgb": [
+          0.052459716796875,
+          0.14459228515625,
+          0.3748779296875
+        ],
+        "maximum_absolute_linear_difference": 0.0390625,
+        "mean_absolute_linear_difference": 0.018119369943936665,
+        "changed_values": 12288,
+        "checked_values": 12288,
+        "scope": "Measured native core BRDF versus extension Lambert-reflection difference, including their shared native specular service. Diagnostic, not a pixel-identity or glTF core conformance assertion. No percentage tolerance used."
+      }
+    ],
+    "canonical_core_validator": {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-canonical-validator.json",
+      "sha256": "ce5575821611b74fa351660a7d94364d63a7ff0ec1e080886eed2658b6fb6b13",
+      "core_errors": 0,
+      "status": "incomplete extension validation, zero coreerrors; DTunsupported notice retained"
+    },
+    "presentation_convergence": {
+      "receipt": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-diffuse-source-convergence1/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "3a470c3d656481c1624c62f66ea3c7ff157290bea620a0f82ed0e7fdc47d7179",
+        "passed": 1,
+        "expected": 1,
+        "failed": 0,
+        "incomplete": 0,
+        "cleanup_errors": [],
+        "engine_mvid": "e66560df-8eba-4c30-998a-a0296a91e4af",
+        "gltf_mvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+        "request_sha256": "c185641eda7966114f4bce5f9d4aeeac8a8a66108becffc53f9a96b07ac5e5bc",
+        "scope": "One presentation-only source convergence capture. Original accepted public3 unchanged; no functional suite rerun."
+      },
+      "runtime_settings": {
+        "phase": "runtime_presentation_settings",
+        "EnablePostProcessing": true,
+        "auto_exposure_enabled": true,
+        "exposure_compensation": 0,
+        "minimum_exposure": 1,
+        "maximum_exposure": 2,
+        "exposure_rate": 20,
+        "native_tonemap_enabled": true,
+        "AntiAliasing": true,
+        "width": 1151,
+        "height": 1309,
+        "camera_position": "4,0,0",
+        "camera_rotation": "0,0,1,0",
+        "OrthographicHeight": 1.25,
+        "front_light": "200,-30,60 radius1000 white4",
+        "rear_light": "-200,30,60 radius1000 white4",
+        "scope": "Same original camera/framing/lights/material and postprocessing policy, changed capture resolution to authored screenshot-large dimensions. Runtime flags recorded instead of assuming AutoExposure defaultfalse survives editor policy."
+      },
+      "measurement": {
+        "phase": "actual_render_to_texture_convergence",
+        "settled": true,
+        "renders": 5,
+        "max_renders": 64,
+        "width": 1151,
+        "height": 1309,
+        "source_sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091",
+        "selected_scene": 0,
+        "authored_default_scene": null,
+        "first_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-convergence/8a470e404eea46918535792a30e57905/first_actual_render.png",
+        "first_sha256": "d2ef1d57919fead0e0880b50f773b0e4c02567cf405b1260119166a7e7986a5b",
+        "final_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-convergence/8a470e404eea46918535792a30e57905/settled_actual_source_diffuse_transmission.png",
+        "final_sha256": "d2ef1d57919fead0e0880b50f773b0e4c02567cf405b1260119166a7e7986a5b",
+        "first_mean_display_luminance": 0.5085539063743977,
+        "final_mean_display_luminance": 0.5085539063743977,
+        "criteria": "Four successive actual RTT/readback pairs: maxchannel delta<=1RGBA8 code and mean absolute foreground-component delta<=.05 code. Presentation convergence only, not radiometric equality.",
+        "rows": [
+          {
+            "render": 1,
+            "coverage": 299765,
+            "foreground_mean_display_luminance": 0.5085539063743977,
+            "maximum_channel_delta_codes": null,
+            "mean_absolute_delta_codes": null,
+            "changed_pixels": null,
+            "stable_consecutive_pairs": 0,
+            "engine_frame": 102905,
+            "elapsed_seconds": 0.0650178,
+            "native_tonemap_enabled": true,
+            "auto_exposure_enabled": true
+          },
+          {
+            "render": 2,
+            "coverage": 299765,
+            "foreground_mean_display_luminance": 0.5085539063743977,
+            "maximum_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "stable_consecutive_pairs": 1,
+            "engine_frame": 102911,
+            "elapsed_seconds": 0.3028944,
+            "native_tonemap_enabled": true,
+            "auto_exposure_enabled": true
+          },
+          {
+            "render": 3,
+            "coverage": 299765,
+            "foreground_mean_display_luminance": 0.5085539063743977,
+            "maximum_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "stable_consecutive_pairs": 2,
+            "engine_frame": 102917,
+            "elapsed_seconds": 0.3642611,
+            "native_tonemap_enabled": true,
+            "auto_exposure_enabled": true
+          },
+          {
+            "render": 4,
+            "coverage": 299765,
+            "foreground_mean_display_luminance": 0.5085539063743977,
+            "maximum_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "stable_consecutive_pairs": 3,
+            "engine_frame": 102923,
+            "elapsed_seconds": 0.4251761,
+            "native_tonemap_enabled": true,
+            "auto_exposure_enabled": true
+          },
+          {
+            "render": 5,
+            "coverage": 299765,
+            "foreground_mean_display_luminance": 0.5085539063743977,
+            "maximum_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "stable_consecutive_pairs": 4,
+            "engine_frame": 102929,
+            "elapsed_seconds": 0.4851958,
+            "native_tonemap_enabled": true,
+            "auto_exposure_enabled": true
+          }
+        ],
+        "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-convergence/8a470e404eea46918535792a30e57905",
+        "scope": "One actual source-only reference-sized settled visual capture; original source+canonical192px functional3 proof remains accepted and separate. No new high-resolution compiled capture claim, no environment/upstream photometric match."
+      },
+      "conclusion": "Adaptive exposure is active; this source presentation was already settled at the first actual RTT. Four successive foreground-union comparison pairs had exactly zero RGB deltas, and first/final full PNG bytes are identical. No exposure warm-up defect observed; grey/yellow versus upstream remains user appearance review."
+    },
+    "hdri_lighting_correction": {
+      "receipt": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-source-field-sky-lighting1-metadata/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "00ead190e6f7049b42210039ca9b6f8bcff0d1a77e6badb1a1795b9a13d30995",
+        "expected": 1,
+        "passed": 1,
+        "failed": 0,
+        "incomplete": 0,
+        "cleanup_errors": [],
+        "engine_mvid": "e66560df-8eba-4c30-998a-a0296a91e4af",
+        "gltf_mvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+        "request_sha256": "a41531e75a1f31abf3ea9d56ed0a327fad8c7a1a774348195767b2d748988b4b",
+        "scope": "One new HDRI lighting/visible sky presentation control; unchanged accepted feature3 and canonical192 proof not rerun."
+      },
+      "summary": {
+        "phase": "source_hdri_sky_presentation",
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/settled_actual_source_field_hdri_sky.png",
+        "sha256": "ba635d35cc0d8c03e5bb853d6a107b17470ab8a0a1de8939d029cda45505491d",
+        "width": 1151,
+        "height": 1309,
+        "source_sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091",
+        "selected_scene": 0,
+        "authored_default_scene": null,
+        "environment_texture": "materials/gltf_reference_environment/field.vtex",
+        "environment_compiled_sha256": "01cc0d0f0f69aa856b6650c71d5a4c8528667f61444b35b7c9bc382cda98fc55",
+        "environment_width": 1024,
+        "environment_height": 1024,
+        "environment_depth": 6,
+        "environment_mips": 9,
+        "environment_intensity": 0.75,
+        "environment_yaw": 0,
+        "sky_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/actual_field_sky_only.png",
+        "sky_sha256": "fb9ba53f9340c43e8ad1f0324d2d3883bc8e78cc434e390d393a8935e172ba3d",
+        "no_ibl_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/same_sky_without_ibl_probe_control.png",
+        "no_ibl_sha256": "5e6e73100c1e4d1190a15d61d3f47b0f96a90c00d55a77fbb4e60e05d28b6c7e",
+        "deleted_black_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/empty_after_sky_model_probe_delete.png",
+        "foreground_pixels": 311280,
+        "actual_ibl_changed_pixels": 311280,
+        "foreground_mean_display_luminance": 0.2387252284608487,
+        "near_white_rgb230_pixels": 0,
+        "near_white_fraction": 0,
+        "camera_position": "4,0,0",
+        "camera_target": "0,0,0",
+        "projection": "perspective",
+        "vertical_fov": 18,
+        "illumination": "Field IBL .75, matching visible Field sky .75; former point lights zero/removed; ambient RGBA0",
+        "tone_mode": "ACES",
+        "exposure_min": 1,
+        "exposure_max": 1,
+        "exposure_compensation": 0,
+        "material_shader": "shaders/gltf_diffuse_transmission.shader",
+        "scope": "New source-only actual HDRI/visible-sky presentation and IBL/sky/deletion controls. No source material edits or functional3 rerun; environment/yaw/ACES/fixedEV0 and perspective framing inferred, not upstream calibrated appearance. Field compiled disk identity known; live HDR resident byte identity not newly proven."
+      },
+      "convergence": [
+        {
+          "phase": "actual_rtt_convergence",
+          "label": "actual_field_sky_only",
+          "rows": [
+            {
+              "render": 1,
+              "max_channel_delta_codes": null,
+              "mean_absolute_delta_codes": null,
+              "changed_pixels": null,
+              "mean_display_luminance": 0.06772661631227464,
+              "stable_pairs": 0,
+              "elapsed_seconds": 0.0854695
+            },
+            {
+              "render": 2,
+              "max_channel_delta_codes": 0,
+              "mean_absolute_delta_codes": 0,
+              "changed_pixels": 0,
+              "mean_display_luminance": 0.06772661631227464,
+              "stable_pairs": 1,
+              "elapsed_seconds": 0.1790747
+            },
+            {
+              "render": 3,
+              "max_channel_delta_codes": 0,
+              "mean_absolute_delta_codes": 0,
+              "changed_pixels": 0,
+              "mean_display_luminance": 0.06772661631227464,
+              "stable_pairs": 2,
+              "elapsed_seconds": 0.2412469
+            },
+            {
+              "render": 4,
+              "max_channel_delta_codes": 0,
+              "mean_absolute_delta_codes": 0,
+              "changed_pixels": 0,
+              "mean_display_luminance": 0.06772661631227464,
+              "stable_pairs": 3,
+              "elapsed_seconds": 0.3013862
+            },
+            {
+              "render": 5,
+              "max_channel_delta_codes": 0,
+              "mean_absolute_delta_codes": 0,
+              "changed_pixels": 0,
+              "mean_display_luminance": 0.06772661631227464,
+              "stable_pairs": 4,
+              "elapsed_seconds": 0.3595859
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/actual_field_sky_only.png",
+          "sha256": "fb9ba53f9340c43e8ad1f0324d2d3883bc8e78cc434e390d393a8935e172ba3d",
+          "native_tonemap_enabled": true,
+          "auto_exposure_enabled": true,
+          "minimum_exposure": 1,
+          "maximum_exposure": 1,
+          "exposure_compensation": 0,
+          "ambient": "0.00, 0.00, 0.00, 0.00",
+          "criteria": "Four consecutive full-image RTT pairs: maximum1RGBA8 code and mean .05codes/component or lower; actual renders, not widget-only wait."
+        },
+        {
+          "phase": "actual_rtt_convergence",
+          "label": "settled_actual_source_field_hdri_sky",
+          "rows": [
+            {
+              "render": 1,
+              "max_channel_delta_codes": null,
+              "mean_absolute_delta_codes": null,
+              "changed_pixels": null,
+              "mean_display_luminance": 0.10585499610820767,
+              "stable_pairs": 0,
+              "elapsed_seconds": 0.0567423
+            },
+            {
+              "render": 2,
+              "max_channel_delta_codes": 0,
+              "mean_absolute_delta_codes": 0,
+              "changed_pixels": 0,
+              "mean_display_luminance": 0.10585499610820767,
+              "stable_pairs": 1,
+              "elapsed_seconds": 0.1161054
+            },
+            {
+              "render": 3,
+              "max_channel_delta_codes": 0,
+              "mean_absolute_delta_codes": 0,
+              "changed_pixels": 0,
+              "mean_display_luminance": 0.10585499610820767,
+              "stable_pairs": 2,
+              "elapsed_seconds": 0.1754894
+            },
+            {
+              "render": 4,
+              "max_channel_delta_codes": 0,
+              "mean_absolute_delta_codes": 0,
+              "changed_pixels": 0,
+              "mean_display_luminance": 0.10585499610820767,
+              "stable_pairs": 3,
+              "elapsed_seconds": 0.2360341
+            },
+            {
+              "render": 5,
+              "max_channel_delta_codes": 0,
+              "mean_absolute_delta_codes": 0,
+              "changed_pixels": 0,
+              "mean_display_luminance": 0.10585499610820767,
+              "stable_pairs": 4,
+              "elapsed_seconds": 0.2955173
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/settled_actual_source_field_hdri_sky.png",
+          "sha256": "ba635d35cc0d8c03e5bb853d6a107b17470ab8a0a1de8939d029cda45505491d",
+          "native_tonemap_enabled": true,
+          "auto_exposure_enabled": true,
+          "minimum_exposure": 1,
+          "maximum_exposure": 1,
+          "exposure_compensation": 0,
+          "ambient": "0.00, 0.00, 0.00, 0.00",
+          "criteria": "Four consecutive full-image RTT pairs: maximum1RGBA8 code and mean .05codes/component or lower; actual renders, not widget-only wait."
+        },
+        {
+          "phase": "actual_rtt_convergence",
+          "label": "same_sky_without_ibl_probe_control",
+          "rows": [
+            {
+              "render": 1,
+              "max_channel_delta_codes": null,
+              "mean_absolute_delta_codes": null,
+              "changed_pixels": null,
+              "mean_display_luminance": 0.05653169508043544,
+              "stable_pairs": 0,
+              "elapsed_seconds": 0.0561063
+            },
+            {
+              "render": 2,
+              "max_channel_delta_codes": 0,
+              "mean_absolute_delta_codes": 0,
+              "changed_pixels": 0,
+              "mean_display_luminance": 0.05653169508043544,
+              "stable_pairs": 1,
+              "elapsed_seconds": 0.1211811
+            },
+            {
+              "render": 3,
+              "max_channel_delta_codes": 0,
+              "mean_absolute_delta_codes": 0,
+              "changed_pixels": 0,
+              "mean_display_luminance": 0.05653169508043544,
+              "stable_pairs": 2,
+              "elapsed_seconds": 0.183039
+            },
+            {
+              "render": 4,
+              "max_channel_delta_codes": 0,
+              "mean_absolute_delta_codes": 0,
+              "changed_pixels": 0,
+              "mean_display_luminance": 0.05653169508043544,
+              "stable_pairs": 3,
+              "elapsed_seconds": 0.2427799
+            },
+            {
+              "render": 5,
+              "max_channel_delta_codes": 0,
+              "mean_absolute_delta_codes": 0,
+              "changed_pixels": 0,
+              "mean_display_luminance": 0.05653169508043544,
+              "stable_pairs": 4,
+              "elapsed_seconds": 0.3017985
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/same_sky_without_ibl_probe_control.png",
+          "sha256": "5e6e73100c1e4d1190a15d61d3f47b0f96a90c00d55a77fbb4e60e05d28b6c7e",
+          "native_tonemap_enabled": true,
+          "auto_exposure_enabled": true,
+          "minimum_exposure": 1,
+          "maximum_exposure": 1,
+          "exposure_compensation": 0,
+          "ambient": "0.00, 0.00, 0.00, 0.00",
+          "criteria": "Four consecutive full-image RTT pairs: maximum1RGBA8 code and mean .05codes/component or lower; actual renders, not widget-only wait."
+        },
+        {
+          "phase": "actual_rtt_convergence",
+          "label": "empty_after_sky_model_probe_delete",
+          "rows": [
+            {
+              "render": 1,
+              "max_channel_delta_codes": null,
+              "mean_absolute_delta_codes": null,
+              "changed_pixels": null,
+              "mean_display_luminance": 0,
+              "stable_pairs": 0,
+              "elapsed_seconds": 0.0605938
+            },
+            {
+              "render": 2,
+              "max_channel_delta_codes": 0,
+              "mean_absolute_delta_codes": 0,
+              "changed_pixels": 0,
+              "mean_display_luminance": 0,
+              "stable_pairs": 1,
+              "elapsed_seconds": 0.1240918
+            },
+            {
+              "render": 3,
+              "max_channel_delta_codes": 0,
+              "mean_absolute_delta_codes": 0,
+              "changed_pixels": 0,
+              "mean_display_luminance": 0,
+              "stable_pairs": 2,
+              "elapsed_seconds": 0.1896593
+            },
+            {
+              "render": 4,
+              "max_channel_delta_codes": 0,
+              "mean_absolute_delta_codes": 0,
+              "changed_pixels": 0,
+              "mean_display_luminance": 0,
+              "stable_pairs": 3,
+              "elapsed_seconds": 0.2479776
+            },
+            {
+              "render": 5,
+              "max_channel_delta_codes": 0,
+              "mean_absolute_delta_codes": 0,
+              "changed_pixels": 0,
+              "mean_display_luminance": 0,
+              "stable_pairs": 4,
+              "elapsed_seconds": 0.3046075
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/empty_after_sky_model_probe_delete.png",
+          "sha256": "47078170a8a4c558c70554480d4f67e4c6d7c3d58271413c6f86afa52a5ce42c",
+          "native_tonemap_enabled": true,
+          "auto_exposure_enabled": true,
+          "minimum_exposure": 1,
+          "maximum_exposure": 1,
+          "exposure_compensation": 0,
+          "ambient": "0.00, 0.00, 0.00, 0.00",
+          "criteria": "Four consecutive full-image RTT pairs: maximum1RGBA8 code and mean .05codes/component or lower; actual renders, not widget-only wait."
+        }
+      ],
+      "first_metadata_failure": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-source-field-sky-lighting1/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "dd7b9fb9e53934bfe5464937fcfca756e13c8c5e027f12b105ac2b5700eeb65d",
+        "error": "Actual presentation assertions completed, but overall receipt serialization failed on Width/width constructor binding. Corrected measurement field names only; prior failure retained."
+      },
+      "user_feedback": "User: The manderin should probably have a hdri skybox, and current light is too bright, it causes it to become almost white",
+      "prior_visual_fingerprint": "a567b47f98b6e735dcd7fe3aa41bbf96d1a76ef0dec31ec68283f18ceddaf336",
+      "source_material_modified": false,
+      "source_or_geometry_modified": false,
+      "functional_suite_rerun": false,
+      "environment_attribution": {
+        "author": "HDRI-Hub",
+        "license": "CC BY3.0",
+        "source_url": "https://www.hdri-hub.com/hdrishop/freesamples/freehdri/item/116-hdr-040-field-free",
+        "license_url": "https://creativecommons.org/licenses/by/3.0/",
+        "source_distribution": "Khronos glTF-Sample-Environments field.hdr, converted existingField.exr"
+      },
+      "feedback_provenance": {
+        "kind": "parent_direct_chat_relay",
+        "case_id": "MandarinOrange/glTF::diffuse-transmission-review",
+        "prior_site_version": 28,
+        "prior_site_commit": "6f8801cc23a0716b4cafc58ce978eefeb6b88d4d",
+        "summary": "User asks for HDRI skybox; current lighting too bright/almostwhite.",
+        "feedback_record": "research/gltf-validation/user-feedback.json#reportedIssues/mandarin-v28-lighting-chat-feedback",
+        "website_form_vote_supplied": false
+      },
+      "root_visual_review": "Approved newba635d image for published user review; not final human appearance acceptance. No further relighting until userfeedback."
+    }
+  },
+  "historical_core_fallback_status": "passed",
+  "current_requested_acceptance": "Diffuse transmission implemented and actual public source/canonical2 plus compatibility1 passed. Named shader matches reviewed candidate; human visual approval pending against new captures.",
+  "historical_core_fallback": {
+    "acceptance_scope": "Bounded Linux model/core acceptance. Valid no-default resource, explicit authored scene, actual original core textures through public Model.Load and ordinary ModelRenderer, source/compiled GPU data/captures, and editable-source scene-view reimport. Human visual approval remains pending.",
+    "producer": {
+      "stage": "8fc2880d1a95400ea530828b91d854f1",
+      "pid": 261353,
+      "start": "1595719",
+      "engine_mvid": "0ce2dfa5-c98c-45e4-ad3a-6c810a17a6ef",
+      "engine_sha256": "10bf7867d04b8b6428c0ec9ecf377d80cb10745099b1ddd81c6b2c9e78819f77",
+      "gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+      "gltf_sha256": "7638a855ba21fd9c079a22cbc8b834d4169112fe08cb9a5fd788e63cf90866e1",
+      "tools_mvid": "ff2adc3f-38da-4c30-88aa-63b1acf594ab",
+      "tools_sha256": "24f1c1f71037b811ae1be462945279e10a54ede908842e143848194cc4e94e1c",
+      "scope": "Current 8fc public material/GPU/capture proof. Resource/core01459 and reimport e12 evidence retain exact original producers."
+    },
+    "producer_modules": [
+      {
+        "diskMvid": "0ce2dfa5-c98c-45e4-ad3a-6c810a17a6ef",
+        "loadedMvid": "0ce2dfa5-c98c-45e4-ad3a-6c810a17a6ef",
+        "name": "Sandbox.Engine",
+        "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.Engine.dll",
+        "sha256": "10bf7867d04b8b6428c0ec9ecf377d80cb10745099b1ddd81c6b2c9e78819f77"
+      },
+      {
+        "diskMvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+        "loadedMvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+        "name": "Sandbox.Gltf",
+        "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.Gltf.dll",
+        "sha256": "7638a855ba21fd9c079a22cbc8b834d4169112fe08cb9a5fd788e63cf90866e1"
+      },
+      {
+        "diskMvid": "c22b305b-109d-4166-a212-a7d4bc301e40",
+        "loadedMvid": "c22b305b-109d-4166-a212-a7d4bc301e40",
+        "name": "Sandbox.SceneRenderer",
+        "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.SceneRenderer.dll",
+        "sha256": "b5c8196be0f3c6bcca5cbae5f11e3ec4d3013fde98afffec99cd0e68fd11e7a1"
+      },
+      {
+        "diskMvid": "ff2adc3f-38da-4c30-88aa-63b1acf594ab",
+        "loadedMvid": "ff2adc3f-38da-4c30-88aa-63b1acf594ab",
+        "name": "Sandbox.Tools",
+        "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.Tools.dll",
+        "sha256": "24f1c1f71037b811ae1be462945279e10a54ede908842e143848194cc4e94e1c"
+      }
+    ],
+    "compiled_shaders": {
+      "gltf_deform_cs.shader_c": {
+        "path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_deform_cs.shader_c",
+        "scope": "compiled bytes on disk; native feature controls remain separate",
+        "sha256": "89b664f9492d1f465a79ae309cc52994cf2d1b391eeea89a0879c97df67f34f2"
+      },
+      "gltf_stock_sampler.shader_c": {
+        "path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_stock_sampler.shader_c",
+        "scope": "compiled bytes on disk; native feature controls remain separate",
+        "sha256": "b45f66c100d9fac1c270e609e11a372dddfc3ecae64029601632b889ec7b6cfd"
+      },
+      "gltf_surface_five_uv.shader_c": {
+        "path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_surface_five_uv.shader_c",
+        "scope": "compiled bytes on disk; native feature controls remain separate",
+        "sha256": "56d299238d1ad80b721ad7ba9f45938725f3b124eb79f0e35020764680b33748"
+      },
+      "gltf_unlit_five_uv.shader_c": {
+        "path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_unlit_five_uv.shader_c",
+        "scope": "compiled bytes on disk; native feature controls remain separate",
+        "sha256": "e494af0983bd7ab5c00c9ee8c78c3fc3cbd406eb9c63c86c466f9396ebf5251d"
+      },
+      "vertex_color.shader_c": {
+        "path": "/home/damian/projects/sbox-public/game/core/shaders/vertex_color.shader_c",
+        "scope": "compiled bytes on disk; native feature controls remain separate",
+        "sha256": "8f4ecfe974cbd25d5cc2319f6a44fb760e47e49e573ca303cb32a94535756f46"
+      }
+    },
+    "executed_suite": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-8fc-public-lazy-captures/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "1ca782cfb82f47dc6ca0ecdda60716d39076ce3e0f3c7ec402bd2d48f3794dbe",
+      "expected": 2,
+      "passed": 2,
+      "failed": 0,
+      "incomplete": 0,
+      "cleanup_errors": [],
+      "engine_mvid": "0ce2dfa5-c98c-45e4-ad3a-6c810a17a6ef",
+      "gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+      "request_sha256": "1d9dc338473a04d4ef100bfb99c28fc41b7e30ae2b90575e74f65a8711723c20",
+      "scope": "8fc actual source/compiled public Model.Load(path,0), ordinary renderer with lazy material realization, every output position/source-normal and index mapping, material-only negative, restore and deletion."
+    },
+    "effective_acceptance_gate_inventory": {
+      "gates": 40,
+      "passed": 40,
+      "failed": 0,
+      "incomplete": 0,
+      "scope": "30 retained reader/resource gates on 01459;6 affected reimport gates rerun e12; 2 historical diagnostic geometry gates on 01459;2 previously failing public material gates superseded by stronger current 8fc public capture cases. This is a proof composition, not a claimed40-case current-producer run."
+    },
+    "forms": [
+      {
+        "name": "glTF/source",
+        "input_sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091",
+        "actual_upstream_variant": "glTF",
+        "derived": false,
+        "unselected_asset_load": "passed01459 original producer",
+        "explicit_public_scene_load": "passed8fc current producer",
+        "public_material_and_gpu": "passed8fc current producer",
+        "capture": {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/942d3b9a5e824986bfe77b7d5d4754ae/actual_public_source_material_scene0.png",
+          "sha256": "bdeeba22156c0d88beccbf924dc846c275a605fd154a02c1f03b542a7ecb968e",
+          "width": 192,
+          "height": 192
+        }
+      },
+      {
+        "name": "glTF/derived-glb_c",
+        "input_sha256": "a7f2ea695570d6c20077f553e0fd5b2736c03899dd474f873e5cd1e966c952d2",
+        "actual_upstream_variant": "glTF",
+        "derived": true,
+        "unselected_asset_load": "passed01459 original producer",
+        "explicit_public_scene_load": "passed8fc current producer",
+        "public_material_and_gpu": "passed8fc current producer",
+        "capture": {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/ab3161f1f1a644d0a62c25b928dfd705/actual_public_source_material_scene0.png",
+          "sha256": "bdeeba22156c0d88beccbf924dc846c275a605fd154a02c1f03b542a7ecb968e",
+          "width": 192,
+          "height": 192
+        }
+      }
+    ],
+    "capture": {
+      "form": "glTF/source",
+      "input_sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091",
+      "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/942d3b9a5e824986bfe77b7d5d4754ae",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/942d3b9a5e824986bfe77b7d5d4754ae/actual_public_source_material_scene0.png",
+      "sha256": "bdeeba22156c0d88beccbf924dc846c275a605fd154a02c1f03b542a7ecb968e",
+      "Coverage": 6356,
+      "public_resource": "mandarin_public_1c73ca9774e3458783f9e50a05797e53.gltf#scene=0",
+      "material_realization": "ordinary renderer lazy instance; getter read only after creation",
+      "source_material_shader_names": [
+        "shaders/gltf_surface_five_uv.shader"
+      ],
+      "compute_shader": "shaders/gltf_deform_cs.shader",
+      "selected_scene": 0,
+      "authored_default": null,
+      "vertex_count": 122508,
+      "source_vertex_count": 24138,
+      "index_count": 122508,
+      "maximum_position_error_inches": 2.9802322e-08,
+      "maximum_normal_error": 1.7881393e-07,
+      "maximum_normal_tangent_dot": 1.1175871e-07,
+      "white_material_negative_changed_pixels": 6380,
+      "restored_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/942d3b9a5e824986bfe77b7d5d4754ae/restored_public_source_material.png",
+      "scope": "Actual public Model.Load(path,0), ordinary ModelRenderer, original core material textures and GPU readbacks. Optional diffuse transmission fallback; inferred camera/light/exposure, no calibrated pixel oracle or user visual approval.",
+      "producer_stage": "8fc",
+      "width": 192,
+      "height": 192,
+      "kind": "image",
+      "mime_type": "image/png"
+    },
+    "captures": [
+      {
+        "form": "glTF/source",
+        "input_sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091",
+        "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/942d3b9a5e824986bfe77b7d5d4754ae",
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/942d3b9a5e824986bfe77b7d5d4754ae/actual_public_source_material_scene0.png",
+        "sha256": "bdeeba22156c0d88beccbf924dc846c275a605fd154a02c1f03b542a7ecb968e",
+        "Coverage": 6356,
+        "public_resource": "mandarin_public_1c73ca9774e3458783f9e50a05797e53.gltf#scene=0",
+        "material_realization": "ordinary renderer lazy instance; getter read only after creation",
+        "source_material_shader_names": [
+          "shaders/gltf_surface_five_uv.shader"
+        ],
+        "compute_shader": "shaders/gltf_deform_cs.shader",
+        "selected_scene": 0,
+        "authored_default": null,
+        "vertex_count": 122508,
+        "source_vertex_count": 24138,
+        "index_count": 122508,
+        "maximum_position_error_inches": 2.9802322e-08,
+        "maximum_normal_error": 1.7881393e-07,
+        "maximum_normal_tangent_dot": 1.1175871e-07,
+        "white_material_negative_changed_pixels": 6380,
+        "restored_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/942d3b9a5e824986bfe77b7d5d4754ae/restored_public_source_material.png",
+        "scope": "Actual public Model.Load(path,0), ordinary ModelRenderer, original core material textures and GPU readbacks. Optional diffuse transmission fallback; inferred camera/light/exposure, no calibrated pixel oracle or user visual approval.",
+        "producer_stage": "8fc",
+        "width": 192,
+        "height": 192,
+        "kind": "image",
+        "mime_type": "image/png"
+      },
+      {
+        "form": "glTF/derived-glb_c",
+        "input_sha256": "a7f2ea695570d6c20077f553e0fd5b2736c03899dd474f873e5cd1e966c952d2",
+        "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/ab3161f1f1a644d0a62c25b928dfd705",
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/ab3161f1f1a644d0a62c25b928dfd705/actual_public_source_material_scene0.png",
+        "sha256": "bdeeba22156c0d88beccbf924dc846c275a605fd154a02c1f03b542a7ecb968e",
+        "Coverage": 6356,
+        "public_resource": "mandarin_public_a5af52e3a10e48b2ab875f1e96a9a417.glb#scene=0",
+        "material_realization": "ordinary renderer lazy instance; getter read only after creation",
+        "source_material_shader_names": [
+          "shaders/gltf_surface_five_uv.shader"
+        ],
+        "compute_shader": "shaders/gltf_deform_cs.shader",
+        "selected_scene": 0,
+        "authored_default": null,
+        "vertex_count": 122508,
+        "source_vertex_count": 24138,
+        "index_count": 122508,
+        "maximum_position_error_inches": 2.9802322e-08,
+        "maximum_normal_error": 1.7881393e-07,
+        "maximum_normal_tangent_dot": 1.1175871e-07,
+        "white_material_negative_changed_pixels": 6380,
+        "restored_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/ab3161f1f1a644d0a62c25b928dfd705/restored_public_source_material.png",
+        "scope": "Actual public Model.Load(path,0), ordinary ModelRenderer, original core material textures and GPU readbacks. Optional diffuse transmission fallback; inferred camera/light/exposure, no calibrated pixel oracle or user visual approval.",
+        "producer_stage": "8fc",
+        "width": 192,
+        "height": 192,
+        "kind": "image",
+        "mime_type": "image/png"
+      }
+    ],
+    "capture_controls": [
+      {
+        "form": "glTF/source",
+        "captures": [
+          {
+            "phase": "capture",
+            "name": "empty_before",
+            "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/942d3b9a5e824986bfe77b7d5d4754ae/empty_before.png",
+            "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+            "width": 192,
+            "height": 192,
+            "coverage": 0,
+            "engine_frame": 35671,
+            "widget_frames": 10,
+            "elapsed_seconds": 0.2043068,
+            "camera_position": "4,0,0",
+            "camera_rotation": "0,0,1,0",
+            "custom_size": "192,192",
+            "scene_camera_size": "192,192",
+            "screen_rect": "0,0,192,192",
+            "viewport": "0,0,1,1",
+            "DebugMode": 0,
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 1.25,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00",
+            "scope": "Fresh192px diagnostic native camera capture; not a1080p performance benchmark."
+          },
+          {
+            "phase": "capture",
+            "name": "actual_public_source_material_scene0",
+            "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/942d3b9a5e824986bfe77b7d5d4754ae/actual_public_source_material_scene0.png",
+            "sha256": "bdeeba22156c0d88beccbf924dc846c275a605fd154a02c1f03b542a7ecb968e",
+            "width": 192,
+            "height": 192,
+            "coverage": 6356,
+            "engine_frame": 35679,
+            "widget_frames": 18,
+            "elapsed_seconds": 5.0649314,
+            "camera_position": "4,0,0",
+            "camera_rotation": "0,0,1,0",
+            "custom_size": "192,192",
+            "scene_camera_size": "192,192",
+            "screen_rect": "0,0,192,192",
+            "viewport": "0,0,1,1",
+            "DebugMode": 0,
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 1.25,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00",
+            "scope": "Fresh192px diagnostic native camera capture; not a1080p performance benchmark."
+          },
+          {
+            "phase": "capture",
+            "name": "borrowed_white_material_negative",
+            "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/942d3b9a5e824986bfe77b7d5d4754ae/borrowed_white_material_negative.png",
+            "sha256": "a403e73d366c5b29ee52a6bd41146625414149945d3168d9ae1638d54d57198d",
+            "width": 192,
+            "height": 192,
+            "coverage": 6350,
+            "engine_frame": 35686,
+            "widget_frames": 24,
+            "elapsed_seconds": 5.8011182,
+            "camera_position": "4,0,0",
+            "camera_rotation": "0,0,1,0",
+            "custom_size": "192,192",
+            "scene_camera_size": "192,192",
+            "screen_rect": "0,0,192,192",
+            "viewport": "0,0,1,1",
+            "DebugMode": 0,
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 1.25,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00",
+            "scope": "Fresh192px diagnostic native camera capture; not a1080p performance benchmark."
+          },
+          {
+            "phase": "capture",
+            "name": "restored_public_source_material",
+            "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/942d3b9a5e824986bfe77b7d5d4754ae/restored_public_source_material.png",
+            "sha256": "bdeeba22156c0d88beccbf924dc846c275a605fd154a02c1f03b542a7ecb968e",
+            "width": 192,
+            "height": 192,
+            "coverage": 6356,
+            "engine_frame": 35692,
+            "widget_frames": 30,
+            "elapsed_seconds": 6.4012746,
+            "camera_position": "4,0,0",
+            "camera_rotation": "0,0,1,0",
+            "custom_size": "192,192",
+            "scene_camera_size": "192,192",
+            "screen_rect": "0,0,192,192",
+            "viewport": "0,0,1,1",
+            "DebugMode": 0,
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 1.25,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00",
+            "scope": "Fresh192px diagnostic native camera capture; not a1080p performance benchmark."
+          },
+          {
+            "phase": "capture",
+            "name": "empty_after_public_delete",
+            "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/942d3b9a5e824986bfe77b7d5d4754ae/empty_after_public_delete.png",
+            "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+            "width": 192,
+            "height": 192,
+            "coverage": 0,
+            "engine_frame": 35698,
+            "widget_frames": 36,
+            "elapsed_seconds": 7.0004582,
+            "camera_position": "4,0,0",
+            "camera_rotation": "0,0,1,0",
+            "custom_size": "192,192",
+            "scene_camera_size": "192,192",
+            "screen_rect": "0,0,192,192",
+            "viewport": "0,0,1,1",
+            "DebugMode": 0,
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 1.25,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00",
+            "scope": "Fresh192px diagnostic native camera capture; not a1080p performance benchmark."
+          }
+        ]
+      },
+      {
+        "form": "glTF/derived-glb_c",
+        "captures": [
+          {
+            "phase": "capture",
+            "name": "empty_before",
+            "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/ab3161f1f1a644d0a62c25b928dfd705/empty_before.png",
+            "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+            "width": 192,
+            "height": 192,
+            "coverage": 0,
+            "engine_frame": 35705,
+            "widget_frames": 6,
+            "elapsed_seconds": 0.6613188,
+            "camera_position": "4,0,0",
+            "camera_rotation": "0,0,1,0",
+            "custom_size": "192,192",
+            "scene_camera_size": "192,192",
+            "screen_rect": "0,0,192,192",
+            "viewport": "0,0,1,1",
+            "DebugMode": 0,
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 1.25,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00",
+            "scope": "Fresh192px diagnostic native camera capture; not a1080p performance benchmark."
+          },
+          {
+            "phase": "capture",
+            "name": "actual_public_source_material_scene0",
+            "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/ab3161f1f1a644d0a62c25b928dfd705/actual_public_source_material_scene0.png",
+            "sha256": "bdeeba22156c0d88beccbf924dc846c275a605fd154a02c1f03b542a7ecb968e",
+            "width": 192,
+            "height": 192,
+            "coverage": 6356,
+            "engine_frame": 35711,
+            "widget_frames": 12,
+            "elapsed_seconds": 5.8584747,
+            "camera_position": "4,0,0",
+            "camera_rotation": "0,0,1,0",
+            "custom_size": "192,192",
+            "scene_camera_size": "192,192",
+            "screen_rect": "0,0,192,192",
+            "viewport": "0,0,1,1",
+            "DebugMode": 0,
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 1.25,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00",
+            "scope": "Fresh192px diagnostic native camera capture; not a1080p performance benchmark."
+          },
+          {
+            "phase": "capture",
+            "name": "borrowed_white_material_negative",
+            "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/ab3161f1f1a644d0a62c25b928dfd705/borrowed_white_material_negative.png",
+            "sha256": "a403e73d366c5b29ee52a6bd41146625414149945d3168d9ae1638d54d57198d",
+            "width": 192,
+            "height": 192,
+            "coverage": 6350,
+            "engine_frame": 35717,
+            "widget_frames": 18,
+            "elapsed_seconds": 6.4591067,
+            "camera_position": "4,0,0",
+            "camera_rotation": "0,0,1,0",
+            "custom_size": "192,192",
+            "scene_camera_size": "192,192",
+            "screen_rect": "0,0,192,192",
+            "viewport": "0,0,1,1",
+            "DebugMode": 0,
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 1.25,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00",
+            "scope": "Fresh192px diagnostic native camera capture; not a1080p performance benchmark."
+          },
+          {
+            "phase": "capture",
+            "name": "restored_public_source_material",
+            "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/ab3161f1f1a644d0a62c25b928dfd705/restored_public_source_material.png",
+            "sha256": "bdeeba22156c0d88beccbf924dc846c275a605fd154a02c1f03b542a7ecb968e",
+            "width": 192,
+            "height": 192,
+            "coverage": 6356,
+            "engine_frame": 35723,
+            "widget_frames": 24,
+            "elapsed_seconds": 7.0598268,
+            "camera_position": "4,0,0",
+            "camera_rotation": "0,0,1,0",
+            "custom_size": "192,192",
+            "scene_camera_size": "192,192",
+            "screen_rect": "0,0,192,192",
+            "viewport": "0,0,1,1",
+            "DebugMode": 0,
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 1.25,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00",
+            "scope": "Fresh192px diagnostic native camera capture; not a1080p performance benchmark."
+          },
+          {
+            "phase": "capture",
+            "name": "empty_after_public_delete",
+            "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/ab3161f1f1a644d0a62c25b928dfd705/empty_after_public_delete.png",
+            "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+            "width": 192,
+            "height": 192,
+            "coverage": 0,
+            "engine_frame": 35729,
+            "widget_frames": 30,
+            "elapsed_seconds": 7.6582067,
+            "camera_position": "4,0,0",
+            "camera_rotation": "0,0,1,0",
+            "custom_size": "192,192",
+            "scene_camera_size": "192,192",
+            "screen_rect": "0,0,192,192",
+            "viewport": "0,0,1,1",
+            "DebugMode": 0,
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 1.25,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00",
+            "scope": "Fresh192px diagnostic native camera capture; not a1080p performance benchmark."
+          }
+        ]
+      }
+    ],
+    "public_gpu_summary": {
+      "output_vertices_per_form": 122508,
+      "source_vertices": 24138,
+      "position_components_per_form": 367524,
+      "normal_components_per_form": 367524,
+      "indices_per_form": 122508,
+      "maximum_position_error_inches": 2.9802322e-08,
+      "maximum_normal_error": 1.7881393e-07,
+      "maximum_normal_tangent_dot": 1.1175871e-07,
+      "white_material_negative_changed_pixels_per_form": [
+        6380,
+        6380
+      ],
+      "identical_source_compiled_png": true,
+      "restore_and_deletion": "passed both forms; cached resource survives renderer deletion",
+      "native_model_or_mesh_placeholder": false,
+      "material_realization": "ordinary renderer instance; model.Materials getter first read after instance creation",
+      "source_material_shader": "shaders/gltf_surface_five_uv.shader",
+      "compute_shader": "shaders/gltf_deform_cs.shader"
+    },
+    "reference": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/screenshot/screenshot-large.jpg",
+      "sha256": "6ad73b4594c28493bd77397da3631eee48859ddc42e31d3fbf90119ca9c58c33",
+      "purpose": "Upstream development Sample Viewer extension-enabled fruit screenshot. Actual image inspected; camera/light/exposure unknown; human visual reference, not numeric pixel oracle."
+    },
+    "additional_reference": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/screenshot/with-without.jpg",
+      "sha256": "f970686d93a2156a9a6110971854c70c748892dc9ec2c6403db1c7fac0c3c6c4",
+      "purpose": "Authored side-by-side comparison: left extension enabled, right standard core fallback without diffuse transmission. Both inspected; right side is relevant fallback context, not a calibrated pixel oracle."
+    },
+    "presentation_recipe": {
+      "camera_position_inches": [
+        4,
+        0,
+        0
+      ],
+      "camera_target_inches": [
+        0,
+        0,
+        0
+      ],
+      "orthographic_height_inches": 1.25,
+      "width": 192,
+      "height": 192,
+      "near": 1,
+      "far": 1000,
+      "background": "black",
+      "camera_mode": "Lit (SceneCameraDebugMode.Normal)",
+      "post_processing": true,
+      "point_light_position_inches": [
+        200,
+        -30,
+        60
+      ],
+      "point_light_radius_inches": 1000,
+      "point_light_color": "white multiplied by 4",
+      "authored_or_inferred": "Inferred framing and lighting; source authored parent rotation and scene are preserved. Reference camera/light/exposure unknown."
+    },
+    "limitations": [
+      "Optional KHR_materials_diffuse_transmission is unsupported and uses its standard core fallback; required-extension negative rejects that same extension when made required.",
+      "Reference screenshot is extension-enabled; authored with-without comparison right side supplies fallback context. Camera, light and exposure differ and are not a calibrated pixel oracle.",
+      "Current captures use 192px inferred private-camera presentation; user appearance approval remains pending.",
+      "No editor UI parity, Windows, load/performance benchmark or complete-format acceptance claim."
+    ],
+    "visual_comparison": {
+      "group": "MandarinOrange",
+      "variants": [
+        {
+          "form": "glTF/source",
+          "input_sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091",
+          "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/942d3b9a5e824986bfe77b7d5d4754ae",
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/942d3b9a5e824986bfe77b7d5d4754ae/actual_public_source_material_scene0.png",
+          "sha256": "bdeeba22156c0d88beccbf924dc846c275a605fd154a02c1f03b542a7ecb968e",
+          "Coverage": 6356,
+          "public_resource": "mandarin_public_1c73ca9774e3458783f9e50a05797e53.gltf#scene=0",
+          "material_realization": "ordinary renderer lazy instance; getter read only after creation",
+          "source_material_shader_names": [
+            "shaders/gltf_surface_five_uv.shader"
+          ],
+          "compute_shader": "shaders/gltf_deform_cs.shader",
+          "selected_scene": 0,
+          "authored_default": null,
+          "vertex_count": 122508,
+          "source_vertex_count": 24138,
+          "index_count": 122508,
+          "maximum_position_error_inches": 2.9802322e-08,
+          "maximum_normal_error": 1.7881393e-07,
+          "maximum_normal_tangent_dot": 1.1175871e-07,
+          "white_material_negative_changed_pixels": 6380,
+          "restored_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/942d3b9a5e824986bfe77b7d5d4754ae/restored_public_source_material.png",
+          "scope": "Actual public Model.Load(path,0), ordinary ModelRenderer, original core material textures and GPU readbacks. Optional diffuse transmission fallback; inferred camera/light/exposure, no calibrated pixel oracle or user visual approval.",
+          "producer_stage": "8fc",
+          "width": 192,
+          "height": 192,
+          "kind": "image",
+          "mime_type": "image/png"
+        },
+        {
+          "form": "glTF/derived-glb_c",
+          "input_sha256": "a7f2ea695570d6c20077f553e0fd5b2736c03899dd474f873e5cd1e966c952d2",
+          "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/ab3161f1f1a644d0a62c25b928dfd705",
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/ab3161f1f1a644d0a62c25b928dfd705/actual_public_source_material_scene0.png",
+          "sha256": "bdeeba22156c0d88beccbf924dc846c275a605fd154a02c1f03b542a7ecb968e",
+          "Coverage": 6356,
+          "public_resource": "mandarin_public_a5af52e3a10e48b2ab875f1e96a9a417.glb#scene=0",
+          "material_realization": "ordinary renderer lazy instance; getter read only after creation",
+          "source_material_shader_names": [
+            "shaders/gltf_surface_five_uv.shader"
+          ],
+          "compute_shader": "shaders/gltf_deform_cs.shader",
+          "selected_scene": 0,
+          "authored_default": null,
+          "vertex_count": 122508,
+          "source_vertex_count": 24138,
+          "index_count": 122508,
+          "maximum_position_error_inches": 2.9802322e-08,
+          "maximum_normal_error": 1.7881393e-07,
+          "maximum_normal_tangent_dot": 1.1175871e-07,
+          "white_material_negative_changed_pixels": 6380,
+          "restored_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/public/ab3161f1f1a644d0a62c25b928dfd705/restored_public_source_material.png",
+          "scope": "Actual public Model.Load(path,0), ordinary ModelRenderer, original core material textures and GPU readbacks. Optional diffuse transmission fallback; inferred camera/light/exposure, no calibrated pixel oracle or user visual approval.",
+          "producer_stage": "8fc",
+          "width": 192,
+          "height": 192,
+          "kind": "image",
+          "mime_type": "image/png"
+        }
+      ],
+      "reference": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/screenshot/screenshot-large.jpg",
+        "sha256": "6ad73b4594c28493bd77397da3631eee48859ddc42e31d3fbf90119ca9c58c33",
+        "purpose": "Upstream development Sample Viewer extension-enabled fruit screenshot. Actual image inspected; camera/light/exposure unknown; human visual reference, not numeric pixel oracle."
+      },
+      "fallback_reference": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/screenshot/with-without.jpg",
+        "sha256": "f970686d93a2156a9a6110971854c70c748892dc9ec2c6403db1c7fac0c3c6c4",
+        "purpose": "Authored side-by-side comparison: left extension enabled, right standard core fallback without diffuse transmission. Both inspected; right side is relevant fallback context, not a calibrated pixel oracle."
+      },
+      "source_compiled_pixels_identical": true,
+      "purpose": "One human-review comparison with source and derived-compiled tabs; same model, inferred presentation and standard optional-extension core fallback."
+    },
+    "source_classification": {
+      "valid_glTF": true,
+      "default_scene": null,
+      "authored_scenes": 1,
+      "required_extensions": [],
+      "unsupported_optional_extensions": [
+        "KHR_materials_diffuse_transmission"
+      ],
+      "fallback": "Standard core material fallback; transmission-specific reference appearance is not promised.",
+      "specification": "https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#scenes"
+    }
+  },
+  "canonical_compiled": {
+    "phase": "single_canonical_compile",
+    "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/MandarinOrange.glb_c",
+    "previous_sha256": "a7f2ea695570d6c20077f553e0fd5b2736c03899dd474f873e5cd1e966c952d2",
+    "sha256": "60373e48dd9216b020590a16fd0c7d3005dc489646b60f0abb129e90132d422f",
+    "bytes": 4146980,
+    "source_sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091",
+    "compiler": "actual installed GltfCompiler.CompileWithEmbeddedImages",
+    "gltf_mvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+    "encoded_images_preserved": 4,
+    "scope": "One stable explicit derived artifact, source dependency and all embedded image bytes checked. This does not establish automatic native asset-graph packaging."
+  },
+  "zero_factor_core_compatibility": [
+    {
+      "phase": "zero_factor_core_compatibility",
+      "roughness": 0,
+      "light_incidence_degrees": 60,
+      "core_center_rgb": [
+        0.04364013671875,
+        0.13092041015625,
+        0.34912109375
+      ],
+      "transmission_zero_center_rgb": [
+        0.0460662841796875,
+        0.13818359375,
+        0.3685302734375
+      ],
+      "maximum_absolute_linear_difference": 0.023681640625,
+      "mean_absolute_linear_difference": 0.009402771790822348,
+      "changed_values": 12288,
+      "checked_values": 12288,
+      "scope": "Measured native core BRDF versus extension Lambert-reflection difference, including their shared native specular service. Diagnostic, not a pixel-identity or glTF core conformance assertion. No percentage tolerance used."
+    },
+    {
+      "phase": "zero_factor_core_compatibility",
+      "roughness": 0.5,
+      "light_incidence_degrees": 60,
+      "core_center_rgb": [
+        0.053314208984375,
+        0.14923095703125,
+        0.3892822265625
+      ],
+      "transmission_zero_center_rgb": [
+        0.0513763427734375,
+        0.14349365234375,
+        0.3739013671875
+      ],
+      "maximum_absolute_linear_difference": 0.019287109375,
+      "mean_absolute_linear_difference": 0.0077340975403785706,
+      "changed_values": 12288,
+      "checked_values": 12288,
+      "scope": "Measured native core BRDF versus extension Lambert-reflection difference, including their shared native specular service. Diagnostic, not a pixel-identity or glTF core conformance assertion. No percentage tolerance used."
+    },
+    {
+      "phase": "zero_factor_core_compatibility",
+      "roughness": 1,
+      "light_incidence_degrees": 60,
+      "core_center_rgb": [
+        0.0570526123046875,
+        0.1583251953125,
+        0.41162109375
+      ],
+      "transmission_zero_center_rgb": [
+        0.052459716796875,
+        0.14459228515625,
+        0.3748779296875
+      ],
+      "maximum_absolute_linear_difference": 0.0390625,
+      "mean_absolute_linear_difference": 0.018119369943936665,
+      "changed_values": 12288,
+      "checked_values": 12288,
+      "scope": "Measured native core BRDF versus extension Lambert-reflection difference, including their shared native specular service. Diagnostic, not a pixel-identity or glTF core conformance assertion. No percentage tolerance used."
+    }
+  ],
+  "presentation_convergence": {
+    "receipt": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-source-field-sky-lighting1-metadata/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "00ead190e6f7049b42210039ca9b6f8bcff0d1a77e6badb1a1795b9a13d30995",
+      "expected": 1,
+      "passed": 1,
+      "failed": 0,
+      "incomplete": 0,
+      "cleanup_errors": [],
+      "engine_mvid": "e66560df-8eba-4c30-998a-a0296a91e4af",
+      "gltf_mvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+      "request_sha256": "a41531e75a1f31abf3ea9d56ed0a327fad8c7a1a774348195767b2d748988b4b",
+      "scope": "One new HDRI lighting/visible sky presentation control; unchanged accepted feature3 and canonical192 proof not rerun."
+    },
+    "states": [
+      {
+        "phase": "actual_rtt_convergence",
+        "label": "actual_field_sky_only",
+        "rows": [
+          {
+            "render": 1,
+            "max_channel_delta_codes": null,
+            "mean_absolute_delta_codes": null,
+            "changed_pixels": null,
+            "mean_display_luminance": 0.06772661631227464,
+            "stable_pairs": 0,
+            "elapsed_seconds": 0.0854695
+          },
+          {
+            "render": 2,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.06772661631227464,
+            "stable_pairs": 1,
+            "elapsed_seconds": 0.1790747
+          },
+          {
+            "render": 3,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.06772661631227464,
+            "stable_pairs": 2,
+            "elapsed_seconds": 0.2412469
+          },
+          {
+            "render": 4,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.06772661631227464,
+            "stable_pairs": 3,
+            "elapsed_seconds": 0.3013862
+          },
+          {
+            "render": 5,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.06772661631227464,
+            "stable_pairs": 4,
+            "elapsed_seconds": 0.3595859
+          }
+        ],
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/actual_field_sky_only.png",
+        "sha256": "fb9ba53f9340c43e8ad1f0324d2d3883bc8e78cc434e390d393a8935e172ba3d",
+        "native_tonemap_enabled": true,
+        "auto_exposure_enabled": true,
+        "minimum_exposure": 1,
+        "maximum_exposure": 1,
+        "exposure_compensation": 0,
+        "ambient": "0.00, 0.00, 0.00, 0.00",
+        "criteria": "Four consecutive full-image RTT pairs: maximum1RGBA8 code and mean .05codes/component or lower; actual renders, not widget-only wait."
+      },
+      {
+        "phase": "actual_rtt_convergence",
+        "label": "settled_actual_source_field_hdri_sky",
+        "rows": [
+          {
+            "render": 1,
+            "max_channel_delta_codes": null,
+            "mean_absolute_delta_codes": null,
+            "changed_pixels": null,
+            "mean_display_luminance": 0.10585499610820767,
+            "stable_pairs": 0,
+            "elapsed_seconds": 0.0567423
+          },
+          {
+            "render": 2,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.10585499610820767,
+            "stable_pairs": 1,
+            "elapsed_seconds": 0.1161054
+          },
+          {
+            "render": 3,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.10585499610820767,
+            "stable_pairs": 2,
+            "elapsed_seconds": 0.1754894
+          },
+          {
+            "render": 4,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.10585499610820767,
+            "stable_pairs": 3,
+            "elapsed_seconds": 0.2360341
+          },
+          {
+            "render": 5,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.10585499610820767,
+            "stable_pairs": 4,
+            "elapsed_seconds": 0.2955173
+          }
+        ],
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/settled_actual_source_field_hdri_sky.png",
+        "sha256": "ba635d35cc0d8c03e5bb853d6a107b17470ab8a0a1de8939d029cda45505491d",
+        "native_tonemap_enabled": true,
+        "auto_exposure_enabled": true,
+        "minimum_exposure": 1,
+        "maximum_exposure": 1,
+        "exposure_compensation": 0,
+        "ambient": "0.00, 0.00, 0.00, 0.00",
+        "criteria": "Four consecutive full-image RTT pairs: maximum1RGBA8 code and mean .05codes/component or lower; actual renders, not widget-only wait."
+      },
+      {
+        "phase": "actual_rtt_convergence",
+        "label": "same_sky_without_ibl_probe_control",
+        "rows": [
+          {
+            "render": 1,
+            "max_channel_delta_codes": null,
+            "mean_absolute_delta_codes": null,
+            "changed_pixels": null,
+            "mean_display_luminance": 0.05653169508043544,
+            "stable_pairs": 0,
+            "elapsed_seconds": 0.0561063
+          },
+          {
+            "render": 2,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.05653169508043544,
+            "stable_pairs": 1,
+            "elapsed_seconds": 0.1211811
+          },
+          {
+            "render": 3,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.05653169508043544,
+            "stable_pairs": 2,
+            "elapsed_seconds": 0.183039
+          },
+          {
+            "render": 4,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.05653169508043544,
+            "stable_pairs": 3,
+            "elapsed_seconds": 0.2427799
+          },
+          {
+            "render": 5,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.05653169508043544,
+            "stable_pairs": 4,
+            "elapsed_seconds": 0.3017985
+          }
+        ],
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/same_sky_without_ibl_probe_control.png",
+        "sha256": "5e6e73100c1e4d1190a15d61d3f47b0f96a90c00d55a77fbb4e60e05d28b6c7e",
+        "native_tonemap_enabled": true,
+        "auto_exposure_enabled": true,
+        "minimum_exposure": 1,
+        "maximum_exposure": 1,
+        "exposure_compensation": 0,
+        "ambient": "0.00, 0.00, 0.00, 0.00",
+        "criteria": "Four consecutive full-image RTT pairs: maximum1RGBA8 code and mean .05codes/component or lower; actual renders, not widget-only wait."
+      },
+      {
+        "phase": "actual_rtt_convergence",
+        "label": "empty_after_sky_model_probe_delete",
+        "rows": [
+          {
+            "render": 1,
+            "max_channel_delta_codes": null,
+            "mean_absolute_delta_codes": null,
+            "changed_pixels": null,
+            "mean_display_luminance": 0,
+            "stable_pairs": 0,
+            "elapsed_seconds": 0.0605938
+          },
+          {
+            "render": 2,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0,
+            "stable_pairs": 1,
+            "elapsed_seconds": 0.1240918
+          },
+          {
+            "render": 3,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0,
+            "stable_pairs": 2,
+            "elapsed_seconds": 0.1896593
+          },
+          {
+            "render": 4,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0,
+            "stable_pairs": 3,
+            "elapsed_seconds": 0.2479776
+          },
+          {
+            "render": 5,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0,
+            "stable_pairs": 4,
+            "elapsed_seconds": 0.3046075
+          }
+        ],
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/empty_after_sky_model_probe_delete.png",
+        "sha256": "47078170a8a4c558c70554480d4f67e4c6d7c3d58271413c6f86afa52a5ce42c",
+        "native_tonemap_enabled": true,
+        "auto_exposure_enabled": true,
+        "minimum_exposure": 1,
+        "maximum_exposure": 1,
+        "exposure_compensation": 0,
+        "ambient": "0.00, 0.00, 0.00, 0.00",
+        "criteria": "Four consecutive full-image RTT pairs: maximum1RGBA8 code and mean .05codes/component or lower; actual renders, not widget-only wait."
+      }
+    ],
+    "scope": "Current HDRI+sky recipe actual render convergence. Previous black-point recipe proof retained under previous_point_light_visual."
+  },
+  "previous_point_light_visual": {
+    "capture": {
+      "form": "glTF/source",
+      "input_sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-convergence/8a470e404eea46918535792a30e57905/settled_actual_source_diffuse_transmission.png",
+      "sha256": "d2ef1d57919fead0e0880b50f773b0e4c02567cf405b1260119166a7e7986a5b",
+      "width": 1151,
+      "height": 1309,
+      "kind": "image",
+      "mime_type": "image/png",
+      "Coverage": 299765,
+      "selected_scene": 0,
+      "authored_default": null,
+      "source_material_shader_names": [
+        "shaders/gltf_diffuse_transmission.shader"
+      ],
+      "compute_shader": "shaders/gltf_deform_cs.shader",
+      "receipt_sha256": "3a470c3d656481c1624c62f66ea3c7ff157290bea620a0f82ed0e7fdc47d7179",
+      "scope": "SOURCE ONLY high-resolution settled visual. Same camera position/rotation/orthographic height, lights and original material; resolution/aspect now match screenshot-large. Original canonical192px proof remains separate. Inferred point lighting, no upstream environment/photometric match; user appearance approval pending."
+    },
+    "presentation_recipe": {
+      "camera_position_inches": [
+        4,
+        0,
+        0
+      ],
+      "camera_target_inches": [
+        0,
+        0,
+        0
+      ],
+      "orthographic_height_inches": 1.25,
+      "width": 1151,
+      "height": 1309,
+      "near": 1,
+      "far": 1000,
+      "background": "black",
+      "camera_mode": "Lit (SceneCameraDebugMode.Normal)",
+      "post_processing": true,
+      "point_light_position_inches": [
+        200,
+        -30,
+        60
+      ],
+      "point_light_radius_inches": 1000,
+      "point_light_color": "white multiplied by 4",
+      "authored_or_inferred": "Inferred framing and lighting; source authored parent rotation and scene are preserved. Reference camera/light/exposure unknown.",
+      "rear_point_light_position_inches": [
+        -200,
+        30,
+        60
+      ],
+      "rear_point_light_radius_inches": 1000,
+      "rear_point_light_color": "white multiplied by4",
+      "scope": "Main source-only settled1151x1309 capture preserves camera pose/vertical orthographic extent, original material and front/rear point lights. Reference-size aspect changes horizontal extent. Original source/canonical192 functional3 proof unchanged. Lighting/environment/exposure do not match documented upstream settings because those settings are unknown.",
+      "original_functional_capture_size": [
+        192,
+        192
+      ],
+      "adaptive_exposure": {
+        "enabled": true,
+        "native_tonemap_enabled": true,
+        "rate": 20,
+        "minimum": 1,
+        "maximum": 2,
+        "compensation": 0,
+        "successive_actual_rtt_renders": 5,
+        "foreground_pair_deltas": "all four pairs exactly zero",
+        "first_final_png_identical": true
+      }
+    },
+    "convergence": {
+      "receipt": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-diffuse-source-convergence1/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "3a470c3d656481c1624c62f66ea3c7ff157290bea620a0f82ed0e7fdc47d7179",
+        "passed": 1,
+        "expected": 1,
+        "failed": 0,
+        "incomplete": 0,
+        "cleanup_errors": [],
+        "engine_mvid": "e66560df-8eba-4c30-998a-a0296a91e4af",
+        "gltf_mvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+        "request_sha256": "c185641eda7966114f4bce5f9d4aeeac8a8a66108becffc53f9a96b07ac5e5bc",
+        "scope": "One presentation-only source convergence capture. Original accepted public3 unchanged; no functional suite rerun."
+      },
+      "runtime_settings": {
+        "phase": "runtime_presentation_settings",
+        "EnablePostProcessing": true,
+        "auto_exposure_enabled": true,
+        "exposure_compensation": 0,
+        "minimum_exposure": 1,
+        "maximum_exposure": 2,
+        "exposure_rate": 20,
+        "native_tonemap_enabled": true,
+        "AntiAliasing": true,
+        "width": 1151,
+        "height": 1309,
+        "camera_position": "4,0,0",
+        "camera_rotation": "0,0,1,0",
+        "OrthographicHeight": 1.25,
+        "front_light": "200,-30,60 radius1000 white4",
+        "rear_light": "-200,30,60 radius1000 white4",
+        "scope": "Same original camera/framing/lights/material and postprocessing policy, changed capture resolution to authored screenshot-large dimensions. Runtime flags recorded instead of assuming AutoExposure defaultfalse survives editor policy."
+      },
+      "measurement": {
+        "phase": "actual_render_to_texture_convergence",
+        "settled": true,
+        "renders": 5,
+        "max_renders": 64,
+        "width": 1151,
+        "height": 1309,
+        "source_sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091",
+        "selected_scene": 0,
+        "authored_default_scene": null,
+        "first_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-convergence/8a470e404eea46918535792a30e57905/first_actual_render.png",
+        "first_sha256": "d2ef1d57919fead0e0880b50f773b0e4c02567cf405b1260119166a7e7986a5b",
+        "final_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-convergence/8a470e404eea46918535792a30e57905/settled_actual_source_diffuse_transmission.png",
+        "final_sha256": "d2ef1d57919fead0e0880b50f773b0e4c02567cf405b1260119166a7e7986a5b",
+        "first_mean_display_luminance": 0.5085539063743977,
+        "final_mean_display_luminance": 0.5085539063743977,
+        "criteria": "Four successive actual RTT/readback pairs: maxchannel delta<=1RGBA8 code and mean absolute foreground-component delta<=.05 code. Presentation convergence only, not radiometric equality.",
+        "rows": [
+          {
+            "render": 1,
+            "coverage": 299765,
+            "foreground_mean_display_luminance": 0.5085539063743977,
+            "maximum_channel_delta_codes": null,
+            "mean_absolute_delta_codes": null,
+            "changed_pixels": null,
+            "stable_consecutive_pairs": 0,
+            "engine_frame": 102905,
+            "elapsed_seconds": 0.0650178,
+            "native_tonemap_enabled": true,
+            "auto_exposure_enabled": true
+          },
+          {
+            "render": 2,
+            "coverage": 299765,
+            "foreground_mean_display_luminance": 0.5085539063743977,
+            "maximum_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "stable_consecutive_pairs": 1,
+            "engine_frame": 102911,
+            "elapsed_seconds": 0.3028944,
+            "native_tonemap_enabled": true,
+            "auto_exposure_enabled": true
+          },
+          {
+            "render": 3,
+            "coverage": 299765,
+            "foreground_mean_display_luminance": 0.5085539063743977,
+            "maximum_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "stable_consecutive_pairs": 2,
+            "engine_frame": 102917,
+            "elapsed_seconds": 0.3642611,
+            "native_tonemap_enabled": true,
+            "auto_exposure_enabled": true
+          },
+          {
+            "render": 4,
+            "coverage": 299765,
+            "foreground_mean_display_luminance": 0.5085539063743977,
+            "maximum_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "stable_consecutive_pairs": 3,
+            "engine_frame": 102923,
+            "elapsed_seconds": 0.4251761,
+            "native_tonemap_enabled": true,
+            "auto_exposure_enabled": true
+          },
+          {
+            "render": 5,
+            "coverage": 299765,
+            "foreground_mean_display_luminance": 0.5085539063743977,
+            "maximum_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "stable_consecutive_pairs": 4,
+            "engine_frame": 102929,
+            "elapsed_seconds": 0.4851958,
+            "native_tonemap_enabled": true,
+            "auto_exposure_enabled": true
+          }
+        ],
+        "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/diffuse-convergence/8a470e404eea46918535792a30e57905",
+        "scope": "One actual source-only reference-sized settled visual capture; original source+canonical192px functional3 proof remains accepted and separate. No new high-resolution compiled capture claim, no environment/upstream photometric match."
+      },
+      "conclusion": "Adaptive exposure is active; this source presentation was already settled at the first actual RTT. Four successive foreground-union comparison pairs had exactly zero RGB deltas, and first/final full PNG bytes are identical. No exposure warm-up defect observed; grey/yellow versus upstream remains user appearance review."
+    },
+    "feedback": "User: The manderin should probably have a hdri skybox, and current light is too bright, it causes it to become almost white",
+    "scope": "Priorv28 visual/feedback retained. Its diffuse feature3 technical acceptance remains valid; this visual is superseded.",
+    "review_fingerprint": "a567b47f98b6e735dcd7fe3aa41bbf96d1a76ef0dec31ec68283f18ceddaf336"
+  },
+  "hdri_lighting_correction": {
+    "receipt": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-source-field-sky-lighting1-metadata/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "00ead190e6f7049b42210039ca9b6f8bcff0d1a77e6badb1a1795b9a13d30995",
+      "expected": 1,
+      "passed": 1,
+      "failed": 0,
+      "incomplete": 0,
+      "cleanup_errors": [],
+      "engine_mvid": "e66560df-8eba-4c30-998a-a0296a91e4af",
+      "gltf_mvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+      "request_sha256": "a41531e75a1f31abf3ea9d56ed0a327fad8c7a1a774348195767b2d748988b4b",
+      "scope": "One new HDRI lighting/visible sky presentation control; unchanged accepted feature3 and canonical192 proof not rerun."
+    },
+    "summary": {
+      "phase": "source_hdri_sky_presentation",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/settled_actual_source_field_hdri_sky.png",
+      "sha256": "ba635d35cc0d8c03e5bb853d6a107b17470ab8a0a1de8939d029cda45505491d",
+      "width": 1151,
+      "height": 1309,
+      "source_sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091",
+      "selected_scene": 0,
+      "authored_default_scene": null,
+      "environment_texture": "materials/gltf_reference_environment/field.vtex",
+      "environment_compiled_sha256": "01cc0d0f0f69aa856b6650c71d5a4c8528667f61444b35b7c9bc382cda98fc55",
+      "environment_width": 1024,
+      "environment_height": 1024,
+      "environment_depth": 6,
+      "environment_mips": 9,
+      "environment_intensity": 0.75,
+      "environment_yaw": 0,
+      "sky_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/actual_field_sky_only.png",
+      "sky_sha256": "fb9ba53f9340c43e8ad1f0324d2d3883bc8e78cc434e390d393a8935e172ba3d",
+      "no_ibl_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/same_sky_without_ibl_probe_control.png",
+      "no_ibl_sha256": "5e6e73100c1e4d1190a15d61d3f47b0f96a90c00d55a77fbb4e60e05d28b6c7e",
+      "deleted_black_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/empty_after_sky_model_probe_delete.png",
+      "foreground_pixels": 311280,
+      "actual_ibl_changed_pixels": 311280,
+      "foreground_mean_display_luminance": 0.2387252284608487,
+      "near_white_rgb230_pixels": 0,
+      "near_white_fraction": 0,
+      "camera_position": "4,0,0",
+      "camera_target": "0,0,0",
+      "projection": "perspective",
+      "vertical_fov": 18,
+      "illumination": "Field IBL .75, matching visible Field sky .75; former point lights zero/removed; ambient RGBA0",
+      "tone_mode": "ACES",
+      "exposure_min": 1,
+      "exposure_max": 1,
+      "exposure_compensation": 0,
+      "material_shader": "shaders/gltf_diffuse_transmission.shader",
+      "scope": "New source-only actual HDRI/visible-sky presentation and IBL/sky/deletion controls. No source material edits or functional3 rerun; environment/yaw/ACES/fixedEV0 and perspective framing inferred, not upstream calibrated appearance. Field compiled disk identity known; live HDR resident byte identity not newly proven."
+    },
+    "convergence": [
+      {
+        "phase": "actual_rtt_convergence",
+        "label": "actual_field_sky_only",
+        "rows": [
+          {
+            "render": 1,
+            "max_channel_delta_codes": null,
+            "mean_absolute_delta_codes": null,
+            "changed_pixels": null,
+            "mean_display_luminance": 0.06772661631227464,
+            "stable_pairs": 0,
+            "elapsed_seconds": 0.0854695
+          },
+          {
+            "render": 2,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.06772661631227464,
+            "stable_pairs": 1,
+            "elapsed_seconds": 0.1790747
+          },
+          {
+            "render": 3,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.06772661631227464,
+            "stable_pairs": 2,
+            "elapsed_seconds": 0.2412469
+          },
+          {
+            "render": 4,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.06772661631227464,
+            "stable_pairs": 3,
+            "elapsed_seconds": 0.3013862
+          },
+          {
+            "render": 5,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.06772661631227464,
+            "stable_pairs": 4,
+            "elapsed_seconds": 0.3595859
+          }
+        ],
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/actual_field_sky_only.png",
+        "sha256": "fb9ba53f9340c43e8ad1f0324d2d3883bc8e78cc434e390d393a8935e172ba3d",
+        "native_tonemap_enabled": true,
+        "auto_exposure_enabled": true,
+        "minimum_exposure": 1,
+        "maximum_exposure": 1,
+        "exposure_compensation": 0,
+        "ambient": "0.00, 0.00, 0.00, 0.00",
+        "criteria": "Four consecutive full-image RTT pairs: maximum1RGBA8 code and mean .05codes/component or lower; actual renders, not widget-only wait."
+      },
+      {
+        "phase": "actual_rtt_convergence",
+        "label": "settled_actual_source_field_hdri_sky",
+        "rows": [
+          {
+            "render": 1,
+            "max_channel_delta_codes": null,
+            "mean_absolute_delta_codes": null,
+            "changed_pixels": null,
+            "mean_display_luminance": 0.10585499610820767,
+            "stable_pairs": 0,
+            "elapsed_seconds": 0.0567423
+          },
+          {
+            "render": 2,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.10585499610820767,
+            "stable_pairs": 1,
+            "elapsed_seconds": 0.1161054
+          },
+          {
+            "render": 3,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.10585499610820767,
+            "stable_pairs": 2,
+            "elapsed_seconds": 0.1754894
+          },
+          {
+            "render": 4,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.10585499610820767,
+            "stable_pairs": 3,
+            "elapsed_seconds": 0.2360341
+          },
+          {
+            "render": 5,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.10585499610820767,
+            "stable_pairs": 4,
+            "elapsed_seconds": 0.2955173
+          }
+        ],
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/settled_actual_source_field_hdri_sky.png",
+        "sha256": "ba635d35cc0d8c03e5bb853d6a107b17470ab8a0a1de8939d029cda45505491d",
+        "native_tonemap_enabled": true,
+        "auto_exposure_enabled": true,
+        "minimum_exposure": 1,
+        "maximum_exposure": 1,
+        "exposure_compensation": 0,
+        "ambient": "0.00, 0.00, 0.00, 0.00",
+        "criteria": "Four consecutive full-image RTT pairs: maximum1RGBA8 code and mean .05codes/component or lower; actual renders, not widget-only wait."
+      },
+      {
+        "phase": "actual_rtt_convergence",
+        "label": "same_sky_without_ibl_probe_control",
+        "rows": [
+          {
+            "render": 1,
+            "max_channel_delta_codes": null,
+            "mean_absolute_delta_codes": null,
+            "changed_pixels": null,
+            "mean_display_luminance": 0.05653169508043544,
+            "stable_pairs": 0,
+            "elapsed_seconds": 0.0561063
+          },
+          {
+            "render": 2,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.05653169508043544,
+            "stable_pairs": 1,
+            "elapsed_seconds": 0.1211811
+          },
+          {
+            "render": 3,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.05653169508043544,
+            "stable_pairs": 2,
+            "elapsed_seconds": 0.183039
+          },
+          {
+            "render": 4,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.05653169508043544,
+            "stable_pairs": 3,
+            "elapsed_seconds": 0.2427799
+          },
+          {
+            "render": 5,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0.05653169508043544,
+            "stable_pairs": 4,
+            "elapsed_seconds": 0.3017985
+          }
+        ],
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/same_sky_without_ibl_probe_control.png",
+        "sha256": "5e6e73100c1e4d1190a15d61d3f47b0f96a90c00d55a77fbb4e60e05d28b6c7e",
+        "native_tonemap_enabled": true,
+        "auto_exposure_enabled": true,
+        "minimum_exposure": 1,
+        "maximum_exposure": 1,
+        "exposure_compensation": 0,
+        "ambient": "0.00, 0.00, 0.00, 0.00",
+        "criteria": "Four consecutive full-image RTT pairs: maximum1RGBA8 code and mean .05codes/component or lower; actual renders, not widget-only wait."
+      },
+      {
+        "phase": "actual_rtt_convergence",
+        "label": "empty_after_sky_model_probe_delete",
+        "rows": [
+          {
+            "render": 1,
+            "max_channel_delta_codes": null,
+            "mean_absolute_delta_codes": null,
+            "changed_pixels": null,
+            "mean_display_luminance": 0,
+            "stable_pairs": 0,
+            "elapsed_seconds": 0.0605938
+          },
+          {
+            "render": 2,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0,
+            "stable_pairs": 1,
+            "elapsed_seconds": 0.1240918
+          },
+          {
+            "render": 3,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0,
+            "stable_pairs": 2,
+            "elapsed_seconds": 0.1896593
+          },
+          {
+            "render": 4,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0,
+            "stable_pairs": 3,
+            "elapsed_seconds": 0.2479776
+          },
+          {
+            "render": 5,
+            "max_channel_delta_codes": 0,
+            "mean_absolute_delta_codes": 0,
+            "changed_pixels": 0,
+            "mean_display_luminance": 0,
+            "stable_pairs": 4,
+            "elapsed_seconds": 0.3046075
+          }
+        ],
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/hdri-presentation/80b44f113b434e8590bddf8da790e34d/empty_after_sky_model_probe_delete.png",
+        "sha256": "47078170a8a4c558c70554480d4f67e4c6d7c3d58271413c6f86afa52a5ce42c",
+        "native_tonemap_enabled": true,
+        "auto_exposure_enabled": true,
+        "minimum_exposure": 1,
+        "maximum_exposure": 1,
+        "exposure_compensation": 0,
+        "ambient": "0.00, 0.00, 0.00, 0.00",
+        "criteria": "Four consecutive full-image RTT pairs: maximum1RGBA8 code and mean .05codes/component or lower; actual renders, not widget-only wait."
+      }
+    ],
+    "first_metadata_failure": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mandarin-source-field-sky-lighting1/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "dd7b9fb9e53934bfe5464937fcfca756e13c8c5e027f12b105ac2b5700eeb65d",
+      "error": "Actual presentation assertions completed, but overall receipt serialization failed on Width/width constructor binding. Corrected measurement field names only; prior failure retained."
+    },
+    "user_feedback": "User: The manderin should probably have a hdri skybox, and current light is too bright, it causes it to become almost white",
+    "prior_visual_fingerprint": "a567b47f98b6e735dcd7fe3aa41bbf96d1a76ef0dec31ec68283f18ceddaf336",
+    "source_material_modified": false,
+    "source_or_geometry_modified": false,
+    "functional_suite_rerun": false,
+    "environment_attribution": {
+      "author": "HDRI-Hub",
+      "license": "CC BY3.0",
+      "source_url": "https://www.hdri-hub.com/hdrishop/freesamples/freehdri/item/116-hdr-040-field-free",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "source_distribution": "Khronos glTF-Sample-Environments field.hdr, converted existingField.exr"
+    },
+    "feedback_provenance": {
+      "kind": "parent_direct_chat_relay",
+      "case_id": "MandarinOrange/glTF::diffuse-transmission-review",
+      "prior_site_version": 28,
+      "prior_site_commit": "6f8801cc23a0716b4cafc58ce978eefeb6b88d4d",
+      "summary": "User asks for HDRI skybox; current lighting too bright/almostwhite.",
+      "feedback_record": "research/gltf-validation/user-feedback.json#reportedIssues/mandarin-v28-lighting-chat-feedback",
+      "website_form_vote_supplied": false
+    },
+    "root_visual_review": "Approved newba635d image for published user review; not final human appearance acceptance. No further relighting until userfeedback."
+  }
+}

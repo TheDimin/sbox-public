@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "engine_sha256": "6ed99fa9d59d5083ef45e17be80b36a2c086bd72748dad733693e5a25f8fd85b",
+  "gltf_sha256": "7638a855ba21fd9c079a22cbc8b834d4169112fe08cb9a5fd788e63cf90866e1",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MandarinOrangeValidation.DiffuseTransmissionShaderPreflightTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ],
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/DiffuseTransmissionShaderPreflightTests.cs",
+      "sha256": "13f26dfb8ce8d23c74a1d4c7968f4b0f7b6919ef8a06199ca5bb55c984c9598f"
+    }
+  ],
+  "frozen_artifacts": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/gltf_diffuse_transmission_candidate.shader",
+      "sha256": "dfbc59486512cab43579aa7e6a12ed14cf10d2667d50ab9e54346e2a655d24e9"
+    }
+  ]
+}

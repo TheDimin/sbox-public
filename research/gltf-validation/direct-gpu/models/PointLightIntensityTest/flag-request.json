@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "engine_sha256": "e05cc4da9851ad2c3306e16ef3af317c8b398516dd6f8bf2bcd902687b5f7215",
+  "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/PointLightIntensityTest/NativeFlagProbe.cs",
+      "sha256": "4f4762db078096d25d0efb61ecc369a8659ceb6e9e07eb6dc5c4f94bfc26531b"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.PointLightIntensityValidation.NativeFlagProbe",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "measurements_property": "Measurements"
+    }
+  ]
+}

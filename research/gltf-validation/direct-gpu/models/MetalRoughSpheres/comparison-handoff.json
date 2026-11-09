@@ -1,0 +1,353 @@
+{
+  "model": "MetalRoughSpheres",
+  "corpus_commit": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "reference": {
+    "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/MetalRoughSpheres/screenshot/screenshot.png",
+    "sha256": "365b62345ecf8253e9e25acf605e424b42b4f4805ff3171096888bf7eefd2272"
+  },
+  "source_rejected_fingerprint": "f00ed08deaabea59f742aa2c73d96580f8aba85c4a433fe8278906390bba3ef6",
+  "forms": [
+    {
+      "form": "source",
+      "caseId": "MetalRoughSpheres/glTF",
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MetalRoughSpheres/ao-corrected-87f/source.png",
+        "sha256": "ee5e79cf3a874d012df8bb7f6239013bf2b3b28dfec8cd50d2278e13b3e4886f",
+        "origin": "authored material, no override, later real editor frame"
+      },
+      "input": {
+        "path": "Models/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf",
+        "sha256": "a24fd6fd24b2baef80a5d56b465a55635f7ec79039414e25c341d1402cc28048",
+        "sourcePath": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf"
+      },
+      "result": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MetalRoughSpheres/ao-corrected-87f/source-result.json",
+        "sha256": "b17bb0f8285eda235ad8da33f4ca66aef4217682f77f5d857d7b466fac730a6b"
+      },
+      "recipeApplied": {
+        "animation": {
+          "appliedClipCount": 0,
+          "captureTimes": [
+            0
+          ],
+          "clip": null,
+          "duration": 0,
+          "frameDurationsSeconds": [],
+          "loop": false,
+          "mode": "public Sequence.Time deterministic seeks; not real-time playback",
+          "playbackRate": 0,
+          "requestedClipCount": 0,
+          "requestedClips": [],
+          "requestedRate": 1,
+          "requires": []
+        },
+        "camera": {
+          "FieldOfView": 60,
+          "Orthographic": true,
+          "OrthographicHeight": 461.0361,
+          "ZFar": 3030.6804,
+          "ZNear": 0.01,
+          "fovAxis": "Horizontal",
+          "height": 498,
+          "positionInches": [
+            756.1027,
+            65.52759,
+            121.91343
+          ],
+          "source": "recipe",
+          "targetInches": [
+            -62.992126,
+            0,
+            23.62205
+          ],
+          "up": [
+            0,
+            0,
+            1
+          ],
+          "width": 512
+        },
+        "complete": true,
+        "limitations": [
+          "Captured default source materials through public components; visual approval, independent geometry/material parity and performance remain pending."
+        ],
+        "presentation": {
+          "background": [
+            0.35,
+            0.35,
+            0.35,
+            1
+          ],
+          "environment": {
+            "Depth": 6,
+            "Height": 1024,
+            "Mips": 9,
+            "Width": 1024,
+            "centerInches": [
+              -62.992126,
+              -2.4555817,
+              -10.941017
+            ],
+            "compiledPath": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/field.vtex_c",
+            "compiledSha256": "01cc0d0f0f69aa856b6650c71d5a4c8528667f61444b35b7c9bc382cda98fc55",
+            "format": "BC6H",
+            "limitations": "Loaded resource-to-compiled-file identity, orientation and actual IBL pixels require native validation.",
+            "projection": "Sphere",
+            "sizeInches": 100000,
+            "sky": null,
+            "sourcePath": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/field.exr",
+            "sourceSha256": "a9ad16a6d516171e425d0fc22cdde643b2116ed544578945899958cea21e1e7f",
+            "texturePath": "materials/gltf_reference_environment/field.vtex",
+            "textureResourcePath": "materials/gltf_reference_environment/field.vtex",
+            "tint": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "type": "cubemap",
+            "yawDegrees": 0
+          },
+          "exposure": 1,
+          "exposureDetails": {
+            "lockStatus": "component-settings-retained-after-render",
+            "locked": true,
+            "observedAfterRender": {
+              "compensation": 0,
+              "enabled": true,
+              "engineFrame": 2041,
+              "frameIndex": 0,
+              "maximum": 1,
+              "minimum": 1,
+              "rate": 20,
+              "sceneMainCamera": true
+            },
+            "requested": {
+              "compensation": 0,
+              "enabled": true,
+              "maximum": 1,
+              "minimum": 1
+            }
+          },
+          "exposureLockStatus": "component-settings-retained-after-render",
+          "exposureLocked": true,
+          "lights": [
+            {
+              "color": [
+                1,
+                1,
+                1,
+                1
+              ],
+              "direction": [
+                -0.9897595,
+                -0.079180755,
+                -0.118771136
+              ],
+              "intensity": 0.5,
+              "type": "directional"
+            }
+          ],
+          "nativeDebugMode": "Normal",
+          "postProcessing": true,
+          "tonemapping": {
+            "exposureCompensationEv": 0,
+            "mode": "ACES",
+            "scope": "Component selection and post-render camera settings; no independent shader pixel oracle.",
+            "source": "camera-colocated stock Tonemapping component"
+          }
+        }
+      }
+    },
+    {
+      "form": "compiled",
+      "caseId": "MetalRoughSpheres/glTF::compiled",
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MetalRoughSpheres/ao-corrected-87f/compiled.png",
+        "sha256": "ee5e79cf3a874d012df8bb7f6239013bf2b3b28dfec8cd50d2278e13b3e4886f",
+        "origin": "authored material, no override, later real editor frame"
+      },
+      "input": {
+        "path": "glTF/MetalRoughSpheres.glb_c",
+        "sha256": "771b1c5e33dd0e01a6d822d9066687c98d6c21e4d9a03788561fe1a5eb8f315f",
+        "sourcePath": "/home/damian/projects/sbox-public/Temp/gltf-validation/metalrough-forms/8de6785ab58d408d9498f0937a06a62a/glTF/MetalRoughSpheres.glb_c"
+      },
+      "result": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MetalRoughSpheres/ao-corrected-87f/compiled-result.json",
+        "sha256": "e90a3df1d5840e1a60ef528ad9d758a90aeb275c7b0083e94037e82261632f90"
+      },
+      "recipeApplied": {
+        "animation": {
+          "appliedClipCount": 0,
+          "captureTimes": [
+            0
+          ],
+          "clip": null,
+          "duration": 0,
+          "frameDurationsSeconds": [],
+          "loop": false,
+          "mode": "public Sequence.Time deterministic seeks; not real-time playback",
+          "playbackRate": 0,
+          "requestedClipCount": 0,
+          "requestedClips": [],
+          "requestedRate": 1,
+          "requires": []
+        },
+        "camera": {
+          "FieldOfView": 60,
+          "Orthographic": true,
+          "OrthographicHeight": 461.0361,
+          "ZFar": 3030.6804,
+          "ZNear": 0.01,
+          "fovAxis": "Horizontal",
+          "height": 498,
+          "positionInches": [
+            756.1027,
+            65.52759,
+            121.91343
+          ],
+          "source": "recipe",
+          "targetInches": [
+            -62.992126,
+            0,
+            23.62205
+          ],
+          "up": [
+            0,
+            0,
+            1
+          ],
+          "width": 512
+        },
+        "complete": true,
+        "limitations": [
+          "Captured default source materials through public components; visual approval, independent geometry/material parity and performance remain pending."
+        ],
+        "presentation": {
+          "background": [
+            0.35,
+            0.35,
+            0.35,
+            1
+          ],
+          "environment": {
+            "Depth": 6,
+            "Height": 1024,
+            "Mips": 9,
+            "Width": 1024,
+            "centerInches": [
+              -62.992126,
+              -2.4555817,
+              -10.941017
+            ],
+            "compiledPath": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/field.vtex_c",
+            "compiledSha256": "01cc0d0f0f69aa856b6650c71d5a4c8528667f61444b35b7c9bc382cda98fc55",
+            "format": "BC6H",
+            "limitations": "Loaded resource-to-compiled-file identity, orientation and actual IBL pixels require native validation.",
+            "projection": "Sphere",
+            "sizeInches": 100000,
+            "sky": null,
+            "sourcePath": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/field.exr",
+            "sourceSha256": "a9ad16a6d516171e425d0fc22cdde643b2116ed544578945899958cea21e1e7f",
+            "texturePath": "materials/gltf_reference_environment/field.vtex",
+            "textureResourcePath": "materials/gltf_reference_environment/field.vtex",
+            "tint": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "type": "cubemap",
+            "yawDegrees": 0
+          },
+          "exposure": 1,
+          "exposureDetails": {
+            "lockStatus": "component-settings-retained-after-render",
+            "locked": true,
+            "observedAfterRender": {
+              "compensation": 0,
+              "enabled": true,
+              "engineFrame": 2089,
+              "frameIndex": 0,
+              "maximum": 1,
+              "minimum": 1,
+              "rate": 20,
+              "sceneMainCamera": true
+            },
+            "requested": {
+              "compensation": 0,
+              "enabled": true,
+              "maximum": 1,
+              "minimum": 1
+            }
+          },
+          "exposureLockStatus": "component-settings-retained-after-render",
+          "exposureLocked": true,
+          "lights": [
+            {
+              "color": [
+                1,
+                1,
+                1,
+                1
+              ],
+              "direction": [
+                -0.9897595,
+                -0.079180755,
+                -0.118771136
+              ],
+              "intensity": 0.5,
+              "type": "directional"
+            }
+          ],
+          "nativeDebugMode": "Normal",
+          "postProcessing": true,
+          "tonemapping": {
+            "exposureCompensationEv": 0,
+            "mode": "ACES",
+            "scope": "Component selection and post-render camera settings; no independent shader pixel oracle.",
+            "source": "camera-colocated stock Tonemapping component"
+          }
+        }
+      }
+    }
+  ],
+  "summary": {
+    "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MetalRoughSpheres/ao-corrected-87f/summary.json",
+    "sha256": "434c58bce052afd252503061505afb0ffa89f61d9d026541a5b3be35c643862b"
+  },
+  "ao_regression": {
+    "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MetalRoughSpheres/ao-corrected-87f/ao-regression-observations.json",
+    "sha256": "ad5526080608cf533b8ba4604b9d52318b4adf5ca1dafd43eb272bc536381dca"
+  },
+  "lease_receipt": {
+    "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MetalRoughSpheres/ao-corrected-87f/lease-receipt.json",
+    "sha256": "1162370663269dfab5a7acfc11d05faf5e68f92f64c85ff0b73cad8c7eee6469"
+  },
+  "field_preflight": {
+    "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MetalRoughSpheres/ao-corrected-87f/field-preflight.json",
+    "sha256": "76d4f894b1ebe1f2739500b0a9fbee6f741094d916c566bdc2127f909bc22bc3"
+  },
+  "producer": {
+    "engine": {
+      "diskMvid": "87f823c3-45fc-4903-a136-2b62d86ee251",
+      "diskSha256": "0bf3e5dcdf4481d070b6a1f89b0cf298a003ca05bcbf52772f308a6cf3e34ba9",
+      "mvid": "87f823c3-45fc-4903-a136-2b62d86ee251",
+      "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.Engine.dll"
+    },
+    "gltf": {
+      "diskMvid": "b083757d-e24c-4b5f-8e04-dd3861b36960",
+      "diskSha256": "e2099978d14a3059ef8fbbd6c45f8e9116724d5ab861f7782bcea4e4779c920b",
+      "mvid": "b083757d-e24c-4b5f-8e04-dd3861b36960",
+      "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.Gltf.dll"
+    },
+    "renderer": {
+      "diskMvid": "c22b305b-109d-4166-a212-a7d4bc301e40",
+      "diskSha256": "b5c8196be0f3c6bcca5cbae5f11e3ec4d3013fde98afffec99cd0e68fd11e7a1",
+      "mvid": "c22b305b-109d-4166-a212-a7d4bc301e40",
+      "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.SceneRenderer.dll"
+    }
+  },
+  "visualReview": "pending",
+  "scope": "Corrected default source material with actual neutral AO. Source and canonical compiled compared to same pinned reference; source vs white AO and black negative passed. Field HDRI is a chosen presentation; compiled identity differs from earlier run and bounded BC6H face reads remained NaN, so texels, HDR equivalence, mips and reference environment are unverified. Exposure component settings retained but prior EV pixel response failed. User approval is pending; retain old rejection in history."
+}

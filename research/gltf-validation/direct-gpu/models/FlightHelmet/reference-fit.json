@@ -1,0 +1,128 @@
+{
+  "referenceSha256": "ed5d7dd6e77c0f76a8e0878d61311ec2302a01be9bf636fc4e112197e1b607f1",
+  "camera": {
+    "space": "gltf-metres",
+    "position": [
+      1.1613128587418706,
+      0.5766378535925183,
+      1.445595784847005
+    ],
+    "target": [
+      -0.036077248000000006,
+      0.361,
+      0.0
+    ],
+    "up": [
+      0,
+      1,
+      0
+    ],
+    "projection": "perspective",
+    "verticalFov": 34.99999999999999,
+    "preset": "flight-helmet-thumbnail-fit"
+  },
+  "edgeRows": [
+    [
+      27,
+      62,
+      77
+    ],
+    [
+      30,
+      58,
+      80
+    ],
+    [
+      33,
+      56,
+      82
+    ],
+    [
+      39,
+      52,
+      85
+    ],
+    [
+      42,
+      52,
+      85
+    ],
+    [
+      45,
+      52,
+      85
+    ],
+    [
+      48,
+      53,
+      84
+    ],
+    [
+      54,
+      51,
+      83
+    ],
+    [
+      57,
+      52,
+      80
+    ],
+    [
+      60,
+      53,
+      79
+    ],
+    [
+      66,
+      55,
+      79
+    ],
+    [
+      72,
+      54,
+      81
+    ],
+    [
+      78,
+      53,
+      71
+    ],
+    [
+      84,
+      55,
+      68
+    ],
+    [
+      90,
+      56,
+      77
+    ],
+    [
+      96,
+      40,
+      93
+    ],
+    [
+      102,
+      40,
+      93
+    ],
+    [
+      105,
+      42,
+      88
+    ],
+    [
+      108,
+      50,
+      80
+    ],
+    [
+      111,
+      59,
+      72
+    ]
+  ],
+  "referencePixelObjective": 1.5841679051433077,
+  "scope": "Approximate no-roll perspective inferred from silhouette and lens location. Lighting and tone mapping are unknown."
+}

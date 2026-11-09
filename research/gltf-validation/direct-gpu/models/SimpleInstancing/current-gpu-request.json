@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "engine_sha256": "ad6a78a7e4f2664fe1f74b1567dde6d15d1519ad78dbd1e21efbb21ebfa2ebd1",
+  "gltf_sha256": "b86cb72e0c0e0f3c23af45bd115f68760655d1754d663f41df62a45e136f9e8b",
+  "tools_sha256": "539c10536c6df8a769eb4f91488ebfe9a048fdf1bd7cd589d0383479b2641b4d",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingCoreTests.cs",
+      "sha256": "dd6bf0cac846251ecb0f7d72ab64ade519f81d069969209a2c31e3655abe8e45"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingReference.cs",
+      "sha256": "15dbb37b0884101b47bbbad3edd81901f504066baec91a74aea1ba2b2b3a7e7d"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingGpuChecks.cs",
+      "sha256": "291d0262b7935f59911014e2728cb33350f090b7ff248b5bbe75a4d691ff8680"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingGpuProbe.cs",
+      "sha256": "4b5a6c8adb5807b114b0f848c0838dd11d7b74233ea10b144d2479d442284f89"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingAffineReference.cs",
+      "sha256": "ea0b46ae1d0d0a0d70bf3cd5603edc50360b3fe4e0cb0499ee342c8315cd3836"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingAffineProbe.cs",
+      "sha256": "7f932eec20b7c940822d46991756a78ed0a42d8925d234314bafe02bcf57d032"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingPublicTests.cs",
+      "sha256": "5de082a6dac9efa4f6be8be907fa74684cfba6a0f324d5f422929ed4cd1da4f4"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingCurrentGpuExecutionTests.cs",
+      "sha256": "0eed927ea5740b1feeea8cc7b460eae3b0519dfc8ab53a8ad53d021434d5f803"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuSimpleInstancingExecutionTests.cs",
+      "sha256": "6f792d2eabbfae178557978df5c1a4147f68ede893c7085ba737a84140966274"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.GltfGpuSimpleInstancingExecutionTests",
+      "kind": "static_results",
+      "method": "RunControls",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 11
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.GltfGpuSimpleInstancingExecutionTests",
+      "kind": "mstest",
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "expected_cases": 1,
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.SimpleInstancingValidation.SimpleInstancingCurrentGpuExecutionTests",
+      "kind": "mstest",
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "expected_cases": 2,
+      "measurements_property": "Measurements"
+    }
+  ]
+}

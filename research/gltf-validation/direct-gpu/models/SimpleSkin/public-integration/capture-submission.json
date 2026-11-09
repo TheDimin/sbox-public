@@ -1,0 +1,64 @@
+{
+  "model": "SimpleSkin",
+  "scope": "public Model.Load + SkinnedModelRenderer actual source glTF and actual derived compiled GLB; two deterministic sequence seeks each, GPU readback and independent native images; not wallclock or materialfidelity",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleSkin/public-integration/SimpleSkinPublicCapture.cs",
+      "sha256": "3d27a1a15b9686895111dccece679ae436c6bf5f12065a969b345c21a73de443"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleSkin/public-integration/SimpleSkinPublicTests.cs",
+      "sha256": "ff499cebfbc055c85c1a0c74a5bcb697f0cb21889a4938d8eb6688ea42b4aeff"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleSkin/SimpleSkinReference.cs",
+      "sha256": "2bb15660cb3a57fdd997c2b6b92b16b0ac6baa9789a2d2f360a48b65c0722226"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleSkin/SimpleSkinGpuChecks.cs",
+      "sha256": "c19d1463292064a13c81325faa0ea3e851f2ca8fe6288ba01567fcb1588ac109"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleSkin/SimpleSkinCoreTests.cs",
+      "sha256": "c18763004d294e3440a2e6eb20a8170346b2cf7023ce10d994d0421a491ed852"
+    }
+  ],
+  "entry": "Sandbox.Gltf.DirectGpu.Validation.SimpleSkinPublicCapture.Run(checkout,NativeCapture.Scene,NativeCapture.Camera,NativeCapture.WaitFrames,NativeCapture.Take,positionToleranceInches,normalTolerance,minimumIoU,maximumMeanRgbError,maximumRgbError,compiled=false)",
+  "expected_results": 2,
+  "poses": 4,
+  "native_captures": 16,
+  "forms": [
+    "glTF/source",
+    "glTF/compiled_glb"
+  ],
+  "framework": "Reuse unchanged GltfGpuTriangleGateTests.NativeCapture and existing coordinator wrapper; this probe supplies no camera/mount/compiler framework.",
+  "proposed_acceptance": {
+    "position_tolerance_inches": 0.0001,
+    "normal_tolerance": 1e-05,
+    "minimum_IoU": 1,
+    "maximum_mean_RGB_error": 0,
+    "maximum_RGB_error": 0,
+    "approval": "Root approved these explicit limits through validation coordinator; execute source and compiled forms independently."
+  },
+  "accessibility_only_change": {
+    "path": "research/gltf-validation/direct-gpu/models/SimpleSkin/SimpleSkinGpuChecks.cs",
+    "old_sha256": "4c7f781b4856643bc91239fe0adb453840763b34a27cb9e4dbdd2af4ebdafa55",
+    "new_sha256": "c19d1463292064a13c81325faa0ea3e851f2ca8fe6288ba01567fcb1588ac109",
+    "change": "public static class -> internal static class; no oracle arithmetic changed"
+  },
+  "status": "actual_source_and_compiled_pass",
+  "receipt": {
+    "path": "Temp/gltf-validation/direct-gpu/c5c0-public-skin-capture-2/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "sha256": "2c7a40a3a203e78c1183045c57f314c9f61de408d7356e1209ffbcfb437dd5a5",
+    "passed": 2,
+    "failed": 0,
+    "native_captures": 16,
+    "maximum_position_error_inches": 3.8146973e-06,
+    "maximum_normal_error": 0,
+    "minimum_IoU": 1,
+    "mean_RGB_error": 0,
+    "maximum_RGB_error": 0,
+    "changed_pixels_each_form_actual_and_reference": 4898,
+    "evidence_manifest": "Temp/gltf-validation/direct-gpu/public-model-smokes/SimpleSkin/latest-evidence.json"
+  }
+}

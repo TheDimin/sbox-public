@@ -1,0 +1,154 @@
+{
+  "version": 1,
+  "engine_sha256": "e05cc4da9851ad2c3306e16ef3af317c8b398516dd6f8bf2bcd902687b5f7215",
+  "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MergedAlphaCoverageTests.cs",
+      "sha256": "e8cb1d509bfd8b9c473454eccff42c0a2949b966b92e717e1ee3791c551093f7"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MergedAlphaSortingTests.cs",
+      "sha256": "8edcf216d833e0517daf2a7477e9a3839bba4da62e776b513047b56f1d82bd37"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MergedAlphaBackfaceTests.cs",
+      "sha256": "9efa998782acbdb05d43a64bcaa3123d3a562cbee6ea0af1a1ab0e618e6fae88"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaControlFixtures.cs",
+      "sha256": "07b5c4ed3e67354fd156d252940a947545e2472dd4b70d833741abf2dc80080b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MeshPrimitiveModesReference.cs",
+      "sha256": "19fad7a82bc48f0a6a393edbe2fcf7f9e7a7bfea5da33ed9e823dc52ef982639"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MergedDrawAttributeTests.cs",
+      "sha256": "a9fe34c3558669b9806fb4291cbab746df917e4c9887b9fb95ab9318f4a23470"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MergedLineBlendTests.cs",
+      "sha256": "2c6405bf44ecb29db939b2ace6ec4e8fbc6e6bfd7c1172db7a6bf8200a8fa49f"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.MergedAlphaCoverageTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "ShaderSha256",
+          "arguments": [
+            "bf6c5e6f16c801a9892a485a53bc4c6b6bef85d4a86c98232af8139187630ed9"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "OutputDirectory",
+          "arguments": [
+            "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/modes-merged-MergedAlphaCoverageTests-01"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.MergedAlphaSortingTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "ShaderSha256",
+          "arguments": [
+            "bf6c5e6f16c801a9892a485a53bc4c6b6bef85d4a86c98232af8139187630ed9"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "OutputDirectory",
+          "arguments": [
+            "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/modes-merged-MergedAlphaSortingTests-01"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.MergedAlphaBackfaceTests",
+      "kind": "mstest",
+      "expected_cases": 2,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MeshPrimitiveModesValidation.MergedDrawAttributeTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MeshPrimitiveModesValidation.MergedLineBlendTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ]
+}

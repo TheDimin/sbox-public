@@ -1,0 +1,5208 @@
+{
+  "audit_version": 1,
+  "date": "2026-11-06",
+  "scope": "read-only static inventory proposal; not executed and not a replacement for historical manifests",
+  "legacy": {
+    "path": "research/gltf-validation/gltf-test-manifest.json",
+    "sha256": "e2682e555098cbe81dcb67c92cb46ef2ca47394b665f4aa480c3c9463657d2b0",
+    "version": 7,
+    "source_class_count": 44,
+    "test_method_count": 432,
+    "data_row_count": 432,
+    "expanded_case_count": 764,
+    "source_snapshot": "Temp/gltf-validation/staged-build/f9fd58602bbf47a6ac1bfa51f0d07845/pure-test-source-snapshot",
+    "all_44_current_sources_byte_identical_to_snapshot": true,
+    "runner_producer_pin": {
+      "source_snapshot_manifest": "Temp/gltf-validation/staged-build/f9fd58602bbf47a6ac1bfa51f0d07845/source-snapshot-manifest.json",
+      "source_snapshot_manifest_sha256": "eb3c3e559767dbc60ac6e60d38522c6f7a83aff39f0e742fa14a3f7b09143d92",
+      "gltf_sha256": "3cc86c2490bc835bcf1932b50ead41ea6ea5e94a46b1212d8ea8a33b8641faa0",
+      "matches_current_disk_gltf": false,
+      "consequence": "Legacy C# inventory is valid but producer pin rejects c5c0; preserve this check and run new frozen cohorts rather than weakening historical identity."
+    }
+  },
+  "current_pure_project": {
+    "source_class_count": 47,
+    "test_method_count": 463,
+    "data_row_count": 460,
+    "expanded_case_count": 816,
+    "suites": [
+      {
+        "name": "accessor",
+        "file": "GltfAccessorTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfAccessorTests",
+        "methods": 14,
+        "data_rows": 2,
+        "cases": 15,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfAccessorTests.cs",
+        "source_sha256": "f580e144e2fb95aafd2b7c1e9114d041f7190afddca262d9ae8a29edbe396d14",
+        "method_inventory": [
+          {
+            "name": "ReadsInterleavedVectorsUsingViewAndAccessorOffsets",
+            "line": 13,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SignedNormalizedByteClampsNegativeMinimum",
+            "line": 30,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnsignedShortNormalizedDecodesFullRange",
+            "line": 40,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SparseAccessorOverridesZeroInitializedBase",
+            "line": 58,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SparseAccessorOverridesExistingBaseValues",
+            "line": 73,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ByteMatrixSkipsEachColumnPadding",
+            "line": 89,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "LastMatrixMayOmitFinalColumnPadding",
+            "line": 100,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnsignedIntIndicesKeepValuesBeyondSixteenBits",
+            "line": 114,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ExternalBufferUsesResolverAndReadsAccessor",
+            "line": 130,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "AccessorCannotReadBeyondItsBufferViewEvenWhenBufferHasBytes",
+            "line": 147,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "BufferViewCannotReadBeyondDeclaredBufferLength",
+            "line": 159,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "TruncatedExternalBufferFailsInsteadOfReturningPartialData",
+            "line": 170,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "IndexAccessorMustUseAnUnsignedScalarComponent",
+            "line": 181,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SparseIndicesMustBeStrictlyIncreasingAndInBounds",
+            "line": 193,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( (byte)1, (byte)1 )]",
+              "[DataRow( (byte)1, (byte)5 )]"
+            ]
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "animated-deformation",
+        "file": "GltfAnimatedDeformationTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfAnimatedDeformationTests",
+        "methods": 4,
+        "data_rows": 0,
+        "cases": 4,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfAnimatedDeformationTests.cs",
+        "source_sha256": "aa6a80621f7a9f02d35183b846f8c9d85ae00609a073f3a4f58288dbac1fa9ef",
+        "method_inventory": [
+          {
+            "name": "UnskinnedVertexFollowsAnimatedParentAndRetainsChildScale",
+            "line": 12,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "AnimatedMorphAndJointHierarchyApplyAllInfluencesBeforeWorldTransform",
+            "line": 31,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CompiledGlbPreservesAnimatedDeformationAcrossSampleTimes",
+            "line": 46,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "PoseMustBeNonNullAndBelongToTheEvaluatedDocument",
+            "line": 61,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "animation-channels",
+        "file": "GltfAnimationChannelTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfAnimationChannelTests",
+        "methods": 16,
+        "data_rows": 6,
+        "cases": 21,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfAnimationChannelTests.cs",
+        "source_sha256": "3ae97384e6e0b841e5d9418c5917b2498f448a7485afb5eece10d1de429e8f78",
+        "method_inventory": [
+          {
+            "name": "TranslationChannelUpdatesDescendantsAndRetainsUntargetedTrs",
+            "line": 45,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RotationAndScaleChannelsCombineWithUntargetedTranslation",
+            "line": 65,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RotationChannelAcceptsNormalizedSignedShortQuaternionValues",
+            "line": 88,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MorphWeightsReadFlattenedScalarOutputsAndDoNotAffectOtherInstances",
+            "line": 108,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MorphChannelAcceptsNormalizedUnsignedByteWeights",
+            "line": 133,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CubicMorphChannelGroupsTangentsAndValuesPerKey",
+            "line": 155,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "StepTranslationChangesExactlyAtTheNextKey",
+            "line": 174,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CubicSplineChannelUsesAccessorTangentsAndKeyDuration",
+            "line": 188,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SamplingLaterTimeDoesNotMutatePreviouslyEvaluatedPose",
+            "line": 206,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InvalidSamplerAndTargetReferencesAreRejected",
+            "line": 223,
+            "data_rows": 6,
+            "cases": 6,
+            "row_source": [
+              "[DataRow( \"{\\\"input\\\":0,\\\"output\\\":1}\", \"{\\\"sampler\\\":1,\\\"target\\\":{\\\"node\\\":0,\\\"path\\\":\\\"translation\\\"}}\" )]",
+              "[DataRow( \"{\\\"input\\\":2,\\\"output\\\":1}\", \"{\\\"sampler\\\":0,\\\"target\\\":{\\\"node\\\":0,\\\"path\\\":\\\"translation\\\"}}\" )]",
+              "[DataRow( \"{\\\"input\\\":0,\\\"output\\\":2}\", \"{\\\"sampler\\\":0,\\\"target\\\":{\\\"node\\\":0,\\\"path\\\":\\\"translation\\\"}}\" )]",
+              "[DataRow( \"{\\\"input\\\":0,\\\"output\\\":1}\", \"{\\\"sampler\\\":0,\\\"target\\\":{\\\"node\\\":1,\\\"path\\\":\\\"translation\\\"}}\" )]",
+              "[DataRow( \"{\\\"input\\\":0,\\\"output\\\":1}\", \"{\\\"sampler\\\":0,\\\"target\\\":{\\\"node\\\":0,\\\"path\\\":\\\"rotation\\\"}}\" )]",
+              "[DataRow( \"{\\\"input\\\":0,\\\"output\\\":1}\", \"{\\\"sampler\\\":0,\\\"target\\\":{\\\"node\\\":0,\\\"path\\\":\\\"unknown\\\"}}\" )]"
+            ]
+          },
+          {
+            "name": "OutputAccessorCountMustMatchTheNumberOfKeys",
+            "line": 245,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CubicOutputRequiresThreeVectorsPerKey",
+            "line": 261,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MorphOutputScalarCountMustMatchKeysTimesTargetCount",
+            "line": 277,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "AnimatedNodeCannotUseMatrixTransform",
+            "line": 295,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "AnAnimationCannotTargetTheSameNodePropertyTwice",
+            "line": 311,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnsupportedChannelWithoutTargetNodeIsIgnored",
+            "line": 329,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "animation-sampler",
+        "file": "GltfAnimationTests.cs",
+        "type": "Sandbox.Test.Gltf.GltfAnimationTests",
+        "methods": 8,
+        "data_rows": 0,
+        "cases": 8,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfAnimationTests.cs",
+        "source_sha256": "83167ad0133c38528c16c853080c4c8931e2ba5204bcbaac985c987d10038600",
+        "method_inventory": [
+          {
+            "name": "StepChangesAtTheKeyRatherThanBeforeIt",
+            "line": 18,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "LinearInterpolatesEachComponentUsingActualKeyTimes",
+            "line": 31,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CubicSplineScalesTangentsBySegmentDuration",
+            "line": 43,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CubicSplineUsesVectorTangentsForEachComponent",
+            "line": 55,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "LinearRotationUsesShortestPathSphericalInterpolation",
+            "line": 67,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CubicRotationNormalizesTheSplineWithoutFlippingKeys",
+            "line": 80,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SingleKeyStaysConstantOutsideItsTime",
+            "line": 93,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RejectsInvalidTimesAndValueCounts",
+            "line": 102,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "artifact-dependencies",
+        "file": "GltfArtifactDependenciesTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfArtifactDependenciesTests",
+        "methods": 10,
+        "data_rows": 10,
+        "cases": 19,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfArtifactDependenciesTests.cs",
+        "source_sha256": "78f06e6461151adfeab77eb691c34246a84dea59bd90218ed24c4113b8223ceb",
+        "method_inventory": [
+          {
+            "name": "CollectsExternalImagesAtDecodedRelativePathsAndSkipsEmbeddedImages",
+            "line": 14,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RejectsUnsafeDependencyPaths",
+            "line": 34,
+            "data_rows": 10,
+            "cases": 10,
+            "row_source": [
+              "[DataRow( \"../outside.png\" )]",
+              "[DataRow( \"%2e%2e/outside.png\" )]",
+              "[DataRow( \"textures/%2e%2e/outside.png\" )]",
+              "[DataRow( \"/absolute.png\" )]",
+              "[DataRow( \"//host/file.png\" )]",
+              "[DataRow( \"https://example.com/file.png\" )]",
+              "[DataRow( \"textures%5coutside.png\" )]",
+              "[DataRow( \"textures/file.png?query=1\" )]",
+              "[DataRow( \"textures/file.png#fragment\" )]",
+              "[DataRow( \"textures/%GG.png\" )]"
+            ]
+          },
+          {
+            "name": "RewritesValidSourceUrisToDeterministicContentAddressedSidecars",
+            "line": 50,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RewritingImageUriRejectsOpaqueReferencesToTheOriginalPath",
+            "line": 77,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "FailedPublishKeepsPreviousArtifactAndSidecarUntouched",
+            "line": 87,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SidecarWriteFailureAfterPartialProgressDoesNotReplacePriorArtifact",
+            "line": 103,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "WritesAndResolvesSidecarsRelativeToTheCompiledArtifact",
+            "line": 121,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ImageSidecarCannotOverwriteTheCompiledArtifact",
+            "line": 139,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MissingDependencyIsAnError",
+            "line": 146,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DifferentUrisCannotSilentlyOverwriteTheSamePathWithDifferentBytes",
+            "line": 153,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "basis-fallbacks",
+        "file": "GltfBasisFallbackTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfBasisFallbackTests",
+        "methods": 4,
+        "data_rows": 4,
+        "cases": 6,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfBasisFallbackTests.cs",
+        "source_sha256": "abc5c770657f0226929285f52a1bd21d9d6fd777ec09c2cc539c8f0e4ba43418",
+        "method_inventory": [
+          {
+            "name": "OptionalBasisUsesSelectedImageOrCoreFallback",
+            "line": 15,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( false )]",
+              "[DataRow( true )]"
+            ]
+          },
+          {
+            "name": "BasisWithoutCoreFallbackMustBeRequiredEvenWhenSupported",
+            "line": 24,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( false )]",
+              "[DataRow( true )]"
+            ]
+          },
+          {
+            "name": "RequiredBasisWithoutFallbackUsesBasisImageWhenSupported",
+            "line": 34,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RequiredBasisWithoutCapabilityIsRejected",
+            "line": 41,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "compiler-orphan-binary",
+        "file": "GltfCompilerOrphanBinaryTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfCompilerOrphanBinaryTests",
+        "methods": 7,
+        "data_rows": 0,
+        "cases": 7,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfCompilerOrphanBinaryTests.cs",
+        "source_sha256": "3b78b90aec1e7443a19da2e2c0a32ac1a161ba41dcfc74e756f0fd10f62cab75",
+        "method_inventory": [
+          {
+            "name": "EmptyUnreferencedBinaryIsRetainedWithZeroPackagingBudget",
+            "line": 13,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnreferencedBinaryWithoutBuffersIsPreservedExactly",
+            "line": 22,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnreferencedBinaryCoexistsWithEmbeddedFirstBuffer",
+            "line": 34,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnreferencedBinaryRetainsMultipleBufferIndicesWithoutExternalDependencies",
+            "line": 46,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnreferencedBinaryObeysPackagingBudget",
+            "line": 59,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "OrphanBudgetIncludesFirstEmbeddedBuffer",
+            "line": 68,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ReferencedBinaryContinuesToRoundTripNormally",
+            "line": 80,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "compiler-safety",
+        "file": "GltfCompilerSafetyTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfCompilerSafetyTests",
+        "methods": 7,
+        "data_rows": 4,
+        "cases": 10,
+        "source_dependencies": [
+          "GltfMeshoptTests.cs"
+        ],
+        "resources": [],
+        "codecs": [
+          "meshopt"
+        ],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfCompilerSafetyTests.cs",
+        "source_sha256": "e43aff8bdf8932033996189081fb1f72dfbe40e3f13ab721e777a21163ca8e08",
+        "method_inventory": [
+          {
+            "name": "OneBufferKeepsItsMetadataAndUnknownExtensionsWhenNoReferencesMove",
+            "line": 14,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "BufferMetadataIsPreservedWhenBuffersCannotBeMerged",
+            "line": 29,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ApplicationExtrasKeepTheirOriginalBufferReferences",
+            "line": 45,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RequiredMeshoptFallbackPlaceholderAndBufferIdsArePreserved",
+            "line": 58,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( \"KHR_meshopt_compression\", 0 )]",
+              "[DataRow( \"KHR_meshopt_compression\", 1 )]",
+              "[DataRow( \"EXT_meshopt_compression\", 0 )]",
+              "[DataRow( \"EXT_meshopt_compression\", 1 )]"
+            ]
+          },
+          {
+            "name": "OversizedFirstPlaceholderIsRejectedBeforeMaterializingIt",
+            "line": 95,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "OptionalMeshoptPreservesTheUncompressedFallbackForUnsupportedReaders",
+            "line": 109,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnknownGlbChunksAreNotSilentlyDropped",
+            "line": 130,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "compiler",
+        "file": "GltfCompilerTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfCompilerTests",
+        "methods": 10,
+        "data_rows": 0,
+        "cases": 10,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfCompilerTests.cs",
+        "source_sha256": "a7c842747236f945a3351c876984b1e938d3a31a8eccae42a8bcb49631b321f4",
+        "method_inventory": [
+          {
+            "name": "CompiledOutputIsAReadableGlbAndRetainsSourceMetadata",
+            "line": 11,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ExternalBuffersAreMergedWithAlignedViewsAndUnchangedAccessorValues",
+            "line": 26,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ExternalImagesRemainIndependentAndPortable",
+            "line": 46,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CompilationIsDeterministicAndIdempotent",
+            "line": 57,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CompilationDoesNotMutateTheInput",
+            "line": 66,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MissingExternalBufferAndUnsupportedRequiredExtensionFail",
+            "line": 75,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DefaultCompilationPreservesFiniteFloatBitsIncludingNegativeZero",
+            "line": 84,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "EmbeddedImageSurvivesBufferPacking",
+            "line": 100,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnknownOptionalExtensionIsPreservedWhenNoReferencesAreRemapped",
+            "line": 113,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnknownExtensionKeepsItsBufferReferencesWithoutUnsafeRemapping",
+            "line": 125,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "container",
+        "file": "GltfContainerTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfContainerTests",
+        "methods": 10,
+        "data_rows": 8,
+        "cases": 17,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfContainerTests.cs",
+        "source_sha256": "22bb095af443fcf896b3f3dc72819af4640b77c26bf33251ac2227e67947660f",
+        "method_inventory": [
+          {
+            "name": "ReadsJsonAssetAndPreservesRoot",
+            "line": 17,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InvalidOrUnsupportedJsonFails",
+            "line": 25,
+            "data_rows": 8,
+            "cases": 8,
+            "row_source": [
+              "[DataRow( \"{}\" )]",
+              "[DataRow( \"[]\" )]",
+              "[DataRow( \"{\\\"asset\\\":{}}\" )]",
+              "[DataRow( \"{\\\"asset\\\":{\\\"version\\\":\\\"1.0\\\"}}\" )]",
+              "[DataRow( \"{\\\"asset\\\":{\\\"version\\\":\\\"2\\\"}}\" )]",
+              "[DataRow( \"{\\\"asset\\\":{\\\"version\\\":\\\"2.1\\\",\\\"minVersion\\\":\\\"2.1\\\"}}\" )]",
+              "[DataRow( \"{\\\"asset\\\":{\\\"version\\\":\\\"2.0\\\",\\\"minVersion\\\":\\\"2.1\\\"}}\" )]",
+              "[DataRow( \"{\\\"asset\\\":{\\\"version\\\":\\\"2.0\\\"}\" )]"
+            ]
+          },
+          {
+            "name": "LaterMinorVersionWithoutNewMinimumRemainsReadable",
+            "line": 39,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnknownRequiredExtensionFailsAndOptionalIsReported",
+            "line": 46,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RequiredExtensionMustBeDeclaredUsedAndSupported",
+            "line": 57,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ReadsGlbWithBinaryPaddingAndIgnoresLaterUnknownChunk",
+            "line": 69,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "GlbJsonOnlyIsValid",
+            "line": 78,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "GlbRejectsBadHeaderVersionAndDeclaredLength",
+            "line": 85,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "GlbRejectsChunkThatIsMisalignedOrExtendsBeyondFile",
+            "line": 101,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "GlbRequiresJsonFirstAndBinWhenBufferHasNoUri",
+            "line": 115,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "core-animation-conformance",
+        "file": "GltfCoreAnimationConformanceTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfCoreAnimationConformanceTests",
+        "methods": 25,
+        "data_rows": 43,
+        "cases": 54,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfCoreAnimationConformanceTests.cs",
+        "source_sha256": "2cedc41110ddb72aa72e6ffb183906de2b41b55ff0ae39ebe7154797ce38e114",
+        "method_inventory": [
+          {
+            "name": "MixedChannelTimeRangesClampIndependentlyWithoutMovingTheClipOrigin",
+            "line": 21,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "StepChannelsChangeAtTheAuthoredKeyBetweenItsImmediateFloatNeighbors",
+            "line": 58,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( \"translation\", 2f, 3f, 4f, 6f, 7f, 8f )]",
+              "[DataRow( \"rotation\", 1f, 1f, 1f, -1f, -1f, 1f )]",
+              "[DataRow( \"scale\", 1f, 2f, 3f, 0f, -2f, 4f )]",
+              "[DataRow( \"weights\", 1f, 1f, 1f, 3f, 1f, 1f )]"
+            ]
+          },
+          {
+            "name": "DistinctSubframeKeysRetainTheRepresentableTimeBetweenThem",
+            "line": 88,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CubicScaleReconstructsAPolynomialAcrossUnequalSegmentsIncludingZeroAndNegativeScale",
+            "line": 105,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( .5f, -.25f )]",
+              "[DataRow( 1f, 0f )]",
+              "[DataRow( 1.75f, .84375f )]"
+            ]
+          },
+          {
+            "name": "CubicQuaternionUsesAuthoredNonzeroTangentsAndNormalizesBeforeApplyingRotation",
+            "line": 126,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( .5f, 176f / 185f, 57f / 185f )]",
+              "[DataRow( 1f, .8f, .6f )]",
+              "[DataRow( 1.5f, 104f / 185f, 153f / 185f )]"
+            ]
+          },
+          {
+            "name": "SparseCubicMorphOutputsPreserveFiveTargetsTangentsAndUnboundedWeights",
+            "line": 148,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SelectingAnotherAnimationRestoresPropertiesThatTheNewClipDoesNotTarget",
+            "line": 177,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RemainingCoreNormalizedAnimationFormatsDecodeBeforeInterpolation",
+            "line": 206,
+            "data_rows": 6,
+            "cases": 6,
+            "row_source": [
+              "[DataRow( \"weights\", 5120 )]",
+              "[DataRow( \"weights\", 5122 )]",
+              "[DataRow( \"weights\", 5123 )]",
+              "[DataRow( \"rotation\", 5120 )]",
+              "[DataRow( \"rotation\", 5121 )]",
+              "[DataRow( \"rotation\", 5123 )]"
+            ]
+          },
+          {
+            "name": "SharedMeshInstancesUseTheirOwnSkinJointOrderAndInverseBindMatrices",
+            "line": 236,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "NineQuantizedInfluencesIncludeUnsignedShortJoint256AndIdentityInverseBindDefaults",
+            "line": 264,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( 5121, 16, 127, 255, 46848 )]",
+              "[DataRow( 5123, 4096, 32767, 65535, 12058368 )]"
+            ]
+          },
+          {
+            "name": "SkinningAttributesMustBePairedWhenPresent",
+            "line": 294,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( \"JOINTS_0\" )]",
+              "[DataRow( \"WEIGHTS_0\" )]"
+            ]
+          },
+          {
+            "name": "ASkinLeavesPrimitivesWithoutSkinningAttributesUnderTheirNodeTransform",
+            "line": 312,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ZeroWeightJointPaddingMayRepeatTheWeightedJoint",
+            "line": 331,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MixedQuantizedWeightSetsUseOneExactIntegerSum",
+            "line": 346,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( -1 )]",
+              "[DataRow( 0 )]",
+              "[DataRow( 1 )]"
+            ]
+          },
+          {
+            "name": "AJointCannotHaveTwoNonzeroInfluencesForOneVertexEvenAcrossSets",
+            "line": 372,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( false )]",
+              "[DataRow( true )]"
+            ]
+          },
+          {
+            "name": "QuantizedJointWeightsMustSumToTheIntegerNormalizationDenominator",
+            "line": 393,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( 5121, 127 )]",
+              "[DataRow( 5121, 128 )]",
+              "[DataRow( 5123, 32767 )]",
+              "[DataRow( 5123, 32768 )]"
+            ]
+          },
+          {
+            "name": "InverseBindMatricesRequireAnAffineFourthRow",
+            "line": 410,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( 3, 1f )]",
+              "[DataRow( 7, 1f )]",
+              "[DataRow( 11, 1f )]",
+              "[DataRow( 15, 2f )]"
+            ]
+          },
+          {
+            "name": "AnimationInputAccessorsRequireBothDeclaredTimeBounds",
+            "line": 430,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( \"min\" )]",
+              "[DataRow( \"max\" )]"
+            ]
+          },
+          {
+            "name": "AnimationAndInverseBindBufferViewsCannotDeclareVertexStride",
+            "line": 449,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( \"input\" )]",
+              "[DataRow( \"output\" )]",
+              "[DataRow( \"inverseBindMatrices\" )]"
+            ]
+          },
+          {
+            "name": "DeclaredAnimationTimeBoundsUseFloat32Comparison",
+            "line": 473,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "AnimationTimeBoundsMustMatchTheDecodedTimeRange",
+            "line": 483,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( \"min\", -1f )]",
+              "[DataRow( \"max\", 3f )]"
+            ]
+          },
+          {
+            "name": "DescriptorOnlyTimeAccessorKeepsTheCoreBoundsException",
+            "line": 496,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "AnimationAndInverseBindBufferViewsCannotDeclareGpuTarget",
+            "line": 509,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( \"input\" )]",
+              "[DataRow( \"output\" )]",
+              "[DataRow( \"inverseBindMatrices\" )]"
+            ]
+          },
+          {
+            "name": "UnusedInverseBindMatricesDoNotAcquireJointOnlyAffineRestrictions",
+            "line": 527,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MorphWeightAnimationPreservesAMatrixNodeWithoutDecomposition",
+            "line": 539,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "core-data-conformance",
+        "file": "GltfCoreDataConformanceTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfCoreDataConformanceTests",
+        "methods": 15,
+        "data_rows": 54,
+        "cases": 59,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfCoreDataConformanceTests.cs",
+        "source_sha256": "88c8b050ea12f5a737c9c99b36ad7d96cf8f3e394a8de9bd39de2684e35a3d5c",
+        "method_inventory": [
+          {
+            "name": "SparseIndexWidthsAndOffsetsReplaceOnlySelectedElements",
+            "line": 20,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( 5121, 1 )]",
+              "[DataRow( 5123, 2 )]",
+              "[DataRow( 5125, 4 )]"
+            ]
+          },
+          {
+            "name": "SparseValuesOutsideTheirOwnViewAreRejected",
+            "line": 37,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( 5121, 1 )]",
+              "[DataRow( 5123, 2 )]",
+              "[DataRow( 5125, 4 )]"
+            ]
+          },
+          {
+            "name": "TwoByteMatricesWithByteComponentsSkipEachColumnPadding",
+            "line": 51,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "NormalizedSignedByteAndUnsignedBytePreserveIntermediateValues",
+            "line": 59,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "IndexedTrianglesAcceptAllCoreIndexWidths",
+            "line": 71,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( 5121, 1 )]",
+              "[DataRow( 5123, 2 )]",
+              "[DataRow( 5125, 4 )]"
+            ]
+          },
+          {
+            "name": "ByteRestartIndexIsRejectedEvenWhenInsideVertexRange",
+            "line": 85,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnsignedShortRestartIndexIsRejectedEvenWhenInsideVertexRange",
+            "line": 94,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "PrimitiveIndicesRequireAnUnnormalizedUnsignedScalar",
+            "line": 103,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( \"VEC2\", 5121, false )]",
+              "[DataRow( \"SCALAR\", 5121, true )]",
+              "[DataRow( \"SCALAR\", 5122, false )]",
+              "[DataRow( \"SCALAR\", 5126, false )]"
+            ]
+          },
+          {
+            "name": "EachCoreTopologyAcceptsItsMinimumImplicitVertexCount",
+            "line": 116,
+            "data_rows": 7,
+            "cases": 7,
+            "row_source": [
+              "[DataRow( 0, 1 )]",
+              "[DataRow( 1, 2 )]",
+              "[DataRow( 2, 2 )]",
+              "[DataRow( 3, 2 )]",
+              "[DataRow( 4, 3 )]",
+              "[DataRow( 5, 3 )]",
+              "[DataRow( 6, 3 )]"
+            ]
+          },
+          {
+            "name": "CoreTopologyRejectsInsufficientOrIncompleteImplicitVertices",
+            "line": 132,
+            "data_rows": 8,
+            "cases": 8,
+            "row_source": [
+              "[DataRow( 1, 1 )]",
+              "[DataRow( 1, 3 )]",
+              "[DataRow( 2, 1 )]",
+              "[DataRow( 3, 1 )]",
+              "[DataRow( 4, 1 )]",
+              "[DataRow( 4, 4 )]",
+              "[DataRow( 5, 2 )]",
+              "[DataRow( 6, 2 )]"
+            ]
+          },
+          {
+            "name": "CoreAttributeLayoutFormatsAreAccepted",
+            "line": 149,
+            "data_rows": 14,
+            "cases": 14,
+            "row_source": [
+              "[DataRow( \"TEXCOORD_0\", \"VEC2\", 5126, false )]",
+              "[DataRow( \"TEXCOORD_0\", \"VEC2\", 5121, true )]",
+              "[DataRow( \"TEXCOORD_0\", \"VEC2\", 5123, true )]",
+              "[DataRow( \"COLOR_0\", \"VEC3\", 5126, false )]",
+              "[DataRow( \"COLOR_0\", \"VEC3\", 5121, true )]",
+              "[DataRow( \"COLOR_0\", \"VEC3\", 5123, true )]",
+              "[DataRow( \"COLOR_0\", \"VEC4\", 5126, false )]",
+              "[DataRow( \"COLOR_0\", \"VEC4\", 5121, true )]",
+              "[DataRow( \"COLOR_0\", \"VEC4\", 5123, true )]",
+              "[DataRow( \"JOINTS_0\", \"VEC4\", 5121, false )]",
+              "[DataRow( \"JOINTS_0\", \"VEC4\", 5123, false )]",
+              "[DataRow( \"WEIGHTS_0\", \"VEC4\", 5126, false )]",
+              "[DataRow( \"WEIGHTS_0\", \"VEC4\", 5121, true )]",
+              "[DataRow( \"WEIGHTS_0\", \"VEC4\", 5123, true )]"
+            ]
+          },
+          {
+            "name": "InvalidCoreAttributeComponentFormatsAreRejected",
+            "line": 171,
+            "data_rows": 6,
+            "cases": 6,
+            "row_source": [
+              "[DataRow( \"COLOR_0\", \"VEC3\", 5121, false )]",
+              "[DataRow( \"COLOR_0\", \"VEC4\", 5123, false )]",
+              "[DataRow( \"TEXCOORD_0\", \"VEC2\", 5121, false )]",
+              "[DataRow( \"WEIGHTS_0\", \"VEC4\", 5123, false )]",
+              "[DataRow( \"JOINTS_0\", \"VEC4\", 5126, false )]",
+              "[DataRow( \"_CUSTOM\", \"SCALAR\", 5125, false )]"
+            ]
+          },
+          {
+            "name": "SkinningLayoutStillRequiresItsMatchingAttribute",
+            "line": 184,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( \"JOINTS_0\", 5121, false )]",
+              "[DataRow( \"WEIGHTS_0\", 5126, false )]"
+            ]
+          },
+          {
+            "name": "InvalidSkinningFormatFailsEvenWithAValidPartner",
+            "line": 194,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( \"JOINTS_0\", \"VEC3\", 5121, false )]",
+              "[DataRow( \"JOINTS_0\", \"VEC4\", 5121, true )]",
+              "[DataRow( \"WEIGHTS_0\", \"VEC3\", 5126, false )]",
+              "[DataRow( \"WEIGHTS_0\", \"VEC4\", 5120, true )]"
+            ]
+          },
+          {
+            "name": "UnsignedIntIndicesRemainLegalWhenUnsignedIntVertexAttributesAreRejected",
+            "line": 207,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "core-material-conformance",
+        "file": "GltfCoreMaterialConformanceTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfCoreMaterialConformanceTests",
+        "methods": 4,
+        "data_rows": 18,
+        "cases": 18,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfCoreMaterialConformanceTests.cs",
+        "source_sha256": "4ac3e62db1445b8b8a722cee8ab1006e066cd821594d48e8096006abb27554d7",
+        "method_inventory": [
+          {
+            "name": "SharedImageRolesKeepIndependentTransformsColorSpacesAndSamplers",
+            "line": 19,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( false )]",
+              "[DataRow( true )]"
+            ]
+          },
+          {
+            "name": "CoreSamplerModesRetainIndependentMinMagAndAxes",
+            "line": 67,
+            "data_rows": 6,
+            "cases": 6,
+            "row_source": [
+              "[DataRow( 9728, 9728, 10497, 33071 )]",
+              "[DataRow( 9729, 9729, 33071, 33648 )]",
+              "[DataRow( 9728, 9984, 33648, 10497 )]",
+              "[DataRow( 9729, 9985, 10497, 33648 )]",
+              "[DataRow( 9728, 9986, 33071, 10497 )]",
+              "[DataRow( 9729, 9987, 33648, 33071 )]"
+            ]
+          },
+          {
+            "name": "MaskMaterialAndNormalizedVertexAlphaSurviveTogether",
+            "line": 83,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( false )]",
+              "[DataRow( true )]"
+            ]
+          },
+          {
+            "name": "OutOfRangeCoreMaterialFactorsAreRejected",
+            "line": 116,
+            "data_rows": 8,
+            "cases": 8,
+            "row_source": [
+              "[DataRow( \"{\\\"pbrMetallicRoughness\\\":{\\\"metallicFactor\\\":-0.01}}\" )]",
+              "[DataRow( \"{\\\"pbrMetallicRoughness\\\":{\\\"metallicFactor\\\":1.01}}\" )]",
+              "[DataRow( \"{\\\"pbrMetallicRoughness\\\":{\\\"roughnessFactor\\\":-0.01}}\" )]",
+              "[DataRow( \"{\\\"pbrMetallicRoughness\\\":{\\\"roughnessFactor\\\":1.01}}\" )]",
+              "[DataRow( \"{\\\"pbrMetallicRoughness\\\":{\\\"baseColorFactor\\\":[1,1,1,-0.01]}}\" )]",
+              "[DataRow( \"{\\\"pbrMetallicRoughness\\\":{\\\"baseColorFactor\\\":[1,1,1,1.01]}}\" )]",
+              "[DataRow( \"{\\\"emissiveFactor\\\":[1,1,-0.01]}\" )]",
+              "[DataRow( \"{\\\"alphaCutoff\\\":-0.01}\" )]"
+            ]
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "core-scene-conformance",
+        "file": "GltfCoreSceneConformanceTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfCoreSceneConformanceTests",
+        "methods": 40,
+        "data_rows": 130,
+        "cases": 147,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfCoreSceneConformanceTests.cs",
+        "source_sha256": "798dde4a5117c5412d754fabad4efeeb2c0e4dbdf7218c56568df316f59cf5da",
+        "method_inventory": [
+          {
+            "name": "LibraryWithoutScenesRetainsIndependentNodeCameraAndLightDefinitions",
+            "line": 24,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ExplicitEmptyDefaultSceneDoesNotImportAnotherScenesNodes",
+            "line": 41,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DifferentScenesMayShareRootNodesWithoutMergingUnselectedRoots",
+            "line": 54,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DefaultSceneIndexMustBeANonnegativeInteger",
+            "line": 70,
+            "data_rows": 5,
+            "cases": 5,
+            "row_source": [
+              "[DataRow( \"-1\" )]",
+              "[DataRow( \"0.5\" )]",
+              "[DataRow( \"\\\"0\\\"\" )]",
+              "[DataRow( \"null\" )]",
+              "[DataRow( \"true\" )]"
+            ]
+          },
+          {
+            "name": "DefaultSceneMustReferenceAnExistingArrayElement",
+            "line": 85,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( \"\\\"scene\\\":0\" )]",
+              "[DataRow( \"\\\"scene\\\":0,\\\"scenes\\\":null\" )]",
+              "[DataRow( \"\\\"scene\\\":0,\\\"scenes\\\":{}\" )]",
+              "[DataRow( \"\\\"scene\\\":0,\\\"scenes\\\":[]\" )]"
+            ]
+          },
+          {
+            "name": "SelectedSceneRequiresUniqueValidRootNodeReferences",
+            "line": 99,
+            "data_rows": 10,
+            "cases": 10,
+            "row_source": [
+              "[DataRow( \"null\" )]",
+              "[DataRow( \"[]\" )]",
+              "[DataRow( \"{\\\"nodes\\\":null}\" )]",
+              "[DataRow( \"{\\\"nodes\\\":{}}\" )]",
+              "[DataRow( \"{\\\"nodes\\\":[]}\" )]",
+              "[DataRow( \"{\\\"nodes\\\":[-1]}\" )]",
+              "[DataRow( \"{\\\"nodes\\\":[\\\"0\\\"]}\" )]",
+              "[DataRow( \"{\\\"nodes\\\":[0.5]}\" )]",
+              "[DataRow( \"{\\\"nodes\\\":[1]}\" )]",
+              "[DataRow( \"{\\\"nodes\\\":[0,0]}\" )]"
+            ]
+          },
+          {
+            "name": "SceneRootCannotBeAChildOfAnotherNode",
+            "line": 119,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ChildReferencesRequireANonemptyArrayOfUniqueValidIndices",
+            "line": 131,
+            "data_rows": 8,
+            "cases": 8,
+            "row_source": [
+              "[DataRow( \"null\" )]",
+              "[DataRow( \"{}\" )]",
+              "[DataRow( \"[]\" )]",
+              "[DataRow( \"[-1]\" )]",
+              "[DataRow( \"[\\\"1\\\"]\" )]",
+              "[DataRow( \"[0.5]\" )]",
+              "[DataRow( \"[2]\" )]",
+              "[DataRow( \"[1,1]\" )]"
+            ]
+          },
+          {
+            "name": "NodeTrsRequiresFiniteVectorsOfTheSpecifiedDimensions",
+            "line": 149,
+            "data_rows": 9,
+            "cases": 9,
+            "row_source": [
+              "[DataRow( \"\\\"translation\\\":[1,2]\" )]",
+              "[DataRow( \"\\\"translation\\\":[1,2,3,4]\" )]",
+              "[DataRow( \"\\\"translation\\\":[1,\\\"2\\\",3]\" )]",
+              "[DataRow( \"\\\"scale\\\":[1,2]\" )]",
+              "[DataRow( \"\\\"scale\\\":[1,2,3,4]\" )]",
+              "[DataRow( \"\\\"scale\\\":[1,1,1e40]\" )]",
+              "[DataRow( \"\\\"rotation\\\":[0,0,1]\" )]",
+              "[DataRow( \"\\\"rotation\\\":[0,0,0,1,0]\" )]",
+              "[DataRow( \"\\\"rotation\\\":[0,0,0,0]\" )]"
+            ]
+          },
+          {
+            "name": "MatrixCannotBeCombinedWithEvenDefaultRotationOrScale",
+            "line": 168,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( \"\\\"rotation\\\":[0,0,0,1]\" )]",
+              "[DataRow( \"\\\"scale\\\":[1,1,1]\" )]"
+            ]
+          },
+          {
+            "name": "NodeMatrixRequiresSixteenFiniteNumericComponents",
+            "line": 180,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( \"[1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,1]\" )]",
+              "[DataRow( \"[1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1,0]\" )]",
+              "[DataRow( \"[1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,\\\"0\\\",1]\" )]",
+              "[DataRow( \"[1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,1e40,1]\" )]"
+            ]
+          },
+          {
+            "name": "LocalNodeMatrixMustBeAffineAndDecomposableToTrs",
+            "line": 194,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( \"[1,0,0,0, 1,1,0,0, 0,0,1,0, 0,0,0,1]\" )]",
+              "[DataRow( \"[1,0,0,0.5, 0,1,0,0, 0,0,1,0, 0,0,0,1]\" )]",
+              "[DataRow( \"[1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,2]\" )]"
+            ]
+          },
+          {
+            "name": "LocalMatrixAllowsSingularScaleWithoutLosingTranslation",
+            "line": 207,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( \"[0,0,0,0, 0,0,0,0, 0,0,0,0, 1,2,3,1]\", 1f, 2f, 3f )]",
+              "[DataRow( \"[0,0,0,0, 0,2,0,0, 0,0,3,0, 1,2,3,1]\", 1f, 8f, 15f )]",
+              "[DataRow( \"[-2,0,0,0, 0,0,0,0, 0,0,0,0, 1,2,3,1]\", -3f, 2f, 3f )]"
+            ]
+          },
+          {
+            "name": "EquivalentReflectedMatrixAndTrsHaveTheSameNumericWorldTransform",
+            "line": 217,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ComposingValidLocalTrsAndMatrixNodesMayProduceWorldShear",
+            "line": 230,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MissingChildrenAndSceneRootPropertiesRemainValidEmptyDefinitions",
+            "line": 248,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RoundedLocalTrsMatricesPreserveTheirOriginalComponentsAtDifferentScales",
+            "line": 256,
+            "data_rows": 6,
+            "cases": 6,
+            "row_source": [
+              "[DataRow( 0f )]",
+              "[DataRow( .001f )]",
+              "[DataRow( 1f )]",
+              "[DataRow( 100f )]",
+              "[DataRow( 1e20f )]",
+              "[DataRow( 1e-20f )]"
+            ]
+          },
+          {
+            "name": "GenuineLocalShearIsRejectedIndependentlyOfScaleAndTranslation",
+            "line": 271,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( .001f )]",
+              "[DataRow( 100f )]",
+              "[DataRow( 1e20f )]",
+              "[DataRow( 1e-20f )]"
+            ]
+          },
+          {
+            "name": "PublishedDecimalRoundedCameraMatrixRemainsAcceptedUnchanged",
+            "line": 282,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SingularAncestorScaleKeepsFiniteDescendantWorldPositions",
+            "line": 297,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( \"[0,0,0]\", 10f, 20f, 30f )]",
+              "[DataRow( \"[0,2,3]\", 10f, 34f, 57f )]",
+              "[DataRow( \"[-2,0,0]\", 0f, 20f, 30f )]"
+            ]
+          },
+          {
+            "name": "NegatedUnitQuaternionProducesTheSameNodeOrientation",
+            "line": 307,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SharedCameraDefinitionKeepsProjectionValuesIndependentOfNodeTransforms",
+            "line": 321,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CameraTypeRequiresItsCorrespondingProjectionObject",
+            "line": 337,
+            "data_rows": 6,
+            "cases": 6,
+            "row_source": [
+              "[DataRow( \"perspective\", \"\" )]",
+              "[DataRow( \"perspective\", \",\\\"perspective\\\":null\" )]",
+              "[DataRow( \"perspective\", \",\\\"perspective\\\":[]\" )]",
+              "[DataRow( \"orthographic\", \"\" )]",
+              "[DataRow( \"orthographic\", \",\\\"orthographic\\\":null\" )]",
+              "[DataRow( \"orthographic\", \",\\\"orthographic\\\":[]\" )]"
+            ]
+          },
+          {
+            "name": "PerspectiveProjectionRequiresPositiveFiniteFovAspectAndOrderedClipping",
+            "line": 353,
+            "data_rows": 11,
+            "cases": 11,
+            "row_source": [
+              "[DataRow( \"{}\" )]",
+              "[DataRow( \"{\\\"yfov\\\":1}\" )]",
+              "[DataRow( \"{\\\"znear\\\":0.1}\" )]",
+              "[DataRow( \"{\\\"yfov\\\":0,\\\"znear\\\":0.1}\" )]",
+              "[DataRow( \"{\\\"yfov\\\":-1,\\\"znear\\\":0.1}\" )]",
+              "[DataRow( \"{\\\"yfov\\\":1,\\\"znear\\\":-0.1}\" )]",
+              "[DataRow( \"{\\\"yfov\\\":1,\\\"znear\\\":0.1,\\\"aspectRatio\\\":0}\" )]",
+              "[DataRow( \"{\\\"yfov\\\":1,\\\"znear\\\":0.1,\\\"aspectRatio\\\":-2}\" )]",
+              "[DataRow( \"{\\\"yfov\\\":1,\\\"znear\\\":0.1,\\\"zfar\\\":0.1}\" )]",
+              "[DataRow( \"{\\\"yfov\\\":1e40,\\\"znear\\\":0.1}\" )]",
+              "[DataRow( \"{\\\"yfov\\\":1,\\\"znear\\\":0.1,\\\"aspectRatio\\\":\\\"2\\\"}\" )]"
+            ]
+          },
+          {
+            "name": "OrthographicProjectionRequiresAllMagnitudesAndOrderedNonnegativeClipping",
+            "line": 374,
+            "data_rows": 9,
+            "cases": 9,
+            "row_source": [
+              "[DataRow( \"{\\\"ymag\\\":1,\\\"znear\\\":0,\\\"zfar\\\":1}\" )]",
+              "[DataRow( \"{\\\"xmag\\\":1,\\\"znear\\\":0,\\\"zfar\\\":1}\" )]",
+              "[DataRow( \"{\\\"xmag\\\":1,\\\"ymag\\\":1,\\\"zfar\\\":1}\" )]",
+              "[DataRow( \"{\\\"xmag\\\":1,\\\"ymag\\\":1,\\\"znear\\\":0}\" )]",
+              "[DataRow( \"{\\\"xmag\\\":1,\\\"ymag\\\":0,\\\"znear\\\":0,\\\"zfar\\\":1}\" )]",
+              "[DataRow( \"{\\\"xmag\\\":1,\\\"ymag\\\":1,\\\"znear\\\":-1,\\\"zfar\\\":1}\" )]",
+              "[DataRow( \"{\\\"xmag\\\":1,\\\"ymag\\\":1,\\\"znear\\\":1,\\\"zfar\\\":1}\" )]",
+              "[DataRow( \"{\\\"xmag\\\":1,\\\"ymag\\\":1,\\\"znear\\\":0,\\\"zfar\\\":-1}\" )]",
+              "[DataRow( \"{\\\"xmag\\\":1e40,\\\"ymag\\\":1,\\\"znear\\\":0,\\\"zfar\\\":1}\" )]"
+            ]
+          },
+          {
+            "name": "OrthographicMagnificationSignsArePreservedWithoutTurningShouldIntoMust",
+            "line": 393,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( \"1.5\", \"-2.5\", 1.5f, -2.5f )]",
+              "[DataRow( \"-1.5\", \"-2.5\", -1.5f, -2.5f )]"
+            ]
+          },
+          {
+            "name": "CameraDefinitionIndexMustBeInRange",
+            "line": 406,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( -1 )]",
+              "[DataRow( 1 )]"
+            ]
+          },
+          {
+            "name": "DirectionalAndPointLightsRetainWhiteUnitIntensityAndUnboundedRangeDefaults",
+            "line": 416,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( \"directional\" )]",
+              "[DataRow( \"point\" )]"
+            ]
+          },
+          {
+            "name": "BlackLightAndZeroIntensityAreValidValuesWithoutDefaultSubstitution",
+            "line": 429,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SpotLightAcceptsHalfPiOuterBoundaryAndPreservesExplicitInnerAngle",
+            "line": 439,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SharedLightDefinitionsKeepPhotometryIndependentOfNodeScaleAndPlacement",
+            "line": 450,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "PunctualLightFieldsEnforceColorPhotometryAndConeDomains",
+            "line": 470,
+            "data_rows": 14,
+            "cases": 14,
+            "row_source": [
+              "[DataRow( \"{}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"point\\\",\\\"color\\\":[0,1]}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"point\\\",\\\"color\\\":[0,1,0,1]}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"point\\\",\\\"color\\\":[-0.1,0,0]}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"point\\\",\\\"color\\\":[0,1.1,0]}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"point\\\",\\\"color\\\":[0,\\\"1\\\",0]}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"point\\\",\\\"intensity\\\":1e40}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"point\\\",\\\"range\\\":-1}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"point\\\",\\\"range\\\":\\\"1\\\"}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"directional\\\",\\\"range\\\":1}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"spot\\\",\\\"spot\\\":null}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"spot\\\",\\\"spot\\\":{\\\"innerConeAngle\\\":-0.1}}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"spot\\\",\\\"spot\\\":{\\\"outerConeAngle\\\":0}}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"spot\\\",\\\"spot\\\":{\\\"innerConeAngle\\\":0.5,\\\"outerConeAngle\\\":0.5}}\" )]"
+            ]
+          },
+          {
+            "name": "PunctualLightDefinitionIndexMustBeInRange",
+            "line": 494,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( -1 )]",
+              "[DataRow( 1 )]"
+            ]
+          },
+          {
+            "name": "ScaleOnlyInstancesPreserveZeroNegativeAndNonuniformScale",
+            "line": 504,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InterleavedInstanceAccessorsComposeBeforeNodeAndAncestorTransforms",
+            "line": 514,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SparseInstanceTranslationsUseZeroBaseAndOverrideOnlyTheIndexedInstance",
+            "line": 534,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SignedNormalizedShortInstanceQuaternionsUseLittleEndianXyzwComponents",
+            "line": 549,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( 0, 32767 )]",
+              "[DataRow( 3, -32768 )]"
+            ]
+          },
+          {
+            "name": "MutatingReturnedInstanceTransformsDoesNotChangeAnotherRead",
+            "line": 563,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InstanceTrsSemanticsEnforceTheirSpecifiedAccessorFormats",
+            "line": 574,
+            "data_rows": 12,
+            "cases": 12,
+            "row_source": [
+              "[DataRow( \"TRANSLATION\", \"{\\\"componentType\\\":5126,\\\"count\\\":1,\\\"type\\\":\\\"SCALAR\\\"}\" )]",
+              "[DataRow( \"TRANSLATION\", \"{\\\"componentType\\\":5126,\\\"count\\\":1,\\\"type\\\":\\\"VEC4\\\"}\" )]",
+              "[DataRow( \"TRANSLATION\", \"{\\\"componentType\\\":5123,\\\"count\\\":1,\\\"type\\\":\\\"VEC3\\\"}\" )]",
+              "[DataRow( \"TRANSLATION\", \"{\\\"componentType\\\":5126,\\\"normalized\\\":true,\\\"count\\\":1,\\\"type\\\":\\\"VEC3\\\"}\" )]",
+              "[DataRow( \"SCALE\", \"{\\\"componentType\\\":5126,\\\"count\\\":1,\\\"type\\\":\\\"VEC2\\\"}\" )]",
+              "[DataRow( \"SCALE\", \"{\\\"componentType\\\":5122,\\\"normalized\\\":true,\\\"count\\\":1,\\\"type\\\":\\\"VEC3\\\"}\" )]",
+              "[DataRow( \"SCALE\", \"{\\\"componentType\\\":5126,\\\"normalized\\\":true,\\\"count\\\":1,\\\"type\\\":\\\"VEC3\\\"}\" )]",
+              "[DataRow( \"ROTATION\", \"{\\\"componentType\\\":5126,\\\"count\\\":1,\\\"type\\\":\\\"VEC3\\\"}\" )]",
+              "[DataRow( \"ROTATION\", \"{\\\"componentType\\\":5123,\\\"normalized\\\":true,\\\"count\\\":1,\\\"type\\\":\\\"VEC4\\\"}\" )]",
+              "[DataRow( \"ROTATION\", \"{\\\"componentType\\\":5122,\\\"count\\\":1,\\\"type\\\":\\\"VEC4\\\"}\" )]",
+              "[DataRow( \"ROTATION\", \"{\\\"componentType\\\":5120,\\\"count\\\":1,\\\"type\\\":\\\"VEC4\\\"}\" )]",
+              "[DataRow( \"ROTATION\", \"{\\\"componentType\\\":5126,\\\"normalized\\\":true,\\\"count\\\":1,\\\"type\\\":\\\"VEC4\\\"}\" )]"
+            ]
+          },
+          {
+            "name": "InstanceAttributesRequireANonemptyObjectOfValidAccessorReferences",
+            "line": 596,
+            "data_rows": 7,
+            "cases": 7,
+            "row_source": [
+              "[DataRow( \"{}\" )]",
+              "[DataRow( \"null\" )]",
+              "[DataRow( \"[]\" )]",
+              "[DataRow( \"{\\\"TRANSLATION\\\":-1}\" )]",
+              "[DataRow( \"{\\\"TRANSLATION\\\":99}\" )]",
+              "[DataRow( \"{\\\"TRANSLATION\\\":\\\"1\\\"}\" )]",
+              "[DataRow( \"{\\\"TRANSLATION\\\":1.5}\" )]"
+            ]
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "deformation",
+        "file": "GltfDeformationTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfDeformationTests",
+        "methods": 5,
+        "data_rows": 0,
+        "cases": 5,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfDeformationTests.cs",
+        "source_sha256": "2a789f913f58762bd1a9adb022e3395b7b3bea17deb9c4af0cc3484703f9c9f2",
+        "method_inventory": [
+          {
+            "name": "UnskinnedVertexUsesItsCompleteWorldTransform",
+            "line": 16,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SkinAppliesInverseBindBeforeJointWorldAndIgnoresMeshNodeTransform",
+            "line": 28,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SkinAccumulatesInfluencesBeyondTheFirstFour",
+            "line": 45,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "NodeMorphWeightsOverrideMeshWeightsAndMissingPositionDeltaIsZero",
+            "line": 63,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MorphPositionIsAppliedBeforeSkinning",
+            "line": 79,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "draco-accessor",
+        "file": "GltfDracoAccessorTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfDracoAccessorTests",
+        "methods": 1,
+        "data_rows": 0,
+        "cases": 1,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [
+          "draco"
+        ],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfDracoAccessorTests.cs",
+        "source_sha256": "5480a04eca3a8f6917fe30da857b396c9008a2631928b3d5663f6b8f726ed161",
+        "method_inventory": [
+          {
+            "name": "IndexAccessorCanBeReadAsBothUnsignedIntegersAndFloats",
+            "line": 16,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "draco-primitive-data",
+        "file": "GltfDracoPrimitiveDataTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfDracoPrimitiveDataTests",
+        "methods": 17,
+        "data_rows": 14,
+        "cases": 27,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [
+          "draco"
+        ],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfDracoPrimitiveDataTests.cs",
+        "source_sha256": "fc29bc5c09835776b7f588ad323df5b563d0cb653d1b1225eba8efb7037e420a",
+        "method_inventory": [
+          {
+            "name": "NativeBoxDecodeSuppliesRawFloatAttributesAndDecodedTopology",
+            "line": 19,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RepresentationPreservesExactComponentBytesAndNormalization",
+            "line": 46,
+            "data_rows": 6,
+            "cases": 6,
+            "row_source": [
+              "[DataRow( 5120, 3, true, \"80FF7F\" )]",
+              "[DataRow( 5121, 3, true, \"0001FF\" )]",
+              "[DataRow( 5122, 3, true, \"0080FFFF007F\" )]",
+              "[DataRow( 5123, 3, true, \"00000180FFFF\" )]",
+              "[DataRow( 5125, 1, false, \"01000001\" )]",
+              "[DataRow( 5126, 1, false, \"00000080\" )]"
+            ]
+          },
+          {
+            "name": "RepresentationRejectsNonFiniteFloatComponents",
+            "line": 67,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( \"0000807F\" )]",
+              "[DataRow( \"000080FF\" )]",
+              "[DataRow( \"0100C07F\" )]"
+            ]
+          },
+          {
+            "name": "RepresentationRejectsDecodedComponentFormatThatDisagreesWithAccessor",
+            "line": 79,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RepresentationRetainsOriginalJointIntegersAndNormalizedWeightBytes",
+            "line": 87,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RepresentationPacksDecodedTriangleListInDeclaredIndexWidth",
+            "line": 110,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( 5121, 1 )]",
+              "[DataRow( 5123, 2 )]",
+              "[DataRow( 5125, 4 )]"
+            ]
+          },
+          {
+            "name": "RepresentationWithoutSourceIndicesStillReturnsCodecTopology",
+            "line": 134,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RepresentationUsesEachPrimitivesOwnMappingForSharedAccessors",
+            "line": 145,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RepresentationDoesNotInspectAnUnrelatedPrimitivesInvalidMapping",
+            "line": 160,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RepresentationReturnsDetachedMutableArraysThatSurviveDocumentDisposal",
+            "line": 169,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RepresentationFlagsSparseOverlaysWhileReturningDecodedBaseBytes",
+            "line": 184,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RepresentationPreflightsEveryOwnedByteIncludingTopology",
+            "line": 195,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RepresentationSharesClonedStorageForRepeatedDecodedAttributeIds",
+            "line": 205,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SparseSourceStripIndicesCannotBeAppliedToDecodedTriangleListPositions",
+            "line": 221,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RepresentationRejectsDecodedIndexWidthRestartAndVertexRangeViolations",
+            "line": 232,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( 256, 255u )]",
+              "[DataRow( 3, 3u )]"
+            ]
+          },
+          {
+            "name": "SelectedCorruptCodecCannotReturnUsableFallbackBytes",
+            "line": 244,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "OrdinaryPrimitiveIsNotReinterpretedThroughAnotherPrimitivesDracoBinding",
+            "line": 251,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "draco",
+        "file": "GltfDracoTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfDracoTests",
+        "methods": 9,
+        "data_rows": 2,
+        "cases": 10,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [
+          "draco"
+        ],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfDracoTests.cs",
+        "source_sha256": "1fd53e2d055f9a0d8f3dfabf9238faa5eb77454bc792c00568117f6776689218",
+        "method_inventory": [
+          {
+            "name": "KhronosBoxDracoMatchesRawOrientedTrianglesAndNormals",
+            "line": 19,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DracoAccessorsDecodeBeforePrimitiveRead",
+            "line": 30,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SelectedDracoIgnoresAccessorFallbackBufferViews",
+            "line": 43,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnsupportedOptionalDracoUsesTheUncompressedFallback",
+            "line": 51,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DecompressedCountsMustMatchDeclaredAccessors",
+            "line": 59,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( 23, 36 )]",
+              "[DataRow( 24, 35 )]"
+            ]
+          },
+          {
+            "name": "UnknownDracoAttributeIdIsRejected",
+            "line": 71,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CorruptNativePayloadIsRejected",
+            "line": 81,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DecompressedOutputBudgetIsEnforced",
+            "line": 87,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DecodedDataIsOwnedByManagedResult",
+            "line": 94,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "draw-data",
+        "file": "GltfDrawDataTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfDrawDataTests",
+        "methods": 5,
+        "data_rows": 7,
+        "cases": 11,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfDrawDataTests.cs",
+        "source_sha256": "d6a9a81f9d79782678f7a8ad0244e18c9161563fc4e5e108c35a1fb59285d6d2",
+        "method_inventory": [
+          {
+            "name": "DrawDataReportsDeformationInsteadOfImplyingAnEvaluatedStaticPose",
+            "line": 11,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DrawDataOwnsConvertedPositionsAndPreservesFloatVertexColor",
+            "line": 26,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DirectionsAreNotScaledAndTangentHandednessSurvives",
+            "line": 46,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "EveryUvSetSurvivesWithoutImplicitVFlip",
+            "line": 61,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CoreModesBecomeListsWithoutChangingWinding",
+            "line": 77,
+            "data_rows": 7,
+            "cases": 7,
+            "row_source": [
+              "[DataRow( 0, 0, 4 )]",
+              "[DataRow( 1, 1, 4 )]",
+              "[DataRow( 2, 1, 8 )]",
+              "[DataRow( 3, 1, 6 )]",
+              "[DataRow( 4, 4, 6 )]",
+              "[DataRow( 5, 4, 6 )]",
+              "[DataRow( 6, 4, 6 )]"
+            ]
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "evaluation-edge",
+        "file": "GltfEvaluationEdgeTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfEvaluationEdgeTests",
+        "methods": 13,
+        "data_rows": 11,
+        "cases": 22,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfEvaluationEdgeTests.cs",
+        "source_sha256": "ca11870328a346097aae43fffca1a00095a7890bfcb150ec9c1b170536593068",
+        "method_inventory": [
+          {
+            "name": "LinearAnimationSupportsMoreThanFourMorphWeights",
+            "line": 31,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CubicAnimationUsesOutgoingAndIncomingTangentsWithoutChangingKeyValues",
+            "line": 39,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "QuaternionKeyAtExactTimeUsesItsStoredValue",
+            "line": 48,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "AnimationRejectsNegativeTimestampsAndSingleKeyCubicSpline",
+            "line": 55,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "AnimationRejectsNonFiniteInputAndOutputEvenAtAnEarlierKey",
+            "line": 62,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "EmptyPrimitiveIndexArraysAreInvalid",
+            "line": 70,
+            "data_rows": 7,
+            "cases": 7,
+            "row_source": [
+              "[DataRow( 0 )]",
+              "[DataRow( 1 )]",
+              "[DataRow( 2 )]",
+              "[DataRow( 3 )]",
+              "[DataRow( 4 )]",
+              "[DataRow( 5 )]",
+              "[DataRow( 6 )]"
+            ]
+          },
+          {
+            "name": "PrimitiveCountsMustMatchTheirTopology",
+            "line": 83,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DegenerateTrianglesDoNotResetTriangleStripParity",
+            "line": 94,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "BasisConversionPreservesHandednessAndNegativeTransformDeterminants",
+            "line": 103,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnsupportedOptionalTextureTransformUsesCoreTextureInfo",
+            "line": 117,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SamplerRejectsInvalidFilterAndWrapEnums",
+            "line": 133,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( \"\\\"magFilter\\\":9987\" )]",
+              "[DataRow( \"\\\"minFilter\\\":123\" )]",
+              "[DataRow( \"\\\"wrapS\\\":123\" )]",
+              "[DataRow( \"\\\"wrapT\\\":123\" )]"
+            ]
+          },
+          {
+            "name": "MissingPrimitiveMaterialUsesDefaultWhenVariantHasNoMapping",
+            "line": 148,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DuplicateVariantMappingOnOnePrimitiveIsInvalid",
+            "line": 161,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "evaluation-robustness",
+        "file": "GltfEvaluationRobustnessTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfEvaluationRobustnessTests",
+        "methods": 4,
+        "data_rows": 0,
+        "cases": 4,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfEvaluationRobustnessTests.cs",
+        "source_sha256": "a800fd722544751cdaf7c6f702a9adac524a2a62bc2976caaf198949e7241a13",
+        "method_inventory": [
+          {
+            "name": "QuaternionInterpolationDoesNotMutateSourceKeysWhenChoosingShortestPath",
+            "line": 10,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InvalidQuaternionDimensionsAndZeroLengthKeysAreRejected",
+            "line": 24,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CubicRotationNormalizesBeforeNarrowingLargeFiniteTangents",
+            "line": 31,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "NonFiniteSampleTimeIsRejected",
+            "line": 48,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "features-edge",
+        "file": "GltfFeaturesEdgeTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfFeaturesEdgeTests",
+        "methods": 8,
+        "data_rows": 0,
+        "cases": 8,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfFeaturesEdgeTests.cs",
+        "source_sha256": "f7177ffc3107772b7569924f7e3e59473d6f88ce8de5fa7baf636e84b4cf7318",
+        "method_inventory": [
+          {
+            "name": "OptionalInstancingWithoutCapabilityDoesNotExpandInstances",
+            "line": 11,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UninstancedNodeDoesNotExpandInstances",
+            "line": 23,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InstanceRotationIsNormalized",
+            "line": 30,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ZeroLengthInstanceQuaternionIsRejected",
+            "line": 45,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InstanceCustomAttributeCountMustMatchTransforms",
+            "line": 60,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "NegativeOrthographicMagnificationIsPermittedByCore",
+            "line": 75,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "PerspectiveYfovGreaterThanPiIsNotRejectedByShouldRecommendation",
+            "line": 84,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnsupportedPunctualLightsCannotBeReadAsSupported",
+            "line": 93,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "geometry",
+        "file": "GltfGeometryTests.cs",
+        "type": "Sandbox.Test.Gltf.GltfGeometryTests",
+        "methods": 9,
+        "data_rows": 0,
+        "cases": 9,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfGeometryTests.cs",
+        "source_sha256": "cd5bda87baaeda63791a809b9fae3d00b7f55e2608af3b4bc1f6cf1a3abb8cc0",
+        "method_inventory": [
+          {
+            "name": "PointsAndExplicitLinesPreserveTheirIndices",
+            "line": 36,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "LineLoopClosesAndLineStripRemainsOpen",
+            "line": 43,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "TriangleListPreservesVertexOrder",
+            "line": 50,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "TriangleStripAlternatesOrderToPreserveFaceWinding",
+            "line": 57,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "TriangleFanKeepsTheFirstVertexAsItsCenter",
+            "line": 64,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnknownPrimitiveModeIsRejected",
+            "line": 71,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "PositionConversionUsesGltfAxisBasisAndMetersToInches",
+            "line": 77,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DirectionConversionChangesBasisWithoutChangingLength",
+            "line": 88,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "TransformConversionPreservesTransformedPointsUnderTheBasisChange",
+            "line": 97,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "hierarchy-cache",
+        "file": "GltfHierarchyCacheTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfHierarchyCacheTests",
+        "methods": 4,
+        "data_rows": 3,
+        "cases": 6,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfHierarchyCacheTests.cs",
+        "source_sha256": "d8d3a7fe09c5e087886ede5a4ac2f637c1a605847cb592286ad84b384c293947",
+        "method_inventory": [
+          {
+            "name": "LongHierarchyTransformsMatchRestPoseAcrossRepeatedConcurrentReads",
+            "line": 14,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnrelatedMalformedTransformRemainsLazyButPoseValidatesAllLocals",
+            "line": 32,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "WholeGraphValidationIsRetainedOnEveryQuery",
+            "line": 42,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( \"[{\\\"children\\\":[1]},{\\\"children\\\":[0]}]\" )]",
+              "[DataRow( \"[{\\\"children\\\":[2]},{\\\"children\\\":[2]},{}]\" )]",
+              "[DataRow( \"[{},null]\" )]"
+            ]
+          },
+          {
+            "name": "CachedReadsStillRejectUseAfterDisposal",
+            "line": 54,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "image",
+        "file": "GltfImageTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfImageTests",
+        "methods": 7,
+        "data_rows": 4,
+        "cases": 10,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfImageTests.cs",
+        "source_sha256": "44f37f27a607b66eae6bc7c9b3f03eff66718972b75b6ac36fcd55602603d57f",
+        "method_inventory": [
+          {
+            "name": "DataUriImagePreservesEncodedPayloadAndMimeType",
+            "line": 13,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ExternalImageResolvesIndependentlyOfGeometry",
+            "line": 22,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "BufferViewImageReadsOnlyItsDeclaredSlice",
+            "line": 38,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MissingOrMalformedImageResourcesFailClearly",
+            "line": 51,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( \"[{\\\"uri\\\":\\\"missing.png\\\"}]\" )]",
+              "[DataRow( \"[{\\\"uri\\\":\\\"data:image/png;base64,%%%\\\"}]\" )]",
+              "[DataRow( \"[{\\\"bufferView\\\":0}]\" )]",
+              "[DataRow( \"[{\\\"bufferView\\\":9,\\\"mimeType\\\":\\\"image/png\\\"}]\" )]"
+            ]
+          },
+          {
+            "name": "TextureRetainsIndependentImageAndSamplerReferences",
+            "line": 65,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "OptionalBasisuWithoutSupportUsesItsCoreImageFallback",
+            "line": 77,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SelectedBasisuUsesTheExtensionImage",
+            "line": 86,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "instancing",
+        "file": "GltfInstancingTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfInstancingTests",
+        "methods": 5,
+        "data_rows": 0,
+        "cases": 5,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfInstancingTests.cs",
+        "source_sha256": "bace509ba9b94790ee5699e0ef0355768c490b4a2c9a51f26fa9046128d34c09",
+        "method_inventory": [
+          {
+            "name": "TranslationOnlyDefaultsRotationAndScaleAndStaysNodeLocal",
+            "line": 14,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InstanceTransformAppliesScaleThenRotationThenTranslation",
+            "line": 31,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SignedNormalizedQuaternionIsDecodedAsInstanceRotation",
+            "line": 58,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CustomOnlyAttributeDefinesCountWithIdentityTransforms",
+            "line": 79,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "AttributeCountsMustMatch",
+            "line": 97,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "ktx",
+        "file": "GltfKtxTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfKtxTests",
+        "methods": 9,
+        "data_rows": 6,
+        "cases": 13,
+        "source_dependencies": [],
+        "resources": [
+          "Fixtures/Ktx/gltf-ktx-alpha-simple.ktx2",
+          "Fixtures/Ktx/gltf-ktx-cyan_rgb_reference_basis.ktx2",
+          "Fixtures/Ktx/gltf-ktx-cyan_rgb_reference_uastc.ktx2",
+          "Fixtures/Ktx/gltf-ktx-rgba-mipmap-reference-basis.ktx2"
+        ],
+        "codecs": [
+          "ktx"
+        ],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfKtxTests.cs",
+        "source_sha256": "84f87074055c8f90faa00c6b011da79f53aa37a5e802e8fd12ac7fc266fa50a1",
+        "method_inventory": [
+          {
+            "name": "TranscodesKhronosEtc1sAndUastcColor",
+            "line": 35,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( \"gltf-ktx-cyan_rgb_reference_basis.ktx2\" )]",
+              "[DataRow( \"gltf-ktx-cyan_rgb_reference_uastc.ktx2\" )]"
+            ]
+          },
+          {
+            "name": "TranscodesIndependentReferenceMipColorsInOrder",
+            "line": 50,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "PreservesTranslucentAlpha",
+            "line": 64,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "PreservesLinearTransferMetadata",
+            "line": 73,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SelectedGltfBasisTextureTranscodesItsReferencedImage",
+            "line": 83,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RequiredBasisTextureResolvesDataUriOrBufferViewAndDecodes",
+            "line": 101,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( \"gltf-ktx-cyan_rgb_reference_basis.ktx2\", false )]",
+              "[DataRow( \"gltf-ktx-cyan_rgb_reference_basis.ktx2\", true )]",
+              "[DataRow( \"gltf-ktx-cyan_rgb_reference_uastc.ktx2\", false )]",
+              "[DataRow( \"gltf-ktx-cyan_rgb_reference_uastc.ktx2\", true )]"
+            ]
+          },
+          {
+            "name": "RequiredBasisIsRejectedWithoutSupportAndOptionalBasisUsesPngFallback",
+            "line": 122,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RejectsInvalidTransferAndColorModelMetadata",
+            "line": 154,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RejectsTruncationInvalidHeadersAndDeclaredExpansionBeforeNativeDecode",
+            "line": 167,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "material-edge",
+        "file": "GltfMaterialEdgeTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfMaterialEdgeTests",
+        "methods": 13,
+        "data_rows": 21,
+        "cases": 28,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfMaterialEdgeTests.cs",
+        "source_sha256": "d37fb910524fd95adc0c747ead1c7e7494c7f2bccc18757835ce2e08ba1252b4",
+        "method_inventory": [
+          {
+            "name": "UnsupportedOptionalUnlitUsesCoreMaterial",
+            "line": 16,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnsupportedOptionalVariantsUsePrimitiveDefault",
+            "line": 29,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "LaterDuplicateVariantMappingIsNotHiddenByEarlierMatch",
+            "line": 44,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SelectedVariantIndexMustExist",
+            "line": 60,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( -1 )]",
+              "[DataRow( 1 )]"
+            ]
+          },
+          {
+            "name": "InvalidTextureReferenceThrowsGltfException",
+            "line": 77,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( \"{\\\"index\\\":1}\" )]",
+              "[DataRow( \"{\\\"index\\\":-1}\" )]",
+              "[DataRow( \"{}\" )]",
+              "[DataRow( \"1\" )]"
+            ]
+          },
+          {
+            "name": "InvalidOcclusionStrengthThrowsGltfException",
+            "line": 91,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( \"{\\\"index\\\":0,\\\"strength\\\":-0.1}\" )]",
+              "[DataRow( \"{\\\"index\\\":0,\\\"strength\\\":1.1}\" )]",
+              "[DataRow( \"{\\\"index\\\":0,\\\"strength\\\":\\\"bad\\\"}\" )]"
+            ]
+          },
+          {
+            "name": "NegativeNormalScaleIsPreserved",
+            "line": 104,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MalformedMaterialObjectsThrowGltfException",
+            "line": 111,
+            "data_rows": 6,
+            "cases": 6,
+            "row_source": [
+              "[DataRow( \"null\" )]",
+              "[DataRow( \"[]\" )]",
+              "[DataRow( \"{\\\"pbrMetallicRoughness\\\":null}\" )]",
+              "[DataRow( \"{\\\"pbrMetallicRoughness\\\":{\\\"baseColorFactor\\\":[1,1,1]}}\" )]",
+              "[DataRow( \"{\\\"doubleSided\\\":0}\" )]",
+              "[DataRow( \"{\\\"alphaMode\\\":\\\"UNKNOWN\\\"}\" )]"
+            ]
+          },
+          {
+            "name": "InvalidMaterialReferenceThrowsGltfException",
+            "line": 127,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InvalidVariantMappingThrowsGltfException",
+            "line": 137,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( \"{\\\"material\\\":1,\\\"variants\\\":[0]}\" )]",
+              "[DataRow( \"{\\\"material\\\":0,\\\"variants\\\":[1]}\" )]",
+              "[DataRow( \"{\\\"material\\\":0,\\\"variants\\\":null}\" )]",
+              "[DataRow( \"true\" )]"
+            ]
+          },
+          {
+            "name": "InvalidNormalScaleThrowsGltfException",
+            "line": 155,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( \"null\" )]",
+              "[DataRow( \"\\\"bad\\\"\" )]"
+            ]
+          },
+          {
+            "name": "OptionalTextureTransformDoesNotAlterCoreTexCoordWhenUnsupported",
+            "line": 167,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InvalidJsonThrowsGltfException",
+            "line": 180,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "material",
+        "file": "GltfMaterialTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfMaterialTests",
+        "methods": 7,
+        "data_rows": 0,
+        "cases": 7,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfMaterialTests.cs",
+        "source_sha256": "1b4c8e22c66430eebf1e1508bd55c67662eb9e81c8d6b8d26eaf135bbf949c41",
+        "method_inventory": [
+          {
+            "name": "DefaultMaterialAndSamplerUseGltfDefaults",
+            "line": 25,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MaterialFactorsAndRenderStateAreRetained",
+            "line": 51,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "TextureRolesRetainColorSpaceTextureSetAndChannelStrengths",
+            "line": 70,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "TextureTransformAppliesScaleThenRotationThenOffsetAndOverridesTexCoord",
+            "line": 100,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "TextureTransformDefaultsToIdentity",
+            "line": 118,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnlitExtensionIsRecognizedWhenSupported",
+            "line": 134,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "VariantsResolvePerPrimitiveAndFallBackToItsDefaultMaterial",
+            "line": 141,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "meshopt-integration",
+        "file": "GltfMeshoptIntegrationTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfMeshoptIntegrationTests",
+        "methods": 13,
+        "data_rows": 9,
+        "cases": 18,
+        "source_dependencies": [
+          "GltfMeshoptTests.cs"
+        ],
+        "resources": [],
+        "codecs": [
+          "meshopt"
+        ],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfMeshoptIntegrationTests.cs",
+        "source_sha256": "5640c30e6de9670cd56fafed81f6068191326cdcc9e86a09073baa62b7eb7a6a",
+        "method_inventory": [
+          {
+            "name": "SelectedExtensionDecodesAnInterleavedAccessorFromItsSourceOffset",
+            "line": 21,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( \"EXT_meshopt_compression\", false )]",
+              "[DataRow( \"KHR_meshopt_compression\", false )]",
+              "[DataRow( \"KHR_meshopt_compression\", true )]"
+            ]
+          },
+          {
+            "name": "UnsupportedOptionalExtensionUsesUncompressedFallback",
+            "line": 33,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RequiredExtensionCanUseAnUnbackedFallbackBuffer",
+            "line": 40,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( \"EXT_meshopt_compression\" )]",
+              "[DataRow( \"KHR_meshopt_compression\" )]"
+            ]
+          },
+          {
+            "name": "RequiredUnsupportedExtensionFailsClearly",
+            "line": 49,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RequiredPlaceholderIsNotAcceptedWhenExtensionIsOptional",
+            "line": 55,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ExtRejectsVersionOneAttributeStream",
+            "line": 61,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "TriangleVersionZeroIsNotAValidGltfExtensionStream",
+            "line": 68,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( \"EXT_meshopt_compression\" )]",
+              "[DataRow( \"KHR_meshopt_compression\" )]"
+            ]
+          },
+          {
+            "name": "KHRSupportsColorFilterWhileExtRejectsIt",
+            "line": 77,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "KhrAllowsDifferentDecompressionAndParentViewStrides",
+            "line": 87,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "IndexSequenceDecodesThroughUnsignedIndexAccessor",
+            "line": 94,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CompressedSourceCannotBeMarkedAsAFallbackBuffer",
+            "line": 101,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( \"EXT_meshopt_compression\" )]",
+              "[DataRow( \"KHR_meshopt_compression\" )]"
+            ]
+          },
+          {
+            "name": "ConfiguredDecodedByteBudgetRejectsBeforeDecompression",
+            "line": 110,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InvalidLengthSourceRangeAndExtParentStrideFail",
+            "line": 118,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "meshopt",
+        "file": "GltfMeshoptTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfMeshoptTests",
+        "methods": 8,
+        "data_rows": 10,
+        "cases": 17,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [
+          "meshopt"
+        ],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfMeshoptTests.cs",
+        "source_sha256": "2a1420075d0d268f53adeac1b92f7798151cdae22073022251ab2cba75458a81",
+        "method_inventory": [
+          {
+            "name": "DecodesUpstreamIndexSequenceV1",
+            "line": 65,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DecodesUpstreamIndexSequenceToSixteenBitValues",
+            "line": 72,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DecodesUpstreamTriangleIndicesV0",
+            "line": 79,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DecodesUpstreamAttributeStreamsV0AndV1",
+            "line": 86,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ExponentialFilterRunsAfterAttributeDecode",
+            "line": 100,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RejectsTruncatedAndMalformedInputs",
+            "line": 111,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InvalidLayoutIsRejectedBeforeNativeDecode",
+            "line": 123,
+            "data_rows": 10,
+            "cases": 10,
+            "row_source": [
+              "[DataRow( 0, 4, \"ATTRIBUTES\", \"NONE\" )]",
+              "[DataRow( 1, 0, \"ATTRIBUTES\", \"NONE\" )]",
+              "[DataRow( 1, 3, \"ATTRIBUTES\", \"NONE\" )]",
+              "[DataRow( 1, 260, \"ATTRIBUTES\", \"NONE\" )]",
+              "[DataRow( 1, 12, \"ATTRIBUTES\", \"OCTAHEDRAL\" )]",
+              "[DataRow( 1, 4, \"ATTRIBUTES\", \"QUATERNION\" )]",
+              "[DataRow( 1, 12, \"ATTRIBUTES\", \"COLOR\" )]",
+              "[DataRow( 6, 4, \"INDICES\", \"EXPONENTIAL\" )]",
+              "[DataRow( 12, 4, \"TRIANGLES\", \"OCTAHEDRAL\" )]",
+              "[DataRow( int.MaxValue, 256, \"ATTRIBUTES\", \"NONE\" )]"
+            ]
+          },
+          {
+            "name": "HeaderMustMatchRequestedCodecMode",
+            "line": 141,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "morph-consistency",
+        "file": "GltfMorphConsistencyTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfMorphConsistencyTests",
+        "methods": 7,
+        "data_rows": 13,
+        "cases": 17,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfMorphConsistencyTests.cs",
+        "source_sha256": "8cb8c66ec8ab99a83497e29f295fa273d71156de62b6e992cf10e66b807232c7",
+        "method_inventory": [
+          {
+            "name": "EqualTargetCountsUseMeshOrNodeWeights",
+            "line": 13,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MatchingPrimitiveTargetsDefaultAllMeshWeightsToZero",
+            "line": 29,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "APrimitiveWithoutTargetsCannotShareAMeshWithMorphedPrimitives",
+            "line": 40,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( false )]",
+              "[DataRow( true )]"
+            ]
+          },
+          {
+            "name": "InconsistentDefinedTargetCountsAreRejected",
+            "line": 56,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "QuantizationPermitsDefinedMorphFormats",
+            "line": 68,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( \"POSITION\", 5120, false )]",
+              "[DataRow( \"POSITION\", 5122, true )]",
+              "[DataRow( \"NORMAL\", 5120, true )]",
+              "[DataRow( \"TANGENT\", 5122, true )]"
+            ]
+          },
+          {
+            "name": "UnsupportedMorphFormatsAreRejected",
+            "line": 79,
+            "data_rows": 7,
+            "cases": 7,
+            "row_source": [
+              "[DataRow( \"POSITION\", 5120, false, false )]",
+              "[DataRow( \"NORMAL\", 5122, true, false )]",
+              "[DataRow( \"POSITION\", 5121, true, true )]",
+              "[DataRow( \"POSITION\", 5123, false, true )]",
+              "[DataRow( \"NORMAL\", 5120, false, true )]",
+              "[DataRow( \"TANGENT\", 5122, false, true )]",
+              "[DataRow( \"NORMAL\", 5125, false, true )]"
+            ]
+          },
+          {
+            "name": "NodeArrayEntriesMustBeObjects",
+            "line": 93,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "morph-upload-data",
+        "file": "GltfMorphUploadDataTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfMorphUploadDataTests",
+        "methods": 10,
+        "data_rows": 16,
+        "cases": 23,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfMorphUploadDataTests.cs",
+        "source_sha256": "6ccd193c93d2d6780b8663013da3e5eb980cebb243dc5d821c90bdf4fe03537e",
+        "method_inventory": [
+          {
+            "name": "InterleavedTargetsShareOneOwnedViewAndRetainAccessorOffsetsAfterDisposal",
+            "line": 18,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SharedViewBudgetCountsOwnedCopiesSeparatelyFromEagerSourceResolution",
+            "line": 47,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SparseInterleavedBaseUsesTightOwnedStorageAndPreservesSignedZero",
+            "line": 65,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SparseZeroBaseAndMissingTargetSemanticsRemainDistinct",
+            "line": 90,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ImplicitZeroTargetsAreMaterializedOncePerAccessor",
+            "line": 107,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "QuantizedSignedPositionDeltasKeepRawFormatAndNormalization",
+            "line": 117,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( 5120, false )]",
+              "[DataRow( 5120, true )]",
+              "[DataRow( 5122, false )]",
+              "[DataRow( 5122, true )]"
+            ]
+          },
+          {
+            "name": "OptionalAndApplicationMorphStreamsArePreservedWithoutClaimingRendererSupport",
+            "line": 138,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MalformedMorphBindingsFailBeforeUploading",
+            "line": 152,
+            "data_rows": 9,
+            "cases": 9,
+            "row_source": [
+              "[DataRow( \"[{\\\"POSITION\\\":6}]\", \"{\\\"componentType\\\":5126,\\\"count\\\":2,\\\"type\\\":\\\"VEC3\\\",\\\"min\\\":[0,0,0],\\\"max\\\":[0,0,0]}\" )]",
+              "[DataRow( \"[{\\\"TANGENT\\\":6}]\", \"{\\\"componentType\\\":5126,\\\"count\\\":3,\\\"type\\\":\\\"VEC4\\\"}\" )]",
+              "[DataRow( \"[{\\\"POSITION\\\":6}]\", \"{\\\"componentType\\\":5126,\\\"count\\\":3,\\\"type\\\":\\\"VEC3\\\"}\" )]",
+              "[DataRow( \"[{\\\"NORMAL\\\":6}]\", \"{\\\"componentType\\\":5121,\\\"normalized\\\":true,\\\"count\\\":3,\\\"type\\\":\\\"VEC3\\\"}\" )]",
+              "[DataRow( \"[{\\\"TEXCOORD_1\\\":6}]\", \"{\\\"componentType\\\":5126,\\\"count\\\":3,\\\"type\\\":\\\"VEC2\\\"}\" )]",
+              "[DataRow( \"[{\\\"JOINTS_0\\\":6}]\", \"{\\\"componentType\\\":5121,\\\"count\\\":3,\\\"type\\\":\\\"VEC4\\\"}\" )]",
+              "[DataRow( \"[{\\\"POSITION\\\":6,\\\"POSITION\\\":6}]\", FloatTarget )]",
+              "[DataRow( \"[]\", FloatTarget )]",
+              "[DataRow( \"[3]\", FloatTarget )]"
+            ]
+          },
+          {
+            "name": "NonFiniteMorphComponentsFailWhileUnusedInterleavePaddingIsPreserved",
+            "line": 168,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( 0x7fc00000 )]",
+              "[DataRow( 0x7f800000 )]",
+              "[DataRow( unchecked((int)0xff800000) )]"
+            ]
+          },
+          {
+            "name": "AbsentTargetsAllocateNothingButNegativeBudgetsRemainInvalid",
+            "line": 184,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "pose-edge",
+        "file": "GltfPoseEdgeTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfPoseEdgeTests",
+        "methods": 3,
+        "data_rows": 0,
+        "cases": 3,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfPoseEdgeTests.cs",
+        "source_sha256": "ad8ed23b9610e234786205620e85123fd826e3c896dec24a18e386ea9acac051",
+        "method_inventory": [
+          {
+            "name": "PrimitiveWithEmptyMorphTargetRetainsItsBaseAttributes",
+            "line": 11,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "PoseReturnsIndependentCopiesOfItsMorphWeights",
+            "line": 26,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "VertexIndexSelectsTheRequestedPositionAndIsRangeChecked",
+            "line": 42,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "pose-morph-overrides",
+        "file": "GltfPoseMorphOverrideTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfPoseMorphOverrideTests",
+        "methods": 17,
+        "data_rows": 12,
+        "cases": 25,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfPoseMorphOverrideTests.cs",
+        "source_sha256": "2dee32444a3d1643ccb00003d30020f65489e3c1863b7d57e60caf1022b2b377",
+        "method_inventory": [
+          {
+            "name": "OneNodeOverridePreservesOtherNodesAndSourceDefaults",
+            "line": 17,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "EveryWorldMatrixIsPreservedExactly",
+            "line": 29,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InputDictionaryAndArraysCannotMutateReturnedSnapshot",
+            "line": 39,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ReturnedWeightArraysDoNotLeakMutableSnapshotState",
+            "line": 50,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ChainedOverridesKeepAllEarlierPosesIndependent",
+            "line": 62,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MultipleNodeOverridesKeepExactDocumentOwnership",
+            "line": 78,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "EmptyOverrideMapReusesItsImmutableSnapshot",
+            "line": 89,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "NodeWithoutTargetsAcceptsOnlyAnEmptyWeightArray",
+            "line": 96,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InvalidNodeIsRejectedWithoutChangingSourcePose",
+            "line": 105,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( -1 )]",
+              "[DataRow( 3 )]",
+              "[DataRow( int.MaxValue )]"
+            ]
+          },
+          {
+            "name": "TargetCountMismatchIsNotPaddedOrTruncated",
+            "line": 116,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( 0 )]",
+              "[DataRow( 1 )]",
+              "[DataRow( 3 )]"
+            ]
+          },
+          {
+            "name": "NonfiniteWeightIsRejectedWithoutPublishingPartialOverrides",
+            "line": 127,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( float.NaN )]",
+              "[DataRow( float.PositiveInfinity )]",
+              "[DataRow( float.NegativeInfinity )]"
+            ]
+          },
+          {
+            "name": "NullOverrideMapIsAnExplicitArgumentError",
+            "line": 139,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "NullNodeWeightArrayIsAnExplicitDataError",
+            "line": 146,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InvalidLaterNodeDoesNotMutateEarlierNodeOrAnExistingDerivedPose",
+            "line": 153,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DisposedOwnerKeepsReadablePoseSnapshotOverrideSemantics",
+            "line": 163,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "FiniteSignedUnboundedWeightsAreNotClampedOrNormalized",
+            "line": 174,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( -2f, 3f )]",
+              "[DataRow( float.MinValue, float.MaxValue )]",
+              "[DataRow( float.Epsilon, -float.Epsilon )]"
+            ]
+          },
+          {
+            "name": "SignedZeroBitsSurviveSnapshotCopy",
+            "line": 185,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "pose-ownership",
+        "file": "GltfPoseOwnershipTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfPoseOwnershipTests",
+        "methods": 4,
+        "data_rows": 0,
+        "cases": 4,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfPoseOwnershipTests.cs",
+        "source_sha256": "93427453276e148dcc1a02f90f2b6735ea4e023ce698124dbb6858795a0f2b49",
+        "method_inventory": [
+          {
+            "name": "OwnPoseRemainsAnIdentityOnlyCheckWhenGeometryCannotDecode",
+            "line": 12,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ForeignPoseFromIdenticalJsonHasTheExistingVertexEvaluatorError",
+            "line": 30,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "NullPoseHasTheExistingVertexEvaluatorNullError",
+            "line": 41,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RepeatedOwnershipChecksAllocateNoArraysOrDelegateState",
+            "line": 50,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "primitive-reader",
+        "file": "GltfPrimitiveTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfPrimitiveTests",
+        "methods": 8,
+        "data_rows": 11,
+        "cases": 17,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfPrimitiveTests.cs",
+        "source_sha256": "84ab0ef2297a1d4bb54374a30ee0c4d10422e8797aba0e62437032ea39ab446b",
+        "method_inventory": [
+          {
+            "name": "NonIndexedPrimitiveUsesEveryVertexAndDefaultTriangleMode",
+            "line": 10,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "IndexedPrimitiveRetainsOrderAndMaterial",
+            "line": 22,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MultipleUvSetsAndApplicationAttributesRemainAddressable",
+            "line": 33,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "AttributeCountsMustAgree",
+            "line": 45,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InvalidCoreAttributeLayoutsAreRejected",
+            "line": 53,
+            "data_rows": 8,
+            "cases": 8,
+            "row_source": [
+              "[DataRow( \"TEXCOORD_01\", \"VEC2\", 5126, false )]",
+              "[DataRow( \"TEXCOORD_1\", \"VEC2\", 5126, false )]",
+              "[DataRow( \"TEXCOORD_0\", \"VEC3\", 5126, false )]",
+              "[DataRow( \"TEXCOORD_0\", \"VEC2\", 5123, false )]",
+              "[DataRow( \"COLOR_0\", \"VEC2\", 5126, false )]",
+              "[DataRow( \"NORMAL\", \"VEC4\", 5126, false )]",
+              "[DataRow( \"TANGENT\", \"VEC3\", 5126, false )]",
+              "[DataRow( \"JOINTS_0\", \"VEC4\", 5121, true )]"
+            ]
+          },
+          {
+            "name": "OutOfRangeIndicesFailBeforeGpuSubmission",
+            "line": 69,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InvalidReferencesAndPrimitiveModesFailClearly",
+            "line": 78,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( \"{\\\"attributes\\\":{\\\"POSITION\\\":6}}\" )]",
+              "[DataRow( \"{\\\"attributes\\\":{\\\"POSITION\\\":0},\\\"material\\\":9}\" )]",
+              "[DataRow( \"{\\\"attributes\\\":{\\\"POSITION\\\":0},\\\"mode\\\":7}\" )]"
+            ]
+          },
+          {
+            "name": "QuantizedPositionRequiresTheSelectedQuantizationExtension",
+            "line": 91,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "quantization-declarations",
+        "file": "GltfQuantizationDeclarationTests.cs",
+        "type": "Sandbox.Test.Gltf.GltfQuantizationDeclarationTests",
+        "methods": 5,
+        "data_rows": 10,
+        "cases": 12,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfQuantizationDeclarationTests.cs",
+        "source_sha256": "5fe2d58f0c0716415f7929493e630b7a553ab268ec4f5fa7a20a368fd648f392",
+        "method_inventory": [
+          {
+            "name": "ExtensionOnlyVertexFormatsRequireAssetDeclaration",
+            "line": 15,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( \"POSITION\", 5122, false, \"VEC3\" )]",
+              "[DataRow( \"NORMAL\", 5120, true, \"VEC3\" )]",
+              "[DataRow( \"TANGENT\", 5120, true, \"VEC4\" )]",
+              "[DataRow( \"TEXCOORD_0\", 5122, false, \"VEC2\" )]"
+            ]
+          },
+          {
+            "name": "DeclaredAndSupportedQuantizedVertexFormatsAreAccepted",
+            "line": 29,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( \"POSITION\", 5122, false, \"VEC3\" )]",
+              "[DataRow( \"NORMAL\", 5120, true, \"VEC3\" )]",
+              "[DataRow( \"TANGENT\", 5120, true, \"VEC4\" )]",
+              "[DataRow( \"TEXCOORD_0\", 5122, false, \"VEC2\" )]"
+            ]
+          },
+          {
+            "name": "RequiredExtensionIsRejectedWithoutCapability",
+            "line": 43,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ExtensionOnlyLayoutIsRejectedWithoutDeclarationOrCapability",
+            "line": 49,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CoreFloatPositionAndUnsignedNormalizedUvRemainValid",
+            "line": 56,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( 5121 )]",
+              "[DataRow( 5123 )]"
+            ]
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "reader-robustness",
+        "file": "GltfReaderRobustnessTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfReaderRobustnessTests",
+        "methods": 10,
+        "data_rows": 6,
+        "cases": 14,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfReaderRobustnessTests.cs",
+        "source_sha256": "7b45ec77ca2372c6ee6b92c9420f56d81d6510453735d32bb5008e07fbf2dec1",
+        "method_inventory": [
+          {
+            "name": "UnsignedIndicesPreserveIntegersNotRepresentableAsFloatsIncludingSparseReplacements",
+            "line": 15,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "FractionalJsonIntegerCannotRoundToAValidCount",
+            "line": 33,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ImpossibleAccessorRangeIsRejectedBeforeAllocatingItsDeclaredElements",
+            "line": 42,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MathematicallyIntegralExponentIsAcceptedForIntegerProperties",
+            "line": 52,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "IntegralNumberSpellingsAlsoWorkForSceneAndSamplerReferences",
+            "line": 61,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "IntegralNumberSpellingsWorkForSkinAccessorComponentTypes",
+            "line": 73,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "NonObjectImageOrTextureReportsGltfError",
+            "line": 82,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( \"images\", \"null\" )]",
+              "[DataRow( \"images\", \"1\" )]",
+              "[DataRow( \"textures\", \"null\" )]",
+              "[DataRow( \"textures\", \"1\" )]"
+            ]
+          },
+          {
+            "name": "NonObjectBufferViewReportsGltfError",
+            "line": 99,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ImageBufferViewsCannotSpecifyGpuTargetOrStride",
+            "line": 108,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( \"\\\"target\\\":34962\" )]",
+              "[DataRow( \"\\\"byteStride\\\":4\" )]"
+            ]
+          },
+          {
+            "name": "EmbeddedImageUriMediaTypeMustMatchItsActualImageEvenWhenMimeTypeIsExplicit",
+            "line": 123,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "scene-feature",
+        "file": "GltfSceneFeatureTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfSceneFeatureTests",
+        "methods": 13,
+        "data_rows": 10,
+        "cases": 21,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfSceneFeatureTests.cs",
+        "source_sha256": "43791ebda3ac7adb876218fdc9c6a7af627852993205e12bafc31c4d71b8e9dd",
+        "method_inventory": [
+          {
+            "name": "SkinWithoutInverseBindAccessorUsesIdentityPerJoint",
+            "line": 15,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SkinReadsInverseBindMatricesInJointOrder",
+            "line": 28,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SkinRejectsTooFewInverseBindMatrices",
+            "line": 50,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SkinRejectsJointIndexOutsideNodes",
+            "line": 66,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MorphTargetsKeepDeltasSeparateAndMissingSemanticsNull",
+            "line": 78,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MorphWeightsPreferNodeThenMeshThenZeroDefaults",
+            "line": 93,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MorphTargetAccessorMustMatchBaseVertexCount",
+            "line": 102,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "PerspectiveCameraPreservesVerticalFovAndInfiniteFarPlane",
+            "line": 119,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "PerspectiveCameraPreservesExplicitAspectAndFarPlane",
+            "line": 134,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "OrthographicCameraPreservesMagnitudesAndClipPlanes",
+            "line": 149,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InvalidCameraParametersAreRejected",
+            "line": 164,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( \"{\\\"type\\\":\\\"perspective\\\",\\\"perspective\\\":{\\\"yfov\\\":1,\\\"znear\\\":0}}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"perspective\\\",\\\"perspective\\\":{\\\"yfov\\\":1,\\\"znear\\\":2,\\\"zfar\\\":1}}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"orthographic\\\",\\\"orthographic\\\":{\\\"xmag\\\":0,\\\"ymag\\\":1,\\\"znear\\\":0,\\\"zfar\\\":10}}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"unknown\\\"}\" )]"
+            ]
+          },
+          {
+            "name": "PunctualLightsUseSpecifiedValuesAndStandardSpotDefaults",
+            "line": 179,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InvalidPunctualLightParametersAreRejected",
+            "line": 205,
+            "data_rows": 6,
+            "cases": 6,
+            "row_source": [
+              "[DataRow( \"{\\\"type\\\":\\\"point\\\",\\\"range\\\":0}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"point\\\",\\\"intensity\\\":-1}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"spot\\\"}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"spot\\\",\\\"spot\\\":{\\\"innerConeAngle\\\":0.9,\\\"outerConeAngle\\\":0.5}}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"spot\\\",\\\"spot\\\":{\\\"outerConeAngle\\\":1.7}}\" )]",
+              "[DataRow( \"{\\\"type\\\":\\\"unknown\\\"}\" )]"
+            ]
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "scene",
+        "file": "GltfSceneTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfSceneTests",
+        "methods": 8,
+        "data_rows": 0,
+        "cases": 8,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfSceneTests.cs",
+        "source_sha256": "ff60a5c9461f3c55eb9f14051712127e8198d4139f24c507c9d7220664f11e27",
+        "method_inventory": [
+          {
+            "name": "AValidAssetMayHaveNoDefaultScene",
+            "line": 22,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ExplicitDefaultSceneMayBeAnyValidScene",
+            "line": 31,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InvalidDefaultSceneIsRejected",
+            "line": 38,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "LocalTrsIsComposedBeforeParentWithNegativeScalePreserved",
+            "line": 48,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MatrixNodeUsesGltfColumnMajorAndComposesWithParent",
+            "line": 62,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "NodeWithoutTransformUsesIdentity",
+            "line": 75,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CycleAndMultipleParentsAreRejected",
+            "line": 82,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "NodeCannotDefineBothMatrixAndTrs",
+            "line": 97,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "skinning-palette",
+        "file": "GltfSkinningPaletteTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfSkinningPaletteTests",
+        "methods": 8,
+        "data_rows": 0,
+        "cases": 8,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfSkinningPaletteTests.cs",
+        "source_sha256": "fb907dcdae4ee4382de41e4ea9ba56eedfc223bff6a8f013b430734866ec8ed0",
+        "method_inventory": [
+          {
+            "name": "PaletteUsesSkinJointOrderPreservesShearAndIgnoresMeshNode",
+            "line": 16,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "AnimatedInstancesAreIndependentAndObjectPlacementIsAppliedOnce",
+            "line": 38,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CompiledAndSourcePalettesMatchAtRestAndAnimatedTimes",
+            "line": 52,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SnapshotsAreImmutableAndPoseResultsDoNotAlias",
+            "line": 70,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "WriteReusesDestinationAndLeavesTrailingValuesUnchanged",
+            "line": 88,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "WriteValidationDoesNotPartiallyChangeDestination",
+            "line": 105,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "NoncommutingObjectPlacementIsAppliedAfterSkinningExactlyOnce",
+            "line": 123,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RejectsInvalidCountsIndicesAndNonAffineOrNonfiniteMatrices",
+            "line": 138,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "static-scene-assembly",
+        "file": "GltfStaticSceneAssemblyTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfStaticSceneAssemblyTests",
+        "methods": 8,
+        "data_rows": 0,
+        "cases": 8,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfStaticSceneAssemblyTests.cs",
+        "source_sha256": "13731bdff17cad5003034c938c89ed443fa85f12296e4b4020097164562aff68",
+        "method_inventory": [
+          {
+            "name": "DefaultSceneIncludesEveryPrimitiveAndRepeatedNodeButNotOtherScenes",
+            "line": 16,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MirroredNonuniformScaleTransformsNormalsTangentsAndWinding",
+            "line": 33,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MissingDefaultSceneFailsClearly",
+            "line": 47,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "AllZeroScaleStillProducesFiniteTranslatedPositionsAndBounds",
+            "line": 54,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RankTwoScaleStillProducesFiniteTransformedPositionsAndBounds",
+            "line": 75,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RankTwoMirroredTransformPreservesSurvivingSurfaceFrame",
+            "line": 99,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SelectedSkinOrAnimationFailsButUnselectedAnimationDoesNot",
+            "line": 121,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MorphAndInstancingAreNotSilentlyDropped",
+            "line": 132,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "texture-transform-declarations",
+        "file": "GltfTextureTransformDeclarationTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfTextureTransformDeclarationTests",
+        "methods": 4,
+        "data_rows": 4,
+        "cases": 6,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfTextureTransformDeclarationTests.cs",
+        "source_sha256": "5bce7f4b15841eee13168320fd01a3e8109445ab10e12c97cba4619573afac4b",
+        "method_inventory": [
+          {
+            "name": "SelectedTransformMustAppearInExtensionsUsed",
+            "line": 17,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( false )]",
+              "[DataRow( true )]"
+            ]
+          },
+          {
+            "name": "DeclaredSelectedTransformUsesOverrideAndSpecifiedOrder",
+            "line": 27,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( false )]",
+              "[DataRow( true )]"
+            ]
+          },
+          {
+            "name": "UnsupportedOptionalTransformKeepsCoreTextureCoordinates",
+            "line": 41,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RequiredUnsupportedTransformIsRejected",
+            "line": 51,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "upload-data",
+        "file": "GltfUploadDataTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfUploadDataTests",
+        "methods": 18,
+        "data_rows": 5,
+        "cases": 21,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [
+          "meshopt"
+        ],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfUploadDataTests.cs",
+        "source_sha256": "ae103131040e56fd9a7d5f2ab074300a3ebdc86ba170e9ea630388420c86eec5",
+        "method_inventory": [
+          {
+            "name": "InterleavedViewsAreCopiedOnceAndSurviveSourceAndDocumentLifetime",
+            "line": 15,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SharedViewBudgetCountsUniqueCopiesAndRejectsInsufficientSpace",
+            "line": 43,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SparseZeroBaseMaterializesOriginalFloatBits",
+            "line": 61,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SparseInterleavedBasePreservesOtherComponentBits",
+            "line": 77,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MissingBaseWithoutSparseProducesOwnedZeroes",
+            "line": 105,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "CopiedViewUsesOwnedOffsetsRatherThanItsSourceBufferOrigin",
+            "line": 118,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SparseIndicesMustBeInRangeBeforeReturningMaterializedData",
+            "line": 136,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SparseByteMatrixKeepsPaddedColumnsAndAllowsMissingLastPadding",
+            "line": 144,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SelectedMeshoptCopiesDecodedViewAndOptionalFallbackRemainsRaw",
+            "line": 163,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DracoAndOrdinaryPrimitivesUseTheirOwnSourceWhenAccessorIsShared",
+            "line": 192,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SparseOverlayOnSharedDracoAttributeDoesNotChangeOtherSemantic",
+            "line": 217,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DracoStripReportsActualDecodedIndexCountAndWidth",
+            "line": 244,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DracoStripWithSparseSourceIndicesFailsExplicitly",
+            "line": 264,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SparseDracoTriangleIndicesAreAppliedAndRangeChecked",
+            "line": 281,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( 2, true )]",
+              "[DataRow( 3, false )]"
+            ]
+          },
+          {
+            "name": "NonFiniteFloatComponentsAreRejectedInDirectSparseAndDracoUploads",
+            "line": 303,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( 0x7fc00000 )]",
+              "[DataRow( 0x7f800000 )]",
+              "[DataRow( unchecked((int)0xff800000) )]"
+            ]
+          },
+          {
+            "name": "FloatValidationIgnoresPaddingAndIntegerFieldsAndPreservesSignedZero",
+            "line": 340,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "FloatMatrixValidationExaminesComponentsButNotStridePadding",
+            "line": 359,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SharedDracoIdWithDistinctSparseAccessorsAndAliasesUsesIsolatedCopies",
+            "line": 376,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "upload-layout",
+        "file": "GltfUploadLayoutTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfUploadLayoutTests",
+        "methods": 14,
+        "data_rows": 7,
+        "cases": 18,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfUploadLayoutTests.cs",
+        "source_sha256": "2b434891efa1afbc7ce789c47b85803a816f4c628104a26f74be58b26d7c20f7",
+        "method_inventory": [
+          {
+            "name": "InterleavedAttributesPreserveActualViewsOffsetsTypesAndStrides",
+            "line": 13,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SparseAndMissingBaseRequireMaterializationWithoutInventingStorage",
+            "line": 45,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SelectedMeshoptViewIsIdentifiedWithoutInvokingTheCodec",
+            "line": 62,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SelectedDracoMarksOnlyItsMappedAttributesAndIndices",
+            "line": 80,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DracoWithoutAnIndexAccessorStillRequiresCodecTopology",
+            "line": 100,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SharedAccessorUsesTheRequestedPrimitivesOwnDracoMapping",
+            "line": 114,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "UnrelatedMalformedDracoMappingDoesNotBlockRequestedPrimitive",
+            "line": 135,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( 0 )]",
+              "[DataRow( 1 )]"
+            ]
+          },
+          {
+            "name": "SharedDracoAccessorDoesNotExcuseInvalidOrdinaryVertexAlignment",
+            "line": 154,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DracoTriangleStripReportsDecodedTriangleListWithoutDoubleExpansion",
+            "line": 171,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SelectedDracoDoesNotInspectAnUnusableFallbackView",
+            "line": 186,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SelectedDracoIgnoresItsAccessorFallbackLocationFields",
+            "line": 201,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( \"\\\"byteOffset\\\":13,\" )]",
+              "[DataRow( \"\\\"bufferView\\\":99,\\\"byteOffset\\\":13,\" )]",
+              "[DataRow( \"\\\"bufferView\\\":\\\"ignored\\\",\\\"byteOffset\\\":\\\"ignored\\\",\" )]"
+            ]
+          },
+          {
+            "name": "CustomMatrixReportsPaddedColumnsWithoutAssumingAStructLayout",
+            "line": 221,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "VertexOffsetsNeedFourByteAlignmentRelativeToTheirView",
+            "line": 236,
+            "data_rows": 2,
+            "cases": 2,
+            "row_source": [
+              "[DataRow( \"COLOR_0\", 5121, 1 )]",
+              "[DataRow( \"TEXCOORD_0\", 5123, 2 )]"
+            ]
+          },
+          {
+            "name": "AlignedAbsoluteOffsetDoesNotExcuseMisalignedRelativeVertexOffset",
+            "line": 250,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "validation-edge",
+        "file": "GltfValidationEdgeTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfValidationEdgeTests",
+        "methods": 15,
+        "data_rows": 0,
+        "cases": 15,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfValidationEdgeTests.cs",
+        "source_sha256": "11299c8766150b500680eb377a62c43ac1300e0672124360ed9df7dabd73ac5a",
+        "method_inventory": [
+          {
+            "name": "AccessorWithoutBufferViewOrSparseDataIsZeroInitialized",
+            "line": 14,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "AccessorCountMustBePositive",
+            "line": 24,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "BufferDataUriMayUsePercentEncodingWithoutBase64",
+            "line": 37,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ExternalBufferMayContainBytesBeyondItsDeclaredLength",
+            "line": 49,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SignedNormalizedShortClampsBothRepresentationsOfNegativeOne",
+            "line": 61,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ShortMatrixSkipsColumnPaddingAndMayOmitTrailingPadding",
+            "line": 74,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "FloatAccessorCannotRequestIntegerNormalization",
+            "line": 91,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ByteOffsetIsInvalidWhenBaseBufferViewIsAbsent",
+            "line": 103,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "AccessorRejectsTotalOffsetMisalignedToComponentSize",
+            "line": 116,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "StrideCannotBeSmallerThanTheAccessorElement",
+            "line": 128,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SparseCountCannotExceedBaseAccessorCount",
+            "line": 140,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SparseIndexBufferViewCannotSpecifyGpuTarget",
+            "line": 154,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "GlbAcceptsThreeBytesOfBinaryPadding",
+            "line": 166,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "GlbMayCombineItsBinaryChunkWithExternalBuffers",
+            "line": 176,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "GlbRejectsMoreThanThreeBytesBeyondBufferLength",
+            "line": 201,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      }
+    ],
+    "native_codec_case_count": 117,
+    "codec_preflights": [
+      {
+        "name": "draco",
+        "file": "GltfDracoPrimitiveDataTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfDracoPrimitiveDataTests",
+        "method": "NativeBoxDecodeSuppliesRawFloatAttributesAndDecodedTopology",
+        "arguments": [],
+        "source_dependencies": [],
+        "resources": []
+      },
+      {
+        "name": "meshopt",
+        "file": "GltfMeshoptTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfMeshoptTests",
+        "method": "DecodesUpstreamAttributeStreamsV0AndV1",
+        "arguments": [],
+        "source_dependencies": [],
+        "resources": []
+      },
+      {
+        "name": "ktx",
+        "file": "GltfKtxTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfKtxTests",
+        "method": "TranscodesKhronosEtc1sAndUastcColor",
+        "arguments": [
+          "gltf-ktx-cyan_rgb_reference_basis.ktx2"
+        ],
+        "source_dependencies": [],
+        "resources": [
+          "Fixtures/Ktx/gltf-ktx-cyan_rgb_reference_basis.ktx2"
+        ]
+      }
+    ],
+    "resource_hashes": {
+      "Fixtures/Ktx/gltf-ktx-alpha-simple.ktx2": "fc21f2c39480383c7943733a18c5a543e89ecb7f035e9f97d501982a4948c8dd",
+      "Fixtures/Ktx/gltf-ktx-cyan_rgb_reference_basis.ktx2": "2b2ceb5627e3f70969c7d99d5c75d462d156c0df0a431c747e43c9307d6cb131",
+      "Fixtures/Ktx/gltf-ktx-cyan_rgb_reference_uastc.ktx2": "fdca34518a64017fc7c8e266c1fcb92f85cc5f2fb13605ea6c816455c4921c94",
+      "Fixtures/Ktx/gltf-ktx-rgba-mipmap-reference-basis.ktx2": "267b18c4badb42fb9739ef42b5e5cd9c2d95872e55ae298a82000fb402c33958"
+    }
+  },
+  "smallest_additive_proposal": {
+    "source_class_count": 3,
+    "test_method_count": 31,
+    "data_row_count": 28,
+    "expanded_case_count": 52,
+    "suites": [
+      {
+        "name": "morph-upload-data",
+        "file": "GltfMorphUploadDataTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfMorphUploadDataTests",
+        "methods": 10,
+        "data_rows": 16,
+        "cases": 23,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfMorphUploadDataTests.cs",
+        "source_sha256": "6ccd193c93d2d6780b8663013da3e5eb980cebb243dc5d821c90bdf4fe03537e",
+        "method_inventory": [
+          {
+            "name": "InterleavedTargetsShareOneOwnedViewAndRetainAccessorOffsetsAfterDisposal",
+            "line": 18,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SharedViewBudgetCountsOwnedCopiesSeparatelyFromEagerSourceResolution",
+            "line": 47,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SparseInterleavedBaseUsesTightOwnedStorageAndPreservesSignedZero",
+            "line": 65,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "SparseZeroBaseAndMissingTargetSemanticsRemainDistinct",
+            "line": 90,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ImplicitZeroTargetsAreMaterializedOncePerAccessor",
+            "line": 107,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "QuantizedSignedPositionDeltasKeepRawFormatAndNormalization",
+            "line": 117,
+            "data_rows": 4,
+            "cases": 4,
+            "row_source": [
+              "[DataRow( 5120, false )]",
+              "[DataRow( 5120, true )]",
+              "[DataRow( 5122, false )]",
+              "[DataRow( 5122, true )]"
+            ]
+          },
+          {
+            "name": "OptionalAndApplicationMorphStreamsArePreservedWithoutClaimingRendererSupport",
+            "line": 138,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MalformedMorphBindingsFailBeforeUploading",
+            "line": 152,
+            "data_rows": 9,
+            "cases": 9,
+            "row_source": [
+              "[DataRow( \"[{\\\"POSITION\\\":6}]\", \"{\\\"componentType\\\":5126,\\\"count\\\":2,\\\"type\\\":\\\"VEC3\\\",\\\"min\\\":[0,0,0],\\\"max\\\":[0,0,0]}\" )]",
+              "[DataRow( \"[{\\\"TANGENT\\\":6}]\", \"{\\\"componentType\\\":5126,\\\"count\\\":3,\\\"type\\\":\\\"VEC4\\\"}\" )]",
+              "[DataRow( \"[{\\\"POSITION\\\":6}]\", \"{\\\"componentType\\\":5126,\\\"count\\\":3,\\\"type\\\":\\\"VEC3\\\"}\" )]",
+              "[DataRow( \"[{\\\"NORMAL\\\":6}]\", \"{\\\"componentType\\\":5121,\\\"normalized\\\":true,\\\"count\\\":3,\\\"type\\\":\\\"VEC3\\\"}\" )]",
+              "[DataRow( \"[{\\\"TEXCOORD_1\\\":6}]\", \"{\\\"componentType\\\":5126,\\\"count\\\":3,\\\"type\\\":\\\"VEC2\\\"}\" )]",
+              "[DataRow( \"[{\\\"JOINTS_0\\\":6}]\", \"{\\\"componentType\\\":5121,\\\"count\\\":3,\\\"type\\\":\\\"VEC4\\\"}\" )]",
+              "[DataRow( \"[{\\\"POSITION\\\":6,\\\"POSITION\\\":6}]\", FloatTarget )]",
+              "[DataRow( \"[]\", FloatTarget )]",
+              "[DataRow( \"[3]\", FloatTarget )]"
+            ]
+          },
+          {
+            "name": "NonFiniteMorphComponentsFailWhileUnusedInterleavePaddingIsPreserved",
+            "line": 168,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( 0x7fc00000 )]",
+              "[DataRow( 0x7f800000 )]",
+              "[DataRow( unchecked((int)0xff800000) )]"
+            ]
+          },
+          {
+            "name": "AbsentTargetsAllocateNothingButNegativeBudgetsRemainInvalid",
+            "line": 184,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "pose-morph-overrides",
+        "file": "GltfPoseMorphOverrideTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfPoseMorphOverrideTests",
+        "methods": 17,
+        "data_rows": 12,
+        "cases": 25,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfPoseMorphOverrideTests.cs",
+        "source_sha256": "2dee32444a3d1643ccb00003d30020f65489e3c1863b7d57e60caf1022b2b377",
+        "method_inventory": [
+          {
+            "name": "OneNodeOverridePreservesOtherNodesAndSourceDefaults",
+            "line": 17,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "EveryWorldMatrixIsPreservedExactly",
+            "line": 29,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InputDictionaryAndArraysCannotMutateReturnedSnapshot",
+            "line": 39,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ReturnedWeightArraysDoNotLeakMutableSnapshotState",
+            "line": 50,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ChainedOverridesKeepAllEarlierPosesIndependent",
+            "line": 62,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "MultipleNodeOverridesKeepExactDocumentOwnership",
+            "line": 78,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "EmptyOverrideMapReusesItsImmutableSnapshot",
+            "line": 89,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "NodeWithoutTargetsAcceptsOnlyAnEmptyWeightArray",
+            "line": 96,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InvalidNodeIsRejectedWithoutChangingSourcePose",
+            "line": 105,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( -1 )]",
+              "[DataRow( 3 )]",
+              "[DataRow( int.MaxValue )]"
+            ]
+          },
+          {
+            "name": "TargetCountMismatchIsNotPaddedOrTruncated",
+            "line": 116,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( 0 )]",
+              "[DataRow( 1 )]",
+              "[DataRow( 3 )]"
+            ]
+          },
+          {
+            "name": "NonfiniteWeightIsRejectedWithoutPublishingPartialOverrides",
+            "line": 127,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( float.NaN )]",
+              "[DataRow( float.PositiveInfinity )]",
+              "[DataRow( float.NegativeInfinity )]"
+            ]
+          },
+          {
+            "name": "NullOverrideMapIsAnExplicitArgumentError",
+            "line": 139,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "NullNodeWeightArrayIsAnExplicitDataError",
+            "line": 146,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "InvalidLaterNodeDoesNotMutateEarlierNodeOrAnExistingDerivedPose",
+            "line": 153,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "DisposedOwnerKeepsReadablePoseSnapshotOverrideSemantics",
+            "line": 163,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "FiniteSignedUnboundedWeightsAreNotClampedOrNormalized",
+            "line": 174,
+            "data_rows": 3,
+            "cases": 3,
+            "row_source": [
+              "[DataRow( -2f, 3f )]",
+              "[DataRow( float.MinValue, float.MaxValue )]",
+              "[DataRow( float.Epsilon, -float.Epsilon )]"
+            ]
+          },
+          {
+            "name": "SignedZeroBitsSurviveSnapshotCopy",
+            "line": 185,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      },
+      {
+        "name": "pose-ownership",
+        "file": "GltfPoseOwnershipTests.cs",
+        "type": "Sandbox.Tests.Gltf.GltfPoseOwnershipTests",
+        "methods": 4,
+        "data_rows": 0,
+        "cases": 4,
+        "source_dependencies": [],
+        "resources": [],
+        "codecs": [],
+        "path": "engine/Tests/Sandbox.Test.Gltf/GltfPoseOwnershipTests.cs",
+        "source_sha256": "93427453276e148dcc1a02f90f2b6735ea4e023ce698124dbb6858795a0f2b49",
+        "method_inventory": [
+          {
+            "name": "OwnPoseRemainsAnIdentityOnlyCheckWhenGeometryCannotDecode",
+            "line": 12,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "ForeignPoseFromIdenticalJsonHasTheExistingVertexEvaluatorError",
+            "line": 30,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "NullPoseHasTheExistingVertexEvaluatorNullError",
+            "line": 41,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          },
+          {
+            "name": "RepeatedOwnershipChecksAllocateNoArraysOrDelegateState",
+            "line": 50,
+            "data_rows": 0,
+            "cases": 1,
+            "row_source": []
+          }
+        ],
+        "inventory_status": "statically_counted_not_a_run_result"
+      }
+    ],
+    "execution_status": "not_requested_not_executed",
+    "source_dependencies": [],
+    "resources": [],
+    "native_codecs": [],
+    "gpu_or_shader_work": false,
+    "required_loaded_assembly": "Sandbox.Gltf",
+    "test_framework": "Microsoft.VisualStudio.TestPlatform.TestFramework",
+    "runner_context": "Existing coordinator engine harness may reference Engine; test logic requires no native engine service. No hidden native model route is permitted.",
+    "runner_admission_gap": "editor_direct_gpu_tests.csx explicitly allows MorphUploadData and PoseMorphOverride but not PoseOwnership; coordinator must review adding the exact third test path, not relocate tests to evade it."
+  },
+  "producer_evidence": {
+    "stage_manifest": "Temp/gltf-validation/staged-build/c5c0fe3da02d46efaca6decd71760d42/manifest.json",
+    "stage_manifest_sha256": "8582db935dd317ddb53f9152ba82af61954a8769e09ea17fee0290508a1931a5",
+    "tests_are_not_producer_build_inputs": true,
+    "api_source_hashes": [
+      {
+        "path": "engine/Sandbox.Gltf/GltfDocument.MorphUpload.cs",
+        "current_source_sha256": "602c3a49d8ebc0c969bebc4f8121deb307c4fe2ef2743d3c2a075e148bca7ea7",
+        "c5c0_input_sha256": "602c3a49d8ebc0c969bebc4f8121deb307c4fe2ef2743d3c2a075e148bca7ea7",
+        "matches_c5c0_input": true
+      },
+      {
+        "path": "engine/Sandbox.Gltf/GltfPose.MorphOverrides.cs",
+        "current_source_sha256": "015ce513c61f6917b443cd2fb7ff5470987a45a7c5fa3150614a8b07a4daad42",
+        "c5c0_input_sha256": "015ce513c61f6917b443cd2fb7ff5470987a45a7c5fa3150614a8b07a4daad42",
+        "matches_c5c0_input": true
+      },
+      {
+        "path": "engine/Sandbox.Gltf/GltfDocument.PoseOwnership.cs",
+        "current_source_sha256": "42e5c136556ea0827c9ebd42b79fb03a71f5eebfecc538292dcea1f136646fdc",
+        "c5c0_input_sha256": "42e5c136556ea0827c9ebd42b79fb03a71f5eebfecc538292dcea1f136646fdc",
+        "matches_c5c0_input": true
+      }
+    ]
+  },
+  "adjacent_engine_unit_project": {
+    "source_class_count": 25,
+    "test_method_count": 220,
+    "data_row_count": 143,
+    "expanded_case_count": 321,
+    "scope": "25 Gltf*.cs files under Sandbox.Test.Unit/Resources only; separate from pure816 and model-local research suites; not execution coverage",
+    "files": [
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfBasisTextureCompilerTests.cs",
+        "source_sha256": "f0d2ae2ed2206f23544773f145ded565aab34c72802f4bc78b8ce384106fef06",
+        "methods": 5,
+        "data_rows": 3,
+        "cases": 7,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfBasisTexturePlanTests.cs",
+        "source_sha256": "5c9853b098100b5e04b5d257aeab17bdcae7df60bfe2a545ba1fc65b8fbc3952",
+        "methods": 9,
+        "data_rows": 9,
+        "cases": 15,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfCoordinatePathTests.cs",
+        "source_sha256": "d7a483bf3c18f37f680fa4f1ccf61fa3bf7499c77837212cb9637e7d28cdb188",
+        "methods": 6,
+        "data_rows": 2,
+        "cases": 7,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfDynamicModelVertexTests.cs",
+        "source_sha256": "2cd7a6b537b04f1d9b5dbdb349916790ff8f264cfba9948c1df95966b023ed7c",
+        "methods": 6,
+        "data_rows": 0,
+        "cases": 6,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfGeometryBufferTests.cs",
+        "source_sha256": "eb6855264bd64c9f326b123ef0f24a137c616039344f09d061076f67e17b3218",
+        "methods": 3,
+        "data_rows": 0,
+        "cases": 3,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfGpuCleanupTests.cs",
+        "source_sha256": "b8418bd21d34396aea68f83623c2eb88598130596fbf4dc313aacef4d2a8882e",
+        "methods": 3,
+        "data_rows": 0,
+        "cases": 3,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfGpuSourceOwnershipTests.cs",
+        "source_sha256": "93cd4ec00f52c38c653be4fbea01ce6d310cedc5927122ea41b61de61dd60a51",
+        "methods": 5,
+        "data_rows": 0,
+        "cases": 5,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfMaterialCacheFailureTests.cs",
+        "source_sha256": "bf48bde2be1e8aaa43239d0a10eef2eb3c764c10db7f8a016631a248a8e9c3f2",
+        "methods": 3,
+        "data_rows": 0,
+        "cases": 3,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfMaterialCacheTests.cs",
+        "source_sha256": "1e79e46a328dfd6df3d9ad10e06af64fd22588989a9ded4c8faf694a3e5da116",
+        "methods": 10,
+        "data_rows": 0,
+        "cases": 10,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfMaterialSamplerCacheIdentityTests.cs",
+        "source_sha256": "2219f344c3adfa818f54857ae1967a90a50a22ff9ef7a6f40f2398af6c30a68a",
+        "methods": 2,
+        "data_rows": 0,
+        "cases": 2,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfMaterialTextureEncodingPlanTests.cs",
+        "source_sha256": "76d22cf12020cd18165b26896f0fe9c9b6ea5bc0320ed5d8b2921196d9a85035",
+        "methods": 11,
+        "data_rows": 8,
+        "cases": 17,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfMaterialUvPlanTests.cs",
+        "source_sha256": "5d0e70f6ab062c96e7b14f4830abac5aa9143595fdab499560176a26c7eee965",
+        "methods": 16,
+        "data_rows": 3,
+        "cases": 18,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfMaterialVariantStateTests.cs",
+        "source_sha256": "e1460ed044a6d5cbde4f203ec6e82a024c848ac168e9cb8c853fd580ad9fe251",
+        "methods": 27,
+        "data_rows": 0,
+        "cases": 27,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfModelDocumentTests.cs",
+        "source_sha256": "35553de10877167f8c2a1b44391cd927cd261917ee8aac59debec76f5221be6b",
+        "methods": 8,
+        "data_rows": 18,
+        "cases": 21,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfModelMorphTests.cs",
+        "source_sha256": "d120c85b2deed900bebd098c92da2007166e8d2b0020bef35d12503ce31c257e",
+        "methods": 6,
+        "data_rows": 5,
+        "cases": 10,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfModelSkinningTests.cs",
+        "source_sha256": "0aefdbb0ac77444b41c50c0864b857b998e423fe5dd6bc17c668135df5fa3625",
+        "methods": 5,
+        "data_rows": 6,
+        "cases": 9,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfPlaybackClockTests.cs",
+        "source_sha256": "154abc6ede147666581ac5fc2a24bad9c8c87afd6137ae44fb3a877e31ec7948",
+        "methods": 14,
+        "data_rows": 18,
+        "cases": 26,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfPunctualLightPlanTests.cs",
+        "source_sha256": "e7d8d3768f42419b48701e8f599c5506da2ad06e2a17208d68836fae69dfce7b",
+        "methods": 18,
+        "data_rows": 5,
+        "cases": 21,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfSamplerMappingTests.cs",
+        "source_sha256": "599ec2eee75e5d8cf135c3a5b49a7e54d275765c4df0cf4ac8b9893eadd0c543",
+        "methods": 5,
+        "data_rows": 15,
+        "cases": 18,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfSceneAnimationTests.cs",
+        "source_sha256": "4141ecfef252bc80925f7e0b2c0d1e1281d3ce6766e9001764435e2c42082a83",
+        "methods": 17,
+        "data_rows": 9,
+        "cases": 23,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfSkinWeightFormatTests.cs",
+        "source_sha256": "502ecf4f633da871744a3e21a77a93c55cb13c6315e444808e62f4a5e3737000",
+        "methods": 4,
+        "data_rows": 3,
+        "cases": 6,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfStockMaterialTests.cs",
+        "source_sha256": "72c13063253460b5b385640a59aa1b19140b334fb2b9727a98796a74a9690d45",
+        "methods": 16,
+        "data_rows": 13,
+        "cases": 24,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfStockSourceMaterialTests.cs",
+        "source_sha256": "2faf70d549512bc98469ad4c7285b2c6195835869e833697eee72872cb1c1089",
+        "methods": 3,
+        "data_rows": 0,
+        "cases": 3,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfStockVertexFrameTests.cs",
+        "source_sha256": "64bc1f8785a5fa6d05d001eb1521648696c3bf684729ca51d71f8cf2081d4417",
+        "methods": 4,
+        "data_rows": 0,
+        "cases": 4,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      },
+      {
+        "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfUnlitMaterialPlanTests.cs",
+        "source_sha256": "13c99781036bc0aec38dee3affcb9a7c2a41199611fa61d0ba4c52e57d89a261",
+        "methods": 14,
+        "data_rows": 26,
+        "cases": 33,
+        "status": "separate_engine_unit_project_not_a_legacy764_delta"
+      }
+    ]
+  },
+  "history_policy": "Keep version7/764 manifest and all receipts unchanged. New full816 and additive52 need fresh frozen source hashes plus reflection-discovered counts and loaded producer identity. No old green total is attributed to c5c0."
+}

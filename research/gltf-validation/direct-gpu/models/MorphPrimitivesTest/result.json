@@ -1,0 +1,1462 @@
+{
+  "model": "MorphPrimitivesTest",
+  "status": "selected source and canonical compiled public tests passed; visual review pending",
+  "corpus_revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "source_choice": {
+    "variant": "glTF",
+    "reason": "Actual source-defined separate primitive-local FLOAT base/morph views, mesh default .5, omitted NORMAL/TANGENT deltas, authored normals/UVs and red/green source materials. One canonical package derives from this exact original source.",
+    "omitted_variants": {
+      "glTF-Binary": "Container encoding covered elsewhere; no binary-source pass claimed.",
+      "glTF-Draco": "Required codec and variant-local compressed geometry were not executed in this focused core run; no Draco-source pass claimed."
+    }
+  },
+  "forms": [
+    "glTF/source",
+    "glTF/compiled_glb_c"
+  ],
+  "producer": {
+    "engine_mvid": "5a07f228-dff8-4d6b-b4ef-890b32a80299",
+    "engine_sha256": "ed5f8073e45d3a4f90e5140323cc5c5a0dddf9707be71ee375966ca0f05403f0",
+    "gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+    "gltf_sha256": "7638a855ba21fd9c079a22cbc8b834d4169112fe08cb9a5fd788e63cf90866e1",
+    "helper_mvid": "efb1941c-beb3-4d47-889f-64a4a7e87f70",
+    "named_shaders": {
+      "gltf_deform_cs.shader_c": {
+        "path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_deform_cs.shader_c",
+        "scope": "compiled bytes on disk; native feature controls remain separate",
+        "sha256": "4e5f9c9da78a82fcdef7ae72d0280a454697a0bf1eea6e46a83ca5a94c259c65"
+      },
+      "gltf_stock_sampler.shader_c": {
+        "path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_stock_sampler.shader_c",
+        "scope": "compiled bytes on disk; native feature controls remain separate",
+        "sha256": "b45f66c100d9fac1c270e609e11a372dddfc3ecae64029601632b889ec7b6cfd"
+      },
+      "gltf_surface_five_uv.shader_c": {
+        "path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_surface_five_uv.shader_c",
+        "scope": "compiled bytes on disk; native feature controls remain separate",
+        "sha256": "56c3158328d44eb11a7e795eb667415b22442abea22058c4a710ac9fc009e01c"
+      },
+      "gltf_unlit_five_uv.shader_c": {
+        "path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_unlit_five_uv.shader_c",
+        "scope": "compiled bytes on disk; native feature controls remain separate",
+        "sha256": "e494af0983bd7ab5c00c9ee8c78c3fc3cbd406eb9c63c86c466f9396ebf5251d"
+      },
+      "vertex_color.shader_c": {
+        "path": "/home/damian/projects/sbox-public/game/core/shaders/vertex_color.shader_c",
+        "scope": "compiled bytes on disk; native feature controls remain separate",
+        "sha256": "8f4ecfe974cbd25d5cc2319f6a44fb760e47e49e573ca303cb32a94535756f46"
+      }
+    },
+    "host_pid": 344533,
+    "host_start": "2080252",
+    "project": "/home/damian/projects/Survive/survive.sbproj"
+  },
+  "source_audit": {
+    "pin": "90d7ede14c7e280af263824604b427a1ca02cb66",
+    "files": [
+      {
+        "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MorphPrimitivesTest/glTF/MorphPrimitivesTest.gltf",
+        "sha256": "a51388b330a49586388e052dc66f74e95cdbc1efcdddea4248f65e200e1d335a",
+        "bytes": 5610
+      },
+      {
+        "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MorphPrimitivesTest/glTF/MorphPrimitivesTest.bin",
+        "sha256": "59ec1d7ca5c8d7605b69aa57cee3da2994384831a290e5271ecd963002c31c76",
+        "bytes": 1512
+      },
+      {
+        "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MorphPrimitivesTest/glTF/uv_texture.jpg",
+        "sha256": "d498c54b30f096b663b161f37ee64397253d6fa15ee4f8c03082c890f6065031",
+        "bytes": 49535
+      },
+      {
+        "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MorphPrimitivesTest/screenshot/screenshot.jpg",
+        "sha256": "2084accd18ea5bc71f394acc1ddae765e8e01652b8f1ecdae18481556721505f",
+        "bytes": 16224
+      },
+      {
+        "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MorphPrimitivesTest/LICENSE.md",
+        "sha256": "6719654d7a4fd68eb671661a465c2262dbeb080c3addedac26fefba59b6c96ed",
+        "bytes": 939
+      },
+      {
+        "path": "research/gltf-validation/direct-gpu/models/MorphPrimitivesTest/reference.json",
+        "sha256": "b4ffe5f9d018d43dcd995e1d3e4b4eca096f394bf6c7003f94cac1a947983e0c",
+        "bytes": 15216
+      }
+    ]
+  },
+  "reference": {
+    "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/MorphPrimitivesTest/screenshot/screenshot.jpg",
+    "sha256": "2084accd18ea5bc71f394acc1ddae765e8e01652b8f1ecdae18481556721505f",
+    "url": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/90d7ede14c7e280af263824604b427a1ca02cb66/Models/MorphPrimitivesTest/screenshot/screenshot.jpg",
+    "kind": "image",
+    "purpose": "Pinned upstream screenshot inspected; exact original camera, lighting, HDRI and exposure unknown."
+  },
+  "license": {
+    "spdx": "CC-BY-4.0",
+    "author": "ft-lab",
+    "copyright": "2018 ft-lab",
+    "upstream_license_path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/MorphPrimitivesTest/LICENSE.md",
+    "upstream_license_sha256": "6719654d7a4fd68eb671661a465c2262dbeb080c3addedac26fefba59b6c96ed"
+  },
+  "canonical_compiled": {
+    "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/canonical/MorphPrimitivesTest.glb_c",
+    "sha256": "c7a11340a4b4f984aacda80fe93f15e48b607ab36027fedbe13ab70696d9afc2",
+    "source_sha256": "a51388b330a49586388e052dc66f74e95cdbc1efcdddea4248f65e200e1d335a",
+    "external_dependencies": [
+      "uv_texture.jpg"
+    ],
+    "self_contained": false
+  },
+  "executed": {
+    "public_mstest_cases_passed": 3,
+    "original_form_cases_passed": 2,
+    "reused_derived_case_passed": 1,
+    "gpu_readback_groups": 30,
+    "primitive_readback_checks": 60,
+    "unique_source_vertices": 30,
+    "repeated_vertex_checks": 900,
+    "maximum_position_error_inches": 9.536743e-07,
+    "maximum_normal_component_error": 0,
+    "maximum_uv_error": 0,
+    "python_oracle_controls": {
+      "passed": 6,
+      "command": "python3 research/gltf-validation/direct-gpu/models/MorphPrimitivesTest/test_reference.py"
+    },
+    "full_historical_105_case_suite_replayed": false
+  },
+  "receipts": [
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/morph-primitives-public-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "84b543f9d979a6593f1c7bcb967588ccd178fc033624ed24bfd3556c9d4a826d",
+      "aggregate_passed": false,
+      "passed_cases": 0,
+      "failed_cases": 0,
+      "incomplete_cases": 3,
+      "scope": "compile-incomplete; no executed cases"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/morph-primitives-public-02/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "90d28087655d1cdad57ad1e10ab6e5cd13c1ff4946deb4d1ed7618661936cc9e",
+      "aggregate_passed": false,
+      "passed_cases": 1,
+      "failed_cases": 2,
+      "incomplete_cases": 0,
+      "scope": "one derived test passed; original cases hit evidence serialization failure"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/morph-primitives-public-03/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "7f383410d3ef6016d4b120c91c20b22556b79114c78df964ff442f6e548dcc49",
+      "aggregate_passed": true,
+      "passed_cases": 2,
+      "failed_cases": 0,
+      "incomplete_cases": 0,
+      "scope": "two original source/compiled public cases passed; corrected scalar-only evidence serialization"
+    }
+  ],
+  "derived_controls": {
+    "status": "passed",
+    "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/morph-primitives-public-02/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "receipt_sha256": "90d28087655d1cdad57ad1e10ab6e5cd13c1ff4946deb4d1ed7618661936cc9e",
+    "reuse_boundary": "Derived test body and dependent oracle/runtime unchanged; later helper edit affects only original-form artifact serialization and adds a two-case wrapper. Mixed receipt aggregate remains failed.",
+    "cases": [
+      {
+        "form": "derived_source_control",
+        "mode": "node_override",
+        "groups": [
+          {
+            "Time": 0,
+            "Weight": -0.75,
+            "measurement": [
+              {
+                "Primitive": 0,
+                "Vertices": 21,
+                "Indices": 72,
+                "Weight": -0.75,
+                "MaximumPositionErrorInches": 4.7683716e-07,
+                "MaximumNormalComponentError": 0,
+                "MaximumUvError": 0,
+                "MaximumDefaultColorError": 0,
+                "MaximumTangentLengthError": 0,
+                "MaximumTangentNormalDot": 0
+              },
+              {
+                "Primitive": 1,
+                "Vertices": 9,
+                "Indices": 24,
+                "Weight": -0.75,
+                "MaximumPositionErrorInches": 4.7683716e-07,
+                "MaximumNormalComponentError": 0,
+                "MaximumUvError": 0,
+                "MaximumDefaultColorError": 0,
+                "MaximumTangentLengthError": 0,
+                "MaximumTangentNormalDot": 0
+              }
+            ]
+          }
+        ],
+        "input_sha256": "fd3e8b44421671d5117ab86f743706ceab3d63d1ff07062b81e0d232b7caab7d",
+        "scope": "Labeled derived fixture, original asset bytes untouched; actual public clip seeks, not authored sample animation or wall-clock cadence."
+      },
+      {
+        "form": "derived_source_control",
+        "mode": "zero_fallback",
+        "groups": [
+          {
+            "Time": 0,
+            "Weight": 0,
+            "measurement": [
+              {
+                "Primitive": 0,
+                "Vertices": 21,
+                "Indices": 72,
+                "Weight": 0,
+                "MaximumPositionErrorInches": 0,
+                "MaximumNormalComponentError": 0,
+                "MaximumUvError": 0,
+                "MaximumDefaultColorError": 0,
+                "MaximumTangentLengthError": 0,
+                "MaximumTangentNormalDot": 0
+              },
+              {
+                "Primitive": 1,
+                "Vertices": 9,
+                "Indices": 24,
+                "Weight": 0,
+                "MaximumPositionErrorInches": 0,
+                "MaximumNormalComponentError": 0,
+                "MaximumUvError": 0,
+                "MaximumDefaultColorError": 0,
+                "MaximumTangentLengthError": 0,
+                "MaximumTangentNormalDot": 0
+              }
+            ]
+          }
+        ],
+        "input_sha256": "978ea9ffeea6584aa21501887d6439ce6d22422640f5ffa9eaeeb3aa9a77bc09",
+        "scope": "Labeled derived fixture, original asset bytes untouched; actual public clip seeks, not authored sample animation or wall-clock cadence."
+      },
+      {
+        "form": "derived_source_control",
+        "mode": "signed_animation",
+        "groups": [
+          {
+            "Time": 0,
+            "Weight": -0.75,
+            "measurement": [
+              {
+                "Primitive": 0,
+                "Vertices": 21,
+                "Indices": 72,
+                "Weight": -0.75,
+                "MaximumPositionErrorInches": 4.7683716e-07,
+                "MaximumNormalComponentError": 0,
+                "MaximumUvError": 0,
+                "MaximumDefaultColorError": 0,
+                "MaximumTangentLengthError": 0,
+                "MaximumTangentNormalDot": 0
+              },
+              {
+                "Primitive": 1,
+                "Vertices": 9,
+                "Indices": 24,
+                "Weight": -0.75,
+                "MaximumPositionErrorInches": 4.7683716e-07,
+                "MaximumNormalComponentError": 0,
+                "MaximumUvError": 0,
+                "MaximumDefaultColorError": 0,
+                "MaximumTangentLengthError": 0,
+                "MaximumTangentNormalDot": 0
+              }
+            ]
+          },
+          {
+            "Time": 0.5,
+            "Weight": -0.125,
+            "measurement": [
+              {
+                "Primitive": 0,
+                "Vertices": 21,
+                "Indices": 72,
+                "Weight": -0.125,
+                "MaximumPositionErrorInches": 0,
+                "MaximumNormalComponentError": 0,
+                "MaximumUvError": 0,
+                "MaximumDefaultColorError": 0,
+                "MaximumTangentLengthError": 0,
+                "MaximumTangentNormalDot": 0
+              },
+              {
+                "Primitive": 1,
+                "Vertices": 9,
+                "Indices": 24,
+                "Weight": -0.125,
+                "MaximumPositionErrorInches": 0,
+                "MaximumNormalComponentError": 0,
+                "MaximumUvError": 0,
+                "MaximumDefaultColorError": 0,
+                "MaximumTangentLengthError": 0,
+                "MaximumTangentNormalDot": 0
+              }
+            ]
+          },
+          {
+            "Time": 1,
+            "Weight": 0.5,
+            "measurement": [
+              {
+                "Primitive": 0,
+                "Vertices": 21,
+                "Indices": 72,
+                "Weight": 0.5,
+                "MaximumPositionErrorInches": 0,
+                "MaximumNormalComponentError": 0,
+                "MaximumUvError": 0,
+                "MaximumDefaultColorError": 0,
+                "MaximumTangentLengthError": 0,
+                "MaximumTangentNormalDot": 0
+              },
+              {
+                "Primitive": 1,
+                "Vertices": 9,
+                "Indices": 24,
+                "Weight": 0.5,
+                "MaximumPositionErrorInches": 0,
+                "MaximumNormalComponentError": 0,
+                "MaximumUvError": 0,
+                "MaximumDefaultColorError": 0,
+                "MaximumTangentLengthError": 0,
+                "MaximumTangentNormalDot": 0
+              }
+            ]
+          },
+          {
+            "Time": 2,
+            "Weight": 1.5,
+            "measurement": [
+              {
+                "Primitive": 0,
+                "Vertices": 21,
+                "Indices": 72,
+                "Weight": 1.5,
+                "MaximumPositionErrorInches": 9.536743e-07,
+                "MaximumNormalComponentError": 0,
+                "MaximumUvError": 0,
+                "MaximumDefaultColorError": 0,
+                "MaximumTangentLengthError": 0,
+                "MaximumTangentNormalDot": 0
+              },
+              {
+                "Primitive": 1,
+                "Vertices": 9,
+                "Indices": 24,
+                "Weight": 1.5,
+                "MaximumPositionErrorInches": 9.536743e-07,
+                "MaximumNormalComponentError": 0,
+                "MaximumUvError": 0,
+                "MaximumDefaultColorError": 0,
+                "MaximumTangentLengthError": 0,
+                "MaximumTangentNormalDot": 0
+              }
+            ]
+          }
+        ],
+        "input_sha256": "d152100e481c8c5912f8ff54ae333020a00191629e4ab416c59ebebee630b113",
+        "scope": "Labeled derived fixture, original asset bytes untouched; actual public clip seeks, not authored sample animation or wall-clock cadence."
+      }
+    ]
+  },
+  "public_forms": [
+    {
+      "form": "glTF/source",
+      "status": "passed",
+      "input_sha256": "a51388b330a49586388e052dc66f74e95cdbc1efcdddea4248f65e200e1d335a",
+      "canonical_path": null,
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/actual_public_default_half_source_material.png",
+        "sha256": "4ed435e7984dc8cf032870d1505c3b11de37e4c2e5e1611da557abb5b8941737",
+        "kind": "image",
+        "width": 192,
+        "height": 192
+      },
+      "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/morph-primitives-public-03/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "7f383410d3ef6016d4b120c91c20b22556b79114c78df964ff442f6e548dcc49",
+      "render": {
+        "status": "passed",
+        "renderer": "SkinnedModelRenderer",
+        "nativeModel": false,
+        "nativeMeshPlaceholders": false,
+        "visualApproval": "pending"
+      },
+      "source_material_shaders": [
+        "shaders/gltf_stock_sampler.shader",
+        "shaders/gltf_stock_sampler.shader"
+      ],
+      "target": "gltf_node_1_target_0",
+      "gpu_readback_groups": [
+        {
+          "phase": "authored_mesh_default",
+          "weight": 0.5,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/authored_mesh_default_0_gpu.json",
+          "sha256": "085f34eaaefd01ca99b0a17ada70835a0561d967dab1fde8f8af898284418f06",
+          "PoseRevision": 4,
+          "SubmittedRevision": 4,
+          "DrawCalls": 60
+        },
+        {
+          "phase": "reenabled_default",
+          "weight": 0.5,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/reenabled_default_1_gpu.json",
+          "sha256": "085f34eaaefd01ca99b0a17ada70835a0561d967dab1fde8f8af898284418f06",
+          "PoseRevision": 4,
+          "SubmittedRevision": 4,
+          "DrawCalls": 18
+        },
+        {
+          "phase": "manual_zero",
+          "weight": 0,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 0,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 0,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/manual_zero_2_gpu.json",
+          "sha256": "1971740ae952a69ad811358eec7a4945074027a2ac6abbd2fdcbddefe74cecbc",
+          "PoseRevision": 5,
+          "SubmittedRevision": 5,
+          "DrawCalls": 78
+        },
+        {
+          "phase": "clear_restores_authored_default",
+          "weight": 0.5,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/clear_restores_authored_default_3_gpu.json",
+          "sha256": "085f34eaaefd01ca99b0a17ada70835a0561d967dab1fde8f8af898284418f06",
+          "PoseRevision": 6,
+          "SubmittedRevision": 6,
+          "DrawCalls": 96
+        },
+        {
+          "phase": "independent_B_over_one",
+          "weight": 1.5,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 1.5,
+              "MaximumPositionErrorInches": 9.536743e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 1.5,
+              "MaximumPositionErrorInches": 9.536743e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/independent_B_over_one_4_gpu.json",
+          "sha256": "022c034b6b33411a9917b2051ad7b01ce6d6c30ae2f45d4a643be0513ef00618",
+          "PoseRevision": 5,
+          "SubmittedRevision": 5,
+          "DrawCalls": 18
+        },
+        {
+          "phase": "signed_public_override",
+          "weight": -0.75,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": -0.75,
+              "MaximumPositionErrorInches": 4.7683716e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": -0.75,
+              "MaximumPositionErrorInches": 4.7683716e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/signed_public_override_5_gpu.json",
+          "sha256": "eaf697ff00e0926b91949c8cb868c6b40205b9150c58f938484d2597f4a7f52f",
+          "PoseRevision": 7,
+          "SubmittedRevision": 7,
+          "DrawCalls": 132
+        },
+        {
+          "phase": "signed_public_override",
+          "weight": 1.5,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 1.5,
+              "MaximumPositionErrorInches": 9.536743e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 1.5,
+              "MaximumPositionErrorInches": 9.536743e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/signed_public_override_6_gpu.json",
+          "sha256": "022c034b6b33411a9917b2051ad7b01ce6d6c30ae2f45d4a643be0513ef00618",
+          "PoseRevision": 8,
+          "SubmittedRevision": 8,
+          "DrawCalls": 150
+        },
+        {
+          "phase": "public_linear_fade_quarter",
+          "weight": -0.1875,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": -0.1875,
+              "MaximumPositionErrorInches": 1.1920929e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": -0.1875,
+              "MaximumPositionErrorInches": 1.1920929e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/public_linear_fade_quarter_7_gpu.json",
+          "sha256": "e921c23d5c6728eec51cd2c0ce45fdea177acf8312061a6384e9597ffb169dbc",
+          "PoseRevision": 11,
+          "SubmittedRevision": 11,
+          "DrawCalls": 168
+        },
+        {
+          "phase": "public_linear_fade_endpoint",
+          "weight": 1.5,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 1.5,
+              "MaximumPositionErrorInches": 9.536743e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 1.5,
+              "MaximumPositionErrorInches": 9.536743e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/public_linear_fade_endpoint_8_gpu.json",
+          "sha256": "022c034b6b33411a9917b2051ad7b01ce6d6c30ae2f45d4a643be0513ef00618",
+          "PoseRevision": 12,
+          "SubmittedRevision": 12,
+          "DrawCalls": 186
+        },
+        {
+          "phase": "clear_after_fade",
+          "weight": 0.5,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/clear_after_fade_9_gpu.json",
+          "sha256": "085f34eaaefd01ca99b0a17ada70835a0561d967dab1fde8f8af898284418f06",
+          "PoseRevision": 13,
+          "SubmittedRevision": 13,
+          "DrawCalls": 204
+        },
+        {
+          "phase": "restored_bound_indices",
+          "weight": 0.5,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/restored_bound_indices_10_gpu.json",
+          "sha256": "085f34eaaefd01ca99b0a17ada70835a0561d967dab1fde8f8af898284418f06",
+          "PoseRevision": 13,
+          "SubmittedRevision": 13,
+          "DrawCalls": 258
+        },
+        {
+          "phase": "survives_other_instance_deletion",
+          "weight": 0.5,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/survives_other_instance_deletion_11_gpu.json",
+          "sha256": "085f34eaaefd01ca99b0a17ada70835a0561d967dab1fde8f8af898284418f06",
+          "PoseRevision": 13,
+          "SubmittedRevision": 13,
+          "DrawCalls": 294
+        }
+      ],
+      "capture_controls": [
+        {
+          "label": "empty_before",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/empty_before.png",
+          "Sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+          "Coverage": 0,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        },
+        {
+          "label": "actual_public_default_half_source_material",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/actual_public_default_half_source_material.png",
+          "Sha256": "4ed435e7984dc8cf032870d1505c3b11de37e4c2e5e1611da557abb5b8941737",
+          "Coverage": 7013,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        },
+        {
+          "label": "empty_disabled",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/empty_disabled.png",
+          "Sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+          "Coverage": 0,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        },
+        {
+          "label": "independent_raw_source_half_reference",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/independent_raw_source_half_reference.png",
+          "Sha256": "5315196ed579b71c6d9dc63a3ef2b35c0378daa000958d64b33c29b0d852c386",
+          "Coverage": 7025,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        },
+        {
+          "label": "empty_after_reference",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/empty_after_reference.png",
+          "Sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+          "Coverage": 0,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        },
+        {
+          "label": "independent_flat_negative_reference",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/independent_flat_negative_reference.png",
+          "Sha256": "1ce64dc8a62a3910f1c06cd817e2a28450557d8e668e926b1d02ce0637993a0a",
+          "Coverage": 7027,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        },
+        {
+          "label": "empty_after_flat_reference",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/empty_after_flat_reference.png",
+          "Sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+          "Coverage": 0,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        },
+        {
+          "label": "actual_public_flat_negative",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/actual_public_flat_negative.png",
+          "Sha256": "0da023c58aac39351960fe292a0aac717a69f0fd1ff7e6dc2ab0d5fd19899616",
+          "Coverage": 7008,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        },
+        {
+          "label": "restored_public_default_source_material",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/restored_public_default_source_material.png",
+          "Sha256": "4ed435e7984dc8cf032870d1505c3b11de37e4c2e5e1611da557abb5b8941737",
+          "Coverage": 7013,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        },
+        {
+          "label": "empty_after_public_delete",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/a785fb5d98d34e2c899f21613a97309d/empty_after_public_delete.png",
+          "Sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+          "Coverage": 0,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        }
+      ],
+      "independent_literal_comparison": {
+        "intersection": 7012,
+        "union": 7026,
+        "iou": 0.9980074010816966,
+        "pixels_different_beyond_8_bytes": 558,
+        "scope": "Measured independent literal geometry comparison; human visual review remains pending.",
+        "maximum_rgb_byte_error": 78,
+        "mean_rgb_byte_error_on_union": 0.7382102272727272,
+        "acceptance": "measured only; historical exact image checker was not invoked; no pixel equality claim"
+      },
+      "negative_controls": {
+        "independent_flat_reference_changed_pixels": 4710,
+        "actual_flat_changed_pixels": 4549,
+        "ignored_default_weight_rejected": true,
+        "bound_gpu_index_negative_rejected": true
+      }
+    },
+    {
+      "form": "glTF/compiled_glb_c",
+      "status": "passed",
+      "input_sha256": "c7a11340a4b4f984aacda80fe93f15e48b607ab36027fedbe13ab70696d9afc2",
+      "canonical_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/canonical/MorphPrimitivesTest.glb_c",
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/actual_public_default_half_source_material.png",
+        "sha256": "4ed435e7984dc8cf032870d1505c3b11de37e4c2e5e1611da557abb5b8941737",
+        "kind": "image",
+        "width": 192,
+        "height": 192
+      },
+      "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/morph-primitives-public-03/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "7f383410d3ef6016d4b120c91c20b22556b79114c78df964ff442f6e548dcc49",
+      "render": {
+        "status": "passed",
+        "renderer": "SkinnedModelRenderer",
+        "nativeModel": false,
+        "nativeMeshPlaceholders": false,
+        "visualApproval": "pending"
+      },
+      "source_material_shaders": [
+        "shaders/gltf_stock_sampler.shader",
+        "shaders/gltf_stock_sampler.shader"
+      ],
+      "target": "gltf_node_1_target_0",
+      "gpu_readback_groups": [
+        {
+          "phase": "authored_mesh_default",
+          "weight": 0.5,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/authored_mesh_default_0_gpu.json",
+          "sha256": "085f34eaaefd01ca99b0a17ada70835a0561d967dab1fde8f8af898284418f06",
+          "PoseRevision": 4,
+          "SubmittedRevision": 4,
+          "DrawCalls": 58
+        },
+        {
+          "phase": "reenabled_default",
+          "weight": 0.5,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/reenabled_default_1_gpu.json",
+          "sha256": "085f34eaaefd01ca99b0a17ada70835a0561d967dab1fde8f8af898284418f06",
+          "PoseRevision": 4,
+          "SubmittedRevision": 4,
+          "DrawCalls": 18
+        },
+        {
+          "phase": "manual_zero",
+          "weight": 0,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 0,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 0,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/manual_zero_2_gpu.json",
+          "sha256": "1971740ae952a69ad811358eec7a4945074027a2ac6abbd2fdcbddefe74cecbc",
+          "PoseRevision": 5,
+          "SubmittedRevision": 5,
+          "DrawCalls": 82
+        },
+        {
+          "phase": "clear_restores_authored_default",
+          "weight": 0.5,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/clear_restores_authored_default_3_gpu.json",
+          "sha256": "085f34eaaefd01ca99b0a17ada70835a0561d967dab1fde8f8af898284418f06",
+          "PoseRevision": 6,
+          "SubmittedRevision": 6,
+          "DrawCalls": 106
+        },
+        {
+          "phase": "independent_B_over_one",
+          "weight": 1.5,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 1.5,
+              "MaximumPositionErrorInches": 9.536743e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 1.5,
+              "MaximumPositionErrorInches": 9.536743e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/independent_B_over_one_4_gpu.json",
+          "sha256": "022c034b6b33411a9917b2051ad7b01ce6d6c30ae2f45d4a643be0513ef00618",
+          "PoseRevision": 5,
+          "SubmittedRevision": 5,
+          "DrawCalls": 24
+        },
+        {
+          "phase": "signed_public_override",
+          "weight": -0.75,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": -0.75,
+              "MaximumPositionErrorInches": 4.7683716e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": -0.75,
+              "MaximumPositionErrorInches": 4.7683716e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/signed_public_override_5_gpu.json",
+          "sha256": "eaf697ff00e0926b91949c8cb868c6b40205b9150c58f938484d2597f4a7f52f",
+          "PoseRevision": 7,
+          "SubmittedRevision": 7,
+          "DrawCalls": 154
+        },
+        {
+          "phase": "signed_public_override",
+          "weight": 1.5,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 1.5,
+              "MaximumPositionErrorInches": 9.536743e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 1.5,
+              "MaximumPositionErrorInches": 9.536743e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/signed_public_override_6_gpu.json",
+          "sha256": "022c034b6b33411a9917b2051ad7b01ce6d6c30ae2f45d4a643be0513ef00618",
+          "PoseRevision": 8,
+          "SubmittedRevision": 8,
+          "DrawCalls": 178
+        },
+        {
+          "phase": "public_linear_fade_quarter",
+          "weight": -0.1875,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": -0.1875,
+              "MaximumPositionErrorInches": 1.1920929e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": -0.1875,
+              "MaximumPositionErrorInches": 1.1920929e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/public_linear_fade_quarter_7_gpu.json",
+          "sha256": "e921c23d5c6728eec51cd2c0ce45fdea177acf8312061a6384e9597ffb169dbc",
+          "PoseRevision": 11,
+          "SubmittedRevision": 11,
+          "DrawCalls": 202
+        },
+        {
+          "phase": "public_linear_fade_endpoint",
+          "weight": 1.5,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 1.5,
+              "MaximumPositionErrorInches": 9.536743e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 1.5,
+              "MaximumPositionErrorInches": 9.536743e-07,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/public_linear_fade_endpoint_8_gpu.json",
+          "sha256": "022c034b6b33411a9917b2051ad7b01ce6d6c30ae2f45d4a643be0513ef00618",
+          "PoseRevision": 12,
+          "SubmittedRevision": 12,
+          "DrawCalls": 226
+        },
+        {
+          "phase": "clear_after_fade",
+          "weight": 0.5,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/clear_after_fade_9_gpu.json",
+          "sha256": "085f34eaaefd01ca99b0a17ada70835a0561d967dab1fde8f8af898284418f06",
+          "PoseRevision": 13,
+          "SubmittedRevision": 13,
+          "DrawCalls": 250
+        },
+        {
+          "phase": "restored_bound_indices",
+          "weight": 0.5,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/restored_bound_indices_10_gpu.json",
+          "sha256": "085f34eaaefd01ca99b0a17ada70835a0561d967dab1fde8f8af898284418f06",
+          "PoseRevision": 13,
+          "SubmittedRevision": 13,
+          "DrawCalls": 322
+        },
+        {
+          "phase": "survives_other_instance_deletion",
+          "weight": 0.5,
+          "measurement": [
+            {
+              "Primitive": 0,
+              "Vertices": 21,
+              "Indices": 72,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            },
+            {
+              "Primitive": 1,
+              "Vertices": 9,
+              "Indices": 24,
+              "Weight": 0.5,
+              "MaximumPositionErrorInches": 0,
+              "MaximumNormalComponentError": 0,
+              "MaximumUvError": 0,
+              "MaximumDefaultColorError": 0,
+              "MaximumTangentLengthError": 0,
+              "MaximumTangentNormalDot": 0
+            }
+          ],
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/survives_other_instance_deletion_11_gpu.json",
+          "sha256": "085f34eaaefd01ca99b0a17ada70835a0561d967dab1fde8f8af898284418f06",
+          "PoseRevision": 13,
+          "SubmittedRevision": 13,
+          "DrawCalls": 370
+        }
+      ],
+      "capture_controls": [
+        {
+          "label": "empty_before",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/empty_before.png",
+          "Sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+          "Coverage": 0,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        },
+        {
+          "label": "actual_public_default_half_source_material",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/actual_public_default_half_source_material.png",
+          "Sha256": "4ed435e7984dc8cf032870d1505c3b11de37e4c2e5e1611da557abb5b8941737",
+          "Coverage": 7013,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        },
+        {
+          "label": "empty_disabled",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/empty_disabled.png",
+          "Sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+          "Coverage": 0,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        },
+        {
+          "label": "independent_raw_source_half_reference",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/independent_raw_source_half_reference.png",
+          "Sha256": "5315196ed579b71c6d9dc63a3ef2b35c0378daa000958d64b33c29b0d852c386",
+          "Coverage": 7025,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        },
+        {
+          "label": "empty_after_reference",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/empty_after_reference.png",
+          "Sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+          "Coverage": 0,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        },
+        {
+          "label": "independent_flat_negative_reference",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/independent_flat_negative_reference.png",
+          "Sha256": "1ce64dc8a62a3910f1c06cd817e2a28450557d8e668e926b1d02ce0637993a0a",
+          "Coverage": 7027,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        },
+        {
+          "label": "empty_after_flat_reference",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/empty_after_flat_reference.png",
+          "Sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+          "Coverage": 0,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        },
+        {
+          "label": "actual_public_flat_negative",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/actual_public_flat_negative.png",
+          "Sha256": "0da023c58aac39351960fe292a0aac717a69f0fd1ff7e6dc2ab0d5fd19899616",
+          "Coverage": 7008,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        },
+        {
+          "label": "restored_public_default_source_material",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/restored_public_default_source_material.png",
+          "Sha256": "4ed435e7984dc8cf032870d1505c3b11de37e4c2e5e1611da557abb5b8941737",
+          "Coverage": 7013,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        },
+        {
+          "label": "empty_after_public_delete",
+          "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MorphPrimitivesTest/public/94db93cb7aaf4caaab12598ad39a7677/empty_after_public_delete.png",
+          "Sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+          "Coverage": 0,
+          "CameraStateJson": "{\"position\":\"65,70,45\",\"rotation\":\"-0.19436,-0.08476,0.8958,-0.39063\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":58,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+        }
+      ],
+      "independent_literal_comparison": {
+        "intersection": 7012,
+        "union": 7026,
+        "iou": 0.9980074010816966,
+        "pixels_different_beyond_8_bytes": 558,
+        "scope": "Measured independent literal geometry comparison; human visual review remains pending.",
+        "maximum_rgb_byte_error": 78,
+        "mean_rgb_byte_error_on_union": 0.7382102272727272,
+        "acceptance": "measured only; historical exact image checker was not invoked; no pixel equality claim"
+      },
+      "negative_controls": {
+        "independent_flat_reference_changed_pixels": 4710,
+        "actual_flat_changed_pixels": 4549,
+        "ignored_default_weight_rejected": true,
+        "bound_gpu_index_negative_rejected": true
+      }
+    }
+  ],
+  "source_compiled_parity": {
+    "default_png_sha256": "4ed435e7984dc8cf032870d1505c3b11de37e4c2e5e1611da557abb5b8941737",
+    "default_pixels_identical": true,
+    "all_numerical_phases_independently_checked": true,
+    "lifetime_and_independence": "Repeated Model.Load resource identity, separate instance output; B unchanged during A signed/fade updates; disable/re-enable, deletion of B with A surviving, deleted callbacks stopped and final empty restored."
+  },
+  "capture_purpose": "192px actual default-source-material lit native camera captures. Camera orthographic at engine inches (65,70,45), target (0,0,1.5), height58; built-in point light (200,-30,60), radius1000, white4. This diagnostic framing is inferred and differs from upstream screenshot.",
+  "visual_review": "pending",
+  "known_limits": [
+    "Human visual approval remains pending. Original screenshot has unknown renderer/camera/lighting/exposure; this is not an exact upstream match.",
+    "Independent literal reference measured IoU .9980074010816966 with 558 pixels differing by more than 8 RGB bytes; full literal-pixel equality/PBR fidelity is not claimed.",
+    "Canonical compiled package retains its external JPEG and was tested with that exact image explicitly mounted; compiled-only self-contained packaging is not established.",
+    "Original model has POSITION-only morph targets and no animation, skins, authored tangents or target NORMAL/TANGENT streams. Preserved normals and valid generated tangent basis prove omission behavior; other streams require separate fixtures.",
+    "Node-default/zero-fallback/signed LINEAR animation are explicitly derived source controls; original upstream bytes are unchanged. Scene-time interpolation and clip seeks do not prove wall-clock cadence.",
+    "Windows, measured load/memory/GPU performance, compiled-vmdl benchmarks, complete APIs and unselected Draco/Binary forms remain unproven."
+  ]
+}

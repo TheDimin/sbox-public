@@ -1,0 +1,60 @@
+{
+  "model": "AnisotropyBarnLamp",
+  "owner": "/root/gpu_basis_lamp",
+  "status": "frozen-pending-coordinator",
+  "files": [
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfTextureCompiler.cs",
+      "sha256": "009a6be613028521b459b331598229679e73000de1692f69050c5d3dcd656d2b"
+    },
+    {
+      "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfBasisTextureCompilerTests.cs",
+      "sha256": "f0d2ae2ed2206f23544773f145ded565aab34c72802f4bc78b8ce384106fef06"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AnisotropyBarnLamp/AnisotropyBarnLampCompilerChecks.cs",
+      "sha256": "601c7db721c71b60e7cf2b7a72708f5493c15aea53c5bc86a73b75a74b23fc56"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AnisotropyBarnLamp/ALLOCATION_AUDIT.md",
+      "sha256": "b2c91410653148b62fccc704e9721187640480df89ee3fbc30c76ef7c13d9ea2"
+    }
+  ],
+  "producer_dependencies": [
+    "Actual rebuilt/staged Sandbox.Engine with exact compiler source hash above",
+    "GltfBasisTexturePlan aa7aaa2e1b1f15a61094a88b76679ccb58a86bb259b0748ae6a0fb0342dbd0fe",
+    "Existing actual Sandbox.Gltf/native KTX codec 2026.6.15.8"
+  ],
+  "previous_request": {
+    "path": "research/gltf-validation/direct-gpu/models/AnisotropyBarnLamp/validation-request.json",
+    "sha256": "85b5e60a3157f58225313af6f5e4614dc06a775e645e81b44ac5acaeaa96ebb9",
+    "cases": 58,
+    "status": "unchanged; prepared/unrun"
+  },
+  "entry": [
+    {
+      "kind": "MSTest",
+      "suite": "Sandbox.Tests.GltfBasisTextureCompilerTests",
+      "expected_cases": 7,
+      "scope": "pure CPU dispatch-negative controls and independent authored MR mip/float precision/shape/budget controls"
+    },
+    {
+      "kind": "static_result_array",
+      "method": "Sandbox.Gltf.DirectGpu.AnisotropyBarnLampValidation.AnisotropyBarnLampCompilerChecks.RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 10,
+      "scope": "actual native KTX compiler routes through general RGBA8 source roles in source/compiled forms; explicit legacy ORM default-budget rejection"
+    }
+  ],
+  "expected_cases": 17,
+  "combined_prepared_cases": 75,
+  "forms": [
+    "glTF-KTX-BasisU/source",
+    "glTF-KTX-BasisU/derived-compiled-glb_c"
+  ],
+  "shared_backend_contract": "Compiler APIs unchanged; canonical encoding binding IsSrgb and UV role metadata remain source-of-truth. Shared adapter/loader capability declaration untouched.",
+  "acceptance": "Independent literal mip content/float factor landmarks, exact resource framing/dimensions/mip count/color flags/payload length. All 4 KTX images compile via actual common compiler; legacy2048 ORM rejects default256MiB before native decode. No source image parity/render/API/performance claim.",
+  "execution_needs": "Coordinator only combined Engine/Gltf stage;7 focused Unit cases+10 helper rows; previous58 retain their separate exact freeze. No Engine/Gltf source edits until coordinator releases freeze."
+}

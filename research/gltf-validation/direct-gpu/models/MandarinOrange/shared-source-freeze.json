@@ -1,0 +1,34 @@
+{
+  "scope": "Installed e12 source snapshot for approved Mandarin scene-resource and atomic reimport slice. Shared loader/resource material routing has been handed to integration owner; later shared changes require their producer receipt.",
+  "files": [
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs",
+      "sha256": "5480cef2386a5fb1f5e47237c3977cc51f335a1f10f82c8cab0f2546922db3a4"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelMetadata.cs",
+      "sha256": "7044af1758694bedbc001b3ffa394dc41214aabc8fccb92c45af27e968f4c784"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs",
+      "sha256": "d9049ee47b998e0940e40203bd0a54d7512dd5f473327112a6b80b6741a65230"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfModelLoader.cs",
+      "sha256": "1b960fd3f48a04e93f05fc2dd6c9baea6af0d2c1cddf64553f70ac8b9cdbcbd8"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Model.GltfScenes.cs",
+      "sha256": "92a43985750ab6d39e60cf7b8a25e890b01d89a672b94447729ac2bf7750facf"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/Model.GltfResource.cs",
+      "sha256": "187b977f6fe7152168c4dfdf2d8bf701b1556791346cac31ef6004641b488243"
+    },
+    {
+      "path": "engine/Sandbox.Tools/Assets/GltfAssetImport.cs",
+      "sha256": "7831ab58bba8b6c4754c04867780ddd0e56f68cdf38ced2db31acb5d4bc3fb40"
+    }
+  ],
+  "stage": "e12c0eea74234f09ab1bef23bcbd8e93"
+}

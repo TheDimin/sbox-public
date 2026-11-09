@@ -1,0 +1,168 @@
+{
+  "model": "MeshPrimitiveModes",
+  "owner": "/root/gpu_mesh_primitive_modes",
+  "status": "frozen; C# and actual GPU/image gates unexecuted",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/ACCEPTANCE.md",
+      "sha256": "258ac1658e2cad1fa17785c7fbb1289537b7c30c4d23e0033d3a232ff9eea67a"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MeshPrimitiveModesCoreTests.cs",
+      "sha256": "d8ad2d14772bd65ee4c8876338308557641a5a2eec14e13ab55423072bb6ecad"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MeshPrimitiveModesGpuChecks.cs",
+      "sha256": "6398c3d0c56511be8721715dbd01010e10b1c0ed8f0d93e629ce2237054a6ced"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MeshPrimitiveModesGpuProbe.cs",
+      "sha256": "e2603267266e1adb06bdee011cc1b6c9449d80d2667f9c631fcf0a8bfe28843f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MeshPrimitiveModesImageChecks.cs",
+      "sha256": "241b8f0768fcd74e85e95ed4f0beccdca97d919527a85158912b0cf0419d4075"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MeshPrimitiveModesPlanTests.cs",
+      "sha256": "79572aa177c0a09d3285b1f5d0834bf1c664d3b4001cde106f31755c6288afe4"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MeshPrimitiveModesReference.cs",
+      "sha256": "19fad7a82bc48f0a6a393edbe2fcf7f9e7a7bfea5da33ed9e823dc52ef982639"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MeshPrimitiveModesReferenceScene.cs",
+      "sha256": "db52a54319e9343678a2a09339d875adf0004c387619f41dcf693108b597352e"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/test_source_oracle.py",
+      "sha256": "31f85576f72fd9d91ec8c215bb33480eef05d629af1b45e66bd23d43f38599ee"
+    }
+  ],
+  "producer_dependencies": [
+    "actual loaded Sandbox.Gltf with GltfReader, GltfCompiler, MaterializePrimitiveUpload, CreateDrawData, EvaluatePose/EvaluateVertexPosition",
+    "actual loaded Sandbox.Engine",
+    "shared GltfGpuBackend.cs + GltfGpuRig.cs included by coordinator; no replacement producer source"
+  ],
+  "shared_backend_contract": "CONTRACT.md; observed shared files are dependencies only, coordinator must approve actual source/loaded-producer freeze",
+  "shared_dependencies_observed": [
+    {
+      "path": "research/gltf-validation/direct-gpu/CONTRACT.md",
+      "sha256": "12ed85fa725cb58481f1fcc334b542f7b6901c5f329fc9182977bbc721da3673"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuBackend.cs",
+      "sha256": "2635a4c287ba1de1eebd59ca43c8feb28d7fb7a98e2330ea68669fe9e2845ef2"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuRig.cs",
+      "sha256": "b271c8f13643015c372664ef3c2d2f5e498a7ec567a619a96ee61cd7c07671bd"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/shaders/gltf_direct_deform.shader",
+      "sha256": "43101e5f4c4ae9727f5a21c2aecc6e391bf16b303099395a703babb490006e47"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MeshPrimitiveModesValidation.MeshPrimitiveModesCoreTests",
+      "kind": "static_results",
+      "method": "RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 84,
+      "scope": "CPU/data"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MeshPrimitiveModesValidation.MeshPrimitiveModesPlanTests",
+      "kind": "static_results",
+      "method": "RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 84,
+      "scope": "pure staging plan"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MeshPrimitiveModesValidation.MeshPrimitiveModesGpuChecks",
+      "kind": "static_results",
+      "method": "RunVerifierControls",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 17,
+      "scope": "manufactured verifier readback controls only"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MeshPrimitiveModesValidation.MeshPrimitiveModesImageChecks",
+      "kind": "static_results",
+      "method": "RunVerifierControls",
+      "arguments": [],
+      "expected_cases": 4,
+      "scope": "manufactured image verifier controls only"
+    }
+  ],
+  "expected_cases": 189,
+  "form_names": [
+    "glTF/source",
+    "glTF/compiled_glb",
+    "glTF-Embedded/source",
+    "glTF-Embedded/compiled_glb",
+    "derived/index-5121/source",
+    "derived/index-5121/compiled_glb",
+    "derived/index-5123/source",
+    "derived/index-5123/compiled_glb",
+    "derived/index-5125/source",
+    "derived/index-5125/compiled_glb",
+    "derived/nonindexed/source",
+    "derived/nonindexed/compiled_glb"
+  ],
+  "upstream_forms": [
+    "glTF",
+    "glTF-Embedded"
+  ],
+  "derived_forms": "Packaged GLB per upstream source and model-derived metamorphic layout fixtures; no upstream nonindexed/UINT8/UINT32/GLB claimed. Optimized portable glb_c is pending.",
+  "acceptance": "ACCEPTANCE.md; literal positions, translations, index sequences and expanded oriented lists; exact raw bytes/offsets/stride/format/owned budgets; generated-vs-authored index provenance; dynamic output declarations. Proposed numeric arithmetic bounds need coordinator review; images require exact nonempty foreground masks and changed negative controls. No model normals assertion for no-normal points/lines.",
+  "actual_gpu_entries": [
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.MeshPrimitiveModesValidation.MeshPrimitiveModesGpuProbe.RunWholeSceneNumeric",
+      "arguments": "checkoutRoot, formName, world, computeMaterial, waitForActualFrames, materialResolver=null",
+      "expected_rows_per_call": 7,
+      "scope": "actual full default-scene GPU vertex and bound-index readback"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.MeshPrimitiveModesValidation.MeshPrimitiveModesGpuProbe.RunNumeric",
+      "arguments": "checkoutRoot, formName, mode, world, computeMaterial, waitForActualFrames, materialResolver=null",
+      "expected_rows_per_call": 3,
+      "scope": "actual selected-mode GPU readback at identity/reflected affine placement and independent instances/disposal"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.MeshPrimitiveModesValidation.MeshPrimitiveModesGpuProbe.RunImage",
+      "arguments": "checkoutRoot, formName, mode, world, computeMaterial, drawMaterial, waitForActualFrames, capture(name)=>Task<Color[]>",
+      "expected_rows_per_call": 1,
+      "scope": "actual selected-mode matched native geometry image; literal same-class reference and topology negative; empty-before/deleted-empty controls"
+    }
+  ],
+  "execution_needs": "Coordinator compilation against actual loaded producers. No jobs run by owner. GPU/image calls require guarded editor, accepted shared compute shader, actual frame waits, native camera/render target and persisted captures. Use real Points/Lines/Triangles, no synthetic substitutions; no native blocker proven.",
+  "executed_evidence": [
+    {
+      "entry": "python3 research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/test_source_oracle.py",
+      "passed": 8,
+      "failed": 0,
+      "scope": "independent stdlib pinned-source audit only"
+    },
+    "owned whitespace check passed; all C# is uncompiled/unexecuted"
+  ],
+  "unexecuted_gates": [
+    "189 C# cases",
+    "full-scene actual GPU readbacks",
+    "selected-mode actual numeric placements/independent instances",
+    "matched point/line/triangle images and deletion controls",
+    "default source-material no-normal point/line handling and width/style",
+    "public Model.Load and vmdl regression",
+    "optimized portable glb_c",
+    "Windows and model-editor parity"
+  ]
+}

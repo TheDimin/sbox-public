@@ -1,0 +1,1967 @@
+{
+  "schema_version": 1,
+  "model": "BrainStem",
+  "owner": "/root/extension_brainstem",
+  "status": "public_source_compiled_gpu_sampled_pass_visual_review_pending",
+  "corpus_revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "producer": {
+    "stage": "8fc",
+    "pid": 261353,
+    "pid_start": "1595719",
+    "engine_mvid": "0ce2dfa5-c98c-45e4-ad3a-6c810a17a6ef",
+    "engine_sha256": "10bf7867d04b8b6428c0ec9ecf377d80cb10745099b1ddd81c6b2c9e78819f77",
+    "gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+    "gltf_sha256": "7638a855ba21fd9c079a22cbc8b834d4169112fe08cb9a5fd788e63cf90866e1",
+    "tools_mvid": "ff2adc3f-38da-4c30-88aa-63b1acf594ab",
+    "tools_sha256": "24f1c1f71037b811ae1be462945279e10a54ede908842e143848194cc4e94e1c",
+    "deform_shader_sha256": "89b664f9492d1f465a79ae309cc52994cf2d1b391eeea89a0879c97df67f34f2"
+  },
+  "inputs": [
+    {
+      "variant": "glTF",
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/BrainStem/glTF/BrainStem.gltf",
+      "sha256": "8fc99ed74161aa79573236f9a457e238b0649993dfb41234fd7f6eafad696b75",
+      "dependencies": [
+        {
+          "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/BrainStem/glTF/BrainStem0.bin",
+          "sha256": "1418d04d972655b9b1907d3d51438cd150e19016716e107bb949cd4379ac5cdb"
+        }
+      ],
+      "required_extensions": [],
+      "primitives": 59,
+      "animation_channels": 57
+    },
+    {
+      "variant": "glTF-Embedded",
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/BrainStem/glTF-Embedded/BrainStem.gltf",
+      "sha256": "3fca4632cfd7dbc2ea7a522dbb8fd42ebfcb651d2567b864d30c39770a0cec36",
+      "dependencies": [],
+      "required_extensions": [],
+      "primitives": 59,
+      "animation_channels": 57
+    },
+    {
+      "variant": "glTF-Binary",
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/BrainStem/glTF-Binary/BrainStem.glb",
+      "sha256": "ddda3a53b5c9771f992463034a430340ba2bac571e5869c723f7cba4976e9174",
+      "dependencies": [],
+      "required_extensions": [],
+      "primitives": 59,
+      "animation_channels": 57
+    },
+    {
+      "variant": "glTF-Draco",
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/BrainStem/glTF-Draco/BrainStem.gltf",
+      "sha256": "d5f35c011854baa9ba8bc89e076f0a3c5a3b64f7b956c5378bfb0b99041c9c40",
+      "dependencies": [
+        {
+          "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/BrainStem/glTF-Draco/BrainStem0.bin",
+          "sha256": "39346163441a1d03258052be80befcb17933f6bae4606aab7deb4f95258ba85c"
+        }
+      ],
+      "required_extensions": [
+        "KHR_draco_mesh_compression"
+      ],
+      "primitives": 59,
+      "animation_channels": 57
+    },
+    {
+      "variant": "glTF-Meshopt",
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/BrainStem/glTF-Meshopt/BrainStem.gltf",
+      "sha256": "a011abbef412e2eb7269dc4f5c3be10dac0145e3c6ef39ff239afacd7d402990",
+      "dependencies": [
+        {
+          "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/BrainStem/glTF-Meshopt/BrainStem.bin",
+          "sha256": "e18cbda514dd7626dcdf36730881a3f9c26def1d84c55b178b932e5c533c44c5"
+        }
+      ],
+      "required_extensions": [
+        "KHR_mesh_quantization",
+        "KHR_meshopt_compression"
+      ],
+      "primitives": 49,
+      "animation_channels": 13
+    },
+    {
+      "variant": "glTF-Meshopt-EXT",
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/BrainStem/glTF-Meshopt-EXT/BrainStem.gltf",
+      "sha256": "75901f9abeff5bf01cff350d08843cc2e93eabd9f99dc52e9552462a26bbd6e0",
+      "dependencies": [
+        {
+          "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/BrainStem/glTF-Meshopt-EXT/BrainStem.bin",
+          "sha256": "ac004b976aa36cd65e03c485cae40aa85341f6653c9795aef2f223cefe14c8c2"
+        }
+      ],
+      "required_extensions": [
+        "KHR_mesh_quantization",
+        "EXT_meshopt_compression"
+      ],
+      "primitives": 49,
+      "animation_channels": 13
+    }
+  ],
+  "forms": [
+    {
+      "name": "glTF/source",
+      "status": "passed",
+      "phases": [
+        {
+          "time": 0,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 2.3165896e-05,
+          "maxNormalError": 2.8115454e-07,
+          "rows": 59,
+          "DrawCalls": 2183,
+          "PoseRevision": 6,
+          "SubmittedRevision": 6
+        },
+        {
+          "time": 0.01333332,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.6022455e-05,
+          "maxNormalError": 1.9768625e-07,
+          "rows": 59,
+          "DrawCalls": 4248,
+          "PoseRevision": 7,
+          "SubmittedRevision": 7
+        },
+        {
+          "time": 17.44,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.7059845e-05,
+          "maxNormalError": 3.5262585e-07,
+          "rows": 59,
+          "DrawCalls": 6136,
+          "PoseRevision": 8,
+          "SubmittedRevision": 8
+        },
+        {
+          "time": 34.88,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.3015121e-05,
+          "maxNormalError": 2.6656008e-07,
+          "rows": 59,
+          "DrawCalls": 8201,
+          "PoseRevision": 9,
+          "SubmittedRevision": 9
+        }
+      ],
+      "captures": [
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-b7c5145fc64d46f18685cfb9aafb9a7a/pose_first_key.png",
+          "sha256": "3538e54d076213993158e674b6871226c121b08dc24063e29dd13190f5d5b1da",
+          "coverage": 3639,
+          "engine_frame": 36372,
+          "wall_seconds": 3.3142013,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-b7c5145fc64d46f18685cfb9aafb9a7a/pose_between_keys.png",
+          "sha256": "b6035a7166d800a548b5e9629ad52ec7e8bbf3ee9e97e0768aa82ea350e76e58",
+          "coverage": 3673,
+          "engine_frame": 36378,
+          "wall_seconds": 4.1284856,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-b7c5145fc64d46f18685cfb9aafb9a7a/pose_middle_key.png",
+          "sha256": "c049cca4d2c5d44c573d764a945a30a87173f66c33239ef34afc39699a717b4f",
+          "coverage": 2467,
+          "engine_frame": 36384,
+          "wall_seconds": 4.7280474,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-b7c5145fc64d46f18685cfb9aafb9a7a/pose_last_key.png",
+          "sha256": "ebe9ab779103809e40e7525d1c4f60153acc2abbdcfffb399c9e99c284d9ba89",
+          "coverage": 3142,
+          "engine_frame": 36390,
+          "wall_seconds": 5.4307917,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        }
+      ],
+      "receipt": "Temp/gltf-validation/direct-gpu/BrainStem/public-source-first/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "675dfbf033d8cbe02b7e6cba0dd668aa32608b7da2c2de0a7e82a780452d1b4d",
+      "cleanup": "passed"
+    },
+    {
+      "name": "glTF-Meshopt/source",
+      "status": "passed",
+      "phases": [
+        {
+          "time": 0,
+          "checkedVertices": 147,
+          "maxPositionErrorInches": 2.3015808e-05,
+          "maxNormalError": 3.1114539e-07,
+          "rows": 49,
+          "DrawCalls": 2303,
+          "PoseRevision": 6,
+          "SubmittedRevision": 6
+        },
+        {
+          "time": 0.016666668,
+          "checkedVertices": 147,
+          "maxPositionErrorInches": 1.5853602e-05,
+          "maxNormalError": 2.6151432e-07,
+          "rows": 49,
+          "DrawCalls": 4018,
+          "PoseRevision": 7,
+          "SubmittedRevision": 7
+        },
+        {
+          "time": 17.466667,
+          "checkedVertices": 147,
+          "maxPositionErrorInches": 1.5288562e-05,
+          "maxNormalError": 4.0535542e-07,
+          "rows": 49,
+          "DrawCalls": 5733,
+          "PoseRevision": 8,
+          "SubmittedRevision": 8
+        },
+        {
+          "time": 34.9,
+          "checkedVertices": 147,
+          "maxPositionErrorInches": 1.0977616e-05,
+          "maxNormalError": 3.5388297e-07,
+          "rows": 49,
+          "DrawCalls": 7448,
+          "PoseRevision": 9,
+          "SubmittedRevision": 9
+        }
+      ],
+      "captures": [
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-294c5b5cd4034d17964a03a41bc9255c/pose_first_key.png",
+          "sha256": "385c0d498b7b8f3a68ddb1b8c9c37e3eb5d739a6309b3b78b1fdb2b1d32024da",
+          "coverage": 3640,
+          "engine_frame": 41068,
+          "wall_seconds": 3.781196,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-294c5b5cd4034d17964a03a41bc9255c/pose_between_keys.png",
+          "sha256": "f7c703ba5ae54e7290520e2fdcb16ff4093d5e9451b9f1ec45b6e25e1676a9ac",
+          "coverage": 3667,
+          "engine_frame": 41075,
+          "wall_seconds": 4.5866689,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-294c5b5cd4034d17964a03a41bc9255c/pose_middle_key.png",
+          "sha256": "42e4967a7a70b9fc32cceb6a100a97b9bac4e41d56659e261b225e8c9242e3cc",
+          "coverage": 2815,
+          "engine_frame": 41081,
+          "wall_seconds": 5.2986957,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-294c5b5cd4034d17964a03a41bc9255c/pose_last_key.png",
+          "sha256": "3ae5adc0922c53b400cb992170307f8ee31054d419c6b555b600d85f51fca43b",
+          "coverage": 3144,
+          "engine_frame": 41087,
+          "wall_seconds": 6.0771617,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        }
+      ],
+      "receipt": "Temp/gltf-validation/direct-gpu/BrainStem/meshopt-public-8fc-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "73bd9af21387d32a3c38f1bb7b1210713e90d99ef31dd901b8f690624be36a4b",
+      "cleanup": "passed"
+    },
+    {
+      "name": "glTF-Meshopt/compiled",
+      "status": "passed",
+      "phases": [
+        {
+          "time": 0,
+          "checkedVertices": 147,
+          "maxPositionErrorInches": 2.3015808e-05,
+          "maxNormalError": 3.1114539e-07,
+          "rows": 49,
+          "DrawCalls": 1715,
+          "PoseRevision": 6,
+          "SubmittedRevision": 6
+        },
+        {
+          "time": 0.016666668,
+          "checkedVertices": 147,
+          "maxPositionErrorInches": 1.5853602e-05,
+          "maxNormalError": 2.6151432e-07,
+          "rows": 49,
+          "DrawCalls": 3430,
+          "PoseRevision": 7,
+          "SubmittedRevision": 7
+        },
+        {
+          "time": 17.466667,
+          "checkedVertices": 147,
+          "maxPositionErrorInches": 1.5288562e-05,
+          "maxNormalError": 4.0535542e-07,
+          "rows": 49,
+          "DrawCalls": 5145,
+          "PoseRevision": 8,
+          "SubmittedRevision": 8
+        },
+        {
+          "time": 34.9,
+          "checkedVertices": 147,
+          "maxPositionErrorInches": 1.0977616e-05,
+          "maxNormalError": 3.5388297e-07,
+          "rows": 49,
+          "DrawCalls": 6860,
+          "PoseRevision": 9,
+          "SubmittedRevision": 9
+        }
+      ],
+      "captures": [
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-3bb2027384534b778514598214b36cac/pose_first_key.png",
+          "sha256": "23e27939a617d16a0abd0d2ab3c4fdc1eba1d66df4e745dc650ae31d8b4cb28b",
+          "coverage": 3641,
+          "engine_frame": 41106,
+          "wall_seconds": 4.2344903,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-3bb2027384534b778514598214b36cac/pose_between_keys.png",
+          "sha256": "f7c703ba5ae54e7290520e2fdcb16ff4093d5e9451b9f1ec45b6e25e1676a9ac",
+          "coverage": 3667,
+          "engine_frame": 41112,
+          "wall_seconds": 5.0244977,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-3bb2027384534b778514598214b36cac/pose_middle_key.png",
+          "sha256": "42e4967a7a70b9fc32cceb6a100a97b9bac4e41d56659e261b225e8c9242e3cc",
+          "coverage": 2815,
+          "engine_frame": 41118,
+          "wall_seconds": 5.8261635,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-3bb2027384534b778514598214b36cac/pose_last_key.png",
+          "sha256": "3ae5adc0922c53b400cb992170307f8ee31054d419c6b555b600d85f51fca43b",
+          "coverage": 3144,
+          "engine_frame": 41124,
+          "wall_seconds": 6.5345935,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        }
+      ],
+      "receipt": "Temp/gltf-validation/direct-gpu/BrainStem/meshopt-public-8fc-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "73bd9af21387d32a3c38f1bb7b1210713e90d99ef31dd901b8f690624be36a4b",
+      "cleanup": "passed"
+    },
+    {
+      "name": "glTF-Meshopt-EXT/source",
+      "status": "passed",
+      "phases": [
+        {
+          "time": 0,
+          "checkedVertices": 147,
+          "maxPositionErrorInches": 2.3015808e-05,
+          "maxNormalError": 3.1114539e-07,
+          "rows": 49,
+          "DrawCalls": 1715,
+          "PoseRevision": 6,
+          "SubmittedRevision": 6
+        },
+        {
+          "time": 0.016666668,
+          "checkedVertices": 147,
+          "maxPositionErrorInches": 1.5853602e-05,
+          "maxNormalError": 2.6151432e-07,
+          "rows": 49,
+          "DrawCalls": 3430,
+          "PoseRevision": 7,
+          "SubmittedRevision": 7
+        },
+        {
+          "time": 17.466667,
+          "checkedVertices": 147,
+          "maxPositionErrorInches": 1.5288562e-05,
+          "maxNormalError": 4.0535542e-07,
+          "rows": 49,
+          "DrawCalls": 5145,
+          "PoseRevision": 8,
+          "SubmittedRevision": 8
+        },
+        {
+          "time": 34.9,
+          "checkedVertices": 147,
+          "maxPositionErrorInches": 1.0977616e-05,
+          "maxNormalError": 3.5388297e-07,
+          "rows": 49,
+          "DrawCalls": 6713,
+          "PoseRevision": 9,
+          "SubmittedRevision": 9
+        }
+      ],
+      "captures": [
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-6ffa9b2f5d234677bb681d5b64d7705d/pose_first_key.png",
+          "sha256": "23e27939a617d16a0abd0d2ab3c4fdc1eba1d66df4e745dc650ae31d8b4cb28b",
+          "coverage": 3641,
+          "engine_frame": 41143,
+          "wall_seconds": 4.2848682,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-6ffa9b2f5d234677bb681d5b64d7705d/pose_between_keys.png",
+          "sha256": "f7c703ba5ae54e7290520e2fdcb16ff4093d5e9451b9f1ec45b6e25e1676a9ac",
+          "coverage": 3667,
+          "engine_frame": 41149,
+          "wall_seconds": 5.0927216,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-6ffa9b2f5d234677bb681d5b64d7705d/pose_middle_key.png",
+          "sha256": "42e4967a7a70b9fc32cceb6a100a97b9bac4e41d56659e261b225e8c9242e3cc",
+          "coverage": 2815,
+          "engine_frame": 41155,
+          "wall_seconds": 5.6915423,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-6ffa9b2f5d234677bb681d5b64d7705d/pose_last_key.png",
+          "sha256": "d0a3527163c65c2b6d6765dbb0b73c8e492a6ae6205f701fe069ecf955e662a2",
+          "coverage": 3143,
+          "engine_frame": 41161,
+          "wall_seconds": 6.2921644,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        }
+      ],
+      "receipt": "Temp/gltf-validation/direct-gpu/BrainStem/meshopt-public-8fc-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "73bd9af21387d32a3c38f1bb7b1210713e90d99ef31dd901b8f690624be36a4b",
+      "cleanup": "passed"
+    },
+    {
+      "name": "glTF-Meshopt-EXT/compiled",
+      "status": "passed",
+      "phases": [
+        {
+          "time": 0,
+          "checkedVertices": 147,
+          "maxPositionErrorInches": 2.3015808e-05,
+          "maxNormalError": 3.1114539e-07,
+          "rows": 49,
+          "DrawCalls": 1715,
+          "PoseRevision": 6,
+          "SubmittedRevision": 6
+        },
+        {
+          "time": 0.016666668,
+          "checkedVertices": 147,
+          "maxPositionErrorInches": 1.5853602e-05,
+          "maxNormalError": 2.6151432e-07,
+          "rows": 49,
+          "DrawCalls": 3430,
+          "PoseRevision": 7,
+          "SubmittedRevision": 7
+        },
+        {
+          "time": 17.466667,
+          "checkedVertices": 147,
+          "maxPositionErrorInches": 1.5288562e-05,
+          "maxNormalError": 4.0535542e-07,
+          "rows": 49,
+          "DrawCalls": 5145,
+          "PoseRevision": 8,
+          "SubmittedRevision": 8
+        },
+        {
+          "time": 34.9,
+          "checkedVertices": 147,
+          "maxPositionErrorInches": 1.0977616e-05,
+          "maxNormalError": 3.5388297e-07,
+          "rows": 49,
+          "DrawCalls": 6860,
+          "PoseRevision": 9,
+          "SubmittedRevision": 9
+        }
+      ],
+      "captures": [
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-e8ebe937f78f4b73a5c657bd7c095ecd/pose_first_key.png",
+          "sha256": "23e27939a617d16a0abd0d2ab3c4fdc1eba1d66df4e745dc650ae31d8b4cb28b",
+          "coverage": 3641,
+          "engine_frame": 41180,
+          "wall_seconds": 4.2219428,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-e8ebe937f78f4b73a5c657bd7c095ecd/pose_between_keys.png",
+          "sha256": "f7c703ba5ae54e7290520e2fdcb16ff4093d5e9451b9f1ec45b6e25e1676a9ac",
+          "coverage": 3667,
+          "engine_frame": 41186,
+          "wall_seconds": 5.0186684,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-e8ebe937f78f4b73a5c657bd7c095ecd/pose_middle_key.png",
+          "sha256": "42e4967a7a70b9fc32cceb6a100a97b9bac4e41d56659e261b225e8c9242e3cc",
+          "coverage": 2815,
+          "engine_frame": 41192,
+          "wall_seconds": 5.6191799,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-e8ebe937f78f4b73a5c657bd7c095ecd/pose_last_key.png",
+          "sha256": "3ae5adc0922c53b400cb992170307f8ee31054d419c6b555b600d85f51fca43b",
+          "coverage": 3144,
+          "engine_frame": 41198,
+          "wall_seconds": 6.2186642,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        }
+      ],
+      "receipt": "Temp/gltf-validation/direct-gpu/BrainStem/meshopt-public-8fc-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "73bd9af21387d32a3c38f1bb7b1210713e90d99ef31dd901b8f690624be36a4b",
+      "cleanup": "passed"
+    },
+    {
+      "name": "glTF-Draco/source",
+      "status": "passed",
+      "phases": [
+        {
+          "time": 0,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 2.3138966e-05,
+          "maxNormalError": 3.071953e-07,
+          "rows": 59,
+          "DrawCalls": 2478,
+          "PoseRevision": 6,
+          "SubmittedRevision": 6
+        },
+        {
+          "time": 0.01333332,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.5864356e-05,
+          "maxNormalError": 2.7028258e-07,
+          "rows": 59,
+          "DrawCalls": 4543,
+          "PoseRevision": 7,
+          "SubmittedRevision": 7
+        },
+        {
+          "time": 17.44,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.4588411e-05,
+          "maxNormalError": 4.6552717e-07,
+          "rows": 59,
+          "DrawCalls": 6608,
+          "PoseRevision": 8,
+          "SubmittedRevision": 8
+        },
+        {
+          "time": 34.88,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.2830375e-05,
+          "maxNormalError": 2.7028258e-07,
+          "rows": 59,
+          "DrawCalls": 8673,
+          "PoseRevision": 9,
+          "SubmittedRevision": 9
+        }
+      ],
+      "captures": [
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-caf2379851da49bfa14fa61417ffc40e/pose_first_key.png",
+          "sha256": "1187cd7ad6d1006c64b5b3d517717b0744bfbb8616f2040dbc2bf38950cdd758",
+          "coverage": 3641,
+          "engine_frame": 41230,
+          "wall_seconds": 3.5810253,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-caf2379851da49bfa14fa61417ffc40e/pose_between_keys.png",
+          "sha256": "d2843edb729e6c461b3a0328454ce9f25f3e6376d68b7a789b84307630019b41",
+          "coverage": 3671,
+          "engine_frame": 41237,
+          "wall_seconds": 4.4262638,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-caf2379851da49bfa14fa61417ffc40e/pose_middle_key.png",
+          "sha256": "e5a1486ad4b30e0039522161b7e37e52294b7c619c9820033005e13f1102d339",
+          "coverage": 2464,
+          "engine_frame": 41243,
+          "wall_seconds": 5.1534456,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-caf2379851da49bfa14fa61417ffc40e/pose_last_key.png",
+          "sha256": "e35fe26a27875589f5aa3720d37c84bdc02a43292467708a482839cf23d122f5",
+          "coverage": 3140,
+          "engine_frame": 41249,
+          "wall_seconds": 5.9285666,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        }
+      ],
+      "receipt": "Temp/gltf-validation/direct-gpu/BrainStem/draco-public-8fc-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "5ac14449d1716e1001b118d184b85d7e271e006c38dca48a5ce97cc205acc895",
+      "cleanup": "passed"
+    },
+    {
+      "name": "glTF-Draco/compiled",
+      "status": "passed",
+      "phases": [
+        {
+          "time": 0,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 2.3138966e-05,
+          "maxNormalError": 3.071953e-07,
+          "rows": 59,
+          "DrawCalls": 2065,
+          "PoseRevision": 6,
+          "SubmittedRevision": 6
+        },
+        {
+          "time": 0.01333332,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.5864356e-05,
+          "maxNormalError": 2.7028258e-07,
+          "rows": 59,
+          "DrawCalls": 4130,
+          "PoseRevision": 7,
+          "SubmittedRevision": 7
+        },
+        {
+          "time": 17.44,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.4588411e-05,
+          "maxNormalError": 4.6552717e-07,
+          "rows": 59,
+          "DrawCalls": 6195,
+          "PoseRevision": 8,
+          "SubmittedRevision": 8
+        },
+        {
+          "time": 34.88,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.2830375e-05,
+          "maxNormalError": 2.7028258e-07,
+          "rows": 59,
+          "DrawCalls": 8260,
+          "PoseRevision": 9,
+          "SubmittedRevision": 9
+        }
+      ],
+      "captures": [
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-745512f8382c42d5a36ecc16daffa47f/pose_first_key.png",
+          "sha256": "09f7f9869bfdc773e3ded2431b36615458983425957958dd98b3aa22ce4a2a96",
+          "coverage": 3642,
+          "engine_frame": 41268,
+          "wall_seconds": 4.4125968,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-745512f8382c42d5a36ecc16daffa47f/pose_between_keys.png",
+          "sha256": "d2843edb729e6c461b3a0328454ce9f25f3e6376d68b7a789b84307630019b41",
+          "coverage": 3671,
+          "engine_frame": 41274,
+          "wall_seconds": 5.2662722,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-745512f8382c42d5a36ecc16daffa47f/pose_middle_key.png",
+          "sha256": "e5a1486ad4b30e0039522161b7e37e52294b7c619c9820033005e13f1102d339",
+          "coverage": 2464,
+          "engine_frame": 41280,
+          "wall_seconds": 5.9841452,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-745512f8382c42d5a36ecc16daffa47f/pose_last_key.png",
+          "sha256": "e35fe26a27875589f5aa3720d37c84bdc02a43292467708a482839cf23d122f5",
+          "coverage": 3140,
+          "engine_frame": 41286,
+          "wall_seconds": 6.702146,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        }
+      ],
+      "receipt": "Temp/gltf-validation/direct-gpu/BrainStem/draco-public-8fc-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "5ac14449d1716e1001b118d184b85d7e271e006c38dca48a5ce97cc205acc895",
+      "cleanup": "passed"
+    },
+    {
+      "name": "glTF/compiled",
+      "status": "passed",
+      "phases": [
+        {
+          "time": 0,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 2.3165896e-05,
+          "maxNormalError": 2.8115454e-07,
+          "rows": 59,
+          "DrawCalls": 1888,
+          "PoseRevision": 6,
+          "SubmittedRevision": 6
+        },
+        {
+          "time": 0.01333332,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.6022455e-05,
+          "maxNormalError": 1.9768625e-07,
+          "rows": 59,
+          "DrawCalls": 3953,
+          "PoseRevision": 7,
+          "SubmittedRevision": 7
+        },
+        {
+          "time": 17.44,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.7059845e-05,
+          "maxNormalError": 3.5262585e-07,
+          "rows": 59,
+          "DrawCalls": 6018,
+          "PoseRevision": 8,
+          "SubmittedRevision": 8
+        },
+        {
+          "time": 34.88,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.3015121e-05,
+          "maxNormalError": 2.6656008e-07,
+          "rows": 59,
+          "DrawCalls": 8083,
+          "PoseRevision": 9,
+          "SubmittedRevision": 9
+        }
+      ],
+      "captures": [
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-93c1f0a6eed748d0a5bf19891ac374f6/pose_first_key.png",
+          "sha256": "3538e54d076213993158e674b6871226c121b08dc24063e29dd13190f5d5b1da",
+          "coverage": 3639,
+          "engine_frame": 41316,
+          "wall_seconds": 3.7181083,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-93c1f0a6eed748d0a5bf19891ac374f6/pose_between_keys.png",
+          "sha256": "b6035a7166d800a548b5e9629ad52ec7e8bbf3ee9e97e0768aa82ea350e76e58",
+          "coverage": 3673,
+          "engine_frame": 41323,
+          "wall_seconds": 4.5265742,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-93c1f0a6eed748d0a5bf19891ac374f6/pose_middle_key.png",
+          "sha256": "e13668de21bf6cbf95afe7db36b6a207d8ca40f9efd933f80f10c6fa2550c4b3",
+          "coverage": 2469,
+          "engine_frame": 41329,
+          "wall_seconds": 5.2375088,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-93c1f0a6eed748d0a5bf19891ac374f6/pose_last_key.png",
+          "sha256": "ebe9ab779103809e40e7525d1c4f60153acc2abbdcfffb399c9e99c284d9ba89",
+          "coverage": 3142,
+          "engine_frame": 41335,
+          "wall_seconds": 5.9386445,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        }
+      ],
+      "receipt": "Temp/gltf-validation/direct-gpu/BrainStem/core-public-rest-8fc-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "dca71f2e49a8adbf90f93c9b76dbcab6b7e1a7801224ebd5c53a8d3074d662c4",
+      "cleanup": "passed"
+    },
+    {
+      "name": "glTF-Embedded/source",
+      "status": "passed",
+      "phases": [
+        {
+          "time": 0,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 2.3165896e-05,
+          "maxNormalError": 2.8115454e-07,
+          "rows": 59,
+          "DrawCalls": 2065,
+          "PoseRevision": 6,
+          "SubmittedRevision": 6
+        },
+        {
+          "time": 0.01333332,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.6022455e-05,
+          "maxNormalError": 1.9768625e-07,
+          "rows": 59,
+          "DrawCalls": 4130,
+          "PoseRevision": 7,
+          "SubmittedRevision": 7
+        },
+        {
+          "time": 17.44,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.7059845e-05,
+          "maxNormalError": 3.5262585e-07,
+          "rows": 59,
+          "DrawCalls": 6195,
+          "PoseRevision": 8,
+          "SubmittedRevision": 8
+        },
+        {
+          "time": 34.88,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.3015121e-05,
+          "maxNormalError": 2.6656008e-07,
+          "rows": 59,
+          "DrawCalls": 8260,
+          "PoseRevision": 9,
+          "SubmittedRevision": 9
+        }
+      ],
+      "captures": [
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-e79e5dd5aab04071a009f8246eb278c7/pose_first_key.png",
+          "sha256": "c9b2f5076becbc22f28869eeb33fc4916aa97f0b57047655fd9c1012fd724942",
+          "coverage": 3640,
+          "engine_frame": 41354,
+          "wall_seconds": 4.2879134,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-e79e5dd5aab04071a009f8246eb278c7/pose_between_keys.png",
+          "sha256": "b6035a7166d800a548b5e9629ad52ec7e8bbf3ee9e97e0768aa82ea350e76e58",
+          "coverage": 3673,
+          "engine_frame": 41360,
+          "wall_seconds": 5.1070616,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-e79e5dd5aab04071a009f8246eb278c7/pose_middle_key.png",
+          "sha256": "e13668de21bf6cbf95afe7db36b6a207d8ca40f9efd933f80f10c6fa2550c4b3",
+          "coverage": 2469,
+          "engine_frame": 41366,
+          "wall_seconds": 5.9000247,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-e79e5dd5aab04071a009f8246eb278c7/pose_last_key.png",
+          "sha256": "ebe9ab779103809e40e7525d1c4f60153acc2abbdcfffb399c9e99c284d9ba89",
+          "coverage": 3142,
+          "engine_frame": 41372,
+          "wall_seconds": 6.6015164,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        }
+      ],
+      "receipt": "Temp/gltf-validation/direct-gpu/BrainStem/core-public-rest-8fc-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "dca71f2e49a8adbf90f93c9b76dbcab6b7e1a7801224ebd5c53a8d3074d662c4",
+      "cleanup": "passed"
+    },
+    {
+      "name": "glTF-Embedded/compiled",
+      "status": "passed",
+      "phases": [
+        {
+          "time": 0,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 2.3165896e-05,
+          "maxNormalError": 2.8115454e-07,
+          "rows": 59,
+          "DrawCalls": 2065,
+          "PoseRevision": 6,
+          "SubmittedRevision": 6
+        },
+        {
+          "time": 0.01333332,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.6022455e-05,
+          "maxNormalError": 1.9768625e-07,
+          "rows": 59,
+          "DrawCalls": 4130,
+          "PoseRevision": 7,
+          "SubmittedRevision": 7
+        },
+        {
+          "time": 17.44,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.7059845e-05,
+          "maxNormalError": 3.5262585e-07,
+          "rows": 59,
+          "DrawCalls": 6195,
+          "PoseRevision": 8,
+          "SubmittedRevision": 8
+        },
+        {
+          "time": 34.88,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.3015121e-05,
+          "maxNormalError": 2.6656008e-07,
+          "rows": 59,
+          "DrawCalls": 8260,
+          "PoseRevision": 9,
+          "SubmittedRevision": 9
+        }
+      ],
+      "captures": [
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-47bebad1bcd348c4a6bb5c1fe79a6e36/pose_first_key.png",
+          "sha256": "c9b2f5076becbc22f28869eeb33fc4916aa97f0b57047655fd9c1012fd724942",
+          "coverage": 3640,
+          "engine_frame": 41391,
+          "wall_seconds": 4.1446548,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-47bebad1bcd348c4a6bb5c1fe79a6e36/pose_between_keys.png",
+          "sha256": "b6035a7166d800a548b5e9629ad52ec7e8bbf3ee9e97e0768aa82ea350e76e58",
+          "coverage": 3673,
+          "engine_frame": 41397,
+          "wall_seconds": 4.9581689,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-47bebad1bcd348c4a6bb5c1fe79a6e36/pose_middle_key.png",
+          "sha256": "e13668de21bf6cbf95afe7db36b6a207d8ca40f9efd933f80f10c6fa2550c4b3",
+          "coverage": 2469,
+          "engine_frame": 41403,
+          "wall_seconds": 5.6612492,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-47bebad1bcd348c4a6bb5c1fe79a6e36/pose_last_key.png",
+          "sha256": "ebe9ab779103809e40e7525d1c4f60153acc2abbdcfffb399c9e99c284d9ba89",
+          "coverage": 3142,
+          "engine_frame": 41409,
+          "wall_seconds": 6.3717179,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        }
+      ],
+      "receipt": "Temp/gltf-validation/direct-gpu/BrainStem/core-public-rest-8fc-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "dca71f2e49a8adbf90f93c9b76dbcab6b7e1a7801224ebd5c53a8d3074d662c4",
+      "cleanup": "passed"
+    },
+    {
+      "name": "glTF-Binary/source",
+      "status": "passed",
+      "phases": [
+        {
+          "time": 0,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 2.3165896e-05,
+          "maxNormalError": 2.8115454e-07,
+          "rows": 59,
+          "DrawCalls": 2065,
+          "PoseRevision": 6,
+          "SubmittedRevision": 6
+        },
+        {
+          "time": 0.01333332,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.6022455e-05,
+          "maxNormalError": 1.9768625e-07,
+          "rows": 59,
+          "DrawCalls": 4130,
+          "PoseRevision": 7,
+          "SubmittedRevision": 7
+        },
+        {
+          "time": 17.44,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.7059845e-05,
+          "maxNormalError": 3.5262585e-07,
+          "rows": 59,
+          "DrawCalls": 6195,
+          "PoseRevision": 8,
+          "SubmittedRevision": 8
+        },
+        {
+          "time": 34.88,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.3015121e-05,
+          "maxNormalError": 2.6656008e-07,
+          "rows": 59,
+          "DrawCalls": 8083,
+          "PoseRevision": 9,
+          "SubmittedRevision": 9
+        }
+      ],
+      "captures": [
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-e0e98652b0514ea3ae5e6a2099e42604/pose_first_key.png",
+          "sha256": "c9b2f5076becbc22f28869eeb33fc4916aa97f0b57047655fd9c1012fd724942",
+          "coverage": 3640,
+          "engine_frame": 41428,
+          "wall_seconds": 4.2739474,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-e0e98652b0514ea3ae5e6a2099e42604/pose_between_keys.png",
+          "sha256": "b6035a7166d800a548b5e9629ad52ec7e8bbf3ee9e97e0768aa82ea350e76e58",
+          "coverage": 3673,
+          "engine_frame": 41434,
+          "wall_seconds": 5.0823823,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-e0e98652b0514ea3ae5e6a2099e42604/pose_middle_key.png",
+          "sha256": "e13668de21bf6cbf95afe7db36b6a207d8ca40f9efd933f80f10c6fa2550c4b3",
+          "coverage": 2469,
+          "engine_frame": 41440,
+          "wall_seconds": 5.8831529,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-e0e98652b0514ea3ae5e6a2099e42604/pose_last_key.png",
+          "sha256": "f06e1bda1c08d0689c7792fcec62201052ba49654c929be90bc3da6784da8578",
+          "coverage": 3142,
+          "engine_frame": 41446,
+          "wall_seconds": 6.4837548,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        }
+      ],
+      "receipt": "Temp/gltf-validation/direct-gpu/BrainStem/core-public-rest-8fc-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "dca71f2e49a8adbf90f93c9b76dbcab6b7e1a7801224ebd5c53a8d3074d662c4",
+      "cleanup": "passed"
+    },
+    {
+      "name": "glTF-Binary/compiled",
+      "status": "passed",
+      "phases": [
+        {
+          "time": 0,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 2.3165896e-05,
+          "maxNormalError": 2.8115454e-07,
+          "rows": 59,
+          "DrawCalls": 2065,
+          "PoseRevision": 6,
+          "SubmittedRevision": 6
+        },
+        {
+          "time": 0.01333332,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.6022455e-05,
+          "maxNormalError": 1.9768625e-07,
+          "rows": 59,
+          "DrawCalls": 4130,
+          "PoseRevision": 7,
+          "SubmittedRevision": 7
+        },
+        {
+          "time": 17.44,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.7059845e-05,
+          "maxNormalError": 3.5262585e-07,
+          "rows": 59,
+          "DrawCalls": 6195,
+          "PoseRevision": 8,
+          "SubmittedRevision": 8
+        },
+        {
+          "time": 34.88,
+          "checkedVertices": 177,
+          "maxPositionErrorInches": 1.3015121e-05,
+          "maxNormalError": 2.6656008e-07,
+          "rows": 59,
+          "DrawCalls": 8260,
+          "PoseRevision": 9,
+          "SubmittedRevision": 9
+        }
+      ],
+      "captures": [
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-ed3d0422997e4fc3b6159b0b0bda8634/pose_first_key.png",
+          "sha256": "c9b2f5076becbc22f28869eeb33fc4916aa97f0b57047655fd9c1012fd724942",
+          "coverage": 3640,
+          "engine_frame": 41465,
+          "wall_seconds": 4.1301594,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-ed3d0422997e4fc3b6159b0b0bda8634/pose_between_keys.png",
+          "sha256": "b6035a7166d800a548b5e9629ad52ec7e8bbf3ee9e97e0768aa82ea350e76e58",
+          "coverage": 3673,
+          "engine_frame": 41471,
+          "wall_seconds": 4.938306,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-ed3d0422997e4fc3b6159b0b0bda8634/pose_middle_key.png",
+          "sha256": "e13668de21bf6cbf95afe7db36b6a207d8ca40f9efd933f80f10c6fa2550c4b3",
+          "coverage": 2469,
+          "engine_frame": 41477,
+          "wall_seconds": 5.7429617,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        },
+        {
+          "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-ed3d0422997e4fc3b6159b0b0bda8634/pose_last_key.png",
+          "sha256": "ebe9ab779103809e40e7525d1c4f60153acc2abbdcfffb399c9e99c284d9ba89",
+          "coverage": 3142,
+          "engine_frame": 41483,
+          "wall_seconds": 6.4562498,
+          "camera": {
+            "position": "149.1369,92.5004,78.5178",
+            "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+            "custom_size": "192,192",
+            "scene_size": "192,192",
+            "viewport": "0,0,1,1",
+            "debug_mode": "Normal",
+            "EnablePostProcessing": true,
+            "Orthographic": true,
+            "OrthographicHeight": 125,
+            "ZNear": 1,
+            "ZFar": 1000,
+            "point_light_position": "200,-30,60",
+            "point_light_radius": 1000,
+            "point_light_color": "4.00, 4.00, 4.00, 1.00"
+          }
+        }
+      ],
+      "receipt": "Temp/gltf-validation/direct-gpu/BrainStem/core-public-rest-8fc-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "dca71f2e49a8adbf90f93c9b76dbcab6b7e1a7801224ebd5c53a8d3074d662c4",
+      "cleanup": "passed"
+    }
+  ],
+  "receipts": [
+    {
+      "name": "core-first",
+      "path": "Temp/gltf-validation/direct-gpu/BrainStem/core-first/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "48beb26a352cf1c69ec90eaf51eb1738d026147fb1b41c6271bd49c3fe090c39",
+      "passed": 6,
+      "failed": 0,
+      "incomplete": 0
+    },
+    {
+      "name": "public-source-first",
+      "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-source-first/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "675dfbf033d8cbe02b7e6cba0dd668aa32608b7da2c2de0a7e82a780452d1b4d",
+      "passed": 1,
+      "failed": 0,
+      "incomplete": 0
+    },
+    {
+      "name": "meshopt-data-8fc-run",
+      "path": "Temp/gltf-validation/direct-gpu/BrainStem/meshopt-data-8fc-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "d9cee9cc0fab517f616c9ef3bd2d42f7c8dbf7bf62a508609f860d6b173bcf92",
+      "passed": 4,
+      "failed": 0,
+      "incomplete": 0
+    },
+    {
+      "name": "meshopt-public-8fc-run",
+      "path": "Temp/gltf-validation/direct-gpu/BrainStem/meshopt-public-8fc-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "73bd9af21387d32a3c38f1bb7b1210713e90d99ef31dd901b8f690624be36a4b",
+      "passed": 4,
+      "failed": 0,
+      "incomplete": 0
+    },
+    {
+      "name": "draco-public-8fc-run",
+      "path": "Temp/gltf-validation/direct-gpu/BrainStem/draco-public-8fc-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "5ac14449d1716e1001b118d184b85d7e271e006c38dca48a5ce97cc205acc895",
+      "passed": 2,
+      "failed": 0,
+      "incomplete": 0
+    },
+    {
+      "name": "core-public-rest-8fc-run",
+      "path": "Temp/gltf-validation/direct-gpu/BrainStem/core-public-rest-8fc-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "dca71f2e49a8adbf90f93c9b76dbcab6b7e1a7801224ebd5c53a8d3074d662c4",
+      "passed": 5,
+      "failed": 0,
+      "incomplete": 0
+    },
+    {
+      "name": "cadence-8fc-run",
+      "path": "Temp/gltf-validation/direct-gpu/BrainStem/cadence-8fc-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "7e681ff292e7c1394c951db38c15f92b3b702981940a31e07e3c955e337e4978",
+      "passed": 1,
+      "failed": 0,
+      "incomplete": 0
+    }
+  ],
+  "reference": {
+    "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/BrainStem/screenshot/screenshot.gif",
+    "sha256": "656ac798fcb1fba84f1911f4dff1688173b367c202c028ab16839399101781bc",
+    "purpose": "Articulated robot animation and hierarchical skinning; reference for human review, camera and lighting unknown.",
+    "license": "Poser EULA; Keith Hunter, Smith Micro Software, Inc., 2017; see Models/BrainStem/LICENSE.md and LICENSES/LicenseRef-Poser-EULA.txt before publishing.",
+    "dimensions": [
+      130,
+      130
+    ],
+    "frames": 392,
+    "duration_seconds": 40.1
+  },
+  "animation_preview": {
+    "path": "Temp/gltf-validation/direct-gpu/BrainStem/brainstem-source-wallclock.apng",
+    "sha256": "8b58f91c201dc8c6e3806bdb1b46d09c1308638032dcd45ea4e2aa1b0e478dfe",
+    "format": "APNG",
+    "source_form": "glTF/source",
+    "captured_frames": 61,
+    "encoded_frames": 62,
+    "elapsed_seconds": 36.5498121,
+    "source_duration_seconds": 34.880001068115234,
+    "actual_widget_callbacks": 366,
+    "max_callback_gap_seconds": 0.1123886,
+    "capture_interval_mean_seconds": 0.599994795,
+    "loops_observed": 1,
+    "scope": "Actual public source playback driven from monotonic callback gaps; sparse screenshots captured at observed times and encoded with timestamp quantization, final frame duplicated. This is not proof of source-reference visual cadence.",
+    "publication_policy": "Diagnostic sparse capture only; do not present as a smooth or frame-rate-matched comparison."
+  },
+  "limits": [
+    "Numerical GPU checks sample three source vertices per primitive at four phases, and full index connectivity; they do not prove all vertices or exact raster winding.",
+    "Draco uses separate official JS/WASM decoder with shared codec ancestry; meshopt uses the same native codec as producer. Pose arithmetic is separately implemented.",
+    "Camera is a 192px orthographic inferred view with a framework point and directional light, not the upstream unknown camera/light/exposure. User visual approval remains pending.",
+    "Real-time preview covers only the glTF source form, 61 sparse captures over one observed loop; no performance target or dense reference-cadence claim.",
+    "Compiled fixture bytes were generated and loaded but not separately hashed in the public receipt.",
+    "The historic SIGSEGV did not recur in these cases; its root cause remains unknown.",
+    "Windows, editor parity, full material conformance and performance remain untested."
+  ],
+  "still_comparison": {
+    "actual": {
+      "path": "Temp/gltf-validation/direct-gpu/BrainStem/public-b7c5145fc64d46f18685cfb9aafb9a7a/pose_first_key.png",
+      "sha256": "3538e54d076213993158e674b6871226c121b08dc24063e29dd13190f5d5b1da",
+      "coverage": 3639,
+      "engine_frame": 36372,
+      "wall_seconds": 3.3142013,
+      "camera": {
+        "position": "149.1369,92.5004,78.5178",
+        "rotation": "-0.11227,-0.0322,0.95467,-0.2738",
+        "custom_size": "192,192",
+        "scene_size": "192,192",
+        "viewport": "0,0,1,1",
+        "debug_mode": "Normal",
+        "EnablePostProcessing": true,
+        "Orthographic": true,
+        "OrthographicHeight": 125,
+        "ZNear": 1,
+        "ZFar": 1000,
+        "point_light_position": "200,-30,60",
+        "point_light_radius": 1000,
+        "point_light_color": "4.00, 4.00, 4.00, 1.00"
+      }
+    },
+    "reference": {
+      "path": "Temp/gltf-validation/direct-gpu/BrainStem/reference-first-frame.png",
+      "sha256": "b4cf208eeca8607d183c5aff978fa1462420e6f39577c08a2ddc1487e919df38",
+      "source_gif_frame_index": 0,
+      "source_gif_time_seconds": 0
+    },
+    "actual_sequence_time_seconds": 0,
+    "purpose": "Review articulated robot source material and silhouette; upstream GIF is context, not a matched pixel or pose oracle.",
+    "limits": "The GIF first frame animation phase is unknown, and camera, lighting and exposure are inferred; pose correspondence is not established."
+  },
+  "deterministic_preview": {
+    "path": "Temp/gltf-validation/direct-gpu/BrainStem/brainstem-source-deterministic.apng",
+    "sha256": "27cc1336bd50303af4b1b75197ce5c78250635a7ec5dbdf192998a7f3ab0fff3",
+    "receipt": "Temp/gltf-validation/direct-gpu/BrainStem/dense-8fc-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "receipt_sha256": "9f30197f9c92c1cad1f7f53b3aab375c2fa965b95ef03f4352557466dc96329e",
+    "source_form": "glTF/source",
+    "frames": 61,
+    "distinct_source_capture_hashes": 61,
+    "source_times_seconds": [
+      0,
+      6
+    ],
+    "sample_interval_seconds": 0.1,
+    "encoded_frame_rate": 10,
+    "purpose": "Six-second actual public Model.Load and SkinnedModelRenderer source-material preview; each frame was independently rendered after a deterministic time seek. Not evidence of real-time playback or a matched upstream reference phase.",
+    "camera_limit": "192px orthographic inferred camera, framework point light and directional light; upstream camera and exposure unknown."
+  }
+}

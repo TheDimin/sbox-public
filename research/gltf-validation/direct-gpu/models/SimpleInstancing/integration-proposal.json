@@ -1,0 +1,43 @@
+{
+  "status": "Renderer patch applied by /root/gpu_fox after producer hold release; compiled/runtime verification pending. Separate loader capability patch remains unapplied.",
+  "owner_applies": "/root/gpu_fox after coordinator freeze release and review",
+  "base_files": [
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs",
+      "sha256": "fed35e793c2aacd7f0180b91128d0067892488231f8c5bfc5fd050575519966e"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuRig.cs",
+      "sha256": "3b45539fca837e3f670e2dc2e0cd32c3a50fade1d53f9eb94fa2fc21b78985ff"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfModelLoader.cs",
+      "sha256": "ce4a8af7ef9a6a65b57c4bcf669b21fe81d7ce7d4b2afebf4f08e4008640106d"
+    }
+  ],
+  "patch_sha256": "7644df237a23d133046beb1d8bd40b2e6dd7501956cc09a449b86b4fefb9e345",
+  "requires_new_combined_engine_stage": true,
+  "tests_authored_first": [
+    "SimpleInstancingExpansionTests29",
+    "SimpleInstancingBackendTests12",
+    "SimpleInstancingGpuChecks11",
+    "SimpleInstancingGpuProbe20actualmeasurements"
+  ],
+  "limits": [
+    "Unskinned selected instancing is expanded toCPUdrawrows sharingoneimmutableprimitive/baseRig. No hardwareinstancing/performanceclaim.",
+    "Skin+EXT is not forbidden by baseline8e798b02 or extensionpin9d23a5a5. It is valid-but-unimplemented here: explicitly tracked required acceptance remains FAILED/PENDING, never excluded or passed merely because rejection is clear.",
+    "Original source descriptor provenance remainsCPUmetadata; GPU receivescomputedaffinepalette, notrawinstanceattribute streams.",
+    "Separate loader capability patch applies only after coherent renderer stage and actual125-row/GPUprobe proof. Unsupported optional fallback/capability rejection tests remain separate evidence."
+  ],
+  "capability_patch_sha256": "62e067dafe6ec2cddde580ffc2007f90a42a4c7e251a20e658bcd043d0c3d24a",
+  "review_revisions": [
+    "InstanceTransform validates finite affine local override with existing RequireAffine.",
+    "Loader promotion removed from main renderer patch: separate instancing-capability.patch is held until actual post-stage125-row+GPUprobe acceptance.",
+    "Skin+EXT not forbidden in either audited extension revision. Rejection is a temporary valid-feature implementation failure, never a permanent exclusion or acceptance pass."
+  ],
+  "applied_renderer_source": {
+    "backend_sha256": "73d226273c6e6d63344cbb02710143fcc265479981ae50305474952daa491d1b",
+    "rig_sha256": "8e1cc351f5563d626d3464370b3a96bda4dc07cfef79479acfd1c0abfeed2de3",
+    "scope": "source identity reported by applying owner; not loaded-producer evidence"
+  }
+}

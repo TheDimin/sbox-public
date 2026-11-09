@@ -1,0 +1,9 @@
+{
+  "SurfaceManifestPath": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/stage485-source-orm-generation-586e462680064571a96c284861c591d5/generation.json",
+  "SurfaceManifestSha256": "47fc2227dd3cbf0afe88b3aabdf11cc81acef642d0548e225bc3d6bbf807af3d",
+  "SurfaceSourceSha256": "6648ccfa4486ef7ad79add3157661398ef7bb3f94e65a6403970ca33dae6bf45",
+  "ReferenceManifestPath": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/stage485-literal-unlit-generation-7f30b1ca92904906ba18e7893e4e5b1c/generation.json",
+  "ReferenceManifestSha256": "f8afe8ba7bb00cc7c0e635053f9eadb912cec92e47bbe872b6595df6b241e8a8",
+  "ReferenceSourceSha256": "bf7fb12b62ed825c71e5ae1f7b88ed97dd6f52d587c73c9b6123be563ecd96c8",
+  "OutputDirectory": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/stage485-source-emission-proof-a7d007ba82714d149a89351113160960"
+}

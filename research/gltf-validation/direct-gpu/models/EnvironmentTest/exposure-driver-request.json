@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "runLabel": "fixed-exposure-shared-branch-negative-ev",
+  "candidatePath": "/tmp/gltf-native-exposure-candidate.csx",
+  "candidateSha256": "ad5e4bed6108e4511f5ba42989a8f2b3dc4d5a4134c188af0930a3cb5976dd71",
+  "sharedBasePath": "research/gltf-validation/editor_corpus.csx",
+  "sharedBaseSha256": "cb7e42fc5bcc3f20f2fdedb1cf77618a96fb2d1222499a18fa70a241654f6396",
+  "sourcePath": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/EnvironmentTest/field-exposure-plane.gltf",
+  "sourceSha256": "9adda3a3cbe59eb1fab39571c6c0db56a3a254386ce6a19d7a9978bb16e98dbb",
+  "expectedCases": 2,
+  "cases": [
+    {
+      "label": "base2_ev0",
+      "baseExposure": 2,
+      "ev": 0,
+      "literalExpectedScalar": 2
+    },
+    {
+      "label": "base2_evMinus2",
+      "baseExposure": 2,
+      "ev": -2,
+      "literalExpectedScalar": 0.5
+    }
+  ],
+  "producers": {
+    "Sandbox.Engine": {
+      "sha256": "60bc2b51bbd70c40a000f8b29f420714aff4e3dbda723794b18fdfc43b571396",
+      "mvid": "e66560df-8eba-4c30-998a-a0296a91e4af"
+    },
+    "Sandbox.Gltf": {
+      "sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+      "mvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0"
+    },
+    "Sandbox.SceneRenderer": {
+      "sha256": "b5c8196be0f3c6bcca5cbae5f11e3ec4d3013fde98afffec99cd0e68fd11e7a1",
+      "mvid": "c22b305b-109d-4166-a212-a7d4bc301e40"
+    },
+    "Sandbox.Tools": {
+      "sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+      "mvid": "50c531e4-8369-4849-a4b6-dd939a8f8e16"
+    }
+  },
+  "scope": "Exact isolated shared-driver candidate branch, two single-frame captures of one synthetic emissive plane. Nonunit base and negative EV literal scalar controls; no model recaptures or photometric equivalence."
+}

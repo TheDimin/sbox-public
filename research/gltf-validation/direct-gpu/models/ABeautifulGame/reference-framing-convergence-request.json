@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "engine_sha256": "e05cc4da9851ad2c3306e16ef3af317c8b398516dd6f8bf2bcd902687b5f7215",
+  "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/ABeautifulGame/ReferenceFramingConvergenceTests.cs",
+      "sha256": "5341638324128f3ad58594fa303e82af439dc1eb35a439e0fe992e00425e7065"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.ABeautifulGameValidation.ReferenceFramingConvergenceTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout",
+            "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/ABeautifulGame/reference-env-config.json"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ]
+}

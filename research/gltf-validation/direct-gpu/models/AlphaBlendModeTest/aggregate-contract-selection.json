@@ -1,0 +1,194 @@
+{
+  "version": 1,
+  "engine_sha256": "e05cc4da9851ad2c3306e16ef3af317c8b398516dd6f8bf2bcd902687b5f7215",
+  "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaManualDispatchTests.cs",
+      "sha256": "73689886abbde75c52f2583ba0563fc0b68af6248f1f7e026e623e305fd706c5"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaNativeCallbackContractTests.cs",
+      "sha256": "285474eacb51ab1d32d2a1c72a351d8900a8bd6c2ad2e474bfe915208b8e4963"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaNativeVmdlMutationTests.cs",
+      "sha256": "1685ceef8bc9ea95f770b1a8c359a0bd62e7c2f8ad8e2ddf143db3b76f308c29"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraReaderTests.cs",
+      "sha256": "42e891f939d80fe7512b295d8124193c80ae2731baa5f59dba5ec4873e291984"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraCapture.cs",
+      "sha256": "3494b025558b9b97bae17fe3ccd20ae0390c6bab971f368e629745a1984e2edc"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraNativeFlipTests.cs",
+      "sha256": "f6ad322a1b594a5680331a8372957361ebd0e7477555953576d8873ec4c101b2"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/CombinedDrawAttributeTests.cs",
+      "sha256": "54d6f5b90d173d3bfecbd6fb4d407d47800efca1dddf14a726ace025d4da2cac"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MeshPrimitiveModesReference.cs",
+      "sha256": "19fad7a82bc48f0a6a393edbe2fcf7f9e7a7bfea5da33ed9e823dc52ef982639"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/PointLineAlphaTests.cs",
+      "sha256": "820644309bb1b2b26c923c0be062c5e3e47e7347ccd1941421cf9ea95a714786"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MixedSlotPublicTests.cs",
+      "sha256": "0b8ed6fd19d0125de0e1fbb3b3a7a96e5c1bae40612c3b9fb1e54daa1cd398db"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/SharedSlotMutationBaseline.cs",
+      "sha256": "44752abde684908159f34da6d633525aae0665e4964d7dad09bef47ddf50d97a"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/CombinedTransmissionTests.cs",
+      "sha256": "b52e0738d74b9afdc7f8aee19a3dd20e4e2b00b50f3dafb65131f3df15f929d1"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/ValidSharedUvProjectionTests.cs",
+      "sha256": "36846d20ac2ac5d08b59548c2d8ac4d86453860290e95554ff4fcbe794cfb7ae"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/PointLightIntensityTest/PointPhotometryTests.cs",
+      "sha256": "40015bdfd18a2e0bafe00785ab8f177992056b3781fddd490f1203894d09d43a"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/PointLightIntensityTest/PointPublicFallbackTests.cs",
+      "sha256": "f2ab3d1340b9e347cdc83878fe42b688fe4448c69e6663ec03c344dea121d0a7"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaManualDispatchTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "OutputDirectory",
+          "arguments": [
+            "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/alpha-native-contract-AlphaManualDispatchTests-01"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaNativeCallbackContractTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "OutputDirectory",
+          "arguments": [
+            "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/alpha-native-contract-AlphaNativeCallbackContractTests-01"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaNativeVmdlMutationTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "OutputDirectory",
+          "arguments": [
+            "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/alpha-native-contract-AlphaNativeVmdlMutationTests-01"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.CamerasValidation.CameraNativeFlipTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MeshPrimitiveModesValidation.SharedSlotMutationBaseline",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.PointLightIntensityValidation.PointPhotometryTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "model": "DirectionalLight",
+  "status": "blocked_public_required_extension_and_unmeasured_photometry",
+  "corpus_revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "inputs": {
+    "glTF/DirectionalLight.gltf": "71fbfe89e98201b70f5de027604d3745be41e900b8cb03ccfd446c3896c6b559",
+    "glTF/DirectionalLight.bin": "43aea71c4cbe518a9aa34e04ea2acd0b779c189213aee70cec3d80d1a8e72741",
+    "glTF-Binary/DirectionalLight.glb": "82e50feb151203f431a3b43985e9f4b2a54131b61a7a8677954922630d90f3de"
+  },
+  "reference": {
+    "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/DirectionalLight/screenshot/screenshot.png",
+    "sha256": "bb27bdea1ce7bdc0c23f3de775ae6ebca7422e06637b04e1298db90396f9459d",
+    "purpose": "BRDF energy and light hue reference; source camera and presentation not a pixel parity oracle"
+  },
+  "forms": [
+    "glTF source",
+    "glTF derived glb_c",
+    "glTF-Binary source",
+    "glTF-Binary derived glb_c"
+  ],
+  "producer": {
+    "engine_mvid": "b5b66ab1-06f5-4aee-b816-92b6b197666e",
+    "gltf_mvid": "88f89cfc-81b4-4744-9888-ec746058a6de"
+  },
+  "tests": [
+    {
+      "purpose": "literal selected directional plan, then public Model.Load",
+      "cases": 4,
+      "passed": 0,
+      "failed": 4,
+      "detail": "Each plan assertion passed before public load rejected required KHR_lights_punctual.",
+      "receipt": "Temp/gltf-validation/direct-gpu/model-tests/816cc8226e7444439be9a013d1fb91e0/receipt.json",
+      "sha256": "2ed7c17ef98ad91f28b1845a6f2e4c87d6d42f5469387da1ff2d56ca246931e5"
+    },
+    {
+      "purpose": "actual native directional packed color, direction, zero and deletion control",
+      "cases": 1,
+      "passed": 1,
+      "failed": 0,
+      "receipt": "Temp/gltf-validation/direct-gpu/model-tests/f6fa61a81af94665a1c77999e0251991/receipt.json",
+      "sha256": "ed52fcaff9a9675633374681b56938a65454724c2e7165881bc3ceef1b20d242"
+    },
+    {
+      "purpose": "8fc native factory lifecycle, independent instances, rotation, visibility, disposal and calibration input",
+      "cases": 1,
+      "passed": 1,
+      "failed": 0,
+      "receipt": "Temp/gltf-validation/direct-gpu/model-tests/0c47817c5aa84e188478e56f563cd544/receipt.json",
+      "sha256": "71788c05800f68a0ce1e5259f2aee2954c659c5a3276c4015ede860f436b70de"
+    }
+  ],
+  "captures": [
+    {
+      "path": "Temp/gltf-validation/direct-gpu/DirectionalLight/rendered/9cd554935a224370939a5e95c02e6259/candidate_intensity_1.png",
+      "sha256": "ca196e8ce9eb77699505948528492ec281a14197e257e5fd9cb597391db672b9",
+      "purpose": "source-material GPU instance and candidate native directional light, 192px postprocessed relative diagnostic; not public or authored-camera match",
+      "user_visual_approval": false
+    }
+  ],
+  "limits": [
+    "No public light realization or lux calibration has passed; three source GPU rows and native directional relative render controls passed in the direct diagnostic.",
+    "Native packing preserves candidate RGB and reverse-facing packed direction; this does not prove emitted direction in a rendered receiver or convert native brightness to lux.",
+    "No source material, BRDF energy, rendered hue, reference appearance or visual approval is claimed.",
+    "No Windows or performance validation."
+  ],
+  "candidate": {
+    "path": "engine/Sandbox.Engine/Resources/Model/Gltf/Lighting/GltfDirectionalLightFactory.cs",
+    "sha256": "17c479eaef32de6e16cb364f9484103bb8599f8f3aea42dc1b02aade4e091d14",
+    "status": "factory built and loaded in 8fc; not wired into public lifecycle; explicit calibration required",
+    "test": "research/gltf-validation/direct-gpu/models/DirectionalLight/DirectionalFactoryTests.cs",
+    "test_sha256": "405ccc23189b80b55e6db94c23cc6f9ab44fe5e76592fe4373fadbb41e70ebdc",
+    "test_status": "8fc native factory lifecycle 1/1 passed"
+  },
+  "scene_selection_candidate": {
+    "path": "engine/Sandbox.Engine/Resources/Model/Gltf/Lighting/GltfPunctualLightPlan.cs",
+    "sha256": "ed47bf1cc793a5e3950803bc8ca6f8d41ef62f4414046678acfd2aaa2ec16881",
+    "status": "included in successfully built stage 00a; not installed or executed",
+    "test": "research/gltf-validation/direct-gpu/models/DirectionalLight/DirectionalSceneSelectionTests.cs"
+  },
+  "binding_candidate": {
+    "path": "engine/Sandbox.Engine/Resources/Model/Gltf/Lighting/GltfDirectionalLightBinding.cs",
+    "sha256": "3f526095b427eb29a7ae04924a7ab9c8dddaff23497dda6b9e58aacacc8759f6",
+    "status": "included in successfully built stage 00a; not installed or public-wired; editor shutdown rejected by automatic approval review",
+    "test": "research/gltf-validation/direct-gpu/models/DirectionalLight/DirectionalBindingTests.cs",
+    "test_sha256": "c9aea0ea87493692c7046b0dd3d13730d9ca7caa018cac4340ef8d321b8ff258",
+    "test_status": "unrun"
+  },
+  "rendered_control": {
+    "test": "research/gltf-validation/direct-gpu/models/DirectionalLight/DirectionalRenderedTests.cs",
+    "test_sha256": "fb7e021548d3966887c135f6cc61d923c33ad5939a5b657be54c473ed29340f9",
+    "status": "8fc passed 1/1",
+    "purpose": "original source-material relative intensity, direction, zero and deletion controls; not public or physical calibration",
+    "receipt": "Temp/gltf-validation/direct-gpu/directional-rendered-8fc-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "receipt_sha256": "0d2d08f3b9a0f8f0ecef19bf254aa2602d8d7e2bb288b91c820f16fee215aa7d",
+    "full_minus_zero_sum": 6520.34912109375,
+    "quarter_minus_zero_sum": 3335.11767578125,
+    "reverse_minus_zero_sum": 0,
+    "removal_max_error": 0
+  },
+  "public_proposal": {
+    "test": "research/gltf-validation/direct-gpu/models/DirectionalLight/DirectionalPublicTests.cs",
+    "sha256": "230dd5fda15a2896dac36a3be7067be32626d27568bcb07731916bd135311e2b",
+    "status": "model-owned patch only, apply-check passed, uncompiled and uninstalled",
+    "cases": 6,
+    "scope": "four forms, independent renderer scale/rotation/disable/deletion, failed preparation and late-application reload rollback, success reload, required point/spot rejection",
+    "patch": "research/gltf-validation/direct-gpu/models/DirectionalLight/public-wiring.patch",
+    "patch_sha256": "7e48f427b0874e42b0844382ce4e87bfe431d597843017d36e038d2052770ecc",
+    "transaction_test": "research/gltf-validation/direct-gpu/models/DirectionalLight/DirectionalTransactionTests.cs",
+    "transaction_test_sha256": "8bb3d5703cf3b7edb0738ce7d87e9fb1a753352d7f05b87fcff75afb41aafb8b",
+    "access_test": "research/gltf-validation/direct-gpu/models/DirectionalLight/DirectionalPublicAccessTests.cs",
+    "access_test_sha256": "5abab0a60bc6dc443df2d9257772dfb4e86e191b0cdb44f552914256371b15e0"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "engine_sha256": "30985d93ff6266240b5666ba8282dcde561ce24613fa89e0b3060db42e0e98d1",
+  "gltf_sha256": "b265e0d75f9c88149266994f04768f07e845c67dabe29e8050449e9409fe82e2",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxVertexColors/BoxVertexColorsBlackDiagnostic.cs",
+      "sha256": "b26f1a3d958e694a363df54d673f859a9f96e68386dbe50640344a868369ca0c"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxVertexColors/BoxVertexColorsGpuChecks.cs",
+      "sha256": "20853fba3c711cf50299705f748598a3ba45e8413dcce9c1c9d04d02b4d2cf40"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxVertexColors/BoxVertexColorsReference.cs",
+      "sha256": "39ec2cc702a60a62b7162c7130032cfe4f86eba2f8dcfbbd5fcb158f422b640f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxVertexColors/BoxVertexColorsImageProbe.cs",
+      "sha256": "ba48fec1b8b59fb76bf9e743c6d1b49aff51067b80bc6b2a8129edbd86b4b579"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxVertexColors/BoxVertexColorsReferenceScene.cs",
+      "sha256": "6a0b0823792a300883b719fbd373a41e9f74ddf3f4508455718d1584a4b7fc52"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.BoxVertexColorsValidation.BoxVertexColorsBlackDiagnostic",
+      "kind": "static_results",
+      "method": "RunRoughness",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 1
+    }
+  ]
+}

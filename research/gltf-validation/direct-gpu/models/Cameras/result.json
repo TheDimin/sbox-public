@@ -1,0 +1,161 @@
+{
+  "model": "Cameras",
+  "chosen_source": "glTF/Cameras.gltf",
+  "canonical_from": "glTF/Cameras.gltf",
+  "omitted_variants": {
+    "glTF-Embedded": "same authored scene and camera definitions; shared data URI/container coverage owns encoding; omitted form is not a new pass"
+  },
+  "pinned_commit": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "source_sha256": "5ca6b0ebf70411edd8a11427adeff23b1a2211ea7145f0964a95ac6573df9abc",
+  "buffer_sha256": "2d73fc484aab11784e8773862e69b28cb7e0d7d1aadac6032ceea7c490cfd15e",
+  "canonical_sha256": "394014a27ad1463637e7a4f375ea996ec76ea6ab5de98a1d328d2d07336625a2",
+  "license": {
+    "asset": "CC0-1.0",
+    "author": "Marco Hutter",
+    "upstream_license": "Temp/gltf-reference/glTF-Sample-Assets/Models/Cameras/LICENSE.md"
+  },
+  "reader": {
+    "passed": 13,
+    "failed": 0,
+    "receipt": "Temp/gltf-validation/direct-gpu/cameras-native-api-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "receipt_sha256": "360f416ecbd74c4ae2c56e2d96ca667cfd12a47ca8ce01b920307d2c0ad7656e",
+    "scope": "Reader metadata and literal accessor values, validity, invalid parameter and wrong-oracle controls. Mixed receipt native case is failed."
+  },
+  "reader_revalidation": {
+    "passed": 13,
+    "failed": 0,
+    "gltf_mvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+    "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+    "receipt": "Temp/gltf-validation/cameras-isolated-xsyDUzPf/reader-check/receipt.json",
+    "receipt_sha256": "9f2d3cf000dc99ca4e329eccab743586bb1ae25e2c9059a911e16ce780e28c7f",
+    "scope": "Standalone reflection invocation of the 13 frozen reader cases against the e3add archived producer. The regenerated canonical GLB bytes match the prior SHA-256."
+  },
+  "isolated_frustum_math": {
+    "passed": 2,
+    "failed": 0,
+    "system_mvid": "c7009e42-0094-490e-8402-ff3e47f10b90",
+    "system_sha256": "7edc4fa120ced9a9d1853b3831d94cc6a44e953077f2bd29dcdee087bcef485d",
+    "receipt": "Temp/gltf-validation/cameras-isolated-xsyDUzPf/frustum-check/isolated/receipt.json",
+    "receipt_sha256": "f7a80092756e1ccef563a4bc390b3a07120b571040993e580dbcdbd221f49d29",
+    "baseline_receipt": "Temp/gltf-validation/cameras-isolated-xsyDUzPf/frustum-check/baseline/receipt.json",
+    "baseline_receipt_sha256": "e4d1bf4ba9f3d259fdaab26275a5f576fb4b4df81984bc92fb71e24f87948c9d",
+    "scope": "Identical finite and infinite Frustum.FromCorners tests executed against candidate and e3add System assemblies. The baseline fails only infinite. Standalone math, separate from component/native execution."
+  },
+  "native_plain_infinite_far": {
+    "passed": false,
+    "finite_source_coverage": 4670,
+    "infinite_coverage": 0,
+    "finite_projection_queries": true,
+    "receipt": "Temp/gltf-validation/direct-gpu/cameras-native-api-02/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "receipt_sha256": "4ddf1a190d00db2f72e0d2323e5a97d0bbb35cfc392b8ddab2d523f5bdfccca3"
+  },
+  "integration": {
+    "implemented": "Coherent eight-target camera candidate built in isolated System+Engine stage. Original2bb09852 frozen candidate retained with CS0136 failure. Corrected dbce5e41 replacement and corrected22-case test snapshots compile; no install or public integration execution.",
+    "tested": false,
+    "remaining": [
+      "Root review and integration window for current custom-query candidate",
+      "Install coherent System+Engine camera stage and restart with explicit authorization",
+      "Execute 27 cases against the actual loaded producer and distinguish the existing native red replay from public import.",
+      "Source and one canonical public camera comparisons and cleanup",
+      "Human visual approval",
+      "Alternative managedSceneRenderer/VR/Windows and broader authoring/reload remain separate gates"
+    ],
+    "freeze": "research/gltf-validation/direct-gpu/models/Cameras/camera-core-freeze.json",
+    "freeze_sha256": "cc5076fb4bd3ab036a93162cccdf62d9088e15866e48d7e03360dc9b40688657",
+    "expected_new_cases": 22,
+    "known_applicable_core_limits": [
+      "Positive decomposable global camera transforms have two frozen positive tests. Separate transactional tests cover reflected and sheared hierarchies whose camera views are ambiguous under published 2.0.1 and undefined in the current Khronos draft. See SPEC_AUDIT.md.",
+      "PI/nativecustomP versus ordinary-FOV queries is explicitly amplified by actualnativeview+screenmatrix probe; mismatch is a namedfailing gate, not hidden by tinyquad/smallcoordinate tolerance. Other arbitrarycustomP rays/frusta retain priorordinary-field basis.",
+      "Defaultfalse/fullviewport paths preserved; existingnonfullviewport noargumentfrustum offset bug deliberately corrected and independentlychecked in fourflipcases.",
+      "Sceneauthoring/reload, alternativeManagedSceneRenderer,VR,Windows remain unproved."
+    ],
+    "compile_freeze": "research/gltf-validation/direct-gpu/models/Cameras/compile-ready-freeze.json",
+    "compile_freeze_sha256": "76346addf0abee6d34a80dc4c22c0db56f66f9805795c18196764b81c6e5600a",
+    "current_candidate_freeze": "research/gltf-validation/direct-gpu/models/Cameras/custom-query-freeze.json",
+    "current_candidate_freeze_sha256": "4063505b36b86131b9f9f3923d273420e0dd93b8078c548ea9ff37d36e4b3aa3",
+    "current_candidate_case_count": 27,
+    "current_candidate_status": "Private nine-target replacement adds active custom matrix point, ray, near-plane and frustum queries. System+Engine and all14 helpers compile. Two standalone frustum cases executed. No installed replay of original22 public cases or five added query cases."
+  },
+  "complete": false,
+  "native_diagnostics": [
+    {
+      "receipt": "Temp/gltf-validation/direct-gpu/cameras-native-api-03/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "b60479f5f075bcbc92253b964f78452943b5340f873cbbc7e61de01b1241e241",
+      "summary": "Untransposed custom infinity +maxfloat and reflected ortho diagnostics failed. No override positive control; cannot infer a native API blocker."
+    },
+    {
+      "receipt": "Temp/gltf-validation/direct-gpu/cameras-native-api-04/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "70ca98f872b89ef77ab3d6edbd2b8281be9b8e5c9cd0e245d9cfc4ae9c5858b3",
+      "summary": "One case passed winding diagnostic, one failed infinity. Finite transposed override also blank, so override route remains unestablished. Signed projection plus GPU winding reversal visible6298pixels; signed query ignores override. Ordinary yfov4 blank."
+    }
+  ],
+  "native_projection_convention": {
+    "passed": true,
+    "receipt": "Temp/gltf-validation/direct-gpu/cameras-projection-convention-03/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "receipt_sha256": "62c051f1c8dba86b72d72dbda2e3bfa74980a7028d7049d19105939d791d2d5f",
+    "finite_as_is_forward_and_reverse_iou": 1,
+    "infinite_reverse_as_is_iou": 1,
+    "finite_override_far_field_meters": 100,
+    "scope": "Exact positive convention proof; finite field diagnostic only."
+  },
+  "native_exact_infinite_projection": {
+    "render_passed": true,
+    "queries_passed": false,
+    "receipt": "Temp/gltf-validation/direct-gpu/cameras-infinite-native-field-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "receipt_sha256": "1553196be8a6540d3dfc0af7123f9254a4b860fc2938d09370d18ddcf7485b90",
+    "native_far": "Infinity",
+    "capture_sha256": "7464d32bb44a12aef7bbf0026101e1ab9965f7004471d6a6f805b9b3a29e89e5",
+    "capture_coverage": 4670,
+    "ray_correct": true,
+    "point_query_finite": true,
+    "near_clip_correct": true,
+    "far101m_inside": false,
+    "root_cause": "Managed Frustum.FromCorners constructs far plane with origin+forward*Infinity, causing NaN via zero direction components. Exact equation distance -Infinity avoids this; fix is proposed, unimplemented pending shared ownership."
+  },
+  "native_near_pi_component_query": {
+    "passed": false,
+    "finite_raster_control_passed": true,
+    "ordinary_45_foreground": 3636,
+    "ordinary_70_foreground": 1279,
+    "custom_45_foreground": 3636,
+    "finite_raster_iou": 1,
+    "ordinary_45_and_custom_45_capture_sha256": "049bf39f98755ff36acb73c2152b21ede8f874e4259bb179672ffe215c4980b3",
+    "near_pi_ordinary_x": 0.5824261,
+    "near_pi_custom_x": 0.5824261,
+    "near_pi_expected_x": 0.5185044875668744,
+    "near_pi_absolute_error": 0.06392158360011779,
+    "engine_mvid": "362ddfea-670c-444f-8088-0f6c6453080e",
+    "engine_sha256": "041e2e0094b4f34539f236e323a0033a2d540f3b4f47efac31b38e4414e03330",
+    "receipt": "Temp/gltf-validation/direct-gpu/cameras-near-pi-e3add-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "receipt_sha256": "81014eaea644dbc75dc6f45a035f131533dcecf3e5595c502552fefdaab53cb5",
+    "scope": "Installed Engine existing native override and component query before persistent flips and camera import. Finite override changes the raster, while near-pi point query keeps the ordinary FOV. Near-pi raster and candidate public API remain separate."
+  },
+  "omitted_variant_audit": {
+    "embedded_source_sha256": "155a7205235a111dd83ae61a66f82b48bec26dc5d70aa9f7982cdd68bddeaa29",
+    "non_uri_json_equal": true,
+    "decoded_buffer_equal": true,
+    "decoded_buffer_sha256": "2d73fc484aab11784e8773862e69b28cb7e0d7d1aadac6032ceea7c490cfd15e",
+    "scope": "Omission justification only; shared generic data-URI/container fixtures own encoding coverage. No new embedded-form render pass."
+  },
+  "native_final_blit_flip": {
+    "passed": true,
+    "cases": 1,
+    "receipt": "Temp/gltf-validation/direct-gpu/alpha-aggregate-contract-run-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "receipt_sha256": "e885d551ac44f2b4b401796174f72d738faff021ba81456a658d489e56848232",
+    "engine_mvid": "123f2cf1-6081-4d93-810b-333342cb20ee",
+    "engine_sha256": "e05cc4da9851ad2c3306e16ef3af317c8b398516dd6f8bf2bcd902687b5f7215",
+    "flips": [
+      "X",
+      "Y",
+      "X+Y"
+    ],
+    "each_iou": 1,
+    "each_mean_rgb_error": 0,
+    "explicit_false_reset_max_error": 0,
+    "null_default_reset_max_error": 0,
+    "base_camera_point_ray_queries_unchanged": true,
+    "scope": "Actual existing per-submission native final-blit contract, not persistent/imported signed-camera support. Captures visually inspected.",
+    "aggregate_request": "Temp/gltf-validation/direct-gpu/model-tests/c2fda64eeca54c6da53923476f2bc2b8/request.json",
+    "identity_note": "Aggregate refreshed global producer to actual installed stage; original Cameras subrequest3fb81eed recorded prior0bf3 expected producer and is not the executed aggregate producer."
+  }
+}

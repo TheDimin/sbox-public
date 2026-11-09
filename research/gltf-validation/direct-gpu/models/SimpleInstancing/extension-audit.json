@@ -1,0 +1,38 @@
+{
+  "audited_date": "2026-11-05",
+  "extension": "EXT_mesh_gpu_instancing",
+  "version_field": "No separate version field",
+  "primary_revisions": [
+    {
+      "repository_commit": "8e798b02d254cea97659a333cfcb20875b62bdd4",
+      "file_blob_sha": "d8900b0c21c8f7b6d28878bba72f720de1015178",
+      "status": "Experimental",
+      "url": "https://github.com/KhronosGroup/glTF/blob/8e798b02d254cea97659a333cfcb20875b62bdd4/extensions/2.0/Vendor/EXT_mesh_gpu_instancing/README.md",
+      "access": "GitHub connector fetch_file verified; web cache had missed this path"
+    },
+    {
+      "repository_commit": "9d23a5a5b1d10f22d1554e847f2a1a3f24222392",
+      "file_blob_sha": "22c33de18c9329d1316747eb6d0a7e01e064e9c6",
+      "status": "Complete, Ratified by the Khronos Group",
+      "url": "https://github.com/KhronosGroup/glTF/blob/9d23a5a5b1d10f22d1554e847f2a1a3f24222392/extensions/2.0/Vendor/EXT_mesh_gpu_instancing/README.md",
+      "access": "GitHub connector fetch_commit main then fetch_file at exact commit; current web primary text corroborates"
+    }
+  ],
+  "skin_combination": {
+    "spec_forbids": false,
+    "implementation": "valid-but-currently-unimplemented; explicit rejection is temporary capability failure",
+    "required_acceptance": "FAILED/PENDING selected combined feature; never permanently excluded",
+    "oracle_status": "independent combined skin/instance transform semantics fixture still needs review; actual SimpleInstancing has no skin",
+    "required_case": {
+      "id": "synthetic_skin_plus_instancing_required",
+      "source_status": "planned explicit fixture and independent combined transform oracle pending",
+      "execution_status": "pending; do not count clear rejection as successful valid-feature acceptance"
+    }
+  },
+  "promotion_gate": "Renderer code plus actual125-row plan/backend tests and completedGPUprobe before separate public loader capability patch; hardware instancing and rawGPUinstance streams remain additional gates",
+  "core_local_matrix_policy": {
+    "url": "https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#transformations",
+    "baseline": "2.0.1 commit8e798b02",
+    "policy": "Each local matrix must decomposeTRS; hierarchy world composition may shear. CorrectedCore40 valid hierarchy passed actualeditor."
+  }
+}

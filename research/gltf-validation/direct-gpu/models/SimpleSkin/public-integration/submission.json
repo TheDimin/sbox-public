@@ -1,0 +1,91 @@
+{
+  "model": "SimpleSkin",
+  "owner": "/root/gpu_simple_skin_public",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleSkin/public-integration/SimpleSkinPublicTests.cs",
+      "sha256": "ff499cebfbc055c85c1a0c74a5bcb697f0cb21889a4938d8eb6688ea42b4aeff"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleSkin/SimpleSkinReference.cs",
+      "sha256": "2bb15660cb3a57fdd997c2b6b92b16b0ac6baa9789a2d2f360a48b65c0722226"
+    }
+  ],
+  "producer_dependencies": [
+    "Actual installed staged Sandbox.Engine with direct GPU internal types; Sandbox.Gltf",
+    "Existing Sandbox.Test.Unit friend-assembly helper compilation"
+  ],
+  "shared_backend_contract": "CONTRACT.md; no native Model/Mesh construction; current producer freeze unchanged",
+  "entries": [
+    {
+      "method": "Sandbox.Gltf.DirectGpu.Validation.SimpleSkinPublicTests.RunResources",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 12
+    },
+    {
+      "method": "Sandbox.Gltf.DirectGpu.Validation.SimpleSkinPublicTests.RunComponents",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 41
+    },
+    {
+      "method": "Sandbox.Gltf.DirectGpu.Validation.SimpleSkinPublicTests.RunAffineTransformLimits",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 4
+    },
+    {
+      "method": "Sandbox.Gltf.DirectGpu.Validation.SimpleSkinPublicTests.RunHandleControls",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 3
+    }
+  ],
+  "expected_cases": 60,
+  "forms": [
+    "glTF/source",
+    "glTF/compiled_glb",
+    "glTF-Embedded/source",
+    "glTF-Embedded/compiled_glb"
+  ],
+  "scope": "Public Model.Load, metadata, SkinnedModelRenderer state and lifecycle; no completed GPU readback, rendered comparison, wall-clock or Windows claim",
+  "acceptance": "Literal two-joint hierarchy/pivot; independently transcribed authored quaternion angles; 0.0002 absolute engine-unit/unit-vector tolerance; no native model handle; correct public finite/signed seek controls; independent instances; no upload in worker AnimationUpdate; queued state cancelled on replace/disable; native vmdl control",
+  "execution_needs": "RunComponents returns Task<Result[]>; worker joins yield main thread, bounded2s. Timeout fails/stops suite; recover pending tasks/private scenes through CompletePendingWorkerCleanupAsync on ORIGINAL loaded helper MVID printed in failure. Never recompile helper to recover original registry. No newer producer results claimed.",
+  "status": "corrected_public60_actual_pass",
+  "source_corpus_revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "baseline": {
+    "receipt_sha256": "6185f21254a4ded01c94824fa7d2915523f395ef3af69021d31679478da0068d",
+    "producer": "immutable fee5",
+    "helper_sha256": "32a1c6810b2aa01a891803eb814056fc14fed2f81859ee7bd17913413bd73b36",
+    "cases": 41,
+    "passed": 1,
+    "failed": 40,
+    "incomplete": 0
+  },
+  "adapter_first_result": {
+    "receipt_sha256": "2a00ccf3fb6374ce901d4029c614fbaf45e509dbe06cd6013a7a9fd2a02f768d",
+    "passed": 53,
+    "failed": 4,
+    "incomplete": 0,
+    "helper_sha256": "35855b8b20d6fdf24ae8dc80d5e7b4c9814824fcd862933b50441c77aade9c97"
+  },
+  "native_handle_controls": {
+    "receipt_sha256": "66ac4a3006173a0b9359591738cad7e85a264071cadf0ef1593d43f037a80315",
+    "passed": 3,
+    "failed": 0,
+    "helper_sha256": "9a5d3d9a09e9a65771b99d54698cb78e6cda77d0f1c60d3c14fd656b951f148f"
+  },
+  "corrected_result": {
+    "receipt_sha256": "e9a3bc6ad826740b93c7a29696e6abcd9c323de967aa55840095728bc2f7579d",
+    "passed": 60,
+    "failed": 0,
+    "incomplete": 0,
+    "helper_sha256": "ff499cebfbc055c85c1a0c74a5bcb697f0cb21889a4938d8eb6688ea42b4aeff",
+    "scope": "Public resource/component/scheduling/lifetime requirements plus matched native-handle controls and explicit public-Transform limitation cases; not GPU/image/wallclock proof."
+  }
+}

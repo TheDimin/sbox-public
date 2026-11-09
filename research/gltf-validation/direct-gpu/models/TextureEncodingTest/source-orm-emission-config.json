@@ -1,0 +1,9 @@
+{
+  "SurfaceManifestPath": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/c5c0-source-orm-generation-423954c3c05743eabf7bb471fd7b495e/generation.json",
+  "SurfaceManifestSha256": "026afe68daaba1dadd5f983e59170f5bf37de9c9e08c3ebef75f7be1b2735f84",
+  "SurfaceSourceSha256": "d988509c2c958680cec9d1334bd16869e39e0bbcd38ed12a4021c9c08c586366",
+  "ReferenceManifestPath": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/c5c0-literal-unlit-generation-fd1edf2933ca4503b5b2b2fa480949ea/generation.json",
+  "ReferenceManifestSha256": "fd5691d47789f4060320f828afb4656d8155422e69d6f69a086e102984f54034",
+  "ReferenceSourceSha256": "bf7fb12b62ed825c71e5ae1f7b88ed97dd6f52d587c73c9b6123be563ecd96c8",
+  "OutputDirectory": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/c5c0-source-emission-proof-01"
+}

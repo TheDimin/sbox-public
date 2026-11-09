@@ -1,0 +1,174 @@
+{
+  "model": "TextureLinearInterpolationTest",
+  "status": "targeted-core-and-public-acceptance-passed",
+  "implemented": "Existing default source-lit and sampler mapping required no producer changes; added independent exact-model tests and reviewed public capture.",
+  "source": "Temp/gltf-reference/glTF-Sample-Assets/Models/TextureLinearInterpolationTest/glTF-Binary/TextureLinearInterpolationTest.glb",
+  "source_sha256": "5a7d79bb138f9f732002a988298b5ba44f614064330e94f6ea8c17e38b998440",
+  "canonical": {
+    "path": "Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/canonical/TextureLinearInterpolationTest.glb_c",
+    "sha256": "5a7d79bb138f9f732002a988298b5ba44f614064330e94f6ea8c17e38b998440",
+    "note": "Compiler output is byte-identical to this already portable upstream GLB; one canonical artifact retained."
+  },
+  "executed": {
+    "core": {
+      "passed": 3,
+      "failed": 0,
+      "receipt": "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/receipts/core-with-retained-public-shader-failure.json",
+      "sha256": "49f41422a6f3b6d30c4980a291b2a9669694ebd3a80e3d3bd318efd0e340eb6e",
+      "scope": "Only the three core rows are reused from this mixed receipt; its two prior public shader failures remain failures."
+    },
+    "public": {
+      "passed": 2,
+      "failed": 0,
+      "receipt": "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/receipts/public.json",
+      "sha256": "7d2a89a3c6adfb949580ea42f4079dc6bcef25500a05c2bac3d032cf2b491897",
+      "engine_mvid": "5a07f228-dff8-4d6b-b4ef-890b32a80299",
+      "gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+      "request_sha256": "c014f2babc168afa281241e3f08488bbeaf1ea17b0ee97b5c0f00fa80fc90bec",
+      "shader_source_sha256": "84cfa8a5af1db55f5ac054ef6595c59fc7e42d3010dacc6a9500134784077dba",
+      "checks": "Per form:6 exact .5 samples; wrong-transfer .21404819 and point1; GPU2x1 one-level view, native original8bytes,416 vertices/1926 indices and all constant UVs, same-green sphere image check, empty/deletion controls."
+    }
+  },
+  "observations": {
+    "exact_linear_samples": 12,
+    "maximum_positive_error": 0,
+    "wrong_transfer_expected": 0.21404114048223255,
+    "wrong_transfer_observed": 0.21404819,
+    "wrong_point_observed": 1,
+    "maximum_position_error_inches": 7.6293945e-06,
+    "uv_error": 0,
+    "topology_exact": true,
+    "sphere_encoded_green_means": [
+      0.7372549,
+      0.7372549
+    ],
+    "image_dimensions": [
+      192,
+      192
+    ],
+    "source_and_canonical_images_identical": true,
+    "empty_and_deleted_coverage": 0
+  },
+  "forms": [
+    {
+      "form": "upstream GLB",
+      "source_sha256": "5a7d79bb138f9f732002a988298b5ba44f614064330e94f6ea8c17e38b998440",
+      "input_sha256": "5a7d79bb138f9f732002a988298b5ba44f614064330e94f6ea8c17e38b998440",
+      "canonical_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/canonical/TextureLinearInterpolationTest.glb_c",
+      "canonical_sha256": "5a7d79bb138f9f732002a988298b5ba44f614064330e94f6ea8c17e38b998440",
+      "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/public/f82447749ba346d4b81dc3df9bc3eb45",
+      "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/public/f82447749ba346d4b81dc3df9bc3eb45/actual_public_source_material.png",
+      "Sha256": "cb42ac81ad03434bdd46dfe8fd03ffc89415f1c1b1185fef77ff318333f9c377",
+      "CameraStateJson": "{\"position\":\"350,0,10\",\"rotation\":\"0,0,1,0\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":false,\"Orthographic\":true,\"OrthographicHeight\":270,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}",
+      "texture_dimensions": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "texture_pixels": "AAAA/wD/AP8=",
+      "numeric_probe_shader_sha256": "84cfa8a5af1db55f5ac054ef6595c59fc7e42d3010dacc6a9500134784077dba",
+      "wrong_transfer": [
+        0,
+        0.21404819,
+        0,
+        1
+      ],
+      "wrong_point": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "sphere_green_means": [
+        0.7372549,
+        0.7372549
+      ],
+      "vertices": 416,
+      "indices": 1926,
+      "max_position_error_inches": 7.6293945e-06,
+      "max_uv_error": 0,
+      "material_shaders": [
+        "shaders/gltf_surface_five_uv.shader",
+        "shaders/gltf_surface_five_uv.shader",
+        "shaders/gltf_surface_five_uv.shader"
+      ],
+      "scope": "Actual public Model.Load/ModelRenderer default source materials, bound sampler and native texture float readback. Inferred native camera; final upstream visual approval is separate."
+    },
+    {
+      "form": "canonical glb_c",
+      "source_sha256": "5a7d79bb138f9f732002a988298b5ba44f614064330e94f6ea8c17e38b998440",
+      "input_sha256": "5a7d79bb138f9f732002a988298b5ba44f614064330e94f6ea8c17e38b998440",
+      "canonical_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/canonical/TextureLinearInterpolationTest.glb_c",
+      "canonical_sha256": "5a7d79bb138f9f732002a988298b5ba44f614064330e94f6ea8c17e38b998440",
+      "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/public/dae79609b54a434f9434d2d7567e6cc0",
+      "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/public/dae79609b54a434f9434d2d7567e6cc0/actual_public_source_material.png",
+      "Sha256": "cb42ac81ad03434bdd46dfe8fd03ffc89415f1c1b1185fef77ff318333f9c377",
+      "CameraStateJson": "{\"position\":\"350,0,10\",\"rotation\":\"0,0,1,0\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":false,\"Orthographic\":true,\"OrthographicHeight\":270,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}",
+      "texture_dimensions": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "texture_pixels": "AAAA/wD/AP8=",
+      "numeric_probe_shader_sha256": "84cfa8a5af1db55f5ac054ef6595c59fc7e42d3010dacc6a9500134784077dba",
+      "wrong_transfer": [
+        0,
+        0.21404819,
+        0,
+        1
+      ],
+      "wrong_point": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "sphere_green_means": [
+        0.7372549,
+        0.7372549
+      ],
+      "vertices": 416,
+      "indices": 1926,
+      "max_position_error_inches": 7.6293945e-06,
+      "max_uv_error": 0,
+      "material_shaders": [
+        "shaders/gltf_surface_five_uv.shader",
+        "shaders/gltf_surface_five_uv.shader",
+        "shaders/gltf_surface_five_uv.shader"
+      ],
+      "scope": "Actual public Model.Load/ModelRenderer default source materials, bound sampler and native texture float readback. Inferred native camera; final upstream visual approval is separate."
+    }
+  ],
+  "media": {
+    "current": "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/media/current.png",
+    "sha256": "cb42ac81ad03434bdd46dfe8fd03ffc89415f1c1b1185fef77ff318333f9c377",
+    "upstream_reference": "Temp/gltf-reference/glTF-Sample-Assets/Models/TextureLinearInterpolationTest/screenshot/screenshot.png",
+    "reference_sha256": "2a833223f130c6acfce9f4de9100a9c75b112b6a8032332f624f988254baf04e",
+    "visual_groups": 1,
+    "author_review": "Reviewed original upstream correct/incorrect screenshots and both new native frames. Both labels and equal green spheres render; inferred front orthographic camera, black background, different exposure/presentation from upstream.",
+    "user_visual_approval": false
+  },
+  "prior_failed_attempts": [
+    {
+      "sha256": "fcae6fc041401566b5cae9dac3c1eb943952a24d571fee2e2387d60742598ea5",
+      "reason": "Unavailable Texture.MipCount helper property prevented compilation; zero cases executed."
+    },
+    {
+      "sha256": "49f41422a6f3b6d30c4980a291b2a9669694ebd3a80e3d3bd318efd0e340eb6e",
+      "reason": "3 core passed;2 public failed local anonymous shader section formatting before sampling. Retained without relabeling."
+    }
+  ],
+  "source_quality_changes": false,
+  "license": "CC0-1.0; lexaknyazev; original license retained",
+  "limits": [
+    "Final user visual approval pending",
+    "Inferred camera/light/exposure; no exact upstream pixel-parity claim",
+    "192x192 native diagnostic capture",
+    "Windows",
+    "full model/editor API parity",
+    "performance",
+    "No broad glTF conformance claim"
+  ]
+}

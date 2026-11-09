@@ -1,0 +1,124 @@
+{
+  "model": "MaterialsVariantsShoe",
+  "owner": "/root/gpu_material_variants",
+  "status": "frozen; authored C# unexecuted",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MaterialsVariantsShoe/ACCEPTANCE.md",
+      "sha256": "57147c7811915c9106fec873a152624f94dfab09b6e98f52f59a003619c69e1a"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MaterialsVariantsShoe/MaterialsVariantsShoeCoreTests.cs",
+      "sha256": "f4a2f61296f9d68a94985199e407b994532edcfd46b2b1768c62486ffb3e8895"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MaterialsVariantsShoe/MaterialsVariantsShoeGpuChecks.cs",
+      "sha256": "9d0e876acd13260645e2bf59ab029d9c5d51ade81d8f28296d5c79612f05115c"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MaterialsVariantsShoe/MaterialsVariantsShoeGpuProbe.cs",
+      "sha256": "76029da3cd0f818cd937e528477a812a282e8e5bf65520828edb90020c0cacb6"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MaterialsVariantsShoe/MaterialsVariantsShoePlanTests.cs",
+      "sha256": "21568e67a0b4d3dc52a40fb3ea6287ab79c3009e4f606ac79582c8d7d6462dff"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MaterialsVariantsShoe/MaterialsVariantsShoeReference.cs",
+      "sha256": "5983874996b8daa1df119e4ab01f9d9e8d1c1b878195815db87e32175cf51e44"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MaterialsVariantsShoe/author_reference.py",
+      "sha256": "eccb36558cb6da0012c55c608a0104a5fc9c05d79a373b161dbe1b4780a41b65"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MaterialsVariantsShoe/reference.json",
+      "sha256": "c0d488379c99f7f250bee99e51f8559510c11a27480c106d21d36baddcddb707"
+    }
+  ],
+  "producer_dependencies": [
+    "actual loaded Sandbox.Gltf with GetMaterialForVariant and MaterializePrimitiveUpload",
+    "actual loaded Sandbox.Engine",
+    "shared direct GPU backend/rig/morph helpers for staging, checker and reflection suites; no embedded replacement producer"
+  ],
+  "shared_backend_contract": {
+    "path": "research/gltf-validation/direct-gpu/CONTRACT.md",
+    "sha256": "12ed85fa725cb58481f1fcc334b542f7b6901c5f329fc9182977bbc721da3673",
+    "variant_API": "Proposed SetVariant(int?) and readonly int? ActiveVariant; root review/backend implementation pending; reflection cases intentionally retain missing API as red"
+  },
+  "entries": [
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.MaterialsVariantsShoeValidation.MaterialsVariantsShoeCoreTests.RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 40,
+      "scope": "CPU/data",
+      "sources": [
+        "MaterialsVariantsShoeReference.cs",
+        "MaterialsVariantsShoeCoreTests.cs"
+      ]
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.MaterialsVariantsShoeValidation.MaterialsVariantsShoePlanTests.RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 12,
+      "scope": "CPU staging plan only",
+      "sources": [
+        "MaterialsVariantsShoeReference.cs",
+        "MaterialsVariantsShoePlanTests.cs"
+      ]
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.MaterialsVariantsShoeValidation.MaterialsVariantsShoeGpuChecks.RunVerifierControls",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 5,
+      "scope": "synthetic verifier sensitivity only, never actual GPU output",
+      "sources": [
+        "MaterialsVariantsShoeReference.cs",
+        "MaterialsVariantsShoeCoreTests.cs",
+        "MaterialsVariantsShoeGpuChecks.cs"
+      ]
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.MaterialsVariantsShoeValidation.MaterialsVariantsShoeGpuProbe.RunContract",
+      "arguments": [],
+      "expected_cases": 2,
+      "scope": "reflection contract; expected red for absent shared API",
+      "sources": [
+        "MaterialsVariantsShoeReference.cs",
+        "MaterialsVariantsShoeCoreTests.cs",
+        "MaterialsVariantsShoeGpuChecks.cs",
+        "MaterialsVariantsShoeGpuProbe.cs"
+      ]
+    }
+  ],
+  "expected_cases": 59,
+  "forms": [
+    "glTF/source",
+    "glTF/compiled_glb",
+    "glTF-Binary/source",
+    "glTF-Binary/compiled_glb"
+  ],
+  "acceptance": "ACCEPTANCE.md; independent pinned stdlib raw-source oracle and literal mapping controls. CPU world tolerance 6e-8 meters; proposed GPU per-component position 2e-5 inches, normal 2e-5, UV 3e-7 awaiting coordinator review. No image parity from metadata.",
+  "execution_needs": "Coordinator compiles helper against loaded producers; CPU/data needs no editor mutations, shader compilation or restart. Shared-backend variant API absent at freeze. Actual GPU probe requires successful raw triangle, root API review, real frame callback, shared compute shader and loaded material implementation. No jobs launched by owner.",
+  "actual_gpu_entry": "Sandbox.Gltf.DirectGpu.MaterialsVariantsShoeValidation.MaterialsVariantsShoeGpuProbe.Run($checkout, formName, world, computeMaterial, waitForActualFrames, materialResolver=null)",
+  "executed_evidence": [
+    "lightweight independent Python source-oracle generation and cross-container geometry/image identity audit",
+    "git diff --check on owned folder; note newly untracked files additionally inspected directly"
+  ],
+  "unexecuted_gates": [
+    "all 59 C# cases",
+    "actual owned GPU readback",
+    "per-instance material binding/switch images",
+    "empty/positive/deletion captures",
+    "source JPEG and PBR material fidelity",
+    "public Model.Load and vmdl regressions",
+    "optimized portable glb_c",
+    "Windows/model editor parity"
+  ]
+}

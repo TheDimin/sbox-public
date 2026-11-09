@@ -1,0 +1,392 @@
+{
+  "corpus_revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "upstream_variants": [
+    "glTF"
+  ],
+  "license": "CC0-1.0; see upstream LICENSE.md",
+  "files": [
+    {
+      "path": "PrimitiveModeNormalsTest.gltf",
+      "bytes": 17010,
+      "sha256": "432c9445f45c31d71b729c20804f91c04a9c60da67cab76c8fb61c2c70c83631"
+    },
+    {
+      "path": "Points.bin",
+      "bytes": 786432,
+      "sha256": "e1c8835ce934b6b4a9d028130babf442dfe1ec2d39c7e795bcbd4bde363eb363"
+    },
+    {
+      "path": "Lines.bin",
+      "bytes": 786432,
+      "sha256": "98febe022a429d8be2c7f628b89a4a1338354ef186c7b10b2f58f53296f1f8f1"
+    },
+    {
+      "path": "Triangles.bin",
+      "bytes": 4380,
+      "sha256": "99addf8a578a4088a9fdcd67a360c57be9f064355b21f53ad7bf30fffb6fc607"
+    },
+    {
+      "path": "Colors.bin",
+      "bytes": 262144,
+      "sha256": "20fd01539648e65f70bb9c1a31e1334ce0e4fb951436d818ebdf250ec3e74481"
+    },
+    {
+      "path": "Plane.bin",
+      "bytes": 92,
+      "sha256": "68eb0aaba58264604648e828ba7536b3c52333659445200f56d90b23b05a2f36"
+    },
+    {
+      "path": "Labels.png",
+      "bytes": 32528,
+      "sha256": "6deb4b18af0594c4696b2afa2601ccba90b9a05d64322faf9ae608a6372edf15"
+    }
+  ],
+  "primitive_instances": [
+    {
+      "node": 0,
+      "mesh": 0,
+      "primitive": 0,
+      "source_mode": 0,
+      "draw_mode": 0,
+      "source_vertices": 65536,
+      "output_vertices": 65536,
+      "expanded_indices": 65536,
+      "normal_policy": "direction_unspecified_recommended_unlit",
+      "color": false,
+      "material": null
+    },
+    {
+      "node": 1,
+      "mesh": 1,
+      "primitive": 0,
+      "source_mode": 3,
+      "draw_mode": 1,
+      "source_vertices": 65536,
+      "output_vertices": 65536,
+      "expanded_indices": 131070,
+      "normal_policy": "direction_unspecified_recommended_unlit",
+      "color": false,
+      "material": null
+    },
+    {
+      "node": 2,
+      "mesh": 2,
+      "primitive": 0,
+      "source_mode": 4,
+      "draw_mode": 4,
+      "source_vertices": 205,
+      "output_vertices": 960,
+      "expanded_indices": 960,
+      "normal_policy": "generated_flat",
+      "color": false,
+      "material": null
+    },
+    {
+      "node": 3,
+      "mesh": 3,
+      "primitive": 0,
+      "source_mode": 0,
+      "draw_mode": 0,
+      "source_vertices": 65536,
+      "output_vertices": 65536,
+      "expanded_indices": 65536,
+      "normal_policy": "direction_unspecified_recommended_unlit",
+      "color": true,
+      "material": null
+    },
+    {
+      "node": 4,
+      "mesh": 4,
+      "primitive": 0,
+      "source_mode": 3,
+      "draw_mode": 1,
+      "source_vertices": 65536,
+      "output_vertices": 65536,
+      "expanded_indices": 131070,
+      "normal_policy": "direction_unspecified_recommended_unlit",
+      "color": true,
+      "material": null
+    },
+    {
+      "node": 5,
+      "mesh": 5,
+      "primitive": 0,
+      "source_mode": 4,
+      "draw_mode": 4,
+      "source_vertices": 205,
+      "output_vertices": 960,
+      "expanded_indices": 960,
+      "normal_policy": "generated_flat",
+      "color": true,
+      "material": null
+    },
+    {
+      "node": 6,
+      "mesh": 6,
+      "primitive": 0,
+      "source_mode": 0,
+      "draw_mode": 0,
+      "source_vertices": 65536,
+      "output_vertices": 65536,
+      "expanded_indices": 65536,
+      "normal_policy": "direction_unspecified_recommended_unlit",
+      "color": false,
+      "material": 0
+    },
+    {
+      "node": 7,
+      "mesh": 7,
+      "primitive": 0,
+      "source_mode": 3,
+      "draw_mode": 1,
+      "source_vertices": 65536,
+      "output_vertices": 65536,
+      "expanded_indices": 131070,
+      "normal_policy": "direction_unspecified_recommended_unlit",
+      "color": false,
+      "material": 0
+    },
+    {
+      "node": 8,
+      "mesh": 8,
+      "primitive": 0,
+      "source_mode": 4,
+      "draw_mode": 4,
+      "source_vertices": 205,
+      "output_vertices": 960,
+      "expanded_indices": 960,
+      "normal_policy": "generated_flat",
+      "color": false,
+      "material": 0
+    },
+    {
+      "node": 9,
+      "mesh": 9,
+      "primitive": 0,
+      "source_mode": 0,
+      "draw_mode": 0,
+      "source_vertices": 65536,
+      "output_vertices": 65536,
+      "expanded_indices": 65536,
+      "normal_policy": "direction_unspecified_recommended_unlit",
+      "color": true,
+      "material": 0
+    },
+    {
+      "node": 10,
+      "mesh": 10,
+      "primitive": 0,
+      "source_mode": 3,
+      "draw_mode": 1,
+      "source_vertices": 65536,
+      "output_vertices": 65536,
+      "expanded_indices": 131070,
+      "normal_policy": "direction_unspecified_recommended_unlit",
+      "color": true,
+      "material": 0
+    },
+    {
+      "node": 11,
+      "mesh": 11,
+      "primitive": 0,
+      "source_mode": 4,
+      "draw_mode": 4,
+      "source_vertices": 205,
+      "output_vertices": 960,
+      "expanded_indices": 960,
+      "normal_policy": "generated_flat",
+      "color": true,
+      "material": 0
+    },
+    {
+      "node": 12,
+      "mesh": 12,
+      "primitive": 0,
+      "source_mode": 0,
+      "draw_mode": 0,
+      "source_vertices": 65536,
+      "output_vertices": 65536,
+      "expanded_indices": 65536,
+      "normal_policy": "authored",
+      "color": false,
+      "material": null
+    },
+    {
+      "node": 13,
+      "mesh": 13,
+      "primitive": 0,
+      "source_mode": 3,
+      "draw_mode": 1,
+      "source_vertices": 65536,
+      "output_vertices": 65536,
+      "expanded_indices": 131070,
+      "normal_policy": "authored",
+      "color": false,
+      "material": null
+    },
+    {
+      "node": 14,
+      "mesh": 14,
+      "primitive": 0,
+      "source_mode": 4,
+      "draw_mode": 4,
+      "source_vertices": 205,
+      "output_vertices": 205,
+      "expanded_indices": 960,
+      "normal_policy": "authored",
+      "color": false,
+      "material": null
+    },
+    {
+      "node": 15,
+      "mesh": 15,
+      "primitive": 0,
+      "source_mode": 0,
+      "draw_mode": 0,
+      "source_vertices": 65536,
+      "output_vertices": 65536,
+      "expanded_indices": 65536,
+      "normal_policy": "authored",
+      "color": true,
+      "material": null
+    },
+    {
+      "node": 16,
+      "mesh": 16,
+      "primitive": 0,
+      "source_mode": 3,
+      "draw_mode": 1,
+      "source_vertices": 65536,
+      "output_vertices": 65536,
+      "expanded_indices": 131070,
+      "normal_policy": "authored",
+      "color": true,
+      "material": null
+    },
+    {
+      "node": 17,
+      "mesh": 17,
+      "primitive": 0,
+      "source_mode": 4,
+      "draw_mode": 4,
+      "source_vertices": 205,
+      "output_vertices": 205,
+      "expanded_indices": 960,
+      "normal_policy": "authored",
+      "color": true,
+      "material": null
+    },
+    {
+      "node": 18,
+      "mesh": 18,
+      "primitive": 0,
+      "source_mode": 0,
+      "draw_mode": 0,
+      "source_vertices": 65536,
+      "output_vertices": 65536,
+      "expanded_indices": 65536,
+      "normal_policy": "authored",
+      "color": false,
+      "material": 0
+    },
+    {
+      "node": 19,
+      "mesh": 19,
+      "primitive": 0,
+      "source_mode": 3,
+      "draw_mode": 1,
+      "source_vertices": 65536,
+      "output_vertices": 65536,
+      "expanded_indices": 131070,
+      "normal_policy": "authored",
+      "color": false,
+      "material": 0
+    },
+    {
+      "node": 20,
+      "mesh": 20,
+      "primitive": 0,
+      "source_mode": 4,
+      "draw_mode": 4,
+      "source_vertices": 205,
+      "output_vertices": 205,
+      "expanded_indices": 960,
+      "normal_policy": "authored",
+      "color": false,
+      "material": 0
+    },
+    {
+      "node": 21,
+      "mesh": 21,
+      "primitive": 0,
+      "source_mode": 0,
+      "draw_mode": 0,
+      "source_vertices": 65536,
+      "output_vertices": 65536,
+      "expanded_indices": 65536,
+      "normal_policy": "authored",
+      "color": true,
+      "material": 0
+    },
+    {
+      "node": 22,
+      "mesh": 22,
+      "primitive": 0,
+      "source_mode": 3,
+      "draw_mode": 1,
+      "source_vertices": 65536,
+      "output_vertices": 65536,
+      "expanded_indices": 131070,
+      "normal_policy": "authored",
+      "color": true,
+      "material": 0
+    },
+    {
+      "node": 23,
+      "mesh": 23,
+      "primitive": 0,
+      "source_mode": 4,
+      "draw_mode": 4,
+      "source_vertices": 205,
+      "output_vertices": 205,
+      "expanded_indices": 960,
+      "normal_policy": "authored",
+      "color": true,
+      "material": 0
+    },
+    {
+      "node": 26,
+      "mesh": 24,
+      "primitive": 0,
+      "source_mode": 4,
+      "draw_mode": 4,
+      "source_vertices": 4,
+      "output_vertices": 6,
+      "expanded_indices": 6,
+      "normal_policy": "generated_flat",
+      "color": false,
+      "material": 1
+    }
+  ],
+  "primitive_instance_count": 25,
+  "total_source_vertices": 1050220,
+  "total_output_vertices": 1053242,
+  "total_expanded_indices": 1580534,
+  "sphere_triangle_count": 320,
+  "sphere_minimum_cross_length_squared": 0.0036878885856500166,
+  "authored_normal_length_ranges": {
+    "Points.bin": [
+      0.9999999497010942,
+      1.0000000451928226
+    ],
+    "Lines.bin": [
+      0.9999999585914479,
+      1.0000000417976613
+    ],
+    "Triangles.bin": [
+      0.9999998927679434,
+      1.0000001030662002
+    ]
+  },
+  "scope": "independent Python pinned-source/geometry audit only; C# reader, compiled packaging, GPU and image gates unrun"
+}

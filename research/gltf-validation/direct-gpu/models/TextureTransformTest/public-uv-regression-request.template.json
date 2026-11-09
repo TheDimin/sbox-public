@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "engine_sha256": "$ENGINE_SHA256_FROM_NEW_BUILD",
+  "gltf_sha256": "$GLTF_SHA256_FROM_LOADED_STAGE",
+  "framework_sha256": "$FRAMEWORK_SHA256_FROM_LOADED_STAGE",
+  "sources": [
+    {
+      "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfLegacyUvBakePlanTests.cs",
+      "sha256": "e5941dcb46ee7cf5390f2c7456aa86dab391c671c91d1041fcc31c90cd8630c1"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureTransformTest/TextureTransformReference.cs",
+      "sha256": "2cb210e56c57645a835bd23d7b900176ad02bfd928dd24925511d3e701bebc24"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureTransformTest/TextureTransformIdentityMaterialReference.cs",
+      "sha256": "172de185b3fe64ac7f7f36e1205e2fa2cf46ccb56cc32ecc63c9c47a3593d5d5"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureTransformTest/TextureTransformGpuChecks.cs",
+      "sha256": "f0f32f4fd27c2fd1c38c22badbc33a3376e352335fea3fa4e2b2aaef77dbf2a5"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureTransformTest/TextureTransformReferenceScene.cs",
+      "sha256": "a69da3512d109f3aa4c551b61f7e1137414771d97649a74ccd0de4f79abe8714"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureTransformTest/TextureTransformLegacySourceTests.cs",
+      "sha256": "34f20700a1e3254c86d392ba435a5c9bebafb30a35cf84733dc815768f09512a"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureTransformTest/TextureTransformPublicRegression.cs",
+      "sha256": "82374cafec88120e5bcc6a591f54c9f02ef2992d74a700ade9d57b30e421a267"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureTransformTest/TextureTransformPublicRegressionTests.cs",
+      "sha256": "452d20a202d51518502814b58bb9bc7db51e7a5821a1d462a11d1d1971573e86"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedCoreTests.cs",
+      "sha256": "b6a97ffe8523217ab5e2e4c605137926efc626583926aba04cf80c623057afcf"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedGpuChecks.cs",
+      "sha256": "cb13a05cb0b006f70ce08a7b26cf861e3efcb994176f77a30e0bb5547021155c"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedImageChecks.cs",
+      "sha256": "25aa5a26ec035644bbd0d534249e2a3174e6f27a4da3e9ba4b65a5b4774abd22"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedReference.cs",
+      "sha256": "c8c3c1a83ca0889ff9bb46b40106feca93d371bd520df5f6767331d89e78dcd8"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/PngTexelReference.cs",
+      "sha256": "9c9b6bc95031449befd2e6e169722eca2d676abe52e5a017b076ccfb4cb0c6f9"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Tests.GltfLegacyUvBakePlanTests",
+      "kind": "mstest",
+      "expected_cases": 14
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureTransformTestValidation.TextureTransformLegacySourceTests",
+      "kind": "mstest",
+      "expected_cases": 2,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureTransformTestValidation.TextureTransformPublicRegressionTests",
+      "kind": "mstest",
+      "expected_cases": 2,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ]
+}

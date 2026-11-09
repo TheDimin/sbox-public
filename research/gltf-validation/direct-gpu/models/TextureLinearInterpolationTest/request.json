@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "engine_sha256": "ed5f8073e45d3a4f90e5140323cc5c5a0dddf9707be71ee375966ca0f05403f0",
+  "gltf_sha256": "7638a855ba21fd9c079a22cbc8b834d4169112fe08cb9a5fd788e63cf90866e1",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearReference.cs",
+      "sha256": "20620636cfbca8040888a085dd21ec148380e0e70603a4ad3213051b13807caa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs",
+      "sha256": "0fd08c9c1aad28ec153779f823b497831442c5040035917292d2fffada0bf37e"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs",
+      "sha256": "2ee192e374d58eef3eca0441c2cfede2501b542137e274ead18e9cc78d40ffb9"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureLinearValidation.TextureLinearPublicTests",
+      "kind": "mstest",
+      "expected_cases": 2,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ]
+}

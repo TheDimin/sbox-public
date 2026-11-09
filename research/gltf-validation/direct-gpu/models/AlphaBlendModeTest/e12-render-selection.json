@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "engine_sha256": "e5906175d954defcc9d9bc758f0d717317254d8f61e03c007490c72e9c02d93e",
+  "gltf_sha256": "b86cb72e0c0e0f3c23af45bd115f68760655d1754d663f41df62a45e136f9e8b",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "tools_sha256": "52dd40c1577878c105ff73bef5854c4d44d1456285922b6ce5e923e15e268371",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaLitRenderTests.cs",
+      "sha256": "f3e133f56f9b960c0daf3aa817278970046c4e6310408b42d21cc9c0e3fe7048"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaControlFixtures.cs",
+      "sha256": "07b5c4ed3e67354fd156d252940a947545e2472dd4b70d833741abf2dc80080b"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaLitRenderTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "ShaderSha256",
+          "arguments": [
+            "b5e7abc1926672e9f7819e092dbd6ae42f26cc4a6f2301ae09eb83c44fff2229"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "OutputDirectory",
+          "arguments": [
+            "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/e12-alpha-lit-captures-01"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "model": "AlphaBlendModeTest",
+  "owner": "/root/gpu_alpha_blend",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaNativePassProbe.cs",
+      "sha256": "b43e0382489e16167986547bc1d0028802223b94a91a43ff29835d478620fe9f"
+    }
+  ],
+  "entry": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaNativePassProbe.Run(scene,camera,opaqueMaterial,blendMaterial,waitForActualFrames,capture)",
+  "expected_cases": 8,
+  "scope": "actual native SceneCustomObject pass callbacks and object-order observations with literal Graphics.Draw/empty-positive-deleted captures; not glTF alpha rendering conformance",
+  "requirements": [
+    "verified native renderer idle private scene",
+    "borrowed visible opaque and translucent materials with actual native blend flag",
+    "real frame wait/capture coordinator callbacks",
+    "actual loaded Engine only; no replacement producer"
+  ],
+  "status": "refrozen_unrun; coordinator-released owned-resource cleanup fixes applied before selection",
+  "execution_needs": "coordinator native captures; no producer rebuild or new shader compile required when suitable existing materials exist",
+  "prior_prepared_identity": "probe-pre-cleanup-identities.json"
+}

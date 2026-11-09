@@ -1,0 +1,236 @@
+{
+ "AnisotropyStrengthTest/glTF-Binary": {
+  "size": [
+   512,
+   484
+  ],
+  "foregroundPct": 92.1,
+  "maeForeground": 0.1342,
+  "maeForegroundPerChannel": [
+   0.1409,
+   0.123,
+   0.1387
+  ],
+  "linearLumaRatio_capture_over_reference": 0.699,
+  "silhouetteIoU": 0.792,
+  "reference": {
+   "meanRGB": [
+    0.6162,
+    0.6284,
+    0.634
+   ],
+   "meanLuma": 0.6262,
+   "p95Luma": 0.8911,
+   "stdLuma": 0.1207,
+   "clippedPct": 0.01,
+   "saturation": 0.0223
+  },
+  "capture": {
+   "meanRGB": [
+    0.4887,
+    0.5367,
+    0.5709
+   ],
+   "meanLuma": 0.529,
+   "p95Luma": 0.6757,
+   "stdLuma": 0.1128,
+   "clippedPct": 0.0,
+   "saturation": 0.0876
+  }
+ },
+ "ClearCoatTest/glTF-Binary": {
+  "size": [
+   449,
+   512
+  ],
+  "foregroundPct": 92.7,
+  "maeForeground": 0.1492,
+  "maeForegroundPerChannel": [
+   0.1309,
+   0.1411,
+   0.1756
+  ],
+  "linearLumaRatio_capture_over_reference": 1.533,
+  "silhouetteIoU": 0.89,
+  "reference": {
+   "meanRGB": [
+    0.3245,
+    0.313,
+    0.2888
+   ],
+   "meanLuma": 0.3137,
+   "p95Luma": 0.6252,
+   "stdLuma": 0.1618,
+   "clippedPct": 0.15,
+   "saturation": 0.082
+  },
+  "capture": {
+   "meanRGB": [
+    0.3703,
+    0.3695,
+    0.3525
+   ],
+   "meanLuma": 0.3684,
+   "p95Luma": 0.7255,
+   "stdLuma": 0.2273,
+   "clippedPct": 0.0,
+   "saturation": 0.0832
+  }
+ },
+ "ClearcoatWicker/glTF-Binary": {
+  "size": [
+   512,
+   494
+  ],
+  "foregroundPct": 94.4,
+  "maeForeground": 0.154,
+  "maeForegroundPerChannel": [
+   0.1388,
+   0.1461,
+   0.1772
+  ],
+  "linearLumaRatio_capture_over_reference": 1.598,
+  "silhouetteIoU": 0.902,
+  "reference": {
+   "meanRGB": [
+    0.3651,
+    0.3375,
+    0.288
+   ],
+   "meanLuma": 0.3398,
+   "p95Luma": 0.5982,
+   "stdLuma": 0.1239,
+   "clippedPct": 0.0,
+   "saturation": 0.0862
+  },
+  "capture": {
+   "meanRGB": [
+    0.4148,
+    0.4013,
+    0.365
+   ],
+   "meanLuma": 0.4015,
+   "p95Luma": 0.7015,
+   "stdLuma": 0.2003,
+   "clippedPct": 0.0,
+   "saturation": 0.0926
+  }
+ },
+ "AnisotropyDiscTest/glTF-Binary": {
+  "size": [
+   512,
+   218
+  ],
+  "foregroundPct": 79.1,
+  "maeForeground": 0.2147,
+  "maeForegroundPerChannel": [
+   0.1998,
+   0.2053,
+   0.2388
+  ],
+  "linearLumaRatio_capture_over_reference": 0.513,
+  "silhouetteIoU": 0.611,
+  "reference": {
+   "meanRGB": [
+    0.6569,
+    0.6819,
+    0.7008
+   ],
+   "meanLuma": 0.6779,
+   "p95Luma": 0.802,
+   "stdLuma": 0.1118,
+   "clippedPct": 0.0,
+   "saturation": 0.044
+  },
+  "capture": {
+   "meanRGB": [
+    0.4629,
+    0.4991,
+    0.5216
+   ],
+   "meanLuma": 0.493,
+   "p95Luma": 0.6434,
+   "stdLuma": 0.111,
+   "clippedPct": 0.0,
+   "saturation": 0.0675
+  }
+ },
+ "AnisotropyRotationTest/glTF-Binary": {
+  "size": [
+   512,
+   276
+  ],
+  "foregroundPct": 81.4,
+  "maeForeground": 0.09,
+  "maeForegroundPerChannel": [
+   0.0945,
+   0.0821,
+   0.0934
+  ],
+  "linearLumaRatio_capture_over_reference": 0.81,
+  "silhouetteIoU": 0.791,
+  "reference": {
+   "meanRGB": [
+    0.6026,
+    0.6156,
+    0.6218
+   ],
+   "meanLuma": 0.6133,
+   "p95Luma": 0.8737,
+   "stdLuma": 0.1037,
+   "clippedPct": 0.01,
+   "saturation": 0.0216
+  },
+  "capture": {
+   "meanRGB": [
+    0.5181,
+    0.5633,
+    0.5975
+   ],
+   "meanLuma": 0.5562,
+   "p95Luma": 0.6948,
+   "stdLuma": 0.0982,
+   "clippedPct": 0.0,
+   "saturation": 0.0856
+  }
+ },
+ "CompareMetallic/glTF-Binary": {
+  "size": [
+   512,
+   253
+  ],
+  "foregroundPct": 77.1,
+  "maeForeground": 0.1081,
+  "maeForegroundPerChannel": [
+   0.1193,
+   0.1054,
+   0.0997
+  ],
+  "linearLumaRatio_capture_over_reference": 0.742,
+  "silhouetteIoU": 0.589,
+  "reference": {
+   "meanRGB": [
+    0.5993,
+    0.5882,
+    0.4799
+   ],
+   "meanLuma": 0.5827,
+   "p95Luma": 0.8155,
+   "stdLuma": 0.1309,
+   "clippedPct": 0.01,
+   "saturation": 0.155
+  },
+  "capture": {
+   "meanRGB": [
+    0.5013,
+    0.5132,
+    0.4389
+   ],
+   "meanLuma": 0.5053,
+   "p95Luma": 0.691,
+   "stdLuma": 0.1258,
+   "clippedPct": 0.0,
+   "saturation": 0.1866
+  }
+ }
+}

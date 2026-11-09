@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "engine_sha256": "ad6a78a7e4f2664fe1f74b1567dde6d15d1519ad78dbd1e21efbb21ebfa2ebd1",
+  "gltf_sha256": "b86cb72e0c0e0f3c23af45bd115f68760655d1754d663f41df62a45e136f9e8b",
+  "tools_sha256": "539c10536c6df8a769eb4f91488ebfe9a048fdf1bd7cd589d0383479b2641b4d",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestPublicLoadTests.cs",
+      "sha256": "df5f26a7cff53b8672d7a42f6b90ac92bc2b75693fea1636e51929b6039aae04"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestReference.cs",
+      "sha256": "5ecbd8a1f577b7b62865a283f70a939553ec4fa9a1dc6bc9d23e0661a6511204"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestLiteralGeometry.cs",
+      "sha256": "35d7af0f850dc89c6a59369e14610462fa45dae85180b8791797b9862c36128b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestCoreTests.cs",
+      "sha256": "f8e894fb1b70a5fd87174b7b52e7567fc445d5a25ceeb6df74d16cce45b83283"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestGpuChecks.cs",
+      "sha256": "8b9084e38b34f83fe9abfdd09c99f5b3615bcc7c6f698b06a5f9ca94432327f9"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestMaterialPlanChecks.cs",
+      "sha256": "30262dddaf2ee6df0b02cb4a69592af45e9841734749e9c11f350b0a12430bea"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.UnlitTestValidation.UnlitTestCoreTests",
+      "kind": "static_results",
+      "method": "RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 39
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.UnlitTestValidation.UnlitTestGpuVerifierTests",
+      "kind": "static_results",
+      "method": "RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 10
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.UnlitTestValidation.UnlitTestMaterialPlanChecks",
+      "kind": "static_results",
+      "method": "RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 4
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.UnlitTestValidation.UnlitTestPublicLoadTests",
+      "kind": "mstest",
+      "expected_cases": 4,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,198 @@
+{
+  "passed": false,
+  "phase": "complete",
+  "error": null,
+  "expected_cases": 5,
+  "passed_cases": 3,
+  "failed_cases": 2,
+  "incomplete_cases": 0,
+  "tests": [
+    {
+      "suite": "Sandbox.Gltf.DirectGpu.TextureLinearValidation.TextureLinearCoreTests",
+      "method": "ExactSourceMaterialSamplerImageAndAllConstantUvs",
+      "arguments": [
+        false
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "suite": "Sandbox.Gltf.DirectGpu.TextureLinearValidation.TextureLinearCoreTests",
+      "method": "ExactSourceMaterialSamplerImageAndAllConstantUvs",
+      "arguments": [
+        true
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "suite": "Sandbox.Gltf.DirectGpu.TextureLinearValidation.TextureLinearCoreTests",
+      "method": "IndependentTransferOrderAndPointFilterControlsAreSensitive",
+      "arguments": [],
+      "passed": true,
+      "error": null
+    },
+    {
+      "suite": "Sandbox.Gltf.DirectGpu.TextureLinearValidation.TextureLinearPublicTests",
+      "method": "ActualSourceEmissiveInterpolationPublicRendererAndCleanup",
+      "arguments": [
+        false
+      ],
+      "passed": false,
+      "error": "Sandbox.ShaderCompileException: anonymous/5.shader didn\u0027t compile: Program VFX_PROGRAM_VS not found. It really should have been found. We have a mismatch somewhere.\n   at Sandbox.Engine.Shaders.GameShaders.CompileInCache(BaseFileSystem fileSystem, String relativePath, String displayPath, String cachePath, CancellationToken token) in /home/damian/projects/sbox-public/engine/Sandbox.Engine/Systems/Render/ShaderCompile/GameShaders.cs:line 219\n   at Sandbox.Engine.Shaders.GameShaders.\u003C\u003Ec__DisplayClass10_0.\u003C\u003CCompileAnonymous\u003Eb__0\u003Ed.MoveNext() in /home/damian/projects/sbox-public/engine/Sandbox.Engine/Systems/Render/ShaderCompile/GameShaders.cs:line 123\n--- End of stack trace from previous location ---\n   at Sandbox.Engine.Shaders.GameShaders.Gated[T](CancellationToken token, Func\u00602 run) in /home/damian/projects/sbox-public/engine/Sandbox.Engine/Systems/Render/ShaderCompile/GameShaders.cs:line 186\n   at Sandbox.Engine.Shaders.GameShaders.CompileAnonymous(String source, CancellationToken token) in /home/damian/projects/sbox-public/engine/Sandbox.Engine/Systems/Render/ShaderCompile/GameShaders.cs:line 119\n   at Sandbox.Gltf.DirectGpu.TextureLinearValidation.TextureLinearPublicTests.ActualSourceEmissiveInterpolationPublicRendererAndCleanup(Boolean compiled)\n   at Sandbox.Gltf.DirectGpu.TextureLinearValidation.TextureLinearPublicTests.ActualSourceEmissiveInterpolationPublicRendererAndCleanup(Boolean compiled)\n   at McpScript.Run(String exchangeDirectory, CancellationToken cancellationToken)"
+    },
+    {
+      "suite": "Sandbox.Gltf.DirectGpu.TextureLinearValidation.TextureLinearPublicTests",
+      "method": "ActualSourceEmissiveInterpolationPublicRendererAndCleanup",
+      "arguments": [
+        true
+      ],
+      "passed": false,
+      "error": "Sandbox.ShaderCompileException: anonymous/6.shader didn\u0027t compile: Program VFX_PROGRAM_VS not found. It really should have been found. We have a mismatch somewhere.\n   at Sandbox.Engine.Shaders.GameShaders.CompileInCache(BaseFileSystem fileSystem, String relativePath, String displayPath, String cachePath, CancellationToken token) in /home/damian/projects/sbox-public/engine/Sandbox.Engine/Systems/Render/ShaderCompile/GameShaders.cs:line 219\n   at Sandbox.Engine.Shaders.GameShaders.\u003C\u003Ec__DisplayClass10_0.\u003C\u003CCompileAnonymous\u003Eb__0\u003Ed.MoveNext() in /home/damian/projects/sbox-public/engine/Sandbox.Engine/Systems/Render/ShaderCompile/GameShaders.cs:line 123\n--- End of stack trace from previous location ---\n   at Sandbox.Engine.Shaders.GameShaders.Gated[T](CancellationToken token, Func\u00602 run) in /home/damian/projects/sbox-public/engine/Sandbox.Engine/Systems/Render/ShaderCompile/GameShaders.cs:line 186\n   at Sandbox.Engine.Shaders.GameShaders.CompileAnonymous(String source, CancellationToken token) in /home/damian/projects/sbox-public/engine/Sandbox.Engine/Systems/Render/ShaderCompile/GameShaders.cs:line 119\n   at Sandbox.Gltf.DirectGpu.TextureLinearValidation.TextureLinearPublicTests.ActualSourceEmissiveInterpolationPublicRendererAndCleanup(Boolean compiled)\n   at Sandbox.Gltf.DirectGpu.TextureLinearValidation.TextureLinearPublicTests.ActualSourceEmissiveInterpolationPublicRendererAndCleanup(Boolean compiled)\n   at McpScript.Run(String exchangeDirectory, CancellationToken cancellationToken)"
+    }
+  ],
+  "measurements": [
+    {
+      "suite": "Sandbox.Gltf.DirectGpu.TextureLinearValidation.TextureLinearPublicTests",
+      "property": "Measurements",
+      "value": [
+        {
+          "compiled": false,
+          "captures": [
+            {
+              "phase": "capture",
+              "name": "empty_before",
+              "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/public/b2b4ddd210114a33bba8d79d742bf0e1/empty_before.png",
+              "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+              "width": 192,
+              "height": 192,
+              "coverage": 0,
+              "engine_frame": 20843,
+              "widget_frames": 6,
+              "elapsed_seconds": 0.5733875,
+              "camera_position": "350,0,10",
+              "camera_rotation": "0,0,1,0",
+              "custom_size": "192,192",
+              "scene_camera_size": "192,192",
+              "screen_rect": "0,0,192,192",
+              "viewport": "0,0,1,1",
+              "DebugMode": 0,
+              "EnablePostProcessing": false,
+              "Orthographic": true,
+              "OrthographicHeight": 270,
+              "ZNear": 1,
+              "ZFar": 1000,
+              "point_light_position": "200,-30,60",
+              "point_light_radius": 1000,
+              "point_light_color": "4.00, 4.00, 4.00, 1.00",
+              "scope": "Fresh192px diagnostic native camera capture; not a1080p performance benchmark."
+            }
+          ]
+        },
+        {
+          "compiled": true,
+          "captures": [
+            {
+              "phase": "capture",
+              "name": "empty_before",
+              "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/public/c19808da12a54fb1954d3676723d2667/empty_before.png",
+              "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+              "width": 192,
+              "height": 192,
+              "coverage": 0,
+              "engine_frame": 20852,
+              "widget_frames": 8,
+              "elapsed_seconds": 0.1989396,
+              "camera_position": "350,0,10",
+              "camera_rotation": "0,0,1,0",
+              "custom_size": "192,192",
+              "scene_camera_size": "192,192",
+              "screen_rect": "0,0,192,192",
+              "viewport": "0,0,1,1",
+              "DebugMode": 0,
+              "EnablePostProcessing": false,
+              "Orthographic": true,
+              "OrthographicHeight": 270,
+              "ZNear": 1,
+              "ZFar": 1000,
+              "point_light_position": "200,-30,60",
+              "point_light_radius": 1000,
+              "point_light_color": "4.00, 4.00, 4.00, 1.00",
+              "scope": "Fresh192px diagnostic native camera capture; not a1080p performance benchmark."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "diagnostics": [
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearReference.cs(1,7): hidden CS8933: The using directive for \u0027System\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearReference.cs(3,7): hidden CS8933: The using directive for \u0027System.Linq\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs(1,7): hidden CS8933: The using directive for \u0027System\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs(3,7): hidden CS8933: The using directive for \u0027System.Linq\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs(4,7): hidden CS8933: The using directive for \u0027Microsoft.VisualStudio.TestTools.UnitTesting\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs(1,7): hidden CS8933: The using directive for \u0027System\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs(5,7): hidden CS8933: The using directive for \u0027System.Linq\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs(7,7): hidden CS8933: The using directive for \u0027System.Threading.Tasks\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs(8,7): hidden CS8933: The using directive for \u0027Microsoft.VisualStudio.TestTools.UnitTesting\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs(1,7): hidden CS8933: The using directive for \u0027System\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs(6,7): hidden CS8933: The using directive for \u0027System.Linq\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs(10,7): hidden CS8933: The using directive for \u0027System.Threading.Tasks\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs(11,7): hidden CS8933: The using directive for \u0027Microsoft.VisualStudio.TestTools.UnitTesting\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs(1,7): hidden CS8933: The using directive for \u0027System\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs(4,7): hidden CS8933: The using directive for \u0027System.Linq\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs(1,7): hidden CS8933: The using directive for \u0027System\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs(4,7): hidden CS8933: The using directive for \u0027System.Linq\u0027 appeared previously as global using",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs(4,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs(7,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs(4,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs(3,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearReference.cs(3,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs(3,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs(6,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs(6,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs(5,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs(10,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs(8,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs(1,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs(1,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs(2,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs(4,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearReference.cs(1,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs(1,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs(1,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs(11,1): hidden CS8019: Unnecessary using directive.",
+    "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs(1,1): hidden CS8019: Unnecessary using directive."
+  ],
+  "cleanup_errors": [],
+  "scope": "Model-local assertions against the actual loaded producer; CPU/data rows alone do not establish directGPU rendered parity.",
+  "source_sha256": {
+    "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearReference.cs": "20620636cfbca8040888a085dd21ec148380e0e70603a4ad3213051b13807caa",
+    "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs": "0fd08c9c1aad28ec153779f823b497831442c5040035917292d2fffada0bf37e",
+    "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs": "2ee192e374d58eef3eca0441c2cfede2501b542137e274ead18e9cc78d40ffb9",
+    "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161",
+    "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544",
+    "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+  },
+  "source_read_paths": {
+    "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearReference.cs": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearReference.cs",
+    "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs",
+    "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs",
+    "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+    "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+    "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs"
+  },
+  "test_snapshot_manifests": {},
+  "request_sha256": "9af7a6cccf5560874f1a4a31cb28bdeefd730e132bea3d92458b1c0a06b3db88",
+  "runner_sha256": "fc29bce8cf60316725df5cc2b56cf203572bce143137d035f809d90fbfeb8983",
+  "helper_mvid": "271aabfc-6dde-4be5-9b4c-e21dacc27067",
+  "engine_location": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.Engine.dll",
+  "engine_mvid": "5a07f228-dff8-4d6b-b4ef-890b32a80299",
+  "gltf_location": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.Gltf.dll",
+  "gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "framework_mvid": "ea501b1a-9500-43b9-9f3d-f638f1824d61",
+  "is_editor": true,
+  "is_unit_test": false,
+  "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/model-tests/a8b1ae02c36a46c898adceec88876652"
+}

@@ -1,0 +1,106 @@
+{
+  "model": "AlphaBlendModeTest",
+  "owner": "/root/gpu_alpha_blend",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaNativePassExecutionTests.cs",
+      "sha256": "97629992baa5c003933e0a9bdef2591bae760a74958e662a7098b26e7d7c1349"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaNativePassProbe.cs",
+      "sha256": "b43e0382489e16167986547bc1d0028802223b94a91a43ff29835d478620fe9f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaMaterialRoutingProbe.cs",
+      "sha256": "63d894c1ba079958345631d7858c650a587fa6baa94546b3491020af94b306fa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaControlFixtures.cs",
+      "sha256": "07b5c4ed3e67354fd156d252940a947545e2472dd4b70d833741abf2dc80080b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaMixedPassProbe.cs",
+      "sha256": "809879244811298058ed5db61cc2c9e58ba60a1a901ec679e8d67deb36073d3e"
+    }
+  ],
+  "suite": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaNativePassExecutionTests",
+  "setup": "public static Configure(checkoutRoot,freshOutputDirectory,exactDeployedComputeShaderPath)",
+  "expected_cases": 4,
+  "nested_result_inventory": {
+    "ActualNativePassCallbacksAndOrdering": 8,
+    "ActualEffectiveMaterialOverrideClassification": 8,
+    "ActualMixedPassAnimatedPoseAndNoOpOverrides": {
+      "animated_gpu_pose_rows": 3,
+      "no_op_repetitions_per_pose": 3,
+      "scope": "actual per-layer draw-count filtering, aggregate completion, independent literal positions from actual GPU readback; no alpha-pixel/sort claim"
+    },
+    "ActualEmptyInstanceReadiness": {
+      "empty_readiness_repetitions": 3,
+      "scope": "vacuous current revision/empty readback/no flags/zero calls; no GPU work claimed"
+    }
+  },
+  "scope": "four actual MSTests: native callback8 observations, effective material routing8, mixed pass animated actual GPU readback at3times with no-op override stability, empty instance readiness",
+  "execution_needs": "coordinator guarded idle native editor; provided stock white material copies use actual F_TRANSLUCENT reload; private visible SceneRenderingWidget/native captures; no new producer build or authored shader",
+  "notes": [
+    "wrapper owns and closes only its private widget/scene/material copies",
+    "borrowed stock template and deployed compute material remain alive",
+    "retain any native feature/material rejection as actual red, not pretend a fake blend control",
+    "actual backend current opaque-only failures anticipated"
+  ],
+  "status": "refrozen_root_approved_evidence_based_counter_oracle_correction; GPUposition1e-4/noop/empty/deletion unchanged",
+  "prior_prepared_identity": "probe-pre-cleanup-identities.json",
+  "prior_compile_failure": {
+    "receipt": "Temp/gltf-validation/direct-gpu/c5c0-alpha-native-routing-2/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "sha256": "f773118171a8c8313e6f77fb83737838dcc574130f284ef96d45e87b6e57cad9",
+    "executed": 0,
+    "incomplete": 2,
+    "diagnostic": "CS1674: Scene is not IDisposable",
+    "prior_helper_sha256": "c7c74d994c0d1f6b8f6cbbbf92a24a735f1c2045b85d01ea82772cfe452c9ac2"
+  },
+  "prior_runtime_receipt": {
+    "path": "Temp/gltf-validation/direct-gpu/c5c0-alpha-native-routing-fixed-2/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "sha256": "ce272234dc5e25f16d77b38d2cade0677994131f8da9bc0e04ec8421ea64adeb",
+    "executed_mstests": 2,
+    "passed_mstests": 1,
+    "failed_mstests": 1,
+    "native_callback_rows_passed": 8,
+    "material_routing_rows_passed": 3,
+    "material_routing_rows_failed": 5,
+    "limitation": "Reverse-camera sort callbacks observed but both images empty; no reverse-view visibility or alpha-pixel claim"
+  },
+  "producer_dependencies": {
+    "backend_next_stage_sha256": "86ac3f13464ac0e323eb12f32c64ede56618630957a416c4ced5a741a9461fd7",
+    "compute_resource_path": "shaders/gltf_deform_cs.shader",
+    "sorting": "not implemented or accepted by this request"
+  },
+  "prior_mixed_failure": {
+    "receipt": "Temp/gltf-validation/direct-gpu/stage485-targeted-92/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "sha256": "f7aa221b0116150b48bd3b6cff4424b3516e4550b7094ffdfb26147c5d2dd2ef",
+    "source_archive": "Temp/gltf-validation/direct-gpu/stage485-targeted-92/frozen-helper-inputs/",
+    "alpha_mstests_passed": 3,
+    "alpha_mstests_failed": 1,
+    "mixed_diagnosis": "Unresolved global draw delta2 and partial aggregate assertion; instrument actual selection, rows and callback overlap without serializing or changing producer/assertions/tolerance"
+  },
+  "instrumentation": {
+    "event_limit": 256,
+    "retain_on_failure": true,
+    "serializes_original_callback": false,
+    "fields": "entry/exit sequence,ticks,thread,frame,view,activecallbacks,layer,pose,globalcounter window,actual DrawsForCurrentView IDs,perdraw cached/native flags and compute/submitted/call counters",
+    "same_row_overlap": "separately retained and fails counter attribution; not silently accepted"
+  },
+  "prior_instrumentation_serialization_failure": {
+    "receipt": "Temp/gltf-validation/direct-gpu/stage485-alpha-instrumented-and-literal-5/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "sha256": "eb50de0f7d333f3a9807c41ce4b8fc345ce7dbf79b6ccc0a75a824f58e464de4",
+    "diagnostic": "Anonymous row keys index and Index collide in System.Text.Json; actual four Alpha tests executed3pass1fail; cohort fifth literal incomplete",
+    "prior_mixed_helper_sha256": "5f8c0237d8e4ee4167894b908f14eb8ede465eeda4c8c15dd25dcea06ba761d0"
+  },
+  "counter_oracle_correction_evidence": {
+    "path": "Temp/gltf-validation/direct-gpu/stage485-alpha-instrumented-and-literal-5/recovered-measurements.json",
+    "sha256": "836c47854c425de75168cafb913428c7d86eb3b4875f499f86e227beec224da7",
+    "callback_count": 30,
+    "correct_actual_selection_and_selected_row_delta_one": 30,
+    "global_delta_two_due_other_row": 11,
+    "aggregate_current_with_stale_row_observed": 0,
+    "correction": "Check actual selected row IDs/native class/per-selected-row count and actual row revisions; do not serialize callbacks. Explicitly fail unresolved same-row overlap attribution."
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "model": "EnvironmentTest",
+  "status": "native-IBL-response-proven-extension-unimplemented",
+  "sourcePin": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "executedTests": {
+    "command": "python3 test_source_environment.py -v",
+    "passed": 6,
+    "scope": "Pinned source/layout, exact HDRroundtrip, independentRGBD andcubebasis controls"
+  },
+  "preparedFixtures": [
+    {
+      "schemaVersion": 1,
+      "name": "field",
+      "source": "/tmp/gltf-field-khronos.hdr",
+      "sourceSha256": "ff5fca75908af1f98d1a458070b7fadac2e6fa9c0b7f997115ec4bc496aee0ef",
+      "exr": "/tmp/gltf-reference-field-native/field.exr",
+      "exrSha256": "a9ad16a6d516171e425d0fc22cdde643b2116ed544578945899958cea21e1e7f",
+      "definition": "/tmp/gltf-reference-field-native/field.vtex",
+      "definitionSha256": "562deb2ba9abd7d44a2b1b15ca4725cf4711a0feb6e6117f3b58e6894ae8eb6d",
+      "resource": "materials/gltf_reference_environment/field.vtex",
+      "width": 4096,
+      "height": 2048,
+      "channels": 3,
+      "minimum": 0.0,
+      "maximum": 18.75,
+      "oiioVersion": "3.1.18.1",
+      "exactDecodedRoundtrip": true,
+      "originalBytesPreserved": false,
+      "provenance": "Khronos glTF-Sample-Environments field.hdr; chosen candidate for NormalTangentTest, exact screenshot environment unproven",
+      "nativeImport": "executed; see result.json and exact current compiled hashes in field-native-result.json for Field",
+      "scope": "Original decoded HDR preserved in source. Native import/IBL pixel influence executed; Field actual GPU HDR/mips now proved by shared diagnostic. Reference renderer, orientation and photometric equivalence remain unproven."
+    },
+    {
+      "schemaVersion": 1,
+      "name": "aerodynamics_workshop",
+      "source": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/ABeautifulGame/aerodynamics_workshop_1k.exr",
+      "sourceSha256": "8294e1425aecde72d188ac003eb46a4dd1a79877a1431e4c3979cfc49b3c5c76",
+      "exr": "/tmp/gltf-reference-aerodynamics-native/aerodynamics_workshop.exr",
+      "exrSha256": "8294e1425aecde72d188ac003eb46a4dd1a79877a1431e4c3979cfc49b3c5c76",
+      "definition": "/tmp/gltf-reference-aerodynamics-native/aerodynamics_workshop.vtex",
+      "definitionSha256": "4e98e40219656a4b81ee525dd63f651d5151d0df3911127d58c44456b15646cf",
+      "resource": "materials/gltf_reference_environment/aerodynamics_workshop.vtex",
+      "width": 1024,
+      "height": 512,
+      "channels": 3,
+      "minimum": 0.0,
+      "maximum": 54.5,
+      "oiioVersion": "3.1.18.1",
+      "exactDecodedRoundtrip": true,
+      "originalBytesPreserved": true,
+      "provenance": "Poly Haven Aerodynamics Workshop CC0; pinned ABeautifulGame README documents Babylon ACES +2EV screenshot; original EXR bytes preserved",
+      "nativeImport": "executed; see result.json and exact current compiled hashes in field-native-result.json for Field",
+      "scope": "Original EXR bytes preserved; native import and IBL pixel influence executed. Raw HDR/mips and reference photometric equivalence remain unproven."
+    }
+  ],
+  "nativeValidation": {
+    "import": "Field andAerodynamics executed; exactresources in result.json",
+    "renderControls": [
+      "no environment",
+      "zero-tint same environment",
+      "positive environment",
+      "same positive with wrong exposure EV"
+    ],
+    "referenceMatch": "unproven",
+    "iblControl": "noenv/black samePNG,positive changes6653px",
+    "wrongExposureControl": "FAILED:0EV/+2EV samePNG despite retainedsettings",
+    "lightingFlags": "Executedconstantcube; defaultsfalse, enabledretainedtrue; allcapturesidentical. Transferredblackpattern toAOowner.",
+    "currentFieldDiagnostic": "research/gltf-validation/direct-gpu/models/EnvironmentTest/field-native-result.json",
+    "currentFieldHdr": "PASS: all9mips/8388576GPUtexelcenters finite/nonnegative/alpha1; baseHDRmax16.1875; literal/black/wrongmip independentcontrols passed",
+    "currentExposure": "PASS: newemissivefixture scalar1\u21923.9810612,+2EV target4,35344pixelsbrighten; realRTTconvergence required. OldsamePNGfailure preserved."
+  },
+  "extension": {
+    "name": "EXT_lights_image_based",
+    "required": false,
+    "sourcePresent": true,
+    "iblImages": {
+      "RGBA": 7,
+      "RGB": 23,
+      "mipSizes": [
+        256,
+        128,
+        64,
+        32,
+        16
+      ]
+    },
+    "nativeLoaderCapability": "not implemented or established by these changes; core fallback separate from imported lighting"
+  },
+  "limitations": [
+    "EnvironmentTest core reference environment/exposure/renderer undocumented; optional glTF-IBL carries authored RGBD cube and SH.",
+    "Field is a chosen candidate for NormalTangentTest; Aerodynamics is documented for ABeautifulGame Babylon screenshot.",
+    "No newly rendered comparison is claimed."
+  ],
+  "embeddedFixture": {
+    "manifest": "research/gltf-validation/direct-gpu/models/EnvironmentTest/embedded-ibl-fixture.json",
+    "payloadSha256": "2c0921457a3730b7e4c1b857a08706892be5aa3cd25a17efed95954184ecc4ca",
+    "payloadBytes": 8380416,
+    "nativeExecution": "notqueued; extensionunselected"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "kind": "agent-recorded terminal observation, not machine-generated runner receipt",
+  "scope": "isolated revised parser candidate and independent source/synthetic tests, not installed engine",
+  "guard": {
+    "admitted": true,
+    "budgetBytes": 4294967296,
+    "availableBytes": 8966078464,
+    "projectedAvailableBytes": 4671111168,
+    "warnings": [
+      "Less than 25% swap free; available RAM and sustained pressure still permit admission."
+    ]
+  },
+  "exitCode": 0,
+  "printedAssertions": [
+    18,
+    8
+  ],
+  "parserPatch": {
+    "path": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/AnimatedColorsCube/candidate/parser-candidate.patch",
+    "sha256": "183dd5ace92da78f4a4890e7689a503d15b582e14b178bee444cc727462679ff"
+  },
+  "tests": [
+    {
+      "path": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/AnimatedColorsCube/PartialPointerTests.cs",
+      "sha256": "2ff23620eb16a7995be65497061661e57e24fbd8d1bb67018bdf2baa0a492b61"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/AnimatedColorsCube/PointerSpecificationTests.cs",
+      "sha256": "e04b3bdb4e4f4fff87800134d26bd8ab72d885584fc688aa934030153a9fab6c"
+    }
+  ],
+  "isolatedOutput": {
+    "path": "/tmp/animatedcolors-parser-candidate/Sandbox.Gltf/bin/Debug/net10.0/Sandbox.Gltf.dll",
+    "sha256": "ca3420d548f624159c3bc77057423a7fe7be22cbb57990ff786a2a8a685b23a2"
+  },
+  "scopeSupported": "opt-in optional /materials/{index}/pbrMetallicRoughness/baseColorFactor VEC4; required extension still rejected; no arbitrary pointer support claim",
+  "limitations": [
+    "No installed producer, native material rendering, texture lifetime, override/variant, compiled public asset or user review proof",
+    "Rendered behavior for spline overshoot is unproven"
+  ]
+}

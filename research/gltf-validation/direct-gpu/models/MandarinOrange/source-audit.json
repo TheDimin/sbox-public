@@ -1,0 +1,85 @@
+{
+  "model": "MandarinOrange",
+  "corpus_revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "actual_source_variants": [
+    "glTF"
+  ],
+  "default_scene": null,
+  "scene_count": 1,
+  "scene_roots": [
+    1
+  ],
+  "node_count": 2,
+  "mesh_count": 1,
+  "primitive_count": 1,
+  "vertex_count": 24138,
+  "index_count": 122508,
+  "source_stride": 32,
+  "source_accessor_offsets": [
+    0,
+    12,
+    24
+  ],
+  "optional_extensions": [
+    "KHR_materials_diffuse_transmission"
+  ],
+  "required_extensions": [],
+  "files": [
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/LICENSE.md",
+      "sha256": "6b9b29412a00de3b36534c7dd071863b0f3d3b2641064d3c90e5db51a6a43d5c"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/README.body.md",
+      "sha256": "b53a72951bbd904c141de3d267989763c348c4957e87d3744057b384bed6529b"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/README.md",
+      "sha256": "201714cb3c45417c164e90f79f3234419e77548448af9dd2d900822a21d776fd"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/metadata.json",
+      "sha256": "0e4cc86876f714aaf90dd3d839ff8cf837668518ce1ddd224b07e4979ca1c104"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/glTF/MandarinOrange.bin",
+      "sha256": "15bc58559ab4b60e6e1a94449940911e1c5ebc4c021004b7f4fac54323063cfd"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/glTF/MandarinOrange.gltf",
+      "sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/glTF/MandarinOrange_Basecolor.jpg",
+      "sha256": "a652724500c853d1470cf2c37d97ea3741f2f1bd206322fe8e9a3b99f9cdaedd"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/glTF/MandarinOrange_DiffuseTransmission.png",
+      "sha256": "6ccaa5a695cf3916d66f7a13565fd0b4a672b2d99f11327b9e36451f5ca49842"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/glTF/MandarinOrange_Normal.png",
+      "sha256": "45fe254d98974f3dadc161100b9175c7f8f3377ab3881a5b9835503e1f0a1dd5"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/glTF/MandarinOrange_OcclusionRough.jpg",
+      "sha256": "08a87a3a66198992988ea98adf69c0d6d787b0b863b5a0f56921178f03152c34"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/screenshot/screenshot-large.jpg",
+      "sha256": "6ad73b4594c28493bd77397da3631eee48859ddc42e31d3fbf90119ca9c58c33"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/screenshot/screenshot.jpg",
+      "sha256": "dd665adb32c6bf5c140352f214d5397caa81cc3d95619ccdb3adb34bdde2558b"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/screenshot/textures.jpg",
+      "sha256": "83ee8dbb0e13298bc92fe94c729c3752cb3fce552381918c2feffadbca74eb93"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/screenshot/with-without.jpg",
+      "sha256": "f970686d93a2156a9a6110971854c70c748892dc9ec2c6403db1c7fac0c3c6c4"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "engine_sha256": "ed5f8073e45d3a4f90e5140323cc5c5a0dddf9707be71ee375966ca0f05403f0",
+  "gltf_sha256": "7638a855ba21fd9c079a22cbc8b834d4169112fe08cb9a5fd788e63cf90866e1",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshoptCubeTest/MeshoptCubeReference.cs",
+      "sha256": "c396611e6e3c6b88b404233be6538135065eef69ba340cd561083e3db6ea902f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshoptCubeTest/MeshoptCubeCoreTests.cs",
+      "sha256": "b188d2b5de7a5a3b60c2e1cd83d642ef82aae568888a6ecf7c3e5309f6b83110"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshoptCubeTest/MeshoptCubeGpuChecks.cs",
+      "sha256": "931514ffa4bcea09ebbda840f93004c8a359777f6a64874b5319d9390f45f257"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshoptCubeTest/MeshoptCubePlaybackTests.cs",
+      "sha256": "f31e10c49fd330a6476180e78669ac6319919b199dbe6f532adfbed87fc6d95b"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MeshoptCubeValidation.MeshoptCubePlaybackTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ]
+}

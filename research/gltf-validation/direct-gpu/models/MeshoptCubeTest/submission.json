@@ -1,0 +1,145 @@
+{
+  "model": "MeshoptCubeTest",
+  "owner": "/root/gpu_meshopt_cube",
+  "coordinator": "/root/gpu_validation",
+  "status": "frozen; C# and actual GPU work unexecuted",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshoptCubeTest/.gitignore",
+      "sha256": "32dae3052f331ee34d628ef535709b301259a45df7c7522c4d35dcf49873f00b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshoptCubeTest/ACCEPTANCE.md",
+      "sha256": "32da5d7c7c63d2297a5a6e5fa97940ab1ca1061e69f8876a5b18a0b3b62adb24"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshoptCubeTest/MeshoptCubeCoreTests.cs",
+      "sha256": "b188d2b5de7a5a3b60c2e1cd83d642ef82aae568888a6ecf7c3e5309f6b83110"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshoptCubeTest/MeshoptCubeGpuChecks.cs",
+      "sha256": "ecaedfccfc0290bf7ae0e73dfb3b6ebe98c725d925a4521a099f3ee82a1543b3"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshoptCubeTest/MeshoptCubeGpuProbe.cs",
+      "sha256": "6debce7d8893969909738b10e61493974dae140b2298c4d38152808de1641029"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshoptCubeTest/MeshoptCubeImageChecks.cs",
+      "sha256": "ab34836016755a233177572a4f750023342d39f2aed84d7ba5f284b93993ae7f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshoptCubeTest/MeshoptCubePlanTests.cs",
+      "sha256": "e26641cb48607b1f4d1dfabf03950c9e810e28cee4cb4005c1fdc5cacd374c17"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshoptCubeTest/MeshoptCubeReference.cs",
+      "sha256": "c396611e6e3c6b88b404233be6538135065eef69ba340cd561083e3db6ea902f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshoptCubeTest/author_reference.py",
+      "sha256": "ac9f972c9f3917502d15ed63f4d91f0524029e6a52f99180447e775b7f613ab8"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshoptCubeTest/reference.json",
+      "sha256": "bffc5439add7da08959b2a01ca93e748b274a3d3e26ce64f0d1b7b448d402219"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshoptCubeTest/test_author_reference.py",
+      "sha256": "280b5f74d8fdbc657c014e8825b1f6a536a6866b60c010fb92118fa86f05ad76"
+    }
+  ],
+  "producer_dependencies": [
+    "actual loaded Sandbox.Gltf including KHR meshopt v0/v1/all filters, quantization, source upload APIs and compiler",
+    "actual loaded Sandbox.Engine and native meshoptimizer package 2026.10.1.20",
+    "shared direct GPU backend/rig/morph helpers; GltfGpuPrimitiveSnapshot.IndexDataOrigin must identify actual bound GPU index readback"
+  ],
+  "shared_backend_contract": {
+    "path": "research/gltf-validation/direct-gpu/CONTRACT.md",
+    "sha256": "12ed85fa725cb58481f1fcc334b542f7b6901c5f329fc9182977bbc721da3673"
+  },
+  "entries": [
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.MeshoptCubeValidation.MeshoptCubeCoreTests.RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 35,
+      "scope": "CPU/codec/data",
+      "sources": [
+        "MeshoptCubeReference.cs",
+        "MeshoptCubeCoreTests.cs"
+      ]
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.MeshoptCubeValidation.MeshoptCubePlanTests.RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 12,
+      "scope": "CPU staging only",
+      "sources": [
+        "MeshoptCubeReference.cs",
+        "MeshoptCubeCoreTests.cs",
+        "MeshoptCubePlanTests.cs"
+      ]
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.MeshoptCubeValidation.MeshoptCubeGpuChecks.RunVerifierControls",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 9,
+      "scope": "synthetic checker sensitivity only; no GPU evidence",
+      "sources": [
+        "MeshoptCubeReference.cs",
+        "MeshoptCubeCoreTests.cs",
+        "MeshoptCubeGpuChecks.cs"
+      ]
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.MeshoptCubeValidation.MeshoptCubeImageChecks.RunVerifierControls",
+      "arguments": [],
+      "expected_cases": 7,
+      "scope": "synthetic image-checker sensitivity only; no GPU evidence",
+      "sources": [
+        "MeshoptCubeReference.cs",
+        "MeshoptCubeCoreTests.cs",
+        "MeshoptCubeImageChecks.cs"
+      ]
+    }
+  ],
+  "expected_cases": 63,
+  "forms": [
+    "glTF/source",
+    "glTF/compiled_glb_c",
+    "glTF-Meshopt/source",
+    "glTF-Meshopt/compiled_glb_c"
+  ],
+  "acceptance": "ACCEPTANCE.md. All independent fallback values/complete-view hashes, source-derived descriptors, strict optional fallback vs required rejection. GPU positions .0002 inches; normals 2e-6; UV/color 2e-7. Image checker enforces IoU .98 / mean RGB byte error 1 / max error 8 for each of 35 regions, subject to coordinator review.",
+  "actual_gpu_entry": "Sandbox.Gltf.DirectGpu.MeshoptCubeValidation.MeshoptCubeGpuProbe.Run($checkout, formName, world, computeMaterial, waitForActualFrames, materialResolver=null)",
+  "actual_gpu_inventory": {
+    "form_invocations": 4,
+    "geometry_rows_per_form": 9,
+    "explicit_pending_material_cadence_rows_per_form": 1,
+    "vertices_per_readback": 640,
+    "bound_indices_per_readback": 960
+  },
+  "image_entry": "Sandbox.Gltf.DirectGpu.MeshoptCubeValidation.MeshoptCubeImageChecks.AssertMatched(emptyBefore, independentExpected, emptyAfterReference, actual, deletedAfter, regions, independentExpectedProvenance)",
+  "execution_needs": "Coordinator alone builds/installs/restarts/compiles shaders/drives editor. Compile helper against actually loaded producers; run 63 pure/model cases first; GPU probes need accepted raw triangle gate, shader, source material adapter and genuine completed-frame callback. Image gate needs an independently authored matched reference, never upstream screenshot or producer-generated expected values.",
+  "executed_evidence": [
+    "5/5 independent Python authoring unit tests; stdlib only",
+    "full source/dependency hashes pinned in reference.json",
+    "local nupkg identity and primary NuGet/upstream release/specification audit"
+  ],
+  "unexecuted_gates": [
+    "all 63 C# CPU/staging/synthetic cases",
+    "four actual GPU probes",
+    "all-35-region independent material images and fresh empty/deletion controls",
+    "wall-clock animation cadence",
+    "repeated load/unload and creation failure rollback",
+    "public Model.Load integration",
+    "Windows",
+    "matched compiled-vmdl load/memory benchmark"
+  ]
+}

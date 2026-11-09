@@ -1,0 +1,184 @@
+{
+  "version": 1,
+  "engine_sha256": "e05cc4da9851ad2c3306e16ef3af317c8b398516dd6f8bf2bcd902687b5f7215",
+  "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MandarinOrangeValidation.DiffuseTransmissionCandidateTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ],
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/DiffuseTransmissionCandidateTests.cs",
+      "sha256": "25705f33f98891517dd71d140cafada033add6fa838f0197f7cd87f5b1453014"
+    }
+  ],
+  "frozen_artifacts": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/gltf_diffuse_transmission_candidate.shader",
+      "sha256": "dfbc59486512cab43579aa7e6a12ed14cf10d2667d50ab9e54346e2a655d24e9"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-native-lambert-reference.shader",
+      "sha256": "1b4febae07e2d474cb27b8f62f8ddb5ebe6b23069ba2c3416884a41e635eb65b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-transmission-plane.gltf",
+      "sha256": "d83fbbde05a3071d54ceabf4aac34901a2a79bb52165ec5cd22404dbc5e0543f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-transmission-role-control.png",
+      "sha256": "0d56394cd9d08679d1c9758c5af2bdf45209ac8e82d92b7c32634b2b88983357"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-transmission-seven-uv-samplers.gltf",
+      "sha256": "3afdc9e602ed95f007e26b053905b7382bb76828c53862904c75f47f0d15f549"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-transmission-oracle.json",
+      "sha256": "827339358c920d0b40dfe7e0a4f3c80c99d2d84aaf9bf662c719339404478550"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/back_factor_zero.gltf",
+      "sha256": "b6567d8f1d09c68c9e62acb54671133f3bc73837a833cc23f06081287453bf91"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/back_factor_one.gltf",
+      "sha256": "6361c7a56775c90168c54d0e9b7983da240f148f192a940c451b889990ed5f43"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/back_factor_quarter.gltf",
+      "sha256": "8248b8f0d146f85276e688296ce190abd9c5fae15a618ed90067019a78551256"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/back_sixty_degree_lambert_fresnel_control.gltf",
+      "sha256": "6361c7a56775c90168c54d0e9b7983da240f148f192a940c451b889990ed5f43"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/front_factor_zero.gltf",
+      "sha256": "b6567d8f1d09c68c9e62acb54671133f3bc73837a833cc23f06081287453bf91"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/front_factor_one.gltf",
+      "sha256": "6361c7a56775c90168c54d0e9b7983da240f148f192a940c451b889990ed5f43"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/front_factor_quarter.gltf",
+      "sha256": "8248b8f0d146f85276e688296ce190abd9c5fae15a618ed90067019a78551256"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/ibl_front_red_factor_zero.gltf",
+      "sha256": "b6567d8f1d09c68c9e62acb54671133f3bc73837a833cc23f06081287453bf91"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/ibl_back_green_factor_one.gltf",
+      "sha256": "6361c7a56775c90168c54d0e9b7983da240f148f192a940c451b889990ed5f43"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/ibl_factor_quarter.gltf",
+      "sha256": "8248b8f0d146f85276e688296ce190abd9c5fae15a618ed90067019a78551256"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/metallic_suppresses_diffuse_transmission.gltf",
+      "sha256": "3f8980790e372aca1a0868bb05e75b7bb18541df2c4fc626b05ad0c6101cb3ff"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/alpha_linear_color_srgb.gltf",
+      "sha256": "8c2f4f53ace6183b27947c81b8c108f5253f9cb198c7c243de586c1022c1978c"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/independent_uniform_reference.gltf",
+      "sha256": "cadfcbb1998096b0d6677719ccf9130d4f7ce85beca34f6935a31e4b5b57449e"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/wrong_color_transfer_negative.gltf",
+      "sha256": "f83aff86c1cada75b9a6973f6b8fc55495c7b6c77149ac7cc8c6395bdda476dc"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/wrong_rgb_strength_negative.gltf",
+      "sha256": "3c3b79fc72b6718d1e804a4ab4e94670fa80f49cdb5fb13bca29cc4bac944faa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/seven_uv_repeat_mirror_actual.gltf",
+      "sha256": "3afdc9e602ed95f007e26b053905b7382bb76828c53862904c75f47f0d15f549"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/seven_uv_independent_uniform_reference.gltf",
+      "sha256": "e448f02efadc9cfa4cb1540a164a03eb1a8dfe936aa65eb242945abc933372ab"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/wrong_strength_clamp_negative.gltf",
+      "sha256": "b0a9d9236910b173a003f5f81c563d3eb3ec3989b653a1391182dc1b2a2f41ae"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/wrong_color_repeat_negative.gltf",
+      "sha256": "6a6eb822d235e73adf30068b4f776e4cf94107f64e2138ba7daa06eb5bb9d102"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/distinct_factor_cache.gltf",
+      "sha256": "6b34623277572605e27ff7ef36d2f68bfa938e61d09a4f10f3fbcaa9467a6d08"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/reader_defaults.gltf",
+      "sha256": "45a604c289f29afed42f17f2a0fb3e2c935b8d7b7f556746e94db6eb64628c9c"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/reader_explicit_zero.gltf",
+      "sha256": "187999beeab6e850003cb63f8629574c87f334142f5acf1dca339bdf83ebba17"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/reader_required_supported.gltf",
+      "sha256": "86b45cb7fa00a2f941032a618621acecb35d51da9b3f6aac0b7d1f8742631a0e"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures/reader_seven_arbitrary_source_sets.gltf",
+      "sha256": "15220ca9a1aa31403c78298624ce1a5820ee0c7d30beb2b8f4a29781f86b7b5a"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-transmission-plane.gltf",
+      "sha256": "d83fbbde05a3071d54ceabf4aac34901a2a79bb52165ec5cd22404dbc5e0543f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-transmission-seven-uv-samplers.gltf",
+      "sha256": "3afdc9e602ed95f007e26b053905b7382bb76828c53862904c75f47f0d15f549"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/glTF/MandarinOrange.gltf",
+      "sha256": "148a260776eb8258f1d90c1623bad1bdca17b1bec42da597536ef09e816c2091"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-positive-fixtures-validation.json",
+      "sha256": "1a4bc849b8543ceba4b7c635ba4cb7d2cb1ced5c7e0aed977244295b92b263e8"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/validate_diffuse_fixtures.py",
+      "sha256": "ac276a39eac880a601a0a66075244a4c86c902bbb0d55baebcb650755d31343e"
+    }
+  ]
+}

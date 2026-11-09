@@ -1,0 +1,460 @@
+{
+  "schemaVersion": 1,
+  "status": "native-hdr-mip-residency-and-exposure-response-proven",
+  "editor": {
+    "pid": 533781,
+    "start": 3180312,
+    "engineMvid": "e66560df-8eba-4c30-998a-a0296a91e4af",
+    "gltfMvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+    "engineSha256": "60bc2b51bbd70c40a000f8b29f420714aff4e3dbda723794b18fdfc43b571396",
+    "gltfSha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3"
+  },
+  "execution": {
+    "guardBudgetGiB": 4,
+    "serializedLock": "/tmp/codex-sbox-gltf-model-tests.lock",
+    "sessions": [
+      89356,
+      28064,
+      29095
+    ],
+    "allTerminal": true,
+    "lockReleased": true,
+    "anonymousComputeOnly": true,
+    "namedShaderInstall": false,
+    "modelRecapture": false
+  },
+  "hdr": {
+    "receipt": {
+      "path": "Temp/gltf-validation/direct-gpu/field-hdr-only-906826c68c-cs-declaration/transport/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "3fa1bad48ba5a2dc2b2bb4c2f7651708bf07e876067e254af66a62b156745fa2"
+    },
+    "expectedCases": 1,
+    "passedCases": 1,
+    "independentControls": {
+      "literalTexelSamples": 2046,
+      "literalTolerance": 2e-06,
+      "literalRgbMaximum": 5.625,
+      "blackBindingAndSentinel": "passed",
+      "wrongBaseMipChangedSamples": 510,
+      "note": "Original measurement exact_hdr_maximum includes metadata header16; do not interpret it as radiance. All literal RGBA comparisons passed."
+    },
+    "residency": {
+      "stage": "field-sampled-gpu-view-residency",
+      "attempts": [
+        {
+          "seconds": 0.0098274,
+          "frame": 277402,
+          "Width": 1024,
+          "Height": 1024,
+          "Mips": 9
+        }
+      ],
+      "first_frame": 277402,
+      "last_frame": 277402,
+      "scope": "Existing-cache state and bounded MarkUsed requests, not cold streaming/load performance or full resident byte identity."
+    },
+    "allMipSamples": 8388576,
+    "result": {
+      "stage": "field-full-sampled-mips",
+      "source_texture": "materials/gltf_reference_environment/field.vtex",
+      "source_compiled_sha256": "01cc0d0f0f69aa856b6650c71d5a4c8528667f61444b35b7c9bc382cda98fc55",
+      "gpu_values_sha256": "1b40f7c86f958a3b75cf383ae15988b449867fa953dc0ce349826a8134055461",
+      "summaries": [
+        {
+          "Mip": 0,
+          "Width": 1024,
+          "Height": 1024,
+          "Samples": 6291456,
+          "Nonfinite": 0,
+          "InvalidAlpha": 0,
+          "Minimum": 0,
+          "Maximum": 16.1875,
+          "Mean": 0.6882982821605848,
+          "StandardDeviation": 1.6236580223149366
+        },
+        {
+          "Mip": 1,
+          "Width": 512,
+          "Height": 512,
+          "Samples": 1572864,
+          "Nonfinite": 0,
+          "InvalidAlpha": 0,
+          "Minimum": 0.002960205,
+          "Maximum": 13.8828125,
+          "Mean": 0.667079913325223,
+          "StandardDeviation": 1.5566043926087598
+        },
+        {
+          "Mip": 2,
+          "Width": 256,
+          "Height": 256,
+          "Samples": 393216,
+          "Nonfinite": 0,
+          "InvalidAlpha": 0,
+          "Minimum": 0.0064353943,
+          "Maximum": 11.3359375,
+          "Mean": 0.6225125094933901,
+          "StandardDeviation": 1.3446771030634495
+        },
+        {
+          "Mip": 3,
+          "Width": 128,
+          "Height": 128,
+          "Samples": 98304,
+          "Nonfinite": 0,
+          "InvalidAlpha": 0,
+          "Minimum": 0.018081665,
+          "Maximum": 7.3671875,
+          "Mean": 0.5506199843043255,
+          "StandardDeviation": 1.0269369856671395
+        },
+        {
+          "Mip": 4,
+          "Width": 64,
+          "Height": 64,
+          "Samples": 24576,
+          "Nonfinite": 0,
+          "InvalidAlpha": 0,
+          "Minimum": 0.02861023,
+          "Maximum": 4.0664062,
+          "Mean": 0.462663476044933,
+          "StandardDeviation": 0.6998240458518942
+        },
+        {
+          "Mip": 5,
+          "Width": 32,
+          "Height": 32,
+          "Samples": 6144,
+          "Nonfinite": 0,
+          "InvalidAlpha": 0,
+          "Minimum": 0.029724121,
+          "Maximum": 2.3164062,
+          "Mean": 0.3914012014865875,
+          "StandardDeviation": 0.4499970474718144
+        },
+        {
+          "Mip": 6,
+          "Width": 16,
+          "Height": 16,
+          "Samples": 1536,
+          "Nonfinite": 0,
+          "InvalidAlpha": 0,
+          "Minimum": 0.030914307,
+          "Maximum": 1.3515625,
+          "Mean": 0.3530227674378289,
+          "StandardDeviation": 0.2978476327655569
+        },
+        {
+          "Mip": 7,
+          "Width": 8,
+          "Height": 8,
+          "Samples": 384,
+          "Nonfinite": 0,
+          "InvalidAlpha": 0,
+          "Minimum": 0.03189087,
+          "Maximum": 1.3408203,
+          "Mean": 0.353154632780287,
+          "StandardDeviation": 0.29744194498708987
+        },
+        {
+          "Mip": 8,
+          "Width": 4,
+          "Height": 4,
+          "Samples": 96,
+          "Nonfinite": 0,
+          "InvalidAlpha": 0,
+          "Minimum": 0.034729004,
+          "Maximum": 1.3554688,
+          "Mean": 0.35306580861409503,
+          "StandardDeviation": 0.29796059916006673
+        }
+      ],
+      "scope": "Every GPU-visible texel center at each of nine mips sampled to float UAV; no raw BC6H CPU conversion, tone map or image editing. Does not establish reference HDRI/orientation/photometric equivalence or independent GGX convolution correctness."
+    }
+  },
+  "exposure": {
+    "receipt": {
+      "path": "Temp/gltf-validation/direct-gpu/field-hdr-exposure-906826c68c-corrected-type/transport/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "aa578c7d86cdf0ad0ac858aec1dce85a6abf49cf7e8ce0a38acaa4e1b2ebb700"
+    },
+    "method": "B_NativeExposureScalarConvergenceAndActualPixelResponse",
+    "passed": true,
+    "result": {
+      "stage": "fixed-exposure-native-scalar-and-pixels",
+      "Samples": [
+        {
+          "attempt": 0,
+          "scalar": 1,
+          "expected": 1,
+          "frame": 275591,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 0
+        }
+      ],
+      "ev2_samples": [
+        {
+          "attempt": 0,
+          "scalar": 1.1596541,
+          "expected": 4,
+          "frame": 275603,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 1,
+          "scalar": 1.6131073,
+          "expected": 4,
+          "frame": 275606,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 2,
+          "scalar": 2.0130103,
+          "expected": 4,
+          "frame": 275610,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 3,
+          "scalar": 2.3442383,
+          "expected": 4,
+          "frame": 275614,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 4,
+          "scalar": 2.6149154,
+          "expected": 4,
+          "frame": 275618,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 5,
+          "scalar": 2.8568397,
+          "expected": 4,
+          "frame": 275621,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 6,
+          "scalar": 3.070042,
+          "expected": 4,
+          "frame": 275625,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 7,
+          "scalar": 3.2453227,
+          "expected": 4,
+          "frame": 275629,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 8,
+          "scalar": 3.3879838,
+          "expected": 4,
+          "frame": 275633,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 9,
+          "scalar": 3.5186782,
+          "expected": 4,
+          "frame": 275637,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 10,
+          "scalar": 3.6146457,
+          "expected": 4,
+          "frame": 275641,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 11,
+          "scalar": 3.6892548,
+          "expected": 4,
+          "frame": 275645,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 12,
+          "scalar": 3.751775,
+          "expected": 4,
+          "frame": 275649,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 13,
+          "scalar": 3.8050277,
+          "expected": 4,
+          "frame": 275653,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 14,
+          "scalar": 3.845917,
+          "expected": 4,
+          "frame": 275657,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 15,
+          "scalar": 3.8786905,
+          "expected": 4,
+          "frame": 275661,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 16,
+          "scalar": 3.9035926,
+          "expected": 4,
+          "frame": 275665,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 17,
+          "scalar": 3.9238303,
+          "expected": 4,
+          "frame": 275669,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 18,
+          "scalar": 3.9398482,
+          "expected": 4,
+          "frame": 275673,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 19,
+          "scalar": 3.9529977,
+          "expected": 4,
+          "frame": 275677,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 20,
+          "scalar": 3.9620898,
+          "expected": 4,
+          "frame": 275681,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 21,
+          "scalar": 3.9698608,
+          "expected": 4,
+          "frame": 275684,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 22,
+          "scalar": 3.9761074,
+          "expected": 4,
+          "frame": 275688,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        },
+        {
+          "attempt": 23,
+          "scalar": 3.9810612,
+          "expected": 4,
+          "frame": 275692,
+          "minimum": 1,
+          "maximum": 1,
+          "compensation": 2
+        }
+      ],
+      "ev0_sha256": "18ce33d1ddc336671d377de41d6fec792c3edd331b2f63fbf877e41c7f37826c",
+      "ev2_sha256": "3e5f9324f190704e2baa2d32e6f1f5cb651cfe73fb6f8976da951c1782b84d76",
+      "changed_pixels_above3of255": 35344,
+      "ev0_mean": 94.80291666666666,
+      "ev2_mean": 112.29083333333334,
+      "scope": "New authored unit-emissive black plane isolates camera exposure; Field retained in private scene. No unchanged NormalTangent/MetalRough captures and no Khronos tone-curve/photometric equivalence claim."
+    },
+    "artifacts": {
+      "exposure_ev0.png": {
+        "path": "Temp/gltf-validation/direct-gpu/field-hdr-exposure-906826c68c-corrected-type/artifacts/exposure_ev0.png",
+        "sha256": "18ce33d1ddc336671d377de41d6fec792c3edd331b2f63fbf877e41c7f37826c"
+      },
+      "exposure_ev2.png": {
+        "path": "Temp/gltf-validation/direct-gpu/field-hdr-exposure-906826c68c-corrected-type/artifacts/exposure_ev2.png",
+        "sha256": "3e5f9324f190704e2baa2d32e6f1f5cb651cfe73fb6f8976da951c1782b84d76"
+      }
+    },
+    "diagnosis": "Camera-owned fixed exposure settings retained immediately, but native scalar takes real camera renders/time to converge. Actual0EV1 and+2EV3.9810612 passed0.5percent target4; resulting private emissive-plane image brightened. Prior immediate0/+2identical PNG is not proof of broken engine exposure.",
+    "captureProposal": "Wait for native scalar exposure*2^EV within0.5percent under a bounded real-frame/RTT loop, then capture a subsequent frame; preserve failure on timeout. Existing model-local patch uses same strategy but its reflection path/shared-driver adoption has not been executed."
+  },
+  "priorAttempts": [
+    {
+      "receipt": {
+        "path": "Temp/gltf-validation/direct-gpu/field-hdr-exposure-906826c68c/transport/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "94fb099f88779de25120d01922a1a0e16502c5436b44602f7aa355ad0c40373c"
+      },
+      "outcome": "0pass0fail2incomplete; helper int FrameCount corrected to ulong before execution"
+    },
+    {
+      "receipt": {
+        "path": "Temp/gltf-validation/direct-gpu/field-hdr-exposure-906826c68c-corrected-type/transport/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "aa578c7d86cdf0ad0ac858aec1dce85a6abf49cf7e8ce0a38acaa4e1b2ebb700"
+      },
+      "outcome": "1pass1fail; exposure passed, HDR anonymous compile failed because CS{ on same line was omitted by managed ReadPrograms. Newline correction passed in HDR-only request; no shared parser change."
+    }
+  ],
+  "cleanup": {
+    "hdr": [],
+    "exposure": []
+  },
+  "limits": [
+    "No exact Khronos reference HDRI/orientation/renderer/photometry equivalence.",
+    "Point sampling all native GPU-visible mip texel centers proves finite HDR content/distinct ranges, not independent GGX convolution correctness or raw BC6H resident byte identity.",
+    "GPU view already full1024x1024/9mips on first query; not cold-streaming timing.",
+    "Compiled hash gates are exact disk source/compiled checks plus loaded resource metadata; content correspondence to original panorama is not an independent texel oracle.",
+    "Optional EXT_lights_image_based remains unselected/unimplemented; this native presentation fixture does not consume authored SH9/source mips."
+  ]
+}

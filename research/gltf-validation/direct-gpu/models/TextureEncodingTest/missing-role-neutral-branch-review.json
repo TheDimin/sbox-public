@@ -1,0 +1,49 @@
+{
+  "purpose": "Root review only; no production/source generator patch applied",
+  "baseline_receipt_sha256": "abd55378afb65e4263454cf010a286927bdfa04561ca91c31ba8fbc206b38712",
+  "patch_sha256": "fb2d2b2fff93ac6fd51600b3811a8fe8a41c4c4d0c7e2e5411443717fa7be9bc",
+  "files": [
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfStockMaterialAdapter.cs",
+      "before_sha256": "4e096821eba13a2a079e9824d961883d1288b6d33eee19ee4905d936f9561b99",
+      "after_sha256": "642886c50bb08a1b4727c560a57d15e9b6eb46af173bb48d9aa619112a3e80e4"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/author_surface_orm_candidate.py",
+      "before_sha256": "0965536e8d2ee8dad971a8125e1ffdf636b44fa323db8b701c6c8c70b91be0bf",
+      "after_sha256": "18c8cccc1325ed15f674229ca8a64c947134193d632133ba750a67cec00ca30d"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/surface_orm_candidate.shdrgrph",
+      "before_sha256": "e1c057c47c7fe9e68d62a2acdbfe4b2634814779aa513344cc6b6f6efb89b0d8",
+      "after_sha256": "1f2860b53fe1c3a377515d915e19bcf12b872a12ae94ec5fa84e9a6436fcbb0e"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/SurfaceOrmCandidateGate.cs",
+      "before_sha256": "57fef79b59a933c146c62d9460b2cd0fa9c893c234903e98c71017c206f17015",
+      "after_sha256": "5dd9b46f56543ebb43169b615ad206b751ba5bd455ac2b5db5d97ff71862b197"
+    },
+    {
+      "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfSourceTexturePresenceKeyTests.cs",
+      "before_sha256": null,
+      "after_sha256": "45f7fb44668b8d83b8bbea086a98aa75be78b92aca7ff077af5ba759070e8843"
+    }
+  ],
+  "candidate_node_count": 67,
+  "flags": [
+    "g_flGltfHasBaseColorTexture",
+    "g_flGltfHasMetallicRoughnessTexture",
+    "g_flGltfHasOcclusionTexture",
+    "g_flGltfHasEmissiveTexture"
+  ],
+  "semantics": "Deterministic0/1 per material; provided dynamic Branch selects neutral float4(1) vs sampled RGBA before channels/factors. No lerp, static features, allocated fallback texture, altered UV/source image/sampler or default-route switch. Existing emission helper/expected numbers/thresholds unchanged.",
+  "focused_tests": {
+    "unit_cases": 4,
+    "unit_path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfSourceTexturePresenceKeyTests.cs",
+    "native_cases": 1,
+    "native_observations": 12,
+    "native_path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/SourceOrmTexturePresenceTests.cs",
+    "native_sha256": "661df59526c1ee11a17477b5fb7c8d5a9d1c6d401050156b6e7dba464a29f96e"
+  },
+  "next_execution": "After approved apply and bounded staged Engine install: actual graph generation67nodes + emitted conditional review, native presence12 observations, unchanged emission8 comparisons under fresh reviewed config/output. Historical .001 precision red remains unchanged."
+}

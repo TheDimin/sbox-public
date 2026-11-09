@@ -1,0 +1,126 @@
+[
+  {
+    "compiled": false,
+    "regions": [
+      {
+        "mode": 0,
+        "actual": 7,
+        "reference": 7,
+        "negative": 0,
+        "actual_reference_differing_pixels": 0,
+        "reference_negative_differing_pixels": 7
+      },
+      {
+        "mode": 1,
+        "actual": 104,
+        "reference": 104,
+        "negative": 0,
+        "actual_reference_differing_pixels": 0,
+        "reference_negative_differing_pixels": 104
+      },
+      {
+        "mode": 2,
+        "actual": 207,
+        "reference": 207,
+        "negative": 0,
+        "actual_reference_differing_pixels": 0,
+        "reference_negative_differing_pixels": 207
+      },
+      {
+        "mode": 3,
+        "actual": 85,
+        "reference": 85,
+        "negative": 0,
+        "actual_reference_differing_pixels": 0,
+        "reference_negative_differing_pixels": 85
+      },
+      {
+        "mode": 4,
+        "actual": 934,
+        "reference": 934,
+        "negative": 0,
+        "actual_reference_differing_pixels": 0,
+        "reference_negative_differing_pixels": 934
+      },
+      {
+        "mode": 5,
+        "actual": 1552,
+        "reference": 1552,
+        "negative": 0,
+        "actual_reference_differing_pixels": 0,
+        "reference_negative_differing_pixels": 1552
+      },
+      {
+        "mode": 6,
+        "actual": 934,
+        "reference": 934,
+        "negative": 0,
+        "actual_reference_differing_pixels": 0,
+        "reference_negative_differing_pixels": 934
+      }
+    ],
+    "scope": "Foreground only in seven fixed spatial regions, Lit camera; negative point/line geometry is degenerate and may be culled. No independent point size, material or full visual parity claim."
+  },
+  {
+    "compiled": true,
+    "regions": [
+      {
+        "mode": 0,
+        "actual": 7,
+        "reference": 7,
+        "negative": 0,
+        "actual_reference_differing_pixels": 0,
+        "reference_negative_differing_pixels": 7
+      },
+      {
+        "mode": 1,
+        "actual": 104,
+        "reference": 104,
+        "negative": 0,
+        "actual_reference_differing_pixels": 0,
+        "reference_negative_differing_pixels": 104
+      },
+      {
+        "mode": 2,
+        "actual": 207,
+        "reference": 207,
+        "negative": 0,
+        "actual_reference_differing_pixels": 0,
+        "reference_negative_differing_pixels": 207
+      },
+      {
+        "mode": 3,
+        "actual": 85,
+        "reference": 85,
+        "negative": 0,
+        "actual_reference_differing_pixels": 0,
+        "reference_negative_differing_pixels": 85
+      },
+      {
+        "mode": 4,
+        "actual": 934,
+        "reference": 934,
+        "negative": 0,
+        "actual_reference_differing_pixels": 0,
+        "reference_negative_differing_pixels": 934
+      },
+      {
+        "mode": 5,
+        "actual": 1552,
+        "reference": 1552,
+        "negative": 0,
+        "actual_reference_differing_pixels": 0,
+        "reference_negative_differing_pixels": 1552
+      },
+      {
+        "mode": 6,
+        "actual": 934,
+        "reference": 934,
+        "negative": 0,
+        "actual_reference_differing_pixels": 0,
+        "reference_negative_differing_pixels": 934
+      }
+    ],
+    "scope": "Foreground only in seven fixed spatial regions, Lit camera; negative point/line geometry is degenerate and may be culled. No independent point size, material or full visual parity claim."
+  }
+]

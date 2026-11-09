@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "engine_sha256": "e05cc4da9851ad2c3306e16ef3af317c8b398516dd6f8bf2bcd902687b5f7215",
+  "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedReference.cs",
+      "sha256": "c8c3c1a83ca0889ff9bb46b40106feca93d371bd520df5f6767331d89e78dcd8"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/PngTexelReference.cs",
+      "sha256": "9c9b6bc95031449befd2e6e169722eca2d676abe52e5a017b076ccfb4cb0c6f9"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/ManagedPng16Candidate.cs",
+      "sha256": "e56a79348346308424003a58745244485d6140bda1de8094204a994a67732fbc"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/Png16Prototype.cs",
+      "sha256": "a43676868f7db829334e3e6e2657027aaed9afac4d406f1fcdb0816b52815999"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/Png16PrecisionTests.cs",
+      "sha256": "56b555d2010b55a95179e689a9ea21a92d5b8ca29072f835623690bd8907dd4b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/Png16GpuPrototypeTests.cs",
+      "sha256": "e7035d5c3c34569239621edf534edce7be21b551c2c24abf614349b470fe54d9"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.Png16PrecisionTests",
+      "kind": "static_results",
+      "method": "RunPrototype",
+      "arguments": [],
+      "expected_cases": 4
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.Png16PrecisionTests",
+      "kind": "static_results",
+      "method": "RunPackedPrototype",
+      "arguments": [],
+      "expected_cases": 2
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.Png16GpuPrototypeTests",
+      "kind": "mstest",
+      "expected_cases": 1
+    }
+  ]
+}

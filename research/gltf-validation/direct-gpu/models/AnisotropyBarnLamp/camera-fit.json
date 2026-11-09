@@ -1,0 +1,35 @@
+{
+  "reference": "screenshot/screenshot_Large.jpg",
+  "referenceSha256": "3ee16e1ae1c7c1d490b91f92da482518e5d8f6da5025cfbd39048c19692966bf",
+  "imageSize": [
+    1055,
+    1202
+  ],
+  "fitSize": [
+    144,
+    164
+  ],
+  "modelSha256": "a9cd85ee50b263cee9a8bd5436cb2af1bb0759d6c20e24c1d698b2ad9743dffc",
+  "cameraPositionInches": [
+    15.606100327571548,
+    -9.1362233707696,
+    -2.01759955777026
+  ],
+  "cameraForward": [
+    -0.7647382077523295,
+    0.63865033462105,
+    -0.08544719826990181
+  ],
+  "cameraUp": [
+    -0.058328491813613374,
+    0.06345133658280619,
+    0.996278934299328
+  ],
+  "verticalFovDegrees": 38.00307914552267,
+  "copperSilhouetteIoU": 0.9584651898734177,
+  "copperReferenceMaskPixels": 9795,
+  "copperMaskMismatchPixels": 420,
+  "sourceEnvironment": "Khronos Sample Viewer Studio Neutral; orientation, prefilter and exposure unknown",
+  "sourceToneMapping": "ACES Filmic Tone Mapping (Hill)",
+  "scope": "Inferred camera fit to colored copper silhouette only. Glass, material appearance and lighting are unscored."
+}

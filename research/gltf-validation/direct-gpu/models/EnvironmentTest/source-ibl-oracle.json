@@ -1,0 +1,671 @@
+{
+  "schemaVersion": 1,
+  "status": "independent_expected_values_prepared_not_GPU_executed",
+  "diffuseControls": [
+    {
+      "name": "constant_white",
+      "coefficients": [
+        [
+          11.136655993663414,
+          11.136655993663414,
+          11.136655993663414
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "engineWorldNormal": [
+        1,
+        0,
+        0
+      ],
+      "yawDegrees": 0,
+      "intensity": 1,
+      "expectedLambertianRgb": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "intensity_zero",
+      "coefficients": [
+        [
+          11.136655993663414,
+          11.136655993663414,
+          11.136655993663414
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "engineWorldNormal": [
+        1,
+        0,
+        0
+      ],
+      "yawDegrees": 0,
+      "intensity": 0,
+      "expectedLambertianRgb": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "intensity_two",
+      "coefficients": [
+        [
+          11.136655993663414,
+          11.136655993663414,
+          11.136655993663414
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "engineWorldNormal": [
+        1,
+        0,
+        0
+      ],
+      "yawDegrees": 0,
+      "intensity": 2,
+      "expectedLambertianRgb": [
+        2,
+        2,
+        2
+      ]
+    },
+    {
+      "name": "first_order_gltf_positive_x",
+      "coefficients": [
+        [
+          11.136655993663414,
+          11.136655993663414,
+          11.136655993663414
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          -1.607437833953458,
+          -1.607437833953458,
+          -1.607437833953458
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "engineWorldNormal": [
+        0,
+        1,
+        0
+      ],
+      "yawDegrees": 0,
+      "intensity": 1,
+      "expectedLambertianRgb": [
+        1.25,
+        1.25,
+        1.25
+      ]
+    },
+    {
+      "name": "first_order_gltf_negative_x",
+      "coefficients": [
+        [
+          11.136655993663414,
+          11.136655993663414,
+          11.136655993663414
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          -1.607437833953458,
+          -1.607437833953458,
+          -1.607437833953458
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "engineWorldNormal": [
+        0,
+        -1,
+        0
+      ],
+      "yawDegrees": 0,
+      "intensity": 1,
+      "expectedLambertianRgb": [
+        0.75,
+        0.75,
+        0.75
+      ]
+    },
+    {
+      "name": "first_order_yaw90_positive_lobe",
+      "coefficients": [
+        [
+          11.136655993663414,
+          11.136655993663414,
+          11.136655993663414
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          -1.607437833953458,
+          -1.607437833953458,
+          -1.607437833953458
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "engineWorldNormal": [
+        -1,
+        0,
+        0
+      ],
+      "yawDegrees": 90,
+      "intensity": 1,
+      "expectedLambertianRgb": [
+        1.25,
+        1.25,
+        1.25
+      ]
+    },
+    {
+      "name": "first_order_yaw90_negative_lobe",
+      "coefficients": [
+        [
+          11.136655993663414,
+          11.136655993663414,
+          11.136655993663414
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          -1.607437833953458,
+          -1.607437833953458,
+          -1.607437833953458
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "engineWorldNormal": [
+        1,
+        0,
+        0
+      ],
+      "yawDegrees": 90,
+      "intensity": 1,
+      "expectedLambertianRgb": [
+        0.75,
+        0.75,
+        0.75
+      ]
+    },
+    {
+      "name": "second_order_xy_positive",
+      "coefficients": [
+        [
+          11.136655993663414,
+          11.136655993663414,
+          11.136655993663414
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1.4377361065299805,
+          1.4377361065299805,
+          1.4377361065299805
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "engineWorldNormal": [
+        0,
+        0.7071067811865475,
+        0.7071067811865475
+      ],
+      "yawDegrees": 0,
+      "intensity": 1,
+      "expectedLambertianRgb": [
+        1.25,
+        1.25,
+        1.25
+      ]
+    },
+    {
+      "name": "second_order_xy_negative",
+      "coefficients": [
+        [
+          11.136655993663414,
+          11.136655993663414,
+          11.136655993663414
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1.4377361065299805,
+          1.4377361065299805,
+          1.4377361065299805
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "engineWorldNormal": [
+        0,
+        0.7071067811865475,
+        -0.7071067811865475
+      ],
+      "yawDegrees": 0,
+      "intensity": 1,
+      "expectedLambertianRgb": [
+        0.75,
+        0.75,
+        0.75
+      ]
+    }
+  ],
+  "specularMipControls": {
+    "authoredMipColors": [
+      [
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        1,
+        0
+      ],
+      [
+        1,
+        0,
+        1
+      ]
+    ],
+    "sameColorEveryFace": true,
+    "cases": [
+      {
+        "roughness": 0,
+        "expectedLod": 0,
+        "expectedRgb": [
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "roughness": 0.25,
+        "expectedLod": 1,
+        "expectedRgb": [
+          0,
+          1,
+          0
+        ]
+      },
+      {
+        "roughness": 0.5,
+        "expectedLod": 2,
+        "expectedRgb": [
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "roughness": 0.75,
+        "expectedLod": 3,
+        "expectedRgb": [
+          1,
+          1,
+          0
+        ]
+      },
+      {
+        "roughness": 1,
+        "expectedLod": 4,
+        "expectedRgb": [
+          1,
+          0,
+          1
+        ]
+      }
+    ],
+    "wrongMipCountNegativeControl": [
+      {
+        "roughness": 0.25,
+        "wrongLod": 1.25,
+        "wrongRgb": [
+          0,
+          0.75,
+          0.25
+        ]
+      },
+      {
+        "roughness": 0.5,
+        "wrongLod": 2.5,
+        "wrongRgb": [
+          0.5,
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "roughness": 0.75,
+        "wrongLod": 3.75,
+        "wrongRgb": [
+          1,
+          0.25,
+          0.75
+        ]
+      }
+    ]
+  },
+  "scope": "Literal polynomial/axis/mip expectations for future linear GPU checks; does not validate HLSL, native binding, public loader, or extension support."
+}

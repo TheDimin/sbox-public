@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "engine_sha256": "60bc2b51bbd70c40a000f8b29f420714aff4e3dbda723794b18fdfc43b571396",
+  "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/Png16StreamRejectionTests.cs",
+      "sha256": "aa3459e501f637cab54f848c70d4411a224ef294b1222493ef7bd75f2decb02c"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/Png16GpuPrecisionNegativeControls.cs",
+      "sha256": "6109ab53d20e2d4e1b514cba8c1031878ac6a16dc07588da8afd3775f534d3b2"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/Png16BudgetBoundaryTests.cs",
+      "sha256": "38b91c6bf28b7d68c05dff977270bb30c459af7c53b2750f6ca6f21aeec340d4"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.Png16StreamRejectionTests",
+      "kind": "static_results",
+      "method": "Run",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 3
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.Png16GpuPrecisionNegativeControls",
+      "kind": "mstest",
+      "expected_cases": 1
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.Png16BudgetBoundaryTests",
+      "kind": "mstest",
+      "expected_cases": 1
+    }
+  ]
+}

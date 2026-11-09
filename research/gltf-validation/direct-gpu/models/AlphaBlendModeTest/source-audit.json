@@ -1,0 +1,177 @@
+{
+  "scope": "independent pinned JSON/PNG source audit only; not an engine test or GPU readback",
+  "revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "source_forms": [
+    "glTF",
+    "glTF-Binary"
+  ],
+  "derived_forms": [
+    "glTF/compiled_glb",
+    "glTF-Binary/compiled_glb"
+  ],
+  "hashes": {
+    "glTF/AlphaBlendLabels.png": "19c705f7e207384ca1ab01e0665601c051ca33c5848c03ce4fffad625b416b53",
+    "glTF/AlphaBlendModeTest.bin": "bb89ab8d9ac0cfbc168e5d552e3ec2fe1285fd01bacb65c863d838b3db025c85",
+    "glTF/AlphaBlendModeTest.gltf": "49e06672900df95593040d35bbc7a2ee5921ae8d46edc44b64ccf2df65e64849",
+    "glTF/MatBed_baseColor.jpg": "71571cce0d86c7c5ed4ac73d852ec34e72e7234a2f905f2758e118519c950bcf",
+    "glTF/MatBed_normal.jpg": "d8891a9c08e375507ac8f1fb260577bda5e90506e79db92ebbfb5caa9216be49",
+    "glTF/MatBed_occlusionRoughnessMetallic.jpg": "e1472454ad6be574c3a418985f06a8ba36877108a94f61590f01e118804379b4",
+    "glTF-Binary/AlphaBlendModeTest.glb": "37c3577d143071b42dd46e9d942b157837eb25c6340112171d7faecaa987b14e"
+  },
+  "probes": [
+    {
+      "texel": [
+        512,
+        256
+      ],
+      "rgba": [
+        223,
+        229,
+        71,
+        45
+      ],
+      "uv_texel_center": [
+        0.50048828125,
+        0.25048828125
+      ],
+      "linear_alpha": 0.17647058823529413,
+      "coverage_opaque_blend_mask25_mask50_mask75": [
+        1,
+        0.17647058823529413,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "texel": [
+        512,
+        384
+      ],
+      "rgba": [
+        223,
+        229,
+        71,
+        87
+      ],
+      "uv_texel_center": [
+        0.50048828125,
+        0.37548828125
+      ],
+      "linear_alpha": 0.3411764705882353,
+      "coverage_opaque_blend_mask25_mask50_mask75": [
+        1,
+        0.3411764705882353,
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "texel": [
+        512,
+        512
+      ],
+      "rgba": [
+        223,
+        229,
+        71,
+        128
+      ],
+      "uv_texel_center": [
+        0.50048828125,
+        0.50048828125
+      ],
+      "linear_alpha": 0.5019607843137255,
+      "coverage_opaque_blend_mask25_mask50_mask75": [
+        1,
+        0.5019607843137255,
+        1,
+        1,
+        0
+      ]
+    },
+    {
+      "texel": [
+        512,
+        640
+      ],
+      "rgba": [
+        223,
+        229,
+        71,
+        169
+      ],
+      "uv_texel_center": [
+        0.50048828125,
+        0.62548828125
+      ],
+      "linear_alpha": 0.6627450980392157,
+      "coverage_opaque_blend_mask25_mask50_mask75": [
+        1,
+        0.6627450980392157,
+        1,
+        1,
+        0
+      ]
+    },
+    {
+      "texel": [
+        512,
+        768
+      ],
+      "rgba": [
+        223,
+        229,
+        71,
+        210
+      ],
+      "uv_texel_center": [
+        0.50048828125,
+        0.75048828125
+      ],
+      "linear_alpha": 0.8235294117647058,
+      "coverage_opaque_blend_mask25_mask50_mask75": [
+        1,
+        0.8235294117647058,
+        1,
+        1,
+        1
+      ]
+    }
+  ],
+  "alpha_zero_nonzero_rgb_example": [
+    288,
+    112,
+    [
+      71,
+      190,
+      229,
+      0
+    ]
+  ],
+  "panels": {
+    "meshes": [
+      6,
+      3,
+      0,
+      8,
+      1
+    ],
+    "nodes": [
+      8,
+      4,
+      5,
+      7,
+      6
+    ],
+    "materials": [
+      5,
+      1,
+      2,
+      4,
+      3
+    ]
+  },
+  "license": "CC-BY-4.0; Ed Mackey / Analytical Graphics, Inc."
+}

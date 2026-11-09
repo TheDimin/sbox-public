@@ -1,0 +1,167 @@
+{
+  "model": "Fox",
+  "owner": "/root/gpu_fox",
+  "coordinator": "/root/gpu_validation",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/FoxPublicCapture.cs",
+      "sha256": "68bdd1e4f389e0a891835c453042e156fb3d81fbbbe3b15b2e007c3b6c327a14"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/FoxReference.cs",
+      "sha256": "74b7945ded180d54d3efc39ef2a6984709bb9d1004e8d01fae4cc0be06f3fc73"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/FoxDiagnostics.cs",
+      "sha256": "61041d7c2b77e869e5907a7f6cdf169f97ebda1d8671843081311cb700e7ee23"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/FoxGpuChecks.cs",
+      "sha256": "17cdc3fea4e9d23a8d57d2afeb334d351745c1cff80e72640aa1de13a57a730c"
+    }
+  ],
+  "framework": {
+    "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+    "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+  },
+  "entry": "Sandbox.Gltf.DirectGpu.Tests.FoxPublicCapture.RunCaptured(checkout,false)",
+  "entry_kind": "internal class, public static async Task<Result>; reflection-callable",
+  "expected_results": 1,
+  "form": "glTF/source",
+  "optional_later_form": "RunCaptured(checkout,true) uses a real compiler-generated GLB and public .glb_c loading",
+  "expected_gpu_rows": 9,
+  "expected_native_captures": 11,
+  "expected_clip_motion_rows": 3,
+  "expected_native_handle_observations": 2,
+  "states": [
+    "B Run middle with A present",
+    "A Run quarter, paused B bytes unchanged",
+    "A survives B component deletion",
+    "Survey start",
+    "Survey middle",
+    "Walk start",
+    "Walk middle",
+    "Run start",
+    "Run middle"
+  ],
+  "capture_controls": [
+    "fresh empty before",
+    "two instances initial",
+    "two instances A changed",
+    "A survivor",
+    "six solo clip PNGs",
+    "empty after both components deleted"
+  ],
+  "resource_requirements": [
+    "actual public Model.Load from unique temporary mounted folder",
+    "actual SkinnedModelRenderer public Sequence.Name/Time; rate0 for deterministic captures",
+    "named Shader.Load(GltfManagedModelResource.ComputeShaderPath) valid and non-anonymous",
+    "zero native IModel in resource, SceneModel null, custom object native model strong-handle INVALID (wrapper may be nonnull)",
+    "default model-owned source materials, no helper material override",
+    "same independent fixed source-derived union camera and owned directional light as previous Fox smoke"
+  ],
+  "provenance": {
+    "corpus_revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+    "source_sha256": "6ddcabf511c0257b87dedf6ac51f1bdb6f21e570eee5fa7c4fa6162d055cb002",
+    "buffer_sha256": "c7d0d8de28a84d5b25623037f88e063e1502495a2ee6c55f182c61161ad12f80",
+    "texture_sha256": "61c8b109ee7f8bf262791933380fafb1465f7b51cbe6472c2d21eff0b31f83a1"
+  },
+  "numeric_scope": "Existing FoxGpuChecks measures all output vertices via runtime descriptors and actual bound indices against the independent FoxReference; no new GPU error tolerance or CPU threshold relaxation.",
+  "preserved_cpu_failures": {
+    "suite": "FoxCoreTests.RunAll",
+    "last_actual_pass": 8,
+    "last_actual_fail": 12,
+    "matrix_component_threshold_source_units": 4e-06,
+    "sampled_vertex_distance_threshold_source_units": 2e-05,
+    "policy": "Public capture success does not convert these failures to green."
+  },
+  "unproven": [
+    "full key/midpoint GPU matrix",
+    "independent source material PBR/sampler/residency image fidelity",
+    "high-cadence wall-clock playback",
+    "performance",
+    "Windows"
+  ],
+  "execution_needs": "Reuse coordinator NativeCapture framework. Never execute anonymous compute compilation or construct native Model/Mesh. Helper references actual installed c5 Engine/Gltf, not replacement producer source.",
+  "license": "PixelMannen model CC0; tomkranis animation/rigging and AsoboStudio/scurest conversion CC BY 4.0. Preserve pinned README attribution with published media.",
+  "status": "actual_public_source_and_derived_compiled_pass",
+  "metadata_contract": {
+    "public_bone_count": 25,
+    "expected_source_nodes": [
+      0,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25
+    ],
+    "skin_joint_count": 24,
+    "authored_node_count": 26,
+    "proof": "Model.BoneCount delegates authored joint+ancestor metadata. Fox joint2 has ancestor0/root; meshnode1/fox is excluded. Expected names independently read from pinned raw source; actual public names/node mapping recorded before assertion."
+  },
+  "previous_attempt": {
+    "receipt_path": "Temp/gltf-validation/direct-gpu/c5c0-public-fox-and-midpoint-10/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "receipt_sha256": "9b840cc679eb99c3882bdd36fd4dc385c76a96226c8ffc5391ecee93728f0965",
+    "public_capture_passed": false,
+    "reason": "Incorrect helper assumed publicBoneCount equals24skin palette slots; stopped before components/positivecaptures. Oneemptybefore capture retained.",
+    "producer_changed": false,
+    "thresholds_changed": false
+  },
+  "actual": {
+    "receipt_path": "Temp/gltf-validation/direct-gpu/c5c0-public-fox-fixed-1/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "receipt_sha256": "cf39db8bcc6634443cca0396a741376295b30c3c282d5d6036f2ad5dcabe21e7",
+    "passed_results": 1,
+    "gpu_rows": 9,
+    "native_pngs": 11,
+    "observed_public_bones": 25,
+    "source_node_and_name_identity_exact": true,
+    "motion_changed_pixels": {
+      "Survey": 1348,
+      "Walk": 2411,
+      "Run": 2623
+    },
+    "maximum_position_error_inches": 0.000954497935,
+    "maximum_normal_distance": 4.2252084e-07,
+    "maximum_uv_component_error": 0,
+    "numeric_status": "measured-not-accepted; no threshold changes",
+    "independent_instances_and_survivor_deletion": true,
+    "named_compiled_deformation_shader": true,
+    "engine_mvid": "2c054bba-c0fa-43b5-a3a2-39a34ff7577f",
+    "gltf_mvid": "c869761c-5b80-462d-982a-bc3a688e57b6"
+  },
+  "actual_compiled": {
+    "receipt_path": "Temp/gltf-validation/direct-gpu/c5c0-public-fox-compiled-1/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "receipt_sha256": "bcd4d52a12b60c535b3222455c6112418ae17c56e85e8b6a8968bd5867af3d91",
+    "passed_results": 1,
+    "gpu_rows": 9,
+    "native_pngs": 11,
+    "scope": "Public load/sequence/motion/lifetime routing, numeric errors measured-not-accepted."
+  },
+  "evidence_manifest": {
+    "path": "Temp/gltf-validation/direct-gpu/public-model-smokes/Fox/latest-evidence.json",
+    "sha256": "6e8582a10eaa3c18d9940c31152f6a00d787a1cc71102aef84562f84b5f2bd16",
+    "passed_results": 2,
+    "gpu_rows": 18,
+    "native_pngs": 22,
+    "corresponding_source_and_compiled_pixels_identical": false
+  }
+}

@@ -1,0 +1,342 @@
+{
+  "model": "NormalTangentTest",
+  "status": "corrected source and canonical compiled rendered; visual feedback awaiting review",
+  "corpus_revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "forms": [
+    "glTF/source",
+    "glTF-Binary/canonical glb_c"
+  ],
+  "producer": {
+    "stage": "0bc",
+    "engine_mvid": "123f2cf1-6081-4d93-810b-333342cb20ee",
+    "engine_sha256": "e05cc4da9851ad2c3306e16ef3af317c8b398516dd6f8bf2bcd902687b5f7215",
+    "gltf_mvid": "56e0e078-1fed-49a1-a3fc-86f4516b0cd0",
+    "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3"
+  },
+  "reference": {
+    "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/NormalTangentTest/screenshot/screenshot-larger.png",
+    "sha256": "fec8952e7af0ed6768547524070a6a30fd3c5ee9986886afe47de9be9196c3b7",
+    "purpose": "Upstream front view; lighting and camera recipe unknown. Human final visual judgment required."
+  },
+  "capture": null,
+  "scope": "Current post-conversion native 12/12 gate and actual reference-sized source and canonical compiled Model.Load/ModelRenderer renders. Independent native Mikk C oracle negated exactly once; authored tangent normal fixture and wrong W/UV negatives passed. GPU source and compiled 23,322 corner frames maximum error 2.682209e-7. Image review remains pending.",
+  "known_limits": [
+    "Reference environment, camera, exposure and tone mapping are unknown. Field is a chosen diagnostic, not established as the reference.",
+    "Current compiled Field cube is 1024x1024x6 BC6H with 9 mips; raw HDR texels, resident-byte identity, mip filtering, effective exposure and exact reference equivalence are unverified. A separate Field BC6H readback showed NaNs.",
+    "Source and compiled captures are not pixel-identical (38,057 differing RGB pixels); reflective cells remain visibly different from the reference horizon.",
+    "AO/PBR full fidelity, Windows, performance and complete API parity remain unproven."
+  ],
+  "receipts": [
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/normal-tangent-9b9f-run3/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "373356b145f4109902ac88152abfa5ade5916ff4c8b80f9cd9bcf399267918ba",
+      "expected": 14,
+      "passed": 10,
+      "failed": 4,
+      "incomplete": 0,
+      "scope": "Historical 9b9f CPU corner/route and public adapter rejection"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/normal-public-current-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "046dcbb11d0f873f128e66fd6c6233a1c576d4ce8bba631bcbafa694cbcd750f",
+      "expected": 7,
+      "passed": 3,
+      "failed": 4,
+      "incomplete": 0,
+      "scope": "8fc named-compute shared seam two forms plus six flat skin combinations pass; four public component cases fail"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/normal-public-diagnostic-8fc-run2/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "39c4e03b39cc7ac470eb7148a20a9f8a96a5c37aa2ead7ae15ac568350509bc6",
+      "expected": 1,
+      "passed": 0,
+      "failed": 1,
+      "incomplete": 0,
+      "scope": "8fc double-sided source material realization fails absent g_flGltfDoubleSided"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/normal-feature-combo-8fc-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "1a75ed9fd737d4da0c99dfaa34efb3750f783c832cfafbe78553efe9466e0bb7",
+      "expected": 6,
+      "passed": 5,
+      "failed": 1,
+      "incomplete": 0,
+      "scope": "Anonymous corrected shader signed world-normal front/back source/compiled and lit front pass; back-lit setup had opposite-side light"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/normal-lit-back-fix-8fc-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "df47904b44351cbcd6c216ca2f72d2000c362c7743615da500e52cfd4fe71913",
+      "expected": 1,
+      "passed": 1,
+      "failed": 0,
+      "incomplete": 0,
+      "scope": "Anonymous corrected shader lit back passes with light on visible side"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/normal-public-final-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "19aedfc44d4d952a3a0d5aac043a6160582638e95cef44c1313c6404418f0960",
+      "scope": "7eb public three forms passed; derived glTF failed because fixture omitted external images"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/normal-public-compiled-deps-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "aa7ca61d5a1bb0382ccabb80d0d221c2333194d0ff7ed226257f7cd0c5a43721",
+      "scope": "7eb corrected derived glTF with retained image dependencies passes"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/normal-convention-postfix-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "a392f5cd3cfd211e8ee4d38a5ea02123390fffa42266397f314f41a8526f0a13",
+      "expected": 12,
+      "passed": 12,
+      "failed": 0,
+      "incomplete": 0,
+      "scope": "Current stage: native Mikk converted-sign differential; mirrored, rotated and degenerate inputs; public generated corner/skin paths; authored tangent fixture with wrong UV/W negatives; source and canonical compiled renderer."
+    }
+  ],
+  "candidate": {
+    "path": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/NormalTangentTest/gltf_surface_five_uv.shader",
+    "sha256": "988161ee617819d8d5a7b490369bd9b1f7e5698bd9c8170561c84f64ededcf19",
+    "scope": "Actual anonymous GPU signed normal, UV and tangent-handedness controls; back material test-owned; candidate not installed as named public shader."
+  },
+  "public_forms": {
+    "expected": 2,
+    "passed": 2,
+    "failed": 0,
+    "incomplete": 0,
+    "scope": "Current stage source glTF and canonical glb_c; previous four-form run retained as historical."
+  },
+  "canonical_captures": [
+    {
+      "form": "glTF/source",
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/normal-tangent-visual-corrected-current-source/case/capture.png",
+        "sha256": "65ab8cf8d7a8a86d2d728d79577f1c7b08affe57b726434eefa7afb53c3d2ada",
+        "kind": "image"
+      },
+      "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/normal-tangent-visual-corrected-current-source/returned-value.json",
+      "receipt_sha256": "aa48d35e1ea4d4c6e68c09f1f38a525b781ca766b9d3df8c2f76ba4d3633779a",
+      "render": {
+        "status": "passed",
+        "error": null,
+        "observation": {
+          "renderer": "ModelRenderer",
+          "resourcePath": "gltf_run_d583af6c52464ef5a0249399ea02a5d1/models/normaltangenttest/gltf/normaltangenttest.gltf",
+          "callbackErrors": [],
+          "drawCalls": 26,
+          "requestedRevision": 2,
+          "submittedRevision": 2,
+          "nativeCaptureSubmitted": true,
+          "widgetFrames": 8,
+          "bounds": {
+            "minimumInches": [
+              -0.3937004,
+              -43.700787,
+              -47.244095
+            ],
+            "maximumInches": [
+              3.1692913,
+              43.700787,
+              37.40158
+            ],
+            "MeshCount": 1,
+            "BoneCount": 0,
+            "AnimationCount": 0
+          }
+        },
+        "visualApproval": "pending"
+      },
+      "cleanup_errors": []
+    },
+    {
+      "form": "glTF-Binary/canonical glb_c",
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/normal-tangent-visual-corrected-current-compiled/case/capture.png",
+        "sha256": "ff4c02e3b709b11bf71516efa3272889a8f90d05685728f61c4b0bda09e07d0d",
+        "kind": "image"
+      },
+      "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/normal-tangent-visual-corrected-current-compiled/returned-value.json",
+      "receipt_sha256": "ceabe8062943628529cca9604f47367630a2a6e1dc002e9c7a76e7a81095d42f",
+      "render": {
+        "status": "passed",
+        "error": null,
+        "observation": {
+          "renderer": "ModelRenderer",
+          "resourcePath": "gltf_run_04880fdbaab54ff2b5ff849c612a7eab/canonical.glb",
+          "callbackErrors": [],
+          "drawCalls": 24,
+          "requestedRevision": 2,
+          "submittedRevision": 2,
+          "nativeCaptureSubmitted": true,
+          "widgetFrames": 7,
+          "bounds": {
+            "minimumInches": [
+              -0.3937004,
+              -43.700787,
+              -47.244095
+            ],
+            "maximumInches": [
+              3.1692913,
+              43.700787,
+              37.40158
+            ],
+            "MeshCount": 1,
+            "BoneCount": 0,
+            "AnimationCount": 0
+          }
+        },
+        "visualApproval": "pending"
+      },
+      "cleanup_errors": []
+    }
+  ],
+  "capture_purpose": "Human comparison after generated tangent sign correction; inferred orthographic framing, chosen Field cubemap and directional fill. Exact reference presentation unknown.",
+  "visual_review": "pending",
+  "visual_feedback": {
+    "status": "new corrected captures awaiting user review",
+    "rejected_fingerprint": "69435aacb9af730a2758dcbdbb3bd5f2013c6924aa233759b5a79f8292e64640",
+    "comment": "Comperison does not look anything like.",
+    "field_candidate": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/normal-tangent-visual-field-first/case/capture.png",
+      "sha256": "82d0519a7647d79249fc8f5c90d8749cc109b3ab9b4b0b09c5149e564f59930c"
+    },
+    "field_capture_receipt": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/normal-tangent-visual-field-first/returned-value.json",
+      "sha256": "ed8beaaea71858b62b47025815acedef2084aba3f18d1b9f7ebd6f438ebbbf25"
+    },
+    "world_normal_diagnostic": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/normal-tangent-visual-normal-world/case/capture.png",
+      "sha256": "4372b2ccb09adbc6f7fbfd393d234a1dcceecfa5b4ac2189ffaaa3d122bdc0ad"
+    },
+    "source_oracle": {
+      "path": "/tmp/normal-tangent-source-oracle.json",
+      "sha256": "20c5cea0ec631217cb7bfe7c031089909e86704e31b62771aeb744fdb27cf019"
+    },
+    "reference_environment": "Unknown. Field HDRI-Hub CC BY 3.0 selected as diagnostic only.",
+    "observation": "Mapped spheres now appear convex like adjacent geometry, but metallic reflection still visibly differs from the reference horizon; image approval remains pending.",
+    "scope": "Prior user rejection retained; changed pixels require human review."
+  },
+  "historical_canonical_captures": [
+    {
+      "form": "glTF/source",
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/normal-tangent-public-glTF/case/capture.png",
+        "sha256": "46552c31ddcbe56cbca5fb7fb50970f31af3a8b41b5498ba08fc368a9d8e919e",
+        "kind": "image"
+      },
+      "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/normal-tangent-public-glTF/returned-value.json",
+      "receipt_sha256": "72f309c8dd76a61b193a0f92de617c5583f66e2a388c7d625086f8451c71a60a",
+      "render": {
+        "status": "passed",
+        "error": null,
+        "observation": {
+          "renderer": "ModelRenderer",
+          "resourcePath": "gltf_run_0149b5a6c58f487e92a718b08a354d14/models/normaltangenttest/gltf/normaltangenttest.gltf",
+          "callbackErrors": [],
+          "drawCalls": 23,
+          "requestedRevision": 2,
+          "submittedRevision": 2,
+          "nativeCaptureSubmitted": true,
+          "widgetFrames": 7,
+          "bounds": {
+            "minimumInches": [
+              -0.3937004,
+              -43.700787,
+              -47.244095
+            ],
+            "maximumInches": [
+              3.1692913,
+              43.700787,
+              37.40158
+            ],
+            "MeshCount": 1,
+            "BoneCount": 0,
+            "AnimationCount": 0
+          }
+        },
+        "visualApproval": "pending"
+      },
+      "cleanup_errors": []
+    },
+    {
+      "form": "glTF-Binary/source",
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/normal-tangent-public-glTF-Binary/case/capture.png",
+        "sha256": "ff15632a98a029748312fcb1d1583b20b4dd1d3f70b70b8a530eb5dd484a4231",
+        "kind": "image"
+      },
+      "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/normal-tangent-public-glTF-Binary/returned-value.json",
+      "receipt_sha256": "cc78d1c6100ce6c8f74b8a35eee01728313e8043a086ad7a8a869fada90829eb",
+      "render": {
+        "status": "passed",
+        "error": null,
+        "observation": {
+          "renderer": "ModelRenderer",
+          "resourcePath": "gltf_run_03966a7941d84b5ba48bef2c8e9a5ac0/models/normaltangenttest/gltf-binary/normaltangenttest.glb",
+          "callbackErrors": [],
+          "drawCalls": 29,
+          "requestedRevision": 2,
+          "submittedRevision": 2,
+          "nativeCaptureSubmitted": true,
+          "widgetFrames": 9,
+          "bounds": {
+            "minimumInches": [
+              -0.3937004,
+              -43.700787,
+              -47.244095
+            ],
+            "maximumInches": [
+              3.1692913,
+              43.700787,
+              37.40158
+            ],
+            "MeshCount": 1,
+            "BoneCount": 0,
+            "AnimationCount": 0
+          }
+        },
+        "visualApproval": "pending"
+      },
+      "cleanup_errors": []
+    }
+  ],
+  "historical_producer_7eb": {
+    "engine_mvid": "6052e3c3-0a6d-48c9-a5d5-9fcd93459514",
+    "engine_sha256": "c0a520f534f2ae93ab4f22c9088fca0277519fd9a97f032c80cf2744c6181171",
+    "gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+    "gltf_sha256": "7638a855ba21fd9c079a22cbc8b834d4169112fe08cb9a5fd788e63cf90866e1",
+    "stage": "7eb",
+    "named_shaders": {
+      "gltf_deform_cs.shader_c": {
+        "path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_deform_cs.shader_c",
+        "scope": "compiled bytes on disk; native feature controls remain separate",
+        "sha256": "89b664f9492d1f465a79ae309cc52994cf2d1b391eeea89a0879c97df67f34f2"
+      },
+      "gltf_stock_sampler.shader_c": {
+        "path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_stock_sampler.shader_c",
+        "scope": "compiled bytes on disk; native feature controls remain separate",
+        "sha256": "b45f66c100d9fac1c270e609e11a372dddfc3ecae64029601632b889ec7b6cfd"
+      },
+      "gltf_surface_five_uv.shader_c": {
+        "path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_surface_five_uv.shader_c",
+        "scope": "compiled bytes on disk; native feature controls remain separate",
+        "sha256": "56c3158328d44eb11a7e795eb667415b22442abea22058c4a710ac9fc009e01c"
+      },
+      "gltf_unlit_five_uv.shader_c": {
+        "path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_unlit_five_uv.shader_c",
+        "scope": "compiled bytes on disk; native feature controls remain separate",
+        "sha256": "e494af0983bd7ab5c00c9ee8c78c3fc3cbd406eb9c63c86c466f9396ebf5251d"
+      },
+      "vertex_color.shader_c": {
+        "path": "/home/damian/projects/sbox-public/game/core/shaders/vertex_color.shader_c",
+        "scope": "compiled bytes on disk; native feature controls remain separate",
+        "sha256": "8f4ecfe974cbd25d5cc2319f6a44fb760e47e49e573ca303cb32a94535756f46"
+      }
+    }
+  },
+  "historical_public_forms_7eb": {
+    "expected": 4,
+    "passed": 4,
+    "failed": 0,
+    "incomplete": 0,
+    "scope": "Across two receipts: first 3 passed; corrected fourth passed with external image dependencies mounted. The original 3/4 receipt remains preserved."
+  }
+}

@@ -1,0 +1,1758 @@
+{
+  "schemaVersion": 1,
+  "corpusPin": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "latestReviewSiteCommit": "44d3b6291889ef773f2fce3ae4ab8c53afcd1f08",
+  "latestReviewRunId": "561cf9f4beef496dbeb4613a2e9c6fe2",
+  "decisions": [
+    {
+      "caseId": "ABeautifulGame/glTF",
+      "fingerprint": "91ba45805342ab8b82ecbe80d229c741527dd44601fecb218beaf20de4db9c19",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:55.106Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "AnimatedColorsCube/glTF",
+      "fingerprint": "986a327902b3e8b6899d3e8fc34df15994f14f7d6907f3b950d5d9f5c7df66b6",
+      "status": "rejected",
+      "notes": "no interperlation of colour, location or rotation is happening.",
+      "reviewedAt": "2026-11-06T06:36:39.539Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "AnimatedCube/glTF",
+      "fingerprint": "f5fa7de1b30b712e473e79dc6e416ad5ca1a4f7a9b808bc34d364f79cfc5c6d2",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T11:09:17.971Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "AnimatedMorphCube/glTF",
+      "fingerprint": "bef299191d3e522ea5df4f1cfea7f81522f9e42e042e23966014d482214323be",
+      "groupFingerprint": "448d48aeb952a516099907e2c73c272f6b78c3ae9021e96eccf489096e95d5d9",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:40:19.258Z",
+      "reviewer": "user",
+      "sourceComparisonId": "AnimatedMorphCube/glTF"
+    },
+    {
+      "caseId": "AnimatedTriangle/glTF",
+      "fingerprint": "032ee089c392cc76addbc860a81f78591a62250988d7d9324dd68c5dc133b334",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T11:10:31.875Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "AnisotropyDiscTest/glTF",
+      "fingerprint": "58f9d23608b2e4648bdcf5e5f8ed3ee5e574a97f4d28a8f827c4906b86a1ac6f",
+      "status": "rejected",
+      "notes": "Texture is not loaded, so i am unable to compare material properties",
+      "reviewedAt": "2026-11-06T06:40:30.854Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "AnisotropyStrengthTest/glTF",
+      "fingerprint": "fe6a54d688321da31998af67ef184f16532d14d41803e2471e7361abbb796618",
+      "status": "approved",
+      "notes": "matching light, and camera angle would be preferred, but this does look correct material property wise.",
+      "reviewedAt": "2026-11-06T06:41:07.710Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "AttenuationTest/glTF",
+      "fingerprint": "9e11e352434d747248c3166536d2016d90b3811ab3eff1a0eed52a34280400fd",
+      "status": "rejected",
+      "notes": "sbox scene brightness is to high, makes the scene unreadable.",
+      "reviewedAt": "2026-11-06T06:41:33.646Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "Box/glTF",
+      "fingerprint": "1882a858434a8d83fbc753f75f4073ffda577487366ab9e91ba17d6aa43f768b",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T11:10:54.388Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "BoxAnimated/glTF-Embedded",
+      "fingerprint": "772f39f617ce0549d194be1b7c60853e3daacabebcd005cfa776da7070c4f4e0",
+      "status": "approved",
+      "notes": "Looks correct, colours are a bit off, but this could be lighting in-engine",
+      "reviewedAt": "2026-11-06T06:43:54.848Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "BoxInterleaved/glTF",
+      "fingerprint": "651f92aeeca68657d06a54f17fa411ae809571e13972f08ab214b4fe25fda747",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T06:44:03.928Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "BoxTextured/glTF",
+      "fingerprint": "39931995de28dc544ad0696f39c13154ea0cc086836cc7a8e41dc226573540d8",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T06:44:10.336Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "BoxTexturedNonPowerOfTwo/glTF",
+      "fingerprint": "04b020ec7b32fb084b04c45192c279a7d437d37a7cfebacaee78a3f4ce9c2efd",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T06:44:27.416Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "BoxTexturedNonPowerOfTwo/glTF-Binary",
+      "fingerprint": "bf8fea6245e5a9971455c89d3239b0d966fa5f3deeebcfa037d263889f69a1a8",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T06:44:30.729Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "BoxTexturedNonPowerOfTwo/glTF-Embedded",
+      "fingerprint": "97e16b2a7f42a9a6ff0c1f9d3553dd4399fe8bb0107b4ad0cc8f21f8dab58262",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T06:44:23.184Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "BoxVertexColors/glTF",
+      "fingerprint": "afb6c187c96148d3fe40cb424d30eebafd6f1072b03cfa43edc337ce3ab4f4d6",
+      "groupFingerprint": "227efa816176de06b7f5aeb05405f0c59150a2549d96d3df60fe53bbf8d3f91a",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:40:27.257Z",
+      "reviewer": "user",
+      "sourceComparisonId": "BoxVertexColors/glTF"
+    },
+    {
+      "caseId": "Cameras/glTF",
+      "fingerprint": "1a1cb091585ae595ff6b3ab0a7228865f36efeecd6e73f2bc0aa73ba160214cb",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T06:45:10.441Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "CesiumMan/glTF",
+      "fingerprint": "252b2a0b513d9df2b499a3d523a16af1fa22646f0708178e73a361aee3b12602",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T06:45:36.369Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "CesiumMan/glTF-Binary",
+      "fingerprint": "4554b5a5eb0b1c5cb5123de6c62e817a2dc6d295d3c9c676b70bfca382739891",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T06:45:39.321Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "CesiumMan/glTF-Draco",
+      "fingerprint": "03e1956b58d4cd3028b85866dcb9ed354c8a6d9da30b4773ca60832531fe4a61",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T06:45:43.609Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "CesiumMan/glTF-Embedded",
+      "fingerprint": "7cdecec1f09f01d9ae21e0c0dadd28adb3b51741e5e4d7e3c4d7e3b85dea2cf8",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T06:45:48.762Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "CesiumMilkTruck/glTF",
+      "fingerprint": "2f1f9ac282496b5829f7345470e17340e50a34eb7c29535f6817a60d02ca9494",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T06:46:14.673Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "CesiumMilkTruck/glTF-Binary",
+      "fingerprint": "96e5feb5f3e3e2784cced27d34f748c1944b0c5492b440207321a46287e8b005",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T06:46:18.673Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "CesiumMilkTruck/glTF-Draco",
+      "fingerprint": "f19550796a127ea1e8c0bcd1ce0a68d806c50edd9f3b6169a87f216fece9fd1e",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T06:46:23.666Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "CesiumMilkTruck/glTF-Embedded",
+      "fingerprint": "92a68bdd538571361a4fb06c27cb866565ca67efcca5c24b1f35bc8f69393616",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T06:46:11.171Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "CompareClearcoat/glTF",
+      "fingerprint": "618a5bef51a97dfa6a3c2129c68bdd7fedba0d496f35cb741475b5923d7248be",
+      "status": "rejected",
+      "notes": "The scene lacks a skybox ? seems to have skybox reflection in sample, where ours just shows black.",
+      "reviewedAt": "2026-11-06T06:47:01.795Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "CompareDispersion/glTF",
+      "fingerprint": "f6dc0194110a5bd078dd257a3357411cec61b44a2b679ca589286448c9619cb6",
+      "status": "rejected",
+      "notes": "Ours is not transparant! shader seems to fail here",
+      "reviewedAt": "2026-11-06T06:47:46.028Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "CompareIridescence/glTF",
+      "fingerprint": "a43ea8cf29a875dd6827c1d905f5a00d11e5e6f3d4c3bfce8e4841b8fc024977",
+      "status": "rejected",
+      "notes": "Needs hdri",
+      "reviewedAt": "2026-11-06T06:48:05.761Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "CompareMetallic/glTF",
+      "fingerprint": "3ba463270a3ba66874aa3c6ef8d5c2857a5fccbcee73086da25514bfc5a4e537",
+      "status": "rejected",
+      "notes": "Needs hdri",
+      "reviewedAt": "2026-11-06T06:48:38.100Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "CompareRoughness/glTF",
+      "fingerprint": "cb258e22858394fc9a50da4aee866cdaa37c4b83f204cfe997101515715e4d41",
+      "status": "rejected",
+      "notes": "needs hdri",
+      "reviewedAt": "2026-11-06T06:48:46.524Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "CompareSpecular/glTF",
+      "fingerprint": "99fb4b89c3bcda6c74494066465f420e532a88c16bdb9b51b12b793e79e80de1",
+      "status": "rejected",
+      "notes": "needs hdri",
+      "reviewedAt": "2026-11-06T06:48:55.637Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "Cube/glTF",
+      "fingerprint": "096349e8b89592462eab09c92f347ad1bf1c7a32bb88e60db761925111288f0d",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T06:49:02.876Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "DispersionTest/glTF",
+      "fingerprint": "b50e2d0a55888d636639f7ee7e0c1ea68bd528a38a457729e046dcec3556d6d2",
+      "status": "rejected",
+      "notes": "camera in s&box does not match khronos reference.\nAs suchh visual is hard to compare.\n\nBut glass doesn't seem to render (looks like just white?)",
+      "reviewedAt": "2026-11-06T06:49:34.934Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "DragonAttenuation/glTF",
+      "fingerprint": "644c991a9203e63c1cf489278158b2643cad79d24ad0e6bc4848db20902d105b",
+      "status": "rejected",
+      "notes": "camera in s&box does not match khronos reference.\nAs suchh visual is hard to compare.\n\nBut glass doesn't seem to render (looks like just white?)",
+      "reviewedAt": "2026-11-06T06:49:47.987Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "DragonDispersion/glTF",
+      "fingerprint": "3d4dbf34063fd0ae301eea2d496118adc2cdce8fd3f943b59a2ff7c78ad1db8a",
+      "status": "rejected",
+      "notes": "camera in s&box does not match khronos reference.\nAs suchh visual is hard to compare.\n\nBut glass doesn't seem to render (looks like just white?)",
+      "reviewedAt": "2026-11-06T06:49:54.437Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "Duck/glTF",
+      "fingerprint": "c0c1a3737f5504b1bc20d7332888e569dc26b1b46cbeac4842bd409e77045243",
+      "groupFingerprint": "2c2bc3d56b0cba144d4bf9da58f83d948d77c9ef6842f9a8720cb109e3757e3d",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:41:07.258Z",
+      "reviewer": "user",
+      "sourceComparisonId": "Duck/glTF"
+    },
+    {
+      "caseId": "EnvironmentTest/glTF",
+      "fingerprint": "f659701b58e1525411985e431bd5a557e6b7800ffc36ff3abc69413c6cf43615",
+      "status": "rejected",
+      "notes": "Add HDRI before we can compare visuals, ligthing info looks wrong in S&BOX BECAuse lack os skybox.\n\nIdeally we have matching skybox/scene for all these tests!",
+      "reviewedAt": "2026-11-06T06:50:52.134Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "Fox/glTF",
+      "fingerprint": "fb2747efb9a2bbb9c30a549f9fc022dd8df4b6bc386836b3aabcae71d7ba2b09",
+      "groupFingerprint": "73d97ce3f64b29067ec3d5a8fd740749c9108da36137fda38906c4909361d383",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:41:16.179Z",
+      "reviewer": "user",
+      "sourceComparisonId": "Fox/glTF"
+    },
+    {
+      "caseId": "IORTestGrid/glTF",
+      "fingerprint": "5a5de7528ab4879b923ee170d4948f37d9655b312b8c05f7724e8e148ae9f817",
+      "status": "rejected",
+      "notes": "Glass renders as just white, lack hdri, the two left rows just look like black ?",
+      "reviewedAt": "2026-11-06T06:51:54.207Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "InterpolationTest/glTF",
+      "fingerprint": "6efe63d212b7d1907441142bf3a0707c5c26751ee2fac5fc0cb6f5b817a52364",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T06:52:15.935Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "IridescenceSuzanne/glTF",
+      "fingerprint": "f0994db2f07a57d117ccafff17e9ee0eddc46a93128e0de73acbc2c0c80fbe1f",
+      "status": "rejected",
+      "notes": "Add HDRI, and brightness value seems to high ?",
+      "reviewedAt": "2026-11-06T06:52:43.695Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "MeshPrimitiveModes/glTF",
+      "fingerprint": "5a71e9194fceeb6109716484a38b0f3bcc7900a41ec53c28a86877d489e2b7ac",
+      "status": "rejected",
+      "notes": "The dots/line thickness should be increased. but looks correct otherwise.",
+      "reviewedAt": "2026-11-06T06:53:14.304Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "MetalRoughSpheres/glTF",
+      "fingerprint": "a09716ed5315b9ef97a990605f78321758f87ef5cf5e35e61bf324bfe9f41db0",
+      "groupFingerprint": "9665f312c23648b10cf8b05873e1fc01c9e16b5f849a54b9166f406f3b2898a1",
+      "status": "rejected",
+      "notes": "Top left ball is black, visually compare some look like fresnell black outline or have other artifacts",
+      "reviewedAt": "2026-11-06T15:43:47.965Z",
+      "reviewer": "user",
+      "sourceComparisonId": "MetalRoughSpheres/glTF"
+    },
+    {
+      "caseId": "OrientationTest/glTF",
+      "fingerprint": "f926b12d238724623072eb7305c727e286e4cf48d1651c407cb32bf7809ef3b4",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T11:12:40.373Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "RiggedFigure/glTF",
+      "fingerprint": "75acb1dc9f0ee865008724417b69d4f0a68ccc6241f531512f8739359378380c",
+      "groupFingerprint": "bbca329bece0b7fad15935a9b89656402c9f116a8461f215fb6ca962b6a1f1d0",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:45:33.558Z",
+      "reviewer": "user",
+      "sourceComparisonId": "RiggedFigure/glTF"
+    },
+    {
+      "caseId": "RiggedSimple/glTF",
+      "fingerprint": "2a0b04d0755d20081b55dc4e4dec6f28cdd95fbb32d3ec20581d2490566195c7",
+      "groupFingerprint": "bc0e363c615fb6e47d93fc08043d39e3d395e17b5a64bb13dec586d952767a80",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:45:39.854Z",
+      "reviewer": "user",
+      "sourceComparisonId": "RiggedSimple/glTF"
+    },
+    {
+      "caseId": "TextureCoordinateTest/glTF",
+      "fingerprint": "806e8329f7fe6806d730c34f690fb1fdb90e5d72a1d278b824df15caf92816a7",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T11:14:27.054Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "TextureTransformTest/glTF",
+      "fingerprint": "12592799b9c4aae8b7bbd8adb9e488d98e3df0cce2e66a8a66591bdd75d708c6",
+      "groupFingerprint": "02275867d11a9500788a100bd83ae409a100c0c3b5a9186b5be256ae125e12cd",
+      "status": "rejected",
+      "notes": "the arrow background  is just white, while in the original image it has a gray/white background diference going on.",
+      "reviewedAt": "2026-11-06T15:47:30.216Z",
+      "reviewer": "user",
+      "sourceComparisonId": "TextureTransformTest/glTF"
+    },
+    {
+      "caseId": "Triangle/glTF",
+      "fingerprint": "5a84b1532bb0a93c87bdfff2cc87f5439e9e49ff006350266a9d2f90a5148443",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T11:15:28.408Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF::canonical-compiled",
+      "fingerprint": "7c78a36664eb81e78a61e35e27d666b8321606c6e66979c8d7dba373f6f30ef8",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:55.106Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "AnimatedMorphCube/glTF-Binary",
+      "fingerprint": "91d952d70140f289968bfea3d9e206d75cec9956f737c372228829ee808013a7",
+      "groupFingerprint": "448d48aeb952a516099907e2c73c272f6b78c3ae9021e96eccf489096e95d5d9",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:40:19.258Z",
+      "reviewer": "user",
+      "sourceComparisonId": "AnimatedMorphCube/glTF"
+    },
+    {
+      "caseId": "AnimatedMorphCube/glTF-Quantized",
+      "fingerprint": "548f9aa2d2dd2c26a716e96b8fac830936f7910787d0a4a2f343178ec254bb78",
+      "groupFingerprint": "b44eb892d3af957a2ea4b3292cb6d760b4b47875f4b4f30b9e211894331e2899",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:40:24.010Z",
+      "reviewer": "user",
+      "sourceComparisonId": "AnimatedMorphCube/glTF-Quantized"
+    },
+    {
+      "caseId": "BoxVertexColors/glTF::compiled",
+      "fingerprint": "24c504478b7b5f7223ba9ee348cca8fa864178fe668245c46406bb90614eec80",
+      "groupFingerprint": "227efa816176de06b7f5aeb05405f0c59150a2549d96d3df60fe53bbf8d3f91a",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:40:27.257Z",
+      "reviewer": "user",
+      "sourceComparisonId": "BoxVertexColors/glTF"
+    },
+    {
+      "caseId": "BrainStem/glTF",
+      "fingerprint": "d98e404ebaf9b4b63e23949d3141d2c5d6172ded479dcfa89f9f2129e925cdd9",
+      "groupFingerprint": "96eec75048c6f583b0e6e34112083b9ee5d8ea460f4528ff38bdff2e29dc5c9c",
+      "status": "rejected",
+      "notes": "Wish to see and compare this being animated !",
+      "reviewedAt": "2026-11-06T15:42:28.627Z",
+      "reviewer": "user",
+      "sourceComparisonId": "BrainStem/glTF"
+    },
+    {
+      "caseId": "BrainStem/glTF-Binary",
+      "fingerprint": "91a9f90ded54d06fdd0e4f45dd0e18aaf8b622f5d721902053c3e7372a18c89d",
+      "groupFingerprint": "f4526b5ffd73011450e282b6dc4eb612468078a80fb84be743fa7790f9849881",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:47:44.271Z",
+      "reviewer": "user",
+      "sourceComparisonId": "BrainStem/glTF-Binary"
+    },
+    {
+      "caseId": "BrainStem/glTF-Binary::compiled",
+      "fingerprint": "09e7f84e97e0f6f48b2d5d6986c5c0897a95b8f9ac96c501ebf06cf9cb70385b",
+      "groupFingerprint": "f4526b5ffd73011450e282b6dc4eb612468078a80fb84be743fa7790f9849881",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:47:44.271Z",
+      "reviewer": "user",
+      "sourceComparisonId": "BrainStem/glTF-Binary"
+    },
+    {
+      "caseId": "BrainStem/glTF-Draco",
+      "fingerprint": "b9bb43fad670230dd89584f3daa8b737c9ef15af55ac41afb1e2bbf9f9f2e38b",
+      "groupFingerprint": "5f77c6a5d663701af24e046d423e68377e72fef7b57651c1841e5a25982446bb",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:47:53.600Z",
+      "reviewer": "user",
+      "sourceComparisonId": "BrainStem/glTF-Draco"
+    },
+    {
+      "caseId": "BrainStem/glTF-Embedded",
+      "fingerprint": "39bc88e90d3f89406068828c574db9c5caa730e50ab2eb1f3271bdfe4eaf6b41",
+      "groupFingerprint": "f4526b5ffd73011450e282b6dc4eb612468078a80fb84be743fa7790f9849881",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:47:44.271Z",
+      "reviewer": "user",
+      "sourceComparisonId": "BrainStem/glTF-Binary"
+    },
+    {
+      "caseId": "BrainStem/glTF-Embedded::compiled",
+      "fingerprint": "75ad91f2f1586bf32ba21ceda2fc6fe382cd48c45e42ca1060069acb540e6026",
+      "groupFingerprint": "f4526b5ffd73011450e282b6dc4eb612468078a80fb84be743fa7790f9849881",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:47:44.271Z",
+      "reviewer": "user",
+      "sourceComparisonId": "BrainStem/glTF-Binary"
+    },
+    {
+      "caseId": "BrainStem/glTF-Meshopt",
+      "fingerprint": "ecdca3449da3de47624fafee807dc545918e0474343e4409b8ed2075d6a859ae",
+      "groupFingerprint": "b83d223acc5c94470a4fc1df6f61563b616d540f1c4fdefedab1c0aebbe5839a",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:47:54.664Z",
+      "reviewer": "user",
+      "sourceComparisonId": "BrainStem/glTF-Meshopt"
+    },
+    {
+      "caseId": "BrainStem/glTF-Meshopt-EXT",
+      "fingerprint": "e7fe36fc6a3b0ab3be09c9b001089b8b015fc583896ab1f01e49a2cc3a046e67",
+      "groupFingerprint": "baa7fdb53b969659bd423760d224d02721edfabca9770f6dc61f96dff662288d",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:47:56.138Z",
+      "reviewer": "user",
+      "sourceComparisonId": "BrainStem/glTF-Meshopt-EXT"
+    },
+    {
+      "caseId": "BrainStem/glTF-Meshopt-EXT::compiled",
+      "fingerprint": "23dcf8aa5e777bfaaaa1861050d0117433599c7b15cf521aabe45c9367a1065c",
+      "groupFingerprint": "baa7fdb53b969659bd423760d224d02721edfabca9770f6dc61f96dff662288d",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:47:56.138Z",
+      "reviewer": "user",
+      "sourceComparisonId": "BrainStem/glTF-Meshopt-EXT"
+    },
+    {
+      "caseId": "BrainStem/glTF-Meshopt::compiled",
+      "fingerprint": "c806b56a5d5be5913da85db05173e387709159eecf9e8c3b171c7fdad24bfb47",
+      "groupFingerprint": "baa7fdb53b969659bd423760d224d02721edfabca9770f6dc61f96dff662288d",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:47:56.138Z",
+      "reviewer": "user",
+      "sourceComparisonId": "BrainStem/glTF-Meshopt-EXT"
+    },
+    {
+      "caseId": "BrainStem/glTF::compiled",
+      "fingerprint": "874477af579d1787fa5479e74d57c1f3f4ef28d93ae2a7400f8fea89d1c4d211",
+      "groupFingerprint": "96eec75048c6f583b0e6e34112083b9ee5d8ea460f4528ff38bdff2e29dc5c9c",
+      "status": "rejected",
+      "notes": "Wish to see and compare this being animated !",
+      "reviewedAt": "2026-11-06T15:42:28.627Z",
+      "reviewer": "user",
+      "sourceComparisonId": "BrainStem/glTF"
+    },
+    {
+      "caseId": "Duck/glTF-Binary",
+      "fingerprint": "9ffb694800a470ff0eed353b2e8c634bd9475f592b1fbcb16f105e40635e2689",
+      "groupFingerprint": "2c2bc3d56b0cba144d4bf9da58f83d948d77c9ef6842f9a8720cb109e3757e3d",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:41:07.258Z",
+      "reviewer": "user",
+      "sourceComparisonId": "Duck/glTF"
+    },
+    {
+      "caseId": "Duck/glTF-Draco",
+      "fingerprint": "cc5fe8c532f443a284282189c6b17a7d71c53be9a10dc09a51dbc8bd36666649",
+      "groupFingerprint": "f80ce80e076a5ebdcf4f238e5089bfbda9db992788eaadcff1a481f97bdbcf5b",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:41:09.371Z",
+      "reviewer": "user",
+      "sourceComparisonId": "Duck/glTF-Draco"
+    },
+    {
+      "caseId": "Duck/glTF-Embedded",
+      "fingerprint": "6f2b76a7d7d274258649f31a505d8c679379e6cb8b1403426806b0b6afd17352",
+      "groupFingerprint": "2c2bc3d56b0cba144d4bf9da58f83d948d77c9ef6842f9a8720cb109e3757e3d",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:41:07.258Z",
+      "reviewer": "user",
+      "sourceComparisonId": "Duck/glTF"
+    },
+    {
+      "caseId": "Duck/glTF-Quantized",
+      "fingerprint": "2d9be88bc6b6ab6117d50e99a2c8e71429e561075e948fa349980a16407f90a1",
+      "groupFingerprint": "0ab868ed46f7c5143ea7bdfb0c82b0d4f0df814a033b92ed7770bcfbca259bd4",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:41:10.314Z",
+      "reviewer": "user",
+      "sourceComparisonId": "Duck/glTF-Quantized"
+    },
+    {
+      "caseId": "Fox/glTF-Binary",
+      "fingerprint": "af135d970c0cca28c28a7105709c7d37b5a4a07429face8b2cdec1f9a3be6ea4",
+      "groupFingerprint": "d52148185ad0ac4421a5cc75ea9e093e14481b5abfab9888a7fe4736f0ef3c6b",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:41:17.458Z",
+      "reviewer": "user",
+      "sourceComparisonId": "Fox/glTF-Binary"
+    },
+    {
+      "caseId": "MandarinOrange/glTF",
+      "fingerprint": "9cb005cf1c509e01c18fc15365539362f5b5ac362f3efd10c921a7584163b00c",
+      "groupFingerprint": "31de09f7d39eebd1d178a3d715f51fda9bf2b8a61d0b0b3df3f23a7da500aa74",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "We should add support for  diffuse transmission.",
+      "reviewedAt": "2026-11-06T16:51:54.355Z",
+      "reviewer": "user",
+      "sourceComparisonId": "MandarinOrange/glTF"
+    },
+    {
+      "caseId": "MandarinOrange/glTF::compiled",
+      "fingerprint": "aa31f2083c8721fda05499dcd9ba26d889b4f01d783c5525f482dd80805a5737",
+      "groupFingerprint": "31de09f7d39eebd1d178a3d715f51fda9bf2b8a61d0b0b3df3f23a7da500aa74",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "We should add support for  diffuse transmission.",
+      "reviewedAt": "2026-11-06T16:51:54.355Z",
+      "reviewer": "user",
+      "sourceComparisonId": "MandarinOrange/glTF"
+    },
+    {
+      "caseId": "MaterialsVariantsShoe/glTF",
+      "fingerprint": "cf5c01e33c72450ede188937be45ddb66084180b45a86e07b94ba0ba67512899",
+      "groupFingerprint": "f1668ae69e99a00364258331157dd99789826b3acff702ed80dc6f1ffb2342d5",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T16:27:44.223Z",
+      "reviewer": "user",
+      "sourceComparisonId": "MaterialsVariantsShoe/glTF"
+    },
+    {
+      "caseId": "MaterialsVariantsShoe/glTF::material=beach",
+      "fingerprint": "1ada2e8002f4f5fa94d122e92f57c02fde18d74e120341552fac311088c28b17",
+      "groupFingerprint": "108a0f9a59dbe7d74ef89f865340cda82c93456affff09146b0ff69ace9780fb",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T16:27:45.528Z",
+      "reviewer": "user",
+      "sourceComparisonId": "MaterialsVariantsShoe/glTF::material=beach"
+    },
+    {
+      "caseId": "MaterialsVariantsShoe/glTF::material=street",
+      "fingerprint": "60940e9962dfe26b5507a9d9c140139a3c5022785e60380e346e893f32aaf968",
+      "groupFingerprint": "069411c3adb095af879e31063d2a044c4a07a444fd4ad19c7fe0d2b0f797c2d8",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T16:27:37.031Z",
+      "reviewer": "user",
+      "sourceComparisonId": "MaterialsVariantsShoe/glTF::material=street"
+    },
+    {
+      "caseId": "MetalRoughSpheres/glTF-Binary",
+      "fingerprint": "46d0b11046fdb3ac7f0ad519884e4dc8b24f02f59b188bd94c9cef3469988cea",
+      "groupFingerprint": "225c7bfa046a7e0e2dae31da1d08f174003440efdeb718f299be18ff7c18408d",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:43:55.605Z",
+      "reviewer": "user",
+      "sourceComparisonId": "MetalRoughSpheres/glTF-Binary"
+    },
+    {
+      "caseId": "MetalRoughSpheres/glTF-Binary::compiled",
+      "fingerprint": "20992f98636ea94dbbda71c6840c74edd155d33cfe3c773ea21832f99e458c6d",
+      "groupFingerprint": "b0ed13880120d9161d284fa2fd46b2f0d55c06517f5e440bfee48faf8b7a4a3c",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:43:58.365Z",
+      "reviewer": "user",
+      "sourceComparisonId": "MetalRoughSpheres/glTF-Embedded"
+    },
+    {
+      "caseId": "MetalRoughSpheres/glTF-Embedded",
+      "fingerprint": "6ce2e8e23000eb49e07ceaa8555371ea05ae20c98474d6d4dff2d33a05416a42",
+      "groupFingerprint": "b0ed13880120d9161d284fa2fd46b2f0d55c06517f5e440bfee48faf8b7a4a3c",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:43:58.365Z",
+      "reviewer": "user",
+      "sourceComparisonId": "MetalRoughSpheres/glTF-Embedded"
+    },
+    {
+      "caseId": "MetalRoughSpheres/glTF-Embedded::compiled",
+      "fingerprint": "f00ed08deaabea59f742aa2c73d96580f8aba85c4a433fe8278906390bba3ef6",
+      "groupFingerprint": "9665f312c23648b10cf8b05873e1fc01c9e16b5f849a54b9166f406f3b2898a1",
+      "status": "rejected",
+      "notes": "Top left ball is black, visually compare some look like fresnell black outline or have other artifacts",
+      "reviewedAt": "2026-11-06T15:43:47.965Z",
+      "reviewer": "user",
+      "sourceComparisonId": "MetalRoughSpheres/glTF"
+    },
+    {
+      "caseId": "MetalRoughSpheres/glTF::compiled",
+      "fingerprint": "1b64ddd3e5427b68369623333776c8d124fc38d6cef8461fbe1eb1879d2de074",
+      "groupFingerprint": "225c7bfa046a7e0e2dae31da1d08f174003440efdeb718f299be18ff7c18408d",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:43:55.605Z",
+      "reviewer": "user",
+      "sourceComparisonId": "MetalRoughSpheres/glTF-Binary"
+    },
+    {
+      "caseId": "NormalTangentTest/glTF",
+      "fingerprint": "69435aacb9af730a2758dcbdbb3bd5f2013c6924aa233759b5a79f8292e64640",
+      "groupFingerprint": "8a79ee6ffb1915be96a8bc8ee785ae449f7f9bc714eaf39c58f2b37b51a9f7d2",
+      "status": "rejected",
+      "notes": "Comperison does not look anything like.",
+      "reviewedAt": "2026-11-06T15:45:26.982Z",
+      "reviewer": "user",
+      "sourceComparisonId": "NormalTangentTest/glTF"
+    },
+    {
+      "caseId": "NormalTangentTest/glTF-Binary",
+      "fingerprint": "44b8cf434fd0271b4c251889735c770a2f3fb980244a89be301f690df912ab09",
+      "groupFingerprint": "5614b3979b72537158edea0ff4a9ddf7308fb651b223c2ce94d61ffd4aeb8f22",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:45:28.670Z",
+      "reviewer": "user",
+      "sourceComparisonId": "NormalTangentTest/glTF-Binary"
+    },
+    {
+      "caseId": "RiggedFigure/glTF-Binary",
+      "fingerprint": "017a6d05a325c0a24bfa8738bc3ad260acf03e11264c5ff0ea7147d99e474b4e",
+      "groupFingerprint": "bbca329bece0b7fad15935a9b89656402c9f116a8461f215fb6ca962b6a1f1d0",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:45:33.558Z",
+      "reviewer": "user",
+      "sourceComparisonId": "RiggedFigure/glTF"
+    },
+    {
+      "caseId": "RiggedFigure/glTF-Draco",
+      "fingerprint": "124efd224a677b4eb2a85d251f3a2d2b3717fa02f07819b33dcb2d31542f866d",
+      "groupFingerprint": "565fbc82a119717c87ca5d36a31e2730c33eb3920ff550d916bb0aa2060012b4",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:45:35.558Z",
+      "reviewer": "user",
+      "sourceComparisonId": "RiggedFigure/glTF-Draco"
+    },
+    {
+      "caseId": "RiggedFigure/glTF-Embedded",
+      "fingerprint": "1797498d1ea02a9fc0c6358ded2c3219f7ddbf662366cc6c7335ad413d9414eb",
+      "groupFingerprint": "bbca329bece0b7fad15935a9b89656402c9f116a8461f215fb6ca962b6a1f1d0",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:45:33.558Z",
+      "reviewer": "user",
+      "sourceComparisonId": "RiggedFigure/glTF"
+    },
+    {
+      "caseId": "RiggedFigure/glTF::compiled",
+      "fingerprint": "24e7f2ee5401c6958606a6491143f65c9888d4435892ddb29b5e161d196b4a9b",
+      "groupFingerprint": "bbca329bece0b7fad15935a9b89656402c9f116a8461f215fb6ca962b6a1f1d0",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:45:33.558Z",
+      "reviewer": "user",
+      "sourceComparisonId": "RiggedFigure/glTF"
+    },
+    {
+      "caseId": "RiggedSimple/glTF-Binary",
+      "fingerprint": "5f3b7902af85d0c06d52df1944a4db0b50b08129575f8e4cf31f2788caf324e7",
+      "groupFingerprint": "bc0e363c615fb6e47d93fc08043d39e3d395e17b5a64bb13dec586d952767a80",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:45:39.854Z",
+      "reviewer": "user",
+      "sourceComparisonId": "RiggedSimple/glTF"
+    },
+    {
+      "caseId": "RiggedSimple/glTF-Binary::compiled",
+      "fingerprint": "26828ad81248fe512e64ef0cb83d542afc07e86d449df174a742ebd12f1640a2",
+      "groupFingerprint": "bc0e363c615fb6e47d93fc08043d39e3d395e17b5a64bb13dec586d952767a80",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:45:39.854Z",
+      "reviewer": "user",
+      "sourceComparisonId": "RiggedSimple/glTF"
+    },
+    {
+      "caseId": "RiggedSimple/glTF-Draco",
+      "fingerprint": "ab51b4c341385766e24ce59719b160fe2485af68cb676fa8383d5f4e09d0aff7",
+      "groupFingerprint": "8e296d49c197814bbf97dc5dd0e9a1e07ab44cada40ed173a17cb750d15402d9",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:45:41.054Z",
+      "reviewer": "user",
+      "sourceComparisonId": "RiggedSimple/glTF-Draco"
+    },
+    {
+      "caseId": "RiggedSimple/glTF-Draco::compiled",
+      "fingerprint": "ad559c97d2b4d6ff86d02a5f8babb1718c99aed318760f6a7bb1137f2524d56a",
+      "groupFingerprint": "8e296d49c197814bbf97dc5dd0e9a1e07ab44cada40ed173a17cb750d15402d9",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:45:41.054Z",
+      "reviewer": "user",
+      "sourceComparisonId": "RiggedSimple/glTF-Draco"
+    },
+    {
+      "caseId": "RiggedSimple/glTF-Embedded",
+      "fingerprint": "f6abc1cb57a089ecb50d3eb66302e119dd3ebf39ddb7bcb6a8972ab669e5b59f",
+      "groupFingerprint": "bc0e363c615fb6e47d93fc08043d39e3d395e17b5a64bb13dec586d952767a80",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:45:39.854Z",
+      "reviewer": "user",
+      "sourceComparisonId": "RiggedSimple/glTF"
+    },
+    {
+      "caseId": "RiggedSimple/glTF-Embedded::compiled",
+      "fingerprint": "e56934947452b1370cce8ed2cbe9e9dd77fe06aa770ef8a6c1a8f9a8ffc26864",
+      "groupFingerprint": "bc0e363c615fb6e47d93fc08043d39e3d395e17b5a64bb13dec586d952767a80",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:45:39.854Z",
+      "reviewer": "user",
+      "sourceComparisonId": "RiggedSimple/glTF"
+    },
+    {
+      "caseId": "RiggedSimple/glTF::compiled",
+      "fingerprint": "f83b618d57878d65907b2ef38679b3fdc6df9a515144625208632a1e2ef839e9",
+      "groupFingerprint": "bc0e363c615fb6e47d93fc08043d39e3d395e17b5a64bb13dec586d952767a80",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:45:39.854Z",
+      "reviewer": "user",
+      "sourceComparisonId": "RiggedSimple/glTF"
+    },
+    {
+      "caseId": "SimpleInstancing/glTF",
+      "fingerprint": "9949c59e41c91baf38c41c5ca4b3af3308a298054951feffab83d39ddbf878b6",
+      "groupFingerprint": "355514f4a29065237d9b280a573a3864b66a87f270599f8f5b291bf3a2299858",
+      "status": "rejected",
+      "notes": "Compare reference with ours, the camera should likely be rotated around, the front-center cube seems to have no rotation and be at scale 1,1,1 but i cannot visually see that one anywhere on the reference",
+      "reviewedAt": "2026-11-06T15:46:53.447Z",
+      "reviewer": "user",
+      "sourceComparisonId": "SimpleInstancing/glTF"
+    },
+    {
+      "caseId": "UnlitTest/glTF",
+      "fingerprint": "0596e9b262b8a5adce6c901ef5de1ea4d9981246690bf6cfb726739a680a8e4c",
+      "groupFingerprint": "ea6a5bef4ad6fc0e73e0bdf1ea0205390a5acb09c74e79ff4ae39c00a32c94eb",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:47:38.319Z",
+      "reviewer": "user",
+      "sourceComparisonId": "UnlitTest/glTF-Binary"
+    },
+    {
+      "caseId": "UnlitTest/glTF-Binary",
+      "fingerprint": "fa753e1fe9f24c8bb3ce3bb04bd3b715c26e4a818fec7886c4228926c6286919",
+      "groupFingerprint": "ea6a5bef4ad6fc0e73e0bdf1ea0205390a5acb09c74e79ff4ae39c00a32c94eb",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:47:38.319Z",
+      "reviewer": "user",
+      "sourceComparisonId": "UnlitTest/glTF-Binary"
+    },
+    {
+      "caseId": "UnlitTest/glTF-Binary::compiled",
+      "fingerprint": "d9d20e5ada673982bf0037135c3b644908279a5c4e8220185d06316ad4a26ea2",
+      "groupFingerprint": "ea6a5bef4ad6fc0e73e0bdf1ea0205390a5acb09c74e79ff4ae39c00a32c94eb",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:47:38.319Z",
+      "reviewer": "user",
+      "sourceComparisonId": "UnlitTest/glTF-Binary"
+    },
+    {
+      "caseId": "UnlitTest/glTF::compiled",
+      "fingerprint": "7c0ec9876f8537ba7ee47649556f5292d89ec5234006edb08c5accf2143a05f1",
+      "groupFingerprint": "ea6a5bef4ad6fc0e73e0bdf1ea0205390a5acb09c74e79ff4ae39c00a32c94eb",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T15:47:38.319Z",
+      "reviewer": "user",
+      "sourceComparisonId": "UnlitTest/glTF-Binary"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF::reframed-ibl-candidate",
+      "fingerprint": "ee30bb0a1a7b7158f6e9a5620f796ca2000c863ea5ae0a749f46c587f71b3212",
+      "groupFingerprint": "07884401191e501635b8b7d3d59c7dd66b87c164eba61aae9aad51e9b464b827",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "The marbles on the pawns are not transparant",
+      "reviewedAt": "2026-11-07T03:18:44.880Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF::reframed-ibl-candidate"
+    },
+    {
+      "caseId": "BrainStem/glTF-Meshopt-EXT::canonical-animation",
+      "fingerprint": "dbde0b0a62b03e85945e203721107018a2b2eb2e119e4abd8ee90f95e5c451cb",
+      "groupFingerprint": "a79a42f11a138e0c0d7bc1652a69b264c1ded0c710f1971fa6d817a59277ae49",
+      "status": "approved",
+      "action": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-07T03:16:45.222Z",
+      "reviewer": "user",
+      "sourceComparisonId": "BrainStem/glTF-Meshopt-EXT::canonical-animation"
+    },
+    {
+      "caseId": "InterpolationTest/glTF::canonical-compiled",
+      "fingerprint": "0113029971ca8715dd79d2bf4f72a64462fa3484ce37df618abf84e1e8f6e861",
+      "groupFingerprint": "75819ca564b1a293fec1baa2cb19f66e8a0152bdec9e7ecb194c179a24014655",
+      "status": "approved",
+      "action": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-07T03:16:56.550Z",
+      "reviewer": "user",
+      "sourceComparisonId": "InterpolationTest/glTF::canonical-compiled"
+    },
+    {
+      "caseId": "MandarinOrange/glTF::diffuse-transmission-review",
+      "fingerprint": "93008dff7f61a2f316419af09eb7fb6c82bcc3009707829ccc63c3f7a2c6e88b",
+      "groupFingerprint": "196fc138ff4f424e29662b89239b78468a952fc57b8bc13b63fffc978de5aa5c",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "Please overlay the manderin with the reference, brightness levels don't match (aim for 80% similarity)",
+      "reviewedAt": "2026-11-07T03:17:38.470Z",
+      "reviewer": "user",
+      "sourceComparisonId": "MandarinOrange/glTF::diffuse-transmission-review"
+    },
+    {
+      "caseId": "MeshoptCubeTest/glTF-Meshopt::canonical-compiled",
+      "fingerprint": "0ab00cfbc33ad5e09ba88787842913a455d9602787eaad851f43d9ecd644f197",
+      "groupFingerprint": "6231233c031d7b3a13e267d53324dc764262fa841028b0020eaa549e4b16a9d1",
+      "status": "approved",
+      "action": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-07T03:18:10.968Z",
+      "reviewer": "user",
+      "sourceComparisonId": "MeshoptCubeTest/glTF-Meshopt::canonical-compiled"
+    },
+    {
+      "caseId": "MetalRoughSpheres/glTF::canonical-ao-review",
+      "fingerprint": "d88948e7a600cdd456e091ef5e7a2dbb8d3135ef28a5320c23e41720ff356db2",
+      "groupFingerprint": "a4de3b9a6d3f7bd9ad0046bd158f4114fe55e112e8495f0998a739f099ea7878",
+      "status": "approved",
+      "action": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-07T03:18:31.560Z",
+      "reviewer": "user",
+      "sourceComparisonId": "MetalRoughSpheres/glTF::canonical-ao-review"
+    },
+    {
+      "caseId": "MorphPrimitivesTest/glTF::canonical-compiled",
+      "fingerprint": "68eaf9b70385edef13736698f51dd8d46e8f9d1cf9dd375714253fae1850ac04",
+      "groupFingerprint": "71fd714396ece34336e50dfc436974fe0461dc69b25443a18c379dff2591f4ae",
+      "status": "approved",
+      "action": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-07T03:18:49.959Z",
+      "reviewer": "user",
+      "sourceComparisonId": "MorphPrimitivesTest/glTF::canonical-compiled"
+    },
+    {
+      "caseId": "NormalTangentTest/glTF-Binary::canonical-normal-review",
+      "fingerprint": "2e380de7f0b5695d1ce0af550f994222eaaeb325444be13db1c30b7267172a9d",
+      "groupFingerprint": "ac54ef63021f04c8731d0e2a24d2ebabbbefbc83c8f885fd8bb5f73661b98ab6",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "Capture should be higher resolution, cannot make clear decision on this",
+      "reviewedAt": "2026-11-07T03:19:15.352Z",
+      "reviewer": "user",
+      "sourceComparisonId": "NormalTangentTest/glTF-Binary::canonical-normal-review"
+    },
+    {
+      "caseId": "SimpleInstancing/glTF::camera-light-review",
+      "fingerprint": "a0c2ffa396727ddeb6429616c1149b3a60424bfb749e66125e92120c26474c3c",
+      "groupFingerprint": "a08b0ca6c0261fee9d05a58e81b5213df929f62c79ca72e6a4e086d90361ae4b",
+      "status": "approved",
+      "action": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-07T03:19:20.776Z",
+      "reviewer": "user",
+      "sourceComparisonId": "SimpleInstancing/glTF::camera-light-review"
+    },
+    {
+      "caseId": "SimpleSparseAccessor/glTF::canonical-compiled",
+      "fingerprint": "d8efcc5d3c7ec31ff13c178bc5d1d2c0db2ce7b10ff2dc0699bdfc36ee831010",
+      "groupFingerprint": "211464a412fc53c616cb3ec50f0df0e8bef14c38949cabc14e656d51d7cd8f85",
+      "status": "approved",
+      "action": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-07T03:19:25.992Z",
+      "reviewer": "user",
+      "sourceComparisonId": "SimpleSparseAccessor/glTF::canonical-compiled"
+    },
+    {
+      "caseId": "TextureLinearInterpolationTest/glTF-Binary::canonical-compiled",
+      "fingerprint": "65ee84f48f6f29dbc7e274c581eb42cb14137142c88e695dbb58fdc7e5a0dfc9",
+      "groupFingerprint": "1ff7a421b16a05492dc0e44861fe2c7988de43f2ac8e5a37231e070b7298fd4e",
+      "status": "approved",
+      "action": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-07T03:19:33.528Z",
+      "reviewer": "user",
+      "sourceComparisonId": "TextureLinearInterpolationTest/glTF-Binary::canonical-compiled"
+    },
+    {
+      "caseId": "TextureTransformTest/glTF::canonical-compiled",
+      "fingerprint": "b64c2bdd6ed040889fa782f9e53fa06243bccb6483cf93278f9da28f7b54b392",
+      "groupFingerprint": "287c1200ecaad65d64fc84f10333e0e2c3bdec8ef37be58c7624aaf0f99f248c",
+      "status": "approved",
+      "action": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-07T03:19:36.584Z",
+      "reviewer": "user",
+      "sourceComparisonId": "TextureTransformTest/glTF::canonical-compiled"
+    }
+  ],
+  "previousDecisions": [
+    {
+      "caseId": "ABeautifulGame/glTF",
+      "fingerprint": "0ea2558d4714edda0afb7ebaab374d0f1e912155920d38a3538fbf82d2894c47",
+      "status": "rejected",
+      "notes": "Sandbox.Gltf.GltfException: The stock glTF model material adapter does not yet support normal, occlusion or emissive textures.\n\nPlease add support for this !",
+      "reviewedAt": "2026-11-06T06:37:19.651Z",
+      "reviewer": "user",
+      "siteCommit": "6f5eb5657c0f21812e1cbe10b231919837d21944"
+    },
+    {
+      "caseId": "AnimatedCube/glTF",
+      "fingerprint": "8daaa5edac9b13787a2af52ea5688b84c98775803c53b0b9e961643534fa6559",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T11:09:17.971Z",
+      "reviewer": "user",
+      "siteCommit": "44d3b6291889ef773f2fce3ae4ab8c53afcd1f08"
+    },
+    {
+      "caseId": "AnimatedMorphCube/glTF",
+      "fingerprint": "fec6299760a47a4c05938920e6aa44aabc604e41396d1acbf7406eed322f310d",
+      "status": "approved",
+      "notes": "Flip 180degree, we had similar issue with duck being rotated before we steered it, keep this in mind for any model we render.",
+      "reviewedAt": "2026-11-06T11:10:20.763Z",
+      "reviewer": "user",
+      "siteCommit": "44d3b6291889ef773f2fce3ae4ab8c53afcd1f08"
+    },
+    {
+      "caseId": "AnimatedTriangle/glTF",
+      "fingerprint": "6c5084b28b23c1d2c34f85e1c1bfe531c244809bfea094cee440c02db9f813d6",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T11:10:31.875Z",
+      "reviewer": "user",
+      "siteCommit": "44d3b6291889ef773f2fce3ae4ab8c53afcd1f08"
+    },
+    {
+      "caseId": "Box/glTF",
+      "fingerprint": "f7befb0a6ec1d6aeedb9ea91a3ddc979cbe09de0160eeb398b0afcb5751b303f",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T11:10:54.388Z",
+      "reviewer": "user",
+      "siteCommit": "44d3b6291889ef773f2fce3ae4ab8c53afcd1f08"
+    },
+    {
+      "caseId": "BoxVertexColors/glTF",
+      "fingerprint": "f20bf6ddf9fdcb178a65b8c31761f7a4201727b4a429b5294b00b7bfb401fbad",
+      "status": "rejected",
+      "notes": "Vertex colors not loaded",
+      "reviewedAt": "2026-11-06T11:11:06.036Z",
+      "reviewer": "user",
+      "siteCommit": "44d3b6291889ef773f2fce3ae4ab8c53afcd1f08"
+    },
+    {
+      "caseId": "Duck/glTF",
+      "fingerprint": "1973892553ac72c8901d524df76444df308eedc786582facc689d08d19aa2f1c",
+      "status": "approved",
+      "notes": "Light too saturated, but looks correct",
+      "reviewedAt": "2026-11-06T11:11:22.284Z",
+      "reviewer": "user",
+      "siteCommit": "44d3b6291889ef773f2fce3ae4ab8c53afcd1f08"
+    },
+    {
+      "caseId": "Fox/glTF",
+      "fingerprint": "27d6afef64d182863fb43672b7c0b2842f254892c2b713e687b822b2ab7028d7",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T11:11:51.532Z",
+      "reviewer": "user",
+      "siteCommit": "44d3b6291889ef773f2fce3ae4ab8c53afcd1f08"
+    },
+    {
+      "caseId": "MetalRoughSpheres/glTF",
+      "fingerprint": "f982ecefcdfbf102efd0b5f459a4270b5e3b2cb17d4e906582facf4ab24ca227",
+      "status": "rejected",
+      "notes": "Camera is not located at the middel, hdri seems to be missing",
+      "reviewedAt": "2026-11-06T11:12:28.341Z",
+      "reviewer": "user",
+      "siteCommit": "44d3b6291889ef773f2fce3ae4ab8c53afcd1f08"
+    },
+    {
+      "caseId": "OrientationTest/glTF",
+      "fingerprint": "698f240a7087ef8231dbd4b891ab1f662db043c53dbba9636a134deb9dc87425",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T11:12:40.373Z",
+      "reviewer": "user",
+      "siteCommit": "44d3b6291889ef773f2fce3ae4ab8c53afcd1f08"
+    },
+    {
+      "caseId": "RiggedFigure/glTF",
+      "fingerprint": "44dff476ce80bb3b530c27cb7e60634b985e0fbd59db8111fdc7e4ab9fbfe19c",
+      "status": "rejected",
+      "notes": "Speed does not match",
+      "reviewedAt": "2026-11-06T11:13:01.269Z",
+      "reviewer": "user",
+      "siteCommit": "44d3b6291889ef773f2fce3ae4ab8c53afcd1f08"
+    },
+    {
+      "caseId": "RiggedSimple/glTF",
+      "fingerprint": "e5fd8f442311b0bcf48e7042dd57cc5ddf16b29b8901e63ad446ffa29e98382f",
+      "status": "approved",
+      "notes": "has to be rotated 180 degree, but looks correct other then that",
+      "reviewedAt": "2026-11-06T11:13:37.750Z",
+      "reviewer": "user",
+      "siteCommit": "44d3b6291889ef773f2fce3ae4ab8c53afcd1f08"
+    },
+    {
+      "caseId": "TextureCoordinateTest/glTF",
+      "fingerprint": "776db077570416d549c93d1a427b7d60fda9f8ed506b7b633b73298a0ec72c49",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T11:14:27.054Z",
+      "reviewer": "user",
+      "siteCommit": "44d3b6291889ef773f2fce3ae4ab8c53afcd1f08"
+    },
+    {
+      "caseId": "TextureTransformTest/glTF",
+      "fingerprint": "c4dadec306851877de3641234798b78b7b09ef1586188d922c1d9f7655b17277",
+      "status": "rejected",
+      "notes": "arrow does not point at the correct elements, and all 3 show yellow instead of the u,v,uv transform being done correctly.",
+      "reviewedAt": "2026-11-06T11:15:22.087Z",
+      "reviewer": "user",
+      "siteCommit": "44d3b6291889ef773f2fce3ae4ab8c53afcd1f08"
+    },
+    {
+      "caseId": "Triangle/glTF",
+      "fingerprint": "cae914dd0e697c2e803dfa682691a0e94cabff5e2d3d7acee9ef8d033634c979",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T11:15:28.408Z",
+      "reviewer": "user",
+      "siteCommit": "44d3b6291889ef773f2fce3ae4ab8c53afcd1f08"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF::canonical-compiled",
+      "fingerprint": "7c78a36664eb81e78a61e35e27d666b8321606c6e66979c8d7dba373f6f30ef8",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:38.050Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF",
+      "fingerprint": "91ba45805342ab8b82ecbe80d229c741527dd44601fecb218beaf20de4db9c19",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:38.050Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF",
+      "fingerprint": "91ba45805342ab8b82ecbe80d229c741527dd44601fecb218beaf20de4db9c19",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:53.114Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF::canonical-compiled",
+      "fingerprint": "7c78a36664eb81e78a61e35e27d666b8321606c6e66979c8d7dba373f6f30ef8",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:53.114Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF::canonical-compiled",
+      "fingerprint": "7c78a36664eb81e78a61e35e27d666b8321606c6e66979c8d7dba373f6f30ef8",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:45.531Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF::canonical-compiled",
+      "fingerprint": "7c78a36664eb81e78a61e35e27d666b8321606c6e66979c8d7dba373f6f30ef8",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:49.723Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF::canonical-compiled",
+      "fingerprint": "7c78a36664eb81e78a61e35e27d666b8321606c6e66979c8d7dba373f6f30ef8",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:39.075Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF",
+      "fingerprint": "91ba45805342ab8b82ecbe80d229c741527dd44601fecb218beaf20de4db9c19",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:42.515Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF",
+      "fingerprint": "91ba45805342ab8b82ecbe80d229c741527dd44601fecb218beaf20de4db9c19",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:49.723Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF",
+      "fingerprint": "91ba45805342ab8b82ecbe80d229c741527dd44601fecb218beaf20de4db9c19",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:51.139Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF::canonical-compiled",
+      "fingerprint": "7c78a36664eb81e78a61e35e27d666b8321606c6e66979c8d7dba373f6f30ef8",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:51.139Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF",
+      "fingerprint": "91ba45805342ab8b82ecbe80d229c741527dd44601fecb218beaf20de4db9c19",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:39.075Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF::canonical-compiled",
+      "fingerprint": "7c78a36664eb81e78a61e35e27d666b8321606c6e66979c8d7dba373f6f30ef8",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:52.202Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "MandarinOrange/glTF::compiled",
+      "fingerprint": "aa31f2083c8721fda05499dcd9ba26d889b4f01d783c5525f482dd80805a5737",
+      "groupFingerprint": "31de09f7d39eebd1d178a3d715f51fda9bf2b8a61d0b0b3df3f23a7da500aa74",
+      "status": "rejected",
+      "notes": "We should add support for  diffuse transmission.",
+      "reviewedAt": "2026-11-06T15:41:53.763Z",
+      "reviewer": "user",
+      "sourceComparisonId": "MandarinOrange/glTF"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF",
+      "fingerprint": "91ba45805342ab8b82ecbe80d229c741527dd44601fecb218beaf20de4db9c19",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:43.710Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF::canonical-compiled",
+      "fingerprint": "7c78a36664eb81e78a61e35e27d666b8321606c6e66979c8d7dba373f6f30ef8",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:42.515Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF",
+      "fingerprint": "91ba45805342ab8b82ecbe80d229c741527dd44601fecb218beaf20de4db9c19",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:45.531Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF",
+      "fingerprint": "91ba45805342ab8b82ecbe80d229c741527dd44601fecb218beaf20de4db9c19",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:52.202Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF::canonical-compiled",
+      "fingerprint": "7c78a36664eb81e78a61e35e27d666b8321606c6e66979c8d7dba373f6f30ef8",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:40.080Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF::canonical-compiled",
+      "fingerprint": "7c78a36664eb81e78a61e35e27d666b8321606c6e66979c8d7dba373f6f30ef8",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:43.710Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "MandarinOrange/glTF",
+      "fingerprint": "9cb005cf1c509e01c18fc15365539362f5b5ac362f3efd10c921a7584163b00c",
+      "groupFingerprint": "31de09f7d39eebd1d178a3d715f51fda9bf2b8a61d0b0b3df3f23a7da500aa74",
+      "status": "rejected",
+      "notes": "We should add support for  diffuse transmission.",
+      "reviewedAt": "2026-11-06T15:41:53.763Z",
+      "reviewer": "user",
+      "sourceComparisonId": "MandarinOrange/glTF"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF",
+      "fingerprint": "91ba45805342ab8b82ecbe80d229c741527dd44601fecb218beaf20de4db9c19",
+      "groupFingerprint": "afb06735bec644924dd2c66eb21c8fc635c69aa6ad85494d04933597cff3d367",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "material,camera,lighting don't match yet. \nFor this model focus on getting the visual to be a 90% match before it will be accepted",
+      "reviewedAt": "2026-11-06T16:50:40.080Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF"
+    },
+    {
+      "caseId": "RiggedFigure/glTF",
+      "fingerprint": "75acb1dc9f0ee865008724417b69d4f0a68ccc6241f531512f8739359378380c",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:02:18.995Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "Fox/glTF",
+      "fingerprint": "fb2747efb9a2bbb9c30a549f9fc022dd8df4b6bc386836b3aabcae71d7ba2b09",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:01:36.027Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "MetalRoughSpheres/glTF-Embedded",
+      "fingerprint": "6ce2e8e23000eb49e07ceaa8555371ea05ae20c98474d6d4dff2d33a05416a42",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:03:38.141Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "RiggedSimple/glTF-Embedded::compiled",
+      "fingerprint": "e56934947452b1370cce8ed2cbe9e9dd77fe06aa770ef8a6c1a8f9a8ffc26864",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:04:08.837Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "RiggedSimple/glTF::compiled",
+      "fingerprint": "f83b618d57878d65907b2ef38679b3fdc6df9a515144625208632a1e2ef839e9",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:04:04.549Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "RiggedSimple/glTF-Binary",
+      "fingerprint": "5f3b7902af85d0c06d52df1944a4db0b50b08129575f8e4cf31f2788caf324e7",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:03:57.357Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "RiggedFigure/glTF-Draco",
+      "fingerprint": "124efd224a677b4eb2a85d251f3a2d2b3717fa02f07819b33dcb2d31542f866d",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:03:51.325Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "MetalRoughSpheres/glTF-Binary",
+      "fingerprint": "46d0b11046fdb3ac7f0ad519884e4dc8b24f02f59b188bd94c9cef3469988cea",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:03:34.637Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "RiggedSimple/glTF",
+      "fingerprint": "2a0b04d0755d20081b55dc4e4dec6f28cdd95fbb32d3ec20581d2490566195c7",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:02:25.428Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "MetalRoughSpheres/glTF",
+      "fingerprint": "a09716ed5315b9ef97a990605f78321758f87ef5cf5e35e61bf324bfe9f41db0",
+      "status": "rejected",
+      "notes": "Some look just black ?",
+      "reviewedAt": "2026-11-06T14:02:02.932Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "Fox/glTF-Binary",
+      "fingerprint": "af135d970c0cca28c28a7105709c7d37b5a4a07429face8b2cdec1f9a3be6ea4",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:03:21.333Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "RiggedFigure/glTF-Binary",
+      "fingerprint": "017a6d05a325c0a24bfa8738bc3ad260acf03e11264c5ff0ea7147d99e474b4e",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:03:49.286Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "AnimatedMorphCube/glTF-Quantized",
+      "fingerprint": "548f9aa2d2dd2c26a716e96b8fac830936f7910787d0a4a2f343178ec254bb78",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:01:20.124Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "AnimatedColorsCube/glTF",
+      "fingerprint": "986a327902b3e8b6899d3e8fc34df15994f14f7d6907f3b950d5d9f5c7df66b6",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T08:04:44.954Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "SimpleInstancing/glTF",
+      "fingerprint": "9949c59e41c91baf38c41c5ca4b3af3308a298054951feffab83d39ddbf878b6",
+      "status": "rejected",
+      "notes": "Think oriantation is wron by 180 degree ? front cube is caled wrong,",
+      "reviewedAt": "2026-11-06T14:03:07.348Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "AnimatedMorphCube/glTF",
+      "fingerprint": "bef299191d3e522ea5df4f1cfea7f81522f9e42e042e23966014d482214323be",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:00:14.283Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "RiggedFigure/glTF-Embedded",
+      "fingerprint": "1797498d1ea02a9fc0c6358ded2c3219f7ddbf662366cc6c7335ad413d9414eb",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:03:53.381Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "MetalRoughSpheres/glTF-Binary::compiled",
+      "fingerprint": "20992f98636ea94dbbda71c6840c74edd155d33cfe3c773ea21832f99e458c6d",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:03:44.901Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "RiggedFigure/glTF::compiled",
+      "fingerprint": "24e7f2ee5401c6958606a6491143f65c9888d4435892ddb29b5e161d196b4a9b",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:03:55.437Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "BoxVertexColors/glTF",
+      "fingerprint": "afb6c187c96148d3fe40cb424d30eebafd6f1072b03cfa43edc337ce3ab4f4d6",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:00:42.531Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "Duck/glTF",
+      "fingerprint": "c0c1a3737f5504b1bc20d7332888e569dc26b1b46cbeac4842bd409e77045243",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:01:24.851Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "RiggedSimple/glTF-Binary::compiled",
+      "fingerprint": "26828ad81248fe512e64ef0cb83d542afc07e86d449df174a742ebd12f1640a2",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:04:06.181Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "RiggedSimple/glTF-Draco::compiled",
+      "fingerprint": "ad559c97d2b4d6ff86d02a5f8babb1718c99aed318760f6a7bb1137f2524d56a",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:04:07.613Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "Duck/glTF-Draco",
+      "fingerprint": "cc5fe8c532f443a284282189c6b17a7d71c53be9a10dc09a51dbc8bd36666649",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:03:24.141Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "Duck/glTF-Quantized",
+      "fingerprint": "2d9be88bc6b6ab6117d50e99a2c8e71429e561075e948fa349980a16407f90a1",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:03:30.477Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "MetalRoughSpheres/glTF::compiled",
+      "fingerprint": "1b64ddd3e5427b68369623333776c8d124fc38d6cef8461fbe1eb1879d2de074",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:03:41.213Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "Duck/glTF-Binary",
+      "fingerprint": "9ffb694800a470ff0eed353b2e8c634bd9475f592b1fbcb16f105e40635e2689",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:03:14.916Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "RiggedSimple/glTF-Embedded",
+      "fingerprint": "f6abc1cb57a089ecb50d3eb66302e119dd3ebf39ddb7bcb6a8972ab669e5b59f",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:04:02.806Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "AnimatedMorphCube/glTF-Binary",
+      "fingerprint": "91d952d70140f289968bfea3d9e206d75cec9956f737c372228829ee808013a7",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:00:51.859Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "BoxVertexColors/glTF::compiled",
+      "fingerprint": "24c504478b7b5f7223ba9ee348cca8fa864178fe668245c46406bb90614eec80",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:00:47.947Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "MetalRoughSpheres/glTF-Embedded::compiled",
+      "fingerprint": "f00ed08deaabea59f742aa2c73d96580f8aba85c4a433fe8278906390bba3ef6",
+      "status": "rejected",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:03:46.429Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "TextureTransformTest/glTF",
+      "fingerprint": "12592799b9c4aae8b7bbd8adb9e488d98e3df0cce2e66a8a66591bdd75d708c6",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:04:28.349Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "Duck/glTF-Embedded",
+      "fingerprint": "6f2b76a7d7d274258649f31a505d8c679379e6cb8b1403426806b0b6afd17352",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:03:26.157Z",
+      "reviewer": "user"
+    },
+    {
+      "caseId": "ABeautifulGame/glTF::reframed-ibl-candidate",
+      "fingerprint": "ee30bb0a1a7b7158f6e9a5620f796ca2000c863ea5ae0a749f46c587f71b3212",
+      "groupFingerprint": "07884401191e501635b8b7d3d59c7dd66b87c164eba61aae9aad51e9b464b827",
+      "status": "rejected",
+      "action": "rejected",
+      "notes": "The marbles on the pawns are not transparant",
+      "reviewedAt": "2026-11-07T03:15:27.997Z",
+      "reviewer": "user",
+      "sourceComparisonId": "ABeautifulGame/glTF::reframed-ibl-candidate"
+    },
+    {
+      "caseId": "RiggedSimple/glTF-Draco",
+      "fingerprint": "ab51b4c341385766e24ce59719b160fe2485af68cb676fa8383d5f4e09d0aff7",
+      "status": "approved",
+      "notes": "",
+      "reviewedAt": "2026-11-06T14:04:01.165Z",
+      "reviewer": "user"
+    }
+  ],
+  "lastAuthenticatedReviewSync": {
+    "source": "Temp/gltf-validation/private-review-latest-observed-v31.json",
+    "sha256": "7ce8a239b21dbc2b9df1067493a3b3357ba3aaa4c38b829e7cd38fc264a85c84",
+    "observedAt": "2026-11-07T03:43:23Z",
+    "siteVersion": 31,
+    "recordsObserved": 75,
+    "latestOriginalReviewTimestamp": "2026-11-07T03:19:36.584Z",
+    "snapshotConsistency": "Bounded live pages. Original timestamps and fingerprints preserved.",
+    "completeEventHistorySource": "Temp/gltf-validation/private-review-event-history-observed-v31.json",
+    "eventRowsObserved": 146
+  },
+  "reportedIssues": [
+    {
+      "id": "mandarin-v28-lighting-chat-feedback",
+      "modelId": "MandarinOrange",
+      "caseId": "MandarinOrange/glTF::diffuse-transmission-review",
+      "comparisonFingerprint": "a567b47f98b6e735dcd7fe3aa41bbf96d1a76ef0dec31ec68283f18ceddaf336",
+      "siteVersion": 28,
+      "siteCommit": "6f8801cc23a0716b4cafc58ce978eefeb6b88d4d",
+      "captureSha256": "d2ef1d57919fead0e0880b50f773b0e4c02567cf405b1260119166a7e7986a5b",
+      "source": "direct-chat-feedback-relayed-by-root",
+      "sourceType": "reported-issue-not-form-vote",
+      "reportedAt": "2026-11-07T02:31:32.817626+00:00",
+      "summary": "User requests an HDRI skybox; current lighting is too bright and almost white.",
+      "summaryIsVerbatimQuote": false,
+      "status": "open",
+      "correctedComparisonApproval": "pending-new-exact-comparison-and-user-review",
+      "provenance": "Parent /root task handoff: new direct chat feedback on v28 Mandarin a567b47f. No authenticated website form decision was supplied."
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "status": "superseded_unrun",
+  "reason": "Shared missing-role actual GPU failure fixed via neutral(1) graph branch; Alpha must consume effective.W instead of raw fallback.A",
+  "request": {
+    "model": "AlphaBlendModeTest",
+    "owner": "/root/gpu_alpha_blend",
+    "files": [
+      {
+        "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaSurfaceCandidateGate.cs",
+        "sha256": "6c4e8fc82d192bc0ce8964c775a0fbc5400b923d066c2ffcf334d3770c6288e9"
+      },
+      {
+        "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaBlendModeCoreTests.cs",
+        "sha256": "f70649e382f96c7006f276f1dd5d5699dce99fb62fe9e60094ef73c8fe139c42"
+      },
+      {
+        "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaBlendModeReference.cs",
+        "sha256": "a3e8f35189e89554a5382bcdbc1a385417aaa6b06bce9fa658b83790fa0a8e9d"
+      },
+      {
+        "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/surface_alpha_opaque.shdrgrph",
+        "sha256": "c3f5b0234bf85dcc3073fd832c68c24d09f4ee73d2df70baec4bc5385e4cb222"
+      },
+      {
+        "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/surface_alpha_masked.shdrgrph",
+        "sha256": "efe391b7ee9a14fa1f986379a8c62ec9fb70e8a133beda11b1d4921c06c7f3a4"
+      },
+      {
+        "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/surface_alpha_translucent.shdrgrph",
+        "sha256": "8e2a05cc57f24fc638f063802437b1056e061a4abf647022a3ef1e760282b7f2"
+      }
+    ],
+    "entry": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaSurfaceCandidateGate.GenerateForReview(checkoutRoot, outputDirectory, expectedToolsMvid)",
+    "expected_cases": 1,
+    "output_variants": 6,
+    "scope": "actual active provided GraphCompiler source generation plus explicit narrow alpha/sidedness delta only; no shader compilation or drawing",
+    "producer_dependencies": [
+      "actual loaded Tools graph/compiler",
+      "provided Sampler.Attribute implementation from TextureSettings owner"
+    ],
+    "execution_needs": "coordinator guarded idle editor generation; output fresh Temp/gltf-validation/direct-gpu directory",
+    "status": "refrozen_unrun; old Alpha generation helper superseded before execution",
+    "shared_helper_dependencies": [
+      {
+        "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/SurfaceOrmCandidateGate.cs",
+        "sha256": "57fef79b59a933c146c62d9460b2cd0fa9c893c234903e98c71017c206f17015",
+        "owner": "/root/gpu_texture_encoding",
+        "entry": "GenerateGraphForReview; actual provided active compiler source generation"
+      }
+    ]
+  }
+}

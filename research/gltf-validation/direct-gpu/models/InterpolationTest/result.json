@@ -1,0 +1,52 @@
+{
+  "model": "InterpolationTest",
+  "corpus_commit": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "canonical_source": "Models/InterpolationTest/glTF/InterpolationTest.gltf",
+  "source_sha256": "4357b9e260f2e7ffb153255da37c20d6c20a03c76cbebf959a0a4f144a873028",
+  "dependency_sha256": {
+    "InterpolationTest_data.bin": "f4ab866b1b34a0b0ae345a4ac37f2b13b49f6f4e4068ef345880bfcdcdd4d961",
+    "InterpolationTest_img0.png": "dc89eecc149440e13448baf1434b313b1c81ecd027f6f68f8ba20e32eefcc0b4"
+  },
+  "license": "Model files CC0-1.0; metadata and documentation CC-BY-4.0. See upstream LICENSE.md.",
+  "coverage": "Nine clips: node translation, rotation and scale with STEP, LINEAR and CUBICSPLINE; no skins or morph targets. One original source and one compiled artifact derived from it are the intended forms.",
+  "prior_numeric": {
+    "passed": 49,
+    "scope": "40 independent source/accessor/sampler/pose cases and nine controlled player cases, fee5 producer; separate ten failures in other shared player cases in the same batch",
+    "receipt": "Temp/gltf-validation/direct-gpu/animation-layout-draco-first-161/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "sha256": "cee5955d7dff542675725caf59e467c8bb14a32ac6a708f98a3a254eb2ac6ef1"
+  },
+  "prior_public": "FEATURE_STATUS reports source and compiled public loading within 12/14 forms and 512 total sampled GPU frames; not independent interpolation or appearance conformance. Original receipt not found at the cited relative path in this checkout.",
+  "new_attempts": [
+    {
+      "request_sha256": "a1cb26f02ac1bdfde95d844ab2a27a5f6a9a066fd94e352b3c4d520e71a3edf0",
+      "receipt": "Temp/gltf-validation/direct-gpu/interpolation-public-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "c270f6c87ce491e75f96126ef1a1b9fdd8419a5cdd2a69cd42bf4ec0c578cf60",
+      "result": "Helper compilation failed; zero cases executed."
+    },
+    {
+      "request_sha256": "62382eef6c095635707cc6f64ff241ba67fe961d736b88f058879546fc20f4c0",
+      "receipt": "Temp/gltf-validation/direct-gpu/model-tests/005c709334d64ef68e3acab165f4f9a9/receipt.json",
+      "sha256": "301243e51a78f169b4a96c0483e42b9b85860cb858050cc28dbfbd9d0de9c90d",
+      "result": "Two GPU-index provenance negatives passed; compiled test failed because the secondary instance was outside the visible draw area; source incomplete after cancellation. Cleanup errors empty."
+    },
+    {
+      "request_sha256": "7862959257b1a947c3dee99d7c7bd022ae5a498e9f702077397f7b0caef91fdc",
+      "receipt": "Temp/gltf-validation/direct-gpu/interpolation-public-run-3/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "b996da7bd98ab318c03304b00d0f7152a093509a00a57b784694295b5e5017b7",
+      "result": "4/4 passed; source and derived compiled public Model.Load and SkinnedModelRenderer; 81 poses per form, all ten nodes compared with independent accessor-driven reference, actual bound GPU vertex/index readback, two-instance isolation, empty-before/after; two GPU index provenance negatives; clean teardown. Max position error 3.10811735e-5 inches, normal distance 1.19209290e-7 and angle 6.83019e-6 degrees. Singular scales produced 168 undefined-normal vertices per form; finite emitted normals still checked. Lit camera frames include two overlapping instances and are diagnostic only."
+    },
+    {
+      "request_sha256": "490bb8dde7c9b79dfda2957b60e18860a5d54d7d29dd24388b69222fdaeeaced",
+      "receipt": "Temp/gltf-validation/direct-gpu/interpolation-presentation-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "a36bc57762d72069e2eeec501675d45596b19ebda7d3ca14f53e065840cdc70a",
+      "result": "2/2 passed: source and compiled public nine-clip composition, 14 actual deterministic frames each, all ten bound GPU node outputs against source math with cleanup and empty controls. Max position error 4.1131e-5 inches, normal 1.6664e-7, angular error 8.996e-6 degrees. Output uses source materials and inferred front orthographic camera, black background and owned point light; appearance approval pending. Two APNGs are byte-identical, SHA 87464d1534817f921fda78b2518237d80c2624e31b527bb879b4c79f26b4b941, 14 frames, 1070ms; timing uses actual deterministic samples and reference delays, inferred time mapping, not wall-clock playback."
+    },
+    {
+      "request_sha256": "744c1b4a2c404f3918143afeb8cf32848d4ebc59afc882df2317b93b192d5acb",
+      "receipt": "Temp/gltf-validation/direct-gpu/interpolation-cadence-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "ac720a9575b2d5ff955f4f5ecb78e4c507233ea6263f0e8dcf1d26a811adb546",
+      "result": "1/1 source public nine-clip cadence passed, 49 monotonic callbacks through 4.0216633 s and two loops, max full delta 0.1009617 s, maximum phase error 5.5635e-7 s. Final actual GPU output agrees with independent composed reference, max position error 2.6657e-5 inches. Cleanup empty. No injected stall or visual FPS claim; compiled cadence was not rerun."
+    }
+  ],
+  "pending": "Remaining key-side GPU coverage, compiled wall-clock cadence and human appearance review remain unproven. This model has no skeleton or morph targets."
+}

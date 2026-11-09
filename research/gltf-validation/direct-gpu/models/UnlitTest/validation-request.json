@@ -1,0 +1,79 @@
+{
+  "model": "UnlitTest",
+  "owner": "/root/gpu_unlit",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestCoreTests.cs",
+      "sha256": "f8e894fb1b70a5fd87174b7b52e7567fc445d5a25ceeb6df74d16cce45b83283"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestGpuChecks.cs",
+      "sha256": "7b630bf5454671e6dc93413640f4810e83677d81a754844e94ff4e27a650c25c"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestGpuProbe.cs",
+      "sha256": "ac6dc37a732ddc674a5a535841df3fbc3a4eee2cb6c381a62dea1b3ecd8e9eb7"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestImageChecks.cs",
+      "sha256": "ea580576180b9fff2d32d985d1d4966a469c85834a65c7f0035dd4492078f24d"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestLiteralGeometry.cs",
+      "sha256": "35d7af0f850dc89c6a59369e14610462fa45dae85180b8791797b9862c36128b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestReference.cs",
+      "sha256": "5ecbd8a1f577b7b62865a283f70a939553ec4fa9a1dc6bc9d23e0661a6511204"
+    }
+  ],
+  "producer_dependencies": [
+    "actual loaded Sandbox.Engine and Sandbox.Gltf; no replacement producer source",
+    "shared GltfGpuBackend.cs + GltfGpuRig.cs + GltfGpuMorphs.cs and agreed source freeze"
+  ],
+  "shared_backend_contract": "research/gltf-validation/direct-gpu/CONTRACT.md; coordinator identifies active shared freeze",
+  "entry": "Sandbox.Gltf.DirectGpu.UnlitTestValidation.UnlitTestCoreTests.RunAll($checkout); Sandbox.Gltf.DirectGpu.UnlitTestValidation.UnlitTestGpuVerifierTests.RunAll($checkout)",
+  "expected_cases": 49,
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.UnlitTestValidation.UnlitTestCoreTests",
+      "kind": "static_results",
+      "method": "RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 39
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.UnlitTestValidation.UnlitTestGpuVerifierTests",
+      "kind": "static_results",
+      "method": "RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 10
+    }
+  ],
+  "forms": [
+    "glTF/source",
+    "glTF/compiled_glb",
+    "glTF-Binary/source",
+    "glTF-Binary/compiled_glb"
+  ],
+  "scope": "49 CPU/data/staging/checker-control rows only. Four default-stock-unlit-preparation rows require real support and currently expose known rejection. Separately 20 actual GPU measurements planned; images/public Model.Load not executed.",
+  "gpu_entry": "Sandbox.Gltf.DirectGpu.UnlitTestValidation.UnlitTestGpuProbe.Run(checkoutRoot, world, computeMaterial, waitForActualFrames, positionToleranceInches, normalTolerance, diagnosticMaterialResolver = null)",
+  "gpu_expected_measurements": 20,
+  "gpu_proposed_tolerances": {
+    "maximum_position_component_error_inches": 0.0002,
+    "maximum_euclidean_normal_error": 1e-05,
+    "generated_color_and_uv_error": 0
+  },
+  "acceptance": "ACCEPTANCE.md; all source geometry/material numbers independently pinned/literal; arbitrary field-order positive and 9 plausible corruption negative controls; preserve known unlit material failures and diagnostic/source-material distinction",
+  "execution_needs": "Coordinator compiles helpers against actual loaded producers with shared source freeze. No producer build/restart needed for current parser/staging expected-failure run. Actual GPU requires terminal rawtriangle gate and completed device submission. Source-material rendering requires bounded adapter implementation/staging after root-approved handoff.",
+  "independent_reference_audit": {
+    "command": "python3 research/gltf-validation/direct-gpu/models/UnlitTest/audit_reference.py",
+    "executed_cases": 4,
+    "passed": 4,
+    "scope": "input hashes/literal transcription/both source forms/units/materials; not production-parser or GPU evidence"
+  }
+}

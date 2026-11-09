@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Coordinator request for current pure glTF suite",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "request_id",
+    "selection",
+    "manifest_path",
+    "manifest_sha256",
+    "runner_sha256",
+    "engine_mvid",
+    "engine_sha256",
+    "gltf_mvid",
+    "gltf_sha256",
+    "framework_sha256",
+    "expected_cases",
+    "expected_preflights"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "request_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$"
+    },
+    "selection": {
+      "const": "all"
+    },
+    "manifest_path": {
+      "const": "research/gltf-validation/direct-gpu/models/OrientationTest/PURE_SUITE_CURRENT_PROPOSAL.json"
+    },
+    "manifest_sha256": {
+      "const": "483e38562566f3c1e4ee6bdad2c01d0c9fa796a153dfdd06c4771c43edf2953e"
+    },
+    "runner_sha256": {
+      "const": "64e6c33af72c54049e6fc596111d6921e2324428d3131a83f55ec2a837af950c"
+    },
+    "engine_mvid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "2c054bba-c0fa-43b5-a3a2-39a34ff7577f"
+      ]
+    },
+    "engine_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "gltf_mvid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "c869761c-5b80-462d-982a-bc3a688e57b6"
+      ]
+    },
+    "gltf_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "framework_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "expected_cases": {
+      "const": 816
+    },
+    "expected_preflights": {
+      "const": 3
+    }
+  }
+}

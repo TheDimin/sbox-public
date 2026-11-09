@@ -1,0 +1,69 @@
+{
+  "revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "files": [
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/CarConcept/glTF/CarConcept.data.bin",
+      "sha256": "5cd6ceb6a502dc3c79863c2f11c06f6aa7474e53367bb212b3e3c3f1e7611d20"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/CarConcept/glTF/CarConcept.gltf",
+      "sha256": "1a2395a86bdef0a1e9b3d3875bb056f688c624c19cf27c867b6d5cde6f37722f"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/CarConcept/glTF/Dash_E.png",
+      "sha256": "23c7ee30e1bf5e2c243330d4d5be7624f96befca8a224a8eec0b9438a64b09a4"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/CarConcept/glTF/Dot_C.png",
+      "sha256": "ac7ca6bf9ee840b78e4a27c82c3c529a1063bba16b9eea120c981a041d922a40"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/CarConcept/glTF/Dot_N.png",
+      "sha256": "ca9ef95997b387a597738e2f3e9dfa6e9f140c38d2f0baa7aadf226ce05c3635"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/CarConcept/glTF/Hex_N.png",
+      "sha256": "738427eb37d929a8a9dff41783cea37a10fd2dc98f53d6d320d9aa5c648beea7"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/CarConcept/glTF/Khronos_C.png",
+      "sha256": "50f16c5a514079b8ea27ba4eb03046b63cd0a9c29686423a2940a8fb2898f1b5"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/CarConcept/glTF/Mechanical_N.png",
+      "sha256": "bc5865f15bffc94e5248cf0a4bb1beaec06150a640b5ca65ad6de3d58d394ca9"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/CarConcept/glTF/Mechanical_ORM.png",
+      "sha256": "1e026202e92d8b701550d1a6803cb3597f1c0d89adce256b0e360a0f547e4da9"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/CarConcept/glTF/Occlusion.png",
+      "sha256": "766c01462c9b344871711c6af66bcd1f75371fc25f7c392a0185f6b62b2dd4f8"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/CarConcept/glTF/Powdercoat_N.png",
+      "sha256": "3f1bf8d127374684c89b0d1963ca57d36a8ea59de96bef752b62daebc6362eeb"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/CarConcept/glTF/Rib_N.png",
+      "sha256": "516aada2d1c574c59352e1221aaf75cc8fa48104aafe05716f02f30b7349c59f"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/CarConcept/glTF/Thickness.png",
+      "sha256": "09d0606c1f90caf3cc5d578d1f695e908df1c10288c9918971890d2d98dc5eae"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/CarConcept/glTF/Tireside_C.png",
+      "sha256": "871509e74cc44ca8fa3b664e59460e62f0edf30007b035bb9f21ad957d6336c1"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/CarConcept/glTF/Tireside_N.png",
+      "sha256": "a7335b72bf59441a4e1856c819c1e1655a5bb6c72661429f70cf5857eb26f1c2"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/CarConcept/glTF/Tiretread_N.png",
+      "sha256": "cc8dd22a4b78dfcebdca12270e3db8a9c381d9b1b40b00d7a0043373abd0f72f"
+    }
+  ]
+}

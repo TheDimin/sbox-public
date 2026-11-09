@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "engine_sha256": "60bc2b51bbd70c40a000f8b29f420714aff4e3dbda723794b18fdfc43b571396",
+  "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MandarinOrangeValidation.DiffuseTransmissionCompatibilityTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MandarinOrangeValidation.DiffuseTransmissionPublicTests",
+      "kind": "mstest",
+      "expected_cases": 2,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "CanonicalCompiledPath",
+          "arguments": [
+            "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MandarinOrange/MandarinOrange.glb_c"
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "PrepareCanonicalCompiled",
+          "arguments": []
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ],
+  "derived_artifact": {
+    "path": "Temp/gltf-validation/direct-gpu/MandarinOrange/MandarinOrange.glb_c",
+    "producer": "actual installed GltfCompiler.CompileWithEmbeddedImages in frozen suite setup",
+    "scope": "One canonical artifact; output digest is measured in receipt. Source inputs remain pinned by model-source audit. Automatic native asset-graph packaging remains separate."
+  },
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/DiffuseTransmissionPublicTests.cs",
+      "sha256": "181909e8466c502807def600a974cc55c3b131f1802cd8c759f2bbf34d05a766"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/DiffuseTransmissionCompatibilityTests.cs",
+      "sha256": "399f4976ba5627f46d29c7245587619bd00372d90ce4ce322498f4250817f75f"
+    }
+  ],
+  "frozen_artifacts": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-compatibility-fixtures/ordinary_core_0.gltf",
+      "sha256": "ab87afaad6a3a5d189d7686e1206530d1f8181e118dd877620b1fa30ff7a7f9f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-compatibility-fixtures/transmission_zero_0.gltf",
+      "sha256": "86170bb2001e1c0e920edb82e29afdd495b2ea97706fcdd979647d1d3cd785f5"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-compatibility-fixtures/ordinary_core_0_5.gltf",
+      "sha256": "ed4e94bbc7060773ebef4526a89d9b7a14ccb40b776615eb8b26cf20b1171a64"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-compatibility-fixtures/transmission_zero_0_5.gltf",
+      "sha256": "577aa3bdd8555ef0c510872aaca1e79a96ba5263011c3b3252d6bd00b11c994e"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-compatibility-fixtures/ordinary_core_1.gltf",
+      "sha256": "babd183d35bf6a4e68a3d010a0d1dbd32665d3ad06a6b8f724ffd62ef286084a"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-compatibility-fixtures/transmission_zero_1.gltf",
+      "sha256": "ecdc1299d8e2e5c3d8ea6940b95aa2e281ebed71ff5b84d813e58d7714c56bd1"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-compatibility-fixtures-validation.json",
+      "sha256": "fd5174dae57d0e7d59a27a13c508ecfe079b7be8bad383a9d4650c016a1c66ae"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/validate_diffuse_compatibility.py",
+      "sha256": "d0227fceea6a69961caf5829b49e5583086469053d6c0bfa70b037fbbc921fdf"
+    },
+    {
+      "path": "game/core/shaders/gltf_diffuse_transmission.shader",
+      "sha256": "dfbc59486512cab43579aa7e6a12ed14cf10d2667d50ab9e54346e2a655d24e9"
+    },
+    {
+      "path": "game/core/shaders/gltf_surface_five_uv.shader",
+      "sha256": "37a1a426d847e94b6f57a46c8bb8f372133a79b00e8c45e2cd572ce91d534993"
+    }
+  ]
+}

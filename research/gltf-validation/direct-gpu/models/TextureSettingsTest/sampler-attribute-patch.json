@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "baseline_receipt_sha256": "cf229f85cd7b0e48fc6edcd8ac8d45e01ecb56153247f90f907072701df81b75",
+  "patch_sha256": "669461292907c170961ad7f0a9491cd9294eae7a1167c25bfd6058d0ea993555",
+  "files": [
+    {
+      "path": "game/addons/tools/Code/ShaderGraph/Sampler.cs",
+      "before_sha256": "d2f114be7c83bff243f7b20a9dca5a23e532a00c1abf203131a098c4fb9d6cc6",
+      "after_sha256": "044c17ddf84194f7f8618957b0d4d5df57b6a253257923f78b4685e34c10ea3a",
+      "utf8_bom": true,
+      "crlf_only": true
+    },
+    {
+      "path": "game/addons/tools/Code/ShaderGraph/Compiler/GraphCompiler.cs",
+      "before_sha256": "7b61d3bad8ba703167ee1c624fb052de8f186325771fb49b3bd1b91df4a8ad1c",
+      "after_sha256": "ad5b3ad4ee7f88634f7597db7e22bafe2fdb1c23ca1ad6dcbbaaa5feda53d45c",
+      "utf8_bom": true,
+      "crlf_only": true
+    }
+  ]
+}

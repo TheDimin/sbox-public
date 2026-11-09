@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "engine_sha256": "041e2e0094b4f34539f236e323a0033a2d540f3b4f47efac31b38e4414e03330",
+  "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MandarinOrangeValidation.MandarinHdriPresentationTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "ReviewProfiles",
+          "arguments": [
+            "aligned_field_exposure2_5,0,2.5"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ],
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/MandarinHdriPresentationTests.cs",
+      "sha256": "b5136d5909c38a1094885315552166587d66a801bd149af94a6bcf3f72c8dc75"
+    }
+  ],
+  "frozen_artifacts": [
+    {
+      "path": "game/core/shaders/gltf_diffuse_transmission.shader",
+      "sha256": "f6d955b7927642f37c639bb49ebaee7831597f52fd430e080cc2666628647d48"
+    },
+    {
+      "path": "game/core/shaders/gltf_diffuse_transmission.shader_c",
+      "sha256": "1b787e27970e03d414ba5f7ed5a34c090a2620e9e0d8e630aa84bd9f509506e2"
+    },
+    {
+      "path": "game/core/materials/gltf_reference_environment/field.exr",
+      "sha256": "a9ad16a6d516171e425d0fc22cdde643b2116ed544578945899958cea21e1e7f"
+    },
+    {
+      "path": "game/core/materials/gltf_reference_environment/field.vtex",
+      "sha256": "562deb2ba9abd7d44a2b1b15ca4725cf4711a0feb6e6117f3b58e6894ae8eb6d"
+    },
+    {
+      "path": "game/core/materials/gltf_reference_environment/field.vtex_c",
+      "sha256": "01cc0d0f0f69aa856b6650c71d5a4c8528667f61444b35b7c9bc382cda98fc55"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MandarinOrange/screenshot/screenshot-large.jpg",
+      "sha256": "6ad73b4594c28493bd77397da3631eee48859ddc42e31d3fbf90119ca9c58c33"
+    }
+  ]
+}

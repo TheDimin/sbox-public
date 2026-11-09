@@ -1,0 +1,8 @@
+{
+  "status": "unapplied_until_coordinator_source_release",
+  "base_sha256": "809879244811298058ed5db61cc2c9e58ba60a1a901ec679e8d67deb36073d3e",
+  "patch_sha256": "cf84a1027115ae26de80e9a2468c2b88da0124e63af38d8e45c99a357327c46a",
+  "evidence_receipt_sha256": "75084ac3089741db9ed74beb2d258abe3e6be68692ad0603d3a5d3ef8dc7915f",
+  "execution_priority": "lower than public corpus capture; no rerun requested ahead of corpus",
+  "scope": "Count at owned disabled/stable-callback boundary; native concurrent rendering unchanged, GPUposition/noop/deletion tests unchanged"
+}

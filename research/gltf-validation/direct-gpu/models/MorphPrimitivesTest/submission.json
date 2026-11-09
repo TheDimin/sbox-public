@@ -1,0 +1,176 @@
+{
+  "version": 1,
+  "model": "MorphPrimitivesTest",
+  "owner": "/root/gpu_morph_primitives",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphPrimitivesTest/ACCEPTANCE.md",
+      "sha256": "d0c1dc9712ccd1f2783785a0d41ebfa58a5b0aada58e1c4793c4a5f9c6a936c2"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphPrimitivesTest/MorphPrimitivesCoreTests.cs",
+      "sha256": "b713387991f17c071641e7c89158102eb4a510ba6c6ee537048112cfeada07e7"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphPrimitivesTest/MorphPrimitivesGpuChecks.cs",
+      "sha256": "490d9d12dd2268baef15f3dbc35e147bf351e44180d367d6b1fce52428c42d05"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphPrimitivesTest/MorphPrimitivesGpuProbe.cs",
+      "sha256": "f1676e28616f7b5d7279fbd4d49af997ebef61bcc7f4a32284b1f604b6479984"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphPrimitivesTest/MorphPrimitivesImageChecks.cs",
+      "sha256": "e5093c4db401725cd5f416bab49b7559216d34e3601bedf508a8cc81f791e8cd"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphPrimitivesTest/MorphPrimitivesLayoutFixture.cs",
+      "sha256": "3f838883e92000f1249c43196cfaa1d66d94b01472a8fad69d8d87f3fadc25db"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphPrimitivesTest/MorphPrimitivesMaterialTests.cs",
+      "sha256": "b87c93228ad12a837a68a65911f70f840f6fee4eb43ff0dbc68ee682b177342b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphPrimitivesTest/MorphPrimitivesPlanTests.cs",
+      "sha256": "0027bdb5be47a93d31d455ce5833eb8eaa268e5d7e693eb1ba90f3b64182c32e"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphPrimitivesTest/MorphPrimitivesReference.cs",
+      "sha256": "fedf0d487154c0db4b83d04b7acf8f6026c76fd79641f2246314534936096a11"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphPrimitivesTest/MorphPrimitivesReferenceScene.cs",
+      "sha256": "2949de45a5edb769e1fe1bc3e4a8c042f4398dd96a446be694c2fa1d8671b245"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphPrimitivesTest/author_draco_reference.cjs",
+      "sha256": "619421974aae1bb7757eaafa68ad4f4dc20caf8145bb9b3786b566f5dac647a5"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphPrimitivesTest/author_reference.py",
+      "sha256": "d950f7a972a20f6ea0542ba44253463ff853f192ac59961c2abc17aa550ab1c9"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphPrimitivesTest/draco-reference.json",
+      "sha256": "80ef0d9e8ee99fa77cbc5dea3b787dfc13b5bab3ed37f236998ca75fd82c267f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphPrimitivesTest/reference.json",
+      "sha256": "b4ffe5f9d018d43dcd995e1d3e4b4eca096f394bf6c7003f94cac1a947983e0c"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MorphPrimitivesTest/test_reference.py",
+      "sha256": "56578509a51a63251188e6a3b6f950b593bf8fd83930f1c1c63e0245d4203f51"
+    }
+  ],
+  "producer_dependencies": [
+    "Canonical Sandbox.Engine internal Sandbox.Gltf.DirectGpu API via Sandbox.Test.Unit IVT; do not compile copied producer source into helper",
+    "Sandbox.Gltf MaterializePrimitiveUpload, MaterializeMorphTargetsUpload, GltfPose signed weights, Draco support",
+    "GltfGpuMorphs.CreateBindings (canonical/shared helper ownership per coordinator)"
+  ],
+  "shared_backend_contract": "CONTRACT.md, canonical engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu producer; coordinator records actual loaded source/assembly MVID freezes",
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MorphPrimitivesValidation.MorphPrimitivesCoreTests",
+      "entry": "RunAll",
+      "expected_cases": 55,
+      "arguments": [
+        "$checkout"
+      ]
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MorphPrimitivesValidation.MorphPrimitivesLayoutFixture",
+      "entry": "RunAll",
+      "expected_cases": 5,
+      "arguments": [
+        "$checkout"
+      ]
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MorphPrimitivesValidation.MorphPrimitivesPlanTests",
+      "entry": "RunAll",
+      "expected_cases": 19,
+      "arguments": [
+        "$checkout"
+      ]
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MorphPrimitivesValidation.MorphPrimitivesMaterialTests",
+      "entry": "RunAll",
+      "expected_cases": 6,
+      "arguments": [
+        "$checkout"
+      ]
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MorphPrimitivesValidation.MorphPrimitivesGpuVerifierTests",
+      "entry": "RunAll",
+      "expected_cases": 13,
+      "arguments": [
+        "$checkout"
+      ]
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MorphPrimitivesValidation.MorphPrimitivesImageChecks",
+      "entry": "RunVerifierControls",
+      "expected_cases": 7,
+      "arguments": []
+    }
+  ],
+  "expected_cases": 105,
+  "forms": [
+    "glTF/source",
+    "glTF/compiled_glb_c",
+    "glTF-Binary/source",
+    "glTF-Binary/compiled_glb_c",
+    "glTF-Draco/source",
+    "glTF-Draco/compiled_glb_c"
+  ],
+  "scope": "CPU/data=66; pure staging=19; synthetic GPU checker=13; synthetic image checker=7. Six Python author controls passed locally. Actual GPU/image/API remain pending.",
+  "acceptance": "ACCEPTANCE.md; per-form independent raw geometry oracle, variant-local official separate Draco integration, no silent primitive omission, signed/default weights, preserved omitted target semantics, offsets/stride/normalization/sparse/nonindexed derived controls and negative sensitivity fixtures",
+  "execution_needs": "Coordinator compiles helper only against actual canonical loaded Engine+Gltf; editor build/stage/restart/shader/capture under existing resource guard as needed. No model worker builds or editor calls.",
+  "gpu_probe": {
+    "entry": "Sandbox.Gltf.DirectGpu.MorphPrimitivesValidation.MorphPrimitivesGpuProbe.Run",
+    "arguments": "checkoutRoot, formName, SceneWorld, computeMaterial, waitForActualFrames, optional materialResolver and afterSample",
+    "expected_rows_per_form": {
+      "glTF/source": 9,
+      "glTF/compiled_glb_c": 9,
+      "others": 8
+    },
+    "numeric_readback_groups_per_form": {
+      "glTF/source": 8,
+      "glTF/compiled_glb_c": 8,
+      "others": 7
+    },
+    "pending_gates_rows_per_form": 1,
+    "status": "prepared/unrun",
+    "numeric_readback_groups_total": 44,
+    "image_callback_scope": "actual authored default, single instance only; derived two-instance signed controls remain numeric GPU gates"
+  },
+  "images": {
+    "reference": "MorphPrimitivesReferenceScene",
+    "checker": "MorphPrimitivesImageChecks.AssertMatched",
+    "negative_control": "MorphPrimitivesImageChecks.AssertDefaultMorphSensitivity; independently rendered flat source must be rejected against authored half strength",
+    "status": "prepared/unrun"
+  },
+  "prior_freezes": [
+    {
+      "expected_cases": 79,
+      "status": "superseded/unrun; coordinator confirmed no active execution",
+      "reason": "independent review caught invalid local shear fixture; corrected to valid parent scale + child rotation yielding inherited world shear"
+    },
+    {
+      "expected_cases": 103,
+      "submission_sha256": "a1b58d07d39ef2c7b844d58ea739dd4c3d6ad5cb40e7001b08a97658a8374d33",
+      "status": "superseded/unrun; coordinator confirmed no active execution",
+      "reason": "adapt GPU helper class accessibility to canonical Engine internal types; add two synthetic derived-layout controls and actual derived mixed-layout GPU probe"
+    },
+    {
+      "expected_cases": 105,
+      "submission_sha256": "f7f4efb7fa58b7e1adeaa603e22eca923ac26760744e0014ccfe81ddd96e0906",
+      "status": "prepared/unrun per last coordinator status; HOLD requested before change",
+      "reason": "move isolation instance B inside default camera view; image callback only for authored default single-instance row; enforce capture pose/byte stability"
+    }
+  ]
+}

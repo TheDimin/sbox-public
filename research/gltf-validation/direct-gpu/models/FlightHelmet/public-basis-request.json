@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "engine_sha256": "041e2e0094b4f34539f236e323a0033a2d540f3b4f47efac31b38e4414e03330",
+  "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/FlightHelmet/PublicBasisTests.cs",
+      "sha256": "d9a6754232f202a6ef7c99454cf200cf6133fd65022bfabbf661c49a6d5376bc"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.FlightHelmetValidation.PublicBasisTests",
+      "kind": "mstest",
+      "expected_cases": 3,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout",
+            "$checkout/Temp/gltf-validation/direct-gpu/FlightHelmet/public-basis-e3add",
+            "352ebbef68475edf38a85dfe47294a7fc9a160baebb5374e6760d9f0234cd16a",
+            "0fc1b35c7403c40049e4f28b765a408048d914fc32f25cf27641986894a310f0"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ]
+}

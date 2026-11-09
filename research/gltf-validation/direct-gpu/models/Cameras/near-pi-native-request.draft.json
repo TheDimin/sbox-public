@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "engine_sha256": "pending-fresh-editor-stage",
+  "gltf_sha256": "pending-fresh-editor-stage",
+  "tools_sha256": "pending-fresh-editor-stage",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraReaderTests.cs",
+      "sha256": "42e891f939d80fe7512b295d8124193c80ae2731baa5f59dba5ec4873e291984"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraCapture.cs",
+      "sha256": "3494b025558b9b97bae17fe3ccd20ae0390c6bab971f368e629745a1984e2edc"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraNearPiNativeTests.cs",
+      "sha256": "aa5b81bc24d261581a431e38d5d06c696dd48111c6fe3c1379de3b71599810fe"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.CamerasValidation.CameraNearPiNativeTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ]
+}

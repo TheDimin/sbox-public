@@ -1,0 +1,98 @@
+{
+  "scope": "core linear PNG16; bounded per-image working set; not a visual approval or complete arbitrary-size support",
+  "status": "implemented and focused producer validation passed",
+  "engine_mvid": "e66560df-8eba-4c30-998a-a0296a91e4af",
+  "engine_sha256": "60bc2b51bbd70c40a000f8b29f420714aff4e3dbda723794b18fdfc43b571396",
+  "sources": {
+    "GltfTextureCompiler.cs": "c5ccf28e307dce7ef60e38a773ccfe8c85fa27cdd1147c81ca7eee0a0c4e150f",
+    "GltfPng16Decoder.cs": "90e7c72dc16ac72d9f19e4e16e5e68ae97372265026d637b2b0d9ed073723041"
+  },
+  "receipts": {
+    "production": {
+      "path": "Temp/gltf-validation/direct-gpu/TextureEncodingTest/png16-production-run-20261107-020700/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "4202567c2955a2eb262f6b581aec027bca00ea292c33470a0754923d92f8f289",
+      "expected": 61,
+      "passed": 61,
+      "failed": 0,
+      "incomplete": 0,
+      "cleanup_errors": []
+    },
+    "followup": {
+      "path": "Temp/gltf-validation/direct-gpu/TextureEncodingTest/png16-followup-run-20261107-020708/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "69fce954815f17e4f79dc420dac90bf2ec885e179ab42a3d871d9ea801207924",
+      "expected": 5,
+      "passed": 5,
+      "failed": 0,
+      "incomplete": 0,
+      "cleanup_errors": []
+    },
+    "isolated_decoder": {
+      "path": "Temp/gltf-validation/direct-gpu/TextureEncodingTest/png16-managed-run-20261107-013936/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "b367156b832155343b8b62d440b0383b5c2cf645995f9c920703040d544c8f4d",
+      "expected": 46,
+      "passed": 46,
+      "failed": 0,
+      "incomplete": 0,
+      "cleanup_errors": []
+    },
+    "isolated_gpu_prototype": {
+      "path": "Temp/gltf-validation/direct-gpu/TextureEncodingTest/png16-prototype-run-20261107-014043/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "3b1449e6290fea40965cc6ecfc76bc3d348a9c38e7bd34d0dd5e23400b701bec",
+      "expected": 7,
+      "passed": 7,
+      "failed": 0,
+      "incomplete": 0,
+      "cleanup_errors": []
+    },
+    "permanent_test_helper": {
+      "path": "Temp/gltf-validation/direct-gpu/TextureEncodingTest/png16-integration-run-20261107-021643/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "91eba66869e4f68fcdcbb0edcdae2830a8799995fc5ae0ce33a4ba63494bd56d",
+      "expected": 1,
+      "passed": 1,
+      "failed": 0,
+      "incomplete": 0,
+      "cleanup_errors": [],
+      "scope": "byte-identical copied permanent test source checked against original before and after; separate global Sandbox using",
+      "original_path": "engine/Tests/Sandbox.Test.Integration/Engine/GltfCompiledTextureTests.cs",
+      "copy_path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/IntegrationRegressionSource.cs",
+      "original_and_copy_sha256": "72016887c01447d13ae4ded5dbd440c354b1d9a1b5dc1c5c46a575b1e67cd5a8"
+    },
+    "policy_rejection": {
+      "path": "Temp/gltf-validation/direct-gpu/TextureEncodingTest/png16-integration-run-20261107-021256/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "1bfd6e679f5acae1bb39a5459769aa8daa17d3587f4bdf9c474f62bb7de22ca1",
+      "expected": 1,
+      "passed": 0,
+      "failed": 0,
+      "incomplete": 1,
+      "scope": "incomplete before test execution"
+    },
+    "missing_global_using": {
+      "path": "Temp/gltf-validation/direct-gpu/TextureEncodingTest/png16-integration-run-20261107-021517/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "afb418a0f30cedc494a026e97cbf7984aaf2ed4b6ddb82eac848da84a4048b2c",
+      "expected": 1,
+      "passed": 0,
+      "failed": 0,
+      "incomplete": 1,
+      "scope": "incomplete before test execution"
+    }
+  },
+  "production_scope": [
+    "PNG16 color types 0/2/4/6; all five filters; Adam7 and noninterlaced; tRNS",
+    "linear float payload and mips; metallic/roughness G/B with factors",
+    "source and canonical compiled public Model.Load plus native material realization",
+    "actual GPU texture Load and bilinear readback, adjacent low/mid/near-white samples and 8-bit/half-float negative controls",
+    "gAMA ignored; grayscale+tRNS, Adam7 RGBA8 and progressive JFIF unchanged",
+    "invalid CRC, truncation, extra PNG bytes, invalid filter, oversized dimension, extra decoded data, budget rejection"
+  ],
+  "limitations": [
+    "256 MiB default working-set budget rejects representative 2048x2048 PNG16; public import setting not established",
+    "base-color/emissive 16-bit sRGB stays rejected; glTF core specifies 8-bit for these roles",
+    "no rendered appearance comparison or broad corpus claim",
+    "PLTE after tRNS malformed ordering follow-up is prepared, unapplied and unrun"
+  ],
+  "budget_estimates_bytes_excluding_encoded": {
+    "1024_mipped": 132470080,
+    "2048_base": 437256192,
+    "2048_mipped": 526734656
+  }
+}

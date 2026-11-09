@@ -1,0 +1,205 @@
+{
+  "revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "files": [
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/ABeautifulGame.bin",
+      "sha256": "727eea28752b2b0c35cad89e726f0bc6a1800c3fa8696867ccf3d0c39933f5fb",
+      "length": 10829440
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/ABeautifulGame.gltf",
+      "sha256": "2e1b63ae34173c6e3251f749b1b8b97a32e92517aab2cfd4bfffd9158f4dd278",
+      "length": 46214
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Bishop_black_ORM.jpg",
+      "sha256": "2e02bf8975c9d0585b1b0a4fbb0448b99a20ce888b8065d37d71d2a6bb26a869",
+      "length": 630950
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Bishop_black_base_color.jpg",
+      "sha256": "3ebe3fe7859d6ae50327033fd4cb61253e81f2441baa3ae752edf309b7491973",
+      "length": 403990
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Bishop_black_normal.jpg",
+      "sha256": "243ed45b4e752f1dd6aa67673239afc8d54ce821ce081d1c8f8d8b877f4c5a3c",
+      "length": 850400
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Bishop_white_ORM.jpg",
+      "sha256": "08fa51b364f6a4484bec3c9e1e3ce8cd0371d0959f38799acbde06e9b910806d",
+      "length": 622771
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Bishop_white_base_color.jpg",
+      "sha256": "f1df1e4b755e95741a4170c73281fb5532394026f2683e5bd5478af053a4c40a",
+      "length": 361127
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Bishop_white_normal.jpg",
+      "sha256": "ffe7997b80f831d099d386483fe195beeee1ff37a11e5e95dad5a830975ec312",
+      "length": 673915
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Castle_ORM.jpg",
+      "sha256": "1e00bd2b6cc122da8fb77f4bf5db590ec10cea609719a334518b6cae7f416d0c",
+      "length": 1371413
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Castle_black_base_color.jpg",
+      "sha256": "025fdde8ae3a97c8d430e1ca2539acc36d071886ed4ff7c0396751094031b479",
+      "length": 394527
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Castle_normal.jpg",
+      "sha256": "91342101f6e3fdced973c247165d4e244c4410e647a524d23a763b122e9881ed",
+      "length": 491396
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Castle_white_base_color.jpg",
+      "sha256": "56aa97849639f9e5def51dd55edd1550038ec31cdd3a362060258ffa526b60ca",
+      "length": 334252
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Chessboard_ORM.jpg",
+      "sha256": "18c357a7aa4beac43c604ebd73dca129e0db505adc74c19dfd3767f8df3d51c5",
+      "length": 582751
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Chessboard_base_color.jpg",
+      "sha256": "31a0a9e3d82958f310ec6c817f13968bdddab4efe5b612d471b1c6177156a0a6",
+      "length": 529405
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Chessboard_normal.jpg",
+      "sha256": "b496ad48f281a4ccbcf2b08378ac4693f21c3942e34340e9cbcd8bec18765bc1",
+      "length": 727372
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/King_black_ORM.jpg",
+      "sha256": "e77a83078879b7068420d2f7ad76a02c3fc78bcf752e82e037754a242895f3da",
+      "length": 782417
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/King_black_base_color.jpg",
+      "sha256": "68d65ffad3ddae474e17a7c028c0ec65af0a15b0a46a5fb03b856eb40f8fe725",
+      "length": 366216
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/King_black_normal.jpg",
+      "sha256": "2fdf5d40f38cac95175f2e685476e28f12c7e0555fb4345df34cc05420cef66e",
+      "length": 764089
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/King_white_ORM.jpg",
+      "sha256": "a9b0bde70cc75d7763dd658a2d5f26f9edb2739f453a88291071e20111b4581c",
+      "length": 822486
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/King_white_base_color.jpg",
+      "sha256": "f64a03112150d2e55bf716b11467a18cf30cab799f9081c2236b8f4ff668fa53",
+      "length": 395138
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/King_white_normal.jpg",
+      "sha256": "9e9630daee38e7eb3e7188540a1a7be1f49187a13cd4b72588ec709f53ce0cea",
+      "length": 961725
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Knight_ORM.jpg",
+      "sha256": "64db87cfd2c2b31400248035817da7fc6e88e58f27ee02b540283e3aa38afc8e",
+      "length": 350946
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Knight_black_base_color.jpg",
+      "sha256": "68db3a457ad7d7e2c6ef19320614cb0976038a9b5d10dc596ef9fa8e0efe71ff",
+      "length": 244999
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Knight_normal.jpg",
+      "sha256": "28d817c0e3179b1bd76c99a8b634ab17cbdd55b9594ef4ec5843ff8cb2811f9f",
+      "length": 215780
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Knight_white_base_color.jpg",
+      "sha256": "89ab1100fce0e724249e433cdf4089a3edfdcd4d9aec9f14ba44f83b7284181e",
+      "length": 395645
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Pawn_ORM.jpg",
+      "sha256": "bb7ac27d4b650cf533e398e0477c9fbf129846d566e706d76146cdb947c3f17a",
+      "length": 792174
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Pawn_black_base_color.jpg",
+      "sha256": "e3a42ac61d090cf23b5722e20b8b993f087ca09689500b74dde61c8a28899e26",
+      "length": 315179
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Pawn_normal.jpg",
+      "sha256": "c1e2e201efcdc9184da793f6fe98bc54dace592274842dd7e42427a9294277c3",
+      "length": 750313
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Pawn_white_base_color.jpg",
+      "sha256": "46153b809dfcc35f1a3c3508310a25dc423062204e95b328dddd420cb3d60952",
+      "length": 303807
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Queen_black_ORM.jpg",
+      "sha256": "4df982f977eae6da3239e9e7a02534633f07473010025cd742d55ad4d85976ca",
+      "length": 741172
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Queen_black_base_color.jpg",
+      "sha256": "26132e8fb23808295c7d77fedf1e760730d097d138e66a5947e0cc3a7f9302ed",
+      "length": 295346
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Queen_black_normal.jpg",
+      "sha256": "b2dfb93933b47ff4589eca6acd8c96b9b17521e024060e7e0fca1a7f95a9401e",
+      "length": 777060
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Queen_white_ORM.jpg",
+      "sha256": "07fba609ee23a02ea22a3d1f6d76df87a0cfa8eca5bc38ddbe7a1258d7448b33",
+      "length": 709227
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Queen_white_base_color.jpg",
+      "sha256": "2cc4b5295ff58d920cc23c13ee089821e193f6006c966af395824fc1c94ce4e0",
+      "length": 309191
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF/Queen_white_normal.jpg",
+      "sha256": "5270859cd49784272da97b92d9aeef4d6008033d654014b34328c7ea961cb282",
+      "length": 662916
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF-Binary/ABeautifulGame.glb",
+      "sha256": "bd7133b4b322aae97c589b8839dae8155ad2546acb35ae32a127e722a959d007",
+      "length": 42977928
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF-Binary-KTX-ETC1S-Draco/ABeautifulGame.glb",
+      "sha256": "d950162d41e0064be9dfac0c09d80c7a23719a37af37f08cd79385b8af0af0c1",
+      "length": 12105252
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/ABeautifulGame/jpeg-reference.json",
+      "sha256": "9f6af99aabc8a5d54d8f06bea5609a5faaf4f271a3ba7a8c3ee654755a900afd",
+      "length": 23936
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/ABeautifulGame/raw-position-bounds.json",
+      "sha256": "d7926511e3f239fc0b28383fd8e2e0f8c2344c52a2936a89f55d8a3638fcf8a3",
+      "length": 4415
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/ABeautifulGame/reference-env-config.json",
+      "sha256": "cce6cc1b137a86923f0a8880e7ed5dc7ad43d273d5c098e79eb89e5de2632cad",
+      "length": 962
+    }
+  ]
+}

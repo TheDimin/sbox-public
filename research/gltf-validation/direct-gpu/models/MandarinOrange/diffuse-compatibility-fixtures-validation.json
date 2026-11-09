@@ -1,0 +1,272 @@
+{
+  "status": "passed_core_only",
+  "validator_version": "2.0.0-dev.3.10",
+  "validator_sha256": "5cba1e097935c9efd929d24a49610824259b030f0ae45672273bfbcbb5b87a62",
+  "scope": "Six exact positive inputs for native zero-factor versus ordinary core source-shader roughness comparison. DT unsupported notices retained; no native/extension acceptance.",
+  "fixtures": [
+    {
+      "name": "ordinary_core_0",
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-compatibility-fixtures/ordinary_core_0.gltf",
+      "sha256": "ab87afaad6a3a5d189d7686e1206530d1f8181e118dd877620b1fa30ff7a7f9f",
+      "numErrors": 0,
+      "truncated": false,
+      "report": "Temp/gltf-validation/direct-gpu/mandarin-diffuse-compatibility-validation/ordinary_core_0.json",
+      "report_sha256": "f7e3d5e30e97069c8322a04372273dc9936cdaf2a13fdeff6b3791aa8d6e6070",
+      "messages": [
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/attributes/POSITION"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/attributes/NORMAL"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/attributes/TEXCOORD_0"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/indices"
+        },
+        {
+          "code": "UNUSED_OBJECT",
+          "message": "This object may be unused.",
+          "severity": 2,
+          "pointer": "/meshes/0/primitives/0/attributes/TEXCOORD_0"
+        }
+      ]
+    },
+    {
+      "name": "transmission_zero_0",
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-compatibility-fixtures/transmission_zero_0.gltf",
+      "sha256": "86170bb2001e1c0e920edb82e29afdd495b2ea97706fcdd979647d1d3cd785f5",
+      "numErrors": 0,
+      "truncated": false,
+      "report": "Temp/gltf-validation/direct-gpu/mandarin-diffuse-compatibility-validation/transmission_zero_0.json",
+      "report_sha256": "02b7f92c40ff8b8da9caea899d9c9b7eb9adfaf2718c27cfb9ad273891b94e11",
+      "messages": [
+        {
+          "code": "UNSUPPORTED_EXTENSION",
+          "message": "Cannot validate an extension as it is not supported by the validator: 'KHR_materials_diffuse_transmission'.",
+          "severity": 2,
+          "pointer": "/extensionsUsed/0"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/attributes/POSITION"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/attributes/NORMAL"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/attributes/TEXCOORD_0"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/indices"
+        },
+        {
+          "code": "UNUSED_OBJECT",
+          "message": "This object may be unused.",
+          "severity": 2,
+          "pointer": "/meshes/0/primitives/0/attributes/TEXCOORD_0"
+        }
+      ]
+    },
+    {
+      "name": "ordinary_core_0_5",
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-compatibility-fixtures/ordinary_core_0_5.gltf",
+      "sha256": "ed4e94bbc7060773ebef4526a89d9b7a14ccb40b776615eb8b26cf20b1171a64",
+      "numErrors": 0,
+      "truncated": false,
+      "report": "Temp/gltf-validation/direct-gpu/mandarin-diffuse-compatibility-validation/ordinary_core_0_5.json",
+      "report_sha256": "63994f64620199ce8b63d0ce4b97dc24c3bcedfcf8ffa9cb807649bfaed3ea11",
+      "messages": [
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/attributes/POSITION"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/attributes/NORMAL"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/attributes/TEXCOORD_0"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/indices"
+        },
+        {
+          "code": "UNUSED_OBJECT",
+          "message": "This object may be unused.",
+          "severity": 2,
+          "pointer": "/meshes/0/primitives/0/attributes/TEXCOORD_0"
+        }
+      ]
+    },
+    {
+      "name": "transmission_zero_0_5",
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-compatibility-fixtures/transmission_zero_0_5.gltf",
+      "sha256": "577aa3bdd8555ef0c510872aaca1e79a96ba5263011c3b3252d6bd00b11c994e",
+      "numErrors": 0,
+      "truncated": false,
+      "report": "Temp/gltf-validation/direct-gpu/mandarin-diffuse-compatibility-validation/transmission_zero_0_5.json",
+      "report_sha256": "337f6528aea3a4f44a1a9bce01b407c28f48700d0d79e98e51eda265038321fc",
+      "messages": [
+        {
+          "code": "UNSUPPORTED_EXTENSION",
+          "message": "Cannot validate an extension as it is not supported by the validator: 'KHR_materials_diffuse_transmission'.",
+          "severity": 2,
+          "pointer": "/extensionsUsed/0"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/attributes/POSITION"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/attributes/NORMAL"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/attributes/TEXCOORD_0"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/indices"
+        },
+        {
+          "code": "UNUSED_OBJECT",
+          "message": "This object may be unused.",
+          "severity": 2,
+          "pointer": "/meshes/0/primitives/0/attributes/TEXCOORD_0"
+        }
+      ]
+    },
+    {
+      "name": "ordinary_core_1",
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-compatibility-fixtures/ordinary_core_1.gltf",
+      "sha256": "babd183d35bf6a4e68a3d010a0d1dbd32665d3ad06a6b8f724ffd62ef286084a",
+      "numErrors": 0,
+      "truncated": false,
+      "report": "Temp/gltf-validation/direct-gpu/mandarin-diffuse-compatibility-validation/ordinary_core_1.json",
+      "report_sha256": "62ce0edb82834dcfc1c0cf8c24d97e87b2c0b143d8c0380988ff70b248ab589b",
+      "messages": [
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/attributes/POSITION"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/attributes/NORMAL"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/attributes/TEXCOORD_0"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/indices"
+        },
+        {
+          "code": "UNUSED_OBJECT",
+          "message": "This object may be unused.",
+          "severity": 2,
+          "pointer": "/meshes/0/primitives/0/attributes/TEXCOORD_0"
+        }
+      ]
+    },
+    {
+      "name": "transmission_zero_1",
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/diffuse-compatibility-fixtures/transmission_zero_1.gltf",
+      "sha256": "ecdc1299d8e2e5c3d8ea6940b95aa2e281ebed71ff5b84d813e58d7714c56bd1",
+      "numErrors": 0,
+      "truncated": false,
+      "report": "Temp/gltf-validation/direct-gpu/mandarin-diffuse-compatibility-validation/transmission_zero_1.json",
+      "report_sha256": "051cce402cb34afafb61659a71b68e20724a96550e2d09ad87a544cbedfdba04",
+      "messages": [
+        {
+          "code": "UNSUPPORTED_EXTENSION",
+          "message": "Cannot validate an extension as it is not supported by the validator: 'KHR_materials_diffuse_transmission'.",
+          "severity": 2,
+          "pointer": "/extensionsUsed/0"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/attributes/POSITION"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/attributes/NORMAL"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/attributes/TEXCOORD_0"
+        },
+        {
+          "code": "BUFFER_VIEW_TARGET_MISSING",
+          "message": "bufferView.target should be set for vertex or index data.",
+          "severity": 3,
+          "pointer": "/meshes/0/primitives/0/indices"
+        },
+        {
+          "code": "UNUSED_OBJECT",
+          "message": "This object may be unused.",
+          "severity": 2,
+          "pointer": "/meshes/0/primitives/0/attributes/TEXCOORD_0"
+        }
+      ]
+    }
+  ]
+}

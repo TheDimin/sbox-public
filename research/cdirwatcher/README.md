@@ -28,7 +28,7 @@ asset reload.
 
 ## Reproduction against the actual main-checkout library
 
-`probe_native_watcher.py` is an isolated Linux x86-64 diagnostic for the inspected
+`../../engine/Tools/CdirWatcherProbe/probe_native_watcher.py` is an isolated Linux x86-64 diagnostic for the inspected
 native ABI, not a proposed production binding. It loads tier0 into a separate
 Python process; all mutations occur in a freshly created temporary directory.
 It calls the exported CDirWatcher methods using oversized, aligned opaque storage.
@@ -52,7 +52,7 @@ implementation changes; it is not a passing test of correct native watching.
 Run from the isolated checkout:
 
 ```sh
-python3 research/cdirwatcher/probe_native_watcher.py /home/damian/projects/sbox-public/game/bin/linuxsteamrt64/libtier0.so
+python3 engine/Tools/CdirWatcherProbe/probe_native_watcher.py /home/damian/projects/sbox-public/game/bin/linuxsteamrt64/libtier0.so
 ```
 
 Raw results are in `native-probe.json` and `isolated-native-probe.json`.

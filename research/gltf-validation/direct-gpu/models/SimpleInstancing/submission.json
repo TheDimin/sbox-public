@@ -1,0 +1,146 @@
+{
+  "model": "SimpleInstancing",
+  "owner": "/root/gpu_simple_instancing",
+  "coordinator": "/root/gpu_validation",
+  "shared_backend_owner": "/root/gpu_fox",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/ACCEPTANCE.md",
+      "sha256": "d3d7282e78a5bf775ec9f4ad2c1fab85ed4d8f595ef1e6f305126a267dbac49a"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingCoreTests.cs",
+      "sha256": "dd6bf0cac846251ecb0f7d72ab64ade519f81d069969209a2c31e3655abe8e45"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingGpuChecks.cs",
+      "sha256": "291d0262b7935f59911014e2728cb33350f090b7ff248b5bbe75a4d691ff8680"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingGpuProbe.cs",
+      "sha256": "4b5a6c8adb5807b114b0f848c0838dd11d7b74233ea10b144d2479d442284f89"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingPlanTests.cs",
+      "sha256": "465712f931e0a2d59b759930331c43f3310c80f5537af49105947c62fdccfa3b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingReference.cs",
+      "sha256": "15dbb37b0884101b47bbbad3edd81901f504066baec91a74aea1ba2b2b3a7e7d"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/author_reference.py",
+      "sha256": "11db4c126cf3c58c3a8c0d0dc69fc46fd88c1fe84853cf35b51fc2b7a97ac89e"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/reference.json",
+      "sha256": "f213b1b9b2105a8eccfb00a472a1fb97581480371060547bd66266aae2cc0839"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/test_reference.py",
+      "sha256": "f18bbc8a189499d95208dae45652840f2814c13440a62050f9174037f435ddfd"
+    }
+  ],
+  "producer_dependencies": [
+    "Actually loaded Sandbox.Gltf exposing GltfReader.Read, GltfCompiler.Compile, GltfDocument.ReadInstances/ReadFloatAccessor/EvaluatePose/MaterializePrimitiveUpload",
+    "Loaded Engine plus frozen shared direct-GPU backend; no replacement producer implementation in helper",
+    "Pending additive public int? GltfGpuPrimitiveSnapshot.InstanceIndex for exact authored identity; missing API fails rather than excluding selected extension"
+  ],
+  "shared_backend_contract": "research/gltf-validation/direct-gpu/CONTRACT.md; coordinator freezes actual backend/helper/producer identities at execution. Current inspected backend explicitly rejects EXT instancing.",
+  "entry": "Sandbox.Gltf.DirectGpu.SimpleInstancingValidation.SimpleInstancingCoreTests.RunAll(checkoutRoot)",
+  "expected_cases": 63,
+  "forms": [
+    "glTF/source",
+    "glTF/compiled_glb_c",
+    "glTF-Binary/source",
+    "glTF-Binary/compiled_glb_c"
+  ],
+  "suites": [
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.SimpleInstancingValidation.SimpleInstancingCoreTests.RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 40,
+      "scope": "CPU/data only"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.SimpleInstancingValidation.SimpleInstancingPlanTests.RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 12,
+      "scope": "base primitive GPU staging plan only; no instance descriptors or device allocation"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.SimpleInstancingValidation.SimpleInstancingGpuChecks.RunContract",
+      "arguments": [],
+      "expected_cases": 1,
+      "scope": "identity API reflection; currently pending"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.SimpleInstancingValidation.SimpleInstancingGpuChecks.RunVerifierControls",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 10,
+      "scope": "synthetic checker sensitivity only; currently blocked by absent identity API"
+    }
+  ],
+  "gpu_probe": {
+    "entry": "Sandbox.Gltf.DirectGpu.SimpleInstancingValidation.SimpleInstancingGpuProbe.Run",
+    "arguments": [
+      "checkoutRoot",
+      "SceneWorld",
+      "compiled compute Material",
+      "Func<Task> waitForActualFrames",
+      "optional Func<int?,Material> materialResolver"
+    ],
+    "expected_measurements": 20,
+    "states_per_form": [
+      "rest_A_all125",
+      "affine_B_all125",
+      "mirrored_A_all125",
+      "affine_B_unchanged_after_A_update",
+      "A_restored_after_B_dispose"
+    ],
+    "expected_instances_per_measurement": 125,
+    "expected_position_normal_vertices_per_measurement": 3000,
+    "scope": "completed actual GPU vertex/index readback and ownership only; no pixel/material/performance/public Model.Load claim"
+  },
+  "scope": "CPU/data, base staging, identity API, synthetic checker controls and callable actual-GPU probe. Separate pending instancing upload descriptors, matched image/material, batching efficiency, public loading and platform/load-memory gates.",
+  "acceptance": "Independent pinned raw values/hashes, analytic grid/quaternions, explicit double quaternion and affine inverse transpose. Exactly125 authored identities, no base cube, all3000 positions/normals per GPU state, actual bound index topology, mirrored winding, shared immutable primitive/material inputs and separate runtime placement/output. Negative controls before actual runtime acceptance. Candidate enforced bounds .0005 engine inch/component and 2e-6 normal/component require coordinator threshold review.",
+  "local_evidence": {
+    "command": "python -m unittest -v test_reference.py",
+    "cwd": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/SimpleInstancing",
+    "executed_cases": 5,
+    "passed_cases": 5,
+    "scope": "independent Python raw-oracle validation only",
+    "csharp_compiled": false,
+    "csharp_executed_cases": 0,
+    "gpu_executed_measurements": 0,
+    "previous_core_run": "39/40 on original fixture; receipt retained. Current corrected Core40 awaits rerun.",
+    "current_core_run": {
+      "entry": "Sandbox.Gltf.DirectGpu.SimpleInstancingValidation.SimpleInstancingCoreTests.RunAll",
+      "source_sha256": "dd6bf0cac846251ecb0f7d72ab64ade519f81d069969209a2c31e3655abe8e45",
+      "scope": "actual editor CPU/data only on coordinator-recorded loaded producer",
+      "passed": 40,
+      "expected": 40,
+      "receipt_sha256": "ca0c3292debc880375790d87e546d9a1c9a6999cd9ad2584d21960bd9e0612db",
+      "producer_or_tolerance_changed": false
+    }
+  },
+  "execution_needs": "Coordinator-owned helper compile against installed/loaded producers; CPU suites may run before backend feature implementation. API and sensitivity controls fail/pending while InstanceIndex absent. Actual20 GPU states require extension backend implementation, reviewed instance source descriptors, admitted editor/shader/frame/readback work. Source-material matched controls/captures and efficiency checks separate. No worker build/editor/shader work performed.",
+  "status": "Executed current coherent stage: base63 passes within154 rows; existing20 GPU states pass within30. See ACCEPTANCE.md for actual receipts, limits and separate scopes.",
+  "previous_freeze": {
+    "submission_sha256": "71ac23a4b0f68bea5083a2e1ddc1df6d9cf2c5ae7befc18421f468e74f14b503",
+    "source_backup": "/tmp/gltf-simpleinstancing-pre-migration",
+    "original_failed_core_receipt_sha256": "495cd936b999645b57398cc36669aa5790c24edfe1d9617c50d62ee606d40240",
+    "observed_cases": 40,
+    "passed_cases": 39,
+    "failed_case": "instances_are_local_then_node_world_applies_once",
+    "root_cause": "Test authored illegal local shear; corrected to valid local rotation beneath nonuniform-scale parent, preserving full-affine world transform requirement and7e-6 tolerance. No producer change."
+  },
+  "visibility_migration": "GpuChecks and GpuProbe helper classes internal; public static reflection entry methods retained. Production Engine API not widened for tests.",
+  "index_resource_instrumentation": "Updated to extracted ownership: immutable topology stays in canonical Primitive.Plan; only bound winding indices are per-runtime GPU buffers. No unused shared Primitive.Indices resource is required."
+}

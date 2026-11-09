@@ -1,0 +1,313 @@
+{
+  "model": "MeshPrimitiveModes",
+  "status": "public geometry passed; no-normal point and line material recommendation unmet; visual review pending",
+  "corpus_revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "forms": [
+    {
+      "name": "glTF/source",
+      "input_sha256": "2a8b3209c25e2fca5105539136a05f42d170767f0eb16148cd3825758e5ee977",
+      "readback": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshPrimitiveModes/public/49283a4ffb4f4803a8a65b858cc111a8/gpu-readback.json",
+        "sha256": "f084ce6e58aa23a6d0f699e3bb4d587065719f9459f8a22dec1619583d9e90c2"
+      },
+      "capture": {
+        "label": "public_default_material_lit",
+        "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshPrimitiveModes/raster/950185d26b5842bc8a3c043c4d37debc/public_default_material_lit.png",
+        "Sha256": "9d56db144202e1acb5cb153cf4dad13235077fc2b33adc1edcce84c359e228b5",
+        "Coverage": 3823,
+        "CameraStateJson": "{\"position\":\"500,0,0\",\"rotation\":\"0,0,1,0\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":360,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+      },
+      "literal_reference": {
+        "label": "independent_literal_reference",
+        "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshPrimitiveModes/public/49283a4ffb4f4803a8a65b858cc111a8/independent_literal_reference.png",
+        "Sha256": "852d1cb3136f3bb6c16adb86b58e7742875ee3cbeb6b570dcb1a36b6db28e4f2",
+        "Coverage": 3823,
+        "Width": 192,
+        "Height": 192,
+        "CameraStateJson": "{\"position\":\"500,0,0\",\"rotation\":\"0,0,1,0\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":360,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+      },
+      "negative": {
+        "label": "wrong_topology_reference",
+        "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshPrimitiveModes/public/49283a4ffb4f4803a8a65b858cc111a8/wrong_topology_reference.png",
+        "Sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+        "Coverage": 0,
+        "Width": 192,
+        "Height": 192,
+        "CameraStateJson": "{\"position\":\"500,0,0\",\"rotation\":\"0,0,1,0\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":360,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+      },
+      "empty_before": {
+        "label": "empty_before",
+        "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshPrimitiveModes/public/49283a4ffb4f4803a8a65b858cc111a8/empty_before.png",
+        "Sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+        "Coverage": 0,
+        "Width": 192,
+        "Height": 192,
+        "CameraStateJson": "{\"position\":\"500,0,0\",\"rotation\":\"0,0,1,0\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":360,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+      },
+      "empty_after": {
+        "label": "empty_after_public_delete",
+        "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshPrimitiveModes/public/49283a4ffb4f4803a8a65b858cc111a8/empty_after_public_delete.png",
+        "Sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+        "Coverage": 0,
+        "Width": 192,
+        "Height": 192,
+        "CameraStateJson": "{\"position\":\"500,0,0\",\"rotation\":\"0,0,1,0\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":360,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+      },
+      "light_off_capture": {
+        "label": "public_default_material_no_direct_light",
+        "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshPrimitiveModes/raster/950185d26b5842bc8a3c043c4d37debc/public_default_material_no_direct_light.png",
+        "Sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+        "Coverage": 0,
+        "CameraStateJson": "{\"position\":\"500,0,0\",\"rotation\":\"0,0,1,0\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":360,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"0.00, 0.00, 0.00, 1.00\"}"
+      },
+      "light_restored_capture": {
+        "label": "public_light_restored",
+        "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshPrimitiveModes/raster/950185d26b5842bc8a3c043c4d37debc/public_light_restored.png",
+        "Sha256": "9d56db144202e1acb5cb153cf4dad13235077fc2b33adc1edcce84c359e228b5",
+        "Coverage": 3823,
+        "CameraStateJson": "{\"position\":\"500,0,0\",\"rotation\":\"0,0,1,0\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":360,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+      }
+    },
+    {
+      "name": "glTF/derived glb_c",
+      "input_sha256": "57af75b7840ce60faf0557ca7a902bf7cabbc186725773e8efcdff47bccbc8aa",
+      "readback": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshPrimitiveModes/public/72e57c9a7c1e45dbad5b17decb192a47/gpu-readback.json",
+        "sha256": "69ce21cb6ce2039459af1de6faf02e24fb3be5f0a082bbd5f62d5f9d95fdf22b"
+      },
+      "capture": {
+        "label": "public_default_material_lit",
+        "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshPrimitiveModes/raster/4b3174b903894f4590f5cef9ddc119ba/public_default_material_lit.png",
+        "Sha256": "9d0b4d119d1a2a4f2e36bce6bb379a969f35718d111bb6028c8510b8d19ef3b9",
+        "Coverage": 3823,
+        "CameraStateJson": "{\"position\":\"500,0,0\",\"rotation\":\"0,0,1,0\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":360,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+      },
+      "literal_reference": {
+        "label": "independent_literal_reference",
+        "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshPrimitiveModes/public/72e57c9a7c1e45dbad5b17decb192a47/independent_literal_reference.png",
+        "Sha256": "852d1cb3136f3bb6c16adb86b58e7742875ee3cbeb6b570dcb1a36b6db28e4f2",
+        "Coverage": 3823,
+        "Width": 192,
+        "Height": 192,
+        "CameraStateJson": "{\"position\":\"500,0,0\",\"rotation\":\"0,0,1,0\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":360,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+      },
+      "negative": {
+        "label": "wrong_topology_reference",
+        "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshPrimitiveModes/public/72e57c9a7c1e45dbad5b17decb192a47/wrong_topology_reference.png",
+        "Sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+        "Coverage": 0,
+        "Width": 192,
+        "Height": 192,
+        "CameraStateJson": "{\"position\":\"500,0,0\",\"rotation\":\"0,0,1,0\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":360,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+      },
+      "empty_before": {
+        "label": "empty_before",
+        "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshPrimitiveModes/public/72e57c9a7c1e45dbad5b17decb192a47/empty_before.png",
+        "Sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+        "Coverage": 0,
+        "Width": 192,
+        "Height": 192,
+        "CameraStateJson": "{\"position\":\"500,0,0\",\"rotation\":\"0,0,1,0\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":360,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+      },
+      "empty_after": {
+        "label": "empty_after_public_delete",
+        "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshPrimitiveModes/public/72e57c9a7c1e45dbad5b17decb192a47/empty_after_public_delete.png",
+        "Sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+        "Coverage": 0,
+        "Width": 192,
+        "Height": 192,
+        "CameraStateJson": "{\"position\":\"500,0,0\",\"rotation\":\"0,0,1,0\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":360,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+      },
+      "light_off_capture": {
+        "label": "public_default_material_no_direct_light",
+        "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshPrimitiveModes/raster/4b3174b903894f4590f5cef9ddc119ba/public_default_material_no_direct_light.png",
+        "Sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024",
+        "Coverage": 0,
+        "CameraStateJson": "{\"position\":\"500,0,0\",\"rotation\":\"0,0,1,0\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":360,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"0.00, 0.00, 0.00, 1.00\"}"
+      },
+      "light_restored_capture": {
+        "label": "public_light_restored",
+        "Path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshPrimitiveModes/raster/4b3174b903894f4590f5cef9ddc119ba/public_light_restored.png",
+        "Sha256": "9d0b4d119d1a2a4f2e36bce6bb379a969f35718d111bb6028c8510b8d19ef3b9",
+        "Coverage": 3823,
+        "CameraStateJson": "{\"position\":\"500,0,0\",\"rotation\":\"0,0,1,0\",\"custom_size\":\"192,192\",\"scene_size\":\"192,192\",\"viewport\":\"0,0,1,1\",\"debug_mode\":\"Normal\",\"EnablePostProcessing\":true,\"Orthographic\":true,\"OrthographicHeight\":360,\"ZNear\":1,\"ZFar\":1000,\"point_light_position\":\"200,-30,60\",\"point_light_radius\":1000,\"point_light_color\":\"4.00, 4.00, 4.00, 1.00\"}"
+      }
+    }
+  ],
+  "reference": {
+    "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/MeshPrimitiveModes/screenshot/screenshot.png",
+    "sha256": "eb90b7b9b26168dec5c83559864331da6957a6e42c6e66f2ccbd43051b283d65",
+    "license": "CC0-1.0",
+    "credit": "Marco Hutter",
+    "license_path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshPrimitiveModes/LICENSE.md"
+  },
+  "producer": {
+    "engine_mvid": "5a07f228-dff8-4d6b-b4ef-890b32a80299",
+    "gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+    "engine_sha256": "ed5f8073e45d3a4f90e5140323cc5c5a0dddf9707be71ee375966ca0f05403f0",
+    "gltf_sha256": "7638a855ba21fd9c079a22cbc8b834d4169112fe08cb9a5fd788e63cf90866e1",
+    "compute_shader_sha256": "4e5f9c9da78a82fcdef7ae72d0280a454697a0bf1eea6e46a83ca5a94c259c65"
+  },
+  "receipts": [
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/modes-public-02/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "8ccf858f8f64bb4c57b8f50f8788dae5355f0200f520310a57e67d11cddc28cf",
+      "passed": 2,
+      "failed": 0,
+      "incomplete": 0,
+      "scope": "Public source and compiled; 7 GPU position/flat-normal and actual bound-index readbacks per form, wrong index mutation and restoration per primitive, default material geometry images and empty/deletion controls."
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/modes-public-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "366c45dba1747fc01819c1447c4fa4259684eaf3e185bee56174a17c8ebebaf2",
+      "scope": "Earlier helper compilation failure CS0051; two cases incomplete before accessibility correction."
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/modes-raster-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "d19189cad4665f571160cd144ac16cae2e97f90be6dbd88f032af8eed188250b",
+      "passed": 0,
+      "failed": 2,
+      "incomplete": 0,
+      "scope": "Light on/off/on captured for both forms; no-normal points and lines go black in unlit scene. Modes 0\u20133 actual GPU index raster negatives executed; test failed due inaccurate fixed grid bounding mode 3 crossing neighbor. Later negative controls did not execute."
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/modes-raster-02/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "02c9ea6d3bc4f08781a607845dec4703bad0adeb313385c67477d162c5739aa1",
+      "passed": 2,
+      "failed": 0,
+      "incomplete": 0,
+      "scope": "Actual public source and compiled Lit/default material captures, seven per-mode actual bound-index raster negatives and independent literal one-primitive removal controls, projection-based regions, light on/off/on, empty/delete controls."
+    }
+  ],
+  "region_analysis": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/region-analysis.json",
+  "scope": "Seven source and canonical compiled public primitives match literal foreground masks under Lit camera and stock source material; per-mode actual and literal negative controls pass. Light on/off reveals no-normal point/line recommendation unmet. Source reference framing and environment remain inferred; final appearance review pending.",
+  "known_limits": [
+    "Lit images do not prove default material appearance, point/line styling or exact upstream camera/light.",
+    "Negative reference collapses lines and reverses triangles; degenerate primitives can be culled. GPU index mutations independently verified for all modes.",
+    "No Windows, model-editor, performance, or overall glTF conformance claim.",
+    "No public raster tests for nonindexed or alternate index width fixtures; earlier CPU data coverage is separate.",
+    "Point and line primitives have no NORMAL and go black without the direct light; glTF 2.0.1 section 3.9.7 recommends base color plus emissive without lighting. This is a SHOULD recommendation, not a MUST. Shared material route fix pending."
+  ],
+  "visual_review": "pending",
+  "capture_correction": "SceneCameraDebugMode.Normal is Lit, not normal-map visualization; prior Normal-debug description was incorrect.",
+  "raster_controls": {
+    "per_mode_changed_pixels": [
+      1,
+      20,
+      20,
+      21,
+      192,
+      188,
+      192
+    ],
+    "source_and_compiled": true,
+    "scope": "Both actual public index corruption and independent literal remove-one change target foreground while retaining nonzero geometry and leaving other projected mode regions unchanged. All seven public and literal positive masks match. One-pixel points observed at 192px; line width not exhaustively measured."
+  },
+  "candidate": {
+    "shader": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/point_line_candidate.shader",
+    "sha256": "9b3342209cf8a51f520c998bbf62e65852cfc59a87637fc4e2d679c83212a76c",
+    "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/modes-candidate-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "receipt_sha256": "ffce362529e55f425422b8bfe66e39af90265349cd00f7ba8639032b6d581f84",
+    "passed": 2,
+    "scope": "Anonymous shader explicitly supplied to all model primitives. Both forms show light independence, correct white base/emissive controls and black/white injected constant textures. No public route, glTF texture/sampler, COLOR_0, alpha or variant/override proof.",
+    "color_emission_receipt": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/modes-candidate-color-02/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "9686a3d046cde50a329704bdf0e659a657b35989e6770cd79ef9979d97e68915",
+      "passed": 2,
+      "scope": "Synthetic strided COLOR_0 with accessor offset and nonzero bufferView origin on original seven-mode topology, source and compiled. Candidate matches independently computed literal base\u00d7vertex-color+emissive product with zero RGB error; missing base/emissive negatives. Same shader supplies both product and white-vertex reference. No public route or source material binding."
+    },
+    "color_compile_failure": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/modes-candidate-color-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "4bcfb47ad32bd6ce1ee308c601f61ddf41c6837b05e6f9b3b224ed69441ed561",
+      "scope": "Helper CS1026 syntax error; both cases incomplete, corrected before retry."
+    },
+    "uv_sampler_receipt": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/modes-candidate-uv-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "c48042df837f873187f908b471134755000f46a05adc91956fb8e8669854d40f",
+      "passed": 2,
+      "scope": "Derived interleaved UV0/UV1, manually injected 2x1 texture and samplers; separate base and emissive UV selection, transform and repeat/clamp matched literal red/green in both forms. Same shader reference; no source material adapter or public routing."
+    },
+    "combined_material_probe": {
+      "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/modes-combined-full-02/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "d426702de1433d6e976a087462275080844c08f2c1e719b5c6091e64e74f3ea6",
+      "scope": "5/6 batch: alpha2, public shared-slot baseline1, valid full-role UV projection1 and seven-UV DT source/candidate literal comparison1 passed. Five-UV combined single-material per-draw flag test failed final exact reset: line pixels white255 became224 after reset although triangle restored; light independence and material mutation observations before failure retained. No public integration.",
+      "retry": {
+        "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/modes-combined-reset-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "8decdf53afc309c577276cd527ecf07a54d9f73c1f160d12e64de34c49933bca",
+        "scope": "Failed earlier light-separation: line disappeared without light. Both attempts reused and cleared one RenderAttributes object across draws; corrected distinct-per-draw attributes untested."
+      },
+      "distinct_attributes": {
+        "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/modes-combined-distinct-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "2f1e62f0c319ed8c0f3ed3c6e18e24ed246b37f1617f6ff55697fcbeec83e964",
+        "passed": 2,
+        "scope": "Anonymous five/ seven-UV shaders and literal geometry. Per-draw attribute objects distinct and persistent. Same material mutation and four exact resets, light separation; 7UV transmission triangle matches original, wrong-factor sensitivity. Not public Model.Load, source texture adapter or variant proof."
+      }
+    },
+    "stock_flag": {
+      "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/modes-stock-flag-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "eddf6d9931a3745e44caab38943a3fb2998e48fb39e3a163ec52fe29ce4a7445",
+      "passed": 1,
+      "scope": "Anonymous stock-adapter literal line/triangle share one material; lit triangle equals original shader, per-draw light separation, legacy tint and texture mutation/restore, normalized linear COLOR0 independent product and wrong-color controls. Not public route or fog/depth/tool pixel proof.",
+      "tools_fog_receipt": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/modes-stock-tools-fog-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "c0dba0d6418e458360a1320b5d29e49defa0c91730020609dbbd12e79af55762",
+        "passed": 1,
+        "scope": "Original-vs-candidate Albedo, NormalMap and Roughness RGB exact; native gradient fog changed candidate line, original-vs-candidate triangle fog RGB exact. Literal anonymous shader; no depth-pass or public route proof."
+      }
+    },
+    "proposed_public_patch": {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/public-combined.proposed.patch",
+      "sha256": "a10e5ca7a7d35c0c0b4c37c8f4ea5af9faba3dea1dce02bb468b4b06db3f46f0",
+      "status": "superseded; isolated and not applied",
+      "scope": "Stock shader keeps legacy parameter surface; already source-lit and transmission materials use distinct combined shader programs per material index with full source UV roles and per-draw no-normal flag. Revised source-lit shader branch retains fog and tools/depth handling; exact shader revision requires native revalidation."
+    },
+    "pending_revalidation": {
+      "request": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/combined-final-source-stage-dt-request.json",
+      "request_sha256": "48cc2262c66417aec3d9b5d855902fcbf7b61d18810603532c998f741f1266b2",
+      "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/modes-final-source-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "receipt_sha256": "ea445c5a42ee9ec1a3de4611db5fafcea0898e75aaa3fc791f88986b462089ce",
+      "status": "2/3; 5-UV shared-material light/mutation and tools/fog passed; 7-UV failed preview-frame wait after original capture; comparison incomplete",
+      "scope": "Anonymous literal geometry, not public material routing or depth-pass proof.",
+      "focused_retry": {
+        "request": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/transmission-final-stage-dt-request.json",
+        "request_sha256": "3e75b81314b0d1e9091e7b8a327791515e2d48a140ecad169d7f78a1405afdab",
+        "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/modes-final-transmission-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "receipt_sha256": "ed0d9346f583720ccf40d909fcbf75df9d4780933caf793509138a47b0b3b30f",
+        "passed_cases": 1,
+        "scope": "Anonymous same-byte 7-UV literal triangle RGB match, wrong transmission factor, light separation and deletion; source extension adapter, document textures, public route and UV7 not tested. Earlier preview timeout cause unproven."
+      }
+    },
+    "existing_program_review": {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/existing-programs.review-draft.patch",
+      "sha256": "0946571f5f73f8cce4d09797e33b281c9ec2416a1029cd8b967d0368d12cde49",
+      "status": "isolated design accepted, not applied; final three native candidate controls pending",
+      "scope": "Existing stock and five-UV shader names and material state, per-draw attribute and no-normal point/line tangent skip; seven-UV delta based on Mandarin frozen candidate pending its public promotion. No material slot scan or template fork."
+    },
+    "merged_alpha_point_line": {
+      "shader": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/combined_alpha_pointline_candidate.shader",
+      "sha256": "bf6c5e6f16c801a9892a485a53bc4c6b6bef85d4a86c98232af8139187630ed9",
+      "request_template": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/merged-alpha-controls-template.json",
+      "request_sha256": "c9b27705f51e5f9851b1f865931b6b38e84dcdba2b95622b0f9bcf129c01eaca",
+      "status": "all six distinct anonymous controls passed across two receipts; public route not yet installed",
+      "scope": "Four passing cases: source/compiled BLEND alpha coverage, sorting and two asymmetric backface tests. Flagged point/line mutation and BLEND/MASK controls incomplete after cancellation; no public route proof. Cleanup errors empty.",
+      "request": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/merged-alpha-controls-stage-dt-request.json",
+      "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/model-tests/a7c2bcc51b454dd898de649195da355c/receipt.json",
+      "receipt_sha256": "862ffdaa57326c3348a93c83a9507d0d30023334cf985bae228462ad9c642a9f",
+      "remaining_receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/capture-diagnostics/native-two-cases-20261107-022854/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "remaining_receipt_sha256": "82cf925374ba1acdb4cfa9fb6f264857559ccd062dd51496cef56a4d397faa0a",
+      "remaining_scope": "Two formerly incomplete controls passed on exact bf6 shader: shared material flag/mutation and flagged BLEND opacity/MASK cutoff; one compile, one reuse, shader released; no public route proof.",
+      "review_patch": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/existing-programs-alpha.review-draft.patch",
+      "review_patch_sha256": "5000e99df13872cc9325f84f2526f22e0b3b09181b41f357f66b7ed7a8db1159"
+    },
+    "public_install": {
+      "status": "staged, not installed or validated; audited editor close blocked by automatic approval review",
+      "scope": "Primitive C# applied to coordinated source, exact named shader sources not copied while editor is active; source and compiled public tests remain pending new producer. No replacement editor or workaround attempted."
+    }
+  },
+  "shared_slot_baseline": {
+    "status": "passed current source route",
+    "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/modes-combined-full-02/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "sha256": "d426702de1433d6e976a087462275080844c08f2c1e719b5c6091e64e74f3ea6",
+    "scope": "One source slot shares exact native Material for no-normal line, normal line and triangle; direct mutation changed 124/146/1140 foreground-region pixels. Prior fixture setup failure e885d551 and stale pin failure 1e7b7ada retained."
+  }
+}

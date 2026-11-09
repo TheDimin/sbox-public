@@ -1,0 +1,44 @@
+{
+  "model": "TextureLinearInterpolationTest",
+  "owner": "/root/model_texture_linear",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearReference.cs",
+      "sha256": "20620636cfbca8040888a085dd21ec148380e0e70603a4ad3213051b13807caa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearCoreTests.cs",
+      "sha256": "0fd08c9c1aad28ec153779f823b497831442c5040035917292d2fffada0bf37e"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/TextureLinearPublicTests.cs",
+      "sha256": "2ee192e374d58eef3eca0441c2cfede2501b542137e274ead18e9cc78d40ffb9"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    }
+  ],
+  "additional_frozen_input": {
+    "path": "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/linear_probe.shader",
+    "sha256": "84cfa8a5af1db55f5ac054ef6595c59fc7e42d3010dacc6a9500134784077dba"
+  },
+  "entry": "request.json suite entries; run_owned_tests.py under host guard+lease",
+  "expected_cases": 2,
+  "forms": [
+    "pinned upstream GLB",
+    "one canonical derived glb_c"
+  ],
+  "scope": "3 reader/oracle cases; 2 public Model.Load/ModelRenderer cases, real native bound sampler float and texture/GPU geometry readback, whole-model captures and cleanup",
+  "acceptance": ".5 linear green vs literal independent .21404114048223255 wrong-transfer control; point control differs>.49; direct float tolerance .002, sphere mean difference<=2/255, geometry<=.00003 inches, exact UV/topology",
+  "execution_needs": "existing editor only; anonymous numeric diagnostic compilation; no producer build/install/restart",
+  "reused_core_receipt": "49f41422a6f3b6d30c4980a291b2a9669694ebd3a80e3d3bd318efd0e340eb6e"
+}

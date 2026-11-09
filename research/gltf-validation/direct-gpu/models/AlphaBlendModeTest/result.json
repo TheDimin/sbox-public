@@ -1,0 +1,317 @@
+{
+  "model": "AlphaBlendModeTest",
+  "status": "incomplete_public_source_material_unsupported",
+  "source_revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "forms": [
+    "glTF/source",
+    "glTF/compiled_glb",
+    "glTF-Binary/source",
+    "glTF-Binary/compiled_glb"
+  ],
+  "producer": {
+    "engine_mvid": "b5b66ab1-06f5-4aee-b816-92b6b197666e",
+    "engine_sha256": "ad6a78a7e4f2664fe1f74b1567dde6d15d1519ad78dbd1e21efbb21ebfa2ebd1",
+    "gltf_mvid": "88f89cfc-81b4-4744-9888-ec746058a6de",
+    "gltf_sha256": "b86cb72e0c0e0f3c23af45bd115f68760655d1754d663f41df62a45e136f9e8b",
+    "editor_pid": 155513
+  },
+  "receipts": {
+    "public": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-public-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "99449d450e5d33903bdaaa28f448e94ed6d41bc5c1ad3d389862722152caff40",
+      "pass": 0,
+      "fail": 4,
+      "incomplete": 0,
+      "phase": "complete"
+    },
+    "core": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-core-02/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "348b3435f47558d60b33150fb0f2bd041e72c7234dad1a7769beafd9679e2180",
+      "pass": 24,
+      "fail": 20,
+      "incomplete": 0,
+      "phase": "complete"
+    },
+    "native_gate_scoped": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-02/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "b41ce1eaeaead72a970c3c315cff1efa354b7d57ceac0f33c994483d794effa9",
+      "pass": 4,
+      "fail": 0,
+      "incomplete": 0,
+      "phase": "complete"
+    },
+    "native_ungated": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "9f30179f58b5fc4be95278174e2c194191078d221cf95bc7116d469b5d7b9e28",
+      "pass": 3,
+      "fail": 1,
+      "incomplete": 0,
+      "phase": "complete"
+    },
+    "graph_identity": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-identity-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "e4024557939405df983aff75229fdb343103969d8f3b22bf8e4918f2264cdcba",
+      "pass": 1,
+      "fail": 0,
+      "incomplete": 0,
+      "phase": "complete"
+    },
+    "generation_failed_identity": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-generate-run-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "f0e5699d5e9a0a28f972bead0fa1e143fd47d202442e6b4bd79687021b2b993c",
+      "pass": 0,
+      "fail": 0,
+      "incomplete": 1,
+      "phase": "execute-model-tests"
+    },
+    "e12_candidate_flags": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/e12-alpha-candidate-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "77755e2655b6f802bcbe38c958ec23a82a9a4a5c2cb927559c34538d980ddc2b",
+      "pass": 1,
+      "fail": 0,
+      "incomplete": 0,
+      "phase": "complete"
+    },
+    "e12_mask_and_order": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/e12-alpha-render-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "19cf4386b277dc575ee50ae606abe13512214c5cd865901b23f3844b7232bb35",
+      "pass": 0,
+      "fail": 1,
+      "incomplete": 0,
+      "phase": "complete"
+    },
+    "8fc_texture_coverage": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/8fc-alpha-coverage-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "66305045b3fd9a4f34af1c6d6d631369bdcf38818fb02ef5255069c696519d47",
+      "pass": 1,
+      "fail": 0,
+      "incomplete": 0,
+      "phase": "complete"
+    },
+    "8fc_opaque_and_invalid_backface_oracle": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/8fc-alpha-opaque-backface-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "4477efbc433d250c4d15c4b207c21f813a9a8f8731d2568730e91fbe6570b1bb",
+      "pass": 5,
+      "fail": 0,
+      "incomplete": 0,
+      "phase": "complete"
+    },
+    "signed_backface": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/alpha-signed-backface-current-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "58ddcc9c71d010b067d070e52fa9e3889b719da49dfe35afbde0e81e2c431077",
+      "pass": 4,
+      "fail": 0,
+      "incomplete": 0,
+      "phase": "complete"
+    }
+  },
+  "reference": {
+    "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/AlphaBlendModeTest/screenshot/screenshot.png",
+    "sha256": "856768a419da4be144fbaa3bf49c9fa456d63d916218d11e981c0a053a6ea42f",
+    "purpose": "Khronos reference artwork; final appearance comparison belongs to user; camera and lighting unknown"
+  },
+  "captures": [
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/blend_only_native_layers_blend.png",
+      "sha256": "e4bd61a22115255531a61f5e430f23d8c14d6f79e96fbf8d04ddbfe561b9fa0b"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/blend_only_native_layers_deleted_empty_after.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/blend_only_native_layers_empty_before.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/both_flags_dispatch_each_native_pass_both_flags.png",
+      "sha256": "e4bd61a22115255531a61f5e430f23d8c14d6f79e96fbf8d04ddbfe561b9fa0b"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/both_flags_dispatch_each_native_pass_deleted_empty_after.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/both_flags_dispatch_each_native_pass_empty_before.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/child_flags_are_measured_not_assumed_deleted_empty_after.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/child_flags_are_measured_not_assumed_empty_before.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/child_flags_are_measured_not_assumed_parent_disabled_child_observation.png",
+      "sha256": "93e0b99e0e8efcc42614b629a7276bdd3c48db5600c6c6e87143b3267dc2625a"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/mixed_deleted_empty_after.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/mixed_empty_before.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/mixed_pose_0.0.png",
+      "sha256": "289f1257f648442a9af2abb9f503e33e51ae3abdb85334e8764ac73a2f2d3e3c"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/mixed_pose_0.5.png",
+      "sha256": "6be1642806fcbd2efa9b2da96bee586d608cb9443e31ef3e796bd78019aefad8"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/mixed_pose_1.0.png",
+      "sha256": "0045977b03a2f35d446f2e1c53c5a35b3f4182cf6c10cb5f1db4d14001fb6e2c"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/opaque_only_native_layers_deleted_empty_after.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/opaque_only_native_layers_empty_before.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/opaque_only_native_layers_opaque.png",
+      "sha256": "e4bd61a22115255531a61f5e430f23d8c14d6f79e96fbf8d04ddbfe561b9fa0b"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/separate_blend_sorted_camera_-1_creation_forward_deleted_empty_after.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/separate_blend_sorted_camera_-1_creation_forward_empty_before.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/separate_blend_sorted_camera_-1_creation_forward_separate_sorted.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/separate_blend_sorted_camera_-1_creation_reverse_deleted_empty_after.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/separate_blend_sorted_camera_-1_creation_reverse_empty_before.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/separate_blend_sorted_camera_-1_creation_reverse_separate_sorted.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/separate_blend_sorted_camera_1_creation_forward_deleted_empty_after.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/separate_blend_sorted_camera_1_creation_forward_empty_before.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/separate_blend_sorted_camera_1_creation_forward_separate_sorted.png",
+      "sha256": "93e0b99e0e8efcc42614b629a7276bdd3c48db5600c6c6e87143b3267dc2625a"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/separate_blend_sorted_camera_1_creation_reverse_deleted_empty_after.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/separate_blend_sorted_camera_1_creation_reverse_empty_before.png",
+      "sha256": "7becd207c868978d870213d67d19d3acfdd3c5ce3902a5f106b56eccd5861024"
+    },
+    {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/today-alpha-native-captures-02/separate_blend_sorted_camera_1_creation_reverse_separate_sorted.png",
+      "sha256": "93e0b99e0e8efcc42614b629a7276bdd3c48db5600c6c6e87143b3267dc2625a"
+    }
+  ],
+  "capture_scope": "Diagnostic native pass and deletion controls only, not sample public source or alpha fidelity; negative camera sort controls have zero foreground despite callback-order observations.",
+  "known_limits": [
+    "Public Model.Load fails before rendering all four forms due stock material adapter rejection of bed normal/occlusion.",
+    "Separate CPU prepare controls reject four non-opaque authored materials per form; 24 of 44 rows pass and 20 fail.",
+    "Four native tests pass under test instrumentation acquiring the actual reentrant submission gate; this establishes measured pass selection and GPU pose controls, not alpha compositing or uninstrumented concurrency.",
+    "Reverse-camera native ordering callbacks observed but image foreground zero.",
+    "Cross-model transparency interleaving, depth cutoff, alpha pixels, overrides lifetime and Windows remain unaccepted.",
+    "Public source material path and full-model images remain incomplete.",
+    "Corrected shader signed normal-debug controls pass; lit backface and public source material remain unverified.",
+    "Per-view transparent sorting validated on canonical fixture; cross-instance alpha-over remains incorrect, and per-draw sort-unit prototype is not installed."
+  ],
+  "candidate": {
+    "shader_path": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/gltf_lit_alpha_candidate.shader",
+    "shader_sha256": "e4d3b1ced069c4aa6a93c5ca40063119d7c1c5423b56f83c005bf5ba0ee4650e",
+    "status": "anonymous tests only; signed backface normal checks pass; not public",
+    "prior_shader_sha256": "b5e7abc1926672e9f7819e092dbd6ae42f26cc4a6f2301ae09eb83c44fff2229",
+    "coverage": "prior candidate RGB/RGBA texture factor vertex coverage passed source+compiled; opaque alpha-ignore passed; source MASK depth controls passed",
+    "backface_caution": "Corrected shader e4d3 signed normal-debug MASK/BLEND 4/4 pass source+compiled with UV and tangent-W negative controls; lit backface pending"
+  },
+  "sorting": {
+    "status": "native_cross_instance_failure_confirmed_prototype_not_installed",
+    "engine_mvid": "5a07f228-dff8-4d6b-b4ef-890b32a80299",
+    "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/alpha-sorted-order-03/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "sha256": "31a9f2daae75b3e153958d0fb7b7b6f8811e5bd625119d0defe84d9446b3c499",
+    "scope": "1 pass / 1 fail; canonical compiled fixture. Per-view sort independently passes positive references for both sides, both orders, translation and blend override. Cross instance clean deletion controls pass but measured actual differs from independent alpha-over.",
+    "cross": {
+      "actual": [
+        0.25854492,
+        0.50878906,
+        0.13366699
+      ],
+      "expected": [
+        0.13371658,
+        0.50863075,
+        0.25868797
+      ],
+      "max_error": 0.12502098
+    },
+    "timing": "50 two-draw SetPose updates .9115ms total, no before baseline; sort overhead unmeasured",
+    "prototype_patch": "sort-units-prototype.patch",
+    "prototype_patch_sha256": "a36b2e0f0c20b6f4820e4a105d140edacaafcdfc863f1493ec978bef00979919",
+    "prototype_freeze": "sort-units-freeze.json",
+    "prototype_status": "uninstalled; untested state/ordinary interleave/manual/lifecycle; material mutation and unprepared manual override gaps"
+  },
+  "mask": {
+    "status": "installed_projected_adapter_pass_meshopt_public_rest_partial",
+    "shader_source_sha256": "37a1a426d847e94b6f57a46c8bb8f372133a79b00e8c45e2cd572ce91d534993",
+    "tests": [
+      {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/8fc-alpha-mask-depth-coverage-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "e647b52a196c34d9191cbced8dbff3ad10b17ff3a668be114348617c3ae36a6b",
+        "pass": 2,
+        "fail": 0,
+        "incomplete": 0,
+        "engine_mvid": "0ce2dfa5-c98c-45e4-ad3a-6c810a17a6ef"
+      },
+      {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/8fc-alpha-mask-normal-02/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "521cfe22566a3c695d6fda44c3585a5f0d11bb25c44183c30c254046ce24bcf8",
+        "pass": 3,
+        "fail": 0,
+        "incomplete": 0,
+        "engine_mvid": "0ce2dfa5-c98c-45e4-ad3a-6c810a17a6ef"
+      },
+      {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/mask-postinstall-run-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+        "sha256": "f82b203e4872fb88ed53bb181f177ca418beb66cd69622cf41383a9aa30b519f",
+        "pass": 4,
+        "fail": 0,
+        "incomplete": 0,
+        "engine_mvid": "6052e3c3-0a6d-48c9-a5d5-9fcd93459514"
+      }
+    ],
+    "scope": "source+compiled MASK depth and texture/factor/vertex cutoff and equality; signed backface and lit front/back asymmetric normals source; installed projected adapter source+compiled and native alpha test flags",
+    "limits": [
+      "Actual original Meshopt public load/render pending its owner.",
+      "MASK shader controls do not establish lit BLEND or cross-instance ordering.",
+      "Human source appearance approval pending."
+    ],
+    "meshopt_public_rest": {
+      "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/public-run-20261106-223927/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "a75e89733d3bba1834ef7024afd0c4d69024476c081ab4b06823cf2b1728f515",
+      "observations": "all 4 forms retain cutoff .001/features1/0/1/alpha1, rest GPU/image checks; parent MSTests 0/4 fail later on foreign-document pose helper; later pose tangent issue separate",
+      "scope": "partial per-case observations, not overall model pass"
+    }
+  }
+}

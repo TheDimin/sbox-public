@@ -1,10 +1,10 @@
 {
-  "version": 3,
+  "version": 7,
   "scope": "Sandbox.Test.Gltf source inventory for loaded-library CPU and codec tests; excludes corpus, editor rendering, GPU, and performance.",
-  "source_class_count": 38,
-  "test_method_count": 309,
-  "data_row_count": 163,
-  "expanded_case_count": 431,
+  "source_class_count": 44,
+  "test_method_count": 432,
+  "data_row_count": 432,
+  "expanded_case_count": 764,
   "suites": [
     {
       "name": "accessor",
@@ -73,6 +73,17 @@
       "codecs": []
     },
     {
+      "name": "compiler",
+      "file": "GltfCompilerTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfCompilerTests",
+      "methods": 10,
+      "data_rows": 0,
+      "cases": 10,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": []
+    },
+    {
       "name": "compiler-orphan-binary",
       "file": "GltfCompilerOrphanBinaryTests.cs",
       "type": "Sandbox.Tests.Gltf.GltfCompilerOrphanBinaryTests",
@@ -99,23 +110,56 @@
       ]
     },
     {
-      "name": "compiler",
-      "file": "GltfCompilerTests.cs",
-      "type": "Sandbox.Tests.Gltf.GltfCompilerTests",
-      "methods": 10,
-      "data_rows": 0,
-      "cases": 10,
-      "source_dependencies": [],
-      "resources": [],
-      "codecs": []
-    },
-    {
       "name": "container",
       "file": "GltfContainerTests.cs",
       "type": "Sandbox.Tests.Gltf.GltfContainerTests",
       "methods": 10,
       "data_rows": 8,
       "cases": 17,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": []
+    },
+    {
+      "name": "core-animation-conformance",
+      "file": "GltfCoreAnimationConformanceTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfCoreAnimationConformanceTests",
+      "methods": 25,
+      "data_rows": 43,
+      "cases": 54,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": []
+    },
+    {
+      "name": "core-data-conformance",
+      "file": "GltfCoreDataConformanceTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfCoreDataConformanceTests",
+      "methods": 15,
+      "data_rows": 54,
+      "cases": 59,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": []
+    },
+    {
+      "name": "core-material-conformance",
+      "file": "GltfCoreMaterialConformanceTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfCoreMaterialConformanceTests",
+      "methods": 4,
+      "data_rows": 18,
+      "cases": 18,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": []
+    },
+    {
+      "name": "core-scene-conformance",
+      "file": "GltfCoreSceneConformanceTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfCoreSceneConformanceTests",
+      "methods": 40,
+      "data_rows": 130,
+      "cases": 147,
       "source_dependencies": [],
       "resources": [],
       "codecs": []
@@ -132,6 +176,19 @@
       "codecs": []
     },
     {
+      "name": "draco",
+      "file": "GltfDracoTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfDracoTests",
+      "methods": 9,
+      "data_rows": 2,
+      "cases": 10,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [
+        "draco"
+      ]
+    },
+    {
       "name": "draco-accessor",
       "file": "GltfDracoAccessorTests.cs",
       "type": "Sandbox.Tests.Gltf.GltfDracoAccessorTests",
@@ -145,12 +202,12 @@
       ]
     },
     {
-      "name": "draco",
-      "file": "GltfDracoTests.cs",
-      "type": "Sandbox.Tests.Gltf.GltfDracoTests",
-      "methods": 9,
-      "data_rows": 2,
-      "cases": 10,
+      "name": "draco-primitive-data",
+      "file": "GltfDracoPrimitiveDataTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfDracoPrimitiveDataTests",
+      "methods": 17,
+      "data_rows": 14,
+      "cases": 27,
       "source_dependencies": [],
       "resources": [],
       "codecs": [
@@ -264,17 +321,6 @@
       ]
     },
     {
-      "name": "material-edge",
-      "file": "GltfMaterialEdgeTests.cs",
-      "type": "Sandbox.Tests.Gltf.GltfMaterialEdgeTests",
-      "methods": 13,
-      "data_rows": 21,
-      "cases": 28,
-      "source_dependencies": [],
-      "resources": [],
-      "codecs": []
-    },
-    {
       "name": "material",
       "file": "GltfMaterialTests.cs",
       "type": "Sandbox.Tests.Gltf.GltfMaterialTests",
@@ -286,19 +332,15 @@
       "codecs": []
     },
     {
-      "name": "meshopt-integration",
-      "file": "GltfMeshoptIntegrationTests.cs",
-      "type": "Sandbox.Tests.Gltf.GltfMeshoptIntegrationTests",
+      "name": "material-edge",
+      "file": "GltfMaterialEdgeTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfMaterialEdgeTests",
       "methods": 13,
-      "data_rows": 9,
-      "cases": 18,
-      "source_dependencies": [
-        "GltfMeshoptTests.cs"
-      ],
+      "data_rows": 21,
+      "cases": 28,
+      "source_dependencies": [],
       "resources": [],
-      "codecs": [
-        "meshopt"
-      ]
+      "codecs": []
     },
     {
       "name": "meshopt",
@@ -308,6 +350,21 @@
       "data_rows": 10,
       "cases": 17,
       "source_dependencies": [],
+      "resources": [],
+      "codecs": [
+        "meshopt"
+      ]
+    },
+    {
+      "name": "meshopt-integration",
+      "file": "GltfMeshoptIntegrationTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfMeshoptIntegrationTests",
+      "methods": 13,
+      "data_rows": 9,
+      "cases": 18,
+      "source_dependencies": [
+        "GltfMeshoptTests.cs"
+      ],
       "resources": [],
       "codecs": [
         "meshopt"
@@ -369,23 +426,23 @@
       "codecs": []
     },
     {
-      "name": "scene-feature",
-      "file": "GltfSceneFeatureTests.cs",
-      "type": "Sandbox.Tests.Gltf.GltfSceneFeatureTests",
-      "methods": 13,
-      "data_rows": 10,
-      "cases": 21,
-      "source_dependencies": [],
-      "resources": [],
-      "codecs": []
-    },
-    {
       "name": "scene",
       "file": "GltfSceneTests.cs",
       "type": "Sandbox.Tests.Gltf.GltfSceneTests",
       "methods": 8,
       "data_rows": 0,
       "cases": 8,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": []
+    },
+    {
+      "name": "scene-feature",
+      "file": "GltfSceneFeatureTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfSceneFeatureTests",
+      "methods": 13,
+      "data_rows": 10,
+      "cases": 21,
       "source_dependencies": [],
       "resources": [],
       "codecs": []
@@ -405,9 +462,9 @@
       "name": "static-scene-assembly",
       "file": "GltfStaticSceneAssemblyTests.cs",
       "type": "Sandbox.Tests.Gltf.GltfStaticSceneAssemblyTests",
-      "methods": 7,
+      "methods": 8,
       "data_rows": 0,
-      "cases": 7,
+      "cases": 8,
       "source_dependencies": [],
       "resources": [],
       "codecs": []
@@ -424,12 +481,25 @@
       "codecs": []
     },
     {
+      "name": "upload-data",
+      "file": "GltfUploadDataTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfUploadDataTests",
+      "methods": 18,
+      "data_rows": 5,
+      "cases": 21,
+      "source_dependencies": [],
+      "resources": [],
+      "codecs": [
+        "meshopt"
+      ]
+    },
+    {
       "name": "upload-layout",
       "file": "GltfUploadLayoutTests.cs",
       "type": "Sandbox.Tests.Gltf.GltfUploadLayoutTests",
-      "methods": 11,
-      "data_rows": 2,
-      "cases": 12,
+      "methods": 14,
+      "data_rows": 7,
+      "cases": 18,
       "source_dependencies": [],
       "resources": [],
       "codecs": []
@@ -449,9 +519,9 @@
   "codec_preflights": [
     {
       "name": "draco",
-      "file": "GltfDracoTests.cs",
-      "type": "Sandbox.Tests.Gltf.GltfDracoTests",
-      "method": "DecodedDataIsOwnedByManagedResult",
+      "file": "GltfDracoPrimitiveDataTests.cs",
+      "type": "Sandbox.Tests.Gltf.GltfDracoPrimitiveDataTests",
+      "method": "NativeBoxDecodeSuppliesRawFloatAttributesAndDecodedTopology",
       "arguments": [],
       "source_dependencies": [],
       "resources": []

@@ -1,0 +1,30 @@
+{
+  "request": {
+    "path": "research/gltf-validation/direct-gpu/capture-diagnostics/native-request.json",
+    "sha256": "40a2736de6f6ad0ff39df8ca24b76fc13337b297ab4f0f440b4209e0e587c4f0"
+  },
+  "inputs": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MergedDrawAttributeTests.cs",
+      "sha256": "a9fe34c3558669b9806fb4291cbab746df917e4c9887b9fb95ab9318f4a23470"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MergedLineBlendTests.cs",
+      "sha256": "2c6405bf44ecb29db939b2ace6ec4e8fbc6e6bfd7c1172db7a6bf8200a8fa49f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/combined_alpha_pointline_candidate.shader",
+      "sha256": "bf6c5e6f16c801a9892a485a53bc4c6b6bef85d4a86c98232af8139187630ed9"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/capture-diagnostics/helper-diff.patch",
+      "sha256": "ce0525d7e3236e841d2cc01b06ba9cda6559460562d29e716fc21cc0b85bbee0"
+    }
+  ],
+  "journal_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/capture-diagnostics/journal-5d94830b1752438495c57694a48bfe15.json",
+  "scope": "Only two incomplete real-render cases; one byte-identical request-scoped anonymous shader compile; no altered assertions."
+}

@@ -1,0 +1,710 @@
+{
+  "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/SimpleInstancing/coherent-original-suffix-native",
+  "driver_sha256": "0d38dd3fe7e74b089ef52cb98300658e4fe0cf33a8ac75900ed7ff5615e3626a",
+  "recipes_sha256": "cf20368147e5a1753b865e810e4f710e83f20d727d30ea792224b3f8283b80a3",
+  "cases": [
+    {
+      "id": "RiggedFigure/glTF",
+      "inputs": [
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/RiggedFigure/glTF/RiggedFigure.gltf",
+          "sha256": "ca84ebbf6084d755ff7ac81b3b7c8bc388da68c8aa4b2cf236503b07d3858cc6"
+        },
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/RiggedFigure/glTF/RiggedFigure0.bin",
+          "sha256": "28baa193dbc2f8bfad9cb8c13ae16191c592725ea3b2b22b7f05ab701618ce27"
+        }
+      ],
+      "request": {
+        "schemaVersion": 1,
+        "id": "RiggedFigure/glTF",
+        "sourcePath": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/RiggedFigure/glTF/RiggedFigure.gltf",
+        "corpusRoot": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets",
+        "inputPath": "Models/RiggedFigure/glTF/RiggedFigure.gltf",
+        "recipe": {
+          "id": "RiggedFigure/glTF",
+          "input": {
+            "path": "Models/RiggedFigure/glTF/RiggedFigure.gltf",
+            "sha256": "ca84ebbf6084d755ff7ac81b3b7c8bc388da68c8aa4b2cf236503b07d3858cc6"
+          },
+          "reference": {
+            "path": "Models/RiggedFigure/screenshot/screenshot.gif",
+            "url": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/90d7ede14c7e280af263824604b427a1ca02cb66/Models/RiggedFigure/screenshot/screenshot.gif",
+            "kind": "image",
+            "sha256": "c1ab7eba904cedf013d3a0fe6f8e5cb8d010c0a1d3e5a30f07f8e32494873107",
+            "format": "gif",
+            "width": 130,
+            "height": 130,
+            "frames": 24,
+            "animated": true,
+            "frameDurationsMs": [
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100
+            ],
+            "durationMs": 2400
+          },
+          "camera": {
+            "space": "gltf-metres",
+            "position": [
+              0.48998703857541287,
+              0.9349544146243172,
+              2.831955585822049
+            ],
+            "target": [
+              0.0,
+              0.7249599695205688,
+              0.0320296511054039
+            ],
+            "up": [
+              0,
+              1,
+              0
+            ],
+            "projection": "perspective",
+            "verticalFov": 45,
+            "orthographicHeight": 1.9443502324246036,
+            "preset": "figure-front"
+          },
+          "presentation": {
+            "background": {
+              "type": "solid",
+              "color": [
+                0.35,
+                0.35,
+                0.35,
+                1
+              ]
+            },
+            "environment": {
+              "type": "engine-default",
+              "sourceReferenceEnvironment": "unknown"
+            },
+            "lights": [
+              {
+                "type": "directional",
+                "direction": [
+                  -0.1719118353444105,
+                  -0.0736765008618902,
+                  -0.982353344825203
+                ],
+                "color": [
+                  1,
+                  1,
+                  1
+                ],
+                "intensity": 2
+              }
+            ],
+            "exposure": 1,
+            "resolution": {
+              "width": 512,
+              "height": 512
+            }
+          },
+          "animation": {
+            "clip": 0,
+            "name": null,
+            "time": 0,
+            "rate": 0.5208333333333334,
+            "duration": 1.25,
+            "loop": true,
+            "captureTimes": [
+              0.0,
+              0.05208333333333334,
+              0.10416666666666669,
+              0.15625000000000003,
+              0.20833333333333337,
+              0.2604166666666667,
+              0.3125,
+              0.3645833333333333,
+              0.4166666666666667,
+              0.46875,
+              0.5208333333333333,
+              0.5729166666666666,
+              0.625,
+              0.6770833333333334,
+              0.7291666666666667,
+              0.7812500000000002,
+              0.8333333333333336,
+              0.885416666666667,
+              0.9375000000000003,
+              0.9895833333333337,
+              1.041666666666667,
+              1.0937500000000004,
+              1.1458333333333337,
+              1.1979166666666672
+            ],
+            "recording": {
+              "kind": "apng",
+              "fps": 9.999999999999996,
+              "frameCount": 24,
+              "duration": 2.400000000000001,
+              "sampleTimes": [
+                0.0,
+                0.05208333333333334,
+                0.10416666666666669,
+                0.15625000000000003,
+                0.20833333333333337,
+                0.2604166666666667,
+                0.3125,
+                0.3645833333333333,
+                0.4166666666666667,
+                0.46875,
+                0.5208333333333333,
+                0.5729166666666666,
+                0.625,
+                0.6770833333333334,
+                0.7291666666666667,
+                0.7812500000000002,
+                0.8333333333333336,
+                0.885416666666667,
+                0.9375000000000003,
+                0.9895833333333337,
+                1.041666666666667,
+                1.0937500000000004,
+                1.1458333333333337,
+                1.1979166666666672
+              ],
+              "frameDurationsSeconds": [
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1
+              ],
+              "timingProvenance": "exact source GIF delays; source-time mapping inferred from inspected motion"
+            },
+            "clips": [
+              {
+                "index": 0,
+                "name": null,
+                "duration": 1.25
+              }
+            ],
+            "referenceDuration": 2.4,
+            "timingRelationship": "source GIF delays exact; phase and cycle/rate mapping inferred, not an engine clock semantic change"
+          },
+          "provenance": {
+            "camera": "inferred-from-preview",
+            "presentation": "inferred-from-preview; exact HDRI/lighting unknown",
+            "animation": "authored-timeline with reference-media timing",
+            "inspectedReference": true,
+            "reviewMethod": "all150 pinned previews and all15 animated preview phase strips visually inspected",
+            "bounds": "declared-position-bounds/node-rest-transforms",
+            "notes": [
+              "Authored-camera selection is inferred even when its numeric parameters are exact source values."
+            ]
+          },
+          "matchStatus": "needs-tuning",
+          "limitations": [
+            "Upstream preview renderer, exact camera selection, environment, exposure and tone mapping are not documented; this is not an exact matched-reference claim.",
+            "Reference appearance is accepted only by the user; recipe inference does not approve a model.",
+            "Camera inferred from inspected source preview; declared-rest bounds framing may need model-specific tuning for deformation or instancing.",
+            "Reference animation timing is recorded exactly, but authored clip phase/loop count may differ; no playback-rate equivalence is invented."
+          ]
+        },
+        "timeoutSeconds": 90
+      }
+    },
+    {
+      "id": "RiggedSimple/glTF",
+      "inputs": [
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/RiggedSimple/glTF/RiggedSimple.gltf",
+          "sha256": "18cd3e4d50ecadc93f6b6a720a4ee0d5154443c2fa331bc0dd3bef7499c02eb0"
+        },
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/RiggedSimple/glTF/RiggedSimple0.bin",
+          "sha256": "b18e39089acca03219a7a3aa4dd3f00eaedebf438bc3bd58fdcda855f64eafe6"
+        }
+      ],
+      "request": {
+        "schemaVersion": 1,
+        "id": "RiggedSimple/glTF",
+        "sourcePath": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/RiggedSimple/glTF/RiggedSimple.gltf",
+        "corpusRoot": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets",
+        "inputPath": "Models/RiggedSimple/glTF/RiggedSimple.gltf",
+        "recipe": {
+          "id": "RiggedSimple/glTF",
+          "input": {
+            "path": "Models/RiggedSimple/glTF/RiggedSimple.gltf",
+            "sha256": "18cd3e4d50ecadc93f6b6a720a4ee0d5154443c2fa331bc0dd3bef7499c02eb0"
+          },
+          "reference": {
+            "path": "Models/RiggedSimple/screenshot/screenshot.gif",
+            "url": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/90d7ede14c7e280af263824604b427a1ca02cb66/Models/RiggedSimple/screenshot/screenshot.gif",
+            "kind": "image",
+            "sha256": "f733010c06c1599a2411008bb2dc32ccda504d23c65ce069b47e9ff900b943ee",
+            "format": "gif",
+            "width": 130,
+            "height": 130,
+            "frames": 42,
+            "animated": true,
+            "frameDurationsMs": [
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100,
+              100
+            ],
+            "durationMs": 4200
+          },
+          "camera": {
+            "space": "gltf-metres",
+            "position": [
+              2.086162567138672e-07,
+              0.718622174353364,
+              -14.372443487067269
+            ],
+            "target": [
+              2.086162567138672e-07,
+              0.0,
+              9.103828801926284e-15
+            ],
+            "up": [
+              0,
+              1,
+              0
+            ],
+            "projection": "orthographic",
+            "verticalFov": 45,
+            "orthographicHeight": 11.437692642211914,
+            "preset": "rigged-column-front"
+          },
+          "presentation": {
+            "background": {
+              "type": "solid",
+              "color": [
+                0.35,
+                0.35,
+                0.35,
+                1
+              ]
+            },
+            "environment": {
+              "type": "engine-default",
+              "sourceReferenceEnvironment": "unknown"
+            },
+            "lights": [
+              {
+                "type": "directional",
+                "direction": [
+                  0.0,
+                  -0.04993761694389224,
+                  0.9987523388778448
+                ],
+                "color": [
+                  1,
+                  1,
+                  1
+                ],
+                "intensity": 2
+              }
+            ],
+            "exposure": 1,
+            "resolution": {
+              "width": 512,
+              "height": 512
+            }
+          },
+          "animation": {
+            "clip": 0,
+            "name": null,
+            "time": 0,
+            "rate": 0.4960316703433083,
+            "duration": 2.083333015441895,
+            "loop": true,
+            "captureTimes": [
+              0.0,
+              0.04960316703433083,
+              0.09920633406866167,
+              0.14880950110299251,
+              0.19841266813732333,
+              0.24801583517165415,
+              0.297619002205985,
+              0.3472221692403158,
+              0.3968253362746466,
+              0.44642850330897743,
+              0.49603167034330825,
+              0.5456348373776391,
+              0.59523800441197,
+              0.6448411714463008,
+              0.6944443384806317,
+              0.7440475055149626,
+              0.7936506725492934,
+              0.8432538395836243,
+              0.8928570066179552,
+              0.9424601736522861,
+              0.9920633406866168,
+              1.0416665077209477,
+              1.0912696747552786,
+              1.1408728417896095,
+              1.1904760088239403,
+              1.2400791758582712,
+              1.289682342892602,
+              1.339285509926933,
+              1.3888886769612638,
+              1.4384918439955947,
+              1.4880950110299256,
+              1.5376981780642565,
+              1.5873013450985873,
+              1.6369045121329182,
+              1.686507679167249,
+              1.73611084620158,
+              1.7857140132359108,
+              1.8353171802702417,
+              1.8849203473045726,
+              1.9345235143389035,
+              1.9841266813732341,
+              2.0337298484075648
+            ],
+            "recording": {
+              "kind": "apng",
+              "fps": 9.999999999999998,
+              "frameCount": 42,
+              "duration": 4.200000000000001,
+              "sampleTimes": [
+                0.0,
+                0.04960316703433083,
+                0.09920633406866167,
+                0.14880950110299251,
+                0.19841266813732333,
+                0.24801583517165415,
+                0.297619002205985,
+                0.3472221692403158,
+                0.3968253362746466,
+                0.44642850330897743,
+                0.49603167034330825,
+                0.5456348373776391,
+                0.59523800441197,
+                0.6448411714463008,
+                0.6944443384806317,
+                0.7440475055149626,
+                0.7936506725492934,
+                0.8432538395836243,
+                0.8928570066179552,
+                0.9424601736522861,
+                0.9920633406866168,
+                1.0416665077209477,
+                1.0912696747552786,
+                1.1408728417896095,
+                1.1904760088239403,
+                1.2400791758582712,
+                1.289682342892602,
+                1.339285509926933,
+                1.3888886769612638,
+                1.4384918439955947,
+                1.4880950110299256,
+                1.5376981780642565,
+                1.5873013450985873,
+                1.6369045121329182,
+                1.686507679167249,
+                1.73611084620158,
+                1.7857140132359108,
+                1.8353171802702417,
+                1.8849203473045726,
+                1.9345235143389035,
+                1.9841266813732341,
+                2.0337298484075648
+              ],
+              "frameDurationsSeconds": [
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1
+              ],
+              "timingProvenance": "exact source GIF delays; source-time mapping inferred from inspected motion"
+            },
+            "clips": [
+              {
+                "index": 0,
+                "name": null,
+                "duration": 2.083333015441895
+              }
+            ],
+            "referenceDuration": 4.2,
+            "timingRelationship": "source GIF delays exact; phase and cycle/rate mapping inferred, not an engine clock semantic change"
+          },
+          "provenance": {
+            "camera": "inferred-from-preview",
+            "presentation": "inferred-from-preview; exact HDRI/lighting unknown",
+            "animation": "authored-timeline with reference-media timing",
+            "inspectedReference": true,
+            "reviewMethod": "all150 pinned previews and all15 animated preview phase strips visually inspected",
+            "bounds": "declared-position-bounds/node-rest-transforms",
+            "notes": [
+              "Authored-camera selection is inferred even when its numeric parameters are exact source values."
+            ]
+          },
+          "matchStatus": "needs-tuning",
+          "limitations": [
+            "Upstream preview renderer, exact camera selection, environment, exposure and tone mapping are not documented; this is not an exact matched-reference claim.",
+            "Reference appearance is accepted only by the user; recipe inference does not approve a model.",
+            "Camera inferred from inspected source preview; declared-rest bounds framing may need model-specific tuning for deformation or instancing.",
+            "Reference animation timing is recorded exactly, but authored clip phase/loop count may differ; no playback-rate equivalence is invented."
+          ]
+        },
+        "timeoutSeconds": 90
+      }
+    },
+    {
+      "id": "SimpleInstancing/glTF",
+      "inputs": [
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/SimpleInstancing/glTF/SimpleInstancing.gltf",
+          "sha256": "a01695630e6459c945826c7ff8dde74784de8279f60b9b62604980dc7486340e"
+        },
+        {
+          "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/SimpleInstancing/glTF/SimpleInstancing.bin",
+          "sha256": "29d38705c2a619f30374e80413be61f2e855dd9ec59c499201000aa53715a73c"
+        }
+      ],
+      "request": {
+        "schemaVersion": 1,
+        "id": "SimpleInstancing/glTF",
+        "sourcePath": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/SimpleInstancing/glTF/SimpleInstancing.gltf",
+        "corpusRoot": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets",
+        "inputPath": "Models/SimpleInstancing/glTF/SimpleInstancing.gltf",
+        "recipe": {
+          "id": "SimpleInstancing/glTF",
+          "input": {
+            "path": "Models/SimpleInstancing/glTF/SimpleInstancing.gltf",
+            "sha256": "a01695630e6459c945826c7ff8dde74784de8279f60b9b62604980dc7486340e"
+          },
+          "reference": {
+            "path": "Models/SimpleInstancing/screenshot/screenshot.png",
+            "url": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/90d7ede14c7e280af263824604b427a1ca02cb66/Models/SimpleInstancing/screenshot/screenshot.png",
+            "kind": "image",
+            "sha256": "7301d0fd145de5c561d604d4fb646eddab69b22b34cad6d28f82fd0b470cfcb9",
+            "format": "png",
+            "width": 128,
+            "height": 128,
+            "frames": 1,
+            "animated": false,
+            "frameDurationsMs": [
+              0
+            ],
+            "durationMs": 0
+          },
+          "camera": {
+            "space": "gltf-metres",
+            "position": [
+              29.607746087499812,
+              21.18141707069602,
+              29.607746087499812
+            ],
+            "target": [
+              5.532520325203252,
+              5.532520325203252,
+              5.532520325203252
+            ],
+            "up": [
+              0,
+              1,
+              0
+            ],
+            "projection": "perspective",
+            "verticalFov": 45,
+            "orthographicHeight": 25.562183168370677,
+            "preset": "instancing-lattice"
+          },
+          "presentation": {
+            "background": {
+              "type": "solid",
+              "color": [
+                0.35,
+                0.35,
+                0.35,
+                1
+              ]
+            },
+            "environment": {
+              "type": "engine-default",
+              "sourceReferenceEnvironment": "unknown"
+            },
+            "lights": [
+              {
+                "type": "directional",
+                "direction": [
+                  -0.6424925662032356,
+                  -0.4176201680321033,
+                  -0.6424925662032356
+                ],
+                "color": [
+                  1,
+                  1,
+                  1
+                ],
+                "intensity": 2
+              }
+            ],
+            "exposure": 1,
+            "resolution": {
+              "width": 512,
+              "height": 512
+            }
+          },
+          "animation": {
+            "clip": null,
+            "name": null,
+            "time": 0,
+            "rate": 1,
+            "duration": 0,
+            "loop": false,
+            "captureTimes": [
+              0
+            ],
+            "recording": {
+              "kind": "image",
+              "fps": null,
+              "frameCount": 1,
+              "duration": 0,
+              "sampleTimes": [
+                0
+              ],
+              "frameDurationsSeconds": [],
+              "timingProvenance": "static reference: one selected pose"
+            },
+            "clips": [],
+            "referenceDuration": 0.0,
+            "timingRelationship": "authored rate retained; reference correspondence needs tuning"
+          },
+          "provenance": {
+            "camera": "inferred-from-preview",
+            "presentation": "inferred-from-preview; exact HDRI/lighting unknown",
+            "animation": "static",
+            "inspectedReference": true,
+            "reviewMethod": "all150 pinned previews and all15 animated preview phase strips visually inspected",
+            "bounds": "existing independent SimpleInstancing reference.json: bounds of all125 instance rows",
+            "notes": [
+              "Authored-camera selection is inferred even when its numeric parameters are exact source values."
+            ]
+          },
+          "matchStatus": "needs-tuning",
+          "limitations": [
+            "Upstream preview renderer, exact camera selection, environment, exposure and tone mapping are not documented; this is not an exact matched-reference claim.",
+            "Reference appearance is accepted only by the user; recipe inference does not approve a model.",
+            "Camera inferred from inspected source preview; declared-rest bounds framing may need model-specific tuning for deformation or instancing."
+          ]
+        },
+        "timeoutSeconds": 90
+      }
+    }
+  ]
+}

@@ -1,0 +1,246 @@
+{
+  "model": "InterpolationTest",
+  "corpus_commit": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "reference": {
+    "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/InterpolationTest/screenshot/screenshot.gif",
+    "sha256": "adad5040972b3b9f6e2145453af952e0fc863d24cab48a747fd4365e16eb4f49",
+    "format": "GIF",
+    "frame_durations_ms": [
+      70,
+      80,
+      80,
+      70,
+      80,
+      80,
+      70,
+      80,
+      80,
+      70,
+      80,
+      80,
+      70,
+      80
+    ]
+  },
+  "receipt": {
+    "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation-run/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "sha256": "a36bc57762d72069e2eeec501675d45596b19ebda7d3ca14f53e065840cdc70a"
+  },
+  "forms": [
+    {
+      "form": "derived-compiled",
+      "apng": {
+        "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/04976c7fe9f74fc288c2c735827e2256/interpolation-deterministic.png",
+        "sha256": "87464d1534817f921fda78b2518237d80c2624e31b527bb879b4c79f26b4b941"
+      },
+      "frames": [
+        {
+          "time_seconds": 0,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/04976c7fe9f74fc288c2c735827e2256/frame-00.png",
+          "sha256": "7bccb828fe55750f66b890cb19c335305feef04f9026e4215cb1cecc8279dfcc"
+        },
+        {
+          "time_seconds": 0.07,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/04976c7fe9f74fc288c2c735827e2256/frame-01.png",
+          "sha256": "92fe3f4e853243b90f07febc58138e647938423e8bd63e969a14f2b46d48b775"
+        },
+        {
+          "time_seconds": 0.15,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/04976c7fe9f74fc288c2c735827e2256/frame-02.png",
+          "sha256": "8bbfdc9c5be0f7533f3cdd7a739c87204f67615a3924fa7d4eca2c7d5ea4a2a0"
+        },
+        {
+          "time_seconds": 0.23,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/04976c7fe9f74fc288c2c735827e2256/frame-03.png",
+          "sha256": "3671e15d6b7d5fdd8aba1ff9c6c21da9e01dc3f23bf9c74f394dddad72da10c1"
+        },
+        {
+          "time_seconds": 0.3,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/04976c7fe9f74fc288c2c735827e2256/frame-04.png",
+          "sha256": "9e1804a27183b522e6cce81f2c264eb6d0614eebc139abf0f87e4310ee3c7d99"
+        },
+        {
+          "time_seconds": 0.38,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/04976c7fe9f74fc288c2c735827e2256/frame-05.png",
+          "sha256": "9deda2fe06abbb1e5395753f1a79a63f4a4eb0abdc0e359e2fc196d38fa46ef8"
+        },
+        {
+          "time_seconds": 0.46,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/04976c7fe9f74fc288c2c735827e2256/frame-06.png",
+          "sha256": "1e8151e00edb8eccffa7145a56b5ee4f8b4d984d6e32c450a7be1d54c03bde33"
+        },
+        {
+          "time_seconds": 0.53,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/04976c7fe9f74fc288c2c735827e2256/frame-07.png",
+          "sha256": "3edd12d133e5e9fae9c230a8af4763483fe1456c7637813bc4d897e3bad0a92e"
+        },
+        {
+          "time_seconds": 0.61,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/04976c7fe9f74fc288c2c735827e2256/frame-08.png",
+          "sha256": "f66138fabb87347ffc6e860e1a7530241104246de4045d42b0fc3fe626613861"
+        },
+        {
+          "time_seconds": 0.69,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/04976c7fe9f74fc288c2c735827e2256/frame-09.png",
+          "sha256": "96e715926a4b0e2b5f386f120eb6f9ca286e54e4bbdc9251ef93086a5e88f566"
+        },
+        {
+          "time_seconds": 0.76,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/04976c7fe9f74fc288c2c735827e2256/frame-10.png",
+          "sha256": "7958a0374a4e42c4dd88c8a6b8c4966024210e44725e5df5286c018e32722d44"
+        },
+        {
+          "time_seconds": 0.84,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/04976c7fe9f74fc288c2c735827e2256/frame-11.png",
+          "sha256": "7fa733e6005fe36dbeddc70fd40dccd29f1059f9fb980b8ef0550e5d1837e237"
+        },
+        {
+          "time_seconds": 0.92,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/04976c7fe9f74fc288c2c735827e2256/frame-12.png",
+          "sha256": "89383c22f98f23aeb8740fa868a7e5b5296379e996659c27db196c19594964ad"
+        },
+        {
+          "time_seconds": 0.99,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/04976c7fe9f74fc288c2c735827e2256/frame-13.png",
+          "sha256": "fdc7e26690fe089d54f90af9289823326be0e7a28bac820d27bc45e835be15b5"
+        }
+      ],
+      "compiled_input": {
+        "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/04976c7fe9f74fc288c2c735827e2256/interpolation_dde389ae9981466798fe7f747681ab58.glb_c",
+        "sha256": "d138c1c436314762a634ac51f20c62a3eb992c2ed7a12dc2aa3db317a6e154bc"
+      }
+    },
+    {
+      "form": "original-source",
+      "apng": {
+        "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/f532c819fd554c6eba15fd5c2d398ec2/interpolation-deterministic.png",
+        "sha256": "87464d1534817f921fda78b2518237d80c2624e31b527bb879b4c79f26b4b941"
+      },
+      "frames": [
+        {
+          "time_seconds": 0,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/f532c819fd554c6eba15fd5c2d398ec2/frame-00.png",
+          "sha256": "7bccb828fe55750f66b890cb19c335305feef04f9026e4215cb1cecc8279dfcc"
+        },
+        {
+          "time_seconds": 0.07,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/f532c819fd554c6eba15fd5c2d398ec2/frame-01.png",
+          "sha256": "92fe3f4e853243b90f07febc58138e647938423e8bd63e969a14f2b46d48b775"
+        },
+        {
+          "time_seconds": 0.15,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/f532c819fd554c6eba15fd5c2d398ec2/frame-02.png",
+          "sha256": "8bbfdc9c5be0f7533f3cdd7a739c87204f67615a3924fa7d4eca2c7d5ea4a2a0"
+        },
+        {
+          "time_seconds": 0.23,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/f532c819fd554c6eba15fd5c2d398ec2/frame-03.png",
+          "sha256": "3671e15d6b7d5fdd8aba1ff9c6c21da9e01dc3f23bf9c74f394dddad72da10c1"
+        },
+        {
+          "time_seconds": 0.3,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/f532c819fd554c6eba15fd5c2d398ec2/frame-04.png",
+          "sha256": "9e1804a27183b522e6cce81f2c264eb6d0614eebc139abf0f87e4310ee3c7d99"
+        },
+        {
+          "time_seconds": 0.38,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/f532c819fd554c6eba15fd5c2d398ec2/frame-05.png",
+          "sha256": "9deda2fe06abbb1e5395753f1a79a63f4a4eb0abdc0e359e2fc196d38fa46ef8"
+        },
+        {
+          "time_seconds": 0.46,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/f532c819fd554c6eba15fd5c2d398ec2/frame-06.png",
+          "sha256": "1e8151e00edb8eccffa7145a56b5ee4f8b4d984d6e32c450a7be1d54c03bde33"
+        },
+        {
+          "time_seconds": 0.53,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/f532c819fd554c6eba15fd5c2d398ec2/frame-07.png",
+          "sha256": "3edd12d133e5e9fae9c230a8af4763483fe1456c7637813bc4d897e3bad0a92e"
+        },
+        {
+          "time_seconds": 0.61,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/f532c819fd554c6eba15fd5c2d398ec2/frame-08.png",
+          "sha256": "f66138fabb87347ffc6e860e1a7530241104246de4045d42b0fc3fe626613861"
+        },
+        {
+          "time_seconds": 0.69,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/f532c819fd554c6eba15fd5c2d398ec2/frame-09.png",
+          "sha256": "96e715926a4b0e2b5f386f120eb6f9ca286e54e4bbdc9251ef93086a5e88f566"
+        },
+        {
+          "time_seconds": 0.76,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/f532c819fd554c6eba15fd5c2d398ec2/frame-10.png",
+          "sha256": "7958a0374a4e42c4dd88c8a6b8c4966024210e44725e5df5286c018e32722d44"
+        },
+        {
+          "time_seconds": 0.84,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/f532c819fd554c6eba15fd5c2d398ec2/frame-11.png",
+          "sha256": "7fa733e6005fe36dbeddc70fd40dccd29f1059f9fb980b8ef0550e5d1837e237"
+        },
+        {
+          "time_seconds": 0.92,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/f532c819fd554c6eba15fd5c2d398ec2/frame-12.png",
+          "sha256": "89383c22f98f23aeb8740fa868a7e5b5296379e996659c27db196c19594964ad"
+        },
+        {
+          "time_seconds": 0.99,
+          "path": "Temp/gltf-validation/direct-gpu/interpolation-presentation/f532c819fd554c6eba15fd5c2d398ec2/frame-13.png",
+          "sha256": "fdc7e26690fe089d54f90af9289823326be0e7a28bac820d27bc45e835be15b5"
+        }
+      ],
+      "source_input": {
+        "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/InterpolationTest/glTF/InterpolationTest.gltf",
+        "sha256": "4357b9e260f2e7ffb153255da37c20d6c20a03c76cbebf959a0a4f144a873028"
+      }
+    }
+  ],
+  "clip_names": [
+    "Step Scale",
+    "Linear Scale",
+    "CubicSpline Scale",
+    "Step Rotation",
+    "CubicSpline Rotation",
+    "Linear Rotation",
+    "Step Translation",
+    "CubicSpline Translation",
+    "Linear Translation"
+  ],
+  "sample_times_seconds": [
+    0,
+    0.07,
+    0.15,
+    0.23,
+    0.3,
+    0.38,
+    0.46,
+    0.53,
+    0.61,
+    0.69,
+    0.76,
+    0.84,
+    0.92,
+    0.99
+  ],
+  "frame_durations_ms": [
+    70,
+    80,
+    80,
+    70,
+    80,
+    80,
+    70,
+    80,
+    80,
+    70,
+    80,
+    80,
+    70,
+    80
+  ],
+  "scope": "14 actual deterministic captures per form with nine simultaneous clips on public Model.Load, SkinnedModelRenderer and GltfAnimationController; each bound GPU pose compared to independent composed source oracle. APNG delays are reference GIF delays; source-time mapping inferred. Not wall-clock video or visual approval. Inferred front orthographic framing, owned point light, black background, 192x192, source materials; exact upstream lighting unknown.",
+  "license": {
+    "model": "CC0-1.0",
+    "metadata": "CC-BY-4.0",
+    "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/InterpolationTest/LICENSE.md"
+  }
+}

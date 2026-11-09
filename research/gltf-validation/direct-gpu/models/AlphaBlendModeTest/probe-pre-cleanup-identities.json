@@ -1,0 +1,65 @@
+{
+  "status": "superseded_unrun",
+  "reason": "Coordinator released model-owned cleanup fixes before any Alpha helper was active or selected. Preserve previous prepared identities; no runtime failure or pass is implied.",
+  "requests": {
+    "native-pass-request.json": {
+      "model": "AlphaBlendModeTest",
+      "owner": "/root/gpu_alpha_blend",
+      "files": [
+        {
+          "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaNativePassProbe.cs",
+          "sha256": "cb02bd5f64c4c9d27a47ac6c357e3e4ad81b6018a69b309aaaa73a1c3bfddf4b"
+        }
+      ],
+      "entry": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaNativePassProbe.Run(scene,camera,opaqueMaterial,blendMaterial,waitForActualFrames,capture)",
+      "expected_cases": 8,
+      "scope": "actual native SceneCustomObject pass callbacks and object-order observations with literal Graphics.Draw/empty-positive-deleted captures; not glTF alpha rendering conformance",
+      "requirements": [
+        "verified native renderer idle private scene",
+        "borrowed visible opaque and translucent materials with actual native blend flag",
+        "real frame wait/capture coordinator callbacks",
+        "actual loaded Engine only; no replacement producer"
+      ],
+      "status": "refrozen_unrun; native material-mode identity correction before execution",
+      "execution_needs": "coordinator native captures; no producer rebuild or new shader compile required when suitable existing materials exist"
+    },
+    "native-execution-request.json": {
+      "model": "AlphaBlendModeTest",
+      "owner": "/root/gpu_alpha_blend",
+      "files": [
+        {
+          "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaNativePassExecutionTests.cs",
+          "sha256": "596da5844a29980ee91e1fcaebf9938541ad9df5faa128649a6a1e9325c4839a"
+        },
+        {
+          "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaNativePassProbe.cs",
+          "sha256": "cb02bd5f64c4c9d27a47ac6c357e3e4ad81b6018a69b309aaaa73a1c3bfddf4b"
+        },
+        {
+          "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaMaterialRoutingProbe.cs",
+          "sha256": "63d894c1ba079958345631d7858c650a587fa6baa94546b3491020af94b306fa"
+        },
+        {
+          "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaControlFixtures.cs",
+          "sha256": "07b5c4ed3e67354fd156d252940a947545e2472dd4b70d833741abf2dc80080b"
+        }
+      ],
+      "suite": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaNativePassExecutionTests",
+      "setup": "public static Configure(checkoutRoot,freshOutputDirectory,exactDeployedComputeShaderPath)",
+      "expected_cases": 2,
+      "nested_result_inventory": {
+        "ActualNativePassCallbacksAndOrdering": 8,
+        "ActualEffectiveMaterialOverrideClassification": 8
+      },
+      "scope": "two actual MSTests with16 named nested observations retained in public static Measurements; actual native8image/pass probe and actual override8state baseline",
+      "execution_needs": "coordinator guarded idle native editor; provided stock white material copies use actual F_TRANSLUCENT reload; private visible SceneRenderingWidget/native captures; no new producer build or authored shader",
+      "notes": [
+        "wrapper owns and closes only its private widget/scene/material copies",
+        "borrowed stock template and deployed compute material remain alive",
+        "retain any native feature/material rejection as actual red, not pretend a fake blend control",
+        "actual backend current opaque-only failures anticipated"
+      ],
+      "status": "frozen_unrun"
+    }
+  }
+}

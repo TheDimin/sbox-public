@@ -1,0 +1,183 @@
+{
+  "corpus_commit": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "model": "TextureEncodingTest",
+  "actual_variants": [
+    "glTF",
+    "glTF-Binary"
+  ],
+  "required_forms": [
+    "original-source",
+    "portable-compiled-glb_c"
+  ],
+  "source_sha256": "7985fb99097900fc8df7ef5e90d750e329db51ecd4174a2b01dc5d727489570c",
+  "glb_sha256": "c2f654bdf918e3cce93db3f8d8c1b008b90d3089e756c9b38149e9306b1338f4",
+  "materials": 14,
+  "images": [
+    {
+      "index": 0,
+      "file": "0_136_0.png",
+      "sha256": "7310c0157395b5732c24711abbbc644ae273587de38077045470c9c7ea129bdb",
+      "bytes": 69,
+      "width": 1,
+      "height": 1,
+      "bit_depth": 8,
+      "color_type": 2,
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "literal_rgba": [
+        0,
+        136,
+        0,
+        255
+      ]
+    },
+    {
+      "index": 1,
+      "file": "0_136_0_gamma.png",
+      "sha256": "ec86d9a12c304702f5f6fc21a03d425bdf8608d8a70a8b0eca5f4ff5521afdff",
+      "bytes": 85,
+      "width": 1,
+      "height": 1,
+      "bit_depth": 8,
+      "color_type": 2,
+      "chunks": [
+        "IHDR",
+        "gAMA",
+        "IDAT",
+        "IEND"
+      ],
+      "literal_rgba": [
+        0,
+        136,
+        0,
+        255
+      ]
+    },
+    {
+      "index": 2,
+      "file": "0_136_0_icc.png",
+      "sha256": "c50df4c3a6c536e27bec21132dcafa2eb0b3c6a5570fe88e7f60aebaa296e8dd",
+      "bytes": 433,
+      "width": 1,
+      "height": 1,
+      "bit_depth": 8,
+      "color_type": 2,
+      "chunks": [
+        "IHDR",
+        "iCCP",
+        "IDAT",
+        "IEND"
+      ],
+      "literal_rgba": [
+        0,
+        136,
+        0,
+        255
+      ]
+    },
+    {
+      "index": 3,
+      "file": "0_136_255.png",
+      "sha256": "0fa99fc5d9a46991a583302bb176867463bc03f13d40ca72ca4ffdbf5f6aa3f9",
+      "bytes": 69,
+      "width": 1,
+      "height": 1,
+      "bit_depth": 8,
+      "color_type": 2,
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "literal_rgba": [
+        0,
+        136,
+        255,
+        255
+      ]
+    },
+    {
+      "index": 4,
+      "file": "0_136_255_gamma.png",
+      "sha256": "f581f51829831a1435e2b1c4e8e1e060c2c91a17fb0403c1c1ae98ebedd9fc5d",
+      "bytes": 85,
+      "width": 1,
+      "height": 1,
+      "bit_depth": 8,
+      "color_type": 2,
+      "chunks": [
+        "IHDR",
+        "gAMA",
+        "IDAT",
+        "IEND"
+      ],
+      "literal_rgba": [
+        0,
+        136,
+        255,
+        255
+      ]
+    },
+    {
+      "index": 5,
+      "file": "0_136_255_icc.png",
+      "sha256": "00681909c34b627cc7ef05da0112f0f384318813ce0726e148d3647a160f619e",
+      "bytes": 433,
+      "width": 1,
+      "height": 1,
+      "bit_depth": 8,
+      "color_type": 2,
+      "chunks": [
+        "IHDR",
+        "iCCP",
+        "IDAT",
+        "IEND"
+      ],
+      "literal_rgba": [
+        0,
+        136,
+        255,
+        255
+      ]
+    },
+    {
+      "index": 6,
+      "file": "TestLabels.png",
+      "sha256": "8d963c30e101bee83df3db342b80d2905b52b076220b2aed76ce9908a15500b6",
+      "bytes": 3177,
+      "width": 1024,
+      "height": 256,
+      "bit_depth": 4,
+      "color_type": 3,
+      "chunks": [
+        "IHDR",
+        "PLTE",
+        "tRNS",
+        "IDAT",
+        "IEND"
+      ]
+    },
+    {
+      "index": 7,
+      "file": "SlotLabels.png",
+      "sha256": "4a4f3a1ecc2bf5085962db72f1b81d7523aa364484fe7049b3c196955cee9cf6",
+      "bytes": 3519,
+      "width": 1024,
+      "height": 256,
+      "bit_depth": 4,
+      "color_type": 3,
+      "chunks": [
+        "IHDR",
+        "PLTE",
+        "tRNS",
+        "IDAT",
+        "IEND"
+      ]
+    }
+  ],
+  "literal_linear_136": 0.24620132670783548,
+  "execution_scope": "Python source audit only; C# / native / GPU execution pending"
+}

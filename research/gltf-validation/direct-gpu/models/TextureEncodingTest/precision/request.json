@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "engine_sha256": "e05cc4da9851ad2c3306e16ef3af317c8b398516dd6f8bf2bcd902687b5f7215",
+  "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedReference.cs",
+      "sha256": "c8c3c1a83ca0889ff9bb46b40106feca93d371bd520df5f6767331d89e78dcd8"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/PngTexelReference.cs",
+      "sha256": "9c9b6bc95031449befd2e6e169722eca2d676abe52e5a017b076ccfb4cb0c6f9"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/Png16PrecisionTests.cs",
+      "sha256": "1c60c168d39d9aa2ade505fbb83334e18a583a283e3881ab190ec85b9a000dee"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/Png16Prototype.cs",
+      "sha256": "b2bb1ff3149cd48cf20ec70f55ef0fdea4aa6af22142ecc744754b40967f63ab"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/precision/CoreImageMatrixTests.cs",
+      "sha256": "83207b738c58cc744b4f6c30f0b3ea9920a7df2a93275d3532c4ddbae25c8e00"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.Png16PrecisionTests",
+      "kind": "static_results",
+      "method": "Run",
+      "arguments": [],
+      "expected_cases": 5
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.Png16PrecisionTests",
+      "kind": "static_results",
+      "method": "RunPrototype",
+      "arguments": [],
+      "expected_cases": 4
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.CoreImageMatrixTests",
+      "kind": "static_results",
+      "method": "Run",
+      "arguments": [],
+      "expected_cases": 3
+    }
+  ]
+}

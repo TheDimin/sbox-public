@@ -1,0 +1,17 @@
+{
+  "model": "TextureLinearInterpolationTest",
+  "result": "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/result.json",
+  "public_receipt_sha256": "7d2a89a3c6adfb949580ea42f4079dc6bcef25500a05c2bac3d032cf2b491897",
+  "forms": [
+    "upstream GLB",
+    "canonical glb_c"
+  ],
+  "one_new_visual_comparison": true,
+  "image": "research/gltf-validation/direct-gpu/models/TextureLinearInterpolationTest/media/current.png",
+  "image_sha256": "cb42ac81ad03434bdd46dfe8fd03ffc89415f1c1b1185fef77ff318333f9c377",
+  "reference": "Temp/gltf-reference/glTF-Sample-Assets/Models/TextureLinearInterpolationTest/screenshot/screenshot.png",
+  "reference_sha256": "2a833223f130c6acfce9f4de9100a9c75b112b6a8032332f624f988254baf04e",
+  "license": "CC0-1.0; lexaknyazev; original license retained",
+  "review_status": "pending user",
+  "scope": "Public default source-material rendering; linear emissive interpolation numeric acceptance passed. Same native192px image for source and compiled; camera/presentation inferred."
+}

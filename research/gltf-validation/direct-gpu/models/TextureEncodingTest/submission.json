@@ -1,0 +1,128 @@
+{
+  "model": "TextureEncodingTest",
+  "owner": "/root/gpu_texture_encoding",
+  "coordinator": "/root/gpu_validation",
+  "shared_backend_owner": "/root/gpu_fox",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/ACCEPTANCE.md",
+      "sha256": "91db200b065c5636e591c658994d4636e33470fa9b8a1d8a864f1bf51fda10ff"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/TextureEncodingCoreTests.cs",
+      "sha256": "0153a2729588e3ecd8829b591fbfc4e869ed5b7f2bcbcda3c363ca2250e5a5e6"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/TextureEncodingGpuSamplingTests.cs",
+      "sha256": "e68b4f4298ae20f6c25c87a43b1cdcd25023317eaf25812c57f581db1a257c77"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/TextureEncodingReference.cs",
+      "sha256": "0d8e6d40bdc5fca76e8d604d281100a4b22e44dd2d1ed0e5aebdcc18335ba16b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/audit_source.py",
+      "sha256": "77b3d62fe061383598887fb4f43f56d6d3991106c356ff4f61c8d4b29b0c84c1"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/source-audit.json",
+      "sha256": "820d55606fadfd5cc33565b82102d333e4454839fcb64551b7b6ac48b077d84d"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/Materials/GltfMaterialTextureEncodingPlan.cs",
+      "sha256": "55123499cb8154e7deb36e6be858b777872dcf7e23e85c8f90200dfcb91a6b1b"
+    },
+    {
+      "path": "engine/Tests/Sandbox.Test.Unit/Resources/GltfMaterialTextureEncodingPlanTests.cs",
+      "sha256": "76d22cf12020cd18165b26896f0fe9c9b6ea5bc0320ed5d8b2921196d9a85035"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedReference.cs",
+      "sha256": "c8c3c1a83ca0889ff9bb46b40106feca93d371bd520df5f6767331d89e78dcd8"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/PngTexelReference.cs",
+      "sha256": "9c9b6bc95031449befd2e6e169722eca2d676abe52e5a017b076ccfb4cb0c6f9"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/EVIDENCE.md",
+      "sha256": "c1f1d289d2dd04ce2116f54fb562c50ed8110b395b083f45e42a8da2cff42c89"
+    }
+  ],
+  "producer_dependencies": [
+    "Actually loaded Sandbox.Gltf reader/compiler/portable artifact API; never replacement producer source in helpers",
+    "Actually loaded Sandbox.Engine GltfTextureCompiler + GltfNativeTextureCache for texture resource/numeric probes",
+    "Next staged actual Engine includes canonical UV role and new encoding plan for focused plan unit tests"
+  ],
+  "shared_backend_contract": "CONTRACT.md; texture diagnostic creates zero native Model/Mesh and does not claim source-material or Model.Load fidelity",
+  "expected_cases": 46,
+  "forms": [
+    "glTF/source",
+    "glTF/portable_glb_c",
+    "glTF-Binary/source",
+    "glTF-Binary/portable_glb_c"
+  ],
+  "suites": [
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.TextureEncodingCoreTests.RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 28,
+      "scope": "CPU + in-engine native texture serialization; no GPU execution",
+      "source_paths": [
+        "research/gltf-validation/direct-gpu/models/TextureEncodingTest/TextureEncodingReference.cs",
+        "research/gltf-validation/direct-gpu/models/TextureEncodingTest/TextureEncodingCoreTests.cs",
+        "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedReference.cs",
+        "research/gltf-validation/direct-gpu/models/BoxTextured/PngTexelReference.cs"
+      ]
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.TextureEncodingGpuSamplingTests",
+      "setup": "Configure",
+      "setup_arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 1,
+      "inner_numeric_samples": 64,
+      "scope": "Actual GPU sample into completed RGBA32F RT; anonymous transfer diagnostic, not source material shader",
+      "source_paths": [
+        "research/gltf-validation/direct-gpu/models/TextureEncodingTest/TextureEncodingReference.cs",
+        "research/gltf-validation/direct-gpu/models/TextureEncodingTest/TextureEncodingGpuSamplingTests.cs",
+        "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedReference.cs",
+        "research/gltf-validation/direct-gpu/models/BoxTextured/PngTexelReference.cs"
+      ]
+    },
+    {
+      "type": "Sandbox.Tests.GltfMaterialTextureEncodingPlanTests",
+      "expected_cases": 17,
+      "scope": "CPU production encoding metadata plan; requires staged actual new Engine + UV enum",
+      "source_paths": [
+        "engine/Tests/Sandbox.Test.Unit/Resources/GltfMaterialTextureEncodingPlanTests.cs"
+      ],
+      "do_not_compile_as_helper": [
+        "engine/Sandbox.Engine/Resources/Model/Gltf/Materials/GltfMaterialTextureEncodingPlan.cs"
+      ]
+    }
+  ],
+  "acceptance": "Literal 1x1 RGB values + independent sRGB equation, independent PNG/4-bit label oracle, straight-alpha/top-left fixtures, native flags/payloads, portable dependency closure. GPU RGB tolerance .001, linear alpha .000001; wrong-transfer green separation >.28. Same-material images and source/compiled self-comparison are not independent color proof.",
+  "execution_needs": "Coordinator only: guarded actual Engine stage + unit suite; GPU suite compiles two anonymous shaders, allocates bounded native texture leases and 1x1 float RTs. No editor launch by model worker.",
+  "status": {
+    "python_source_audit": "passed",
+    "csharp_compile": "original helper passed; corrected GPU fixture compile pending",
+    "native_serialization_28": "passed actual Engine D / Gltf1de213d3 in original69 terminal receipt",
+    "production_encoding_plan_17": "unrun",
+    "gpu_sampling_1_with_64_samples": "original failed shader compilation before samples; corrected grammar pending rerun",
+    "source_material_rendering": "pending existing adapter emissive/MASK implementation",
+    "public_model_load": "unrun"
+  },
+  "previous_submission_sha256": "b42b1338f6fb7e75c475f2f3c16bfb7a135bb04eb0d25bbdca0805cceeebef6f",
+  "refreeze_reason": "Coordinator released original69 terminal freeze. Only model GPU helper native HEADER/VS block grammar and source identity receipt events changed; Core28 and Engine/unit files unchanged.",
+  "evidence": {
+    "receipt_path": "Temp/gltf-validation/direct-gpu/texture-transfer-instancing-69/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "receipt_sha256": "ca0c3292debc880375790d87e546d9a1c9a6999cd9ad2584d21960bd9e0612db",
+    "texture_core_passed": 28,
+    "gpu_diagnostic_failed": 1,
+    "completed_gpu_samples": 0
+  }
+}

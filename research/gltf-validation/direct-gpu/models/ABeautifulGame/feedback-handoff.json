@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "model": "ABeautifulGame",
+  "owner": "/root/model_beautiful_game",
+  "status": "reference-inspired-candidate-for-review-optics-incomplete",
+  "visualApproval": "pending",
+  "addressedFeedback": {
+    "caseId": "ABeautifulGame/glTF::canonical-compiled",
+    "fingerprint": "7c78a36664eb81e78a61e35e27d666b8321606c6e66979c8d7dba373f6f30ef8",
+    "status": "rejected",
+    "notes": "material,camera,lighting don\u2019t match yet. For this model focus on getting the visual to be a 90% match before it will be accepted"
+  },
+  "preserveHistoricalRejection": true,
+  "currentNative": {
+    "producerSession": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/beautiful-e05-reference-proof/producer-session-ready.json",
+      "sha256": "7fb4260130bdf57097ec2e0b74d089b178bb7d11c1703c37d29b734e9152bbf3"
+    },
+    "receipt": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/beautiful-e05-reference-proof/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "1035a45799b58fee58928fa665bd9ecd0ddb341d4a910c885986e4481389b336"
+    },
+    "sourceAudit": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/beautiful-e05-reference-proof/model-source-audit.json",
+      "sha256": "9092a04b4e99bbf089e0250b08bc15652dd5c8d2e2c8d43cb2059e33333670c5"
+    },
+    "request": {
+      "path": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/ABeautifulGame/reference-proof-request.json",
+      "sha256": "4a46b856f7854b2050406fc69dbe51e2c3226b4317c91c33e801a6c877df0e38"
+    },
+    "canonicalCompiled": {
+      "proposedComparisonId": "ABeautifulGame/glTF::canonical-compiled",
+      "inputSha256": "aa0e45833d5d39e5c9a81658d19588ce91d88356509bfb9755dce88599eeca33",
+      "capture": {
+        "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/ABeautifulGame/reference-proof/43098fc1f2014360af6ebf0f3bbc8ac2/candidate_yaw_270.png",
+        "sha256": "41d18a688371df976db0a1d8ac42dd6cdba7d71e226d6f6d691e958998cdddba"
+      }
+    },
+    "reference": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/screenshot/screenshot.jpg",
+      "sha256": "03da38faeddee145e21a9e2f539f5879c725db7b8ebdf730d6d77345111d4baf"
+    },
+    "referenceProvenance": {
+      "path": "/home/damian/projects/sbox-public/research/gltf-validation/direct-gpu/models/ABeautifulGame/reference-crop-evidence.json",
+      "sha256": "abb8475a82bb42e40c0067859cf3ec83a56534283c2c4a9da5c47df657c0d922"
+    },
+    "testCounts": {
+      "passed": 1,
+      "expected": 1,
+      "cleanupErrors": 0
+    },
+    "controls": {
+      "environmentChangedForegroundPixels": 384546,
+      "plus2EvChangedForegroundPixels": 384466,
+      "deletion": "scene object invalid, drawing stopped, independently uniform background"
+    }
+  },
+  "recipe": {
+    "cameraPositionInches": [
+      -20.127,
+      -12.29,
+      5.102
+    ],
+    "cameraTargetInches": [
+      -1.65,
+      -5.55,
+      1.52
+    ],
+    "verticalFovDegrees": 27.2,
+    "size": [
+      800,
+      620
+    ],
+    "environment": "Aerodynamics Workshop 1K CC0, compiled cube 256 square, yaw inferred 270 degrees",
+    "environmentCompiledSha256": "740fce93832d41943ad30d3585b2e04c9804296b05e71b5b7a02e4731bcfb7e8",
+    "tonemapping": "engine ACES; exposure compensation +2 EV"
+  },
+  "limitations": [
+    "Approximate fitted camera and inferred environment orientation; original setup not fully known.",
+    "Actual engine exposure control changes model pixels, but this does not prove photometric equivalence to Babylon ACES.",
+    "Pawn top transmission and volume remain unsupported optional core fallback: opaque surfaces differ visibly from reference. Native glass diagnostic and optical implementation remain open.",
+    "Solid background differs from reference gradient. No numerical visual acceptance claim; user review remains pending.",
+    "Source model and textures preserved byte-identical."
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "engine_sha256": "60bc2b51bbd70c40a000f8b29f420714aff4e3dbda723794b18fdfc43b571396",
+  "gltf_sha256": "e9370989286b02ac130f1f6978a37ca39d1f72b639a77c0740828873224158c3",
+  "tools_sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.EnvironmentValidation.FieldHdrOnlyTests",
+      "kind": "mstest",
+      "expected_cases": 1,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "OutputDirectory",
+          "arguments": [
+            "$checkout/Temp/gltf-validation/direct-gpu/field-hdr-only-906826c68c-cs-declaration/artifacts"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ],
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/EnvironmentTest/FieldHdrAndExposureTests.cs",
+      "sha256": "094a59ced0cebee68b8e50f65c0d8e87d5214dc20efcda370ed8a7328b420564"
+    }
+  ],
+  "frozen_artifacts": [
+    {
+      "path": "game/core/materials/gltf_reference_environment/field.exr",
+      "sha256": "a9ad16a6d516171e425d0fc22cdde643b2116ed544578945899958cea21e1e7f"
+    },
+    {
+      "path": "game/core/materials/gltf_reference_environment/field.vtex",
+      "sha256": "562deb2ba9abd7d44a2b1b15ca4725cf4711a0feb6e6117f3b58e6894ae8eb6d"
+    },
+    {
+      "path": "game/core/materials/gltf_reference_environment/field.vtex_c",
+      "sha256": "01cc0d0f0f69aa856b6650c71d5a4c8528667f61444b35b7c9bc382cda98fc55"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/EnvironmentTest/field-exposure-plane.gltf",
+      "sha256": "9adda3a3cbe59eb1fab39571c6c0db56a3a254386ce6a19d7a9978bb16e98dbb"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/EnvironmentTest/field-exposure-plane-validator.json",
+      "sha256": "76b38c4b128f09a4e491731d521fc80c06cc2e5e822940d8ae119e13add64804"
+    }
+  ],
+  "runLabel": "field-hdr-only-906826c68c-cs-declaration",
+  "scope": "One HDR-only diagnostic: independent cube readback controls, actual Field all-mip values/residency. Exposure passed in separate retained receipt and is not repeated."
+}

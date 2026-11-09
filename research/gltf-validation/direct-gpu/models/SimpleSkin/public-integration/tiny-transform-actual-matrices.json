@@ -1,0 +1,150 @@
+{
+  "receipt_sha256": "cf229f85cd7b0e48fc6edcd8ac8d45e01ecb56153247f90f907072701df81b75",
+  "origin": "Exact FLOAT inputs reconstructed from frozen835f helper literal Trs with float32 rounding, not a runtime matrix dump. Actual acceptance flags come from receipt.",
+  "cases": [
+    {
+      "case": "tiny_uniform_1e6",
+      "matrix_rows": [
+        [
+          7.071067784636398e-07,
+          7.071067784636398e-07,
+          0,
+          0
+        ],
+        [
+          -7.071067784636398e-07,
+          7.071067784636398e-07,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          9.999999974752427e-07,
+          0
+        ],
+        [
+          3,
+          5,
+          -7,
+          1
+        ]
+      ],
+      "row_norms_double": [
+        9.99999996149227e-07,
+        9.99999996149227e-07,
+        9.999999974752427e-07
+      ],
+      "expected_representable": true,
+      "actual_fee5_accepted": false
+    },
+    {
+      "case": "tiny_uniform_1e12",
+      "matrix_rows": [
+        [
+          7.071067906552764e-13,
+          7.071067906552764e-13,
+          0,
+          0
+        ],
+        [
+          -7.071067906552764e-13,
+          7.071067906552764e-13,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          9.999999960041972e-13,
+          0
+        ],
+        [
+          3,
+          5,
+          -7,
+          1
+        ]
+      ],
+      "row_norms_double": [
+        1.0000000133908048e-12,
+        1.0000000133908048e-12,
+        9.999999960041972e-13
+      ],
+      "expected_representable": true,
+      "actual_fee5_accepted": false
+    },
+    {
+      "case": "tiny_x_only",
+      "matrix_rows": [
+        [
+          7.071067906552764e-13,
+          7.071067906552764e-13,
+          0,
+          0
+        ],
+        [
+          -1.4142135381698608,
+          1.4142135381698608,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          3.0,
+          0
+        ],
+        [
+          3,
+          5,
+          -7,
+          1
+        ]
+      ],
+      "row_norms_double": [
+        1.0000000133908048e-12,
+        1.999999965771458,
+        3.0
+      ],
+      "expected_representable": true,
+      "actual_fee5_accepted": false
+    },
+    {
+      "case": "tiny_nonuniform",
+      "matrix_rows": [
+        [
+          7.071067906552764e-13,
+          7.071067906552764e-13,
+          0,
+          0
+        ],
+        [
+          -1.4142135813105527e-12,
+          1.4142135813105527e-12,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          2.9999999880125916e-12,
+          0
+        ],
+        [
+          3,
+          5,
+          -7,
+          1
+        ]
+      ],
+      "row_norms_double": [
+        1.0000000133908048e-12,
+        2.0000000267816097e-12,
+        2.9999999880125916e-12
+      ],
+      "expected_representable": true,
+      "actual_fee5_accepted": false
+    }
+  ]
+}

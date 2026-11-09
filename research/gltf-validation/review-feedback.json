@@ -1,0 +1,505 @@
+{
+  "entries": {
+    "ABeautifulGame/glTF": {
+      "captureSha256": "b3fa2918f4d7e9400a38e4c94603f2b9db98d5c077da48b385407ed7455f396e",
+      "issues": [
+        "lighting",
+        "material"
+      ],
+      "notes": "Lights far too strong. Glass/transmissive king and queen parts are over-lit and lose their surface properties. (From chat 2026-11-09.)",
+      "reviewedAt": "2026-11-09T07:39:10+00:00",
+      "verdict": "rejected"
+    },
+    "AlphaBlendModeTest/glTF-Binary": {
+      "captureSha256": "705b3c5993a83008aa5994ba630994cfe131462ef73296b3a6f9a40748eaf22c",
+      "issues": [
+        "camera",
+        "lighting"
+      ],
+      "notes": "camera and light don't match reference, makes it hard to compare, and read. but blend looks correct",
+      "reviewedAt": "2026-11-09T05:04:39+00:00",
+      "verdict": "close"
+    },
+    "AnimatedColorsCube/glTF": {
+      "captureSha256": "8ee865a93cdee99910744588c16ae6d1774b7e96ab7ca0d5eb20df9987599329",
+      "issues": [
+        "color"
+      ],
+      "notes": "The moving cubes color is not lerping",
+      "reviewedAt": "2026-11-09T05:02:05+00:00",
+      "verdict": "close"
+    },
+    "AnimatedColorsCube/glTF-Binary": {
+      "captureSha256": "8ee865a93cdee99910744588c16ae6d1774b7e96ab7ca0d5eb20df9987599329",
+      "issues": [
+        "color",
+        "animation"
+      ],
+      "notes": "The cube color is not lerping !",
+      "reviewedAt": "2026-11-09T07:39:30+00:00",
+      "verdict": "rejected"
+    },
+    "AnimationPointerUVs/glTF": {
+      "captureSha256": "8b66c06a83e70651e06fe966a79b4030a9e4e83e98784b74a04b6b70135fa1d7",
+      "issues": [],
+      "notes": "I cant read or understand whats going on on the reference or in s&box. but they do not match",
+      "reviewedAt": "2026-11-09T06:14:25+00:00",
+      "verdict": "rejected"
+    },
+    "AnisotropyBarnLamp/glTF-Binary": {
+      "captureSha256": "54c3839c20fc9e1e50b6e0d6514f91cc04694125d63447d964ef01b023fc86f1",
+      "issues": [
+        "material"
+      ],
+      "notes": "Glass is white instead of transparrent",
+      "reviewedAt": "2026-11-09T07:40:45+00:00",
+      "verdict": "rejected"
+    },
+    "AnisotropyDiscTest/glTF": {
+      "captureSha256": "123a42cb40ae187709422b4bd8cb4042024b5f8270b0964da0f775f4428de461",
+      "issues": [
+        "material"
+      ],
+      "notes": "In - engine looks just white",
+      "reviewedAt": "2026-11-09T06:14:58+00:00",
+      "verdict": "rejected"
+    },
+    "AnisotropyRotationTest/glTF-Binary": {
+      "captureSha256": "759bb07db3583a3281faf0912b72fdae35c174f72d2ae2be01c4c7b1dc849193",
+      "issues": [
+        "lighting"
+      ],
+      "notes": "sun is at wrong location compared to reference",
+      "reviewedAt": "2026-11-09T06:15:20+00:00",
+      "verdict": null
+    },
+    "AnisotropyStrengthTest/glTF": {
+      "captureSha256": "64a93776558f023a4112367074fa948bc07806feca2aa9d4d5a8cd4f5881b2bc",
+      "issues": [
+        "lighting"
+      ],
+      "notes": "seems okay ? but hard to say with light being at difference locations",
+      "reviewedAt": "2026-11-09T06:15:43+00:00",
+      "verdict": "close"
+    },
+    "AntiqueCamera/glTF-Binary": {
+      "captureSha256": "2ebd0136d5be51a363d1000896d00046da43946469a4ea9c23be2bf3f6683ef8",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:15:59+00:00",
+      "verdict": "approved"
+    },
+    "AttenuationTest/glTF": {
+      "captureSha256": "80cd90e547ec13be3cf9a11e2514d563c497d880bdb30c2cd74f33c290ec55f4",
+      "issues": [
+        "material",
+        "lighting"
+      ],
+      "notes": "scene way to bright, first row doesn't look opaque, and everything else is just blased into white",
+      "reviewedAt": "2026-11-09T06:16:30+00:00",
+      "verdict": "rejected"
+    },
+    "AttenuationTest/glTF-Binary": {
+      "captureSha256": "e18a2bb4d5d99e0134228a8bffa348debc536a4a7e7bb64c9598309a2df91b20",
+      "issues": [
+        "material"
+      ],
+      "notes": "No translucency,",
+      "reviewedAt": "2026-11-09T08:33:12+00:00",
+      "verdict": "rejected"
+    },
+    "Avocado/glTF": {
+      "captureSha256": "1d7f22bceaefc3f1c7944008cd14858cad4be84afa63f329bb0b97999b76e37c",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:16:36+00:00",
+      "verdict": "approved"
+    },
+    "Avocado/glTF-Binary": {
+      "captureSha256": "e9aff944f76c90051957283fed1609c2c035eebf18afaad36cddd9441e9ffbe4",
+      "issues": [
+        "color"
+      ],
+      "notes": "nut looks orange in-engine, brown in reference",
+      "reviewedAt": "2026-11-09T08:32:51+00:00",
+      "verdict": "close"
+    },
+    "BarramundiFish/glTF": {
+      "captureSha256": "7cedeba8ed94df1c2ecf4ae638f0008813b068ef653ac72edf211017faca3d13",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:16:56+00:00",
+      "verdict": "approved"
+    },
+    "BarramundiFish/glTF-Binary": {
+      "captureSha256": "fe5fc2dfe57a43bacbbfb665df1aec868b689702e6d42a29c41af3077b2ea03e",
+      "issues": [
+        "material"
+      ],
+      "notes": "sub-surfcae material is wrong.\n\nLook around the eye, in-engine its just flat",
+      "reviewedAt": "2026-11-09T08:32:01+00:00",
+      "verdict": null
+    },
+    "BarramundiFish/glTF-Draco": {
+      "captureSha256": "c3b654e8d1d9430b07d2f7a408431540caf4923da5d6dd6176fa7083748fc288",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:16:57+00:00",
+      "verdict": "approved"
+    },
+    "BoomBox/glTF": {
+      "captureSha256": "06acaec4412f59ae469c76f6e6f59a801d0bb7b7aadab6122cc98bbf554d5a54",
+      "issues": [
+        "texture"
+      ],
+      "notes": "The play texture looks like lower res, the atenna is not as reflective and so is the material in general.\n\nIt may just lack a hdri",
+      "reviewedAt": "2026-11-09T06:17:45+00:00",
+      "verdict": "close"
+    },
+    "BoomBoxWithAxes/glTF": {
+      "captureSha256": "106f852d8c7b29c04630e7890e973504739089636ee12719bb279d8eae31977a",
+      "issues": [
+        "geometry"
+      ],
+      "notes": "Feels very low quality compared to reference",
+      "reviewedAt": "2026-11-09T08:31:23+00:00",
+      "verdict": "close"
+    },
+    "Box With Spaces/glTF": {
+      "captureSha256": "e861844fc53cff3999b15b31adee4877221f284a9cfef2b1f316b361caab2ec5",
+      "issues": [
+        "material"
+      ],
+      "notes": "engine lacks reflection on the green.",
+      "reviewedAt": "2026-11-09T08:30:54+00:00",
+      "verdict": null
+    },
+    "Box/glTF": {
+      "captureSha256": "2894b0f84866537b8da45b756e51ee8de7cb2794be030a41cc0b6d7848cf3c7b",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:18:41+00:00",
+      "verdict": "approved"
+    },
+    "Box/glTF-Binary": {
+      "captureSha256": "e53f969a278151b30ab4e70394e714d021183675a3e4efeb9b2de1baedf56bc6",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T08:30:16+00:00",
+      "verdict": "approved"
+    },
+    "Box/glTF-Draco": {
+      "captureSha256": "a9c1712057863528e4a5b814687029d5b20237e62da82b9052148f742ec4beb9",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:18:44+00:00",
+      "verdict": "approved"
+    },
+    "Box/glTF-Embedded": {
+      "captureSha256": "2894b0f84866537b8da45b756e51ee8de7cb2794be030a41cc0b6d7848cf3c7b",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:18:47+00:00",
+      "verdict": "approved"
+    },
+    "BoxAnimated/glTF-Binary": {
+      "captureSha256": "e0f4d0c79ef1aeef79a1a501c5f70f31d71aa4678067f00deff7b2188217b132",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T08:30:14+00:00",
+      "verdict": "approved"
+    },
+    "BoxInterleaved/glTF": {
+      "captureSha256": "0e8102a88c2e10f6636c9a803bf8f9a581693dd0fea782c0a102f861ea63faf1",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:19:33+00:00",
+      "verdict": "approved"
+    },
+    "BoxInterleaved/glTF-Binary": {
+      "captureSha256": "838b6b8ee5a8f2c0780ecc72348b499f6c406631521e87fc926096fb23a6e794",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T08:30:00+00:00",
+      "verdict": null
+    },
+    "BoxInterleaved/glTF-Embedded": {
+      "captureSha256": "0e8102a88c2e10f6636c9a803bf8f9a581693dd0fea782c0a102f861ea63faf1",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:19:39+00:00",
+      "verdict": "approved"
+    },
+    "BoxTextured/glTF": {
+      "captureSha256": "a011cb7e676c4ac9d05df1076744ec8e27c0e8498f2bdab520b1c20086b16492",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:19:44+00:00",
+      "verdict": "approved"
+    },
+    "BoxTextured/glTF-Binary": {
+      "captureSha256": "84277ec9972d196969e2006d4cedbef7ecf1192657c9bd02108158ca0e577505",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T08:29:52+00:00",
+      "verdict": "approved"
+    },
+    "BoxTextured/glTF-Embedded": {
+      "captureSha256": "a011cb7e676c4ac9d05df1076744ec8e27c0e8498f2bdab520b1c20086b16492",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:19:51+00:00",
+      "verdict": "approved"
+    },
+    "BoxTexturedNonPowerOfTwo/glTF": {
+      "captureSha256": "7ca37a0012b56fe6fbd59ef63b4af59478f663d9e2e0942c367bd8361ce69c4b",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:19:55+00:00",
+      "verdict": "approved"
+    },
+    "BoxTexturedNonPowerOfTwo/glTF-Binary": {
+      "captureSha256": "0794796ba97f63714be31667278aa3ea5ab3f383aa393426880fd333ea49cf93",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T08:29:55+00:00",
+      "verdict": "approved"
+    },
+    "BoxTexturedNonPowerOfTwo/glTF-Embedded": {
+      "captureSha256": "7ca37a0012b56fe6fbd59ef63b4af59478f663d9e2e0942c367bd8361ce69c4b",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:20:10+00:00",
+      "verdict": "approved"
+    },
+    "BoxVertexColors/glTF": {
+      "captureSha256": "e95de2579576cbc2412ae6402793e09f0376da486e620f202d1f9e5008e5fb29",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:20:14+00:00",
+      "verdict": "approved"
+    },
+    "BoxVertexColors/glTF-Binary": {
+      "captureSha256": "f7fe07ed2a529d8ef37250c208bfa0f352391740a70f4944413489cd00de0380",
+      "issues": [
+        "color"
+      ],
+      "notes": "Colors are slightly off, please run a pixel color comperison and reason as to why this is",
+      "reviewedAt": "2026-11-09T08:29:39+00:00",
+      "verdict": "close"
+    },
+    "BoxVertexColors/glTF-Embedded": {
+      "captureSha256": "e95de2579576cbc2412ae6402793e09f0376da486e620f202d1f9e5008e5fb29",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:20:21+00:00",
+      "verdict": "approved"
+    },
+    "BrainStem/glTF": {
+      "captureSha256": "f05f40f695a82bce1383e9662fd91dbc56c2a4d2ac8f2260afa5a5974ff061e2",
+      "issues": [
+        "animation"
+      ],
+      "notes": "Animation playback speed does not match",
+      "reviewedAt": "2026-11-09T06:20:57+00:00",
+      "verdict": "close"
+    },
+    "CarConcept/glTF": {
+      "captureSha256": "d625844fa96c146c92ce9a3cc1edf2ffd964c720ee268a64666e66c853127a23",
+      "issues": [
+        "material"
+      ],
+      "notes": "Glass became white, missing hdri",
+      "reviewedAt": "2026-11-09T06:21:32+00:00",
+      "verdict": "rejected"
+    },
+    "CesiumMan/glTF-Binary": {
+      "captureSha256": "371ec87631ecb6e02cfde3282103a023202ed62fea832baab6a1f02c61766c95",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:22:13+00:00",
+      "verdict": "approved"
+    },
+    "CesiumMan/glTF-Draco": {
+      "captureSha256": "98f358dcad654e051c440ec7c4f26dabfefc8e7229fdcc94cd83ed6defa71a29",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:22:15+00:00",
+      "verdict": "approved"
+    },
+    "CesiumMan/glTF-Embedded": {
+      "captureSha256": "73edad186855bd6df99616f3971f8ff295d299b9526e3ce7c1438f29823965a1",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:22:17+00:00",
+      "verdict": "approved"
+    },
+    "CesiumMilkTruck/glTF": {
+      "captureSha256": "254601bd0c9b3f5e3478db27131d22b6c09d640d494fa635f8019909b9314d9e",
+      "issues": [],
+      "notes": "Wheels are rotating in wrong direction. windows are blueish tinted in reference, black in-engine",
+      "reviewedAt": "2026-11-09T06:23:49+00:00",
+      "verdict": "close"
+    },
+    "CesiumMilkTruck/glTF-Binary": {
+      "captureSha256": "254601bd0c9b3f5e3478db27131d22b6c09d640d494fa635f8019909b9314d9e",
+      "issues": [],
+      "notes": "Wheels are rotating in wrong direction. windows are blueish tinted in reference, black in-engine",
+      "reviewedAt": "2026-11-09T06:23:46+00:00",
+      "verdict": "close"
+    },
+    "CesiumMilkTruck/glTF-Draco": {
+      "captureSha256": "d10c43f8713f1332b0e16603220e90f5ae39759169a10f05dbd3e9aa643a8620",
+      "issues": [],
+      "notes": "Wheels are rotating in wrong direction. windows are blueish tinted in reference, black in-engine",
+      "reviewedAt": "2026-11-09T06:23:52+00:00",
+      "verdict": "close"
+    },
+    "CesiumMilkTruck/glTF-Embedded": {
+      "captureSha256": "dbc95be3f1aec1442dde1d7d3fc1c44a074fc0df87e5aa0fbeec6492e1baf83a",
+      "issues": [],
+      "notes": "Wheels are rotating in wrong direction. windows are blueish tinted in reference, black in-engine",
+      "reviewedAt": "2026-11-09T06:23:54+00:00",
+      "verdict": "close"
+    },
+    "ChairDamaskPurplegold/glTF": {
+      "captureSha256": "d0df4f40b7ffd6fe6ac52d085298cdf72684cad4ea8099f609c1dd3d00f2997f",
+      "issues": [
+        "color"
+      ],
+      "notes": "Colors don't match",
+      "reviewedAt": "2026-11-09T06:24:11+00:00",
+      "verdict": "rejected"
+    },
+    "ChairDamaskPurplegold/glTF-Binary": {
+      "captureSha256": "d0df4f40b7ffd6fe6ac52d085298cdf72684cad4ea8099f609c1dd3d00f2997f",
+      "issues": [
+        "color"
+      ],
+      "notes": "don't match",
+      "reviewedAt": "2026-11-09T06:24:17+00:00",
+      "verdict": null
+    },
+    "ChronographWatch/glTF": {
+      "captureSha256": "17000e450e31ef69294357345ee99392d07e8973435830911970e0727628cdb2",
+      "issues": [
+        "material",
+        "color"
+      ],
+      "notes": "Glass is white, there parts that are gray in the image but should been black,  there are parts that are black but should be silver. Light is un-even and should probably just have HDRI to begin with",
+      "reviewedAt": "2026-11-09T06:28:45+00:00",
+      "verdict": "rejected"
+    },
+    "ClearCoatTest/glTF": {
+      "captureSha256": "9d2fada11b9d15ceda4ee1df47f0be5e92bba01de0fd15189f7369fe56842ae5",
+      "issues": [
+        "camera",
+        "lighting"
+      ],
+      "notes": "lacking hdri? camera does not match the source, coats do seem slightly off but could be previous things mentioned",
+      "reviewedAt": "2026-11-09T06:30:14+00:00",
+      "verdict": "rejected"
+    },
+    "ClearcoatWicker/glTF": {
+      "captureSha256": "f44eecfa98ba64aeac5b42a587b21f4295b595ffc3fdc0bb4272644f78ff6d27",
+      "issues": [
+        "camera",
+        "material",
+        "lighting"
+      ],
+      "notes": "HDRI, rotation and generally don't know whats wrong but looks wrong",
+      "reviewedAt": "2026-11-09T06:30:50+00:00",
+      "verdict": "rejected"
+    },
+    "CompareAlphaCoverage/glTF": {
+      "captureSha256": "6389a02c6fbdcbdaa9dcb381211ba7572bc99b8d9e87b9c41084f9b8a6044593",
+      "issues": [
+        "lighting"
+      ],
+      "notes": "The middle has a lot of black spots in-engine",
+      "reviewedAt": "2026-11-09T06:31:26+00:00",
+      "verdict": "close"
+    },
+    "CompareAnisotropy/glTF": {
+      "captureSha256": "4ac5f7d387931ff19cc1bacc7eb5cbb21df5777a712aa51591a3843e9d6e04ca",
+      "issues": [
+        "lighting"
+      ],
+      "notes": "HDRI please",
+      "reviewedAt": "2026-11-09T06:31:49+00:00",
+      "verdict": "rejected"
+    },
+    "CompareBaseColor/glTF": {
+      "captureSha256": "866855c87063f1b2306455652c8ade5537d26ef227ff7a932753eaf6b0ccc54e",
+      "issues": [
+        "lighting"
+      ],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:34:44+00:00",
+      "verdict": "close"
+    },
+    "CompareClearcoat/glTF-Binary": {
+      "captureSha256": "994510ac26e94fa73efb66823b234827841c76e0ca49d66ce66b73cc12ddf89d",
+      "issues": [
+        "material",
+        "lighting",
+        "color"
+      ],
+      "notes": "",
+      "reviewedAt": "2026-11-09T06:34:57+00:00",
+      "verdict": "rejected"
+    },
+    "CompareDispersion/glTF": {
+      "captureSha256": "e7111c2d59eff639329df612c599b1bce8491e47a30451ed36b976d78e386ee4",
+      "issues": [
+        "material"
+      ],
+      "notes": "Looks just white in-engine\n",
+      "reviewedAt": "2026-11-09T06:35:12+00:00",
+      "verdict": "rejected"
+    },
+    "CompareEmissiveStrength/glTF": {
+      "captureSha256": "36fa9528c06c6d976892bfb85d779f614525fc9a506b2d95835175be886e7e2a",
+      "issues": [],
+      "notes": "lacks hdri",
+      "reviewedAt": "2026-11-09T06:35:23+00:00",
+      "verdict": "rejected"
+    },
+    "CompareIor/glTF": {
+      "captureSha256": "7399efd78f376a4e59cba00fff0bbf35f111782f79dc9580e3a42b77c678491f",
+      "issues": [],
+      "notes": "Looks just white with black outline in-engine",
+      "reviewedAt": "2026-11-09T06:35:38+00:00",
+      "verdict": "rejected"
+    },
+    "CompareMetallic/glTF-Binary": {
+      "captureSha256": "8e24d3986cd6a470a38ec6ae9a668078c57555602001cbf3d587744653309b44",
+      "issues": [
+        "lighting"
+      ],
+      "notes": "left has black outline, and is too bright, right is just black ? (lacks hdri?)\n",
+      "reviewedAt": "2026-11-09T06:13:07+00:00",
+      "verdict": "rejected"
+    },
+    "CompareNormal/glTF-Binary": {
+      "captureSha256": "30e591f592429bbee0caaee1b4223784860bc7529a932f69fe777275084bbb8c",
+      "issues": [],
+      "notes": "Why does it have a black outline ?",
+      "reviewedAt": "2026-11-09T06:12:35+00:00",
+      "verdict": "close"
+    },
+    "CompareVolume/glTF": {
+      "captureSha256": "24d7e9ec19632ee12080714af6e0b3da9937b8e99dab6a5f31fcef29166b3369",
+      "issues": [
+        "material",
+        "color",
+        "alpha"
+      ],
+      "notes": "Glass is white, and top part that looks like bronze? is black.",
+      "reviewedAt": "2026-11-09T06:36:23+00:00",
+      "verdict": "rejected"
+    }
+  },
+  "schemaVersion": 1,
+  "updatedAt": "2026-11-09T08:33:12+00:00"
+}

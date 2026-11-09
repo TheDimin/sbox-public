@@ -1,0 +1,40 @@
+{
+  "model": "TextureEncodingTest/source-ORM-provided-candidate",
+  "owner": "/root/gpu_texture_encoding",
+  "coordinator": "/root/gpu_validation",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/ADAPTER_INTEGRATION.md",
+      "sha256": "073789d45a10c5e6adf31c0512239be2b52f8a295729205b12b6a0bc4139ea2e"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/author_surface_orm_candidate.py",
+      "sha256": "0965536e8d2ee8dad971a8125e1ffdf636b44fa323db8b701c6c8c70b91be0bf"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/surface_orm_candidate.shdrgrph",
+      "sha256": "e1c057c47c7fe9e68d62a2acdbfe4b2634814779aa513344cc6b6f6efb89b0d8"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/SurfaceOrmCandidateGate.cs",
+      "sha256": "57fef79b59a933c146c62d9460b2cd0fa9c893c234903e98c71017c206f17015"
+    }
+  ],
+  "producer_dependencies": [
+    "Actual active provided Tools graph/compiler/node implementations; freeze real Tools MVID at execution",
+    "Sampler owner real optional Sampler.Attribute + GenerateGlobals annotation implementation; no helper replacement producer",
+    "Current adapter/encoding source is next-stage only; immutable fee5 and original helper freezes unchanged."
+  ],
+  "entry": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.SurfaceOrmCandidateGate.GenerateForReview",
+  "arguments": [
+    "$checkout",
+    "$fresh_output_directory",
+    "$actual_frozen_tools_mvid"
+  ],
+  "expected_cases": 1,
+  "scope": "Actual provided source generation for review only; not compiled material, GPU, source-ORM render or public API pass",
+  "acceptance": "Exact provided-node inventory and active registry types; 4 source texture roles with correct transfer; distinct typed sampler attribute names; independent UV0/UV1 selector plus affine rows per role; raw COLOR0; linear factor uniforms; provided Standard lighting/projection/depth route; no legacy complex packed-factor parameters.",
+  "execution_needs": "Coordinator-only guarded idle editor. Provided texture-node construction can compile default preview texture as existing Tools side effect; source-generation function does not Shader.CompileAsync or create Model/Mesh. User playing currently defers editor work. Require actual generation baseline + sampler feature implementation/stage first.",
+  "status": "prepared/unrun; original base entry retained; optional graph/hash/roles generation supports sibling normal/alpha augmentations, separate reviewed template factory; no capability/default switch",
+  "previous_request_sha256": "8b322db9a9dbbfbefda68252d595134c8cb8e3c63f96d033ed327bfd2fb23c54"
+}

@@ -1,0 +1,93 @@
+{
+  "model": "TextureLinearInterpolationTest",
+  "corpus_commit": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "chosen_source": "glTF-Binary/TextureLinearInterpolationTest.glb",
+  "canonical": "Temp/gltf-validation/direct-gpu/TextureLinearInterpolationTest/canonical/TextureLinearInterpolationTest.glb_c",
+  "additional_sources": [],
+  "license": "CC0-1.0",
+  "author": "lexaknyazev",
+  "files": [
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/TextureLinearInterpolationTest/LICENSE.md",
+      "sha256": "b0132e0a5a897ed0868c2468f3340dfc0a57abbd920926b61a3326bdeebd0ea6"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/TextureLinearInterpolationTest/README.body.md",
+      "sha256": "bc43c514158cb78ebe8b719aabf94ca9b53c947ff12001355d03690384608671"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/TextureLinearInterpolationTest/README.md",
+      "sha256": "b1de48e3f364662a8a0996011f51a70857a9ac9a8d449796aacef98ce2fe9cd3"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/TextureLinearInterpolationTest/metadata.json",
+      "sha256": "e2a39fcd02bb5e440d824f2effcda7500d07d18c787fb42e0e65e01a88c5a0de"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/TextureLinearInterpolationTest/glTF-Binary/TextureLinearInterpolationTest.glb",
+      "sha256": "5a7d79bb138f9f732002a988298b5ba44f614064330e94f6ea8c17e38b998440"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/TextureLinearInterpolationTest/glTF/0_0_0-0_255_0.png",
+      "sha256": "b187aa937b175ec5149c05d01bd0ab4707d604d7487d4fa736eb5bef180db065"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/TextureLinearInterpolationTest/glTF/Plane.bin",
+      "sha256": "68eb0aaba58264604648e828ba7536b3c52333659445200f56d90b23b05a2f36"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/TextureLinearInterpolationTest/glTF/Sphere.bin",
+      "sha256": "facd4236ec7c5f3b17fa9afe610ce02afabc6d40fb58d07895c20aa550b22d02"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/TextureLinearInterpolationTest/glTF/TestLabels.png",
+      "sha256": "a8b570e2bfbe93d4bb8850942a3d0204aa8bc4b6ea3d1c9c2d2fbccfd70bb7a9"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/TextureLinearInterpolationTest/glTF/TextureLinearInterpolationTest.gltf",
+      "sha256": "017a093c27d291948c8fd59069c2162b434dffd57eb2d4d09d4bf779095b1fb5"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/TextureLinearInterpolationTest/screenshot/incorrect.png",
+      "sha256": "749003c900ee05898e64806ae9ab374e36e70df82ce9da1533e6d7b0a6d217dd"
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/TextureLinearInterpolationTest/screenshot/screenshot.png",
+      "sha256": "2a833223f130c6acfce9f4de9100a9c75b112b6a8032332f624f988254baf04e"
+    }
+  ],
+  "source_feature": {
+    "image_size": [
+      2,
+      1
+    ],
+    "rgba": [
+      [
+        0,
+        0,
+        0,
+        255
+      ],
+      [
+        0,
+        255,
+        0,
+        255
+      ]
+    ],
+    "linear_min_mag": 9729,
+    "mipmaps": false,
+    "constant_uv": [
+      0.5,
+      0
+    ],
+    "expected_linear_green": 0.5,
+    "wrong_filter_before_decode": 0.21404114048223255,
+    "geometry": "205 vertices and 960 U16 indices per sphere, plane 4 vertices/6 indices",
+    "camera": "No authored camera/light. Native front orthographic framing is inferred."
+  },
+  "reuse": [
+    "TextureSettings 102 sampler requests c97866b3 plus 21 CPU and 16 graph tests retain original scope; no unchanged replay",
+    "TextureEncoding exact transfer tests retained; this adds interpolation of distinct endpoints through actual bound public emissive sampler."
+  ]
+}

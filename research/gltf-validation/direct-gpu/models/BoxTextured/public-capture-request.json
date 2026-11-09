@@ -1,0 +1,80 @@
+{
+  "model": "BoxTextured",
+  "owner": "/root/gpu_box_textured_public",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedCoreTests.cs",
+      "sha256": "b6a97ffe8523217ab5e2e4c605137926efc626583926aba04cf80c623057afcf"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedGpuChecks.cs",
+      "sha256": "cb13a05cb0b006f70ce08a7b26cf861e3efcb994176f77a30e0bb5547021155c"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedImageChecks.cs",
+      "sha256": "25aa5a26ec035644bbd0d534249e2a3174e6f27a4da3e9ba4b65a5b4774abd22"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedImageControlTests.cs",
+      "sha256": "894d3c337cad9ee42284184a50c65a1eafbc064002454bbb3546a0b3a5ad0706"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedModelMount.cs",
+      "sha256": "1573f9f6c869ecafb50255ea101cfaf7472eae8569f9a740feb2b187f5bac1c0"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedPublicCapture.cs",
+      "sha256": "725678bdbed4aadea0fa767e344f6d49c96952f08c95a4d0d752fc15c7fbe562"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedReference.cs",
+      "sha256": "c8c3c1a83ca0889ff9bb46b40106feca93d371bd520df5f6767331d89e78dcd8"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/PngTexelReference.cs",
+      "sha256": "9c9b6bc95031449befd2e6e169722eca2d676abe52e5a017b076ccfb4cb0c6f9"
+    }
+  ],
+  "producer_dependencies": [
+    "Actual loaded Sandbox.Engine MVID 2c054bba-c0fa-43b5-a3a2-39a34ff7577f and Sandbox.Gltf MVID c869761c-5b80-462d-982a-bc3a688e57b6, coordinator must revalidate",
+    "shared GltfGpuTriangleGateTests.NativeCapture (coordinator-owned current source)"
+  ],
+  "shared_backend_contract": "research/gltf-validation/direct-gpu/CONTRACT.md; public managed resource and ordinary ModelRenderer",
+  "entry": "Sandbox.Gltf.DirectGpu.BoxTexturedValidation.BoxTexturedPublicCapture.Run(checkoutRoot, NativeCapture.Scene, NativeCapture.Camera, NativeCapture.WaitFrames, NativeCapture.Take, 1e-4f, 1e-5f, 1, 0, 0, formName)",
+  "controls_entry": "Sandbox.Gltf.DirectGpu.BoxTexturedValidation.BoxTexturedImageControlTests.RunAll()",
+  "controls_expected_cases": 8,
+  "initial_capture_expected_cases": 2,
+  "all_capture_expected_cases": 6,
+  "forms": [
+    "glTF/source",
+    "glTF/compiled_glb",
+    "glTF-Embedded/source",
+    "glTF-Embedded/compiled_glb",
+    "glTF-Binary/source",
+    "glTF-Binary/compiled_glb"
+  ],
+  "initial_forms": [
+    "glTF/source",
+    "glTF/compiled_glb"
+  ],
+  "captures_per_form": 7,
+  "gpu_rows_per_form": 1,
+  "scope": "Actual public Model.Load + ordinary ModelRenderer; source default complex material; native-free backend identity, GPU position/normal/UV/index readback, exact base-color decoded texture resource, same-material independent literal geometry images and V-flip sensitivity. Not independent sampler/sRGB/PBR fidelity.",
+  "acceptance": {
+    "position_tolerance_inches": 0.0001,
+    "normal_tolerance": 1e-05,
+    "uv_tolerance": 0,
+    "texture_different_pixels": 0,
+    "silhouette_iou": 1,
+    "mean_rgb_error": 0,
+    "max_rgb_error": 0,
+    "negative_changed_pixels_min_exclusive": 64,
+    "fresh_empty_captures_per_form": 4,
+    "positive_capture_min_exclusive": 64
+  },
+  "execution_needs": "Coordinator compiles research helper only against real loaded producers; no engine build/restart/shader change. Coordinator supplies NativeCapture + receipt and revalidates idle visible editor. Start 8 controls + 2 capture cases, then remaining 4 forms.",
+  "status": "prepared_unrun",
+  "previous_gpu_helper_sha256": "66738196482db365cd671ffd87c82055e837f2abce2ed19c5128f9e1b31637bd",
+  "gpu_helper_change": "Only class accessibility public -> internal to match extracted internal GltfGpuInstance. CPU Box50 helper unchanged.",
+  "prior_cpu_receipt_sha256": "0da83949e97504dcc493158bf7f912d928b288827ebf3b5f8653ff35c74d59d2"
+}

@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "engine_sha256": "cd87f30b2c2024dedf073d394e47c4412a4df28018846e17728f52e635845771",
+  "gltf_sha256": "b86cb72e0c0e0f3c23af45bd115f68760655d1754d663f41df62a45e136f9e8b",
+  "tools_sha256": "f015bd68d6bae3573b2476e1d8ac27f65e5b245bb825828cb8a1011929b724c6",
+  "framework_sha256": "81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad",
+  "sources": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/MandarinOrangeTests.cs",
+      "sha256": "d86d37c6cbd6d2f5f227df659ae4e056c909e3a6943c57569e42363e47d8414f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/SceneResourceTests.cs",
+      "sha256": "6dc00160743d91dcc7196df3611d2c9512b2dc156ea67b874a79ed41bc36fe93"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/MandarinOrangeGpuTests.cs",
+      "sha256": "f4b6c3a74b4cc654ca13030049e02f8de53e313be44850dd9024be92afd66790"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuBackendContractTests.cs",
+      "sha256": "304477b17bdb20494ca0c89c3a8b738302cb08a71825e81821ebc85a04eff544"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfGpuRawTriangleChecks.cs",
+      "sha256": "f63b4c12381f18d5da92727c94729ae7b7a72dacac4abfffb2d5bb66b23e3ffa"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/SceneReimportTests.cs",
+      "sha256": "25eb3ea3c8c491775352acb8d4c7f33c214150998238feeb69b0ed0ed673f76d"
+    }
+  ],
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MandarinOrangeValidation.MandarinOrangeTests",
+      "kind": "static_results",
+      "method": "RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 15
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MandarinOrangeValidation.SceneResourceTests",
+      "kind": "static_results",
+      "method": "RunAll",
+      "arguments": [],
+      "expected_cases": 17
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MandarinOrangeValidation.SceneReimportTests",
+      "kind": "mstest",
+      "expected_cases": 6
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.MandarinOrangeValidation.MandarinOrangeGpuTests",
+      "kind": "mstest",
+      "expected_cases": 2,
+      "setup": [
+        {
+          "kind": "method",
+          "name": "Configure",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ],
+      "measurements_property": "Measurements"
+    }
+  ]
+}

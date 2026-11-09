@@ -1,0 +1,70 @@
+{
+  "model": "Cameras",
+  "owner": "/root/model_cameras",
+  "status": "draft_not_installed",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/draft/Model.GltfCameras.cs",
+      "sha256": "78baa196abbedb471000ad55208681e9fd6bac77b2ac73291372095144a03d49"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/draft/GltfCameraImport.cs",
+      "sha256": "65db86dd311e8c1807388caec99376d52cf5bbf6aac19f756c792443d750c043"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/draft/infinite-frustum.patch",
+      "sha256": "d9be653032fa816664435306135ec50b472059c93cbf6f823eb01705cd0ea689"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraIntegrationTests.cs",
+      "sha256": "6272c4052df859f079420efb08cf4a7b19d2a6a60af394bce91c7cc7ec93e7d3"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraFrustumTests.cs",
+      "sha256": "a6b312f932d3b075a38305f9208643f12c5b6dfef7841e159f869482ac3a3acf"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraInfiniteFarTests.cs",
+      "sha256": "15d4929d51bc809a36c1d1dbfcf0da5ea31a66ba7a960344385b7f0a5c257d09"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraReaderTests.cs",
+      "sha256": "42e891f939d80fe7512b295d8124193c80ae2731baa5f59dba5ec4873e291984"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraCapture.cs",
+      "sha256": "3494b025558b9b97bae17fe3ccd20ae0390c6bab971f368e629745a1984e2edc"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Cameras/CameraNativeApiTests.cs",
+      "sha256": "07e085cfb10a07dbcb5008b0278c78cc7c8be3fa379105a308545ed07a71ade4"
+    }
+  ],
+  "producer_dependencies": [
+    "Restore exact two owned importer new files at agreed Engine paths",
+    "Apply infinite-frustum.patch to Sandbox.System and install coherent System+Engine stage after current performance first-use",
+    "Preserve installed producer identity; refresh request producer hashes only after stage handshake"
+  ],
+  "entry": "editor_direct_gpu_tests.csx; suites CameraIntegrationTests4,CameraFrustumTests2,CameraInfiniteFarTests1",
+  "expected_new_cases": 7,
+  "reuse": {
+    "CameraReaderTests": {
+      "cases": 13,
+      "receipt_sha256": "360f416ecbd74c4ae2c56e2d96ca667cfd12a47ca8ce01b920307d2c0ad7656e",
+      "source_sha256": "42e891f939d80fe7512b295d8124193c80ae2731baa5f59dba5ec4873e291984"
+    }
+  },
+  "forms": [
+    "chosen upstream glTF/Cameras.gltf",
+    "one canonical .glb_c derived from chosen source",
+    "source-only generated companion fixtures for distinct no-default scene/infinitefar/aspect/hierarchy behavior"
+  ],
+  "scope": "Existing native camera render override convention proved separately; public source/canonical importer test execution and new comparison captures remain pending. Human approval pending.",
+  "acceptance": "Independent literal source camera fields, quaternion square projection, rays/frustum, actual wrongFOV/near/far/orientation, unselected resource validity, explicit scene, ordinary camera defaults, unrelated existing-camera preservation, independent imports and snapshot/cleanup lifetime. Exact infinite reverseZ with native Infinity field; no sentinel. Actual bound GPU position/index readback uses runtime output fields/stride, CPU provenance map only as an explicit source-vertex mapping, and an independent literal source square/quaternion oracle.",
+  "remaining_applicable_core": [
+    "Signed ortho magnitudes via native final-blit flip/query contract (unimplemented)",
+    "yfov>=pi (unimplemented ordinary projection domain; valid resources retained)",
+    "Broader affine camera world decomposition and standalone scene serialization/editing/reimport unproved"
+  ],
+  "canonical_output": "Temp/gltf-validation/direct-gpu/Cameras/canonical/Cameras.glb_c; one stable derived artifact, mounted temporary copies cleaned after each execution"
+}

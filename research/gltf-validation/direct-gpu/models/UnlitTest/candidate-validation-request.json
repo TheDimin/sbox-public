@@ -1,0 +1,96 @@
+{
+  "model": "UnlitTest",
+  "owner": "/root/gpu_unlit",
+  "purpose": "separate reviewed provided-Surface-Unlit candidate gate; preserves original 49-case request",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestCoreTests.cs",
+      "sha256": "f8e894fb1b70a5fd87174b7b52e7567fc445d5a25ceeb6df74d16cce45b83283"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestGpuChecks.cs",
+      "sha256": "8b9084e38b34f83fe9abfdd09c99f5b3615bcc7c6f698b06a5f9ca94432327f9"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestImageChecks.cs",
+      "sha256": "ea580576180b9fff2d32d985d1d4966a469c85834a65c7f0035dd4492078f24d"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestLiteralGeometry.cs",
+      "sha256": "35d7af0f850dc89c6a59369e14610462fa45dae85180b8791797b9862c36128b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestReference.cs",
+      "sha256": "5ecbd8a1f577b7b62865a283f70a939553ec4fa9a1dc6bc9d23e0661a6511204"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/UnlitTestGraphCandidateGate.cs",
+      "sha256": "1aaaf26476052d5d1a4523fbb097a2c2dc3364618cef5942309282a7f6b2e292"
+    }
+  ],
+  "data_files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/UnlitTest/unlit_surface_candidate.shdrgrph",
+      "sha256": "579e22ddfedc2588ba051afd01799aaced463135fb0ef230b7413327f1d788c7"
+    }
+  ],
+  "producer_dependencies": [
+    "actually installed canonical Engine internal GltfGpuAsset/GltfGpuInstance/GltfGpuPrimitiveSnapshot APIs and Sandbox.Gltf",
+    "actual active tools graph/compiler/node assemblies identified by MVID; no replacement Engine/Gltf backend source in helper"
+  ],
+  "generation": {
+    "type": "Sandbox.Gltf.DirectGpu.UnlitTestValidation.UnlitTestGraphCandidateGate",
+    "kind": "static_results",
+    "method": "GenerateForReview",
+    "expected_cases": 1,
+    "arguments": [
+      "$checkout",
+      "<fresh absolute output beneath $checkout/Temp/gltf-validation/direct-gpu/>",
+      "<active EditorTypeLibrary GraphCompiler/ShaderGraph assembly MVID>"
+    ],
+    "scope": "actual provided graph generation only, no Shader.CompileAsync or draw"
+  },
+  "runtime": {
+    "type": "Sandbox.Gltf.DirectGpu.UnlitTestValidation.UnlitTestGraphCandidateGate",
+    "kind": "mstest",
+    "expected_cases": 1,
+    "setup": [
+      {
+        "kind": "method",
+        "name": "Configure",
+        "arguments": [
+          "$checkout",
+          "<coordinator reviewed configuration absolute path>"
+        ]
+      }
+    ],
+    "measurements_property": "Measurements",
+    "method_inventory": [
+      "ReviewedProvidedGraphHas3DUnlitColorAndLightingBehavior"
+    ],
+    "model_form_measurements": 6,
+    "scope": "anonymous reviewed-source candidate proof and actual GPU/literal/image controls; explicit resolver override only"
+  },
+  "required_before_runtime": "all four actual current-producer default-stock-unlit preparation failures retained in a hashed receipt; reviewed generated sources/manifest/config; coordinator guard and idle verified editor",
+  "acceptance": "CANDIDATE_GATE.md. FLOAT32 literal expected colors avoid uniform/multiply self-agreement. All actual/derived forms labeled. Native empty/deletion, front/back/depth/normal, two-factor/nonwhite, light-sensitive lit negative, encoded-factor negative and GPU-bound-index controls.",
+  "execution_needs": "coordinator only: compile helper, actual graph generation, review sources, anonymous shader compilation and native camera/GPU execution. No worker execution, shared adapter edits, watched content or global renderer changes.",
+  "status": "prepared and unrun",
+  "supersedes_prepared_freeze": {
+    "request_sha256": "ebcc44e199a6760ab046ed37cda2755c49b11959ce7a3c1d00cdbd5cc0c5b85b",
+    "executed": false,
+    "reason": "canonical Engine now owns internal GPU snapshot types; narrow checker/probe class accessibility to internal while preserving callable public methods; exclude unused GpuProbe from generation compile",
+    "ancestor": {
+      "request_sha256": "0595a8745def0e2448961d70d9b1719e1d9726f97322d8b6230c7a2800dc9bfb",
+      "gate_source_sha256": "117891a5ec66d384999fd8600f5bf5ccf8eeaf9a51b5ef2d1657f439677f7bcb",
+      "executed": false,
+      "archive_confirmed": false,
+      "archived_ancestor": {
+        "request_sha256": "2a1cb288e608cc54f18cedb497457704fbe0ca3866ecd7350bd8ba8b3954c961",
+        "preserved_by": "/root/gpu_validation",
+        "archive": "Temp/gltf-validation/direct-gpu/prepared-freezes/unlit-candidate/2a1cb288e608cc54f18cedb497457704fbe0ca3866ecd7350bd8ba8b3954c961",
+        "reason": "actual read-only metadata found retained hotload assemblies; source now resolves active editor-registry CLR types"
+      },
+      "reason": "actual sibling sampler-helper AmbiguousMatchException showed TypeLibrary generic/non-generic overload collision; filter explicit non-generic exact parameters before invoking"
+    }
+  }
+}

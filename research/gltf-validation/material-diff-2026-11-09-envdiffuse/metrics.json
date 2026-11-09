@@ -1,0 +1,314 @@
+{
+ "BoxVertexColors/glTF-Binary": {
+  "size": [
+   512,
+   512
+  ],
+  "foregroundPct": 90.1,
+  "maeForeground": 0.174,
+  "maeForegroundPerChannel": [
+   0.1602,
+   0.1581,
+   0.2037
+  ],
+  "linearLumaRatio_capture_over_reference": 0.501,
+  "silhouetteIoU": 0.652,
+  "reference": {
+   "meanRGB": [
+    0.5009,
+    0.4892,
+    0.5161
+   ],
+   "meanLuma": 0.4936,
+   "p95Luma": 0.59,
+   "stdLuma": 0.1082,
+   "clippedPct": 0.0,
+   "saturation": 0.1522
+  },
+  "capture": {
+   "meanRGB": [
+    0.358,
+    0.3396,
+    0.327
+   ],
+   "meanLuma": 0.3426,
+   "p95Luma": 0.5665,
+   "stdLuma": 0.1195,
+   "clippedPct": 0.0,
+   "saturation": 0.1393
+  }
+ },
+ "Avocado/glTF-Binary": {
+  "size": [
+   512,
+   512
+  ],
+  "foregroundPct": 96.9,
+  "maeForeground": 0.2219,
+  "maeForegroundPerChannel": [
+   0.1809,
+   0.2098,
+   0.2748
+  ],
+  "linearLumaRatio_capture_over_reference": 0.497,
+  "silhouetteIoU": 0.683,
+  "reference": {
+   "meanRGB": [
+    0.5506,
+    0.5644,
+    0.5077
+   ],
+   "meanLuma": 0.5574,
+   "p95Luma": 0.6372,
+   "stdLuma": 0.0682,
+   "clippedPct": 0.0,
+   "saturation": 0.0817
+  },
+  "capture": {
+   "meanRGB": [
+    0.387,
+    0.3706,
+    0.2495
+   ],
+   "meanLuma": 0.3653,
+   "p95Luma": 0.7149,
+   "stdLuma": 0.1551,
+   "clippedPct": 0.0,
+   "saturation": 0.1566
+  }
+ },
+ "AnimationPointerUVs/glTF-Binary": {
+  "size": [
+   512,
+   273
+  ],
+  "foregroundPct": 98.4,
+  "maeForeground": 0.2488,
+  "maeForegroundPerChannel": [
+   0.211,
+   0.2308,
+   0.3046
+  ],
+  "linearLumaRatio_capture_over_reference": 0.382,
+  "silhouetteIoU": 0.397,
+  "reference": {
+   "meanRGB": [
+    0.5017,
+    0.5306,
+    0.5199
+   ],
+   "meanLuma": 0.5237,
+   "p95Luma": 0.9179,
+   "stdLuma": 0.2026,
+   "clippedPct": 0.16,
+   "saturation": 0.0483
+  },
+  "capture": {
+   "meanRGB": [
+    0.3124,
+    0.313,
+    0.2292
+   ],
+   "meanLuma": 0.3068,
+   "p95Luma": 0.7255,
+   "stdLuma": 0.1711,
+   "clippedPct": 0.0,
+   "saturation": 0.1175
+  }
+ },
+ "CompareMetallic/glTF-Binary": {
+  "size": [
+   512,
+   253
+  ],
+  "foregroundPct": 74.1,
+  "maeForeground": 0.1826,
+  "maeForegroundPerChannel": [
+   0.1544,
+   0.1613,
+   0.2321
+  ],
+  "linearLumaRatio_capture_over_reference": 0.636,
+  "silhouetteIoU": 0.603,
+  "reference": {
+   "meanRGB": [
+    0.6015,
+    0.5896,
+    0.477
+   ],
+   "meanLuma": 0.584,
+   "p95Luma": 0.818,
+   "stdLuma": 0.1335,
+   "clippedPct": 0.01,
+   "saturation": 0.161
+  },
+  "capture": {
+   "meanRGB": [
+    0.4729,
+    0.4467,
+    0.2748
+   ],
+   "meanLuma": 0.4398,
+   "p95Luma": 0.7385,
+   "stdLuma": 0.1909,
+   "clippedPct": 0.0,
+   "saturation": 0.2173
+  }
+ },
+ "MetalRoughSpheres/glTF-Binary": {
+  "size": [
+   512,
+   498
+  ],
+  "foregroundPct": 86.1,
+  "maeForeground": 0.2198,
+  "maeForegroundPerChannel": [
+   0.1787,
+   0.2011,
+   0.2796
+  ],
+  "linearLumaRatio_capture_over_reference": 0.484,
+  "silhouetteIoU": 0.706,
+  "reference": {
+   "meanRGB": [
+    0.5671,
+    0.5669,
+    0.5124
+   ],
+   "meanLuma": 0.563,
+   "p95Luma": 0.6726,
+   "stdLuma": 0.075,
+   "clippedPct": 0.0,
+   "saturation": 0.0836
+  },
+  "capture": {
+   "meanRGB": [
+    0.3994,
+    0.3738,
+    0.2458
+   ],
+   "meanLuma": 0.37,
+   "p95Luma": 0.6135,
+   "stdLuma": 0.1469,
+   "clippedPct": 0.0,
+   "saturation": 0.1621
+  }
+ },
+ "DamagedHelmet/glTF-Binary": {
+  "size": [
+   512,
+   496
+  ],
+  "foregroundPct": 96.1,
+  "maeForeground": 0.2269,
+  "maeForegroundPerChannel": [
+   0.1845,
+   0.2123,
+   0.284
+  ],
+  "linearLumaRatio_capture_over_reference": 0.473,
+  "silhouetteIoU": 0.665,
+  "reference": {
+   "meanRGB": [
+    0.5138,
+    0.53,
+    0.5339
+   ],
+   "meanLuma": 0.5268,
+   "p95Luma": 0.6177,
+   "stdLuma": 0.1153,
+   "clippedPct": 0.01,
+   "saturation": 0.0256
+  },
+  "capture": {
+   "meanRGB": [
+    0.3514,
+    0.3404,
+    0.2741
+   ],
+   "meanLuma": 0.3379,
+   "p95Luma": 0.7194,
+   "stdLuma": 0.1568,
+   "clippedPct": 0.0,
+   "saturation": 0.105
+  }
+ },
+ "ClearCoatTest/glTF-Binary": {
+  "size": [
+   449,
+   512
+  ],
+  "foregroundPct": 95.2,
+  "maeForeground": 0.0959,
+  "maeForegroundPerChannel": [
+   0.0876,
+   0.0871,
+   0.113
+  ],
+  "linearLumaRatio_capture_over_reference": 0.939,
+  "silhouetteIoU": 0.934,
+  "reference": {
+   "meanRGB": [
+    0.3323,
+    0.3214,
+    0.2983
+   ],
+   "meanLuma": 0.3221,
+   "p95Luma": 0.6479,
+   "stdLuma": 0.1676,
+   "clippedPct": 0.14,
+   "saturation": 0.0807
+  },
+  "capture": {
+   "meanRGB": [
+    0.3313,
+    0.3078,
+    0.2568
+   ],
+   "meanLuma": 0.3091,
+   "p95Luma": 0.7241,
+   "stdLuma": 0.168,
+   "clippedPct": 0.0,
+   "saturation": 0.1162
+  }
+ },
+ "BoomBox/glTF-Binary": {
+  "size": [
+   512,
+   474
+  ],
+  "foregroundPct": 96.0,
+  "maeForeground": 0.2306,
+  "maeForegroundPerChannel": [
+   0.1883,
+   0.2157,
+   0.2877
+  ],
+  "linearLumaRatio_capture_over_reference": 0.445,
+  "silhouetteIoU": 0.76,
+  "reference": {
+   "meanRGB": [
+    0.5065,
+    0.5217,
+    0.528
+   ],
+   "meanLuma": 0.5189,
+   "p95Luma": 0.6138,
+   "stdLuma": 0.1274,
+   "clippedPct": 0.0,
+   "saturation": 0.023
+  },
+  "capture": {
+   "meanRGB": [
+    0.341,
+    0.3285,
+    0.2639
+   ],
+   "meanLuma": 0.3265,
+   "p95Luma": 0.7152,
+   "stdLuma": 0.1484,
+   "clippedPct": 0.0,
+   "saturation": 0.1002
+  }
+ }
+}

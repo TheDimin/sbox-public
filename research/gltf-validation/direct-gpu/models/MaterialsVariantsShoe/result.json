@@ -1,0 +1,148 @@
+{
+  "model": "MaterialsVariantsShoe",
+  "corpus_revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "status": "incomplete",
+  "license": "CC-BY-4.0, Shopify 2021",
+  "public_variant_support": "Installed on 7eb; public selection passes for glTF and glTF-Binary source and derived compiled forms, with external images mounted for glTF-derived compiled. Full parity remains incomplete.",
+  "actual_variant_names": [
+    "midnight",
+    "beach",
+    "street"
+  ],
+  "source_material_indices": [
+    0,
+    1,
+    2
+  ],
+  "default_material_index": 0,
+  "prior_source_cpu_results": {
+    "passed": 57,
+    "failed": 2,
+    "scope": "original CPU/plan/checker 57 passes, missing prototype API two failures; no GPU proof",
+    "receipt": "Temp/gltf-validation/direct-gpu/material-core-first-186/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "sha256": "0da83949e97504dcc493158bf7f912d928b288827ebf3b5f8653ff35c74d59d2"
+  },
+  "native_override_probe": {
+    "passed_classifier_controls": 7,
+    "failed_matrix": 1,
+    "failure": "initial native ModelRenderer lifecycle precondition; no precedence measured",
+    "receipt": "Temp/gltf-validation/direct-gpu/shoe-precedence-8fc/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "sha256": "afd07e2040167b1e3dc15afe63c03e8c22ab883d3361754a38644112db6f9718",
+    "diagnostic": {
+      "receipt": "Temp/gltf-validation/direct-gpu/shoe-precedence-8fc-diagnostic/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "34dbf12eaa8356b5ba396e22c107e0c4625f7ea87b6ccb563583c9123ee87bea",
+      "observation": "Valid native SceneObject and one material slot; wrapper reference differs. Corrected native-binding matrix passed; see corrected_matrix."
+    },
+    "corrected_matrix": {
+      "passed": true,
+      "matrix_rows": 10,
+      "scope": "one-slot native Model.Cube; whole, slot, clear, reenable; no authored groups or tagged overrides",
+      "receipt": "Temp/gltf-validation/direct-gpu/native-material-precedence/274fa96c0ad14e2c806c8d3c1dfd41a3/receipt.json",
+      "sha256": "723068c36ce81fc4fbc35f22379bd9ff0a7ab7fdd4a7a1d74eb4acb607b558b2",
+      "winners": {
+        "whole_then_slot": "whole",
+        "slot_then_whole": "whole",
+        "both_clear_slot": "whole",
+        "both_clear_whole": "slot",
+        "both_clear_all": "slot",
+        "reenable_both": "whole",
+        "clear_single": "default"
+      },
+      "top_level_receipt": "Temp/gltf-validation/direct-gpu/shoe-precedence-8fc-binding/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "top_level_sha256": "d246afa5976f0a6063135e3fdafd20c66f6b170a58095a5450a735f2435d5d8f"
+    }
+  },
+  "remaining": [
+    "historical 7eb tight-frame transient cause unproven; current reset test passes on 5a07",
+    "user review changed captures",
+    "full source+compiled GPU and material UV/sampler semantics, per-instance rendered independence and reload",
+    "compiled-only packaging, Windows and model-editor parity"
+  ],
+  "stage_blocker": null,
+  "producer": {
+    "stage": "7eb",
+    "engine_mvid": "6052e3c3-0a6d-48c9-a5d5-9fcd93459514",
+    "engine_sha256": "c0a520f534f2ae93ab4f22c9088fca0277519fd9a97f032c80cf2744c6181171"
+  },
+  "public_7eb": {
+    "first_receipt": "Temp/gltf-validation/direct-gpu/shoe-public-7eb-01/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "first_sha256": "79d143f083c04a6dce19ea1fbd6ce406c0c87ae4868d9780eaf966707f3349ce",
+    "first_passed": 6,
+    "first_failed": 2,
+    "scope": "source and GLB selection, source render, native accessor injected rollback, two-slot transactional rendering passed; glTF-derived compiled missing mounted external JPEG",
+    "compiled_retry_receipt": "Temp/gltf-validation/direct-gpu/shoe-compiled-7eb-retry/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "compiled_retry_sha256": "cd947b03f74497b8222326d26c5cdaef0fbb47e79c0313b27dc769d6e596cbda",
+    "compiled_retry_passed": 2,
+    "compiled_scope": "glTF derived compiled with external images mounted; not compiled-only packaging"
+  },
+  "review_7eb": {
+    "receipt": "Temp/gltf-validation/direct-gpu/shoe-review-7eb/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "sha256": "443f5a609ffb709068cb44db92e42f0bb01fd17eca2da7a1396c8cad222b7c40",
+    "source": "passed, visual approval pending",
+    "compiled": "failed default reset comparison (69 pixels > threshold 64); diagnostic pending",
+    "scope": "inferred camera and lighting",
+    "reference": {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MaterialsVariantsShoe/screenshot/screenshot-large.png",
+      "sha256": "e21dfa54d1fca987ace712f21657fc316b3251fd51a837ea81dd3b2b787d0d05",
+      "purpose": "upstream labeled Street, Beach and Midnight visual reference; camera and lighting unknown",
+      "license": "CC-BY-4.0, Shopify 2021"
+    },
+    "source_captures": [
+      {
+        "variant": "default / midnight",
+        "path": "Temp/gltf-validation/direct-gpu/MaterialsVariantsShoe/review/ea32bea95f404f02bb9a982ce2e932e0/default.png",
+        "sha256": "1aad8f2ca02b7ca7416c3048226887de5bb02702921cdbf93a4f6e632c01eb3e"
+      },
+      {
+        "variant": "beach",
+        "path": "Temp/gltf-validation/direct-gpu/MaterialsVariantsShoe/review/ea32bea95f404f02bb9a982ce2e932e0/beach.png",
+        "sha256": "1dccde864aa14e38aa5413789362f29035d9b2a2426afef73cd8421431a6557d"
+      },
+      {
+        "variant": "street",
+        "path": "Temp/gltf-validation/direct-gpu/MaterialsVariantsShoe/review/ea32bea95f404f02bb9a982ce2e932e0/street.png",
+        "sha256": "09ccabbb09fa7091d5c6135738977405f865dac3a427370b79f77b7d6df44057"
+      }
+    ],
+    "source_recipe": "Static rest pose; inferred orthographic camera 140,80,60, target origin, height 40, normalized 32-inch maximum extent, point light 200,-30,60; 192x192."
+  },
+  "implemented_and_executed": {
+    "public_selection": "ShoePublicSelectionTests.cs",
+    "public_render_capture": "ShoePublicCaptureTests.cs",
+    "override_precedence_patch": "override-precedence.patch",
+    "override_rendered_regression": "GltfOverridePrecedenceTests.cs",
+    "override_precedence_patch_sha256": "be72734ced783324108b23f0b8d40c62e1064abeacfe1a55546d46ee8584620f",
+    "override_rendered_regression_sha256": "fa792f51ebb049160f2e41db261708179541bb831eadec8bf673a5ac8fa54a32",
+    "native_accessor_rollback": "NativeAccessorRollbackTests.cs",
+    "native_accessor_rollback_sha256": "142ee3088f5302b7cee3a217265265c2b960f386d3f4dade06c397f54f262f71",
+    "override_precedence_patch_status": "applied, built and installed in 7eb; bounded two-slot rendered precedence and invalid-material rollback test passed"
+  },
+  "pending_diagnostic": {
+    "status": "completed; original failure remains",
+    "receipt": "Temp/gltf-validation/direct-gpu/shoe-restore-diagnostic-7eb/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "sha256": "232dad772e5c7e71e3d190b01f9364ef55834719a79ea12180c52ec0d83a9491",
+    "scope": "compiled glTF with mounted external images; 3 initial repeat frames and 6 post-reset frames",
+    "observation": "All nine repeats byte-identical SHA 14a60d14798ff563de17eba4c2bb642de0803ae9d0d85396d7871e2592577454, zero >0.06 RGB differences, null active variant and no callback errors. Prior failed restored frame has same SHA while prior first default differs. Initial transient inferred; underlying cause unproven."
+  },
+  "binding_diagnostic": {
+    "receipt": "Temp/gltf-validation/direct-gpu/shoe-binding-diagnostic-7eb/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "sha256": "c004500555a95dd31a1a7ea3ebd7f8207b3fa441ac1f1671b418e9edc0c768f0",
+    "observation": "Submitted material indices 0,1,2,0; default material identity restored and revision advanced. All repeat frames matched. Texture queried via Material.Attributes.GetTexture, but adapter uses Material.Set so null is not a valid texture conclusion; corrected Material.GetTexture diagnostic pending. Hardware residency and actual sampler remain unobserved."
+  },
+  "corrected_texture_diagnostic_5a07": {
+    "receipt": "Temp/gltf-validation/direct-gpu/shoe-material-texture-diagnostic-5a07/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "sha256": "ce123638d0ecd41f30385901e53d3557882da77c7be6147832628f7a560287b8",
+    "engine_mvid": "5a07f228-dff8-4d6b-b4ef-890b32a80299",
+    "compiled_input_sha256": "997249ace440074edb9679ce6a7aae079a810ab17d3a7ad840ee315ca933dfa1",
+    "scope": "glTF-derived compiled with external images mounted; diagnostic readback synchronizes; not hardware mip residency or sampler readback",
+    "observed": "Submitted materials 0,1,2,0. Distinct valid loaded 2048x2048 12-mip base-color textures; original material and texture identity restored. Initial and six post-reset captures identical, with same default/beach/street hashes as 7eb source images. New producer; original 7eb transient cause remains unproven."
+  },
+  "current_compiled_acceptance": {
+    "passed": true,
+    "producer_engine_mvid": "5a07f228-dff8-4d6b-b4ef-890b32a80299",
+    "receipt": "Temp/gltf-validation/direct-gpu/shoe-compiled-acceptance-5a07/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "sha256": "d1e4ee8194c100c776d64db426c3ad5060ce554a31649b100e1114233013598c",
+    "input_sha256": "997249ace440074edb9679ce6a7aae079a810ab17d3a7ad840ee315ca933dfa1",
+    "scope": "One canonical glTF-derived compiled form, external JPEG dependencies mounted. Original tight-frame reset comparison and threshold passed; image hashes match prior source views. User visual review still pending. Prior 7eb 69-pixel failure retained, cause unknown."
+  }
+}

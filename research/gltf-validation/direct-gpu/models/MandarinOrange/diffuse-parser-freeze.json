@@ -1,0 +1,43 @@
+{
+  "status": "applied_not_built_not_enabled",
+  "files": [
+    {
+      "path": "engine/Sandbox.Gltf/GltfContracts.cs",
+      "before_sha256": "3748085645693cb9f740ea5bc6c6dc8b727582733b4174da93bb33e2e6257c1e",
+      "after_sha256": "6431acadc57e472cd8511ac22d1a78bf6367bfc683a64f3399f730400f59a027"
+    },
+    {
+      "path": "engine/Sandbox.Gltf/GltfDocument.Materials.cs",
+      "before_sha256": "7bdf949ad029cde4af80225679e5053605bddf86dd6fce599f65e6b3548d6972",
+      "after_sha256": "fa6d9f4639a90f36e32af8b79f635e34fd1736c1aa357fc70b5fa7535ea85851"
+    },
+    {
+      "path": "engine/Sandbox.Gltf/GltfDocument.DiffuseTransmission.cs",
+      "before_sha256": null,
+      "after_sha256": "ba8a1aea082adf16fe93f836deb9f97c394cf3f889526a8287ad236f9ccc467e"
+    },
+    {
+      "path": "engine/Sandbox.Gltf/GltfDocument.MaterialImages.cs",
+      "before_sha256": "9c2ba93ac2cbf4f40beb515de67616eb67a894fb2a95b89590f73e1ccd0e36a3",
+      "after_sha256": "e0711106f32a7c76a8c75e7d62a447aef43ff42e454216cb7dd079681a5c7971"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/Materials/GltfMaterialUvPlan.cs",
+      "before_sha256": "526c08ca813ee501f3663b52ca56354436af1e5999ae9f865113772984e3adf9",
+      "after_sha256": "7bf77924dccd038e1591e86034476604ed849c92c59fb3be56b0bc19d02df5a2"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/Materials/GltfMaterialTextureEncodingPlan.cs",
+      "before_sha256": "55123499cb8154e7deb36e6be858b777872dcf7e23e85c8f90200dfcb91a6b1b",
+      "after_sha256": "aba4e8daa6597c2cc466e397c3f32cb159039dc65cef6318ddc3fe6d6f66c81a"
+    }
+  ],
+  "default_capability_unchanged": true,
+  "tests": {
+    "path": "research/gltf-validation/direct-gpu/models/MandarinOrange/DiffuseTransmissionReaderTests.cs",
+    "sha256": "145b89bd573bde9e5e02fc29cdb9fe0f716897a8dffd4e72fa520cb18912618b",
+    "expected_cases": 17,
+    "status": "17/17 passed on installed0bf/e209; receipt66bc20f08320d03be1d1765f9fe10e17043725af957242d215e8e3b544e3b735",
+    "producer_dependency": "Actual Sandbox.Gltf+Engine staged from these six parser/data-role files; no loader capability registration required"
+  }
+}

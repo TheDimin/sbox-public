@@ -1,0 +1,31 @@
+{
+  "model": "AlphaBlendModeTest",
+  "owner": "/root/gpu_alpha_blend",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaBlendModeReference.cs",
+      "sha256": "a3e8f35189e89554a5382bcdbc1a385417aaa6b06bce9fa658b83790fa0a8e9d"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaBlendModeCoreTests.cs",
+      "sha256": "f70649e382f96c7006f276f1dd5d5699dce99fb62fe9e60094ef73c8fe139c42"
+    }
+  ],
+  "producer_dependencies": [
+    "actual loaded Sandbox.Gltf",
+    "actual loaded Sandbox.Engine GltfStockMaterialAdapter"
+  ],
+  "shared_backend_contract": "CONTRACT.md; no shared Engine edits",
+  "entry": "Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaBlendModeCoreTests.RunAll(string checkoutRoot)",
+  "expected_cases": 44,
+  "forms": [
+    "glTF/source",
+    "glTF/compiled_glb",
+    "glTF-Binary/source",
+    "glTF-Binary/compiled_glb"
+  ],
+  "scope": "CPU parser/owned source streams/image bytes/real default material Prepare acceptance; not GPU material proof",
+  "acceptance": "Literal six materials and five source panels, strict legal/invalid cutoff defaults; default material acceptance rows retain actual unsupported errors. Real pixel/probe acceptance is separate.",
+  "execution_needs": "coordinator helper compile/run against loaded producer only; no producer rebuild required",
+  "status": "frozen_unrun"
+}

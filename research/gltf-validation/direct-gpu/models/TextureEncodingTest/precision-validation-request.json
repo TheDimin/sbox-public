@@ -1,0 +1,39 @@
+{
+  "model": "TextureEncodingTest/precision-failure-triage",
+  "owner": "/root/gpu_texture_encoding",
+  "coordinator": "/root/gpu_validation",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/TextureEncodingPrecisionTests.cs",
+      "sha256": "fe703f64ca1abe836afb40805f853182b1db464aeaeaee559d0e1dae7eefe23e"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureEncodingTest/TextureEncodingReference.cs",
+      "sha256": "0d8e6d40bdc5fca76e8d604d281100a4b22e44dd2d1ed0e5aebdcc18335ba16b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/BoxTexturedReference.cs",
+      "sha256": "c8c3c1a83ca0889ff9bb46b40106feca93d371bd520df5f6767331d89e78dcd8"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/BoxTextured/PngTexelReference.cs",
+      "sha256": "9c9b6bc95031449befd2e6e169722eca2d676abe52e5a017b076ccfb4cb0c6f9"
+    }
+  ],
+  "type": "Sandbox.Gltf.DirectGpu.TextureEncodingTestValidation.TextureEncodingPrecisionTests",
+  "kind": "mstest",
+  "expected_cases": 1,
+  "method_inventory": [
+    "LiteralBufferAndFloatTargetSeparateCaptureFromSrgbConversion"
+  ],
+  "measurements_property": "Measurements",
+  "shader_sources_property": "ShaderSources",
+  "scope": "Actual GPU numeric precision diagnostic only; five float4 compute buffer rows and three same-path RGBA32F capture controls. No texture producer or material/default support change.",
+  "acceptance": "All eight numeric rows recorded before checks. Literal float buffer/clear/pixel-output, raw samples and explicit float32 EOTF retain 1e-6 bound. Hardware sRGB conversion retains original 0.001 RGB and 1e-6 alpha bounds. Records actual runtime texture descriptors as well as disk/public format. A transfer failure remains red.",
+  "preserved_failure_receipt_sha256": "165598de63db1add007c7ddedb19b5d4ecb7c95501302d5c117e68255ac20f7f",
+  "execution_needs": "Coordinator only: verified idle editor, guarded helper/shader compilation and actual compute/raster readback. Current installed c5c0 real producers; no replacements.",
+  "status": "prepared/unrun",
+  "supersedes_prepared_request_sha256": "f7c33fab8ea4a76a81de951b0ce69877c412b4d7001693081b66e49b9b3a64c6",
+  "preserved_compile_only_receipt_sha256": "6b34634c84da37c51f24754853b7183806b74e1cca76fcba06217c7ec325fd47",
+  "compile_correction": "Add Sandbox.Rendering namespace import for actual ResourceState enum; shader sources, numeric expectations, thresholds, producers and emission gate unchanged."
+}

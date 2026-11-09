@@ -1,0 +1,39 @@
+{
+  "model": "Fox",
+  "owner": "/root/gpu_fox",
+  "coordinator": "/root/gpu_validation",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/Fox/GltfAnimationMidpointPrecisionTests.cs",
+      "sha256": "e0e2b27fbdf79c2b16d2600347fd5fc893d548a5506fe7a6d2e981ae6c64b822"
+    }
+  ],
+  "entry": "Sandbox.Tests.Gltf.GltfAnimationMidpointPrecisionTests.MidpointRetainsDoublePrecisionUntilTheFinalFloatRounding",
+  "entry_kind": "MSTest TestMethod with nine DataRows0..8",
+  "expected_cases": 9,
+  "installed_baseline": "actual c5c0 Sandbox.Gltf (no producer patch applied)",
+  "scope": "Independent analytic quaternion midpoint precision target for chosen pinned well-conditioned literals; nearest-float components and sign-independent physical angular error in failure text. Not a glTF bitwise-conformance requirement.",
+  "policy": "Run the original frozen file before considering the separate UNAPPLIED slerp-final-rounding.patch; preserve raw results, original Fox20 thresholds and12 animated failures.",
+  "no_helpers_needed": "Only MSTest and actual public Sandbox.Gltf.GltfAnimationSampler; no backend, native renderer, model mount or shader compilation.",
+  "status": "actual_baseline_5pass_4fail_preserved",
+  "actual_baseline": {
+    "receipt_sha256": "9b840cc679eb99c3882bdd36fd4dc385c76a96226c8ffc5391ecee93728f0965",
+    "passed": 5,
+    "failed": 4,
+    "incomplete": 0,
+    "failed_fixture_indices": [
+      2,
+      3,
+      4,
+      6
+    ],
+    "difference": "Each first failing component differs by1float ULP from independent analytic nearestfloat.",
+    "physical_orientation_errors_radians": [
+      3.20187666005975e-08,
+      1.8717767530930883e-08,
+      1.2186619827496195e-08,
+      7.3213829326515885e-09
+    ],
+    "scope": "Project accuracy target; not glTF bitwiseconformance."
+  }
+}

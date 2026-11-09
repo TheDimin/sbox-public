@@ -1,0 +1,131 @@
+{
+  "model": "SimpleSkin",
+  "owner": "/root/gpu_simple_skin_public",
+  "status": "frozen_tiny_transform_followup_source_unbuilt",
+  "files": [
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelMetadata.cs",
+      "sha256": "c03812bed7945e6449dc3eceaea5e2d3e2b3a80788bd29b11fb238ea94609f26"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs",
+      "sha256": "18d3444c02463023bba1f422e886282f40f942016d6d332774624f669d3ebd10"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Model.Skeleton.cs",
+      "sha256": "9f130cdc34adad214ebd9c8a6858a950e37e0b4d8e1de8b5a60775a022f8a5d6"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Model.Animation.cs",
+      "sha256": "be5a2e076b23ed1054176088d66887dc8571e570074d88f0499e4f099e48e1ef"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Model.Sequence.cs",
+      "sha256": "719ce66c06e98fcdb2b9b464ce4d9cc14742685b2ee84d1ccbb2e4976621d3f9"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Model.Morphs.cs",
+      "sha256": "bd0b0abbe66d4d076f3d108e5d6fed342b78cbf4a803b6df2d2782a787a5391a"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.cs",
+      "sha256": "28b5489852c56cda2cc3b2e97daea3ff134be2ea649a246d63049a6ae9f70db6"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Scene/Components/Render/SkinnedModelRenderer.cs",
+      "sha256": "c00edeea701550122eb9a435a819dc674e50c79f92859e9f940a7c8de8473598"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Scene/Components/Render/SkinnedModelRenderer.Sequence.cs",
+      "sha256": "61220da190ff19ca03e16631f18c4edc734eea7bfe1eed4804133aa66c636deb"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Scene/Components/Render/SkinnedModelRenderer.Bones.cs",
+      "sha256": "2c9e9b7be360f222901a94428af93ac82f803d243456230cc7e98aa585b5a7dc"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Scene/Components/Render/SkinnedModelRenderer.Morphs.cs",
+      "sha256": "422fd7e76c8629fa6b07103d16a0d37018569cfba621db2f50fd4df007994275"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Scene/Components/Render/SkinnedModelRenderer.Gltf.cs",
+      "sha256": "1429f58a8667c8d73be0cd8cdb5da1a107bfc3c1396c47a7b9a69967f5e4f2f1"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Scene/Components/Render/SkinnedModelRenderer.GltfMorphs.cs",
+      "sha256": "5f7afc14e51aa78a2b6a08ae8451ad1506734ab965dd5b91fb0c948dc7525ef8"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfModelRig.cs",
+      "sha256": "9db4ff4455c2e7899e1e82eed241644eddbd650d6d863674d7d75c4e3f0894df"
+    }
+  ],
+  "dependencies": [
+    {
+      "path": "engine/Sandbox.Gltf/GltfPose.MorphOverrides.cs",
+      "sha256": "015ce513c61f6917b443cd2fb7ff5470987a45a7c5fa3150614a8b07a4daad42"
+    }
+  ],
+  "prerequisite": "Coordinator must execute original frozen41 public cases on preserved fee5 before installing this later source stage. Use bounded async revision only after adapter installation.",
+  "scope": "Managed public skeleton/clip/logical morph metadata; SkinnedModelRenderer own-buffer adapter; mainthread scheduling; public bone/sequence and manual morph state. No actual GPU or visual or wallclock validation claim.",
+  "limitations": [
+    "Unrepresentable public Transform shear explicitly rejects while GPU affine matrices remain exact.",
+    "Managed timed morph transitions use provisional linear curve and native default0.05s duration; native curve equivalence unmeasured.",
+    "Native animation graphs, sequence blending, bone merging, procedural bone overrides and bone velocities remain unsupported; broad parity remains unfinished."
+  ],
+  "baseline": {
+    "receipt_sha256": "6185f21254a4ded01c94824fa7d2915523f395ef3af69021d31679478da0068d",
+    "producer": "fee5",
+    "passed": 1,
+    "failed": 40,
+    "incomplete": 0,
+    "helper_sha256": "32a1c6810b2aa01a891803eb814056fc14fed2f81859ee7bd17913413bd73b36"
+  },
+  "next_tests": {
+    "path": "research/gltf-validation/direct-gpu/models/SimpleSkin/public-integration/SimpleSkinPublicTests.cs",
+    "sha256": "ff499cebfbc055c85c1a0c74a5bcb697f0cb21889a4938d8eb6688ea42b4aeff",
+    "expected_cases": 60,
+    "status": "c5c0_actual_60_pass",
+    "receipt_sha256": "e9a3bc6ad826740b93c7a29696e6abcd9c323de967aa55840095728bc2f7579d"
+  },
+  "additional_tests": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleSkin/public-integration/SimpleSkinTransformConversionTests.cs",
+      "sha256": "835f3465560b94864bbbc8db35d0094c63b7bcbe33b04985f6c59e278bf9d752",
+      "entries": [
+        {
+          "method": "Sandbox.Gltf.DirectGpu.Validation.SimpleSkinTransformConversionTests.RunLegacy",
+          "cases": 18
+        },
+        {
+          "method": "Sandbox.Gltf.DirectGpu.Validation.SimpleSkinTransformConversionTests.RunPublicAdapter",
+          "cases": 18
+        }
+      ],
+      "status": "legacy18_fee5_actual_14pass_4fail; same18_each_entry_queued_next_stage"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleSkin/public-integration/SimpleSkinTinyTransformRegressionTests.cs",
+      "sha256": "4705116f8e0d5f236d73b5bd3e9f4b8ddc798ae018bd3594a1677e03c9da46fc",
+      "entries": [
+        {
+          "method": "Sandbox.Gltf.DirectGpu.Validation.SimpleSkinTinyTransformRegressionTests.Run",
+          "cases": 19
+        }
+      ],
+      "status": "c5c0_actual_7pass_12fail; unchanged19_queued_next_stage"
+    }
+  ],
+  "tiny_transform_followup": {
+    "previous_submission_sha256": "e8711ee2ebf9a40e233566a7e67825742e85da34cf9c1223b91a278d6edd685e",
+    "previous_rig_sha256": "98379f38b82960bfd8ab5ac96082acd12a11a56936d0adfbe2180349bfa3e9e8",
+    "applied_patch_sha256": "ee20a4c8de12591ddbf2239b465ad930df7897d3b1ce24c079a5e792619b898d",
+    "baseline_receipt": "Temp/gltf-validation/direct-gpu/c5c0-public-cadence-material-diagnostics-25/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "baseline_receipt_sha256": "165598de63db1add007c7ddedb19b5d4ecb7c95501302d5c117e68255ac20f7f",
+    "baseline_passed": 7,
+    "baseline_failed": 12,
+    "baseline_incomplete": 0,
+    "scope": "Only GltfModelRig public/native TRS conversion fallback. Previously accepted path and per-row eight-epsilon reconstruction arithmetic unchanged; full-affine GPU path untouched.",
+    "execution": "Next coherent Engine stage coordinated with material fixes; no separate build or restart. Post-change actual results pending."
+  }
+}

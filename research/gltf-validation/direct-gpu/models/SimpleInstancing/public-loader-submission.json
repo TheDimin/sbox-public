@@ -1,0 +1,95 @@
+{
+  "model": "SimpleInstancing",
+  "owner": "/root/gpu_simple_instancing",
+  "coordinator": "/root/gpu_validation",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingPublicTests.cs",
+      "sha256": "5de082a6dac9efa4f6be8be907fa74684cfba6a0f324d5f422929ed4cd1da4f4"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingLoaderPolicyTests.cs",
+      "sha256": "9177debd80da1d810d05d383abb697fe381be0822d54e74d9c74c7612a25825b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingCoreTests.cs",
+      "sha256": "dd6bf0cac846251ecb0f7d72ab64ade519f81d069969209a2c31e3655abe8e45"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingReference.cs",
+      "sha256": "15dbb37b0884101b47bbbad3edd81901f504066baec91a74aea1ba2b2b3a7e7d"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/SimpleInstancingGpuChecks.cs",
+      "sha256": "291d0262b7935f59911014e2728cb33350f090b7ff248b5bbe75a4d691ff8680"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/SimpleInstancing/reference.json",
+      "sha256": "f213b1b9b2105a8eccfb00a472a1fb97581480371060547bd66266aae2cc0839"
+    }
+  ],
+  "producer_change": {
+    "path": "engine/Sandbox.Engine/Resources/Model/Gltf/GltfModelLoader.cs",
+    "sha256": "a199189f92a6fec23537ad3a075c605106d0efe672977234b98f995cc6459592",
+    "patch_sha256": "62e067dafe6ec2cddde580ffc2007f90a42a4c7e251a20e658bcd043d0c3d24a",
+    "scope": "Only add EXT_mesh_gpu_instancing to SupportedExtensions; root approved after actual installed renderer prerequisite; coordinator direct source-window ACK received; all producer files held for combined build"
+  },
+  "prerequisite": {
+    "receipt": "Temp/gltf-validation/direct-gpu/c5c0-instancing-gpu-12/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "sha256": "a64b707726dd2bf7f6e9805aceee32a0ab87d72cff2c8b0c6a29064c2f2d2149",
+    "controls_passed": 11,
+    "gpu_states_passed": 20,
+    "max_position_component_inches": 0.00010870577523292013,
+    "max_normal_component": 1.7860918744005971e-07,
+    "root_review": "Accepted bounded readback prerequisite at original .0005in/2e-6 limits; no pixel/public-loader/hardware-efficiency claim"
+  },
+  "expected_cpu_policy_resource_rows": 22,
+  "suites": [
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.SimpleInstancingValidation.SimpleInstancingLoaderPolicyTests.RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 14,
+      "scope": "Public document optional/required selection6; explicit unselected optional fallback2; unselected required rejection2; valid skin+EXT current error-policy4 only, combined rendering stays FAILED/PENDING"
+    },
+    {
+      "entry": "Sandbox.Gltf.DirectGpu.SimpleInstancingValidation.SimpleInstancingPublicTests.RunResources",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 8,
+      "scope": "Public Model.Load metadata/bounds/cache/native absence and cold canonical reload; four actual source/compiled forms; no geometry GPU realization"
+    }
+  ],
+  "public_draw": {
+    "entry": "Sandbox.Gltf.DirectGpu.SimpleInstancingValidation.SimpleInstancingPublicTests.RunRenderer",
+    "arguments": [
+      "checkoutRoot",
+      "formName",
+      "coordinator private Scene",
+      "Func<Task> waitForActualFrames",
+      "optional Func<string,Task> observe"
+    ],
+    "forms": [
+      "glTF/source",
+      "glTF/compiled_glb_c",
+      "glTF-Binary/source",
+      "glTF-Binary/compiled_glb_c"
+    ],
+    "expected_measurements": 4,
+    "recommended_first_bounded_pair": [
+      "glTF/source",
+      "glTF/compiled_glb_c"
+    ],
+    "observation_checkpoints": [
+      "empty_before_public_instancing",
+      "actual_public_instancing",
+      "empty_after_public_instancing"
+    ],
+    "acceptance": "Public Model.Load and ordinary ModelRenderer only; actual cached named default compute material identity; all125 source IDs,3000 positions/normals,4500 actual bound indices; every current triangle submission; native Model absent; component deletion stops callbacks and retains cached resource; original .0005in/2e-6 checker limits. No alternate asset creation or SetPose command. Optional observed native images remain diagnostic only."
+  },
+  "execution_needs": "Compile helpers as Sandbox.Test.Unit for Engine IVT against actual loaded producers. New source selection must be built/installed/restarted by coordinator before positive public acceptance. The unchanged installed c5c0 loader is an intentional pre-promotion red baseline. No worker editor/build/shader execution. Native camera/frame scene supplied by coordinator, fit to original 125-instance AABB. Source and compiled default-material/rendered image fidelity remains separate.",
+  "status": "Executed current coherent stage: policy14/resources8 and all4 public source/compiled GPU states pass with fresh native captures, named compute/default source materials and cleanup. Visual approval remains pending.",
+  "remaining_valid_feature": "Skin+EXT instancing is not forbidden by audited spec; fixture is reader-valid, error-policy checks must not count as successful combined rendering. Combined rendering and its independent transform oracle remain FAILED/PENDING."
+}

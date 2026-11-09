@@ -1,0 +1,309 @@
+{
+  "scope": "Read-only audit of historical actual GPU results. No modified test acceptance, producer or new GPU execution.",
+  "receipt_sha256": {
+    "samples": "165598de63db1add007c7ddedb19b5d4ecb7c95501302d5c117e68255ac20f7f",
+    "differential": "abd55378afb65e4263454cf010a286927bdfa04561ca91c31ba8fbc206b38712"
+  },
+  "actual_engine_mvid": "2c054bba-c0fa-43b5-a3a2-39a34ff7577f",
+  "actual_gltf_mvid": "c869761c-5b80-462d-982a-bc3a688e57b6",
+  "representative_code_count": 11,
+  "rows": [
+    {
+      "encoded_byte": 0,
+      "analytic_linear": 0,
+      "actual_linear": 0.0,
+      "absolute_linear_error": 0.0,
+      "absolute_encoded_byte_error": 0.0,
+      "inside_d3d_srgb_to_float_bound": true,
+      "d3d_allowed_linear_interval": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "encoded_byte": 3,
+      "analytic_linear": 0.0009105809506465125,
+      "actual_linear": 0.00091552734375,
+      "absolute_linear_error": 4.946393103487509e-06,
+      "absolute_encoded_byte_error": 0.01629638671875,
+      "inside_d3d_srgb_to_float_bound": true,
+      "d3d_allowed_linear_interval": [
+        0.0007588174588720937,
+        0.0010623444424209313
+      ]
+    },
+    {
+      "encoded_byte": 5,
+      "analytic_linear": 0.0015176349177441874,
+      "actual_linear": 0.00152587890625,
+      "absolute_linear_error": 8.243988505812587e-06,
+      "absolute_encoded_byte_error": 0.02716064453125,
+      "inside_d3d_srgb_to_float_bound": true,
+      "d3d_allowed_linear_interval": [
+        0.0013658714259697686,
+        0.0016693984095186062
+      ]
+    },
+    {
+      "encoded_byte": 32,
+      "analytic_linear": 0.014443843596092545,
+      "actual_linear": 0.014404296875,
+      "absolute_linear_error": 3.954672109254473e-05,
+      "absolute_encoded_byte_error": 0.052548150901259305,
+      "inside_d3d_srgb_to_float_bound": true,
+      "d3d_allowed_linear_interval": [
+        0.01407011200216447,
+        0.014823302800086416
+      ]
+    },
+    {
+      "encoded_byte": 64,
+      "analytic_linear": 0.05126945837404324,
+      "actual_linear": 0.05126953125,
+      "absolute_linear_error": 7.287595676225278e-08,
+      "absolute_encoded_byte_error": 4.621126909398754e-05,
+      "inside_d3d_srgb_to_float_bound": true,
+      "d3d_allowed_linear_interval": [
+        0.05048448422192488,
+        0.0520615066083972
+      ]
+    },
+    {
+      "encoded_byte": 71,
+      "analytic_linear": 0.06301001765316767,
+      "actual_linear": 0.06298828125,
+      "absolute_linear_error": 2.1736403167674223e-05,
+      "absolute_encoded_byte_error": 0.012222419368953297,
+      "inside_d3d_srgb_to_float_bound": true,
+      "d3d_allowed_linear_interval": [
+        0.062124383858694746,
+        0.06390297286737924
+      ]
+    },
+    {
+      "encoded_byte": 90,
+      "analytic_linear": 0.10224173308810132,
+      "actual_linear": 0.10205078125,
+      "absolute_linear_error": 0.00019095183810131922,
+      "absolute_encoded_byte_error": 0.0809951224336487,
+      "inside_d3d_srgb_to_float_bound": true,
+      "d3d_allowed_linear_interval": [
+        0.1010662700323678,
+        0.10342513269534023
+      ]
+    },
+    {
+      "encoded_byte": 128,
+      "analytic_linear": 0.21586050011389926,
+      "actual_linear": 0.2158203125,
+      "absolute_linear_error": 4.018761389926184e-05,
+      "absolute_encoded_byte_error": 0.011017832930974691,
+      "inside_d3d_srgb_to_float_bound": true,
+      "d3d_allowed_linear_interval": [
+        0.21404114048223255,
+        0.21768884898113222
+      ]
+    },
+    {
+      "encoded_byte": 136,
+      "analytic_linear": 0.24620132670783548,
+      "actual_linear": 0.24609375,
+      "absolute_linear_error": 0.00010757670783548279,
+      "absolute_encoded_byte_error": 0.027317164074162292,
+      "inside_d3d_srgb_to_float_bound": true,
+      "d3d_allowed_linear_interval": [
+        0.2442366364919083,
+        0.24817520537484558
+      ]
+    },
+    {
+      "encoded_byte": 201,
+      "analytic_linear": 0.5840784178911641,
+      "actual_linear": 0.5859375,
+      "absolute_linear_error": 0.0018590821088358966,
+      "absolute_encoded_byte_error": 0.2849065518891507,
+      "inside_d3d_srgb_to_float_bound": true,
+      "d3d_allowed_linear_interval": [
+        0.5808241284012621,
+        0.5873433187761736
+      ]
+    },
+    {
+      "encoded_byte": 255,
+      "analytic_linear": 1,
+      "actual_linear": 1.0,
+      "absolute_linear_error": 0.0,
+      "absolute_encoded_byte_error": 0.0,
+      "inside_d3d_srgb_to_float_bound": true,
+      "d3d_allowed_linear_interval": [
+        1.0,
+        1.0
+      ]
+    }
+  ],
+  "additional_sampler_codes": [
+    {
+      "encoded_byte": 160,
+      "analytic_linear": 0.35153259950043936,
+      "actual_linear": 0.3515625,
+      "absolute_linear_error": 2.9900499560642224e-05,
+      "absolute_encoded_byte_error": 0.006167404957722056,
+      "path": "TextureSettingsMipDiagnosticTests Mode2 Load(mip1), native and explicit upload agree",
+      "native_encoded_bytes": [
+        160,
+        227,
+        160,
+        255
+      ]
+    },
+    {
+      "encoded_byte": 227,
+      "analytic_linear": 0.768151147247507,
+      "actual_linear": 0.76953125,
+      "absolute_linear_error": 0.0013801027524930065,
+      "absolute_encoded_byte_error": 0.18033837974923017,
+      "path": "TextureSettingsMipDiagnosticTests Mode2 Load(mip1), native and explicit upload agree",
+      "native_encoded_bytes": [
+        160,
+        227,
+        160,
+        255
+      ]
+    }
+  ],
+  "combined_distinct_code_count": 13,
+  "differential_controls": [
+    {
+      "Path": "compute_literal",
+      "Expected": [
+        0.5840784311294556,
+        0.7681511640548706,
+        0.35153260827064514,
+        0.5
+      ],
+      "Actual": [
+        0.58407843,
+        0.76815116,
+        0.3515326,
+        0.5
+      ],
+      "Scope": "float4 uniform -> RWStructuredBuffer<float4> -> synchronous float readback"
+    },
+    {
+      "Path": "compute_srgb_sample",
+      "Expected": [
+        0.06301001765316767,
+        0.0009105809506465125,
+        0.5840784178911641,
+        1
+      ],
+      "Actual": [
+        0.06298828,
+        0.00091552734,
+        0.5859375,
+        1
+      ],
+      "Scope": "hardware sRGB SampleLevel -> float buffer; no color render target"
+    },
+    {
+      "Path": "compute_linear_sample",
+      "Expected": [
+        0.2784313725490196,
+        0.011764705882352941,
+        0.788235294117647,
+        1
+      ],
+      "Actual": [
+        0.2784314,
+        0.011764706,
+        0.7882353,
+        1
+      ],
+      "Scope": "linear SampleLevel -> float buffer"
+    },
+    {
+      "Path": "compute_manual_eotf",
+      "Expected": [
+        0.06301001765316767,
+        0.0009105809506465125,
+        0.5840784178911641,
+        1
+      ],
+      "Actual": [
+        0.063010044,
+        0.000910581,
+        0.5840786,
+        1
+      ],
+      "Scope": "linear SampleLevel plus explicit float32 piecewise EOTF -> float buffer"
+    },
+    {
+      "Path": "compute_srgb_load",
+      "Expected": [
+        0.06301001765316767,
+        0.0009105809506465125,
+        0.5840784178911641,
+        1
+      ],
+      "Actual": [
+        0.06298828,
+        0.00091552734,
+        0.5859375,
+        1
+      ],
+      "Scope": "hardware sRGB Load -> float buffer; no sampler or color target"
+    },
+    {
+      "Path": "float_target_clear",
+      "Expected": [
+        0.5840784311294556,
+        0.7681511640548706,
+        0.35153260827064514,
+        0.5
+      ],
+      "Actual": [
+        0.58407843,
+        0.76815116,
+        0.3515326,
+        0.5
+      ],
+      "Scope": "native clear -> requested RGBA32F target -> RGBA32F GetPixels"
+    },
+    {
+      "Path": "float_target_literal_shader",
+      "Expected": [
+        0.5840784311294556,
+        0.7681511640548706,
+        0.35153260827064514,
+        0.5
+      ],
+      "Actual": [
+        0.58407843,
+        0.76815116,
+        0.3515326,
+        0.5
+      ],
+      "Scope": "literal pixel output -> same requested RGBA32F capture"
+    },
+    {
+      "Path": "float_target_srgb_shader",
+      "Expected": [
+        0.06301001765316767,
+        0.0009105809506465125,
+        0.5840784178911641,
+        1
+      ],
+      "Actual": [
+        0.06298828,
+        0.00091552734,
+        0.5859375,
+        1
+      ],
+      "Scope": "hardware sRGB SampleLevel -> same requested RGBA32F capture"
+    }
+  ],
+  "all_representative_values_inside_d3d_code_space_bound": true,
+  "maximum_absolute_linear_error": 0.0018590821088358966,
+  "maximum_absolute_encoded_byte_error": 0.2849065518891507,
+  "classification_limit": "D3D bound is not asserted to be a Vulkan normative guarantee. Actual host uses native sRGB read path; strict .001 result remains failed. No full256-code sweep was executed."
+}

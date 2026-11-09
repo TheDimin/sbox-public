@@ -1,0 +1,44 @@
+{
+  "baseline": "6543fdeea62146c681a7732eb4a16585",
+  "baseline_identity": "each reconstructed/found file verified byte-for-byte against stage manifest",
+  "files": [
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs",
+      "baseline_6543_sha256": "7f16f6fb13086b646e75b14d8e61ef2edf60546f821dc37ba34d30938a411fde",
+      "candidate_sha256": "53393569dc278266f12dd4a0f588980ec6c33d5959cfb6eb45bf1bbb34f84f5e"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuInstance.Variants.cs",
+      "baseline_6543_sha256": "f42bf638b9de96ae6aacd33b0977f5c19c77d9bb727e76a1b2f07c2ab4290008",
+      "candidate_sha256": "ca590063837d5be75b3c317176f147dc92c6e4f230f19668b92bf95ca0f6bf11"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Systems/SceneSystem/SceneObject.cs",
+      "baseline_6543_sha256": "c79f2d2fd4cc4280ebe8cbafe196a10b3867922b2315ccce3c181f0d47122ca3",
+      "candidate_sha256": "2d9713a5209906ef551544b57aae227667d064eebd64e1c15bd6f7625a89ddb5"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Systems/SceneSystem/SceneObject.Callbacks.cs",
+      "baseline_6543_sha256": "2d1d120f856067c40f8e17a0463a23dda9e29dea972f6db2ab01eb9b068b88c8",
+      "candidate_sha256": "e3646330e06fe2e5bc27249558827877c4bfee1ba681b894901123d079460496"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Systems/Render/Graphics.Draw.cs",
+      "baseline_6543_sha256": "4fd3ed85486dffecea3ffd290d128001264602ad04a04801c49334a68b070f33",
+      "candidate_sha256": "fb8566c2a8d7bd174d3a9d158bdf82bd982c221916b873a709955727ba1b6943"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.cs",
+      "baseline_6543_sha256": "1c49bfaa290d0c8a225ed4855405f441f60ff2e5e67235b06132df2dfd085daf",
+      "candidate_sha256": "f5e43675880c3425fbb6417399e7aa817576ec2b3e3ac8ed5131059d9cfa06ec"
+    },
+    {
+      "path": "engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.Gltf.cs",
+      "baseline_6543_sha256": "240fd12bb926c0f40fe90c73c232c84b28707d556c5e12823da8d8a768a45dbb",
+      "candidate_sha256": "d9fa9c258c1f8136014cab2a62834a2b1f0b9695bddac6d24e391af9cfafb31a"
+    }
+  ],
+  "patch_sha256": "a36b2e0f0c20b6f4820e4a105d140edacaafcdfc863f1493ec978bef00979919",
+  "status": "uninstalled prototype; public lit BLEND still rejected",
+  "restore": "Reverse only this patch after verifying every candidate file hash; validate normalized baseline against verified 6543 content; never reset entire files or unrelated work."
+}

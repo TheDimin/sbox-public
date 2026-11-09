@@ -1,0 +1,75 @@
+{
+  "status": "passed_independent_fixture_audit_only",
+  "scope": "Generated input bytes, transfer values, adversarial descriptor/sampler sensitivity and literal BSDF arithmetic. No engine reader, shader, GPU, public loading or model appearance acceptance.",
+  "checks": [
+    {
+      "name": "literal_RGBA_and_linear_alpha_sRGB_RGB",
+      "passed": true,
+      "rgba": [
+        128,
+        64,
+        192,
+        64
+      ],
+      "strength": 0.12549019607843137,
+      "linear_color": [
+        0.10793025005694963,
+        0.03845209378053243,
+        0.13177878142645327
+      ]
+    },
+    {
+      "name": "literal_descriptor_stride_offset_and_normalization",
+      "passed": true,
+      "uv": {
+        "TEXCOORD_41": [
+          0.5000076295109483,
+          0.2500038147554742
+        ],
+        "TEXCOORD_49": [
+          1.5,
+          0.75
+        ]
+      },
+      "wrong_offset_negative_sensitive": true
+    },
+    {
+      "name": "independent_point_repeat_mirror_and_transfer_oracle",
+      "passed": true,
+      "strength_texel": [
+        255,
+        0,
+        0,
+        16
+      ],
+      "color_texel": [
+        128,
+        192,
+        64,
+        255
+      ],
+      "wrong_sampler_negatives_sensitive": true
+    },
+    {
+      "name": "literal_Lambert_mirrored_Fresnel_angular_ratio",
+      "passed": true,
+      "expected": 0.4999784184671149,
+      "wrong_native_roughness_exponent": 0.6597539553864471
+    }
+  ],
+  "engine_tests_executed": false,
+  "inputs": [
+    {
+      "path": "diffuse-transmission-role-control.png",
+      "sha256": "0d56394cd9d08679d1c9758c5af2bdf45209ac8e82d92b7c32634b2b88983357"
+    },
+    {
+      "path": "diffuse-transmission-seven-uv-samplers.gltf",
+      "sha256": "3afdc9e602ed95f007e26b053905b7382bb76828c53862904c75f47f0d15f549"
+    },
+    {
+      "path": "diffuse-transmission-oracle.json",
+      "sha256": "827339358c920d0b40dfe7e0a4f3c80c99d2d84aaf9bf662c719339404478550"
+    }
+  ]
+}

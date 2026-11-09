@@ -1,0 +1,29 @@
+{
+  "model": "AlphaBlendModeTest",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaBlendModeImageChecks.cs",
+      "sha256": "cf9682b9ebd6d47d595a1e61477eaa8f34a705e8315d93753af807fc728a85a6"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaBlendModeSourceProbe.cs",
+      "sha256": "dfb8cb2a02fcaffdeb2dbcdcdbf6010c0b408458c5453a10c537723b53ac7427"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaControlFixtures.cs",
+      "sha256": "07b5c4ed3e67354fd156d252940a947545e2472dd4b70d833741abf2dc80080b"
+    }
+  ],
+  "dependencies": [
+    "frozen AlphaBlendModeReference.cs and AlphaBlendModeCoreTests.cs",
+    "loaded internal GltfGpuAsset/GltfGpuInstance",
+    "actual source/default or explicitly reviewed candidate materials",
+    "independent constant RGB opaque reference material",
+    "coordinator native linear float camera capture"
+  ],
+  "entry": "internal Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation.AlphaBlendModeSourceProbe public static Run",
+  "scope": "actual source-isolated native captures with GPU geometry, independent reference and pixel acceptance; two derived forms",
+  "expected_cases": 2,
+  "supplemental_fixtures": 11,
+  "status": "authored_unrun; runtime caller/reviewed tolerance configuration pending"
+}

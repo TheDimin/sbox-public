@@ -1,0 +1,143 @@
+{
+  "model": "TextureCoordinateTest",
+  "owner": "/root/gpu_texture_coordinates",
+  "coordinator": "/root/gpu_validation",
+  "status": "frozen; Python 4/4 passed; C# and actual GPU/image gates pending",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureCoordinateTest/.gitignore",
+      "sha256": "32dae3052f331ee34d628ef535709b301259a45df7c7522c4d35dcf49873f00b"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureCoordinateTest/ACCEPTANCE.md",
+      "sha256": "c0772a5d347c1dcb046a7d1a972ee09eb7d9a54d9f56a1bae3017ea61827b70c"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureCoordinateTest/TextureCoordinateCoreTests.cs",
+      "sha256": "d42e419c339cb91bc13fae36f41ccfb9e80b025d4b9b6e2840c6cb1e4e8e50b4"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureCoordinateTest/TextureCoordinateGpuChecks.cs",
+      "sha256": "abf06f4cb2d4c0f460f3929bc7b9c56302848f66a1c92dafe2d5b7d77b554a70"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureCoordinateTest/TextureCoordinateGpuProbe.cs",
+      "sha256": "c4d4e187df5e935c145bffa919da0655786b72efeb23221e6f93c7576835eb55"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureCoordinateTest/TextureCoordinateGpuVerifierTests.cs",
+      "sha256": "3ae09c92a5c005046837f561922e9397ecc2a96eca37df080953b16a345cef2f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureCoordinateTest/TextureCoordinateImageProbe.cs",
+      "sha256": "4dd84ea06249fc035aa33020f164e75e3a357cb299e6d9e4390589e2e71b2eca"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureCoordinateTest/TextureCoordinateReference.cs",
+      "sha256": "84e4fd74438ac2606746d2c875c06fc4dee108e6b746d0e69e3abdfef844f5e8"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureCoordinateTest/TextureCoordinateReferenceScene.cs",
+      "sha256": "6a7c27519130d6e40ffcf04c7be41e8ae80eb378b0ec3f3e87618ebdaf6d60d2"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureCoordinateTest/TextureCoordinateUvPlanTests.cs",
+      "sha256": "acdeb4d9110fdaf166f618f059742baf013bf744bccefcad255882cbf5237607"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureCoordinateTest/author_reference.py",
+      "sha256": "3cf1de8e9d610851ff0af7fac33701550eadd4cae1498c9c0a437a461329cdce"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureCoordinateTest/source-audit.json",
+      "sha256": "de243a582cb5045e78cb1f28619c767d20299c6ae2cb9f6a8b58188532bd3b8f"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/TextureCoordinateTest/test_source_oracle.py",
+      "sha256": "062bc0f497473e33584c8662bbf67d37d68635998bf77c501679f00077758cc3"
+    }
+  ],
+  "producer_dependencies": [
+    "actual loaded Sandbox.Gltf accessor/material/upload/compiler APIs",
+    "actual new Sandbox.Engine Sandbox.GltfMaterialUvPlan matching gpu_texture_transform owned source freeze",
+    "agreed shared direct GPU backend/rig/morph helpers; actual GltfGpuPrimitiveSnapshot.IndexDataOrigin"
+  ],
+  "shared_backend_contract": "research/gltf-validation/direct-gpu/CONTRACT.md; coordinator identifies loaded source/assembly/shader freeze",
+  "expected_cases": 69,
+  "suites": [
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureCoordinateTestValidation.TextureCoordinateCoreTests",
+      "kind": "static_results",
+      "method": "RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 40
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureCoordinateTestValidation.TextureCoordinateGpuVerifierTests",
+      "kind": "mstest",
+      "expected_cases": 5,
+      "setup": [
+        {
+          "kind": "property",
+          "name": "CheckoutRoot",
+          "arguments": [
+            "$checkout"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Sandbox.Gltf.DirectGpu.TextureCoordinateTestValidation.TextureCoordinateUvPlanTests",
+      "kind": "static_results",
+      "method": "RunAll",
+      "arguments": [
+        "$checkout"
+      ],
+      "expected_cases": 24
+    }
+  ],
+  "forms": [
+    "glTF/source",
+    "glTF/compiled_glb",
+    "glTF-Embedded/source",
+    "glTF-Embedded/compiled_glb",
+    "glTF-Binary/source",
+    "glTF-Binary/compiled_glb",
+    "derived_normalized_interleaved_uv1/source",
+    "derived_normalized_interleaved_uv1/compiled_glb"
+  ],
+  "scope": "69 planned CPU/reader/material-plan/staging/checker-control cases; actual GPU/image results require separate execution receipts. Four independent Python source-oracle tests passed.",
+  "gpu_entry": "Sandbox.Gltf.DirectGpu.TextureCoordinateTestValidation.TextureCoordinateGpuProbe.MeasureAll(checkoutRoot, world, borrowedComputeMaterial, awaitCompletedNativeFrame)",
+  "gpu_expected_measurements": 24,
+  "gpu_primitives_per_measurement": 5,
+  "gpu_vertices_per_measurement": 20,
+  "gpu_bound_indices_per_measurement": 30,
+  "gpu_acceptance_entry": "TextureCoordinateGpuChecks.RequireWithin(measurement, maximumPositionErrorInches, maximumNormalError, maximumRawUvError)",
+  "proposed_numeric_thresholds_pending_coordinator_review": {
+    "maximumPositionErrorInches": 2e-05,
+    "maximumNormalError": 1e-06,
+    "maximumRawUvError": 1e-07,
+    "topology": "exact",
+    "index_origin": "gpu-readback"
+  },
+  "image_entry": "Sandbox.Gltf.DirectGpu.TextureCoordinateTestValidation.TextureCoordinateImageProbe.MeasureAll(checkoutRoot, world, borrowedComputeMaterial, captureCompletedNativeFrame, projectEnginePointToTopLeftPixel)",
+  "image_expected_rows": 16,
+  "independent_png_landmarks_per_row": 12,
+  "image_callback_contract": "Frame RGBA bytes use top-left origin; metadata camera and presentation identify exact matched capture configuration; projection callback maps engine points through that exact camera to top-left pixel coordinates; textured quads >=220 screen pixels, recommend >=1024 square capture.",
+  "image_acceptance_entry": "TextureCoordinateImageProbe.RequireAccepted(row, minimumIoU, maximumMeanRgbError, maximumChangedRgbPixels, minimumWhiteByteLuminance, maximumDarkToWhiteRatio, minimumRejectedVFlipLandmarks); thresholds require coordinator review",
+  "acceptance": "ACCEPTANCE.md. All original data/layouts preserved, source and compiled forms separate, normalized U16 alternate layout/UV1 fixture, all raw UV outputs remain distinct, effective per-role coordinate selection, standard transform order, actual GPU readback, matched literal images plus independent source-PNG asymmetric labels and V-flip negative controls.",
+  "execution_needs": "Coordinator alone builds/installs/restarts/shader-compiles/captures. Core/helper verifier suite can run against current shared backend; UvPlan suite requires actual new Engine containing canonical production plan. Actual default-source-material rendering must route selected TEXCOORD_1 per role without overwriting original TEXCOORD_0. Compile research helpers against loaded producers only.",
+  "known_limits": [
+    "No C# compilation or execution by model worker",
+    "Shared-material image agreement is geometry/UV binding only; independent source-PNG landmarks required separately",
+    "Source filters are unspecified; filter/color-space parity is separate",
+    "Original sample static: no animation/wall-clock gate",
+    "Public Model.Load, Windows, optimized resource and matched compiled-vmdl performance remain broader gates"
+  ],
+  "supersedes_prepared_unrun_freeze": {
+    "sha256": "3389ee2081e536d1aba2c7ae678c6f46d6ed102b731f849c0b67e873e2aac70d",
+    "reason": "Independent native reference now supplies raw UV0 in TexCoord0 and raw UV1 in TexCoord1; both channels preserved, no selected-UV replacement. Coordinator confirmed no helper dispatch occurred before release."
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "status": "unapplied_review_only",
+  "source": "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs",
+  "base_sha256": "1e8017cc6d4252329f2883bd393c328fb30ff809cea91eca8facaf118595937f",
+  "patch_sha256": "6f9d4cbf7cb81ce262395095788d2d1d27c88f0e1df1a24305cfb2f6f84daa54",
+  "evidence_receipt_sha256": "ce272234dc5e25f16d77b38d2cade0677994131f8da9bc0e04ec8421ea64adeb",
+  "owner": "/root/gpu_fox",
+  "reviewer": "/root",
+  "limits": [
+    "No within-model transparent sort implemented; actual metric and layered pixel acceptance pending",
+    "Single external native sort unit; cross-model interleaving unresolved",
+    "Native MASK depth/AlphaTestZPrepass not yet measured",
+    "In-place native material changes detected when explicit refresh invoked, no automatic native event subscription",
+    "Per-row no-op refresh preserves submitted evidence; renderer clear/whole/slot transient churn needs later final-vector transaction",
+    "Unknown layer retains historical manual draw behavior without native alpha guarantee"
+  ],
+  "superseded_patch_sha256": "ba98cec11ee472f76271c46606a929214640d298825cd3e761203adf4b66245f",
+  "prior_reviewed_patch_sha256": "f28b4bb9e2007fb837a2661832e81babb31339890a17b3a628041b423672f9c6"
+}

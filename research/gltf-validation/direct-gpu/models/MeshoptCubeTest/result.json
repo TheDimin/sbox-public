@@ -1,0 +1,1235 @@
+{
+  "schema_version": 1,
+  "model": "MeshoptCubeTest",
+  "status": "passed",
+  "acceptance_scope": "Bounded Linux model acceptance: one canonical required-meshopt .glb_c through actual public Model.Load, ordinary renderer owned poses and real GPU index negatives, supported SkinnedModelRenderer ordinary two-loop playback, independent actual GPU attribute/topology oracles, source-material1024px preview and cleanup. Human visual approval, independent final PBR matching and broader platform/performance goals remain separate.",
+  "corpus_revision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "actual_upstream_variants": [
+    "glTF",
+    "glTF-Meshopt"
+  ],
+  "forms": [
+    {
+      "name": "glTF-Meshopt/compiled_glb_c",
+      "role": "only canonical compiled result",
+      "status": "passed current targeted pose/playback",
+      "input_sha256": "e820e3a683d872e728a9a7429ad5ed7f97adfa7c9da55b96a82b2de22329d60a"
+    },
+    {
+      "name": "glTF/source",
+      "role": "distinct optional compression declaration with real fallback buffer",
+      "status": "retained7eb partial public rest assertions; unchanged codec fallback proof reused centrally"
+    },
+    {
+      "name": "glTF-Meshopt/source",
+      "role": "distinct required compression declaration with URI-less fallback placeholder",
+      "status": "retained7eb partial public rest assertions; unchanged required-codec rejection proof reused centrally"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/LICENSE.md",
+      "sha256": "15e6f8f5ca0528f58678cce403e924e120fa7754bfb6b5c0941a763468f32ea6",
+      "bytes": 781
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/README.body.md",
+      "sha256": "48b93bc57c12409f92bc3dde515ca1ca53fab3495f69ddca0730135fb2d8325c",
+      "bytes": 4036
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/README.md",
+      "sha256": "aa663e778261339301f36e8b08be8f538e073b32475f9bbf66e761547e9f9bdb",
+      "bytes": 4901
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF/MeshoptCubeTest.bin",
+      "sha256": "6578c1d82c5cc2b228e9513e37f348ca89cdb24b5985aa0567efef8d3c014360",
+      "bytes": 10528
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF/MeshoptCubeTest.gltf",
+      "sha256": "8721150e3409425acf83aa21986e55880360ab084c17e96409c25fac53477f72",
+      "bytes": 68047
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF/MeshoptCubeTestFallback.bin",
+      "sha256": "8d3d779653780e85a75eda988110ab235ea85cd3d174361ffb318c6b657dee07",
+      "bytes": 9984
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF/col0.png",
+      "sha256": "250410286de74c532ee877b51b039228742a2e4d7fd611dce29230e841ab75f7",
+      "bytes": 1511
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF/col1.png",
+      "sha256": "10a6db3432385dceaacb15a66f94ce79c6c2460d9b1ef1f25c3399bd2d0ee521",
+      "bytes": 1563
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF/col2.png",
+      "sha256": "28f15b21a88b213315e13cdcb7914007934e69f3ed8b8dc9495f469d865d57e7",
+      "bytes": 1458
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF/col3.png",
+      "sha256": "d518c528b85d9c2c5915c5822b152ac8c162da1bc11a9581e5486d53ebaeb11a",
+      "bytes": 1586
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF/col4.png",
+      "sha256": "8f5659a0451392c567217b432a6c83f65a6c22eb3a225e853daa45ec847abdb3",
+      "bytes": 1062
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF/row0.png",
+      "sha256": "a26715d56e91e83b19e336174494bd3e39cfc3a5f1b6f1166951a9ec38bf6baa",
+      "bytes": 1568
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF/row1.png",
+      "sha256": "8b005615419b1efb98d3cce2fd9529fc53bd34337a317aece8cd4a7558053ec4",
+      "bytes": 3268
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF/row2.png",
+      "sha256": "b4e1d53d2a5492adc2d148b19b421733fb23edf1a0aded6fea1ec11c710f11b0",
+      "bytes": 3324
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF/row3.png",
+      "sha256": "ae96accde34a0a35ffe63a2fa4f777eaeacf6d3157e6ef69ba5da285949d7f77",
+      "bytes": 3026
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF/row4.png",
+      "sha256": "689cf0ae16c22125a4a1ad44e0431aed1a92a101def096161d133ec56906bca3",
+      "bytes": 2884
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF-Meshopt/MeshoptCubeTest.bin",
+      "sha256": "6578c1d82c5cc2b228e9513e37f348ca89cdb24b5985aa0567efef8d3c014360",
+      "bytes": 10528
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF-Meshopt/MeshoptCubeTest.gltf",
+      "sha256": "b5947609f3d8aba58de3d43101df3b635ffaaab5849431f8518af6a98a040433",
+      "bytes": 68034
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF-Meshopt/col0.png",
+      "sha256": "250410286de74c532ee877b51b039228742a2e4d7fd611dce29230e841ab75f7",
+      "bytes": 1511
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF-Meshopt/col1.png",
+      "sha256": "10a6db3432385dceaacb15a66f94ce79c6c2460d9b1ef1f25c3399bd2d0ee521",
+      "bytes": 1563
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF-Meshopt/col2.png",
+      "sha256": "28f15b21a88b213315e13cdcb7914007934e69f3ed8b8dc9495f469d865d57e7",
+      "bytes": 1458
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF-Meshopt/col3.png",
+      "sha256": "d518c528b85d9c2c5915c5822b152ac8c162da1bc11a9581e5486d53ebaeb11a",
+      "bytes": 1586
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF-Meshopt/col4.png",
+      "sha256": "8f5659a0451392c567217b432a6c83f65a6c22eb3a225e853daa45ec847abdb3",
+      "bytes": 1062
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF-Meshopt/row0.png",
+      "sha256": "a26715d56e91e83b19e336174494bd3e39cfc3a5f1b6f1166951a9ec38bf6baa",
+      "bytes": 1568
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF-Meshopt/row1.png",
+      "sha256": "8b005615419b1efb98d3cce2fd9529fc53bd34337a317aece8cd4a7558053ec4",
+      "bytes": 3268
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF-Meshopt/row2.png",
+      "sha256": "b4e1d53d2a5492adc2d148b19b421733fb23edf1a0aded6fea1ec11c710f11b0",
+      "bytes": 3324
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF-Meshopt/row3.png",
+      "sha256": "ae96accde34a0a35ffe63a2fa4f777eaeacf6d3157e6ef69ba5da285949d7f77",
+      "bytes": 3026
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/glTF-Meshopt/row4.png",
+      "sha256": "689cf0ae16c22125a4a1ad44e0431aed1a92a101def096161d133ec56906bca3",
+      "bytes": 2884
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/metadata.json",
+      "sha256": "8c0754180256099118dd9cfe9e49bc4673ef5d6f9a813a992824c4ba5de43f48",
+      "bytes": 672
+    },
+    {
+      "path": "Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/screenshot/screenshot.png",
+      "sha256": "7279131622bd7bcaf1daaa6f649c7deb3f9e79caedd543fb5833d44f068e55e1",
+      "bytes": 91768
+    }
+  ],
+  "producer": {
+    "stage": "cache-tangent-corrective",
+    "engine_mvid": "5a07f228-dff8-4d6b-b4ef-890b32a80299",
+    "gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+    "scope": "Current canonical pose/playback/captures only; historical rest assertions retain their7eb identities."
+  },
+  "producer_modules": [
+    {
+      "diskMvid": "5a07f228-dff8-4d6b-b4ef-890b32a80299",
+      "loadedMvid": "5a07f228-dff8-4d6b-b4ef-890b32a80299",
+      "name": "Sandbox.Engine",
+      "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.Engine.dll",
+      "sha256": "ed5f8073e45d3a4f90e5140323cc5c5a0dddf9707be71ee375966ca0f05403f0"
+    },
+    {
+      "diskMvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+      "loadedMvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+      "name": "Sandbox.Gltf",
+      "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.Gltf.dll",
+      "sha256": "7638a855ba21fd9c079a22cbc8b834d4169112fe08cb9a5fd788e63cf90866e1"
+    },
+    {
+      "diskMvid": "c22b305b-109d-4166-a212-a7d4bc301e40",
+      "loadedMvid": "c22b305b-109d-4166-a212-a7d4bc301e40",
+      "name": "Sandbox.SceneRenderer",
+      "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.SceneRenderer.dll",
+      "sha256": "b5c8196be0f3c6bcca5cbae5f11e3ec4d3013fde98afffec99cd0e68fd11e7a1"
+    },
+    {
+      "diskMvid": "50c531e4-8369-4849-a4b6-dd939a8f8e16",
+      "loadedMvid": "50c531e4-8369-4849-a4b6-dd939a8f8e16",
+      "name": "Sandbox.Tools",
+      "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.Tools.dll",
+      "sha256": "966779a7d5edb8cb976b0450c95791f30311edda1c114faa09900bd2ed1b5a9c"
+    }
+  ],
+  "compiled_shaders": {
+    "gltf_deform_cs.shader_c": {
+      "path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_deform_cs.shader_c",
+      "scope": "compiled bytes on disk; native feature controls remain separate",
+      "sha256": "4e5f9c9da78a82fcdef7ae72d0280a454697a0bf1eea6e46a83ca5a94c259c65"
+    },
+    "gltf_stock_sampler.shader_c": {
+      "path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_stock_sampler.shader_c",
+      "scope": "compiled bytes on disk; native feature controls remain separate",
+      "sha256": "b45f66c100d9fac1c270e609e11a372dddfc3ecae64029601632b889ec7b6cfd"
+    },
+    "gltf_surface_five_uv.shader_c": {
+      "path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_surface_five_uv.shader_c",
+      "scope": "compiled bytes on disk; native feature controls remain separate",
+      "sha256": "56c3158328d44eb11a7e795eb667415b22442abea22058c4a710ac9fc009e01c"
+    },
+    "gltf_unlit_five_uv.shader_c": {
+      "path": "/home/damian/projects/sbox-public/game/core/shaders/gltf_unlit_five_uv.shader_c",
+      "scope": "compiled bytes on disk; native feature controls remain separate",
+      "sha256": "e494af0983bd7ab5c00c9ee8c78c3fc3cbd406eb9c63c86c466f9396ebf5251d"
+    },
+    "vertex_color.shader_c": {
+      "path": "/home/damian/projects/sbox-public/game/core/shaders/vertex_color.shader_c",
+      "scope": "compiled bytes on disk; native feature controls remain separate",
+      "sha256": "8f4ecfe974cbd25d5cc2319f6a44fb760e47e49e573ca303cb32a94535756f46"
+    }
+  },
+  "executed_suite": {
+    "scope": "Current canonical changed pose and ordinary playback tests only",
+    "expected": 2,
+    "passed": 2,
+    "failed": 0,
+    "incomplete": 0,
+    "cleanup_errors": [],
+    "counting_policy": "Five pose samples, two real GPU negative controls and643 clock observations are assertions/measurements inside two MSTests, not extra test cases. Earlier failed wrappers remain red."
+  },
+  "receipts": [
+    {
+      "purpose": "Actual public source and derived-compiled loading, original MASK/default source material integration",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/public-run-20261106-220818/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "3ee6292d1f993c49a47035c250a91381be2ddff29430ad3bd4361018569c6b82",
+      "counts": {
+        "passed": 0,
+        "failed": 4,
+        "incomplete": 0
+      }
+    },
+    {
+      "purpose": "Historical initial helper compile-only attempt, no model execution",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/public-run-20261106-215548/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "8124c82d9221c3ee4bc252e21451a5d30a08592d4277324445a3bacb50ce650d",
+      "counts": {
+        "passed": 0,
+        "failed": 0,
+        "incomplete": 4
+      }
+    },
+    {
+      "purpose": "Actual public loading/MASK succeeds; exact-index oracle initially rejects cyclic triangles",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/public-run-20261106-223250/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "b48a9fb1da9da94691f4c558289b5b0b240109ec46bec42b9dee4acfd63dba5e",
+      "counts": {
+        "expected": 4,
+        "passed": 0,
+        "failed": 4,
+        "incomplete": 0
+      },
+      "producer_engine_mvid": "6052e3c3-0a6d-48c9-a5d5-9fcd93459514",
+      "producer_gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+      "cleanup_errors": []
+    },
+    {
+      "purpose": "Retained actual GPU rest bytes proving72cyclic/248exact/no reversed or changed triangles",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/diagnostic-run-20261106-223706/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "aa36983366ec2aeb2847b37aded9347ecd538b95f3cfa0f44981e869850abeb6",
+      "counts": {
+        "expected": 1,
+        "passed": 0,
+        "failed": 1,
+        "incomplete": 0
+      },
+      "producer_engine_mvid": "6052e3c3-0a6d-48c9-a5d5-9fcd93459514",
+      "producer_gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+      "cleanup_errors": []
+    },
+    {
+      "purpose": "Four forms finish rest GPU/topology/material/image assertions; later helper foreign-pose ownership error",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/public-run-20261106-223927/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "a75e89733d3bba1834ef7024afd0c4d69024476c081ab4b06823cf2b1728f515",
+      "counts": {
+        "expected": 4,
+        "passed": 0,
+        "failed": 4,
+        "incomplete": 0
+      },
+      "producer_engine_mvid": "6052e3c3-0a6d-48c9-a5d5-9fcd93459514",
+      "producer_gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+      "cleanup_errors": []
+    },
+    {
+      "purpose": "Owned midpoint exposes strict generated tangent orthogonality failure",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/pose-smoke-run-20261106-224410/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "ce210f679846d4084cd1b34abc4d1d1c5cffdaceaacdc780e3f4168440d08748",
+      "counts": {
+        "expected": 1,
+        "passed": 0,
+        "failed": 1,
+        "incomplete": 0
+      },
+      "producer_engine_mvid": "6052e3c3-0a6d-48c9-a5d5-9fcd93459514",
+      "producer_gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+      "cleanup_errors": []
+    },
+    {
+      "purpose": "Retains posed GPU vectors before same strict tangent failure",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/pose-smoke-run-20261106-224933/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "619579271fc67cbf15e6cf7123cd36c4dba5c2a55b781ea9288cfec8e4245f11",
+      "counts": {
+        "expected": 1,
+        "passed": 0,
+        "failed": 1,
+        "incomplete": 0
+      },
+      "producer_engine_mvid": "6052e3c3-0a6d-48c9-a5d5-9fcd93459514",
+      "producer_gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+      "cleanup_errors": []
+    },
+    {
+      "purpose": "Current canonical owned-generation five pose samples, real reversed/changed bound-GPU negatives and cleanup",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/poses-run-20261106-230325/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "5af9f799098552bd904ac16ee4de65eee4b730ef8b7fc04077ef8896b26ac0c2",
+      "counts": {
+        "expected": 1,
+        "passed": 1,
+        "failed": 0,
+        "incomplete": 0
+      },
+      "producer_engine_mvid": "5a07f228-dff8-4d6b-b4ef-890b32a80299",
+      "producer_gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+      "cleanup_errors": []
+    },
+    {
+      "purpose": "Current canonical ordinary public two-loop playback, final independent GPU check,1024px source-material previews and cleanup",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/playback-run-20261106-230347/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "7c7ce23616416480a9844e1eba12540917c37d020f18937ecf95daa2b79919b2",
+      "counts": {
+        "expected": 1,
+        "passed": 1,
+        "failed": 0,
+        "incomplete": 0
+      },
+      "producer_engine_mvid": "5a07f228-dff8-4d6b-b4ef-890b32a80299",
+      "producer_gltf_mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+      "cleanup_errors": []
+    }
+  ],
+  "gates": {
+    "pinned_source_audit": "complete",
+    "independent_data_oracle": "existing Python fallback/literal geometry oracle retained; no old codec/layout replay",
+    "public_source_and_compiled_load": "Canonical current compiled-only mounted load passed; distinct source required/optional cases retain exact7eb partial rest proof. No form-multiplicity replay.",
+    "actual_gpu_independent_geometry": "Current canonical all35 primitives/640 vertices/960 indices checked at .375,1,1.625,2,2.25 seconds; independent raw-GPU Python report passes all five. Clock-final and separate public midpoint also checked by independent C# oracle.",
+    "source_material_preview": "Current1024px oblique actual authored source materials captured and visually inspected,25 cubes+10 labels. Final user appearance approval pending.",
+    "normal_public_playback": "Passed643 observations across4.2016328seconds/2.1008164loops through public SkinnedModelRenderer and normal Scene.EditorTick; initial reset only, full monotonic gaps.",
+    "generated_tangent_frame": "Fixed installed named shader; actual canonical tangent length and normal dot errors zero in all five independent posed readbacks. Original strict failures retained.",
+    "actual_gpu_index_negative_controls": "Both actual bound-GPU reversed-winding and changed-index corruptions rejected, exact mutation/provenance verified, restored positive geometry passed each time."
+  },
+  "reference": {
+    "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/screenshot/screenshot.png",
+    "sha256": "7279131622bd7bcaf1daaa6f649c7deb3f9e79caedd543fb5833d44f068e55e1",
+    "purpose": "Pinned upstream visual context, visually inspected; no authored camera/light/exposure available"
+  },
+  "captures": [
+    {
+      "form": "glTF-Meshopt/compiled_glb_c",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/playback/17f45c0c331947cabf0e84abc0d0f21a/actual_public_source_material_after_two_wallclock_loops.png",
+      "sha256": "34a644292e599faed0e0baab7b34f82c91e095fbf83d5c8131950275a030f8d7",
+      "width": 1024,
+      "height": 1024,
+      "purpose": "Actual canonical public source-material view after ordinary two-loop playback; frozen source time0.20163281",
+      "producer_stage": "cache-tangent-corrective"
+    },
+    {
+      "form": "glTF-Meshopt/compiled_glb_c",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/playback/17f45c0c331947cabf0e84abc0d0f21a/actual_public_source_material_public_midpoint_seek.png",
+      "sha256": "ed0c06869803e5afc2ef0944170f54aedae2ccbe9337774ba8b0b1c51ece9961",
+      "width": 1024,
+      "height": 1024,
+      "purpose": "Separate public Sequence.Time .375 midpoint image; deterministic seek after clock observation,2511changed pixels",
+      "producer_stage": "cache-tangent-corrective"
+    }
+  ],
+  "capture": {
+    "form": "glTF-Meshopt/compiled_glb_c",
+    "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/playback/17f45c0c331947cabf0e84abc0d0f21a/actual_public_source_material_after_two_wallclock_loops.png",
+    "sha256": "34a644292e599faed0e0baab7b34f82c91e095fbf83d5c8131950275a030f8d7",
+    "width": 1024,
+    "height": 1024,
+    "purpose": "Actual canonical public source-material view after ordinary two-loop playback; frozen source time0.20163281",
+    "producer_stage": "cache-tangent-corrective"
+  },
+  "blockers": [],
+  "visual_approval": {
+    "status": "pending user review",
+    "agent_visual_check": "Both fresh1024px captures inspected:25cubes and10textured labels present, right-column rotation changes visible. Appearance darker than upstream; lighting/exposure not calibrated."
+  },
+  "extension_audit": {
+    "KHR_meshopt_compression_maturity": "Release Candidate as primary spec rechecked6Nov2026",
+    "KHR_mesh_quantization_maturity": "ratified",
+    "compressed_views": 60,
+    "headers": {
+      "a0": 33,
+      "a1": 11,
+      "e1": 12,
+      "d1": 4
+    },
+    "filters": {
+      "NONE": 40,
+      "EXPONENTIAL": 6,
+      "OCTAHEDRAL": 6,
+      "COLOR": 6,
+      "QUATERNION": 2
+    },
+    "codec_package": "Evergine.Bindings.MeshOptimizer2026.10.1.20",
+    "binding_source_commit": "2d5fe80c599106a869570096fad6a1441b6853d0",
+    "limitation": "Pinned remote binding.yml could not be fetched; exact native upstream revision not independently reverified remotely."
+  },
+  "limitations": [
+    "KHR_meshopt_compression remains Release Candidate; selected pinned codec/version compatibility and remote binding-source audit limits remain explicit.",
+    "Historical7eb rest literal image assertions are preserved at their original producer under a broader red wrapper; not rerun or relabeled current.",
+    "Source-material image fidelity is for user review. Same-material literal reference isolates geometry/bindings; independent full PBR/sampler matching and exact upstream camera/exposure not established.",
+    "643 widget callbacks prove ordinary monotonic phase progression and final GPU correctness, not visual FPS or a continuous independent per-frame geometry oracle.",
+    "Canonical output uses the ordinary conservative portable GLB compiler; no dense-layout optimization or matched vmdl performance claim.",
+    "Windows and broad editor/physics/LOD APIs remain separate central requirements."
+  ],
+  "canonical_compiled": {
+    "form": "glTF-Meshopt/compiled_glb_c",
+    "actual_upstream_variant": "glTF-Meshopt",
+    "derived": true,
+    "status": "passed",
+    "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/canonical/MeshoptCubeTest.glb_c",
+    "input_sha256": "e820e3a683d872e728a9a7429ad5ed7f97adfa7c9da55b96a82b2de22329d60a",
+    "bytes": 48572,
+    "package_manifest": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/canonical/package-manifest.json",
+    "package_manifest_sha256": "fc63ff19a2cddf15645aa5034c5c8df332fd833f52b71e5291dddcbbe5399f3b",
+    "compiler": "ordinary GltfCompiler.Compile; conservative extension identities retained",
+    "dependency_policy": "Exactly one canonical compiled .glb_c, ten PNG textures and upstream attribution. Model tests mount no source .gltf/.bin geometry fallback."
+  },
+  "retained_noncanonical_evidence": [
+    "glTF/compiled_glb_c historical rest measurements retained; not a second canonical asset or future replay target."
+  ],
+  "partial_rest_assertions": {
+    "receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/public-run-20261106-223927/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "receipt_sha256": "a75e89733d3bba1834ef7024afd0c4d69024476c081ab4b06823cf2b1728f515",
+    "wrapper_counts": {
+      "expected": 4,
+      "passed": 0,
+      "failed": 4,
+      "incomplete": 0
+    },
+    "failure_after_assertions": "Foreign-document pose rejected in helper; ownership fixed without weakening engine guard.",
+    "forms": [
+      {
+        "form": "glTF/source",
+        "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/public/21e60c6eb6604f1aa5c8f982e5768397",
+        "input_sha256": "8721150e3409425acf83aa21986e55880360ab084c17e96409c25fac53477f72",
+        "independent_reference_sha256": "bffc5439add7da08959b2a01ca93e748b274a3d3e26ce64f0d1b7b448d402219",
+        "public_resource": "meshopt_cube_022dede45d7c4566af81a53a8e04433f.gltf",
+        "numeric": {
+          "primitives": 35,
+          "checkedVertices": 640,
+          "checkedIndices": 960,
+          "sourceTime": null,
+          "PositionToleranceInches": 0.0002,
+          "NormalTolerance": 2e-06,
+          "ColorUvTolerance": 2e-07,
+          "materialImageAcceptance": "separate pending gate"
+        },
+        "image": {
+          "Iou": 1,
+          "MeanRgbByteError": 0.0002531828552794953,
+          "MaximumRgbByteError": 0.9999999403953552,
+          "DifferentPixels": 14
+        },
+        "actual_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/public/21e60c6eb6604f1aa5c8f982e5768397/actual_public_source_material_rest.png",
+        "actual_sha256": "c2a8c1252e93e08be08854cc0c0cb177ba336c5ffb2c98025998e54f7166b782",
+        "reference_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/public/21e60c6eb6604f1aa5c8f982e5768397/independent_fallback_literal_geometry_source_material.png",
+        "reference_sha256": "1554783ef27d302a441c9e98fa5bd1580482bdf4ae5f1ac6930d11e60eac9087",
+        "source_material_shaders": [
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_stock_sampler.shader"
+        ],
+        "source_label_material_state": [
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          }
+        ],
+        "compute_shader": "shaders/gltf_deform_cs.shader",
+        "scope": "Actual public Model.Load and ordinary ModelRenderer, all GPU positions/normals/colors/UVs and bound indices against Python fallback oracle; same-source-material independent literal geometry image. Inferred orthographic reference framing, not exact upstream camera or independent PBR material fidelity."
+      },
+      {
+        "form": "glTF/compiled_glb_c",
+        "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/public/e32674445a044267a1544c21512a1c6f",
+        "input_sha256": "071531bd795074e9a074542975d1620c815e2d8ede7ac6b45e669eba8dcfad3f",
+        "independent_reference_sha256": "bffc5439add7da08959b2a01ca93e748b274a3d3e26ce64f0d1b7b448d402219",
+        "public_resource": "meshopt_cube_157eb38c521e49feb5777157d45a302a.glb",
+        "numeric": {
+          "primitives": 35,
+          "checkedVertices": 640,
+          "checkedIndices": 960,
+          "sourceTime": null,
+          "PositionToleranceInches": 0.0002,
+          "NormalTolerance": 2e-06,
+          "ColorUvTolerance": 2e-07,
+          "materialImageAcceptance": "separate pending gate"
+        },
+        "image": {
+          "Iou": 1,
+          "MeanRgbByteError": 0.0002531828552794953,
+          "MaximumRgbByteError": 0.9999999403953552,
+          "DifferentPixels": 14
+        },
+        "actual_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/public/e32674445a044267a1544c21512a1c6f/actual_public_source_material_rest.png",
+        "actual_sha256": "c2a8c1252e93e08be08854cc0c0cb177ba336c5ffb2c98025998e54f7166b782",
+        "reference_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/public/e32674445a044267a1544c21512a1c6f/independent_fallback_literal_geometry_source_material.png",
+        "reference_sha256": "1554783ef27d302a441c9e98fa5bd1580482bdf4ae5f1ac6930d11e60eac9087",
+        "source_material_shaders": [
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_stock_sampler.shader"
+        ],
+        "source_label_material_state": [
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          }
+        ],
+        "compute_shader": "shaders/gltf_deform_cs.shader",
+        "scope": "Actual public Model.Load and ordinary ModelRenderer, all GPU positions/normals/colors/UVs and bound indices against Python fallback oracle; same-source-material independent literal geometry image. Inferred orthographic reference framing, not exact upstream camera or independent PBR material fidelity."
+      },
+      {
+        "form": "glTF-Meshopt/source",
+        "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/public/515973f201cf42d298d8ad4c85b1a5d7",
+        "input_sha256": "b5947609f3d8aba58de3d43101df3b635ffaaab5849431f8518af6a98a040433",
+        "independent_reference_sha256": "bffc5439add7da08959b2a01ca93e748b274a3d3e26ce64f0d1b7b448d402219",
+        "public_resource": "meshopt_cube_be975a30eaa645f096953b2b7bb00d52.gltf",
+        "numeric": {
+          "primitives": 35,
+          "checkedVertices": 640,
+          "checkedIndices": 960,
+          "sourceTime": null,
+          "PositionToleranceInches": 0.0002,
+          "NormalTolerance": 2e-06,
+          "ColorUvTolerance": 2e-07,
+          "materialImageAcceptance": "separate pending gate"
+        },
+        "image": {
+          "Iou": 1,
+          "MeanRgbByteError": 0.0002531828552794953,
+          "MaximumRgbByteError": 0.9999999403953552,
+          "DifferentPixels": 14
+        },
+        "actual_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/public/515973f201cf42d298d8ad4c85b1a5d7/actual_public_source_material_rest.png",
+        "actual_sha256": "c2a8c1252e93e08be08854cc0c0cb177ba336c5ffb2c98025998e54f7166b782",
+        "reference_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/public/515973f201cf42d298d8ad4c85b1a5d7/independent_fallback_literal_geometry_source_material.png",
+        "reference_sha256": "1554783ef27d302a441c9e98fa5bd1580482bdf4ae5f1ac6930d11e60eac9087",
+        "source_material_shaders": [
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_stock_sampler.shader"
+        ],
+        "source_label_material_state": [
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          }
+        ],
+        "compute_shader": "shaders/gltf_deform_cs.shader",
+        "scope": "Actual public Model.Load and ordinary ModelRenderer, all GPU positions/normals/colors/UVs and bound indices against Python fallback oracle; same-source-material independent literal geometry image. Inferred orthographic reference framing, not exact upstream camera or independent PBR material fidelity."
+      },
+      {
+        "form": "glTF-Meshopt/compiled_glb_c",
+        "output": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/public/c695a6b4ce564445b7cc0da49440177c",
+        "input_sha256": "e820e3a683d872e728a9a7429ad5ed7f97adfa7c9da55b96a82b2de22329d60a",
+        "independent_reference_sha256": "bffc5439add7da08959b2a01ca93e748b274a3d3e26ce64f0d1b7b448d402219",
+        "public_resource": "meshopt_cube_985042d7b5444218aa2edc4b3e0811cc.glb",
+        "numeric": {
+          "primitives": 35,
+          "checkedVertices": 640,
+          "checkedIndices": 960,
+          "sourceTime": null,
+          "PositionToleranceInches": 0.0002,
+          "NormalTolerance": 2e-06,
+          "ColorUvTolerance": 2e-07,
+          "materialImageAcceptance": "separate pending gate"
+        },
+        "image": {
+          "Iou": 1,
+          "MeanRgbByteError": 0.0002531828552794953,
+          "MaximumRgbByteError": 0.9999999403953552,
+          "DifferentPixels": 14
+        },
+        "actual_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/public/c695a6b4ce564445b7cc0da49440177c/actual_public_source_material_rest.png",
+        "actual_sha256": "c2a8c1252e93e08be08854cc0c0cb177ba336c5ffb2c98025998e54f7166b782",
+        "reference_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/public/c695a6b4ce564445b7cc0da49440177c/independent_fallback_literal_geometry_source_material.png",
+        "reference_sha256": "1554783ef27d302a441c9e98fa5bd1580482bdf4ae5f1ac6930d11e60eac9087",
+        "source_material_shaders": [
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_surface_five_uv.shader",
+          "shaders/gltf_stock_sampler.shader"
+        ],
+        "source_label_material_state": [
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          },
+          {
+            "shader": "shaders/gltf_surface_five_uv.shader",
+            "alpha_test": 1,
+            "translucent": 0,
+            "backfaces": 1,
+            "cutoff": 0.001,
+            "factor_alpha": 1
+          }
+        ],
+        "compute_shader": "shaders/gltf_deform_cs.shader",
+        "scope": "Actual public Model.Load and ordinary ModelRenderer, all GPU positions/normals/colors/UVs and bound indices against Python fallback oracle; same-source-material independent literal geometry image. Inferred orthographic reference framing, not exact upstream camera or independent PBR material fidelity."
+      }
+    ],
+    "counting_policy": "Completed rest assertions are retained by exact scope; they do not turn failed MSTest wrappers into passes."
+  },
+  "independent_gpu_summary": {
+    "scope": "Five actual canonical posed GPU readback files independently parsed in stdlib Python; no Sandbox evaluator or codec used for expectations",
+    "poses": [
+      0.375,
+      1.0,
+      1.625,
+      2.0,
+      2.25
+    ],
+    "unique_vertices": 640,
+    "indices_per_sample": 960,
+    "maximum_errors": {
+      "POSITION": 3.556379181191005e-05,
+      "NORMAL": 5.960465181958564e-08,
+      "COLOR": 5.983838846645995e-08,
+      "TEXCOORD": 0.0,
+      "TANGENT_LENGTH": 0.0,
+      "TANGENT_NORMAL_DOT": 0.0
+    },
+    "source_vertex_correspondence": "exact original identity maps and complete attributes; no fixed input vertex layout assumed",
+    "triangles_per_sample": {
+      "exact": 248,
+      "cyclic": 72,
+      "reversed": 0,
+      "changed": 0
+    },
+    "cyclic_policy": "Only the three cyclic rotations at the same triangle ordinal. No sorting, reordered faces, changed indices, reversed winding or widened limits.",
+    "summary_path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/poses/9d4db71b65a245a3b5c51f259ff704f6/independent-pose-summary.json",
+    "summary_sha256": "36232a7a3e91fddd08651b0418c62894de6455652399ec93767ff53770f8613e",
+    "reports": [
+      {
+        "time": 0.375,
+        "report": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/poses/9d4db71b65a245a3b5c51f259ff704f6/independent-pose-0.375.json",
+        "sha256": "4e13c7e481a19c6bb7b38bc2d409a6e30b98680a954e7be4e7ec43591c3ab3b8",
+        "maximum_errors": {
+          "POSITION": 3.556379181191005e-05,
+          "NORMAL": 1.6870263741530778e-08,
+          "COLOR": 5.983838846645995e-08,
+          "TEXCOORD": 0.0,
+          "TANGENT_LENGTH": 0.0,
+          "TANGENT_NORMAL_DOT": 0.0
+        },
+        "triangle_classification": {
+          "exact": 248,
+          "cyclic": 72,
+          "reversed": 0,
+          "changed": 0
+        }
+      },
+      {
+        "time": 1.0,
+        "report": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/poses/9d4db71b65a245a3b5c51f259ff704f6/independent-pose-1.json",
+        "sha256": "8e38c81692e914b88f551e0899a1cd96e756bc9cd6c716272ea8725c0c550d50",
+        "maximum_errors": {
+          "POSITION": 3.556379181191005e-05,
+          "NORMAL": 5.960465181958564e-08,
+          "COLOR": 5.983838846645995e-08,
+          "TEXCOORD": 0.0,
+          "TANGENT_LENGTH": 0.0,
+          "TANGENT_NORMAL_DOT": 0.0
+        },
+        "triangle_classification": {
+          "exact": 248,
+          "cyclic": 72,
+          "reversed": 0,
+          "changed": 0
+        }
+      },
+      {
+        "time": 1.625,
+        "report": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/poses/9d4db71b65a245a3b5c51f259ff704f6/independent-pose-1.625.json",
+        "sha256": "aa94b970c34a379af226d1aa1d8833b31f207a314bc923b82a08e753a84f2b3e",
+        "maximum_errors": {
+          "POSITION": 3.556379181191005e-05,
+          "NORMAL": 1.6870263741530778e-08,
+          "COLOR": 5.983838846645995e-08,
+          "TEXCOORD": 0.0,
+          "TANGENT_LENGTH": 0.0,
+          "TANGENT_NORMAL_DOT": 0.0
+        },
+        "triangle_classification": {
+          "exact": 248,
+          "cyclic": 72,
+          "reversed": 0,
+          "changed": 0
+        }
+      },
+      {
+        "time": 2.0,
+        "report": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/poses/9d4db71b65a245a3b5c51f259ff704f6/independent-pose-2.json",
+        "sha256": "7ba291c71c7c77898630ea423f2cbda9f1042707f6bdae4bdd68e42cfca97681",
+        "maximum_errors": {
+          "POSITION": 3.556379181191005e-05,
+          "NORMAL": 0.0,
+          "COLOR": 5.983838846645995e-08,
+          "TEXCOORD": 0.0,
+          "TANGENT_LENGTH": 0.0,
+          "TANGENT_NORMAL_DOT": 0.0
+        },
+        "triangle_classification": {
+          "exact": 248,
+          "cyclic": 72,
+          "reversed": 0,
+          "changed": 0
+        }
+      },
+      {
+        "time": 2.25,
+        "report": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/poses/9d4db71b65a245a3b5c51f259ff704f6/independent-pose-2.25.json",
+        "sha256": "c12202af4a08423eb6cd740f87f7a47d0d3c0609bc6962aecd654bb2c1be530d",
+        "maximum_errors": {
+          "POSITION": 3.556379181191005e-05,
+          "NORMAL": 0.0,
+          "COLOR": 5.983838846645995e-08,
+          "TEXCOORD": 0.0,
+          "TANGENT_LENGTH": 0.0,
+          "TANGENT_NORMAL_DOT": 0.0
+        },
+        "triangle_classification": {
+          "exact": 248,
+          "cyclic": 72,
+          "reversed": 0,
+          "changed": 0
+        }
+      }
+    ]
+  },
+  "playback": {
+    "model": "MeshoptCubeTest",
+    "form": "glTF-Meshopt/compiled_glb_c",
+    "input_sha256": "e820e3a683d872e728a9a7429ad5ed7f97adfa7c9da55b96a82b2de22329d60a",
+    "public_resource": "meshopt_clock_8510a2fad4a24c13a79f089eb59a7dcb.glb",
+    "sequence": "RotateCubes",
+    "duration": 2,
+    "playback_rate": 1,
+    "completed_loops": 2.1008164,
+    "ticks": 643,
+    "elapsed_seconds": 4.2016328,
+    "maximum_full_callback_gap_seconds": 0.03892759999999999,
+    "maximum_phase_error_seconds": 6.70043944772658e-08,
+    "input_rounding_bound_seconds": 7.808681090105962e-08,
+    "double_arithmetic_bound_seconds": 4.810374321095878e-12,
+    "numeric": {
+      "primitives": 35,
+      "checkedVertices": 640,
+      "checkedIndices": 960,
+      "sourceTime": 0.20163281,
+      "PositionToleranceInches": 0.0002,
+      "NormalTolerance": 2e-06,
+      "ColorUvTolerance": 2e-07,
+      "materialImageAcceptance": "separate pending gate"
+    },
+    "midpoint_numeric": {
+      "primitives": 35,
+      "checkedVertices": 640,
+      "checkedIndices": 960,
+      "sourceTime": 0.375,
+      "PositionToleranceInches": 0.0002,
+      "NormalTolerance": 2e-06,
+      "ColorUvTolerance": 2e-07,
+      "materialImageAcceptance": "separate pending gate"
+    },
+    "source_time_final_clock": 0.20163281,
+    "changed_pixels": 2511,
+    "camera": "{\"position\":\"1600,1000,900\",\"rotation\":\"-0.14171,-0.03157,0.96574,-0.21511\",\"Orthographic\":true,\"OrthographicHeight\":1100,\"ZNear\":1,\"ZFar\":4000,\"size\":1024,\"EnablePostProcessing\":true,\"debug_mode\":\"Normal\",\"directional_light\":\"camera-forward White*2\",\"recipe\":\"inferred oblique grid view; no authored upstream camera/lighting\"}",
+    "scope": "Public Model.Load and SkinnedModelRenderer, full monotonic widget gaps passed into normal Scene.EditorTick, initial clock seek only, actual final GPU pose/indices independently checked. Separate public midpoint seek proves source-material motion pixels. Camera/light inferred, final user visual approval pending; not visual FPS, Windows or performance.",
+    "observations_receipt": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/playback-run-20261106-230347/probe-01-editor_direct_gpu_tests/receipt-01.json",
+    "observations_receipt_sha256": "7c7ce23616416480a9844e1eba12540917c37d020f18937ecf95daa2b79919b2"
+  },
+  "capture_controls": [
+    {
+      "label": "empty_before",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/playback/17f45c0c331947cabf0e84abc0d0f21a/empty_before.png",
+      "sha256": "bda58e41c31291a94563a6cb2ddb70fa39eb22aea3cb42954fe38c393432838a",
+      "Coverage": 0,
+      "width": 1024,
+      "height": 1024,
+      "camera": "{\"position\":\"1600,1000,900\",\"rotation\":\"-0.14171,-0.03157,0.96574,-0.21511\",\"Orthographic\":true,\"OrthographicHeight\":1100,\"ZNear\":1,\"ZFar\":4000,\"size\":1024,\"EnablePostProcessing\":true,\"debug_mode\":\"Normal\",\"directional_light\":\"camera-forward White*2\",\"recipe\":\"inferred oblique grid view; no authored upstream camera/lighting\"}",
+      "engine_frame": 679
+    },
+    {
+      "label": "actual_public_source_material_after_two_wallclock_loops",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/playback/17f45c0c331947cabf0e84abc0d0f21a/actual_public_source_material_after_two_wallclock_loops.png",
+      "sha256": "34a644292e599faed0e0baab7b34f82c91e095fbf83d5c8131950275a030f8d7",
+      "Coverage": 110672,
+      "width": 1024,
+      "height": 1024,
+      "camera": "{\"position\":\"1600,1000,900\",\"rotation\":\"-0.14171,-0.03157,0.96574,-0.21511\",\"Orthographic\":true,\"OrthographicHeight\":1100,\"ZNear\":1,\"ZFar\":4000,\"size\":1024,\"EnablePostProcessing\":true,\"debug_mode\":\"Normal\",\"directional_light\":\"camera-forward White*2\",\"recipe\":\"inferred oblique grid view; no authored upstream camera/lighting\"}",
+      "engine_frame": 1334
+    },
+    {
+      "label": "actual_public_source_material_public_midpoint_seek",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/playback/17f45c0c331947cabf0e84abc0d0f21a/actual_public_source_material_public_midpoint_seek.png",
+      "sha256": "ed0c06869803e5afc2ef0944170f54aedae2ccbe9337774ba8b0b1c51ece9961",
+      "Coverage": 110843,
+      "width": 1024,
+      "height": 1024,
+      "camera": "{\"position\":\"1600,1000,900\",\"rotation\":\"-0.14171,-0.03157,0.96574,-0.21511\",\"Orthographic\":true,\"OrthographicHeight\":1100,\"ZNear\":1,\"ZFar\":4000,\"size\":1024,\"EnablePostProcessing\":true,\"debug_mode\":\"Normal\",\"directional_light\":\"camera-forward White*2\",\"recipe\":\"inferred oblique grid view; no authored upstream camera/lighting\"}",
+      "engine_frame": 1342
+    },
+    {
+      "label": "empty_after_public_renderer_delete",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/playback/17f45c0c331947cabf0e84abc0d0f21a/empty_after_public_renderer_delete.png",
+      "sha256": "bda58e41c31291a94563a6cb2ddb70fa39eb22aea3cb42954fe38c393432838a",
+      "Coverage": 0,
+      "width": 1024,
+      "height": 1024,
+      "camera": "{\"position\":\"1600,1000,900\",\"rotation\":\"-0.14171,-0.03157,0.96574,-0.21511\",\"Orthographic\":true,\"OrthographicHeight\":1100,\"ZNear\":1,\"ZFar\":4000,\"size\":1024,\"EnablePostProcessing\":true,\"debug_mode\":\"Normal\",\"directional_light\":\"camera-forward White*2\",\"recipe\":\"inferred oblique grid view; no authored upstream camera/lighting\"}",
+      "engine_frame": 1350
+    }
+  ],
+  "presentation_recipe": {
+    "position": "1600,1000,900",
+    "rotation": "-0.14171,-0.03157,0.96574,-0.21511",
+    "Orthographic": true,
+    "OrthographicHeight": 1100,
+    "ZNear": 1,
+    "ZFar": 4000,
+    "size": 1024,
+    "EnablePostProcessing": true,
+    "debug_mode": "Normal",
+    "directional_light": "camera-forward White*2",
+    "recipe": "inferred oblique grid view; no authored upstream camera/lighting"
+  },
+  "visual_comparison": {
+    "model": "MeshoptCubeTest",
+    "comparison_count": 1,
+    "canonical_capture": {
+      "form": "glTF-Meshopt/compiled_glb_c",
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-validation/direct-gpu/MeshoptCubeTest/playback/17f45c0c331947cabf0e84abc0d0f21a/actual_public_source_material_after_two_wallclock_loops.png",
+      "sha256": "34a644292e599faed0e0baab7b34f82c91e095fbf83d5c8131950275a030f8d7",
+      "width": 1024,
+      "height": 1024,
+      "purpose": "Actual canonical public source-material view after ordinary two-loop playback; frozen source time0.20163281",
+      "producer_stage": "cache-tangent-corrective"
+    },
+    "reference": {
+      "path": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/MeshoptCubeTest/screenshot/screenshot.png",
+      "sha256": "7279131622bd7bcaf1daaa6f649c7deb3f9e79caedd543fb5833d44f068e55e1",
+      "purpose": "Pinned upstream visual context, visually inspected; no authored camera/light/exposure available"
+    },
+    "status": "ready for user review",
+    "limits": "Inferred orthographic oblique camera/light. Upstream original camera, renderer and exposure unknown; no exact reference-camera or independent PBR pixel-match claim."
+  },
+  "resolved_defects": [
+    {
+      "problem": "Lit MASK-only scene routed to unsupported stock adapter",
+      "proof": "Original8fc actual red3ee6292d;7ebsource material/MASK/cutoff partial assertions undera75e8973."
+    },
+    {
+      "problem": "Exact byte-order index oracle rejected valid cyclic TRIANGLES encoding rotations",
+      "proof": "Actual raw readbacke7608000 and independent58ec8d8f; narrow per-ordinal oriented equivalence, no production decoding/layout change."
+    },
+    {
+      "problem": "Rotated missing-TANGENT fallback normalized a nearly cancelled Gram-Schmidt residual",
+      "proof": "OriginalactualGPU61957927/raw791a1809/independent7db2bed5, ownercandidatefecfef1d, installeddeform4e5f9c9d and currentcanonical5af9f799/7c7ce236."
+    }
+  ]
+}

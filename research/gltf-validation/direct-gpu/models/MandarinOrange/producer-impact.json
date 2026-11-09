@@ -1,0 +1,24 @@
+{
+  "prior_stage": "01459cedf3de4d298bfd2e270ac540d4",
+  "current_stage": "e12c0eea74234f09ab1bef23bcbd8e93",
+  "prior_inputs_sha256": "f7668ce3331b3f672ff93173275a9de7e4546b3cc827ed1395275cb159bfb57d",
+  "current_inputs_sha256": "1afb8f648007582d34100f8642a360c239b8d661f81aac0419c3d92bd5a4c7f3",
+  "changed_files": [
+    "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuAsset.Variants.cs",
+    "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuPrimitivePlan.LegacyUv.cs",
+    "engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfProjectedMaterialPacket.cs",
+    "engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs",
+    "engine/Sandbox.Engine/Resources/Model/Gltf/GltfModelLoader.cs",
+    "engine/Sandbox.Engine/Resources/Model/Gltf/GltfPublicMaterialRoute.cs",
+    "engine/Sandbox.Engine/Resources/Model/Gltf/Materials/GltfLegacyUvBakePlan.cs",
+    "engine/Sandbox.Engine/Resources/Model/Gltf/Model.GltfResource.cs"
+  ],
+  "retained_proofs": {
+    "Mandarin_geometry_gpu": "Retain01459 actual source/derived POSITION/index readback and borrowed-white Lit captures under their original01459 producer. GltfGpuBackend.cs, GltfGpuRig.cs and glTF reader input hashes are unchanged; diagnostic materialResolver bypasses the changed projected-material/legacy-UV branches. No e12 GPU rerun or loaded-shader identity promotion.",
+    "Mandarin_resource_core": "Retain01459 actual public no-default and explicit-scene identity/empty-library cases under01459. e12 constructor/material changes apply to selected unlit/projected routes; Mandarin has no unlit materials and no selected scene at asset load. Current source-material gap remains reported from its actual01459 failure receipt, without presenting it as a fresh e12 run.",
+    "reimport_observer": "e12 six affected real Reimport/observer cases actually rerun, including compiled-alias-origin selected view."
+  },
+  "current_render_stage": "8fc2880d1a95400ea530828b91d854f1",
+  "current_render_evidence": "8fc actual public source+compiled original-material GPU/capture tests supersede prior material failures and provide fresh position/source-normal/topology proof for generated corner output. Historical borrowed-material diagnostics retain01459 labels.",
+  "retained_reimport_scope": "e12 group observer/lifetime source proof retained; subsequent8fc rendering/deformation/material changes are covered by fresh model public GPU tests. Group replacement and editor atomic publication methods retain their e12 implementation."
+}

@@ -1,0 +1,345 @@
+{
+  "schemaVersion": 1,
+  "model": "EnvironmentTest",
+  "owner": "/root/model_environment_feedback",
+  "feedbackStatus": "unresolved",
+  "sourcePin": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "sourceTests": {
+    "passed": 6,
+    "currentInventory": 6,
+    "status": "executed under normal2GiB hostguard admission",
+    "scope": "Pinned source/ORM channels; optional IBL30sourcePNG layouts; wrong-source/LDR negative controls; exact float HDR roundtrip; literal RGBD gamma/divisor and cube cardinal/texel orientation controls",
+    "testSha256": "980f70018ced37abf572b3e5e94e658232a725bd85a4d7535b1b174e5dac6a1c"
+  },
+  "native": {
+    "producer": {
+      "engine": {
+        "diskMvid": "5832b742-ded3-46b8-94f2-1f62c65d5bd8",
+        "diskSha256": "6ed99fa9d59d5083ef45e17be80b36a2c086bd72748dad733693e5a25f8fd85b",
+        "mvid": "5832b742-ded3-46b8-94f2-1f62c65d5bd8",
+        "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.Engine.dll"
+      },
+      "gltf": {
+        "diskMvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+        "diskSha256": "7638a855ba21fd9c079a22cbc8b834d4169112fe08cb9a5fd788e63cf90866e1",
+        "mvid": "075675b7-ad83-46c0-8a5d-3c53301f2d9c",
+        "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.Gltf.dll"
+      },
+      "renderer": {
+        "diskMvid": "c22b305b-109d-4166-a212-a7d4bc301e40",
+        "diskSha256": "b5c8196be0f3c6bcca5cbae5f11e3ec4d3013fde98afffec99cd0e68fd11e7a1",
+        "mvid": "c22b305b-109d-4166-a212-a7d4bc301e40",
+        "path": "/home/damian/projects/sbox-public/game/bin/managed/Sandbox.SceneRenderer.dll"
+      }
+    },
+    "importedEnvironments": [
+      {
+        "Depth": 6,
+        "Height": 1024,
+        "Mips": 9,
+        "Width": 1024,
+        "compileOutcome": "compiled",
+        "compileReturned": null,
+        "compiled": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/field.vtex_c",
+        "compiledSha256": "c4f8a0b9bde9026b18390175bdc4cdd8a79c3d9589ec252179ee839ed80422ca",
+        "constructionPassed": true,
+        "definition": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/field.vtex",
+        "definitionSha256": "562deb2ba9abd7d44a2b1b15ca4725cf4711a0feb6e6117f3b58e6894ae8eb6d",
+        "engineMvid": "5832b742-ded3-46b8-94f2-1f62c65d5bd8",
+        "environment": {
+          "attribution": {
+            "author": "HDRI-Hub",
+            "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+            "sourceUrl": "https://www.hdri-hub.com/hdrishop/freesamples/freehdri/item/116-hdr-040-field-free"
+          },
+          "compiledPath": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/field.vtex_c",
+          "compiledSha256": "c4f8a0b9bde9026b18390175bdc4cdd8a79c3d9589ec252179ee839ed80422ca",
+          "sizeInches": 100000,
+          "sourcePath": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/field.exr",
+          "sourceProvenance": "Khronos glTF-Sample-Environments field.hdr; chosen candidate for NormalTangentTest, exact screenshot environment unproven",
+          "sourceSha256": "a9ad16a6d516171e425d0fc22cdde643b2116ed544578945899958cea21e1e7f",
+          "texturePath": "materials/gltf_reference_environment/field.vtex",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "type": "cubemap",
+          "yawDegrees": 0
+        },
+        "format": "BC6H",
+        "passed": true,
+        "resource": "materials/gltf_reference_environment/field.vtex",
+        "scope": "Native compile and SceneCubemap construction only. Require positive/no-environment/black and wrong-exposure rendered controls; HDR readback, orientation, mips and reference fidelity remain unproven.",
+        "source": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/field.exr",
+        "sourceSha256": "a9ad16a6d516171e425d0fc22cdde643b2116ed544578945899958cea21e1e7f",
+        "textureResourcePath": "materials/gltf_reference_environment/field.vtex"
+      },
+      {
+        "Depth": 6,
+        "Height": 256,
+        "Mips": 7,
+        "Width": 256,
+        "compileOutcome": "compiled",
+        "compileReturned": true,
+        "compiled": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/aerodynamics_workshop.vtex_c",
+        "compiledSha256": "f3949ae4dc2277fa466123d7a286a9368deb22985f0930165540d67d79327725",
+        "constructionPassed": true,
+        "definition": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/aerodynamics_workshop.vtex",
+        "definitionSha256": "4e98e40219656a4b81ee525dd63f651d5151d0df3911127d58c44456b15646cf",
+        "engineMvid": "5832b742-ded3-46b8-94f2-1f62c65d5bd8",
+        "environment": {
+          "attribution": {
+            "author": "Oliksiy Yakovlyev",
+            "licenseUrl": "https://polyhaven.com/license",
+            "sourceUrl": "https://polyhaven.com/a/aerodynamics_workshop"
+          },
+          "compiledPath": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/aerodynamics_workshop.vtex_c",
+          "compiledSha256": "f3949ae4dc2277fa466123d7a286a9368deb22985f0930165540d67d79327725",
+          "sizeInches": 100000,
+          "sourcePath": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/aerodynamics_workshop.exr",
+          "sourceProvenance": "Poly Haven Aerodynamics Workshop CC0; pinned ABeautifulGame README documents Babylon ACES +2EV screenshot; original EXR bytes preserved",
+          "sourceSha256": "8294e1425aecde72d188ac003eb46a4dd1a79877a1431e4c3979cfc49b3c5c76",
+          "texturePath": "materials/gltf_reference_environment/aerodynamics_workshop.vtex",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "type": "cubemap",
+          "yawDegrees": 0
+        },
+        "format": "BC6H",
+        "passed": true,
+        "resource": "materials/gltf_reference_environment/aerodynamics_workshop.vtex",
+        "scope": "Native compile and SceneCubemap construction only. Require positive/no-environment/black and wrong-exposure rendered controls; HDR readback, orientation, mips and reference fidelity remain unproven.",
+        "source": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/aerodynamics_workshop.exr",
+        "sourceSha256": "8294e1425aecde72d188ac003eb46a4dd1a79877a1431e4c3979cfc49b3c5c76",
+        "textureResourcePath": "materials/gltf_reference_environment/aerodynamics_workshop.vtex"
+      }
+    ],
+    "iblControls": {
+      "status": "passed",
+      "noEnvironmentVsBlackSamePng": true,
+      "positiveChangedPixelsAbove3of255": 6653,
+      "receipt": "/tmp/gltf-native-field-controls-02/summary.json"
+    },
+    "exposureControls": {
+      "status": "failed",
+      "componentSettingsRetained": true,
+      "zeroEvVsTwoEvSamePng": true,
+      "changedPixels": 0,
+      "scope": "Camera min=max/compensation observations did not establish pixel exposure. Isolated repeated-capture/native-scalar candidate prepared, not executed."
+    },
+    "sourceCapture": {
+      "kind": "image",
+      "path": "/tmp/gltf-native-field-controls-02/positive_environment/capture.png",
+      "sha256": "62bd0b6a9ffe5a2f36c2b24d7316e9e6173b6bebe2069aed4149698ae1d23606"
+    },
+    "captureScope": "Private diagnostic chosen Field environment, no direct lights; not matched reference, no canonical compiled visual proof.",
+    "primaryObjectLightingFlagControls": {
+      "status": "executed",
+      "receipt": "/tmp/gltf-native-metalrough-lighting-flags/summary.json",
+      "default": {
+        "isEnvMap": false,
+        "needsEnvironmentMap": false,
+        "needsLightProbe": false
+      },
+      "explicitEnabledRetained": true,
+      "allThreePngsIdentical": true,
+      "cube": "Constant-white16px RGBA32F5mips,30exactface/mip GPU sample checks",
+      "conclusion": "Flags hypothesis falsified; black pattern persists independently of spatial HDR/mip content. Transferred to material AO owner."
+    },
+    "initialImportAttempt": {
+      "receipt": "/tmp/gltf-native-field-controls/import-result.json",
+      "outcome": "uncertain source-index state after compileReturnedtrue",
+      "resolved": "Existing compiled file registered; exactasset state IsCompiled and upToDate true before guardedhold released. Corrected importer then confirmed nativeconstruction in secondreceipt."
+    },
+    "currentAerodynamicsRevalidation87f": {
+      "import": {
+        "Depth": 6,
+        "Height": 256,
+        "Mips": 7,
+        "Width": 256,
+        "compileOutcome": "compiled",
+        "compileReturned": null,
+        "compiled": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/aerodynamics_workshop.vtex_c",
+        "compiledSha256": "740fce93832d41943ad30d3585b2e04c9804296b05e71b5b7a02e4731bcfb7e8",
+        "constructionPassed": true,
+        "definition": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/aerodynamics_workshop.vtex",
+        "definitionSha256": "4e98e40219656a4b81ee525dd63f651d5151d0df3911127d58c44456b15646cf",
+        "engineMvid": "87f823c3-45fc-4903-a136-2b62d86ee251",
+        "environment": {
+          "attribution": {
+            "author": "Oliksiy Yakovlyev",
+            "licenseUrl": "https://polyhaven.com/license",
+            "sourceUrl": "https://polyhaven.com/a/aerodynamics_workshop"
+          },
+          "compiledPath": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/aerodynamics_workshop.vtex_c",
+          "compiledSha256": "740fce93832d41943ad30d3585b2e04c9804296b05e71b5b7a02e4731bcfb7e8",
+          "sizeInches": 100000,
+          "sourcePath": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/aerodynamics_workshop.exr",
+          "sourceProvenance": "Poly Haven Aerodynamics Workshop CC0; pinned ABeautifulGame README documents Babylon ACES +2EV screenshot; original EXR bytes preserved",
+          "sourceSha256": "8294e1425aecde72d188ac003eb46a4dd1a79877a1431e4c3979cfc49b3c5c76",
+          "texturePath": "materials/gltf_reference_environment/aerodynamics_workshop.vtex",
+          "tint": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "type": "cubemap",
+          "yawDegrees": 0
+        },
+        "format": "BC6H",
+        "nativeDirtyVersion": 0,
+        "passed": true,
+        "readOnlyExisting": true,
+        "resource": "materials/gltf_reference_environment/aerodynamics_workshop.vtex",
+        "scope": "Exact existing compiled disk bytes, native asset/source/path correspondence, descriptor and SceneCubemap construction checked; no source write or Compile call. Resident GPU-byte identity and raw HDR/mip readback remain unproven; rendered IBL response is a separate receipt.",
+        "source": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/aerodynamics_workshop.exr",
+        "sourceSha256": "8294e1425aecde72d188ac003eb46a4dd1a79877a1431e4c3979cfc49b3c5c76",
+        "textureGuid": "b9e6e317-0fdf-4434-9cec-c00b42518200",
+        "textureResourcePath": "materials/gltf_reference_environment/aerodynamics_workshop.vtex"
+      },
+      "ibl": {
+        "changedPixelsAbove3of255": 11578,
+        "iblResponse": true,
+        "results": [
+          {
+            "capture": {
+              "kind": "image",
+              "path": "/tmp/gltf-aerodynamics-current-preflight-87f/no_environment/capture.png",
+              "sha256": "cf21faa4cfe116ad4b99ffdfe1a6d72031d271aa41c8ffb6f1e3d10bedff21cc"
+            },
+            "label": "no_environment",
+            "result": "/tmp/gltf-aerodynamics-current-preflight-87f/no_environment-result.json"
+          },
+          {
+            "capture": {
+              "kind": "image",
+              "path": "/tmp/gltf-aerodynamics-current-preflight-87f/positive_environment/capture.png",
+              "sha256": "39a3a63de54d9a472f4707eda5110e581587f51407fa67a9d998e7855b123c60"
+            },
+            "label": "positive_environment",
+            "result": "/tmp/gltf-aerodynamics-current-preflight-87f/positive_environment-result.json"
+          }
+        ],
+        "scope": "Current exact existing compiled native cubemap, same public EnvironmentTest source/camera/materials, no direct lights. No exposure match, HDR float-readback, mip-filtering or source-extension claim."
+      },
+      "diskPayloadFingerprint": {
+        "path": "/home/damian/projects/sbox-public/game/core/materials/gltf_reference_environment/aerodynamics_workshop.vtex_c",
+        "wholeFileSha256": "740fce93832d41943ad30d3585b2e04c9804296b05e71b5b7a02e4731bcfb7e8",
+        "resourceVersion": 1,
+        "nonstreamingBytes": 1196,
+        "streamingBytes": 524256,
+        "streamingSha256": "333eb757284580ae15c4cab7c795b449bd7029284dd2ba39bff5078fdd18722e",
+        "blocks": [
+          {
+            "type": "GUID",
+            "bytes": 16,
+            "sha256": "2cddf0af6127f42e20d8ff6266ca819644c6d44f597183f5fedd1ea3fad4edb9"
+          },
+          {
+            "type": "REDI",
+            "bytes": 900,
+            "sha256": "d6bd5ded86c03612dfcd669803340ca6bc55f96f7a38750fc7dc4d6651b761c3"
+          },
+          {
+            "type": "DATA",
+            "bytes": 220,
+            "sha256": "bb0d62c25064dc43b96df963be1dafb9ed6e5cddefa3a59b231d7a0675069b61"
+          }
+        ],
+        "scope": "Disk block/stream identity only. Future rebuilds can distinguish metadata changes from texture DATA/stream changes; no historical or resident-GPU equivalence implied."
+      },
+      "scope": "Read-only exact-current asset/path/descriptor and native IBL response; no Compile/sourcewrite/Abeautifulmodel load. No rawHDR/mip/residentbyte identity claim."
+    },
+    "currentFieldRevalidation": {
+      "status": "separate preflight notrun per explicit rootdirection; no jobstarted",
+      "compiledSha256": "01cc0d0f0f69aa856b6650c71d5a4c8528667f61444b35b7c9bc382cda98fc55",
+      "sourceSha256": "a9ad16a6d516171e425d0fc22cdde643b2116ed544578945899958cea21e1e7f",
+      "definitionSha256": "562deb2ba9abd7d44a2b1b15ca4725cf4711a0feb6e6117f3b58e6894ae8eb6d",
+      "authorization": "NormalTangent owner may use exactcurrent diskhash with explicit HDR/resident/mip/exposure/reference limitations; capture performs basic native validity/path/descriptor checks",
+      "limits": "Earlier c4f8nativeproof remains historical; currenthash is diskobserved, not a new independent HDRtexel/preflightpass"
+    }
+  },
+  "sharedDriver": {
+    "path": "research/gltf-validation/editor_corpus.csx",
+    "sha256": "cb7e42fc5bcc3f20f2fdedb1cf77618a96fb2d1222499a18fa70a241654f6396",
+    "changes": [
+      "opt-in camera-colocated stock Tonemapping; actual settings retained check",
+      "opt-in same-cubemap native SceneSkyBox with owned material lifetime"
+    ],
+    "tested": "Native compilation and no-sky exposure/IBL cases executed; visibleSky not yet rendered"
+  },
+  "optionalExtension": {
+    "name": "EXT_lights_image_based",
+    "required": false,
+    "mipSizes": [
+      256,
+      128,
+      64,
+      32,
+      16
+    ],
+    "images": {
+      "RGBA": 7,
+      "RGB": 23
+    },
+    "capability": "not implemented or established by fixture/capture setup; authored diffuse SH and source prefiltered mips remain separate",
+    "selectedInManifest": false,
+    "maturity": "Multi-Vendor per primary specification, not listed as ratified Khronos",
+    "nativeStockBlocker": "No exposed SH9 RGB setter/transport; native diffuse samples most blurred specular mip; stock LOD maps level*count instead of level*(count-1).",
+    "managedAlternative": "Model-local unwired9SH/exactLOD helper; capability registration staysoff. Actual typed document/selected-scene resource consumption required.",
+    "selectionDecisionNeeded": "EXT_lights_image_based is unselected. Scope selection is required before broader reader/shader/defaultcapability implementation; retain optional corefallback."
+  },
+  "remaining": [
+    "Actual extension parser/selected-scene resource consumption while capability remainsunselected until acceptance",
+    "Authored SH9 and exact source mip sampling GPU controls",
+    "Source/onecanonicalcompiled finalrender and userreview",
+    "Visible native sky pixels/lifetime; framing/source-renderer calibration",
+    "Shared-driver native exposure convergence patch adoption/validation; isolated native scalar and pixel response now passed."
+  ],
+  "published": false,
+  "proposals": {
+    "design": "research/gltf-validation/direct-gpu/models/EnvironmentTest/NATIVE_IBL_BINDING.md",
+    "shaderCandidate": "research/gltf-validation/direct-gpu/models/EnvironmentTest/gltf_source_ibl_candidate.hlsl",
+    "independentGpuOracles": "research/gltf-validation/direct-gpu/models/EnvironmentTest/source-ibl-oracle.json",
+    "status": "Uncompiled, unbound, unexecuted; no shared shader/engine changes",
+    "derivedFixture": {
+      "status": "CPU extraction executed; no native calls/capture queued",
+      "manifest": "research/gltf-validation/direct-gpu/models/EnvironmentTest/embedded-ibl-fixture.json",
+      "payload": "/tmp/gltf-native-embedded-ibl-fixture/authored-cube-native.rgba32f",
+      "payloadSha256": "2c0921457a3730b7e4c1b857a08706892be5aa3cd25a17efed95954184ecc4ca",
+      "payloadBytes": 8380416,
+      "mips": 5,
+      "sourceShPreservedAsMetadata": true,
+      "nativeYawDegrees": 89.99999034065368,
+      "limitation": "Private derivedfixture only; public extension remainsunconsumed. Source SH application and sourceexactLOD remainunimplemented."
+    }
+  },
+  "backlog": [
+    {
+      "id": "select-EXT_lights_image_based",
+      "status": "selection-decision-needed",
+      "requirement": "Decide practicalextension scope; then implement typed source/compiled sceneconsumption and9SH/exactLOD binding before claiming support."
+    }
+  ],
+  "fieldNativeDiagnostic": {
+    "path": "research/gltf-validation/direct-gpu/models/EnvironmentTest/field-native-result.json",
+    "status": "native-hdr-mip-residency-and-exposure-response-proven",
+    "hdrReceipt": {
+      "path": "Temp/gltf-validation/direct-gpu/field-hdr-only-906826c68c-cs-declaration/transport/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "3fa1bad48ba5a2dc2b2bb4c2f7651708bf07e876067e254af66a62b156745fa2"
+    },
+    "exposureReceipt": {
+      "path": "Temp/gltf-validation/direct-gpu/field-hdr-exposure-906826c68c-corrected-type/transport/probe-01-editor_direct_gpu_tests/receipt-01.json",
+      "sha256": "aa578c7d86cdf0ad0ac858aec1dce85a6abf49cf7e8ce0a38acaa4e1b2ebb700"
+    },
+    "nativeDefectObserved": false,
+    "captureFixProposal": "Wait for native scalar exposure*2^EV within0.5percent under a bounded real-frame/RTT loop, then capture a subsequent frame; preserve failure on timeout. Existing model-local patch uses same strategy but its reflection path/shared-driver adoption has not been executed."
+  }
+}

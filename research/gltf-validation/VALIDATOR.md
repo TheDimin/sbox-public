@@ -1,12 +1,12 @@
 # Khronos validator adapter
 
-`validator_adapter.py` runs the official Khronos glTF-Validator CLI against a freshly checked pinned sample checkout and, optionally, the corresponding generated `.glb_c` artifacts. It is independent of the s&box readers. It preserves every reported validator message, the source or artifact hash and source external-resource hashes. It does not waive defects or infer rendering correctness. The existing `validate.py` full-goal gate remains unchanged.
+`../../engine/Tools/Gltf/scripts/validator_adapter.py` runs the official Khronos glTF-Validator CLI against a freshly checked pinned sample checkout and, optionally, the corresponding generated `.glb_c` artifacts. It is independent of the s&box readers. It preserves every reported validator message, the source or artifact hash and source external-resource hashes. It does not waive defects or infer rendering correctness. The existing `../../engine/Tools/Gltf/scripts/validate.py` full-goal gate remains unchanged.
 
 The recorded Linux x64 tool is Khronos release [2.0.0-dev.3.10](https://github.com/KhronosGroup/glTF-Validator/releases/tag/2.0.0-dev.3.10), source commit [bcd52cc4ba5f333b2999a58f67cc05ddf28b4fb1](https://github.com/KhronosGroup/glTF-Validator/commit/bcd52cc4ba5f333b2999a58f67cc05ddf28b4fb1). The release archive `gltf_validator-2.0.0-dev.3.10-linux64.tar.xz` observed SHA-256 is `168eba887964125abe17ae97899b38d0b3cfd73c266c78424c194929ddcbc522`, and its executable SHA-256 is `5cba1e097935c9efd929d24a49610824259b030f0ae45672273bfbcbb5b87a62`. Khronos's release metadata did not publish a digest; these hashes record the copy observed from the official release and are not an upstream signature or independent attestation. Review the origin and hashes before changing the pin. Keep the release `LICENSE` and `NOTICES` with redistributed copies; generated binaries and model artifacts belong in ignored `Temp/`, not Git.
 
 ```sh
 python3 -B -m unittest discover -s research/gltf-validation -p 'test_*.py' -v
-python3 -B research/gltf-validation/validator_adapter.py \
+python3 -B engine/Tools/Gltf/scripts/validator_adapter.py \
   --validator Temp/gltf-validation/validator/gltf_validator \
   --corpus Temp/gltf-reference/glTF-Sample-Assets \
   --compiled-root Temp/gltf-validation/compiled \

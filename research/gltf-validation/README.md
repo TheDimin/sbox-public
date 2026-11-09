@@ -1,17 +1,39 @@
 # glTF sample validation scaffold
 
+## Where things live
+
+- Docs, JSON manifests, receipts, captures, reference recipes and fixtures: this folder.
+- Editor probes (`editor_*.csx`), Python and Node runners, and the `Run` driver: [`engine/Tools/Gltf/`](../../engine/Tools/Gltf/README.md).
+- Per-model code: `engine/Tools/Gltf/direct-gpu/`. Per-model requests, results and docs: `direct-gpu/models/<Model>/` in this folder.
+- Move history and rules for old paths: [CODE_LOCATIONS](CODE_LOCATIONS.md).
+
+Status as of 2026-11-08 is in [FEATURE_STATUS](FEATURE_STATUS.md), section "Status on 2026-11-08".
+
+
+The current corpus entry point is [Run](../../engine/Tools/Gltf/scripts/Run), using the public model APIs in
+[editor_corpus.csx](../../engine/Tools/Gltf/editor/editor_corpus.csx). Its stock-resource proof recursively pins
+resource dependencies and audited shader parents before reusing captures.
+The selected `vertex_color.shader` compile took 29.575062905 seconds and produced
+`8f4ecfe974cbd25d5cc2319f6a44fb760e47e49e573ca303cb32a94535756f46`.
+Its compiled FEATURE metadata retains Forward, delegated Depth and delegated
+ToolsShadingComplexity; both delegated shader hashes are unchanged. Container,
+program bounds, preserved GUID and dependency identity were checked. This proves
+the compiled resource closure, not shader appearance or runtime mode correctness;
+new captures and visual review remain required. The editor observations below
+describe their original, narrower fixtures.
+
 Rendering acceptance runs in the real s&box editor, using its virtual display when
 requested. The user chose editor-only validation on 2026-11-04; do not substitute
 a standalone `TestAppSystem` render or manually pump engine frames for this proof.
 Reuse an existing authorized editor and confirm its project with `editor_status`.
-Use [editor_render.csx](editor_render.csx) through the discovered `run_csharp`
+Use [editor_render.csx](../../engine/Tools/Gltf/editor/editor_render.csx) through the discovered `run_csharp`
 tool. It creates its own `SceneRenderingWidget`, waits for real editor frames,
 and writes PNGs plus a scoped receipt under `Temp/gltf-validation/editor-render`.
 It checks the pinned Triangle's source and packaged geometry, both windings and
 camera sides, single/double-sided stock materials, shared material leases and
 empty-frame controls. This is one geometry fixture, not full corpus parity.
 
-[editor_texture.csx](editor_texture.csx) compiles and packages the pinned
+[editor_texture.csx](../../engine/Tools/Gltf/editor/editor_texture.csx) compiles and packages the pinned
 BoxTextured sample inside the editor, compiles its PNG into a native RGBA texture,
 and renders through the shared material cache and stock complex shader. It checks
 all native texture texels, source/package render agreement, an untextured control,
@@ -19,7 +41,7 @@ and black initial/disabled frames. Its receipt and PNGs are under
 `Temp/gltf-validation/editor-texture`. This covers a static base-color fixture,
 not complete PBR, sampling, mip or material conformance.
 
-[editor_cache.csx](editor_cache.csx) checks the actual registered
+[editor_cache.csx](../../engine/Tools/Gltf/editor/editor_cache.csx) checks the actual registered
 `GltfMaterialSceneSystem` in two private editor scenes, an asset lease that
 outlives both, isolated edits, rejection after disposal and final material-wrapper
 invalidation. It writes `Temp/gltf-validation/editor-cache/receipt.json` and does
@@ -52,7 +74,7 @@ pixels in the current editor. Merely registering a custom command therefore does
 not explain the explicit-clear diagnostic's success. Preserve this failing
 control when investigating the renderer; no global pipeline change is included.
 
-[editor_morph.csx](editor_morph.csx) constructs a pinned, self-contained glTF with
+[editor_morph.csx](../../engine/Tools/Gltf/editor/editor_morph.csx) constructs a pinned, self-contained glTF with
 one animated position target, builds stock-shader native morphs and independent
 CPU-evaluated reference models, and captures 0/+1/−1 weights. It records actual
 controller names, requested and native-reported weights, preview updates and
@@ -75,7 +97,7 @@ skinning, memory efficiency or full deformation conformance. Pairing duplicates
 target data and controllers; quantify that cost before selecting the compiled
 representation. The baseline remains failing.
 
-[editor_material_schema.csx](editor_material_schema.csx) reads the actual loaded
+[editor_material_schema.csx](../../engine/Tools/Gltf/editor/editor_material_schema.csx) reads the actual loaded
 stock complex shader's 159 variables and 20 combos in the current editor and
 writes `editor-material-schema/receipt.json`. It does not mutate the shader or
 material. Metadata supplies candidates for subsequent controlled render tests;
@@ -96,7 +118,7 @@ ordinary view may use the managed renderer when `r_managed_scene` is enabled.
 Record this distinction: running inside the editor alone does not establish
 coverage of both pipelines. The current editor's viewport flag is false.
 
-`editor_render.csx` additionally accepts `SBOX_GLTF_CAPTURE_RENDERER=managed` to
+`../../engine/Tools/Gltf/editor/editor_render.csx` additionally accepts `SBOX_GLTF_CAPTURE_RENDERER=managed` to
 call the already-registered `SceneBridge.RenderToTexture` for its private camera
 and target after the normal preview callbacks. It does not change the global
 viewport flag. In this path the complete Triangle/winding/sharing matrix and
@@ -104,7 +126,7 @@ deleted/fresh empty controls passed without the color-clear diagnostic. The
 receipt is `editor-render-managed/receipt.json`. The native stale-frame control
 remains a separate failure.
 
-[editor_scene.csx](editor_scene.csx) compiles the exact new
+[editor_scene.csx](../../engine/Tools/Gltf/editor/editor_scene.csx) compiles the exact new
 `GltfStaticSceneAssembler` source and its self-contained MSTest source inside the
 editor, in a collectible helper assembly. It records both source hashes, the
 framework hash and helper module ID, and checks that the loaded glTF assembly
@@ -127,7 +149,7 @@ full implementation.
 
 ### Material and lighting prerequisites
 
-[editor_material_channels.csx](editor_material_channels.csx) compiles eight
+[editor_material_channels.csx](../../engine/Tools/Gltf/editor/editor_material_channels.csx) compiles eight
 controlled PNG channel fixtures into native linear texture resources, verifies
 their actual RGBA readback and measures stock complex debug output. Under the
 tested settings, normal-texture blue values 32/224 produced roughness output
@@ -136,7 +158,7 @@ packing candidate; it does not prove factor equations or independent UV/sampler
 support. Its metalness control was unresponsive, so the overall receipt remains
 failed at `editor-material-channels-camera-clear`.
 
-[editor_metalness_lighting.csx](editor_metalness_lighting.csx) adds direct-light
+[editor_metalness_lighting.csx](../../engine/Tools/Gltf/editor/editor_metalness_lighting.csx) adds direct-light
 controls and an optional short `SBOX_GLTF_LIGHTING_CONTROLS_ONLY=1` mode. Its
 `SBOX_GLTF_CAPTURE_RENDERER=managed` option keeps both capture paths separate.
 The first tests found that the stock vmdl sphere lights correctly, while both
@@ -147,7 +169,7 @@ pixels; a light behind the triangle contributes zero. This isolates a runtime
 mesh vertex-frame prerequisite. Preserve the failed original controls while
 fixing primitive staging; do not infer metalness behavior from an unlit mesh.
 
-[editor_vertex_frame.csx](editor_vertex_frame.csx) compiles the exact primitive
+[editor_vertex_frame.csx](../../engine/Tools/Gltf/editor/editor_vertex_frame.csx) compiles the exact primitive
 builder source and its new MSTest regression source inside the editor. The
 `SBOX_GLTF_EXPECT_VERTEX_FRAME_RED=1` run against the original source recorded
 three failures for missing tangent frames and one passing authored-tangent
@@ -194,7 +216,7 @@ resolves that compiled file while preserving the logical `.glb` identity.
 The separate nonwhite-factor positive test also failed before RGB support was
 added. These are real API failures, not assertions against an invented stub.
 
-[editor_model_load.csx](editor_model_load.csx) mounts private fixtures, verifies
+[editor_model_load.csx](../../engine/Tools/Gltf/editor/editor_model_load.csx) mounts private fixtures, verifies
 their bytes and exercises the actual resource API. `SBOX_GLTF_MODEL_CASE=all`
 passed all 13 current cases with 42 loads on the rebuilt engine. It covers both
 untouched Khronos Triangle variants, source GLB, direct compiled-file loading,
@@ -228,7 +250,7 @@ The loaded two-color scene also passed the same references and omission controls
 through the native capture pipeline with its scoped color-clear diagnostic:
 `editor-model-load-render-camera-clear/6d7c219285e545c5bef76147d95d9951`.
 
-[editor_model_lifetime.csx](editor_model_lifetime.csx) additionally proved that
+[editor_model_lifetime.csx](../../engine/Tools/Gltf/editor/editor_model_lifetime.csx) additionally proved that
 two distinct loaded models share a material, explicit destruction decrements its
 lease count 2→1→0, the surviving model remains valid, the last wrapper becomes
 invalid, and repeated destruction is harmless. A separate no-inline weak-model
@@ -268,7 +290,7 @@ sampler explicitly requests linear magnification, `NEAREST_MIPMAP_LINEAR`
 minification and repeat addressing. Merely binding its image at the base mip
 cannot establish support for that sampler or full sample parity.
 
-[editor_model_texture_load.csx](editor_model_texture_load.csx) is prepared for
+[editor_model_texture_load.csx](../../engine/Tools/Gltf/editor/editor_model_texture_load.csx) is prepared for
 this regression but has not run. It independently calls the actual resource
 APIs for the original external, embedded and binary assets plus a labeled
 derived compiled-only GLB, retaining every failed case. Success checks geometry,
@@ -326,7 +348,7 @@ sampler. Existing vmdl behavior remains a regression requirement.
 
 The current `Model.Load` adapter still rejects skinned, morphed and animated
 selected nodes. Existing CPU readers/evaluation do not establish native model
-loading or playback. [editor_animation.csx](editor_animation.csx) is a prepared,
+loading or playback. [editor_animation.csx](../../engine/Tools/Gltf/editor/editor_animation.csx) is a prepared,
 unrun editor check of analytic translation/rotation/scale expectations for
 STEP, LINEAR and CUBICSPLINE, including keys, intermediate times, immediate
 STEP-boundary neighbors, hierarchy and a skinned vertex. Its arithmetic epsilon
@@ -346,7 +368,7 @@ against independently evaluated geometry. Rest scale/shear, native influence
 limits and graph interaction remain open integration checks. Treat an exposed
 API limitation as a question to investigate, not a proven native blocker.
 
-[editor_skinning.csx](editor_skinning.csx) prepares source/compiled two-joint
+[editor_skinning.csx](../../engine/Tools/Gltf/editor/editor_skinning.csx) prepares source/compiled two-joint
 fixtures with inverse-bind offsets, hierarchy and normalized weight sets. Its
 private native construction uses independent bind/posed reference geometry,
 actual preview callbacks and empty-frame controls, with an optional managed
@@ -369,7 +391,7 @@ instanced with different skins. Nonjoint ancestors are included in the glTF pose
 hierarchy. Native vertex-index interpretation and generated master/render-bone
 order still need actual editor readback before packing can rely on them.
 
-[editor_animation_playback.csx](editor_animation_playback.csx) prepares native
+[editor_animation_playback.csx](../../engine/Tools/Gltf/editor/editor_animation_playback.csx) prepares native
 fixed-frame seek measurements and an actual load of the pinned embedded
 AnimatedTriangle. It records fractional and boundary-adjacent times, local/world
 bones and mixed-channel reference errors. This is a measurement probe with no
@@ -382,7 +404,7 @@ optional engine-space object placement once. Its reusable destination API
 validates before writing and does not require an array allocation per update.
 This helper has not been connected to a renderer or `Model.Load`.
 
-[editor_skinning_palette.csx](editor_skinning_palette.csx) is the unrun editor
+[editor_skinning_palette.csx](../../engine/Tools/Gltf/editor/editor_skinning_palette.csx) is the unrun editor
 runner for its new unit tests. It compiles the worktree helper/test sources with
 one renamed type identifier and records original/compiled hashes and module
 identities. Cases cover valid TRS hierarchies producing shear, independent
@@ -419,7 +441,7 @@ mirror's visibility-to-null transition will need provider reapplication on show,
 along with posed bounds and ordinary component/playback integration. These
 source changes and tests are unbuilt and unrun.
 
-[editor_direct_skinning_palette.csx](editor_direct_skinning_palette.csx) queues
+[editor_direct_skinning_palette.csx](../../engine/Tools/Gltf/editor/editor_direct_skinning_palette.csx) queues
 those tests against the actual loaded Engine/SceneRenderer modules. It checks
 disk/loaded module identities, reports a missing producer API explicitly, and
 compiles only the test and existing fixture source in the established friend
@@ -443,7 +465,7 @@ metadata staging; the fixed renderer paths remain in use and are not replaced.
 Actual dynamic native bindings or vertex pulling, owned byte lifetimes, sparse
 materialization and stock-shader compatibility remain implementation work.
 
-[editor_primitive_modes.csx](editor_primitive_modes.csx) prepares 42 cases across
+[editor_primitive_modes.csx](../../engine/Tools/Gltf/editor/editor_primitive_modes.csx) prepares 42 cases across
 seven primitive modes, source/cold compiled-only storage, and three authored or
 missing normal/tangent combinations. It requires independent native topology,
 visible omission controls, metadata and image comparisons, and empty frames.
@@ -457,13 +479,13 @@ scales, replacing an incorrect expectation that all singular transforms should
 be rejected. Zero scale is valid in the
 [core transformation rules](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#transformations).
 The production assembler still rejects these cases. Record the actual failing
-editor run before implementing the correction. The revised `editor_scene.csx`
+editor run before implementing the correction. The revised `../../engine/Tools/Gltf/editor/editor_scene.csx`
 can compile the worktree helper even when that helper already exists in the
 loaded module: it renames three type identifiers and records both original and
 compiled source hashes. The algorithm and tests otherwise remain unchanged;
 this does not substitute for rebuilding and validating the production engine.
 
-[editor_quantization.csx](editor_quantization.csx) prepares two actual-load
+[editor_quantization.csx](../../engine/Tools/Gltf/editor/editor_quantization.csx) prepares two actual-load
 checks for a pinned synthetic `KHR_mesh_quantization` triangle with strided
 SHORT positions, normalized BYTE directions and node dequantization scale.
 The source and cold compiled-only cases verify independent native geometry
@@ -488,17 +510,44 @@ FLOAT/unsigned-normalized UV inputs. The fix follows the ratified
 The separate loader-policy change above enables decoding for `Model.Load`;
 these declaration tests remain unrun.
 
-[editor_gltf_unit_tests.csx](editor_gltf_unit_tests.csx) queues those tests against
-the loaded glTF module, without compiling production source. Its default suite
-is `quantization-declarations`; `SBOX_GLTF_UNIT_SUITE` selects any alias from
-[gltf-test-manifest.json](gltf-test-manifest.json), or `all` for the complete
-`Sandbox.Test.Gltf` project. Manifest version 3 inventories 38 source classes,
-309 methods, 163 DataRows and 431 expanded cases. These are source counts, not
+[editor_gltf_unit_tests.csx](../../engine/Tools/Gltf/editor/editor_gltf_unit_tests.csx) queues those tests against
+the loaded glTF module, without compiling production source. Manifest version 5
+inventories 44 source classes, 416 methods, 409 DataRows and 732 expanded cases,
+including the revised UploadData/UploadLayout suites and the raw Draco primitive
+suite. These are source counts, not
 execution results or a claim of complete specification coverage.
+
+An optional `gltf-unit-request.json` in the current connection's
+`exchangeDirectory` selects any manifest suite alias, or `all` for the complete
+`Sandbox.Test.Gltf` project. A valid request takes precedence over the editor's
+`SBOX_GLTF_UNIT_SUITE` environment variable. Only an absent request retains that
+environment selection, or the `quantization-declarations` default when the
+editor has no nonblank environment value. Setting an environment variable on a
+new CLI process does not change the existing editor's environment. The runner
+changes neither process environment nor CWD.
+
+The request must be UTF-8 JSON, between 1 and 4096 bytes, with exactly these four
+properties, no duplicate properties, integer version `1`, a 32-character
+lowercase hexadecimal request ID, an exact suite alias, and the lowercase
+SHA-256 of the manifest bytes used for this run:
+
+```json
+{"version":1,"request_id":"0123456789abcdef0123456789abcdef","suite":"all","manifest_sha256":"<64 lowercase hexadecimal characters>"}
+```
+
+A malformed or stale request fails the run; it cannot fall back to environment
+or default selection. The receipt records `selection_source` (`request`,
+`environment` or `default`), `request_path`, `request_sha256`, `request_id` and
+`request_values`. Empty or oversized inputs are rejected before hashing;
+invalid UTF-8 or JSON has a hash but no parsed values. The manifest, runner,
+test sources and fixtures keep their independent hashes.
 
 The runner checks source-file inventory and fixed class/method/row/case totals,
 supports both TestMethod and DataTestMethod, and compiles selected test sources
-plus their declared source dependencies. It embeds the actual checked-in KTX
+plus their declared source dependencies. DataRow arguments support exact CLR
+`string`, `int`, `uint`, `byte`, `bool` and `float` values; argument types must match the
+method parameters without conversion. Receipts preserve `argument_types` beside
+the JSON argument values, including blocked cases and codec preflights. It embeds the actual checked-in KTX
 fixtures and records their hashes with test, manifest and framework hashes.
 The helper references the glTF library, BCL and MSTest, matching the pure test
 project, and checks loaded/disk producer identity. It executes cases sequentially,
@@ -510,10 +559,155 @@ preflight blocks its dependent cases; malformed-input tests cannot pass merely
 because a missing decoder also throws. Preflight results and module observations
 are separate from project-case totals. They prove only their sampled paths;
 the remaining codec cases still determine other modes and formats. The revised
-runner remains unrun. A complete project pass remains separate from Khronos
+Draco preflight is `NativeBoxDecodeSuppliesRawFloatAttributesAndDecodedTopology`
+from the raw primitive suite. Its other cache-seeded cases exercise adapter and
+representation behavior; they do not establish native decoding of those formats.
+The UploadData suite requires the positive meshopt preflight. Root's first
+actual-editor attempt failed before test execution because the method-body
+wrapper did not import the namespace containing `GetValueOrDefault`. The
+runner now uses `TryGetValue` explicitly. A second actual run compiled the
+runner but its test-source compilation reported 16 CS9007 raw-literal errors;
+the receipt records zero executed cases and 485 partial cases. Owners are
+correcting those literals. The orchestrator retains the negative receipt and
+reports its phase/error/diagnostics before validating identities that are absent
+when compilation fails. A subsequent 485-case run completed with 366 passed,
+two singular-transform failures and 117 blocked cases from three unavailable
+native codecs; that is not a complete pass. The new singular-transform
+regression raised the next inventory to 486. Root later recorded 483 passed and
+three singular-transform failures with no blocked/partial cases, and all three
+codec preflights passed. Manifest v5 now adds 246 authored, unrun core
+data/material/animation/scene cases for 732 total. A complete project pass remains separate from Khronos
 corpus rendering, native component/editor behavior and performance acceptance.
 An installed module missing a newly added API must be rebuilt/restarted before
 that suite can compile; compiling test sources never substitutes for that step.
+
+### Run selection within one attached CLI connection
+
+[run_editor_tests.py](../../engine/Tools/Gltf/scripts/run_editor_tests.py) implements the following protocol with
+two explicit modes. Root runs each entire foreground command through the
+resource guard after verifying the physical desktop editor. First use
+`python3 engine/Tools/Gltf/scripts/run_editor_tests.py discover --pid PID --project /absolute/project.sbproj
+--output /absolute/new-discovery-directory`. Inspect its `instructions.txt`,
+`schemas.json`, full JSON replies and `discovery.json`. It dispatches no scripts
+or tests. Then use `python3 engine/Tools/Gltf/scripts/run_editor_tests.py run --pid PID --project
+/absolute/project.sbproj --output /absolute/new-run-directory
+--confirmed-discovery /absolute/new-discovery-directory/discovery.json
+--confirmed-sha256 HASH`, substituting the discovery file's printed SHA-256.
+Run mode repeats discovery and rejects changed schemas or frozen inputs before
+dispatching the unchanged runner with a same-session `all` request. It retains
+the full receipt, checks the 732-case result and records console output. It
+never launches or kills an editor. Transport failures produce incomplete/error
+artifacts and a cooperative disconnect; a normal disconnect follows the final
+response. Root's attempts have exercised the protocol; complete-suite acceptance
+remains unverified.
+
+[run_editor_probes.py](../../engine/Tools/Gltf/scripts/run_editor_probes.py) reuses that reviewed connection for
+an explicit root-provided list, for example
+`python3 engine/Tools/Gltf/scripts/run_editor_probes.py --pid PID --project
+/absolute/project.sbproj --output /absolute/new-probe-directory
+--confirmed-discovery /absolute/discovery.json --confirmed-sha256 HASH
+editor_animation.csx editor_skinning_palette.csx`. Root guards the whole command
+and chooses CPU and rendering batches separately. Full replies, per-probe
+console/status snapshots and safe returned receipt copies stay in the artifact
+directory; stdout is concise progress only. Existing fixed-output evidence is
+archived before overwrite, within an 8192-file/512-MiB batch bound. The executor
+does not interpret a common `passed` field or claim feature acceptance. It
+records human scene changes and stops rather than changing play/compile state.
+Optional `--model-request /absolute/request.json` accepts only the existing
+six-field model-probe schema with `selection: "all"` and `render: true`, and
+copies it unchanged to the actual session. It accepts no arbitrary editor code.
+The batch executor remains unrun by its author.
+
+First satisfy the resource guard and existing-editor identity checks. Use the
+installed CLI's `--connect <verified-pid>` protocol mode and keep its stdin open
+until the final response arrives. A new connection has a new exchange directory.
+`--call` initializes and immediately invokes its one tool, so it does not provide
+an opportunity to prepare that connection's request file. An earlier `--call`
+connection's exchange directory cannot select a later run.
+
+The exact sequence on one process is:
+
+1. Start `/absolute/path/to/game/bin/managed/sbox-cli --connect <verified-pid>
+   --request-timeout 900` with UTF-8 stdin/stdout pipes and stderr inherited or
+   drained separately. Send one JSON object per line, without a BOM. Flush after
+   each message; match responses by ID and ignore notifications. Treat any
+   JSON-RPC `error`, including an error with null ID, as fatal.
+2. Send initialization and wait for response ID 1. Read its instructions and
+   require `_meta.pid`, `_meta.kind == "editor"` and the resolved `_meta.project`
+   to match the editor already verified for this task. Retain the returned
+   `_meta.exchangeDirectory` as `exchange`.
+
+   ```json
+   {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"gltf-validation","version":"1"}}}
+   ```
+
+3. Send the initialized notification, then list entry points and wait for ID 2:
+
+   ```json
+   {"jsonrpc":"2.0","method":"notifications/initialized"}
+   {"jsonrpc":"2.0","id":2,"method":"tools/list"}
+   ```
+
+4. Call `editor_status` and confirm its project and responsiveness. Discover
+   `run_csharp` with `search_tools`, checking its current argument schema. Wait
+   for each matching response and reject `result.isError == true`.
+
+   ```json
+   {"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"editor_status","arguments":{}}}
+   {"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"search_tools","arguments":{"query":"run_csharp"}}}
+   ```
+
+5. Read the canonical manifest and runner bytes from this checkout. Hash both.
+   Create the four-field request using the manifest hash and a fresh
+   `uuid.uuid4().hex` request ID. Write it as UTF-8 without BOM to
+   `exchange/gltf-unit-request.json`. Copy the runner bytes unchanged to
+   `exchange/editor_gltf_unit_tests.csx`; verify that copy's hash equals the
+   canonical runner hash. Record the request bytes' hash before invoking. Do not
+   insert a selection assignment or otherwise rewrite the script body.
+6. Substitute the actual absolute path in this request and wait for response
+   ID 5 before closing stdin:
+
+   ```json
+   {"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"run_csharp","arguments":{"path":"<exchange>/editor_gltf_unit_tests.csx"}}}
+   ```
+
+7. Retain the complete response and read the returned receipt. Require the
+   requested suite, `selection_source == "request"`, request ID, exact request
+   path/hash/values, manifest hash and original runner hash to match the inputs
+   recorded above. A complete project pass additionally requires
+   `manifest_version == 5`, `all_project_cases_passed == true`, 732 expected and
+   passed cases, and zero failed, blocked or partial cases. Verify the three
+   positive codec preflights separately. Close stdin only after the last
+   response, then wait for this attached CLI to exit; the editor stays open.
+
+These instructions follow the installed CLI's
+`skills/sbox-cli/references/protocol.md` and `run-csharp.md`. They prepare no new
+editor, change no global environment/CWD, and have not been executed for the
+version 4 runner.
+
+### Request regression matrix for the central editor test run
+
+All cases below remain **unrun**. Root runs them using the connection sequence
+above, replacing only the request bytes between fully completed calls. For
+every rejected request require `passed == false`,
+`all_project_cases_passed == false`, zero executed/preflight cases, an actionable
+error, and a receipt. Verify the request hash for every nonempty input no larger
+than 4096 bytes, including invalid JSON/UTF-8. Rejection never falls back.
+
+| Request case | Required observation |
+|---|---|
+| Request absent | Source is `environment` if the existing editor already has a nonblank selection; otherwise `default` and `quantization-declarations`. Do not set editor environment to arrange this case. |
+| Valid `accessor` request | Source is `request`, request/hash/values match, and exactly 15 accessor cases are selected. |
+| Valid `all` request | Source is `request`, all 732 manifest cases are selected, and positive Draco, meshopt and KTX preflights precede dependent cases. |
+| Valid request padded with JSON whitespace to exactly 4096 bytes | Request accepted; hash includes the padding. |
+| Empty input; 4097-byte input | Rejected as empty/oversized; no request hash or parsed values. |
+| Invalid UTF-8; BOM; malformed JSON; trailing second JSON value | Rejected during request parsing; no parsed values. |
+| `null`, array or scalar root; JSON deeper than four levels | Rejected before suite execution. |
+| Each missing property; extra property; duplicate property | Exact schema/uniqueness rejection. |
+| Version `0`, `2`, `1.0`, string `"1"`, boolean or null | Integer version 1 required. |
+| ID wrong length, uppercase or nonhex; nonstring ID | Rejected with request source and no suite execution. |
+| Manifest hash wrong length, uppercase, nonhex, nonstring or stale | Rejected before suite execution; compare the supplied and observed manifest hashes in the receipt. |
+| Empty, whitespace, unknown, oversized or nonstring suite | Rejected; an unknown alias must not select the default suite. |
 
 `GltfTextureTransformDeclarationTests` now checks that a selected
 `KHR_texture_transform` is listed in `extensionsUsed`, while preserving valid
@@ -545,7 +739,7 @@ without mip filtering require a single-mip texture or view; a sampler descriptor
 alone does not meet that requirement. In particular, setting Vulkan maximum LOD
 to zero can lose the requested independent min/mag behavior.
 
-The revised [editor_material_schema.csx](editor_material_schema.csx) preserves
+The revised [editor_material_schema.csx](../../engine/Tools/Gltf/editor/editor_material_schema.csx) preserves
 the native shader-properties JSON as well as the typed variables/combos schema,
 and reports mounted source/compiled filenames. Each run has a unique receipt
 and raw-metadata hash. This query loads the stock material but does not create
@@ -589,6 +783,66 @@ This tool inventories every model variant in the pinned [Khronos sample assets r
 
 This is scaffolding, **not an s&box adapter, glTF conformance validator, reference evaluator, image comparison or performance benchmark**. It checks enough of a `.glb` to read its JSON chunk, but does not validate the rest of the GLB or glTF specification. Artifact hashes establish file integrity, not that a claimed adapter ran or that its assertions are correct. Consequently even a well-formed, hash-matching evidence record reports `adapter-integration-pending` and cannot pass. No engine capability is established by running this tool alone.
 
+## Actual-editor corpus tests
+
+[corpus-case-manifest.json](corpus-case-manifest.json) inventories **150 models
+and all 337 variants** at the pinned commit. Independent authoring checks found
+337 indexed assets and exactly the same 337 on disk, a clean Models/LICENSES
+checkout, and 1890 distinct hashed source/dependency/provenance files. Rebuild
+this metadata with `python3 engine/Tools/Gltf/scripts/build_corpus_manifest.py
+--corpus Temp/gltf-reference/glTF-Sample-Assets`. The stdlib builder performs no
+engine or rendering validation. It bounds independent accessor reads to 2 MiB
+and position decoding to 100000 elements; unavailable/large oracles remain
+explicit coverage holes.
+
+There are **312 applicable rows and 25 exclusions for required extensions
+outside the selected scope**. Optional outside-scope extensions remain
+applicable core-fallback cases. A valid asset with no default scene stays
+applicable and records selection-needed import behavior. Unsupported point/line,
+camera, skin, morph or animation behavior is never an exclusion. The reviewed
+upstream-defect ledger is currently empty; no sample has been repaired or
+discarded. Each row keeps its source form, extension declarations, source and
+dependency SHA-256s, README/metadata/legal references and upstream screenshot
+reference. Full immutable material tables and node→mesh→primitive→material
+bindings are shared by SHA-256 across identical source forms; all 10000
+NodePerformance material contracts and their distinct values are retained.
+
+[editor_corpus.csx](../../engine/Tools/Gltf/editor/editor_corpus.csx) is an **authored, unrun** existing-editor
+test. It rechecks the pin, index/disk set and shared table hashes, mounts unique
+private copies, and attempts actual `Model.Load` for each applicable original
+source and a packaging-only `.glb_c` derivative. A compiler failure cannot hide
+the separate original-source attempt. Original assets are unchanged. It
+destroys each uniquely owned model explicitly, unmounts/removes its redirects,
+and removes only that form's owned input copies before advancing; it retains no
+array of loaded models. Main-thread yields occur between forms/assets. Human
+play mode stops further loads, and no active scene, environment or CWD is changed.
+
+Every row receives a stable per-run case receipt, including exclusions,
+resource-admission pending cases and work not run after interruption. Default
+per-asset admission is a conservative 256 MiB estimate and 64 MiB individual
+file limit. Estimates are not hard memory caps. Larger valid assets remain in
+scope with `resource_admission_pending`; root must choose a suitably guarded
+isolated run. Optional `exchangeDirectory/gltf-corpus-request.json` has exactly
+these fields (an empty `case_ids` selects all 337 rows):
+
+```json
+{"version":1,"request_id":"<32 lowercase hex>","manifest_sha256":"<manifest SHA-256>","case_ids":[],"max_estimated_bytes":268435456,"max_file_bytes":67108864,"keep_inputs":false}
+```
+
+Load, geometry, material, animation and render appearance are separate gates.
+Independent stdlib-decoded transformed bounds are available for 224 corpus
+rows, subject to their recorded limits. Declared triangle counts are diagnostic;
+degenerate pruning or Draco strip topology can make native counts differ.
+Native base-factor/backface parameter checks are partial material observations.
+Source-versus-derived agreement is supplementary and cannot act as an
+independent oracle. The upstream screenshots lack matched camera/light/exposure
+contracts and are review context only. There are no heavy captures by default.
+Full vertex/attribute/posed readback, PBR/texture/alpha behavior, native animation
+and matched appearance oracles remain explicitly unverified where not attached;
+**loading every row cannot produce `applicable_full_pass`**. The manifest's
+feature matrix reports sample presence independently from acceptance and lists
+requirements needing dedicated feature tests.
+
 ## Corpus and licenses
 
 Obtain the upstream repository and its complete Git LFS content through the project's approved network workflow, then check out the exact manifest commit. The tool does not download or alter it. A missing repository, wrong commit, local changes under `Models` or `LICENSES`, missing indexed assets, LFS pointer instead of an indexed asset or referenced buffer/image, unsafe paths and malformed asset JSON all prevent either pass. Do not run against a partial or modified corpus. Git status does not verify ignored files or changes outside these paths; CI should use a fresh, trusted checkout.
@@ -597,10 +851,17 @@ Preserve each model's upstream README, metadata, attribution and applicable lice
 
 ## Run
 
+This section describes the older offline `../../engine/Tools/Gltf/scripts/validate.py` evidence aggregator. Its
+legacy any-unselected-extension filter is stricter than the latest required-only
+exclusion policy in `corpus-case-manifest.json`; do not use its applicable-case
+count as the new editor harness's scope. Its adapters also remain pending. The
+337-row editor inventory above is authoritative for the newly requested corpus
+tests, including optional outside-scope core fallback.
+
 ```sh
-python3 -B research/gltf-validation/validate.py --corpus /path/to/glTF-Sample-Assets > report.json
-python3 -B research/gltf-validation/validate.py --corpus /path/to/glTF-Sample-Assets --evidence /path/to/evidence.json > report.json
-python3 -B research/gltf-validation/validate.py --coverage-status > pending-integrations.json
+python3 -B engine/Tools/Gltf/scripts/validate.py --corpus /path/to/glTF-Sample-Assets > report.json
+python3 -B engine/Tools/Gltf/scripts/validate.py --corpus /path/to/glTF-Sample-Assets --evidence /path/to/evidence.json > report.json
+python3 -B engine/Tools/Gltf/scripts/validate.py --coverage-status > pending-integrations.json
 python3 -B -m unittest discover -s research/gltf-validation -p 'test_*.py' -v
 ```
 

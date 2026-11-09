@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "id": "SimpleInstancing/glTF",
+  "sourcePath": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets/Models/SimpleInstancing/glTF/SimpleInstancing.gltf",
+  "corpusRoot": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets",
+  "inputPath": "Models/SimpleInstancing/glTF/SimpleInstancing.gltf",
+  "outputDir": "/home/damian/projects/sbox-public/Temp/gltf-validation/simple-instancing-crash-validation/case",
+  "recipe": {
+    "id": "SimpleInstancing/glTF",
+    "input": {
+      "path": "Models/SimpleInstancing/glTF/SimpleInstancing.gltf",
+      "sha256": "a01695630e6459c945826c7ff8dde74784de8279f60b9b62604980dc7486340e"
+    },
+    "reference": {
+      "path": "Models/SimpleInstancing/screenshot/screenshot.png",
+      "url": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/90d7ede14c7e280af263824604b427a1ca02cb66/Models/SimpleInstancing/screenshot/screenshot.png",
+      "kind": "image",
+      "sha256": "7301d0fd145de5c561d604d4fb646eddab69b22b34cad6d28f82fd0b470cfcb9",
+      "format": "png",
+      "width": 128,
+      "height": 128,
+      "frames": 1,
+      "animated": false,
+      "frameDurationsMs": [
+        0
+      ],
+      "durationMs": 0
+    },
+    "camera": {
+      "space": "gltf-metres",
+      "position": [
+        29.607746087499812,
+        21.18141707069602,
+        29.607746087499812
+      ],
+      "target": [
+        5.532520325203252,
+        5.532520325203252,
+        5.532520325203252
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "projection": "perspective",
+      "verticalFov": 45,
+      "orthographicHeight": 25.562183168370677,
+      "preset": "instancing-lattice"
+    },
+    "presentation": {
+      "background": {
+        "type": "solid",
+        "color": [
+          0.35,
+          0.35,
+          0.35,
+          1
+        ]
+      },
+      "environment": {
+        "type": "engine-default",
+        "sourceReferenceEnvironment": "unknown"
+      },
+      "lights": [
+        {
+          "type": "directional",
+          "direction": [
+            -0.6424925662032356,
+            -0.4176201680321033,
+            -0.6424925662032356
+          ],
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "intensity": 2
+        }
+      ],
+      "exposure": 1,
+      "resolution": {
+        "width": 512,
+        "height": 512
+      }
+    },
+    "animation": {
+      "clip": null,
+      "name": null,
+      "time": 0,
+      "rate": 1,
+      "duration": 0,
+      "loop": false,
+      "captureTimes": [
+        0
+      ],
+      "recording": {
+        "kind": "image",
+        "fps": null,
+        "frameCount": 1,
+        "duration": 0,
+        "sampleTimes": [
+          0
+        ],
+        "frameDurationsSeconds": [],
+        "timingProvenance": "static reference: one selected pose"
+      },
+      "clips": [],
+      "referenceDuration": 0.0,
+      "timingRelationship": "authored rate retained; reference correspondence needs tuning"
+    },
+    "provenance": {
+      "camera": "inferred-from-preview",
+      "presentation": "inferred-from-preview; exact HDRI/lighting unknown",
+      "animation": "static",
+      "inspectedReference": true,
+      "reviewMethod": "all150 pinned previews and all15 animated preview phase strips visually inspected",
+      "bounds": "existing independent SimpleInstancing reference.json: bounds of all125 instance rows",
+      "notes": [
+        "Authored-camera selection is inferred even when its numeric parameters are exact source values."
+      ]
+    },
+    "matchStatus": "needs-tuning",
+    "limitations": [
+      "Upstream preview renderer, exact camera selection, environment, exposure and tone mapping are not documented; this is not an exact matched-reference claim.",
+      "Reference appearance is accepted only by the user; recipe inference does not approve a model.",
+      "Camera inferred from inspected source preview; declared-rest bounds framing may need model-specific tuning for deformation or instancing."
+    ]
+  },
+  "timeoutSeconds": 90
+}

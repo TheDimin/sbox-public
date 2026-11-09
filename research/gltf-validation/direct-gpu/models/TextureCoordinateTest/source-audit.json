@@ -1,0 +1,3210 @@
+{
+  "corpusRevision": "90d7ede14c7e280af263824604b427a1ca02cb66",
+  "files": {
+    "glTF/TextureCoordinateTest.gltf": "424f373518a4451c612d952290dc3aa217de8f17008c4030e378da0d582ab1da",
+    "glTF-Embedded/TextureCoordinateTest.gltf": "34a6f3559308a79df53c225a2b4ef84f4d086843fc4257e0cd99598c4afb7d00",
+    "glTF-Binary/TextureCoordinateTest.glb": "fe75a63a0423c9a682bf46c3045b6328ae9c55abefc9a50adf3ec1d6dc6ea3b9",
+    "glTF/TextureCoordinateTest.bin": "428cf36c6431d3252568295ea9bd5301813c96bb9cdd0f141de7a40a5abc9858",
+    "glTF/TextureCoordinateTemplate.png": "07728c817d1f3d0b86d1fcc4610ed5ae4cf5064cb7f245bb891e84fb95fe28c8",
+    "LICENSE.md": "c150c33c2137dce1dceab721d34dc59465535a4626d95c25cf6ddb687325ea10",
+    "metadata.json": "c1ba8b8b4d8ba56de8a78e55d0b5eeb6dcf2732842c63a4297af15f57311b512"
+  },
+  "forms": [
+    {
+      "name": "glTF",
+      "path": "glTF/TextureCoordinateTest.gltf",
+      "sha256": "424f373518a4451c612d952290dc3aa217de8f17008c4030e378da0d582ab1da",
+      "sceneNodes": [
+        0,
+        2,
+        1,
+        4,
+        3
+      ],
+      "primitives": [
+        {
+          "mesh": 0,
+          "node": 4,
+          "material": 4,
+          "mode": 4,
+          "indices": {
+            "accessor": 0,
+            "view": 0,
+            "buffer": 0,
+            "viewOffset": 0,
+            "viewLength": 6,
+            "accessorOffset": 0,
+            "stride": 1,
+            "componentType": 5121,
+            "components": 1,
+            "count": 6,
+            "normalized": false,
+            "values": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ]
+          },
+          "streams": {
+            "NORMAL": {
+              "accessor": 2,
+              "view": 2,
+              "buffer": 0,
+              "viewOffset": 56,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  -2.1316282072803006e-14,
+                  1.0728441424134871e-07,
+                  1.0
+                ],
+                [
+                  -2.1316282072803006e-14,
+                  1.0728441424134871e-07,
+                  1.0
+                ],
+                [
+                  -2.1316282072803006e-14,
+                  1.0728441424134871e-07,
+                  1.0
+                ],
+                [
+                  -2.1316282072803006e-14,
+                  1.0728441424134871e-07,
+                  1.0
+                ]
+              ]
+            },
+            "POSITION": {
+              "accessor": 1,
+              "view": 1,
+              "buffer": 0,
+              "viewOffset": 8,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  1.2000000476837158,
+                  0.20000019669532776,
+                  -5.205485820169997e-08
+                ],
+                [
+                  0.19999980926513672,
+                  1.1999999284744263,
+                  -1.5933926533762133e-07
+                ],
+                [
+                  0.19999995827674866,
+                  0.20000004768371582,
+                  -5.205485820169997e-08
+                ],
+                [
+                  1.1999998092651367,
+                  1.2000001668930054,
+                  -1.5933926533762133e-07
+                ]
+              ]
+            },
+            "TEXCOORD_0": {
+              "accessor": 3,
+              "view": 3,
+              "buffer": 0,
+              "viewOffset": 104,
+              "viewLength": 32,
+              "accessorOffset": 0,
+              "stride": 8,
+              "componentType": 5126,
+              "components": 2,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  1.0,
+                  0.3999999761581421
+                ],
+                [
+                  0.6000000238418579,
+                  0.0
+                ],
+                [
+                  0.6000000238418579,
+                  0.3999999761581421
+                ],
+                [
+                  1.0,
+                  0.0
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "mesh": 1,
+          "node": 3,
+          "material": 3,
+          "mode": 4,
+          "indices": {
+            "accessor": 4,
+            "view": 4,
+            "buffer": 0,
+            "viewOffset": 136,
+            "viewLength": 6,
+            "accessorOffset": 0,
+            "stride": 1,
+            "componentType": 5121,
+            "components": 1,
+            "count": 6,
+            "normalized": false,
+            "values": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ]
+          },
+          "streams": {
+            "NORMAL": {
+              "accessor": 6,
+              "view": 6,
+              "buffer": 0,
+              "viewOffset": 192,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  1.7807019503379706e-07,
+                  2.853547016457014e-07,
+                  1.0
+                ],
+                [
+                  1.7807019503379706e-07,
+                  2.853547016457014e-07,
+                  1.0
+                ],
+                [
+                  1.7807019503379706e-07,
+                  2.853547016457014e-07,
+                  1.0
+                ],
+                [
+                  1.7807019503379706e-07,
+                  2.853547016457014e-07,
+                  1.0
+                ]
+              ]
+            },
+            "POSITION": {
+              "accessor": 5,
+              "view": 5,
+              "buffer": 0,
+              "viewOffset": 144,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  -0.20000006258487701,
+                  0.19999994337558746,
+                  -5.2054843990845256e-08
+                ],
+                [
+                  -1.2000001668930054,
+                  1.1999998092651367,
+                  -1.5933929375933076e-07
+                ],
+                [
+                  -1.1999999284744263,
+                  0.19999974966049194,
+                  1.2601539367551595e-07
+                ],
+                [
+                  -0.20000025629997253,
+                  1.2000000476837158,
+                  -3.3740951721483725e-07
+                ]
+              ]
+            },
+            "TEXCOORD_0": {
+              "accessor": 7,
+              "view": 7,
+              "buffer": 0,
+              "viewOffset": 240,
+              "viewLength": 32,
+              "accessorOffset": 0,
+              "stride": 8,
+              "componentType": 5126,
+              "components": 2,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  0.3999999463558197,
+                  0.3999999761581421
+                ],
+                [
+                  7.915305388905836e-08,
+                  0.0
+                ],
+                [
+                  7.915305388905836e-08,
+                  0.3999999761581421
+                ],
+                [
+                  0.3999999463558197,
+                  0.0
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "mesh": 2,
+          "node": 2,
+          "material": 2,
+          "mode": 4,
+          "indices": {
+            "accessor": 8,
+            "view": 8,
+            "buffer": 0,
+            "viewOffset": 272,
+            "viewLength": 6,
+            "accessorOffset": 0,
+            "stride": 1,
+            "componentType": 5121,
+            "components": 1,
+            "count": 6,
+            "normalized": false,
+            "values": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ]
+          },
+          "streams": {
+            "NORMAL": {
+              "accessor": 10,
+              "view": 10,
+              "buffer": 0,
+              "viewOffset": 328,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  -1.7807025187721592e-07,
+                  2.853545879588637e-07,
+                  1.0
+                ],
+                [
+                  -1.7807025187721592e-07,
+                  2.853545879588637e-07,
+                  1.0
+                ],
+                [
+                  -1.7807025187721592e-07,
+                  2.853545879588637e-07,
+                  1.0
+                ],
+                [
+                  -1.7807025187721592e-07,
+                  2.853545879588637e-07,
+                  1.0
+                ]
+              ]
+            },
+            "POSITION": {
+              "accessor": 9,
+              "view": 9,
+              "buffer": 0,
+              "viewOffset": 280,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  1.2000001668930054,
+                  -1.1999998092651367,
+                  5.255118367131217e-07
+                ],
+                [
+                  0.2000000923871994,
+                  -0.19999991357326508,
+                  6.20869826661874e-08
+                ],
+                [
+                  0.20000037550926208,
+                  -1.2000000476837158,
+                  3.4744169852274354e-07
+                ],
+                [
+                  1.1999999284744263,
+                  -0.1999996304512024,
+                  2.401571350674203e-07
+                ]
+              ]
+            },
+            "TEXCOORD_0": {
+              "accessor": 11,
+              "view": 11,
+              "buffer": 0,
+              "viewOffset": 376,
+              "viewLength": 32,
+              "accessorOffset": 0,
+              "stride": 8,
+              "componentType": 5126,
+              "components": 2,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  0.9999998211860657,
+                  1.0
+                ],
+                [
+                  0.6000000834465027,
+                  0.5999999046325684
+                ],
+                [
+                  0.6000001430511475,
+                  1.0
+                ],
+                [
+                  0.9999998807907104,
+                  0.5999999046325684
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "mesh": 3,
+          "node": 0,
+          "material": 0,
+          "mode": 4,
+          "indices": {
+            "accessor": 12,
+            "view": 12,
+            "buffer": 0,
+            "viewOffset": 408,
+            "viewLength": 6,
+            "accessorOffset": 0,
+            "stride": 1,
+            "componentType": 5121,
+            "components": 1,
+            "count": 6,
+            "normalized": false,
+            "values": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                0
+              ],
+              [
+                3
+              ],
+              [
+                1
+              ]
+            ]
+          },
+          "streams": {
+            "NORMAL": {
+              "accessor": 14,
+              "view": 14,
+              "buffer": 0,
+              "viewOffset": 464,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  1.0658142730467397e-14,
+                  -7.450581307466564e-08,
+                  -1.0
+                ],
+                [
+                  1.0658142730467397e-14,
+                  -7.450581307466564e-08,
+                  -1.0
+                ],
+                [
+                  1.0658142730467397e-14,
+                  -7.450581307466564e-08,
+                  -1.0
+                ],
+                [
+                  1.0658142730467397e-14,
+                  -7.450581307466564e-08,
+                  -1.0
+                ]
+              ]
+            },
+            "POSITION": {
+              "accessor": 13,
+              "view": 13,
+              "buffer": 0,
+              "viewOffset": 416,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  -1.0000001192092896,
+                  0.9999998211860657,
+                  -0.05259115248918533
+                ],
+                [
+                  1.0000001192092896,
+                  -0.9999998211860657,
+                  -0.052591003477573395
+                ],
+                [
+                  -0.9999998211860657,
+                  -1.0000001192092896,
+                  -0.052591003477573395
+                ],
+                [
+                  0.9999998211860657,
+                  1.0000001192092896,
+                  -0.05259115248918533
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "mesh": 4,
+          "node": 1,
+          "material": 1,
+          "mode": 4,
+          "indices": {
+            "accessor": 15,
+            "view": 15,
+            "buffer": 0,
+            "viewOffset": 512,
+            "viewLength": 6,
+            "accessorOffset": 0,
+            "stride": 1,
+            "componentType": 5121,
+            "components": 1,
+            "count": 6,
+            "normalized": false,
+            "values": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ]
+          },
+          "streams": {
+            "NORMAL": {
+              "accessor": 17,
+              "view": 17,
+              "buffer": 0,
+              "viewOffset": 568,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  -8.526512829121202e-14,
+                  4.6342486825778906e-07,
+                  1.0
+                ],
+                [
+                  -8.526512829121202e-14,
+                  4.6342486825778906e-07,
+                  1.0
+                ],
+                [
+                  -8.526512829121202e-14,
+                  4.6342486825778906e-07,
+                  1.0
+                ],
+                [
+                  -8.526512829121202e-14,
+                  4.6342486825778906e-07,
+                  1.0
+                ]
+              ]
+            },
+            "POSITION": {
+              "accessor": 16,
+              "view": 16,
+              "buffer": 0,
+              "viewOffset": 520,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  -0.19999969005584717,
+                  -1.1999999284744263,
+                  5.255118367131217e-07
+                ],
+                [
+                  -1.2000000476837158,
+                  -0.2000003159046173,
+                  6.208705372046097e-08
+                ],
+                [
+                  -1.1999998092651367,
+                  -1.2000001668930054,
+                  5.255118367131217e-07
+                ],
+                [
+                  -0.19999992847442627,
+                  -0.2000000774860382,
+                  6.208701108789683e-08
+                ]
+              ]
+            },
+            "TEXCOORD_0": {
+              "accessor": 18,
+              "view": 18,
+              "buffer": 0,
+              "viewOffset": 616,
+              "viewLength": 32,
+              "accessorOffset": 0,
+              "stride": 8,
+              "componentType": 5126,
+              "components": 2,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  0.40000009536743164,
+                  0.9999999403953552
+                ],
+                [
+                  5.960464477539063e-08,
+                  0.6000000238418579
+                ],
+                [
+                  0.0,
+                  0.9999999403953552
+                ],
+                [
+                  0.4000000059604645,
+                  0.6000000238418579
+                ]
+              ]
+            }
+          }
+        }
+      ],
+      "texture": {
+        "index": 0,
+        "image": 0,
+        "sampler": 0,
+        "texCoord": 0,
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        "wrapS": 10497,
+        "wrapT": 10497,
+        "minFilter": null,
+        "magFilter": null
+      }
+    },
+    {
+      "name": "glTF-Embedded",
+      "path": "glTF-Embedded/TextureCoordinateTest.gltf",
+      "sha256": "34a6f3559308a79df53c225a2b4ef84f4d086843fc4257e0cd99598c4afb7d00",
+      "sceneNodes": [
+        0,
+        2,
+        1,
+        4,
+        3
+      ],
+      "primitives": [
+        {
+          "mesh": 0,
+          "node": 4,
+          "material": 4,
+          "mode": 4,
+          "indices": {
+            "accessor": 0,
+            "view": 0,
+            "buffer": 0,
+            "viewOffset": 0,
+            "viewLength": 6,
+            "accessorOffset": 0,
+            "stride": 1,
+            "componentType": 5121,
+            "components": 1,
+            "count": 6,
+            "normalized": false,
+            "values": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ]
+          },
+          "streams": {
+            "NORMAL": {
+              "accessor": 2,
+              "view": 2,
+              "buffer": 0,
+              "viewOffset": 56,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  -2.1316282072803006e-14,
+                  1.0728441424134871e-07,
+                  1.0
+                ],
+                [
+                  -2.1316282072803006e-14,
+                  1.0728441424134871e-07,
+                  1.0
+                ],
+                [
+                  -2.1316282072803006e-14,
+                  1.0728441424134871e-07,
+                  1.0
+                ],
+                [
+                  -2.1316282072803006e-14,
+                  1.0728441424134871e-07,
+                  1.0
+                ]
+              ]
+            },
+            "POSITION": {
+              "accessor": 1,
+              "view": 1,
+              "buffer": 0,
+              "viewOffset": 8,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  1.2000000476837158,
+                  0.20000019669532776,
+                  -5.205485820169997e-08
+                ],
+                [
+                  0.19999980926513672,
+                  1.1999999284744263,
+                  -1.5933926533762133e-07
+                ],
+                [
+                  0.19999995827674866,
+                  0.20000004768371582,
+                  -5.205485820169997e-08
+                ],
+                [
+                  1.1999998092651367,
+                  1.2000001668930054,
+                  -1.5933926533762133e-07
+                ]
+              ]
+            },
+            "TEXCOORD_0": {
+              "accessor": 3,
+              "view": 3,
+              "buffer": 0,
+              "viewOffset": 104,
+              "viewLength": 32,
+              "accessorOffset": 0,
+              "stride": 8,
+              "componentType": 5126,
+              "components": 2,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  1.0,
+                  0.3999999761581421
+                ],
+                [
+                  0.6000000238418579,
+                  0.0
+                ],
+                [
+                  0.6000000238418579,
+                  0.3999999761581421
+                ],
+                [
+                  1.0,
+                  0.0
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "mesh": 1,
+          "node": 3,
+          "material": 3,
+          "mode": 4,
+          "indices": {
+            "accessor": 4,
+            "view": 4,
+            "buffer": 0,
+            "viewOffset": 136,
+            "viewLength": 6,
+            "accessorOffset": 0,
+            "stride": 1,
+            "componentType": 5121,
+            "components": 1,
+            "count": 6,
+            "normalized": false,
+            "values": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ]
+          },
+          "streams": {
+            "NORMAL": {
+              "accessor": 6,
+              "view": 6,
+              "buffer": 0,
+              "viewOffset": 192,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  1.7807019503379706e-07,
+                  2.853547016457014e-07,
+                  1.0
+                ],
+                [
+                  1.7807019503379706e-07,
+                  2.853547016457014e-07,
+                  1.0
+                ],
+                [
+                  1.7807019503379706e-07,
+                  2.853547016457014e-07,
+                  1.0
+                ],
+                [
+                  1.7807019503379706e-07,
+                  2.853547016457014e-07,
+                  1.0
+                ]
+              ]
+            },
+            "POSITION": {
+              "accessor": 5,
+              "view": 5,
+              "buffer": 0,
+              "viewOffset": 144,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  -0.20000006258487701,
+                  0.19999994337558746,
+                  -5.2054843990845256e-08
+                ],
+                [
+                  -1.2000001668930054,
+                  1.1999998092651367,
+                  -1.5933929375933076e-07
+                ],
+                [
+                  -1.1999999284744263,
+                  0.19999974966049194,
+                  1.2601539367551595e-07
+                ],
+                [
+                  -0.20000025629997253,
+                  1.2000000476837158,
+                  -3.3740951721483725e-07
+                ]
+              ]
+            },
+            "TEXCOORD_0": {
+              "accessor": 7,
+              "view": 7,
+              "buffer": 0,
+              "viewOffset": 240,
+              "viewLength": 32,
+              "accessorOffset": 0,
+              "stride": 8,
+              "componentType": 5126,
+              "components": 2,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  0.3999999463558197,
+                  0.3999999761581421
+                ],
+                [
+                  7.915305388905836e-08,
+                  0.0
+                ],
+                [
+                  7.915305388905836e-08,
+                  0.3999999761581421
+                ],
+                [
+                  0.3999999463558197,
+                  0.0
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "mesh": 2,
+          "node": 2,
+          "material": 2,
+          "mode": 4,
+          "indices": {
+            "accessor": 8,
+            "view": 8,
+            "buffer": 0,
+            "viewOffset": 272,
+            "viewLength": 6,
+            "accessorOffset": 0,
+            "stride": 1,
+            "componentType": 5121,
+            "components": 1,
+            "count": 6,
+            "normalized": false,
+            "values": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ]
+          },
+          "streams": {
+            "NORMAL": {
+              "accessor": 10,
+              "view": 10,
+              "buffer": 0,
+              "viewOffset": 328,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  -1.7807025187721592e-07,
+                  2.853545879588637e-07,
+                  1.0
+                ],
+                [
+                  -1.7807025187721592e-07,
+                  2.853545879588637e-07,
+                  1.0
+                ],
+                [
+                  -1.7807025187721592e-07,
+                  2.853545879588637e-07,
+                  1.0
+                ],
+                [
+                  -1.7807025187721592e-07,
+                  2.853545879588637e-07,
+                  1.0
+                ]
+              ]
+            },
+            "POSITION": {
+              "accessor": 9,
+              "view": 9,
+              "buffer": 0,
+              "viewOffset": 280,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  1.2000001668930054,
+                  -1.1999998092651367,
+                  5.255118367131217e-07
+                ],
+                [
+                  0.2000000923871994,
+                  -0.19999991357326508,
+                  6.20869826661874e-08
+                ],
+                [
+                  0.20000037550926208,
+                  -1.2000000476837158,
+                  3.4744169852274354e-07
+                ],
+                [
+                  1.1999999284744263,
+                  -0.1999996304512024,
+                  2.401571350674203e-07
+                ]
+              ]
+            },
+            "TEXCOORD_0": {
+              "accessor": 11,
+              "view": 11,
+              "buffer": 0,
+              "viewOffset": 376,
+              "viewLength": 32,
+              "accessorOffset": 0,
+              "stride": 8,
+              "componentType": 5126,
+              "components": 2,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  0.9999998211860657,
+                  1.0
+                ],
+                [
+                  0.6000000834465027,
+                  0.5999999046325684
+                ],
+                [
+                  0.6000001430511475,
+                  1.0
+                ],
+                [
+                  0.9999998807907104,
+                  0.5999999046325684
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "mesh": 3,
+          "node": 0,
+          "material": 0,
+          "mode": 4,
+          "indices": {
+            "accessor": 12,
+            "view": 12,
+            "buffer": 0,
+            "viewOffset": 408,
+            "viewLength": 6,
+            "accessorOffset": 0,
+            "stride": 1,
+            "componentType": 5121,
+            "components": 1,
+            "count": 6,
+            "normalized": false,
+            "values": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                0
+              ],
+              [
+                3
+              ],
+              [
+                1
+              ]
+            ]
+          },
+          "streams": {
+            "NORMAL": {
+              "accessor": 14,
+              "view": 14,
+              "buffer": 0,
+              "viewOffset": 464,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  1.0658142730467397e-14,
+                  -7.450581307466564e-08,
+                  -1.0
+                ],
+                [
+                  1.0658142730467397e-14,
+                  -7.450581307466564e-08,
+                  -1.0
+                ],
+                [
+                  1.0658142730467397e-14,
+                  -7.450581307466564e-08,
+                  -1.0
+                ],
+                [
+                  1.0658142730467397e-14,
+                  -7.450581307466564e-08,
+                  -1.0
+                ]
+              ]
+            },
+            "POSITION": {
+              "accessor": 13,
+              "view": 13,
+              "buffer": 0,
+              "viewOffset": 416,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  -1.0000001192092896,
+                  0.9999998211860657,
+                  -0.05259115248918533
+                ],
+                [
+                  1.0000001192092896,
+                  -0.9999998211860657,
+                  -0.052591003477573395
+                ],
+                [
+                  -0.9999998211860657,
+                  -1.0000001192092896,
+                  -0.052591003477573395
+                ],
+                [
+                  0.9999998211860657,
+                  1.0000001192092896,
+                  -0.05259115248918533
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "mesh": 4,
+          "node": 1,
+          "material": 1,
+          "mode": 4,
+          "indices": {
+            "accessor": 15,
+            "view": 15,
+            "buffer": 0,
+            "viewOffset": 512,
+            "viewLength": 6,
+            "accessorOffset": 0,
+            "stride": 1,
+            "componentType": 5121,
+            "components": 1,
+            "count": 6,
+            "normalized": false,
+            "values": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ]
+          },
+          "streams": {
+            "NORMAL": {
+              "accessor": 17,
+              "view": 17,
+              "buffer": 0,
+              "viewOffset": 568,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  -8.526512829121202e-14,
+                  4.6342486825778906e-07,
+                  1.0
+                ],
+                [
+                  -8.526512829121202e-14,
+                  4.6342486825778906e-07,
+                  1.0
+                ],
+                [
+                  -8.526512829121202e-14,
+                  4.6342486825778906e-07,
+                  1.0
+                ],
+                [
+                  -8.526512829121202e-14,
+                  4.6342486825778906e-07,
+                  1.0
+                ]
+              ]
+            },
+            "POSITION": {
+              "accessor": 16,
+              "view": 16,
+              "buffer": 0,
+              "viewOffset": 520,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  -0.19999969005584717,
+                  -1.1999999284744263,
+                  5.255118367131217e-07
+                ],
+                [
+                  -1.2000000476837158,
+                  -0.2000003159046173,
+                  6.208705372046097e-08
+                ],
+                [
+                  -1.1999998092651367,
+                  -1.2000001668930054,
+                  5.255118367131217e-07
+                ],
+                [
+                  -0.19999992847442627,
+                  -0.2000000774860382,
+                  6.208701108789683e-08
+                ]
+              ]
+            },
+            "TEXCOORD_0": {
+              "accessor": 18,
+              "view": 18,
+              "buffer": 0,
+              "viewOffset": 616,
+              "viewLength": 32,
+              "accessorOffset": 0,
+              "stride": 8,
+              "componentType": 5126,
+              "components": 2,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  0.40000009536743164,
+                  0.9999999403953552
+                ],
+                [
+                  5.960464477539063e-08,
+                  0.6000000238418579
+                ],
+                [
+                  0.0,
+                  0.9999999403953552
+                ],
+                [
+                  0.4000000059604645,
+                  0.6000000238418579
+                ]
+              ]
+            }
+          }
+        }
+      ],
+      "texture": {
+        "index": 0,
+        "image": 0,
+        "sampler": 0,
+        "texCoord": 0,
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        "wrapS": 10497,
+        "wrapT": 10497,
+        "minFilter": null,
+        "magFilter": null
+      }
+    },
+    {
+      "name": "glTF-Binary",
+      "path": "glTF-Binary/TextureCoordinateTest.glb",
+      "sha256": "fe75a63a0423c9a682bf46c3045b6328ae9c55abefc9a50adf3ec1d6dc6ea3b9",
+      "sceneNodes": [
+        0,
+        2,
+        1,
+        4,
+        3
+      ],
+      "primitives": [
+        {
+          "mesh": 0,
+          "node": 4,
+          "material": 4,
+          "mode": 4,
+          "indices": {
+            "accessor": 0,
+            "view": 0,
+            "buffer": 0,
+            "viewOffset": 0,
+            "viewLength": 6,
+            "accessorOffset": 0,
+            "stride": 1,
+            "componentType": 5121,
+            "components": 1,
+            "count": 6,
+            "normalized": false,
+            "values": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ]
+          },
+          "streams": {
+            "NORMAL": {
+              "accessor": 2,
+              "view": 2,
+              "buffer": 0,
+              "viewOffset": 56,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  -2.1316282072803006e-14,
+                  1.0728441424134871e-07,
+                  1.0
+                ],
+                [
+                  -2.1316282072803006e-14,
+                  1.0728441424134871e-07,
+                  1.0
+                ],
+                [
+                  -2.1316282072803006e-14,
+                  1.0728441424134871e-07,
+                  1.0
+                ],
+                [
+                  -2.1316282072803006e-14,
+                  1.0728441424134871e-07,
+                  1.0
+                ]
+              ]
+            },
+            "POSITION": {
+              "accessor": 1,
+              "view": 1,
+              "buffer": 0,
+              "viewOffset": 8,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  1.2000000476837158,
+                  0.20000019669532776,
+                  -5.205485820169997e-08
+                ],
+                [
+                  0.19999980926513672,
+                  1.1999999284744263,
+                  -1.5933926533762133e-07
+                ],
+                [
+                  0.19999995827674866,
+                  0.20000004768371582,
+                  -5.205485820169997e-08
+                ],
+                [
+                  1.1999998092651367,
+                  1.2000001668930054,
+                  -1.5933926533762133e-07
+                ]
+              ]
+            },
+            "TEXCOORD_0": {
+              "accessor": 3,
+              "view": 3,
+              "buffer": 0,
+              "viewOffset": 104,
+              "viewLength": 32,
+              "accessorOffset": 0,
+              "stride": 8,
+              "componentType": 5126,
+              "components": 2,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  1.0,
+                  0.3999999761581421
+                ],
+                [
+                  0.6000000238418579,
+                  0.0
+                ],
+                [
+                  0.6000000238418579,
+                  0.3999999761581421
+                ],
+                [
+                  1.0,
+                  0.0
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "mesh": 1,
+          "node": 3,
+          "material": 3,
+          "mode": 4,
+          "indices": {
+            "accessor": 4,
+            "view": 4,
+            "buffer": 0,
+            "viewOffset": 136,
+            "viewLength": 6,
+            "accessorOffset": 0,
+            "stride": 1,
+            "componentType": 5121,
+            "components": 1,
+            "count": 6,
+            "normalized": false,
+            "values": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ]
+          },
+          "streams": {
+            "NORMAL": {
+              "accessor": 6,
+              "view": 6,
+              "buffer": 0,
+              "viewOffset": 192,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  1.7807019503379706e-07,
+                  2.853547016457014e-07,
+                  1.0
+                ],
+                [
+                  1.7807019503379706e-07,
+                  2.853547016457014e-07,
+                  1.0
+                ],
+                [
+                  1.7807019503379706e-07,
+                  2.853547016457014e-07,
+                  1.0
+                ],
+                [
+                  1.7807019503379706e-07,
+                  2.853547016457014e-07,
+                  1.0
+                ]
+              ]
+            },
+            "POSITION": {
+              "accessor": 5,
+              "view": 5,
+              "buffer": 0,
+              "viewOffset": 144,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  -0.20000006258487701,
+                  0.19999994337558746,
+                  -5.2054843990845256e-08
+                ],
+                [
+                  -1.2000001668930054,
+                  1.1999998092651367,
+                  -1.5933929375933076e-07
+                ],
+                [
+                  -1.1999999284744263,
+                  0.19999974966049194,
+                  1.2601539367551595e-07
+                ],
+                [
+                  -0.20000025629997253,
+                  1.2000000476837158,
+                  -3.3740951721483725e-07
+                ]
+              ]
+            },
+            "TEXCOORD_0": {
+              "accessor": 7,
+              "view": 7,
+              "buffer": 0,
+              "viewOffset": 240,
+              "viewLength": 32,
+              "accessorOffset": 0,
+              "stride": 8,
+              "componentType": 5126,
+              "components": 2,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  0.3999999463558197,
+                  0.3999999761581421
+                ],
+                [
+                  7.915305388905836e-08,
+                  0.0
+                ],
+                [
+                  7.915305388905836e-08,
+                  0.3999999761581421
+                ],
+                [
+                  0.3999999463558197,
+                  0.0
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "mesh": 2,
+          "node": 2,
+          "material": 2,
+          "mode": 4,
+          "indices": {
+            "accessor": 8,
+            "view": 8,
+            "buffer": 0,
+            "viewOffset": 272,
+            "viewLength": 6,
+            "accessorOffset": 0,
+            "stride": 1,
+            "componentType": 5121,
+            "components": 1,
+            "count": 6,
+            "normalized": false,
+            "values": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ]
+          },
+          "streams": {
+            "NORMAL": {
+              "accessor": 10,
+              "view": 10,
+              "buffer": 0,
+              "viewOffset": 328,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  -1.7807025187721592e-07,
+                  2.853545879588637e-07,
+                  1.0
+                ],
+                [
+                  -1.7807025187721592e-07,
+                  2.853545879588637e-07,
+                  1.0
+                ],
+                [
+                  -1.7807025187721592e-07,
+                  2.853545879588637e-07,
+                  1.0
+                ],
+                [
+                  -1.7807025187721592e-07,
+                  2.853545879588637e-07,
+                  1.0
+                ]
+              ]
+            },
+            "POSITION": {
+              "accessor": 9,
+              "view": 9,
+              "buffer": 0,
+              "viewOffset": 280,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  1.2000001668930054,
+                  -1.1999998092651367,
+                  5.255118367131217e-07
+                ],
+                [
+                  0.2000000923871994,
+                  -0.19999991357326508,
+                  6.20869826661874e-08
+                ],
+                [
+                  0.20000037550926208,
+                  -1.2000000476837158,
+                  3.4744169852274354e-07
+                ],
+                [
+                  1.1999999284744263,
+                  -0.1999996304512024,
+                  2.401571350674203e-07
+                ]
+              ]
+            },
+            "TEXCOORD_0": {
+              "accessor": 11,
+              "view": 11,
+              "buffer": 0,
+              "viewOffset": 376,
+              "viewLength": 32,
+              "accessorOffset": 0,
+              "stride": 8,
+              "componentType": 5126,
+              "components": 2,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  0.9999998211860657,
+                  1.0
+                ],
+                [
+                  0.6000000834465027,
+                  0.5999999046325684
+                ],
+                [
+                  0.6000001430511475,
+                  1.0
+                ],
+                [
+                  0.9999998807907104,
+                  0.5999999046325684
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "mesh": 3,
+          "node": 0,
+          "material": 0,
+          "mode": 4,
+          "indices": {
+            "accessor": 12,
+            "view": 12,
+            "buffer": 0,
+            "viewOffset": 408,
+            "viewLength": 6,
+            "accessorOffset": 0,
+            "stride": 1,
+            "componentType": 5121,
+            "components": 1,
+            "count": 6,
+            "normalized": false,
+            "values": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                0
+              ],
+              [
+                3
+              ],
+              [
+                1
+              ]
+            ]
+          },
+          "streams": {
+            "NORMAL": {
+              "accessor": 14,
+              "view": 14,
+              "buffer": 0,
+              "viewOffset": 464,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  1.0658142730467397e-14,
+                  -7.450581307466564e-08,
+                  -1.0
+                ],
+                [
+                  1.0658142730467397e-14,
+                  -7.450581307466564e-08,
+                  -1.0
+                ],
+                [
+                  1.0658142730467397e-14,
+                  -7.450581307466564e-08,
+                  -1.0
+                ],
+                [
+                  1.0658142730467397e-14,
+                  -7.450581307466564e-08,
+                  -1.0
+                ]
+              ]
+            },
+            "POSITION": {
+              "accessor": 13,
+              "view": 13,
+              "buffer": 0,
+              "viewOffset": 416,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  -1.0000001192092896,
+                  0.9999998211860657,
+                  -0.05259115248918533
+                ],
+                [
+                  1.0000001192092896,
+                  -0.9999998211860657,
+                  -0.052591003477573395
+                ],
+                [
+                  -0.9999998211860657,
+                  -1.0000001192092896,
+                  -0.052591003477573395
+                ],
+                [
+                  0.9999998211860657,
+                  1.0000001192092896,
+                  -0.05259115248918533
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "mesh": 4,
+          "node": 1,
+          "material": 1,
+          "mode": 4,
+          "indices": {
+            "accessor": 15,
+            "view": 15,
+            "buffer": 0,
+            "viewOffset": 512,
+            "viewLength": 6,
+            "accessorOffset": 0,
+            "stride": 1,
+            "componentType": 5121,
+            "components": 1,
+            "count": 6,
+            "normalized": false,
+            "values": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ]
+          },
+          "streams": {
+            "NORMAL": {
+              "accessor": 17,
+              "view": 17,
+              "buffer": 0,
+              "viewOffset": 568,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  -8.526512829121202e-14,
+                  4.6342486825778906e-07,
+                  1.0
+                ],
+                [
+                  -8.526512829121202e-14,
+                  4.6342486825778906e-07,
+                  1.0
+                ],
+                [
+                  -8.526512829121202e-14,
+                  4.6342486825778906e-07,
+                  1.0
+                ],
+                [
+                  -8.526512829121202e-14,
+                  4.6342486825778906e-07,
+                  1.0
+                ]
+              ]
+            },
+            "POSITION": {
+              "accessor": 16,
+              "view": 16,
+              "buffer": 0,
+              "viewOffset": 520,
+              "viewLength": 48,
+              "accessorOffset": 0,
+              "stride": 12,
+              "componentType": 5126,
+              "components": 3,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  -0.19999969005584717,
+                  -1.1999999284744263,
+                  5.255118367131217e-07
+                ],
+                [
+                  -1.2000000476837158,
+                  -0.2000003159046173,
+                  6.208705372046097e-08
+                ],
+                [
+                  -1.1999998092651367,
+                  -1.2000001668930054,
+                  5.255118367131217e-07
+                ],
+                [
+                  -0.19999992847442627,
+                  -0.2000000774860382,
+                  6.208701108789683e-08
+                ]
+              ]
+            },
+            "TEXCOORD_0": {
+              "accessor": 18,
+              "view": 18,
+              "buffer": 0,
+              "viewOffset": 616,
+              "viewLength": 32,
+              "accessorOffset": 0,
+              "stride": 8,
+              "componentType": 5126,
+              "components": 2,
+              "count": 4,
+              "normalized": false,
+              "values": [
+                [
+                  0.40000009536743164,
+                  0.9999999403953552
+                ],
+                [
+                  5.960464477539063e-08,
+                  0.6000000238418579
+                ],
+                [
+                  0.0,
+                  0.9999999403953552
+                ],
+                [
+                  0.4000000059604645,
+                  0.6000000238418579
+                ]
+              ]
+            }
+          }
+        }
+      ],
+      "texture": {
+        "index": 0,
+        "image": 0,
+        "sampler": 0,
+        "texCoord": 0,
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        "wrapS": 10497,
+        "wrapT": 10497,
+        "minFilter": null,
+        "magFilter": null
+      }
+    }
+  ],
+  "derivedFixture": {
+    "primitives": [
+      {
+        "mesh": 0,
+        "node": 4,
+        "material": 4,
+        "mode": 4,
+        "indices": {
+          "accessor": 0,
+          "view": 0,
+          "buffer": 0,
+          "viewOffset": 0,
+          "viewLength": 6,
+          "accessorOffset": 0,
+          "stride": 1,
+          "componentType": 5121,
+          "components": 1,
+          "count": 6,
+          "normalized": false,
+          "values": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              1
+            ],
+            [
+              0
+            ]
+          ]
+        },
+        "streams": {
+          "NORMAL": {
+            "accessor": 2,
+            "view": 2,
+            "buffer": 0,
+            "viewOffset": 56,
+            "viewLength": 48,
+            "accessorOffset": 0,
+            "stride": 12,
+            "componentType": 5126,
+            "components": 3,
+            "count": 4,
+            "normalized": false,
+            "values": [
+              [
+                -2.1316282072803006e-14,
+                1.0728441424134871e-07,
+                1.0
+              ],
+              [
+                -2.1316282072803006e-14,
+                1.0728441424134871e-07,
+                1.0
+              ],
+              [
+                -2.1316282072803006e-14,
+                1.0728441424134871e-07,
+                1.0
+              ],
+              [
+                -2.1316282072803006e-14,
+                1.0728441424134871e-07,
+                1.0
+              ]
+            ]
+          },
+          "POSITION": {
+            "accessor": 1,
+            "view": 1,
+            "buffer": 0,
+            "viewOffset": 8,
+            "viewLength": 48,
+            "accessorOffset": 0,
+            "stride": 12,
+            "componentType": 5126,
+            "components": 3,
+            "count": 4,
+            "normalized": false,
+            "values": [
+              [
+                1.2000000476837158,
+                0.20000019669532776,
+                -5.205485820169997e-08
+              ],
+              [
+                0.19999980926513672,
+                1.1999999284744263,
+                -1.5933926533762133e-07
+              ],
+              [
+                0.19999995827674866,
+                0.20000004768371582,
+                -5.205485820169997e-08
+              ],
+              [
+                1.1999998092651367,
+                1.2000001668930054,
+                -1.5933926533762133e-07
+              ]
+            ]
+          },
+          "TEXCOORD_0": {
+            "accessor": 3,
+            "view": 3,
+            "buffer": 0,
+            "viewOffset": 104,
+            "viewLength": 32,
+            "accessorOffset": 0,
+            "stride": 8,
+            "componentType": 5126,
+            "components": 2,
+            "count": 4,
+            "normalized": false,
+            "values": [
+              [
+                1.0,
+                0.3999999761581421
+              ],
+              [
+                0.6000000238418579,
+                0.0
+              ],
+              [
+                0.6000000238418579,
+                0.3999999761581421
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          "TEXCOORD_1": {
+            "accessor": 19,
+            "view": 19,
+            "buffer": 0,
+            "viewOffset": 664,
+            "viewLength": 52,
+            "accessorOffset": 4,
+            "stride": 12,
+            "componentType": 5123,
+            "components": 2,
+            "count": 4,
+            "normalized": true,
+            "values": [
+              [
+                0.0,
+                0.4
+              ],
+              [
+                0.4,
+                0.0
+              ],
+              [
+                0.4,
+                0.4
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "mesh": 1,
+        "node": 3,
+        "material": 3,
+        "mode": 4,
+        "indices": {
+          "accessor": 4,
+          "view": 4,
+          "buffer": 0,
+          "viewOffset": 136,
+          "viewLength": 6,
+          "accessorOffset": 0,
+          "stride": 1,
+          "componentType": 5121,
+          "components": 1,
+          "count": 6,
+          "normalized": false,
+          "values": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              1
+            ],
+            [
+              0
+            ]
+          ]
+        },
+        "streams": {
+          "NORMAL": {
+            "accessor": 6,
+            "view": 6,
+            "buffer": 0,
+            "viewOffset": 192,
+            "viewLength": 48,
+            "accessorOffset": 0,
+            "stride": 12,
+            "componentType": 5126,
+            "components": 3,
+            "count": 4,
+            "normalized": false,
+            "values": [
+              [
+                1.7807019503379706e-07,
+                2.853547016457014e-07,
+                1.0
+              ],
+              [
+                1.7807019503379706e-07,
+                2.853547016457014e-07,
+                1.0
+              ],
+              [
+                1.7807019503379706e-07,
+                2.853547016457014e-07,
+                1.0
+              ],
+              [
+                1.7807019503379706e-07,
+                2.853547016457014e-07,
+                1.0
+              ]
+            ]
+          },
+          "POSITION": {
+            "accessor": 5,
+            "view": 5,
+            "buffer": 0,
+            "viewOffset": 144,
+            "viewLength": 48,
+            "accessorOffset": 0,
+            "stride": 12,
+            "componentType": 5126,
+            "components": 3,
+            "count": 4,
+            "normalized": false,
+            "values": [
+              [
+                -0.20000006258487701,
+                0.19999994337558746,
+                -5.2054843990845256e-08
+              ],
+              [
+                -1.2000001668930054,
+                1.1999998092651367,
+                -1.5933929375933076e-07
+              ],
+              [
+                -1.1999999284744263,
+                0.19999974966049194,
+                1.2601539367551595e-07
+              ],
+              [
+                -0.20000025629997253,
+                1.2000000476837158,
+                -3.3740951721483725e-07
+              ]
+            ]
+          },
+          "TEXCOORD_0": {
+            "accessor": 7,
+            "view": 7,
+            "buffer": 0,
+            "viewOffset": 240,
+            "viewLength": 32,
+            "accessorOffset": 0,
+            "stride": 8,
+            "componentType": 5126,
+            "components": 2,
+            "count": 4,
+            "normalized": false,
+            "values": [
+              [
+                0.3999999463558197,
+                0.3999999761581421
+              ],
+              [
+                7.915305388905836e-08,
+                0.0
+              ],
+              [
+                7.915305388905836e-08,
+                0.3999999761581421
+              ],
+              [
+                0.3999999463558197,
+                0.0
+              ]
+            ]
+          },
+          "TEXCOORD_1": {
+            "accessor": 20,
+            "view": 20,
+            "buffer": 0,
+            "viewOffset": 716,
+            "viewLength": 52,
+            "accessorOffset": 4,
+            "stride": 12,
+            "componentType": 5123,
+            "components": 2,
+            "count": 4,
+            "normalized": true,
+            "values": [
+              [
+                0.6,
+                0.4
+              ],
+              [
+                1.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.4
+              ],
+              [
+                0.6,
+                0.0
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "mesh": 2,
+        "node": 2,
+        "material": 2,
+        "mode": 4,
+        "indices": {
+          "accessor": 8,
+          "view": 8,
+          "buffer": 0,
+          "viewOffset": 272,
+          "viewLength": 6,
+          "accessorOffset": 0,
+          "stride": 1,
+          "componentType": 5121,
+          "components": 1,
+          "count": 6,
+          "normalized": false,
+          "values": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              1
+            ],
+            [
+              0
+            ]
+          ]
+        },
+        "streams": {
+          "NORMAL": {
+            "accessor": 10,
+            "view": 10,
+            "buffer": 0,
+            "viewOffset": 328,
+            "viewLength": 48,
+            "accessorOffset": 0,
+            "stride": 12,
+            "componentType": 5126,
+            "components": 3,
+            "count": 4,
+            "normalized": false,
+            "values": [
+              [
+                -1.7807025187721592e-07,
+                2.853545879588637e-07,
+                1.0
+              ],
+              [
+                -1.7807025187721592e-07,
+                2.853545879588637e-07,
+                1.0
+              ],
+              [
+                -1.7807025187721592e-07,
+                2.853545879588637e-07,
+                1.0
+              ],
+              [
+                -1.7807025187721592e-07,
+                2.853545879588637e-07,
+                1.0
+              ]
+            ]
+          },
+          "POSITION": {
+            "accessor": 9,
+            "view": 9,
+            "buffer": 0,
+            "viewOffset": 280,
+            "viewLength": 48,
+            "accessorOffset": 0,
+            "stride": 12,
+            "componentType": 5126,
+            "components": 3,
+            "count": 4,
+            "normalized": false,
+            "values": [
+              [
+                1.2000001668930054,
+                -1.1999998092651367,
+                5.255118367131217e-07
+              ],
+              [
+                0.2000000923871994,
+                -0.19999991357326508,
+                6.20869826661874e-08
+              ],
+              [
+                0.20000037550926208,
+                -1.2000000476837158,
+                3.4744169852274354e-07
+              ],
+              [
+                1.1999999284744263,
+                -0.1999996304512024,
+                2.401571350674203e-07
+              ]
+            ]
+          },
+          "TEXCOORD_0": {
+            "accessor": 11,
+            "view": 11,
+            "buffer": 0,
+            "viewOffset": 376,
+            "viewLength": 32,
+            "accessorOffset": 0,
+            "stride": 8,
+            "componentType": 5126,
+            "components": 2,
+            "count": 4,
+            "normalized": false,
+            "values": [
+              [
+                0.9999998211860657,
+                1.0
+              ],
+              [
+                0.6000000834465027,
+                0.5999999046325684
+              ],
+              [
+                0.6000001430511475,
+                1.0
+              ],
+              [
+                0.9999998807907104,
+                0.5999999046325684
+              ]
+            ]
+          },
+          "TEXCOORD_1": {
+            "accessor": 21,
+            "view": 21,
+            "buffer": 0,
+            "viewOffset": 768,
+            "viewLength": 52,
+            "accessorOffset": 4,
+            "stride": 12,
+            "componentType": 5123,
+            "components": 2,
+            "count": 4,
+            "normalized": true,
+            "values": [
+              [
+                0.0,
+                1.0
+              ],
+              [
+                0.4,
+                0.6
+              ],
+              [
+                0.4,
+                1.0
+              ],
+              [
+                0.0,
+                0.6
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "mesh": 3,
+        "node": 0,
+        "material": 0,
+        "mode": 4,
+        "indices": {
+          "accessor": 12,
+          "view": 12,
+          "buffer": 0,
+          "viewOffset": 408,
+          "viewLength": 6,
+          "accessorOffset": 0,
+          "stride": 1,
+          "componentType": 5121,
+          "components": 1,
+          "count": 6,
+          "normalized": false,
+          "values": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              0
+            ],
+            [
+              3
+            ],
+            [
+              1
+            ]
+          ]
+        },
+        "streams": {
+          "NORMAL": {
+            "accessor": 14,
+            "view": 14,
+            "buffer": 0,
+            "viewOffset": 464,
+            "viewLength": 48,
+            "accessorOffset": 0,
+            "stride": 12,
+            "componentType": 5126,
+            "components": 3,
+            "count": 4,
+            "normalized": false,
+            "values": [
+              [
+                1.0658142730467397e-14,
+                -7.450581307466564e-08,
+                -1.0
+              ],
+              [
+                1.0658142730467397e-14,
+                -7.450581307466564e-08,
+                -1.0
+              ],
+              [
+                1.0658142730467397e-14,
+                -7.450581307466564e-08,
+                -1.0
+              ],
+              [
+                1.0658142730467397e-14,
+                -7.450581307466564e-08,
+                -1.0
+              ]
+            ]
+          },
+          "POSITION": {
+            "accessor": 13,
+            "view": 13,
+            "buffer": 0,
+            "viewOffset": 416,
+            "viewLength": 48,
+            "accessorOffset": 0,
+            "stride": 12,
+            "componentType": 5126,
+            "components": 3,
+            "count": 4,
+            "normalized": false,
+            "values": [
+              [
+                -1.0000001192092896,
+                0.9999998211860657,
+                -0.05259115248918533
+              ],
+              [
+                1.0000001192092896,
+                -0.9999998211860657,
+                -0.052591003477573395
+              ],
+              [
+                -0.9999998211860657,
+                -1.0000001192092896,
+                -0.052591003477573395
+              ],
+              [
+                0.9999998211860657,
+                1.0000001192092896,
+                -0.05259115248918533
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "mesh": 4,
+        "node": 1,
+        "material": 1,
+        "mode": 4,
+        "indices": {
+          "accessor": 15,
+          "view": 15,
+          "buffer": 0,
+          "viewOffset": 512,
+          "viewLength": 6,
+          "accessorOffset": 0,
+          "stride": 1,
+          "componentType": 5121,
+          "components": 1,
+          "count": 6,
+          "normalized": false,
+          "values": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              1
+            ],
+            [
+              0
+            ]
+          ]
+        },
+        "streams": {
+          "NORMAL": {
+            "accessor": 17,
+            "view": 17,
+            "buffer": 0,
+            "viewOffset": 568,
+            "viewLength": 48,
+            "accessorOffset": 0,
+            "stride": 12,
+            "componentType": 5126,
+            "components": 3,
+            "count": 4,
+            "normalized": false,
+            "values": [
+              [
+                -8.526512829121202e-14,
+                4.6342486825778906e-07,
+                1.0
+              ],
+              [
+                -8.526512829121202e-14,
+                4.6342486825778906e-07,
+                1.0
+              ],
+              [
+                -8.526512829121202e-14,
+                4.6342486825778906e-07,
+                1.0
+              ],
+              [
+                -8.526512829121202e-14,
+                4.6342486825778906e-07,
+                1.0
+              ]
+            ]
+          },
+          "POSITION": {
+            "accessor": 16,
+            "view": 16,
+            "buffer": 0,
+            "viewOffset": 520,
+            "viewLength": 48,
+            "accessorOffset": 0,
+            "stride": 12,
+            "componentType": 5126,
+            "components": 3,
+            "count": 4,
+            "normalized": false,
+            "values": [
+              [
+                -0.19999969005584717,
+                -1.1999999284744263,
+                5.255118367131217e-07
+              ],
+              [
+                -1.2000000476837158,
+                -0.2000003159046173,
+                6.208705372046097e-08
+              ],
+              [
+                -1.1999998092651367,
+                -1.2000001668930054,
+                5.255118367131217e-07
+              ],
+              [
+                -0.19999992847442627,
+                -0.2000000774860382,
+                6.208701108789683e-08
+              ]
+            ]
+          },
+          "TEXCOORD_0": {
+            "accessor": 18,
+            "view": 18,
+            "buffer": 0,
+            "viewOffset": 616,
+            "viewLength": 32,
+            "accessorOffset": 0,
+            "stride": 8,
+            "componentType": 5126,
+            "components": 2,
+            "count": 4,
+            "normalized": false,
+            "values": [
+              [
+                0.40000009536743164,
+                0.9999999403953552
+              ],
+              [
+                5.960464477539063e-08,
+                0.6000000238418579
+              ],
+              [
+                0.0,
+                0.9999999403953552
+              ],
+              [
+                0.4000000059604645,
+                0.6000000238418579
+              ]
+            ]
+          },
+          "TEXCOORD_1": {
+            "accessor": 22,
+            "view": 22,
+            "buffer": 0,
+            "viewOffset": 820,
+            "viewLength": 52,
+            "accessorOffset": 4,
+            "stride": 12,
+            "componentType": 5123,
+            "components": 2,
+            "count": 4,
+            "normalized": true,
+            "values": [
+              [
+                0.6,
+                1.0
+              ],
+              [
+                1.0,
+                0.6
+              ],
+              [
+                1.0,
+                1.0
+              ],
+              [
+                0.6,
+                0.6
+              ]
+            ]
+          }
+        }
+      }
+    ],
+    "scope": "synthetic alternate-layout and coordinate-selection control; not an upstream variant"
+  },
+  "landmarks": [
+    {
+      "mesh": 0,
+      "x": 384,
+      "y": 55,
+      "u": 0.7509765625,
+      "v": 0.1083984375,
+      "rgba": [
+        0,
+        0,
+        0,
+        255
+      ],
+      "wrongVrgba": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "whiteU": 0.7314453125,
+      "whiteV": 0.1083984375
+    },
+    {
+      "mesh": 0,
+      "x": 421,
+      "y": 59,
+      "u": 0.8232421875,
+      "v": 0.1162109375,
+      "rgba": [
+        0,
+        0,
+        0,
+        255
+      ],
+      "wrongVrgba": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "whiteU": 0.8056640625,
+      "whiteV": 0.1162109375
+    },
+    {
+      "mesh": 0,
+      "x": 399,
+      "y": 63,
+      "u": 0.7802734375,
+      "v": 0.1240234375,
+      "rgba": [
+        0,
+        0,
+        0,
+        255
+      ],
+      "wrongVrgba": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "whiteU": 0.7607421875,
+      "whiteV": 0.1240234375
+    },
+    {
+      "mesh": 1,
+      "x": 110,
+      "y": 56,
+      "u": 0.2158203125,
+      "v": 0.1103515625,
+      "rgba": [
+        0,
+        0,
+        0,
+        255
+      ],
+      "wrongVrgba": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "whiteU": 0.1962890625,
+      "whiteV": 0.1103515625
+    },
+    {
+      "mesh": 1,
+      "x": 95,
+      "y": 62,
+      "u": 0.1865234375,
+      "v": 0.1220703125,
+      "rgba": [
+        0,
+        0,
+        0,
+        255
+      ],
+      "wrongVrgba": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "whiteU": 0.1689453125,
+      "whiteV": 0.1220703125
+    },
+    {
+      "mesh": 1,
+      "x": 68,
+      "y": 66,
+      "u": 0.1337890625,
+      "v": 0.1298828125,
+      "rgba": [
+        0,
+        0,
+        0,
+        255
+      ],
+      "wrongVrgba": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "whiteU": 0.1259765625,
+      "whiteV": 0.1298828125
+    },
+    {
+      "mesh": 2,
+      "x": 453,
+      "y": 429,
+      "u": 0.8857421875,
+      "v": 0.8388671875,
+      "rgba": [
+        0,
+        0,
+        0,
+        255
+      ],
+      "wrongVrgba": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "whiteU": 0.8779296875,
+      "whiteV": 0.8388671875
+    },
+    {
+      "mesh": 2,
+      "x": 465,
+      "y": 434,
+      "u": 0.9091796875,
+      "v": 0.8486328125,
+      "rgba": [
+        0,
+        0,
+        0,
+        255
+      ],
+      "wrongVrgba": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "whiteU": 0.8896484375,
+      "whiteV": 0.8486328125
+    },
+    {
+      "mesh": 2,
+      "x": 436,
+      "y": 453,
+      "u": 0.8525390625,
+      "v": 0.8857421875,
+      "rgba": [
+        0,
+        0,
+        0,
+        255
+      ],
+      "wrongVrgba": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "whiteU": 0.8330078125,
+      "whiteV": 0.8857421875
+    },
+    {
+      "mesh": 4,
+      "x": 76,
+      "y": 429,
+      "u": 0.1494140625,
+      "v": 0.8388671875,
+      "rgba": [
+        0,
+        0,
+        0,
+        255
+      ],
+      "wrongVrgba": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "whiteU": 0.1552734375,
+      "whiteV": 0.8388671875
+    },
+    {
+      "mesh": 4,
+      "x": 92,
+      "y": 433,
+      "u": 0.1806640625,
+      "v": 0.8466796875,
+      "rgba": [
+        0,
+        0,
+        0,
+        255
+      ],
+      "wrongVrgba": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "whiteU": 0.1611328125,
+      "whiteV": 0.8466796875
+    },
+    {
+      "mesh": 4,
+      "x": 64,
+      "y": 452,
+      "u": 0.1259765625,
+      "v": 0.8837890625,
+      "rgba": [
+        0,
+        0,
+        0,
+        255
+      ],
+      "wrongVrgba": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "whiteU": 0.1220703125,
+      "whiteV": 0.8837890625
+    }
+  ],
+  "scope": "independent Python struct/json/Pillow oracle; no GPU or rendered proof"
+}

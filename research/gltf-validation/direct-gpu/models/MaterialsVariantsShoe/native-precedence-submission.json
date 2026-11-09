@@ -1,0 +1,53 @@
+{
+  "model": "MaterialsVariantsShoe/native-vmdl-override-precedence",
+  "owner": "/root/gpu_material_variants",
+  "status": "frozen source preparation; all C# unexecuted",
+  "files": [
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MaterialsVariantsShoe/NativeMaterialOverridePrecedenceProbe.cs",
+      "sha256": "506d8564c05fb4b521355c00cc636b6c2d3be688652c3c27e1a1278e2c48ef08"
+    },
+    {
+      "path": "research/gltf-validation/direct-gpu/models/MaterialsVariantsShoe/VARIANT_DESIGN.md",
+      "sha256": "09d2c14443806e1f1c46915fef15baabd66f043f4e08110ab3cbda42358b7f51"
+    }
+  ],
+  "dependencies": [
+    {
+      "path": "research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs",
+      "sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161",
+      "scope": "reuse accepted NativeCapture only; no triangle/GPU tests auto-run"
+    }
+  ],
+  "entry": "Sandbox.Gltf.DirectGpu.MaterialsVariantsShoeValidation.NativeMaterialOverridePrecedenceProbe.Run",
+  "arguments": [
+    "$checkout"
+  ],
+  "expected_matrix_rows": 10,
+  "expected_capture_count": 17,
+  "controls": [
+    "fresh empty before",
+    "default native cached cube",
+    "whole A only",
+    "slot B only",
+    "deleted empty after references",
+    "fresh default restored after matrix",
+    "final deleted empty"
+  ],
+  "expected_states": "Control winners default/whole_A/slot_B. Combined matrix winners measured from actual component pixels; do not invent native precedence. Native cached Model.Cube/original material preserved. Tagged attributes/alternate groups remain unmeasured.",
+  "classifier_entry": "Sandbox.Gltf.DirectGpu.MaterialsVariantsShoeValidation.NativeMaterialOverridePrecedenceProbe.RunClassificationControls",
+  "expected_classifier_cases": 7,
+  "thresholds": {
+    "maximum_mean_rgb_error": 0.02,
+    "minimum_mask_iou": 0.995,
+    "minimum_winner_margin": 0.03
+  },
+  "execution_needs": "Coordinator only after nearest animated smokes/public 25 boundary. Authorized idle physical editor, unchanged native renderer, actual loaded producer hashes, source freeze and receipt. Reuses Normal+postprocessing+owned light exact-size fresh NativeCapture route; no shader compilation or native Model/Mesh construction. Normal ModelRenderer lifecycle and EditorTick before real-frame capture. Exactly two owned material copies total (harness material A plus material B).",
+  "original_59_case_submission_sha256": "829bb11dd8e047f37d24c7c238101b22dd7c44df8bd57e2771e691c68ae16f21",
+  "previous_submission_sha256": "8717bfa8adee107c3d9502b02ca4137562af97ab157a8519ee208c1b1014910a",
+  "dependency_refresh": {
+    "previous_capture_helper_sha256": "1abfa12638ab7f4b1dcf0973e9778eb333ad24e2d12f27ebc92ec0139c3bbaff",
+    "current_capture_helper_sha256": "35cf8663b61fe62dde41a3f5c157e555889ac0b8122e59d591349cbd64139161",
+    "review": "NativeCapture path and API unchanged; current metadata additionally records orthographic/near/far and owned light state in captures/CameraStateJson. Source probe unchanged. Original request unexecuted; no result replaced."
+  }
+}
