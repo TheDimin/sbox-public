@@ -100,7 +100,11 @@ public sealed partial class ModelBuilder
 			var resourceName = Resource.FixPath( modelName ).Replace( ':', '_' );
 			resourceName = string.IsNullOrEmpty( resourceName ) ? "sbox_procedural_model" : System.IO.Path.ChangeExtension( resourceName, ".vmdl" );
 			var model = modelBuilder.CreateRuntimeModel( resourceName, true );
-			return Model.FromNative( model, true, modelName );
+			var result = Model.FromNative( model, true, modelName );
+			result.AuthoringMeshGroupNames = meshGroups.ToArray();
+			result.AuthoringMaterialGroups = _materialGroups.Select( g => new ModelSaveMaterialGroup( g.Name, g.Materials.Select( m => m.ResourcePath ).ToArray() ) ).ToArray();
+			ApplyBodyMetadataOverrides( result );
+			return result;
 		}
 		finally
 		{

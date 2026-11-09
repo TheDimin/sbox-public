@@ -165,8 +165,6 @@ internal sealed partial class MeshRenderFeature
 	{
 		if ( skinJobs.Count == 0 || frameTransforms is null ) return;
 
-		skinningShader ??= Material.Load( SkinningShader );
-
 		// Batch matching meshes; deformation/morph combos must match (CSceneSystem::CanBatchVertexCacheRequests).
 		var jobs = CollectionsMarshal.AsSpan( skinJobs );
 		jobs.Sort( static ( a, b ) =>
@@ -230,7 +228,8 @@ internal sealed partial class MeshRenderFeature
 				count++;
 			}
 
-			context.DispatchSkinning( skinningShader, mesh, modelMesh, frameTransforms.Current, batchSlots.AsSpan( 0, count ), batchOffsets.AsSpan( 0, count ), mesh.SkinFor( modelMesh ).BlendWeightCount,
+			var weightFormat = GltfSkinningMeshFormats.ForModel( mesh.Model, modelMesh );
+			context.DispatchSkinning( SkinningShaderFor( weightFormat ), mesh, modelMesh, frameTransforms.Current, batchSlots.AsSpan( 0, count ), batchOffsets.AsSpan( 0, count ), mesh.SkinFor( modelMesh ).BlendWeightCount,
 				deformed ? volumeBuffer : null, batchVolumeOffsets.AsSpan( 0, count ), batchVolumeCounts.AsSpan( 0, count ), anchorBuffer, batchAnchorOffsets.AsSpan( 0, count ), morphed );
 			first += count;
 		}

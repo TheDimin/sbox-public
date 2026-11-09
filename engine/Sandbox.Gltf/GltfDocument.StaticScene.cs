@@ -76,10 +76,10 @@ public static class GltfStaticSceneAssembler
 			if ( mesh.ValueKind != JsonValueKind.Object ) throw new GltfException( "Mesh must be an object." );
 			if ( !mesh.TryGetProperty( "primitives", out var primitives ) || primitives.ValueKind != JsonValueKind.Array ) throw new GltfException( "Mesh primitives must be an array." );
 			var transform = GltfGeometry.ConvertTransform( document.GetWorldTransform( nodeIndex ) );
-			if ( !NMatrix4x4.Invert( transform, out var inverse ) ) throw new GltfException( "Static scene node has a singular transform." );
-			var normalTransform = NMatrix4x4.Transpose( inverse );
 			var determinant = transform.GetDeterminant();
-			if ( !float.IsFinite( determinant ) || determinant == 0 ) throw new GltfException( "Static scene node has an invalid transform." );
+			if ( !float.IsFinite( determinant ) ) throw new GltfException( "Static scene node has an invalid transform." );
+			var invertible = NMatrix4x4.Invert( transform, out var inverse );
+			var normalTransform = invertible ? NMatrix4x4.Transpose( inverse ) : SceneCofactorTransform( transform );
 			for ( var primitiveIndex = 0; primitiveIndex < primitives.GetArrayLength(); primitiveIndex++ )
 			{
 				var source = document.CreateDrawData( meshIndex, primitiveIndex );
@@ -93,12 +93,23 @@ public static class GltfStaticSceneAssembler
 					else { min = NVector3.Min( min, positions[i] ); max = NVector3.Max( max, positions[i] ); }
 				}
 				var normals = source.Normals.ToArray();
-				for ( var i = 0; i < normals.Length; i++ ) normals[i] = NormalizeSceneDirection( NVector3.TransformNormal( normals[i], normalTransform ) );
+				for ( var i = 0; i < normals.Length; i++ )
+				{
+					var direction = NVector3.TransformNormal( normals[i], normalTransform );
+					normals[i] = invertible ? NormalizeSceneDirection( direction ) : NormalizeCollapsedSceneDirection( direction, normals[i] );
+				}
 				var tangents = source.Tangents.ToArray();
 				for ( var i = 0; i < tangents.Length; i++ )
 				{
 					var tangent = tangents[i];
-					var direction = NormalizeSceneDirection( NVector3.TransformNormal( new NVector3( tangent.X, tangent.Y, tangent.Z ), transform ) );
+					var original = new NVector3( tangent.X, tangent.Y, tangent.Z );
+					var direction = NVector3.TransformNormal( original, transform );
+					direction = invertible ? NormalizeSceneDirection( direction ) : NormalizeCollapsedSceneDirection( direction, original );
+					if ( !invertible && normals.Length != 0 )
+					{
+						var normal = normals[i];
+						direction = NormalizeCollapsedSceneDirection( direction - normal * NVector3.Dot( normal, direction ), ScenePerpendicular( normal ) );
+					}
 					tangents[i] = new NVector4( direction, determinant < 0 ? -tangent.W : tangent.W );
 				}
 				var indices = source.Indices.ToArray();
@@ -146,6 +157,44 @@ public static class GltfStaticSceneAssembler
 	}
 
 	private static bool FiniteSceneVector( NVector3 value ) => float.IsFinite( value.X ) && float.IsFinite( value.Y ) && float.IsFinite( value.Z );
+
+	private static NMatrix4x4 SceneCofactorTransform( NMatrix4x4 transform )
+	{
+		// Cofactors transform oriented surface area even when an inverse does not
+		// exist. Normalize the linear part first to keep its products in range.
+		var x = new NVector3( transform.M11, transform.M12, transform.M13 );
+		var y = new NVector3( transform.M21, transform.M22, transform.M23 );
+		var z = new NVector3( transform.M31, transform.M32, transform.M33 );
+		var max = NVector3.Max( NVector3.Abs( x ), NVector3.Max( NVector3.Abs( y ), NVector3.Abs( z ) ) );
+		var scale = MathF.Max( max.X, MathF.Max( max.Y, max.Z ) );
+		if ( scale > 0 ) { x /= scale; y /= scale; z /= scale; }
+		var cofactorX = NVector3.Cross( y, z );
+		var cofactorY = NVector3.Cross( z, x );
+		var cofactorZ = NVector3.Cross( x, y );
+		return new NMatrix4x4(
+			cofactorX.X, cofactorX.Y, cofactorX.Z, 0,
+			cofactorY.X, cofactorY.Y, cofactorY.Z, 0,
+			cofactorZ.X, cofactorZ.Y, cofactorZ.Z, 0,
+			0, 0, 0, 1 );
+	}
+
+	private static NVector3 NormalizeCollapsedSceneDirection( NVector3 value, NVector3 fallback )
+	{
+		if ( !FiniteSceneVector( value ) ) throw new GltfException( "Static scene direction is invalid." );
+		var length = Math.Sqrt( (double)value.X * value.X + (double)value.Y * value.Y + (double)value.Z * value.Z );
+		// Only a collapsed direction is undefined: retain its source direction,
+		// or a perpendicular tangent when the original frame also collapses.
+		if ( length == 0 ) return NormalizeSceneDirection( fallback );
+		return new NVector3( (float)(value.X / length), (float)(value.Y / length), (float)(value.Z / length) );
+	}
+
+	private static NVector3 ScenePerpendicular( NVector3 normal )
+	{
+		var absolute = NVector3.Abs( normal );
+		var axis = absolute.X <= absolute.Y && absolute.X <= absolute.Z ? NVector3.UnitX : absolute.Y <= absolute.Z ? NVector3.UnitY : NVector3.UnitZ;
+		return NVector3.Cross( normal, axis );
+	}
+
 	private static NVector3 NormalizeSceneDirection( NVector3 value )
 	{
 		var length = value.Length();

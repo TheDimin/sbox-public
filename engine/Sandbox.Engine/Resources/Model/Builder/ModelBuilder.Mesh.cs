@@ -9,8 +9,9 @@ public sealed partial class ModelBuilder
 	private readonly Dictionary<(string, int), int> _groupChoiceToIndex = [];
 	private readonly HashSet<string> _groupNames = new( StringComparer.Ordinal );
 	private ulong _defaultMeshGroupMask;
+	private bool _explicitMeshGroups;
 
-	private ulong DefaultMeshGroupMask => _groupNames.Count > 0 ? _defaultMeshGroupMask : ulong.MaxValue;
+	private ulong DefaultMeshGroupMask => _explicitMeshGroups || _groupNames.Count > 0 ? _defaultMeshGroupMask : ulong.MaxValue;
 
 	private void ApplyMeshes( NativeEngine.ModelBuilder modelBuilder )
 	{
@@ -157,8 +158,37 @@ public sealed partial class ModelBuilder
 		return this;
 	}
 
+	/// <summary>
+	/// Sets the ordered native mesh-group names and default mask for an existing model layout.
+	/// Call before adding meshes. This explicit mode cannot be mixed with named bodygroup choices.
+	/// </summary>
+	public ModelBuilder WithExplicitMeshGroups( IReadOnlyList<string> names, ulong defaultMask )
+	{
+		ArgumentNullException.ThrowIfNull( names );
+		if ( _explicitMeshGroups || meshGroups.Count != 0 || meshes.Count != 0 ) throw new InvalidOperationException( "Mesh groups must be configured once before adding meshes." );
+		if ( names.Count > 64 ) throw new ArgumentOutOfRangeException( nameof( names ) );
+		var unique = new HashSet<string>( StringComparer.Ordinal );
+		foreach ( var name in names )
+			if ( string.IsNullOrWhiteSpace( name ) || name.Length > 1024 || !unique.Add( name ) ) throw new ArgumentException( "Mesh-group names must be nonempty, bounded and unique.", nameof( names ) );
+		var allowed = names.Count == 64 ? ulong.MaxValue : names.Count == 0 ? 0UL : (1UL << names.Count) - 1;
+		if ( names.Count == 0 ? defaultMask != 0 && defaultMask != ulong.MaxValue : (defaultMask & ~allowed) != 0 ) throw new ArgumentOutOfRangeException( nameof( defaultMask ) );
+		meshGroups.AddRange( names ); _defaultMeshGroupMask = defaultMask; _explicitMeshGroups = true;
+		return this;
+	}
+
+	/// <summary>Adds a mesh with an explicit native group mask and LOD.</summary>
+	public ModelBuilder AddMeshWithGroupMask( Mesh mesh, int lod, ulong groupMask )
+	{
+		if ( !_explicitMeshGroups ) throw new InvalidOperationException( "Configure explicit mesh groups first." );
+		if ( lod is < 0 or >= 8 ) throw new ArgumentOutOfRangeException( nameof( lod ) );
+		var allowed = meshGroups.Count == 64 ? ulong.MaxValue : meshGroups.Count == 0 ? 0UL : (1UL << meshGroups.Count) - 1;
+		if ( groupMask != ulong.MaxValue && (groupMask & ~allowed) != 0 ) throw new ArgumentOutOfRangeException( nameof( groupMask ) );
+		return AddMesh( mesh, 1 << lod, groupMask );
+	}
+
 	private int EnsureGroupChoice( string name, int choice )
 	{
+		if ( _explicitMeshGroups ) throw new InvalidOperationException( "Explicit mesh groups cannot be mixed with named bodygroup choices." );
 		if ( string.IsNullOrWhiteSpace( name ) )
 			throw new ArgumentException( null, nameof( name ) );
 

@@ -41,6 +41,39 @@ public sealed class PhysicsBodyBuilder
 	/// </summary>
 	public string BoneName { get; set; }
 
+	/// <summary>Collision-shape types whose surface slot may be overridden.</summary>
+	public enum ShapeKind { Box, Hull, Sphere, Capsule, Mesh }
+	internal float? GravityScaleOverride;
+	internal bool? MassCenterOverrideEnabled;
+	internal Vector3 MassCenterOverrideValue;
+	internal readonly Dictionary<(ShapeKind Kind, int Index), int> ShapeSurfaceSlots = [];
+
+	/// <summary>Sets the authored gravity multiplier for this body.</summary>
+	public PhysicsBodyBuilder SetGravityScale( float scale )
+	{
+		if ( !float.IsFinite( scale ) ) throw new ArgumentOutOfRangeException( nameof( scale ) );
+		GravityScaleOverride = scale; return this;
+	}
+
+	/// <summary>Sets the authored local mass-center override and whether it is active.</summary>
+	public PhysicsBodyBuilder SetMassCenterOverride( bool enabled, Vector3 center )
+	{
+		if ( !float.IsFinite( center.x ) || !float.IsFinite( center.y ) || !float.IsFinite( center.z ) ) throw new ArgumentOutOfRangeException( nameof( center ) );
+		MassCenterOverrideEnabled = enabled; MassCenterOverrideValue = center; return this;
+	}
+
+	/// <summary>
+	/// Selects an index in the model's AddSurface list for one previously added shape.
+	/// The surface list is validated when the model is created.
+	/// </summary>
+	public PhysicsBodyBuilder SetShapeSurfaceSlot( ShapeKind kind, int shapeIndex, int surfaceSlot )
+	{
+		var count = kind switch { ShapeKind.Box => Boxes.Count, ShapeKind.Hull => Hulls.Count, ShapeKind.Sphere => Spheres.Count, ShapeKind.Capsule => Capsules.Count, ShapeKind.Mesh => Meshes.Count, _ => throw new ArgumentOutOfRangeException( nameof( kind ) ) };
+		if ( shapeIndex < 0 || shapeIndex >= count ) throw new ArgumentOutOfRangeException( nameof( shapeIndex ) );
+		ArgumentOutOfRangeException.ThrowIfNegative( surfaceSlot );
+		ShapeSurfaceSlots[(kind, shapeIndex)] = surfaceSlot; return this;
+	}
+
 	internal struct BoxShape { public Vector3 Extents; public Transform Transform; }
 	internal struct SphereShape { public Sphere Sphere; }
 	internal struct CapsuleShape { public Capsule Capsule; }

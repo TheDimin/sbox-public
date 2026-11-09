@@ -25,11 +25,11 @@ public sealed class ModelMorphs
 	{
 		Model = model;
 
-		Count = model.native.NumFlexControllers();
+		Count = model.GltfResource?.Metadata.Morphs.Count ?? model.native.NumFlexControllers();
 
 		for ( int i = 0; i < Count; i++ )
 		{
-			var name = model.native.GetFlexControllerName( i );
+			var name = model.GltfResource is { } gltf ? gltf.Metadata.Morphs[i].Name : model.native.GetFlexControllerName( i );
 			_nameToIndex[name] = i;
 			_indexToName[i] = name;
 		}
@@ -39,7 +39,7 @@ public sealed class ModelMorphs
 		_visemeIndices = new int[Visemes.Count];
 		for ( int i = 0; i < _visemeIndices.Length; i++ )
 		{
-			_visemeIndices[i] = model.native.GetVisemeIndex( Visemes.MorphNameArray[i] );
+			_visemeIndices[i] = model.GltfResource is not null ? -1 : model.native.GetVisemeIndex( Visemes.MorphNameArray[i] );
 			_visemeNameToIndex[Visemes.MorphNameArray[i]] = _visemeIndices[i];
 		}
 	}
@@ -69,7 +69,7 @@ public sealed class ModelMorphs
 
 			for ( var v = 0; v < row.Length; v++ )
 			{
-				row[v] = Model.native.GetVisemeMorph( _visemeIndices[v], morphIndex );
+				row[v] = Model.GltfResource is not null ? 0 : Model.native.GetVisemeMorph( _visemeIndices[v], morphIndex );
 				any |= row[v] != 0.0f;
 			}
 
@@ -204,7 +204,7 @@ public partial class Model
 	{
 		if ( morph < 0 || morph >= MorphCount )
 			throw new ArgumentOutOfRangeException( nameof( morph ), $"Tried to access out of range morph index {morph}, range is 0-{MorphCount - 1}" );
-		return native.GetFlexControllerName( morph );
+		return GltfResource is not null ? Morphs.GetName( morph ) : native.GetFlexControllerName( morph );
 	}
 
 	/// <summary>

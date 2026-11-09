@@ -30,24 +30,6 @@ public sealed partial class GltfDocument
 		if ( !nodeValue.TryGetProperty( "skin", out var skinValue ) || !geometry.Attributes.ContainsKey( "JOINTS_0" ) )
 			return Vector3.Transform( position, GetWorldTransform( node ) );
 		var skin = ReadSkin( SceneIndex( skinValue, "node skin" ) );
-		var result = Vector3.Zero;
-		for ( var set = 0; geometry.Attributes.TryGetValue( "JOINTS_" + set, out var jointsAccessor ); set++ )
-		{
-			if ( !geometry.Attributes.TryGetValue( "WEIGHTS_" + set, out var weightsAccessor ) ) throw new GltfException( "Missing skinning weight set." );
-			var joints = ReadFloatAccessor( jointsAccessor );
-			var weights = ReadFloatAccessor( weightsAccessor );
-			var baseIndex = vertex * 4;
-			for ( var influence = 0; influence < 4; influence++ )
-			{
-				var joint = (int)joints[baseIndex + influence];
-				var weight = weights[baseIndex + influence];
-				if ( (uint)joint >= (uint)skin.Joints.Length ) throw new GltfException( "Skinning joint index is out of range." );
-				if ( weight < 0 || !float.IsFinite( weight ) ) throw new GltfException( "Skinning weights must be finite and non-negative." );
-				if ( weight == 0 ) continue;
-				var world = skin.InverseBindMatrices[joint] * GetWorldTransform( skin.Joints[joint] );
-				result += Vector3.Transform( position, world ) * weight;
-			}
-		}
-		return result;
+		return EvaluateSkinnedPosition( geometry, skin, vertex, position, GetWorldTransform );
 	}
 }

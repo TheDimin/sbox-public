@@ -8,6 +8,7 @@ public static partial class SandboxSystemExtensions
 	public static bool HasRenderMeshes( this Model model )
 	{
 		if ( model is null ) return false;
+		if ( model.GltfResource is { } gltf ) return gltf.IsValid && gltf.MeshCount > 0;
 		if ( !model.native.IsValid ) return false;
 		if ( model.MeshCount <= 0 ) return false;
 		if ( model.native.HasSceneObjects() == false ) return false;

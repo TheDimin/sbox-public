@@ -1,3 +1,5 @@
+using System.Buffers.Binary;
+using System.Collections.ObjectModel;
 using System.Text.Json;
 
 namespace Sandbox.Gltf;
@@ -9,6 +11,96 @@ public sealed partial class GltfDocument
 	private readonly Dictionary<(int Mesh, int Primitive), GltfDracoMesh> dracoCache = [];
 	private Dictionary<int, List<DracoBinding>> dracoBindings;
 	private long dracoDecodedBytes;
+
+	/// <summary>
+	/// Read only this primitive's selected Draco mapping, preserving original component
+	/// bytes and normalization metadata. Returned arrays are caller-owned snapshots and
+	/// survive document disposal. Accessor fallback buffer views/offsets are ignored.
+	/// Sparse replacements are not applied: flagged streams retain accessor provenance
+	/// so the caller can apply overlays to the decoded base. Sparse source-strip indices
+	/// cannot be mapped faithfully to decoded triangle-list positions and are rejected.
+	/// The output limit bounds distinct returned arrays; the document's separate shared
+	/// decoder budget bounds cached decoded bytes, not initial native decoder allocations.
+	/// </summary>
+	public GltfDracoPrimitiveData ReadDracoPrimitiveData( int mesh, int primitive, long maxOwnedBytes = 256L * 1024 * 1024 )
+	{
+		if ( maxOwnedBytes < 0 ) throw new GltfException( "Draco owned-byte budget cannot be negative." );
+		if ( !SupportsExtension( DracoExtension ) ) throw new GltfException( "Draco is not selected for this document." );
+		lock ( meshoptViews )
+		{
+			var value = DracoPrimitive( mesh, primitive );
+			if ( !TryGetDracoExtension( value, out var extension ) ) throw new GltfException( "This primitive has no selected Draco extension." );
+			var mode = GltfJson.Int( value, "mode", 4 );
+			if ( mode is not (4 or 5) ) throw new GltfException( "Draco primitives require TRIANGLES or TRIANGLE_STRIP mode." );
+			var attributes = GltfJson.Required( value, "attributes" );
+			var compressedAttributes = GltfJson.Required( extension, "attributes" );
+			if ( attributes.ValueKind != JsonValueKind.Object || compressedAttributes.ValueKind != JsonValueKind.Object || !compressedAttributes.EnumerateObject().Any() )
+				throw new GltfException( "Draco primitive attributes must be non-empty objects." );
+			var mappings = new Dictionary<string, (int Accessor, uint Id, AccessorLayout Layout)>( StringComparer.Ordinal );
+			foreach ( var attribute in compressedAttributes.EnumerateObject() )
+			{
+				if ( !attributes.TryGetProperty( attribute.Name, out var accessor ) ) throw new GltfException( $"Draco attribute '{attribute.Name}' is not present in the primitive." );
+				var index = GltfJson.Integer( accessor, attribute.Name );
+				if ( !mappings.TryAdd( attribute.Name, (index, DracoAttributeId( attribute.Value ), Accessor( index )) ) )
+					throw new GltfException( $"Duplicate Draco attribute '{attribute.Name}'." );
+			}
+			int? indexAccessor = value.TryGetProperty( "indices", out var indexValue ) ? GltfJson.Integer( indexValue, "indices" ) : null;
+			AccessorLayout? indexLayout = indexAccessor.HasValue ? Accessor( indexAccessor.Value ) : null;
+			var sparseIndices = indexLayout.HasValue && indexLayout.Value.Json.TryGetProperty( "sparse", out _ );
+			if ( mode == 5 && sparseIndices ) throw new GltfException( "Draco sparse strip indices cannot be mapped to decoded triangle-list positions." );
+			var decoded = ReadDracoMesh( mesh, primitive );
+			ValidateDracoIndices( decoded, indexLayout, mode );
+			var indexType = indexLayout?.ComponentType ?? 5125;
+			var indexWidth = indexLayout?.Size ?? sizeof( uint );
+			var indexBytes = (long)decoded.Indices.Length * indexWidth;
+			if ( indexBytes > Array.MaxLength ) throw new GltfException( "Draco packed topology exceeds the supported array length." );
+			long ownedBytes = indexBytes;
+			var distinctAttributes = new Dictionary<uint, GltfDracoAttribute>();
+			foreach ( var mapping in mappings.Values )
+			{
+				var attribute = ValidateDracoAttribute( decoded, mapping.Id, mapping.Layout );
+				if ( !distinctAttributes.TryAdd( mapping.Id, attribute ) ) continue;
+				ownedBytes += attribute.Bytes.LongLength;
+				if ( attribute.ComponentType == 5126 )
+				{
+					// Test the float exponent directly so validation never changes
+					// component bits, including signed zero, on the raw-byte path.
+					for ( var offset = 0; offset < attribute.Bytes.Length; offset += sizeof( float ) )
+						if ( (BinaryPrimitives.ReadUInt32LittleEndian( attribute.Bytes.AsSpan( offset, sizeof( float ) ) ) & 0x7f800000u) == 0x7f800000u )
+							throw new GltfException( "Draco accessor contains a non-finite floating-point value." );
+				}
+			}
+			if ( ownedBytes > maxOwnedBytes ) throw new GltfException( "Draco owned-byte budget exceeded." );
+
+			// Every layout, decoded range, index width and owned length has been
+			// checked before any returned array is allocated or copied.
+			var copies = distinctAttributes.ToDictionary( pair => pair.Key, pair => (byte[])pair.Value.Bytes.Clone() );
+			var streams = new Dictionary<string, GltfDracoStream>( StringComparer.Ordinal );
+			foreach ( var (semantic, mapping) in mappings )
+			{
+				var layout = mapping.Layout;
+				streams.Add( semantic, new GltfDracoStream { AccessorIndex = mapping.Accessor, Count = layout.Count,
+					ComponentType = layout.ComponentType, Components = layout.Components, Normalized = layout.Normalized,
+					ByteStride = layout.Size * layout.Components, HasSparseOverrides = layout.Json.TryGetProperty( "sparse", out _ ), Bytes = copies[mapping.Id] } );
+			}
+			var packedIndices = new byte[(int)indexBytes];
+			for ( var i = 0; i < decoded.Indices.Length; i++ )
+			{
+				var target = packedIndices.AsSpan( i * indexWidth, indexWidth );
+				var index = decoded.Indices[i];
+				switch ( indexWidth )
+				{
+					case 1: target[0] = (byte)index; break;
+					case 2: BinaryPrimitives.WriteUInt16LittleEndian( target, (ushort)index ); break;
+					case 4: BinaryPrimitives.WriteUInt32LittleEndian( target, index ); break;
+				}
+			}
+			return new GltfDracoPrimitiveData { VertexCount = decoded.VertexCount, SourceMode = mode, OwnedBytes = ownedBytes,
+				Attributes = new ReadOnlyDictionary<string, GltfDracoStream>( streams ),
+				Indices = new GltfDracoStream { AccessorIndex = indexAccessor, Count = decoded.Indices.Length, ComponentType = indexType,
+					Components = 1, Normalized = false, ByteStride = indexWidth, HasSparseOverrides = sparseIndices, Bytes = packedIndices } };
+		}
+	}
 
 	// Draco changes the source of only the attributes listed in its extension,
 	// and of the primitive's index accessor; other attributes remain ordinary glTF.

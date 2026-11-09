@@ -19,6 +19,41 @@ public sealed class GltfDracoAttribute
 	public byte[] Bytes { get; init; }
 }
 
+/// <summary>A tightly packed decoded base stream in its original component format.</summary>
+public sealed class GltfDracoStream
+{
+	/// <summary>Source accessor provenance; null for topology without an authored index accessor.</summary>
+	public int? AccessorIndex { get; internal init; }
+	/// <summary>Actual decoded element count, which can differ from a source strip index count.</summary>
+	public int Count { get; internal init; }
+	public int ComponentType { get; internal init; }
+	public int Components { get; internal init; }
+	/// <summary>glTF interpretation metadata; the returned component bytes are not normalized.</summary>
+	public bool Normalized { get; internal init; }
+	public int ByteStride { get; internal init; }
+	/// <summary>Apply this source accessor's sparse replacements to the decoded base before use.</summary>
+	public bool HasSparseOverrides { get; internal init; }
+	/// <summary>
+	/// Caller-owned mutable bytes, detached from the decoder cache. Aliases of the same
+	/// decoded attribute ID share this array within one result; use copy-on-write when
+	/// their source accessors require different sparse replacements.
+	/// </summary>
+	public byte[] Bytes { get; internal init; }
+}
+
+/// <summary>Primitive-scoped decoded base attributes and triangle-list topology.</summary>
+public sealed class GltfDracoPrimitiveData
+{
+	public int VertexCount { get; internal init; }
+	public int SourceMode { get; internal init; }
+	public int Mode => 4;
+	/// <summary>Only attributes mapped by this primitive's selected Draco extension.</summary>
+	public IReadOnlyDictionary<string, GltfDracoStream> Attributes { get; internal init; }
+	public GltfDracoStream Indices { get; internal init; }
+	/// <summary>Total bytes in distinct returned arrays, including packed topology.</summary>
+	public long OwnedBytes { get; internal init; }
+}
+
 /// <summary>Decodes triangle geometry into managed-owned arrays.</summary>
 public static class GltfDraco
 {

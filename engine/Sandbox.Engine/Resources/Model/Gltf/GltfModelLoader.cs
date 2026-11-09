@@ -4,43 +4,108 @@ using Sandbox.Gltf;
 namespace Sandbox;
 
 /// <summary>
-/// Initial static, untextured glTF adapter through the existing native model and
-/// stock-material pipelines. It is not a complete glTF loader or a GPU-optimized
-/// compiled-resource implementation. Unsupported material/deformation inputs fail.
+/// glTF resource loading through the managed GPU backend. CPU preparation does
+/// not require a graphics device; rendering realizes buffers and stock materials
+/// lazily. This is not proof of complete format/API or compiled-layout parity.
 /// </summary>
 internal static class GltfModelLoader
 {
-	// Quantized attributes are decoded into the same float streams as core data
-	// before native upload. Do not advertise codecs or shader extensions merely
-	// because the standalone reader knows their metadata.
-	private static readonly IReadOnlySet<string> SupportedExtensions = new HashSet<string>( StringComparer.Ordinal ) { "KHR_mesh_quantization" };
+	// These geometry extensions are consumed by both CreateDrawData and the
+	// descriptor-driven upload path. Required codecs decode or report their real
+	// native decoder error; they never silently select an ordinary fallback.
+	// Material/deformation extensions remain separate rendering capabilities.
+	internal static readonly IReadOnlySet<string> SupportedExtensions = new HashSet<string>( StringComparer.Ordinal )
+	{
+		"KHR_mesh_quantization", "KHR_texture_transform", "KHR_draco_mesh_compression", "KHR_texture_basisu",
+		"KHR_meshopt_compression", "EXT_meshopt_compression", "EXT_mesh_gpu_instancing", "KHR_materials_unlit", "KHR_materials_variants", "KHR_materials_diffuse_transmission",
+		"KHR_materials_emissive_strength", "KHR_node_visibility", "EXT_texture_webp",
+		"KHR_materials_clearcoat", "KHR_materials_anisotropy",
+		// Lights are scene data, not model data: the model loads and the lights are not instanced.
+		"KHR_lights_punctual"
+	};
 
 	/// <summary>The loader's document policy, shared by source and compiled input.</summary>
 	internal static GltfDocument ReadDocument( byte[] source, Func<string, byte[]> resolve = null ) =>
 		GltfReader.Read( source, resolve, supportedExtensions: SupportedExtensions );
 
-	internal static bool IsGltfPath( string path ) => path is not null &&
-		(path.EndsWith( ".gltf", StringComparison.OrdinalIgnoreCase ) ||
+	internal static bool IsGltfPath( string path )
+	{
+		if ( path is null ) return false;
+		var fragment = path.IndexOf( '#' );
+		if ( fragment >= 0 ) path = path[..fragment];
+		return path.EndsWith( ".gltf", StringComparison.OrdinalIgnoreCase ) ||
 		 path.EndsWith( ".glb", StringComparison.OrdinalIgnoreCase ) ||
-		 path.EndsWith( ".glb_c", StringComparison.OrdinalIgnoreCase ));
+		 path.EndsWith( ".glb_c", StringComparison.OrdinalIgnoreCase );
+	}
 
-	internal static Model Load( string path )
+	internal static string CompiledPath( string path ) => path.EndsWith( ".gltf", StringComparison.OrdinalIgnoreCase )
+		? path + ".glb_c" : path.EndsWith( ".glb", StringComparison.OrdinalIgnoreCase ) ? path + "_c" : path;
+
+	internal static Model Load( string path, int? sceneIndex = null )
 	{
 		ThreadSafe.AssertIsMainThread();
-		var mountedPath = NormalizeMountedPath( path );
-		var canonical = Resource.FixPath( mountedPath );
+		var selection = ParseScenePath( path, sceneIndex );
+		var mountedPath = NormalizeMountedPath( selection.Path );
+		var canonical = SceneResourcePath( mountedPath, selection.Scene );
 		if ( Game.Resources.TryGet<Model>( canonical, out var cached ) && cached.IsValid && !cached.IsError )
 			return cached;
+		var resource = Prepare( mountedPath, sceneIndex: selection.Scene );
+		try { return Model.FromGltfResource( resource, canonical ); }
+		catch { resource.ReleaseOwner(); throw; }
+	}
+
+	internal static (Model Model, GltfManagedModelResource Resource) PrepareReload( string path, byte[] compiled )
+	{
+		ThreadSafe.AssertIsMainThread();
+		var selection = ParseScenePath( path );
+		var mountedPath = NormalizeMountedPath( selection.Path );
+		var canonical = SceneResourcePath( mountedPath, selection.Scene );
+		if ( !Game.Resources.TryGet<Model>( canonical, out var model ) || model.GltfResource is null ) return default;
+		return (model, Prepare( mountedPath, compiled, selection.Scene ));
+	}
+
+	/// <summary>Prepare all live resource selections belonging to exactly one logical source.</summary>
+	internal static IReadOnlyList<(Model Model, GltfManagedModelResource Resource)> PrepareReloads( string path, byte[] compiled )
+	{
+		ThreadSafe.AssertIsMainThread(); ArgumentNullException.ThrowIfNull( compiled );
+		var canonical = SceneResourcePath( NormalizeMountedPath( ParseScenePath( path ).Path ), null );
+		// Snapshot the weak index before any resources are prepared or notifications
+		// can alter it. Full parsed identities prevent similarly prefixed filenames,
+		// source .gltf/.glb siblings or individual scenes from being conflated.
+		var models = Game.Resources.FindWeakByPathPrefix<Model>( canonical )
+			.Where( model => model.IsValid && model.GltfResource is not null && IsGltfPath( model.ResourcePath ) &&
+				string.Equals( SceneResourcePath( NormalizeMountedPath( ParseScenePath( model.ResourcePath ).Path ), null ), canonical, StringComparison.OrdinalIgnoreCase ) )
+			.Distinct().OrderBy( model => model.ResourcePath, StringComparer.Ordinal ).ToArray();
+		var prepared = new List<(Model Model, GltfManagedModelResource Resource)>();
+		try
+		{
+			foreach ( var model in models )
+			{
+				var selection = ParseScenePath( model.ResourcePath );
+				prepared.Add( (model, Prepare( NormalizeMountedPath( selection.Path ), compiled, selection.Scene )) );
+			}
+			return prepared;
+		}
+		catch ( Exception error )
+		{
+			Sandbox.Gltf.DirectGpu.GltfGpuCleanup.Rollback( error, prepared.AsEnumerable().Reverse().Select<(Model Model, GltfManagedModelResource Resource), Action>( entry => entry.Resource.ReleaseOwner ) );
+			throw;
+		}
+	}
+
+	private static GltfManagedModelResource Prepare( string mountedPath, byte[] preparedBytes = null, int? sceneIndex = null )
+	{
 		if ( Graphics.IsActive ) throw new GltfException( "glTF models cannot be constructed during rendering." );
 
 		var fs = EngineFileSystem.Mounted ?? throw new GltfException( "No mounted filesystem is available for glTF loading." );
 		var storagePath = mountedPath;
 		// Serialized resource paths omit _c. Resolve the compiled representation on a
 		// cold load too, while preserving the logical .glb identity and relative URIs.
-		if ( !fs.FileExists( storagePath ) && mountedPath.EndsWith( ".glb", StringComparison.OrdinalIgnoreCase ) && fs.FileExists( mountedPath + "_c" ) )
-			storagePath = mountedPath + "_c";
-		if ( !fs.FileExists( storagePath ) ) throw new GltfException( $"glTF model '{mountedPath}' was not found in the mounted filesystem." );
-		var source = fs.ReadAllBytes( storagePath ).ToArray();
+		var compiledPath = CompiledPath( mountedPath );
+		if ( !fs.FileExists( storagePath ) && fs.FileExists( compiledPath ) )
+			storagePath = compiledPath;
+		if ( preparedBytes is null && !fs.FileExists( storagePath ) ) throw new GltfException( $"glTF model '{mountedPath}' was not found in the mounted filesystem." );
+		var source = preparedBytes ?? fs.ReadAllBytes( storagePath ).ToArray();
 		byte[] Resolve( string uri )
 		{
 			var dependency = ResolveMountedUri( mountedPath, uri );
@@ -48,103 +113,41 @@ internal static class GltfModelLoader
 			return fs.ReadAllBytes( dependency ).ToArray();
 		}
 
-		using var document = ReadDocument( source, Resolve );
+		using var sourceOwner = new DocumentOwner( ReadDocument( source, Resolve ) );
+		var document = sourceOwner.Document;
 		if ( document.UnsupportedOptionalExtensions.Count > 0 )
 			Log.Warning( $"glTF '{mountedPath}' uses unsupported optional extensions: {string.Join( ", ", document.UnsupportedOptionalExtensions )}. The standard core fallback is used where available." );
-		var scene = GltfStaticSceneAssembler.Assemble( document );
-		if ( !scene.HasBounds || scene.Primitives.Count == 0 ) throw new GltfException( "The glTF default scene contains no renderable geometry." );
-
-		// Validate all selected materials and geometry before allocating native resources.
-		var prepared = new List<(GltfModelPrimitiveBuilder.PreparedPrimitive Geometry, bool DoubleSided, System.Numerics.Vector4 Color)>();
-		foreach ( var primitive in scene.Primitives )
-		{
-			var material = primitive.Data.Material is int materialIndex ? document.ReadMaterial( materialIndex ) : null;
-			ValidateMaterial( material );
-			foreach ( var color in primitive.Data.Colors.Span )
-				if ( color != System.Numerics.Vector4.One )
-					throw new GltfException( "The initial glTF model loader does not yet support non-white vertex colors." );
-			var effectiveColor = material?.BaseColorFactor ?? System.Numerics.Vector4.One;
-			// OPAQUE ignores alpha; cache effective rendering inputs independently of
-			// authored material identity, which remains in the glTF source.
-			effectiveColor.W = 1;
-			prepared.Add( (GltfModelPrimitiveBuilder.Prepare( primitive.Data ), material?.DoubleSided ?? false, effectiveColor) );
-		}
-
-		var stock = Material.Load( "materials/default/white.vmat" );
-		if ( stock is null || !stock.IsValid || stock.IsError ) throw new GltfException( "The stock glTF material template is unavailable." );
-		var leases = new List<GltfMaterialLease<Material>>();
-		var meshes = new List<Mesh>();
-		Model result = null;
-		try
-		{
-			var materials = new Dictionary<(bool DoubleSided, System.Numerics.Vector4 Color), Material>();
-			var builder = Model.Builder.WithName( "gltf_model_" + Guid.NewGuid().ToString( "N" ) );
-			foreach ( var (geometry, doubleSided, color) in prepared )
-			{
-				var descriptor = (doubleSided, color);
-				if ( !materials.TryGetValue( descriptor, out var material ) )
-				{
-					var key = new GltfMaterialKey( stock, 0,
-						[new( "F_RENDER_BACKFACES", doubleSided ? 1 : 0 ), new( "F_METALNESS_TEXTURE", 0 ), new( "F_ALPHA_TEST", 0 ), new( "F_TRANSLUCENT", 0 )],
-						[new( "g_vColorTint", color )], [], [new( "g_flMetalness", 1f ), new( "g_flRoughnessScaleFactor", 0f )] );
-					var lease = GltfMaterialCache.Shared.Acquire( key );
-					leases.Add( lease );
-					material = lease.Value;
-					materials.Add( descriptor, material );
-				}
-				var mesh = new Mesh( "gltf_primitive", material, geometry.PrimitiveType );
-				meshes.Add( mesh );
-				mesh.CreateVertexBuffer( geometry.Vertices.Length, geometry.Vertices.AsSpan() );
-				mesh.CreateIndexBuffer( geometry.Indices.Length, geometry.Indices.AsSpan() );
-				mesh.Bounds = geometry.Bounds;
-				builder.AddMesh( mesh );
-			}
-			builder.WithViewBounds( new BBox( scene.BoundsMin, scene.BoundsMax ) );
-			result = builder.Create();
-			if ( result is null || ReferenceEquals( result, Model.Error ) )
-			{
-				result = null;
-				throw new GltfException( "Native glTF model construction failed." );
-			}
-			// Transfer ownership before validation/publication so rollback follows the
-			// same ordered model -> mesh -> material release as ordinary destruction.
-			result.SetGltfLifetime( GlobalContext.Current, leases, meshes );
-			leases = null;
-			meshes = null;
-			if ( !result.IsValid || result.IsError ) throw new GltfException( "Native glTF model construction failed." );
-
-			// ModelBuilder registers its temporary procedural name and native GUID. Remove
-			// those aliases before publishing a stable path for this mounted source.
-			Game.Resources.Unregister( result );
-			result.Guid = Guid.Empty;
-			result.Name = canonical;
-			result.RegisterWeakResourceId( canonical );
-			return result;
-		}
-		catch
-		{
-			if ( meshes is null && leases is null ) result?.Destroy();
-			else
-			{
-				try { ReleaseMeshes( meshes ); }
-				catch ( Exception e ) { Log.Warning( e, e.Message ); }
-				if ( leases is not null )
-					foreach ( var lease in leases )
-						try { lease.Dispose(); }
-						catch ( Exception e ) { Log.Warning( e, e.Message ); }
-			}
-			throw;
-		}
+		var resource = new GltfManagedModelResource( document, sceneIndex );
+		sourceOwner.Release(); // Successful preparation now owns this document generation.
+		// A selected scene may legally contain no drawable primitives. Preserve it
+		// as an empty model; HasRenderMeshes reports whether anything can render.
+		return resource;
 	}
 
-	private static void ValidateMaterial( GltfMaterial material )
+	// Selection is an identity fragment, never a mounted filename or a URI base.
+	// Canonicalize it before cache lookup so source/compiled aliases share one view.
+	internal static (string Path, int? Scene) ParseScenePath( string path, int? sceneIndex = null )
 	{
-		if ( material is null ) return; // glTF's default material.
-		if ( material.MetallicFactor != 1 || material.RoughnessFactor != 1 ) throw new GltfException( "The initial glTF model loader supports only default metallicFactor and roughnessFactor." );
-		if ( material.EmissiveFactor != System.Numerics.Vector3.Zero || material.Unlit || material.AlphaMode != "OPAQUE" )
-			throw new GltfException( "The initial glTF model loader does not yet support emissive, unlit or non-opaque materials." );
-		if ( material.BaseColorTexture is not null || material.MetallicRoughnessTexture is not null || material.NormalTexture is not null || material.OcclusionTexture is not null || material.EmissiveTexture is not null )
-			throw new GltfException( "The initial glTF model loader does not yet support material textures." );
+		if ( sceneIndex < 0 ) throw new ArgumentOutOfRangeException( nameof( sceneIndex ) );
+		if ( path is null ) throw new ArgumentNullException( nameof( path ) );
+		var fragment = path.IndexOf( '#' );
+		if ( fragment < 0 ) return (path, sceneIndex);
+		var suffix = path[(fragment + 1)..];
+		if ( !suffix.StartsWith( "scene=", StringComparison.Ordinal ) ||
+			!int.TryParse( suffix.AsSpan( 6 ), System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var selected ) || selected < 0 )
+			throw new GltfException( "Invalid glTF scene selection fragment; expected #scene=<nonnegative index>." );
+		if ( sceneIndex.HasValue && sceneIndex.Value != selected ) throw new ArgumentException( "Conflicting glTF scene selections.", nameof( sceneIndex ) );
+		return (path[..fragment], selected);
+	}
+
+	internal static string SceneResourcePath( string mountedPath, int? sceneIndex ) =>
+		(mountedPath.EndsWith( ".gltf.glb_c", StringComparison.OrdinalIgnoreCase ) ? Resource.FixPath( mountedPath[..^6] ) : Resource.FixPath( mountedPath )) + (sceneIndex.HasValue ? "#scene=" + sceneIndex.Value.ToString( System.Globalization.CultureInfo.InvariantCulture ) : "");
+
+	private sealed class DocumentOwner( GltfDocument document ) : IDisposable
+	{
+		internal GltfDocument Document { get; private set; } = document;
+		internal void Release() => Document = null;
+		public void Dispose() => Document?.Dispose();
 	}
 
 	internal static void ReleaseMeshes( List<Mesh> meshes )

@@ -346,6 +346,12 @@ internal sealed class SceneMirror : ISceneObjectListener, IDisposable
 			var span = bones.AsSpan( 0, count );
 			model.GetBoneWorldTransforms( span );
 			mesh.SetBones( span );
+			for ( var modelMesh = 0; modelMesh < mesh.Mesh.ModelMeshCount; modelMesh++ )
+			{
+				var gltfPalette = model.GetGltfSkinningPalette( modelMesh );
+				if ( !gltfPalette.IsEmpty ) mesh.SetSkinningPalette( modelMesh, gltfPalette );
+				else mesh.ClearSkinningPalette( modelMesh );
+			}
 
 			// Native evaluates morph flex rules each frame.
 			mesh.MorphSource = model.Model is { MorphCount: > 0 } ? model : null;

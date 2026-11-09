@@ -1,4 +1,5 @@
 using Sandbox.Rendering;
+using Sandbox.Gltf.DirectGpu;
 using System.Runtime.CompilerServices;
 
 namespace Sandbox;
@@ -152,10 +153,14 @@ internal sealed class GltfMaterialCacheCore<T> : IDisposable where T : class
 				entries.Add( key, entry );
 				value = null; // Ownership transfers to the entry only after publication.
 			}
+			catch ( Exception original )
+			{
+				if ( value is not null ) GltfGpuCleanup.Rollback( original, [() => release( value )] );
+				throw;
+			}
 			finally
 			{
 				creating.Remove( key );
-				if ( value is not null ) release( value );
 			}
 		}
 		entry.Users++;
@@ -215,7 +220,11 @@ internal sealed class GltfMaterialCache : IDisposable
 			}
 			return result;
 		}
-		catch { result?.Destroy(); throw; }
+		catch ( Exception original )
+		{
+			if ( result is not null ) GltfGpuCleanup.Rollback( original, [result.Destroy] );
+			throw;
+		}
 	}
 }
 

@@ -57,6 +57,11 @@ partial class ModelRenderer
 		}
 
 		_hasActiveDeformations = _effectiveVolumes.Count > 0;
+		if ( gltfInstance is not null )
+		{
+			if ( _hasActiveDeformations ) throw new NotSupportedException( "ModelDeformer volumes for managed glTF models are not implemented yet." );
+			return;
+		}
 		if ( this is not SkinnedModelRenderer && (_sceneObject is SceneModel) != _hasActiveDeformations )
 		{
 			RecreateSceneObject();
@@ -120,6 +125,7 @@ partial class ModelRenderer
 	/// </summary>
 	protected virtual SceneObject CreateSceneObject( Model model )
 	{
+		if ( model?.GltfResource is { } gltf ) return CreateGltfSceneObject( gltf );
 		if ( _hasActiveDeformations )
 		{
 			return new SceneModel( Scene.SceneWorld, model, WorldTransform ) { UseAnimGraph = false };

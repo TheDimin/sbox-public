@@ -15,7 +15,7 @@ public partial class Model
 	{
 		ThreadSafe.AssertIsMainThread();
 
-		// Only explicit glTF paths enter this initial adapter. GUID-only loading
+		// Explicit glTF paths enter the managed resource backend. GUID-only loading
 		// continues through the established native resource path.
 		if ( GltfModelLoader.IsGltfPath( id.Path ) )
 			return GltfModelLoader.Load( id.Path );

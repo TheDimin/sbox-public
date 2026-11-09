@@ -130,7 +130,7 @@ namespace Sandbox
 		}
 	}
 
-	internal struct VertexBufferHandle
+	internal partial struct VertexBufferHandle
 	{
 		public readonly bool IsValid => _native != IntPtr.Zero && _elementType != null;
 		public readonly int ElementCount => _elementCount;

@@ -7,10 +7,43 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Evergine.Bindings.Draco" Version="2025.10.14.20" />
-    <PackageReference Include="Evergine.Bindings.MeshOptimizer" Version="2026.10.1.20" />
-    <PackageReference Include="Evergine.Bindings.KTX" Version="2026.6.15.8" />
+    <PackageReference Include="Evergine.Bindings.Draco" Version="2025.10.14.20" GeneratePathProperty="true" />
+    <PackageReference Include="Evergine.Bindings.MeshOptimizer" Version="2026.10.1.20" GeneratePathProperty="true" />
+    <PackageReference Include="Evergine.Bindings.KTX" Version="2026.6.15.8" GeneratePathProperty="true" />
     <None Update="ThirdPartyNotices.md" CopyToOutputDirectory="PreserveNewest" />
     <None Update="KtxThirdPartyNotices.md" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="ThirdParty/MikkTSpaceSharp/LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <None Update="ThirdParty/MikkTSpaceSharp/NOTICE.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
+  <!-- The engine launcher does not consume the library's .deps.json runtimeTargets.
+       Standard content items also flow through ProjectReferences, placing the native
+       libraries beside their managed assemblies for normal builds, stages and publish. -->
+  <Target Name="IncludeGltfNativeAssets" BeforeTargets="AssignTargetPaths"
+          Condition="'$(DesignTimeBuild)' != 'true'">
+    <!-- Resolve after SDK/publish-profile imports so a requested target RID wins.
+         Ordinary AnyCPU builds use the SDK's portable host RID without changing
+         managed PlatformTarget. Missing RID assets never fall back to host codecs. -->
+    <PropertyGroup>
+      <_GltfNativeRuntimeIdentifier>$(RuntimeIdentifier)</_GltfNativeRuntimeIdentifier>
+      <_GltfNativeRuntimeIdentifier Condition="'$(_GltfNativeRuntimeIdentifier)' == ''">$(NETCoreSdkPortableRuntimeIdentifier)</_GltfNativeRuntimeIdentifier>
+    </PropertyGroup>
+    <ItemGroup>
+      <_GltfDracoNativeAsset Include="$(PkgEvergine_Bindings_Draco)/runtimes/$(_GltfNativeRuntimeIdentifier)/native/*" />
+      <_GltfMeshoptNativeAsset Include="$(PkgEvergine_Bindings_MeshOptimizer)/runtimes/$(_GltfNativeRuntimeIdentifier)/native/*" />
+      <_GltfKtxNativeAsset Include="$(PkgEvergine_Bindings_KTX)/runtimes/$(_GltfNativeRuntimeIdentifier)/native/*" />
+      <Content Include="@(_GltfDracoNativeAsset);@(_GltfMeshoptNativeAsset);@(_GltfKtxNativeAsset)"
+               Link="%(Filename)%(Extension)" TargetPath="%(Filename)%(Extension)"
+               CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
+    <Error Condition="'$(_GltfNativeRuntimeIdentifier)' == ''"
+           Text="Cannot select glTF native codecs: set RuntimeIdentifier or use an SDK with NETCoreSdkPortableRuntimeIdentifier." />
+    <Error Condition="'$(PkgEvergine_Bindings_Draco)' == '' or '$(PkgEvergine_Bindings_MeshOptimizer)' == '' or '$(PkgEvergine_Bindings_KTX)' == ''"
+           Text="glTF native codec package paths are unavailable. Restore Sandbox.Gltf after enabling GeneratePathProperty before building or publishing." />
+    <Error Condition="'@(_GltfDracoNativeAsset)' == ''"
+           Text="The pinned Draco package has no native assets for requested RID '$(_GltfNativeRuntimeIdentifier)'." />
+    <Error Condition="'@(_GltfMeshoptNativeAsset)' == ''"
+           Text="The pinned meshoptimizer package has no native assets for requested RID '$(_GltfNativeRuntimeIdentifier)'." />
+    <Error Condition="'@(_GltfKtxNativeAsset)' == ''"
+           Text="The pinned KTX package has no native assets for requested RID '$(_GltfNativeRuntimeIdentifier)'." />
+  </Target>
 </Project>

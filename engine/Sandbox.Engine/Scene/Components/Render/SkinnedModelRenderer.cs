@@ -36,6 +36,8 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 		{
 			if ( value == this ) return;
 			if ( _boneMergeTarget == value ) return;
+			if ( value is not null && (Model?.GltfResource is not null || value.Model?.GltfResource is not null) )
+				throw new NotSupportedException( "Bone merging is not implemented for managed glTF renderers." );
 
 			_boneMergeTarget?.RemoveBoneMergeChild( this );
 
@@ -79,6 +81,8 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 		set
 		{
 			if ( _animationGraph == value ) return;
+			if ( value is not null && Model?.GltfResource is not null )
+				throw new NotSupportedException( "Native animation graphs are not implemented for managed glTF renderers." );
 
 			_animationGraph = value;
 
@@ -114,14 +118,15 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 		get => _playbackRate;
 		set
 		{
+			if ( !float.IsFinite( value ) ) throw new ArgumentOutOfRangeException( nameof( value ), "Animation playback rate must be finite." );
 			if ( _playbackRate == value ) return;
-
-			_playbackRate = value;
 
 			if ( SceneModel.IsValid() )
 			{
-				SceneModel.PlaybackRate = _playbackRate;
+				SceneModel.PlaybackRate = value;
 			}
+
+			_playbackRate = value;
 		}
 	}
 
@@ -230,6 +235,23 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 		Scene.GetSystem<SceneAnimationSystem>().AddRenderer( this );
 
 		var model = Model ?? Model.Load( "models/dev/box.vmdl" );
+		if ( model.GltfResource is not null )
+		{
+			try
+			{
+				base.OnEnabled();
+				Transform.OnTransformChanged += OnTransformChanged;
+			}
+			catch
+			{
+				ResetGltfAnimation();
+				Scene.GetSystem<SceneAnimationSystem>().RemoveRenderer( this );
+				_skinnedParent?._skinnedChildren.Remove( this );
+				_skinnedParent = null;
+				throw;
+			}
+			return;
+		}
 
 		var so = new SceneModel( Scene.SceneWorld, model, WorldTransform );
 		_sceneObject = so;
@@ -263,12 +285,30 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 
 	internal override void OnSceneObjectCreated( SceneObject o )
 	{
+		if ( Model?.GltfResource is not null )
+		{
+			var previous = CaptureGltfAnimationState();
+			try
+			{
+				InitializeGltfAnimation();
+				base.OnSceneObjectCreated( o );
+				Morphs.Apply();
+				Sequence.Apply();
+				RebindGltfController( previous );
+			}
+			catch { RestoreGltfAnimationState( previous ); throw; }
+			return;
+		}
+
+		var previousController = gltfController;
 		base.OnSceneObjectCreated( o );
 
 		ApplyStoredAnimParameters();
 
 		Morphs.Apply();
 		Sequence.Apply();
+		ResetGltfAnimation();
+		GltfControllerBindingLost( previousController, "The target no longer has a glTF model." );
 
 		//
 		// Merge our bones immediately if we have a parent. This avoids frame 0 flicker.
@@ -284,13 +324,21 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 
 	protected override void UpdateObject()
 	{
-		BuildBoneHierarchy();
+		if ( !IsGltfChangeStaged )
+		{
+			BuildBoneHierarchy();
 
-		// If the model is changing, let go of any voice morphs now, while the
-		// scene object still has the old model our morph indices belong to
-		ReleaseVoiceMorphs();
+			// If the model is changing, let go of any voice morphs now, while the
+			// scene object still has the old model our morph indices belong to
+			ReleaseVoiceMorphs();
+		}
 
 		base.UpdateObject();
+		if ( Model?.GltfResource is not null )
+		{
+			UpdateGltfBoneObjects();
+			return;
+		}
 
 		if ( !SceneModel.IsValid() )
 			return;
@@ -331,6 +379,7 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 
 	internal override void OnDisabledInternal()
 	{
+		ResetGltfAnimation();
 		try
 		{
 			ClearBoneProxies();
@@ -397,6 +446,11 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 
 	internal bool AnimationUpdate( bool previewBindPose = false )
 	{
+		if ( GltfInstance is not null )
+		{
+			QueueGltfAnimation( Time.Delta, previewBindPose );
+			return false;
+		}
 		if ( !SceneModel.IsValid() )
 			return false;
 
@@ -439,12 +493,23 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 
 	void OnTransformChanged()
 	{
+		if ( GltfInstance is not null )
+		{
+			_boneSnapshotFrame = -1;
+			UpdateGltfBoneObjects();
+			return;
+		}
 		// Check transform because we could get a false positive.
 		_transformDirty = SceneModel.IsValid() && SceneModel.Transform != WorldTransform;
 	}
 
 	internal void FinishUpdate()
 	{
+		if ( Model?.GltfResource is not null )
+		{
+			FinishGltfAnimation();
+			return;
+		}
 		// Debug draw physics world if it exists.
 		Physics?.DebugDraw();
 

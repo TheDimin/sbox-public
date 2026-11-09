@@ -11,6 +11,9 @@ MODES
 
 FEATURES
 {
+	// Existing compiled model and native-dispatch materials keep packed UNORM8.
+	// Managed runtime meshes select their declared weight storage explicitly.
+	Feature( F_SKIN_WEIGHT_FORMAT, 0..2( 0 = "UNORM8", 1 = "FLOAT32", 2 = "UNORM16" ), "Vertex weight storage" );
 }
 
 COMMON
@@ -25,6 +28,7 @@ COMMON
 
 CS
 {
+	StaticCombo( S_SKIN_WEIGHT_FORMAT, F_SKIN_WEIGHT_FORMAT, Sys( ALL ) );
 	#include "vs_decompress.fxc"
 	#include "octohedral_encoding.fxc"
 
@@ -224,17 +228,25 @@ CS
 			}
 		}
 
-		float4 vBoneWeights;
-		vBoneWeights.x = 1.0;	// in case there are no weights
+		float4 vBoneWeights = float4( 1.0, 0.0, 0.0, 0.0 );
 		if ( g_nBoneWeightOffset < 0xFFFFFFFF )
 		{
-			// fetch input weights (ubyte4)	// FIXME: We also support two 16 bit unorms for only two bones.
+			// The native dispatcher supplies the actual byte offset and vertex stride.
+			// The material variant supplies the declaration's scalar format; floats
+			// remain floats and normalized integers use their exact storage divisor.
+			#if S_SKIN_WEIGHT_FORMAT == 1
+			vBoneWeights = asfloat( g_inputVB.Load4( nVertexBaseOffset + g_nBoneWeightOffset ) );
+			#elif S_SKIN_WEIGHT_FORMAT == 2
+			uint2 nPackedWeights = g_inputVB.Load2( nVertexBaseOffset + g_nBoneWeightOffset );
+			vBoneWeights = float4( nPackedWeights.x & 0xFFFF, nPackedWeights.x >> 16, nPackedWeights.y & 0xFFFF, nPackedWeights.y >> 16 ) * ( 1.0 / 65535.0 );
+			#else
 			uint nPackedWeights = g_inputVB.Load( nVertexBaseOffset + g_nBoneWeightOffset );
 			vBoneWeights.x = float( nPackedWeights & 0xFF );
 			vBoneWeights.y = float( ( nPackedWeights >> 8 ) & 0xFF );
 			vBoneWeights.z = float( ( nPackedWeights >> 16 ) & 0xFF );
 			vBoneWeights.w = float( ( nPackedWeights >> 24 ) & 0xFF );
 			vBoneWeights *= 1.0f/255.0f;
+			#endif
 		}
 
 		uint nBlendWeightCount = inst.nTransformBufferOffset_BlendWeightCount & 0xF;

@@ -540,6 +540,7 @@ internal sealed partial class MeshRenderFeature : RenderFeature
 
 	internal override void Dispose()
 	{
+		DisposeSkinningMaterials();
 		defaultMaterial?.Destroy();
 		defaultMaterial = null;
 		volumeRing.Dispose();

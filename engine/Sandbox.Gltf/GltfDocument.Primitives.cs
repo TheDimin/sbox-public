@@ -23,20 +23,7 @@ public sealed partial class GltfDocument
 			ValidateAttribute( attribute.Name, layout, index );
 			if ( !result.TryAdd( attribute.Name, index ) ) throw new GltfException( $"Duplicate primitive attribute '{attribute.Name}'." );
 		}
-		foreach ( var name in result.Keys )
-		{
-			foreach ( var group in new[] { "TEXCOORD_", "COLOR_", "JOINTS_", "WEIGHTS_" } )
-			{
-				if ( !name.StartsWith( group, StringComparison.Ordinal ) ) continue;
-				var number = AttributeSetIndex( name, group );
-				if ( number > 0 && !result.ContainsKey( group + (number - 1) ) ) throw new GltfException( $"Attribute set '{name}' has a gap." );
-				if ( group is "JOINTS_" or "WEIGHTS_" )
-				{
-					var partner = (group == "JOINTS_" ? "WEIGHTS_" : "JOINTS_") + number;
-					if ( !result.ContainsKey( partner ) ) throw new GltfException( $"Skinning attribute '{name}' requires '{partner}'." );
-				}
-			}
-		}
+		ValidateAttributeSets( result.Keys );
 		var mode = GltfJson.Int( value, "mode", 4 );
 		uint[] indices;
 		if ( TryReadDracoPrimitive( mesh, primitive, out var dracoIndices ) )
@@ -72,8 +59,31 @@ public sealed partial class GltfDocument
 		return new GltfPrimitive { VertexCount = vertexCount.Value, Mode = mode, Indices = indices, Material = material, Attributes = new ReadOnlyDictionary<string, int>( result ) };
 	}
 
-	private void ValidateAttribute( string semantic, AccessorLayout layout, int accessorIndex )
+	private static void ValidateAttributeSets( IEnumerable<string> names )
 	{
+		var keys = names.ToHashSet( StringComparer.Ordinal );
+		foreach ( var name in keys )
+		{
+			foreach ( var group in new[] { "TEXCOORD_", "COLOR_", "JOINTS_", "WEIGHTS_" } )
+			{
+				if ( !name.StartsWith( group, StringComparison.Ordinal ) ) continue;
+				var number = AttributeSetIndex( name, group );
+				if ( number > 0 && !keys.Contains( group + (number - 1) ) ) throw new GltfException( $"Attribute set '{name}' has a gap." );
+				if ( group is "JOINTS_" or "WEIGHTS_" )
+				{
+					var partner = (group == "JOINTS_" ? "WEIGHTS_" : "JOINTS_") + number;
+					if ( !keys.Contains( partner ) ) throw new GltfException( $"Skinning attribute '{name}' requires '{partner}'." );
+				}
+			}
+		}
+	}
+
+	private void ValidateAttribute( string semantic, AccessorLayout layout, int accessorIndex, bool? selectedDraco = null )
+	{
+		// Published glTF 2.0.1 forbids UNSIGNED_INT for mesh vertex attributes.
+		// Keep this role-specific: general accessors, indices, and extension
+		// instance attributes have their own validation and decoding paths.
+		if ( layout.ComponentType == 5125 ) throw new GltfException( "Mesh vertex attributes cannot use UNSIGNED_INT component type." );
 		var type = GltfJson.String( layout.Json, "type" );
 		// Capability alone does not make extension-only attribute layouts legal:
 		// the asset must declare this non-optional extension as required too.
@@ -97,7 +107,7 @@ public sealed partial class GltfDocument
 		else if ( semantic.StartsWith( "WEIGHTS_", StringComparison.Ordinal ) ) valid = type == "VEC4" && (floating || unsignedNormalized);
 		else valid = true;
 		if ( !valid ) throw new GltfException( $"Invalid accessor layout for '{semantic}'." );
-		if ( !IsDracoAttributeAccessor( accessorIndex ) && layout.Json.TryGetProperty( "bufferView", out _ ) )
+		if ( !(selectedDraco ?? IsDracoAttributeAccessor( accessorIndex )) && layout.Json.TryGetProperty( "bufferView", out _ ) )
 		{
 			var view = ElementAt( "bufferViews", GltfJson.Int( layout.Json, "bufferView" ) );
 			var offset = GltfJson.Int( layout.Json, "byteOffset", 0 );

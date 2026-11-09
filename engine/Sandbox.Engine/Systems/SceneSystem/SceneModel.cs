@@ -27,6 +27,7 @@ public sealed partial class SceneModel : SceneObject
 		Assert.NotNull( model );
 
 		if ( !model.HasRenderMeshes() ) model = Model.Error;
+		gltfModelOwner = model.GltfAnimation is not null ? model : null;
 
 		using ( var h = IHandle.MakeNextHandle( this ) )
 		{
@@ -52,6 +53,8 @@ public sealed partial class SceneModel : SceneObject
 			// TODO
 			animNative.InitAnimGraph( animGraphChangedCallback );
 		}
+
+		if ( model.GltfAnimation is not null ) UpdateToBindPose();
 	}
 
 	private void OnAnimGraphChanged( IntPtr p )
@@ -68,6 +71,8 @@ public sealed partial class SceneModel : SceneObject
 
 	internal override void OnNativeDestroy()
 	{
+		gltfSequence = null;
+		gltfModelOwner = null;
 		animNative = default;
 		base.OnNativeDestroy();
 	}
@@ -95,12 +100,20 @@ public sealed partial class SceneModel : SceneObject
 	public float PlaybackRate
 	{
 		get => animNative.GetPlaybackRate();
-		set => animNative.SetPlaybackRate( value );
+		set
+		{
+			if ( !float.IsFinite( value ) ) throw new ArgumentOutOfRangeException( nameof( value ), "Animation playback rate must be finite." );
+			animNative.SetPlaybackRate( value );
+		}
 	}
 
 	internal override void OnModelChanged()
 	{
+		if ( gltfSequence is not null ) SetGltfSkinningPalettes( null );
+		gltfSequence = null;
+		gltfModelOwner = null;
 		base.OnModelChanged();
+		if ( animNative.IsValid && Model?.GltfAnimation is not null ) UpdateToBindPose();
 	}
 
 	/// <summary>
@@ -284,6 +297,8 @@ public sealed partial class SceneModel : SceneObject
 	{
 		get
 		{
+			if ( GetGltfSequence() is { } gltf ) return gltf;
+
 			// Create on first access
 			_currentSequence ??= new SceneObjectAnimationSequence( this );
 

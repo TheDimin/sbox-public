@@ -5,7 +5,7 @@ public partial class Model
 	/// <summary>
 	/// Number of animations this model has.
 	/// </summary>
-	public int AnimationCount => native.GetNumAnim();
+	public int AnimationCount => (GltfResource?.Metadata.Animation ?? GltfAnimation)?.Clips.Count ?? native.GetNumAnim();
 
 	/// <summary>
 	/// Returns name of an animation at given animation index.
@@ -18,15 +18,15 @@ public partial class Model
 		if ( animationIndex < 0 || animationIndex >= AnimationCount )
 			throw new ArgumentOutOfRangeException( "animationIndex", $"Tried to access out of range animation index {animationIndex}, range is 0-{AnimationCount - 1}" );
 
-		return native.GetAnimationName( animationIndex );
+		return (GltfResource?.Metadata.Animation ?? GltfAnimation) is { } gltf ? gltf.Clips[animationIndex].Name : native.GetAnimationName( animationIndex );
 	}
 
 	private List<string> _animationNames;
-	public IReadOnlyList<string> AnimationNames => _animationNames ??= Enumerable.Range( 0, AnimationCount )
-			.Select( GetAnimationName ).ToList();
+	public IReadOnlyList<string> AnimationNames => (GltfResource?.Metadata.Animation ?? GltfAnimation)?.SequenceNames ?? (_animationNames ??= Enumerable.Range( 0, AnimationCount )
+			.Select( GetAnimationName ).ToList());
 
 	/// <summary>
 	/// Get the animgraph this model uses.
 	/// </summary>
-	public AnimationGraph AnimGraph => AnimationGraph.FromNative( native.GetAnimationGraph() );
+	public AnimationGraph AnimGraph => GltfResource is not null ? null : AnimationGraph.FromNative( native.GetAnimationGraph() );
 }

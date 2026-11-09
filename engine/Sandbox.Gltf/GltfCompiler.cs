@@ -16,8 +16,93 @@ public static class GltfCompiler
 	/// limit caller-owned input, resource resolution, or arbitrary JSON metadata.
 	/// This is a lossless packaging step, not a GPU layout optimization.
 	/// </summary>
-	public static byte[] Compile( byte[] source, Func<string, byte[]> resolve = null, IReadOnlySet<string> supportedExtensions = null, long maxBufferBytes = DefaultMaxBufferBytes )
+	public static byte[] Compile( byte[] source, Func<string, byte[]> resolve = null, IReadOnlySet<string> supportedExtensions = null, long maxBufferBytes = DefaultMaxBufferBytes ) =>
+		Compile( source, resolve, supportedExtensions, maxBufferBytes, true );
+
+	/// <summary>Explicitly embeds encoded images into standard buffer views.</summary>
+	public static byte[] CompileWithEmbeddedImages( byte[] source, Func<string, byte[]> resolve = null, IReadOnlySet<string> supportedExtensions = null, long maxBufferBytes = DefaultMaxBufferBytes, bool consolidateBuffers = true )
 	{
+		try
+		{
+			var packaged = CompilePackage( source, resolve, supportedExtensions, maxBufferBytes, consolidateBuffers, out var charge );
+			return EmbedImages( packaged, resolve, supportedExtensions, maxBufferBytes, charge );
+		}
+		catch ( Exception e ) when ( e is JsonException or InvalidOperationException or ArgumentException or OverflowException )
+		{
+			throw new GltfException( "Cannot package glTF: " + e.Message, e );
+		}
+	}
+
+	/// <summary>
+	/// Optionally materializes sparse accessors into ordinary glTF buffer views so
+	/// consumers need not apply sparse overlays at load time. This may increase
+	/// the file size substantially. Opaque metadata and extensions prevent the
+	/// rewrite because they may refer to the original storage layout.
+	/// </summary>
+	public static byte[] CompileWithDenseAccessors( byte[] source, Func<string, byte[]> resolve = null, IReadOnlySet<string> supportedExtensions = null, long maxBufferBytes = DefaultMaxBufferBytes )
+	{
+		var packaged = Compile( source, resolve, supportedExtensions, maxBufferBytes );
+		using var document = GltfReader.Read( packaged, supportedExtensions: supportedExtensions );
+		if ( ContainsOpaqueData( document.Root ) || document.CompilerBufferCount != 1 ||
+			!document.Root.TryGetProperty( "accessors", out var accessors ) || accessors.ValueKind != JsonValueKind.Array ) return packaged;
+		var indices = new List<int>();
+		for ( var i = 0; i < accessors.GetArrayLength(); i++ )
+			if ( accessors[i].TryGetProperty( "sparse", out _ ) ) indices.Add( i );
+		if ( indices.Count == 0 ) return packaged;
+		var original = document.CompilerBuffer( 0 );
+		var chunks = new List<(int Index, byte[] Bytes)>();
+		long length = original.Length;
+		foreach ( var index in indices )
+		{
+			length = (length + 3) & ~3L;
+			var remaining = maxBufferBytes / 3 - length;
+			if ( remaining < 0 ) throw new GltfException( "Compiler accessor budget exceeded." );
+			var chunk = document.CompilerMaterializeAccessor( index, remaining, out _ );
+			if ( chunk is null ) continue;
+			chunks.Add( (index, chunk) );
+			length = checked(length + chunk.Length);
+		}
+		if ( chunks.Count == 0 ) return packaged;
+		if ( length > Array.MaxLength || length > maxBufferBytes / 3 ) throw new GltfException( "Compiler accessor budget exceeded." );
+		var binary = new byte[(int)length];
+		original.Span.CopyTo( binary );
+		var root = JsonNode.Parse( document.Root.GetRawText() )!.AsObject();
+		var views = root["bufferViews"]!.AsArray();
+		var outputAccessors = root["accessors"]!.AsArray();
+		var offset = original.Length;
+		for ( var i = 0; i < chunks.Count; i++ )
+		{
+			offset = checked((offset + 3) & ~3);
+			var (index, chunk) = chunks[i];
+			chunk.CopyTo( binary, offset );
+			var viewIndex = views.Count;
+			views.Add( new JsonObject { ["buffer"] = 0, ["byteOffset"] = offset, ["byteLength"] = chunk.Length } );
+			var accessor = outputAccessors[index]!.AsObject();
+			accessor["bufferView"] = viewIndex;
+			accessor.Remove( "byteOffset" );
+			accessor.Remove( "sparse" );
+			offset += chunk.Length;
+		}
+		root["buffers"]![0]!["byteLength"] = binary.Length;
+		return WriteGlb( JsonSerializer.SerializeToUtf8Bytes( root ), binary, true );
+	}
+
+	/// <summary>Packages a GLB with optional safe consolidation of geometry buffers.</summary>
+	public static byte[] Compile( byte[] source, Func<string, byte[]> resolve, IReadOnlySet<string> supportedExtensions, long maxBufferBytes, bool consolidateBuffers )
+	{
+		try
+		{
+			return CompilePackage( source, resolve, supportedExtensions, maxBufferBytes, consolidateBuffers, out _ );
+		}
+		catch ( Exception e ) when ( e is JsonException or InvalidOperationException or ArgumentException or OverflowException )
+		{
+			throw new GltfException( "Cannot package glTF: " + e.Message, e );
+		}
+	}
+
+	private static byte[] CompilePackage( byte[] source, Func<string, byte[]> resolve, IReadOnlySet<string> supportedExtensions, long maxBufferBytes, bool consolidateBuffers, out long packagingCharge )
+	{
+		packagingCharge = 0;
 		if ( maxBufferBytes < 0 ) throw new GltfException( "Buffer packaging budget cannot be negative." );
 		using var document = GltfReader.Read( source, resolve, supportedExtensions );
 		RejectUnknownChunks( source );
@@ -28,11 +113,11 @@ public static class GltfCompiler
 				?? throw new GltfException( "glTF root must be an object." );
 			var bufferCount = document.CompilerBufferCount;
 			var orphanBinary = FindOrphanBinary( source, document );
-			var merge = !orphanBinary.HasValue && bufferCount > 1 && CanMergeBuffers( document.Root );
+			var merge = consolidateBuffers && !orphanBinary.HasValue && bufferCount > 1 && CanMergeBuffers( document.Root );
 			for ( var i = 0; i < bufferCount && merge; i++ )
 				if ( !document.CompilerBufferOrPlaceholder( i ).HasValue ) merge = false;
 			ValidateBufferViews( document );
-			CheckBufferBudget( document, merge, maxBufferBytes, orphanBinary?.Length ?? -1 );
+			packagingCharge = CheckBufferBudget( document, merge, maxBufferBytes, orphanBinary?.Length ?? -1 );
 			if ( orphanBinary.HasValue )
 			{
 				// Keep the pre-existing unreferenced chunk, and embed every core
@@ -93,6 +178,77 @@ public static class GltfCompiler
 		}
 	}
 
+	private static byte[] EmbedImages( byte[] packaged, Func<string, byte[]> resolve, IReadOnlySet<string> supportedExtensions, long budget, long packagingCharge )
+	{
+		using var document = GltfReader.Read( packaged, resolve, supportedExtensions );
+		if ( !document.Root.TryGetProperty( "images", out var images ) ) return packaged;
+		if ( images.ValueKind != JsonValueKind.Array ) throw new GltfException( "'images' must be an array." );
+		var embedded = new List<(int Index, GltfImage Image)>();
+		long imageBytes = 0;
+		long validationCharge = 0;
+		for ( var i = 0; i < images.GetArrayLength(); i++ )
+		{
+			var image = images[i];
+			if ( image.ValueKind != JsonValueKind.Object ) throw new GltfException( $"Image {i} must be an object." );
+			if ( !image.TryGetProperty( "uri", out _ ) )
+			{
+				validationCharge = checked(validationCharge + document.ReadImage( i ).Bytes.LongLength);
+				if ( validationCharge > budget - packagingCharge ) throw new GltfException( "Image packaging budget exceeded." );
+				continue;
+			}
+			// Image-level extensions may attach semantics to URI storage. Do not
+			// rewrite one that the compiler cannot inspect safely.
+			if ( image.TryGetProperty( "extensions", out var extensions ) )
+			{
+				if ( extensions.ValueKind != JsonValueKind.Object ) throw new GltfException( $"Image {i} extensions must be an object." );
+				if ( extensions.EnumerateObject().Any() ) throw new GltfException( $"Cannot safely embed image {i} with image-level extensions." );
+			}
+			var data = document.ReadImage( i );
+			if ( GltfDocument.ImageMimeType( data.Bytes ) is null )
+				throw new GltfException( $"Image {i} has an unrecognized or truncated encoded image signature." );
+			imageBytes = checked(imageBytes + ((data.Bytes.LongLength + 3) & ~3L));
+			if ( imageBytes > (budget - packagingCharge - validationCharge) / 12 ) throw new GltfException( "Image packaging budget exceeded." );
+			embedded.Add( (i, data) );
+		}
+		if ( embedded.Count == 0 ) return packaged;
+
+		var root = JsonNode.Parse( document.Root.GetRawText() )!.AsObject();
+		var buffers = root["buffers"] as JsonArray ?? new JsonArray();
+		if ( root["buffers"] is null ) root["buffers"] = buffers;
+		var views = root["bufferViews"] as JsonArray ?? new JsonArray();
+		if ( root["bufferViews"] is null ) root["bufferViews"] = views;
+		var orphan = FindOrphanBinary( packaged, document );
+		// Repackaging copies the existing BIN or orphan and reserializes any
+		// retained data-URI buffers as well as adding the new image payloads.
+		var repackCharge = CheckBufferBudget( document, false, budget, orphan?.Length ?? -1 );
+		var appendBin = !orphan.HasValue && (document.CompilerBufferCount == 0 || !document.ElementAt( "buffers", 0 ).TryGetProperty( "uri", out _ ));
+		var original = appendBin && document.CompilerBufferCount > 0 ? document.CompilerBuffer( 0 ) : ReadOnlyMemory<byte>.Empty;
+		var total = checked(((long)original.Length + 3 & ~3L) + imageBytes);
+		if ( total > Array.MaxLength || checked(packagingCharge + repackCharge + validationCharge + 12L * imageBytes) > budget )
+			throw new GltfException( "Image packaging budget exceeded." );
+		var binary = new byte[(int)total];
+		original.Span.CopyTo( binary );
+		var offset = (original.Length + 3) & ~3;
+		var bufferIndex = appendBin ? 0 : buffers.Count;
+		foreach ( var (index, image) in embedded )
+		{
+			image.Bytes.CopyTo( binary, offset );
+			var viewIndex = views.Count;
+			views.Add( new JsonObject { ["buffer"] = bufferIndex, ["byteOffset"] = offset, ["byteLength"] = image.Bytes.Length } );
+			var target = root["images"]![index]!.AsObject();
+			target.Remove( "uri" ); target["bufferView"] = viewIndex; target["mimeType"] = image.MimeType;
+			offset = checked((offset + image.Bytes.Length + 3) & ~3);
+		}
+		if ( appendBin )
+		{
+			if ( buffers.Count == 0 ) buffers.Add( new JsonObject { ["byteLength"] = binary.Length } );
+			else buffers[0]!["byteLength"] = binary.Length;
+			return WriteGlb( JsonSerializer.SerializeToUtf8Bytes( root ), binary, true );
+		}
+		buffers.Add( new JsonObject { ["uri"] = "data:application/gltf-buffer;base64," + Convert.ToBase64String( binary ), ["byteLength"] = binary.Length } );
+		return WriteGlb( JsonSerializer.SerializeToUtf8Bytes( root ), orphan?.ToArray() ?? [], orphan.HasValue );
+	}
+
 	private static bool CanMergeBuffers( JsonElement root )
 	{
 		if ( ContainsOpaqueData( root ) ) return false;
@@ -122,7 +278,7 @@ public static class GltfCompiler
 		}
 	}
 
-	private static void CheckBufferBudget( GltfDocument document, bool merge, long budget, int orphanBinaryLength )
+	private static long CheckBufferBudget( GltfDocument document, bool merge, long budget, int orphanBinaryLength )
 	{
 		// An orphan BIN is copied once to a temporary array and once into output.
 		long charge = orphanBinaryLength >= 0 ? 2L * orphanBinaryLength : 0;
@@ -159,6 +315,7 @@ public static class GltfCompiler
 		}
 		if ( merge && (mergedLength > Array.MaxLength || mergedLength > budget / 2) )
 			throw new GltfException( "Buffer packaging budget exceeded." );
+		return merge ? checked(charge + 2L * mergedLength) : charge;
 	}
 
 	private static byte[] PreserveBuffers( JsonObject root, GltfDocument document, bool embedFirstBufferAsUri = false )

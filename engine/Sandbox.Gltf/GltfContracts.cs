@@ -44,11 +44,45 @@ public sealed class GltfMaterial
 	public float AlphaCutoff { get; init; }
 	public bool DoubleSided { get; init; }
 	public bool Unlit { get; init; }
+	/// <summary>Supported thin-surface diffuse transmission; null for absent or unsupported extension.</summary>
+	public GltfDiffuseTransmission DiffuseTransmission { get; init; }
+	/// <summary>KHR_materials_clearcoat; null for absent or unsupported extension.</summary>
+	public GltfClearcoat Clearcoat { get; init; }
+	/// <summary>KHR_materials_anisotropy; null for absent or unsupported extension.</summary>
+	public GltfAnisotropy Anisotropy { get; init; }
 	public GltfTextureInfo BaseColorTexture { get; init; }
 	public GltfTextureInfo MetallicRoughnessTexture { get; init; }
 	public GltfTextureInfo NormalTexture { get; init; }
 	public GltfTextureInfo OcclusionTexture { get; init; }
 	public GltfTextureInfo EmissiveTexture { get; init; }
+}
+
+/// <summary>Standard KHR_materials_diffuse_transmission Release Candidate parameters.</summary>
+public sealed class GltfDiffuseTransmission
+{
+	public float Factor { get; init; }
+	public Vector3 ColorFactor { get; init; } = Vector3.One;
+	public GltfTextureInfo Texture { get; init; }
+	public GltfTextureInfo ColorTexture { get; init; }
+}
+
+/// <summary>KHR_materials_clearcoat parameters. The coat factor is texture R, coat roughness is texture G.</summary>
+public sealed class GltfClearcoat
+{
+	public float Factor { get; init; }
+	public GltfTextureInfo Texture { get; init; }
+	public float RoughnessFactor { get; init; }
+	public GltfTextureInfo RoughnessTexture { get; init; }
+	public GltfTextureInfo NormalTexture { get; init; }
+}
+
+/// <summary>KHR_materials_anisotropy parameters. Texture RG is the tangent-space direction, B scales strength.</summary>
+public sealed class GltfAnisotropy
+{
+	public float Strength { get; init; }
+	/// <summary>Counter-clockwise rotation of the direction in tangent space, in radians.</summary>
+	public float Rotation { get; init; }
+	public GltfTextureInfo Texture { get; init; }
 }
 
 public sealed partial class GltfTextureInfo

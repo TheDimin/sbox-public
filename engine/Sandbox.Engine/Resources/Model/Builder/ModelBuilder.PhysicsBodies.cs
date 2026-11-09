@@ -31,6 +31,33 @@ public sealed partial class ModelBuilder
 		return builder;
 	}
 
+	private void ApplyBodyMetadataOverrides( Model model )
+	{
+		if ( !_bodies.Any( b => b.GravityScaleOverride.HasValue || b.MassCenterOverrideEnabled.HasValue || b.ShapeSurfaceSlots.Count != 0 ) ) return;
+		var physics = model.Physics;
+		if ( physics == null || physics.Parts.Count != _bodies.Count ) throw new InvalidOperationException( "Constructed physics body count differs." );
+		for ( var i = 0; i < _bodies.Count; ++i )
+		{
+			var source = _bodies[i]; var body = physics.Parts[i].native;
+			if ( source.GravityScaleOverride is float gravity ) body.m_flGravityScale = gravity;
+			if ( source.MassCenterOverrideEnabled is bool enabled ) { body.m_bOverrideMassCenter = enabled; body.m_vMassCenterOverride = source.MassCenterOverrideValue; }
+			foreach ( var (key, slot) in source.ShapeSurfaceSlots )
+			{
+				if ( slot < 0 || slot >= _surfaces.Count ) throw new InvalidOperationException( "Physics surface slot is outside the model surface list." );
+				switch ( key.Kind )
+				{
+					case PhysicsBodyBuilder.ShapeKind.Box: { var shape = body.GetHull( key.Index ); if ( shape.IsNull ) throw new InvalidOperationException( "Constructed box hull is missing." ); shape.m_nSurfacePropertyIndex = (uint)slot; break; }
+					case PhysicsBodyBuilder.ShapeKind.Hull: { var shape = body.GetHull( source.Boxes.Count + key.Index ); if ( shape.IsNull ) throw new InvalidOperationException( "Constructed hull is missing." ); shape.m_nSurfacePropertyIndex = (uint)slot; break; }
+					case PhysicsBodyBuilder.ShapeKind.Sphere: { var shape = body.GetSphere( key.Index ); if ( shape.IsNull ) throw new InvalidOperationException( "Constructed sphere is missing." ); shape.m_nSurfacePropertyIndex = (uint)slot; break; }
+					case PhysicsBodyBuilder.ShapeKind.Capsule: { var shape = body.GetCapsule( key.Index ); if ( shape.IsNull ) throw new InvalidOperationException( "Constructed capsule is missing." ); shape.m_nSurfacePropertyIndex = (uint)slot; break; }
+					case PhysicsBodyBuilder.ShapeKind.Mesh: { var shape = body.GetMesh( key.Index ); if ( shape.IsNull ) throw new InvalidOperationException( "Constructed mesh is missing." ); shape.m_nSurfacePropertyIndex = (uint)slot; break; }
+					default: throw new InvalidOperationException( "Unsupported physics shape." );
+				}
+			}
+		}
+		physics.RefreshBuilderOverrides();
+	}
+
 	private CPhysBodyDescArray CreatePhysicsBodies()
 	{
 		if ( _bodies.Count == 0 )

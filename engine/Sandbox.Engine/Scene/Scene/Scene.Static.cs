@@ -10,6 +10,9 @@ partial class Scene
 	/// All active non-editor scenes.
 	/// </summary>
 	public static IEnumerable<Scene> All => _all.Where( x => !x.IsEditor && x.Active );
+	// Managed glTF resources can be live in editor scenes too. Keep the public
+	// non-editor enumeration unchanged for existing callers.
+	internal static IEnumerable<Scene> AllActiveIncludingEditor => _all.Where( x => x.Active );
 
 	/// <summary>
 	/// <see cref="RenderEnvmaps"/> on each scene in <see cref="All"/>, without allocating.

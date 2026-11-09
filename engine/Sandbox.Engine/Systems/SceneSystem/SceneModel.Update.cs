@@ -7,8 +7,10 @@ public sealed partial class SceneModel
 	/// </summary>
 	public void Update( float delta )
 	{
+		var gltfPose = PrepareGltfAnimation( delta, bindPose: false );
 		animNative.Update( delta );
 		FinishBoneUpdate();
+		ApplyGltfAnimation( gltfPose );
 	}
 
 	/// <summary>
@@ -16,9 +18,11 @@ public sealed partial class SceneModel
 	/// </summary>
 	internal void Update( float delta, Action updateBones )
 	{
+		var gltfPose = PrepareGltfAnimation( delta, bindPose: false );
 		animNative.Update( delta );
 		updateBones.Invoke();
 		FinishBoneUpdate();
+		ApplyGltfAnimation( gltfPose );
 	}
 
 	/// <summary>
@@ -26,8 +30,11 @@ public sealed partial class SceneModel
 	/// </summary>
 	public void UpdateToBindPose()
 	{
+		var gltfPose = PrepareGltfAnimation( 0, bindPose: true );
 		animNative.SetBindPose();
+		if ( gltfPose is not null && gltfModelOwner.GltfAnimation.Rig.HasMorphs ) animNative.Update( 0 );
 		FinishBoneUpdate();
+		ApplyGltfAnimation( gltfPose );
 	}
 
 	/// <summary>
@@ -35,9 +42,12 @@ public sealed partial class SceneModel
 	/// </summary>
 	internal void UpdateToBindPose( Action updateBones )
 	{
+		var gltfPose = PrepareGltfAnimation( 0, bindPose: true );
 		animNative.SetBindPose();
+		if ( gltfPose is not null && gltfModelOwner.GltfAnimation.Rig.HasMorphs ) animNative.Update( 0 );
 		updateBones.Invoke();
 		FinishBoneUpdate();
+		ApplyGltfAnimation( gltfPose );
 	}
 
 	/// <summary>

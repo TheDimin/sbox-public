@@ -29,7 +29,8 @@ public sealed class GltfUploadBinding
 	public int? SourceBuffer { get; init; }
 	public int? ViewByteOffset { get; init; }
 	public int? ViewByteLength { get; init; }
-	public int AccessorByteOffset { get; init; }
+	/// <summary>Offset in the source view, or null when Draco ignores fallback location fields.</summary>
+	public int? AccessorByteOffset { get; init; }
 	/// <summary>Source stride, or null when a selected Draco fallback is not inspected.</summary>
 	public int? ByteStride { get; init; }
 	public int ComponentType { get; init; }
@@ -87,12 +88,13 @@ public sealed partial class GltfDocument
 			var layout = Accessor( index );
 			if ( count.HasValue && count != layout.Count ) throw new GltfException( "Primitive attribute counts must agree." );
 			count = layout.Count;
-			ValidateAttribute( attribute.Name, layout, index );
 			var dracoAttribute = dracoTopology && dracoAttributes.TryGetProperty( attribute.Name, out _ );
+			ValidateAttribute( attribute.Name, layout, index, dracoAttribute );
 			if ( !result.TryAdd( attribute.Name, UploadBinding( index, layout, false, dracoAttribute ) ) )
 				throw new GltfException( $"Duplicate primitive attribute '{attribute.Name}'." );
 		}
 		if ( !count.HasValue ) throw new GltfException( "A primitive must define at least one attribute." );
+		ValidateAttributeSets( result.Keys );
 		GltfUploadBinding indices = null;
 		if ( value.TryGetProperty( "indices", out var indexValue ) )
 		{
@@ -118,24 +120,20 @@ public sealed partial class GltfDocument
 	{
 		var materialization = draco ? GltfUploadMaterialization.Draco : GltfUploadMaterialization.None;
 		if ( layout.Json.TryGetProperty( "sparse", out _ ) ) materialization |= GltfUploadMaterialization.Sparse;
+		if ( draco )
+		{
+			// Both fallback location fields are ignored by selected Draco; they may
+			// not describe any source storage used by this primitive.
+			return new GltfUploadBinding { AccessorIndex = index, ComponentType = layout.ComponentType,
+				Components = layout.Components, Rows = layout.Rows, Columns = layout.Columns, Count = layout.Count,
+				Normalized = layout.Normalized, ColumnStride = layout.ColumnStride, Materialization = materialization };
+		}
 		int? viewIndex = null, buffer = null, viewOffset = null, viewLength = null;
 		var accessorOffset = GltfJson.Int( layout.Json, "byteOffset", 0 );
 		int? stride = layout.Stride;
 		if ( layout.Json.TryGetProperty( "bufferView", out _ ) )
 		{
 			viewIndex = GltfJson.Int( layout.Json, "bufferView" );
-			// Draco overrides its mapped accessor's fallback view; it can be absent
-			// or unusable and must not be mistaken for the selected byte stream.
-			if ( draco )
-			{
-				stride = null;
-				return new GltfUploadBinding
-				{
-					AccessorIndex = index, SourceBufferView = viewIndex, AccessorByteOffset = accessorOffset,
-					ByteStride = stride, ComponentType = layout.ComponentType, Components = layout.Components, Rows = layout.Rows, Columns = layout.Columns,
-					Count = layout.Count, Normalized = layout.Normalized, ColumnStride = layout.ColumnStride, Materialization = materialization
-				};
-			}
 			var view = ElementAt( "bufferViews", viewIndex.Value );
 			buffer = GltfJson.Int( view, "buffer" );
 			viewOffset = GltfJson.Int( view, "byteOffset", 0 );

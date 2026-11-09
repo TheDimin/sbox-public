@@ -106,7 +106,7 @@ public sealed partial class SkinnedModelRenderer
 	public bool TryGetBoneTransform( string boneName, out Transform tx )
 	{
 		tx = global::Transform.Zero;
-		if ( !SceneModel.IsValid() ) return false;
+		if ( !SceneModel.IsValid() && GltfInstance is null ) return false;
 		if ( Model is null ) return false;
 
 		return TryGetBoneTransform( Model.Bones.GetBone( boneName ), out tx );
@@ -118,6 +118,7 @@ public sealed partial class SkinnedModelRenderer
 	public bool TryGetBoneTransform( in BoneCollection.Bone bone, out Transform tx )
 	{
 		tx = global::Transform.Zero;
+		if ( Model?.GltfResource is not null ) return TryGetGltfBoneTransform( bone, true, out tx );
 
 		if ( bone is null ) return false;
 		if ( !SceneModel.IsValid() ) return false;
@@ -133,7 +134,7 @@ public sealed partial class SkinnedModelRenderer
 	public bool TryGetBoneTransformLocal( string boneName, out Transform tx )
 	{
 		tx = global::Transform.Zero;
-		if ( !SceneModel.IsValid() ) return false;
+		if ( !SceneModel.IsValid() && GltfInstance is null ) return false;
 		if ( Model is null ) return false;
 
 		return TryGetBoneTransformLocal( Model.Bones.GetBone( boneName ), out tx );
@@ -142,6 +143,7 @@ public sealed partial class SkinnedModelRenderer
 	public bool TryGetBoneTransformLocal( in BoneCollection.Bone bone, out Transform tx )
 	{
 		tx = global::Transform.Zero;
+		if ( Model?.GltfResource is not null ) return TryGetGltfBoneTransform( bone, false, out tx );
 
 		if ( bone is null ) return false;
 		if ( !SceneModel.IsValid() ) return false;
@@ -160,6 +162,7 @@ public sealed partial class SkinnedModelRenderer
 	public bool TryGetBoneTransformAnimation( in BoneCollection.Bone bone, out Transform tx )
 	{
 		tx = global::Transform.Zero;
+		if ( Model?.GltfResource is not null ) return TryGetGltfBoneTransform( bone, true, out tx );
 
 		if ( bone is null ) return false;
 		if ( !SceneModel.IsValid() ) return false;
@@ -171,6 +174,7 @@ public sealed partial class SkinnedModelRenderer
 
 	public void SetBoneTransform( in BoneCollection.Bone bone, Transform transform )
 	{
+		if ( Model?.GltfResource is not null ) throw new NotSupportedException( "Procedural bone overrides are not implemented for managed glTF renderers." );
 		if ( !SceneModel.IsValid() ) return;
 		ArgumentNullException.ThrowIfNull( bone, nameof( bone ) );
 
@@ -190,6 +194,18 @@ public sealed partial class SkinnedModelRenderer
 	/// </summary>
 	public BoneCollection.Bone GetClosestBone( Vector3 worldPoint )
 	{
+		if ( Model?.GltfResource is not null )
+		{
+			BoneCollection.Bone closest = null;
+			var distance = float.PositiveInfinity;
+			foreach ( var bone in Model.Bones.AllBones )
+				if ( TryGetGltfBoneTransform( bone, true, out var transform ) )
+				{
+					var candidate = (worldPoint - transform.Position).LengthSquared;
+					if ( candidate < distance ) { closest = bone; distance = candidate; }
+				}
+			return closest;
+		}
 		if ( Model is null || !SceneModel.IsValid() )
 			return null;
 
@@ -208,6 +224,12 @@ public sealed partial class SkinnedModelRenderer
 		Assert.NotNull( Model, "Model should not be null when calling GetBoneTransforms" );
 
 		Transform[] transforms = new Transform[Model.BoneCount];
+		if ( Model.GltfResource is not null )
+		{
+			for ( var i = 0; i < transforms.Length; i++ )
+				transforms[i] = TryGetGltfBoneTransform( Model.Bones.AllBones[i], world, out var transform ) ? transform : Model.GetBoneTransform( i );
+			return transforms;
+		}
 
 		// World space has a batch fill - one interop call instead of one per bone.
 		if ( world && SceneModel.IsValid() )
@@ -238,6 +260,7 @@ public sealed partial class SkinnedModelRenderer
 	/// </summary>
 	public BoneVelocity[] GetBoneVelocities()
 	{
+		if ( Model?.GltfResource is not null ) throw new NotSupportedException( "Bone velocities are not implemented for managed glTF renderers." );
 		Assert.NotNull( Model, "Model should not be null when calling GetBoneVelocities" );
 
 		BoneVelocity[] transforms = new BoneVelocity[Model.BoneCount];
@@ -259,6 +282,7 @@ public sealed partial class SkinnedModelRenderer
 	/// </summary>
 	public BoneVelocity GetBoneVelocity( int boneIndex )
 	{
+		if ( Model?.GltfResource is not null ) throw new NotSupportedException( "Bone velocities are not implemented for managed glTF renderers." );
 		Assert.NotNull( Model, "Model should not be null when calling GetBoneVelocity" );
 
 		if ( !SceneModel.IsValid() || boneIndex < 0 || boneIndex >= Model.BoneCount )
@@ -332,7 +356,7 @@ public sealed partial class SkinnedModelRenderer
 	/// </summary>
 	internal void EnsureBoneSnapshot()
 	{
-		if ( Model is null || !SceneModel.IsValid() )
+		if ( Model is null || (!SceneModel.IsValid() && GltfInstance is null) )
 			return;
 
 		var frame = Scene.GetSystem<SceneAnimationSystem>().BoneFrame;
@@ -346,6 +370,14 @@ public sealed partial class SkinnedModelRenderer
 				return;
 
 			var boneCount = Model.BoneCount;
+			if ( Model.GltfResource is not null )
+			{
+				var current = GetBoneTransforms( world: true );
+				_boneSnapshotPrevious = _boneSnapshot is { } previous && previous.Length == current.Length ? previous : (Transform[])current.Clone();
+				_boneSnapshot = current;
+				_boneSnapshotFrame = frame;
+				return;
+			}
 
 			if ( _boneSnapshot is null || _boneSnapshot.Length != boneCount )
 			{

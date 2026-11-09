@@ -63,6 +63,11 @@ public partial class SkinnedModelRenderer
 		/// </summary>
 		public void Set( string name, float weight )
 		{
+			if ( renderer.Model?.GltfResource is not null )
+			{
+				Set( name, weight, GltfDefaultMorphFade );
+				return;
+			}
 			_values[name] = weight;
 
 			if ( renderer.SceneObject is SceneModel model )
@@ -78,6 +83,13 @@ public partial class SkinnedModelRenderer
 		/// </summary>
 		public void Set( string name, float weight, float fadeTime )
 		{
+			if ( renderer.Model?.GltfResource is not null && renderer is SkinnedModelRenderer skinned )
+			{
+				ValidateGltfMorphChange( weight, fadeTime );
+				skinned.SetGltfMorph( name, weight, fadeTime );
+				_values[name] = weight;
+				return;
+			}
 			_values[name] = weight;
 
 			if ( renderer.SceneObject is SceneModel model )
@@ -109,6 +121,7 @@ public partial class SkinnedModelRenderer
 			{
 				return model.Morphs.Get( name );
 			}
+			if ( renderer.Model?.GltfResource is not null && renderer is SkinnedModelRenderer skinned ) return skinned.GetGltfMorph( name );
 
 			return default;
 		}
@@ -119,6 +132,11 @@ public partial class SkinnedModelRenderer
 		/// </summary>
 		public void Clear( string name )
 		{
+			if ( renderer.Model?.GltfResource is not null )
+			{
+				Clear( name, GltfDefaultMorphFade );
+				return;
+			}
 			_values.Remove( name );
 
 			if ( renderer.SceneObject is SceneModel model )
@@ -133,6 +151,13 @@ public partial class SkinnedModelRenderer
 		/// </summary>
 		public void Clear( string name, float fadeTime )
 		{
+			if ( renderer.Model?.GltfResource is not null && renderer is SkinnedModelRenderer skinned )
+			{
+				ValidateGltfMorphChange( 0, fadeTime );
+				skinned.ClearGltfMorph( name, fadeTime );
+				_values.Remove( name );
+				return;
+			}
 			_values.Remove( name );
 
 			if ( renderer.SceneObject is SceneModel model )
@@ -143,6 +168,14 @@ public partial class SkinnedModelRenderer
 
 		internal void Apply()
 		{
+			if ( renderer.Model?.GltfResource is not null && renderer is SkinnedModelRenderer skinned )
+			{
+				foreach ( var value in _values ) ValidateGltfMorphChange( value.Value, GltfDefaultMorphFade );
+				skinned.gltfMorphOverrides.Clear();
+				foreach ( var value in _values ) skinned.SetGltfMorph( value.Key, value.Value, GltfDefaultMorphFade );
+				skinned.ApplyGltfPose();
+				return;
+			}
 			if ( renderer.SceneObject is not SceneModel model )
 				return;
 

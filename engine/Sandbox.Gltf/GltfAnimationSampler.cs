@@ -154,9 +154,18 @@ public static class GltfAnimationSampler
 			bWeight = Math.Sin( t * angle ) / denominator * sign;
 		}
 
+		// Normalize before the only float rounding. An intermediate float
+		// quaternion can add angular error through translated joint chains.
+		Span<double> interpolated = stackalloc double[4];
+		var squaredLength = 0.0;
 		for ( var i = 0; i < 4; i++ )
-			result[i] = (float)(aWeight * values[a + i] / aLength + bWeight * values[b + i] / bLength);
-		NormalizeQuaternion( result );
+		{
+			interpolated[i] = aWeight * values[a + i] / aLength + bWeight * values[b + i] / bLength;
+			squaredLength += interpolated[i] * interpolated[i];
+		}
+		var length = Math.Sqrt( squaredLength );
+		if ( length == 0 || !double.IsFinite( length ) ) throw new GltfException( "Animation rotation evaluated to an invalid quaternion." );
+		for ( var i = 0; i < 4; i++ ) result[i] = (float)(interpolated[i] / length);
 	}
 
 	private static double QuaternionLength( float[] values, int offset )
@@ -165,15 +174,6 @@ public static class GltfAnimationSampler
 		for ( var i = 0; i < 4; i++ )
 			sum += (double)values[offset + i] * values[offset + i];
 		return Math.Sqrt( sum );
-	}
-
-	private static void NormalizeQuaternion( float[] value )
-	{
-		var length = QuaternionLength( value, 0 );
-		if ( length == 0 || !double.IsFinite( length ) )
-			throw new GltfException( "Animation rotation evaluated to an invalid quaternion." );
-		for ( var i = 0; i < 4; i++ )
-			value[i] = (float)(value[i] / length);
 	}
 
 	private static float ToFiniteFloat( double value )

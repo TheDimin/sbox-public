@@ -106,7 +106,7 @@ public sealed partial class GltfDocument
 			Index = index,
 			TexCoord = texCoord,
 			IsSrgb = srgb,
-			Scale = name == "normalTexture" ? MaterialOptionalNumber( value, "scale", 1 ) : 1,
+			Scale = name is "normalTexture" or "clearcoatNormalTexture" ? MaterialOptionalNumber( value, "scale", 1 ) : 1,
 			Strength = name == "occlusionTexture" ? MaterialOptionalNumber( value, "strength", 1, 0, 1 ) : 1,
 			Offset = new Vector2( offset[0], offset[1] ),
 			Tiling = new Vector2( tiling[0], tiling[1] ),
@@ -146,11 +146,14 @@ public sealed partial class GltfDocument
 			BaseColorFactor = new Vector4( color[0], color[1], color[2], color[3] ),
 			MetallicFactor = MaterialOptionalNumber( pbr, "metallicFactor", 1, 0, 1 ),
 			RoughnessFactor = MaterialOptionalNumber( pbr, "roughnessFactor", 1, 0, 1 ),
-			EmissiveFactor = new Vector3( emissive[0], emissive[1], emissive[2] ),
+			EmissiveFactor = new Vector3( emissive[0], emissive[1], emissive[2] ) * (unlit ? 1 : ReadMaterialEmissiveStrength( index )),
 			AlphaMode = alpha,
 			AlphaCutoff = MaterialOptionalNumber( value, "alphaCutoff", 0.5f, 0 ),
 			DoubleSided = sidedElement.ValueKind == JsonValueKind.True,
 			Unlit = unlit,
+			DiffuseTransmission = MaterialDiffuseTransmission( value ),
+			Clearcoat = MaterialClearcoat( value ),
+			Anisotropy = MaterialAnisotropy( value ),
 			BaseColorTexture = MaterialTexture( pbr, "baseColorTexture", true ),
 			MetallicRoughnessTexture = MaterialTexture( pbr, "metallicRoughnessTexture", false ),
 			NormalTexture = MaterialTexture( value, "normalTexture", false ),
@@ -234,6 +237,7 @@ public sealed partial class GltfTextureInfo
 		var scaled = uv * Tiling;
 		var cosine = MathF.Cos( Rotation );
 		var sine = MathF.Sin( Rotation );
-		return new Vector2( cosine * scaled.X - sine * scaled.Y, sine * scaled.X + cosine * scaled.Y ) + Offset;
+		// Match the Khronos Sample Renderer texture-coordinate rotation convention.
+		return new Vector2( cosine * scaled.X + sine * scaled.Y, -sine * scaled.X + cosine * scaled.Y ) + Offset;
 	}
 }

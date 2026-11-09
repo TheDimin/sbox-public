@@ -32,6 +32,14 @@ public class ModelParts
 	public ModelParts( Model model )
 	{
 		_model = model ?? throw new ArgumentNullException( nameof( model ) );
+		if ( model.GltfResource is not null )
+		{
+			// Core glTF has no authored bodyparts. Keep an empty read model;
+			// supporting authored engine bodygroups is a separate format feature.
+			Count = 0;
+			DefaultMask = ulong.MaxValue;
+			return;
+		}
 
 		Count = _model.native.GetNumBodyParts();
 		DefaultMask = _model.native.GetDefaultMeshGroupMask();

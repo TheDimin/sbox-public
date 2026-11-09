@@ -16,6 +16,8 @@ MODES
 FEATURES
 {
 	#include "vr_common_features.fxc"
+	Feature( F_GLTF_LINEAR_VERTEX_COLOR, 0..1, "glTF linear vertex color" );
+	Feature( F_GLTF_METALLIC_TEXTURE, 0..1, "glTF metallic texture" );
 }
 
 COMMON
@@ -40,14 +42,19 @@ struct PS_INPUT
 
 VS
 {
+	StaticCombo( S_GLTF_LINEAR_VERTEX_COLOR, F_GLTF_LINEAR_VERTEX_COLOR, Sys( ALL ) );
 	#include "vr_shared_standard_vs_code.fxc"
 
 	PS_INPUT MainVs( VS_INPUT i )
 	{
 		PS_INPUT o = VS_SharedStandardProcessing( i );
 		
-		ExtraShaderData_t extraShaderData = GetExtraPerInstanceShaderData( i.nInstanceTransformID );
-		o.vVertexColor.rgb = SrgbGammaToLinear( i.vColor.rgb ) * extraShaderData.vTint.rgb;
+		#if S_GLTF_LINEAR_VERTEX_COLOR
+			o.vVertexColor *= i.vColor;
+		#else
+			ExtraShaderData_t extraShaderData = GetExtraPerInstanceShaderData( i.nInstanceTransformID );
+			o.vVertexColor.rgb = SrgbGammaToLinear( i.vColor.rgb ) * extraShaderData.vTint.rgb;
+		#endif
 
 		return VS_CommonProcessing_Post( o );
 	}
@@ -56,6 +63,12 @@ VS
 PS
 {
 	DynamicCombo( D_OPAQUE_FADE, 0..1, Sys( ALL ) );
+	StaticCombo( S_GLTF_LINEAR_VERTEX_COLOR, F_GLTF_LINEAR_VERTEX_COLOR, Sys( ALL ) );
+	StaticCombo( S_METALNESS_TEXTURE, F_GLTF_METALLIC_TEXTURE, Sys( ALL ) );
+
+	#if S_GLTF_LINEAR_VERTEX_COLOR
+		#define ENABLE_NORMAL_MAPS
+	#endif
 
 	#include "vr_shared_standard_ps_code.fxc"
 

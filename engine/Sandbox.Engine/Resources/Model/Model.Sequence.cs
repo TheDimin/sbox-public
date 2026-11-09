@@ -5,7 +5,7 @@ partial class Model
 	/// <summary>
 	/// List of sequence names this model has.
 	/// </summary>
-	internal IReadOnlyList<string> SequenceNames => _sequenceNames ??= GetSequenceNames();
+	internal IReadOnlyList<string> SequenceNames => (GltfResource?.Metadata.Animation ?? GltfAnimation)?.SequenceNames ?? (_sequenceNames ??= GetSequenceNames());
 	private List<string> _sequenceNames;
 
 	private List<string> GetSequenceNames()

@@ -12,7 +12,21 @@ public sealed partial class GltfDocument
 	{
 		if ( !Root.TryGetProperty( "scene", out var value ) ) return null;
 		var index = SceneIndex( value, "scene" );
-		_ = ElementAt( "scenes", index );
+		var scene = SceneObject( ElementAt( "scenes", index ), "scene" );
+		if ( scene.TryGetProperty( "nodes", out var roots ) )
+		{
+			if ( roots.ValueKind != JsonValueKind.Array || roots.GetArrayLength() == 0 )
+				throw new GltfException( "Defined scene nodes must be a nonempty array." );
+			var parents = NodeParents();
+			var unique = new HashSet<int>();
+			foreach ( var root in roots.EnumerateArray() )
+			{
+				var node = SceneIndex( root, "scene root" );
+				if ( node >= parents.Length ) throw new GltfException( "Scene root index is out of range." );
+				if ( !unique.Add( node ) ) throw new GltfException( "Scene roots must be unique." );
+				if ( parents[node] != -1 ) throw new GltfException( "A scene root cannot be a child of another node." );
+			}
+		}
 		return index;
 	}
 
@@ -44,7 +58,7 @@ public sealed partial class GltfDocument
 			{
 				var element = SceneObject( nodes[parent], "node" );
 				if ( !element.TryGetProperty( "children", out var children ) ) continue;
-				if ( children.ValueKind != JsonValueKind.Array ) throw new GltfException( "Node children must be an array." );
+				if ( children.ValueKind != JsonValueKind.Array || children.GetArrayLength() == 0 ) throw new GltfException( "Defined node children must be a nonempty array." );
 				foreach ( var childValue in children.EnumerateArray() )
 				{
 					var child = SceneIndex( childValue, "node child" );
@@ -113,9 +127,16 @@ public sealed partial class GltfDocument
 			if ( !accessor.TryGetProperty( "type", out var type ) || type.ValueKind != JsonValueKind.String || type.GetString() != "MAT4"
 				|| GltfJson.Int( accessor, "componentType" ) != 5126 )
 				throw new GltfException( "Inverse bind matrices must use a FLOAT MAT4 accessor." );
+			ValidateNonVertexAccessor( Accessor( accessorIndex ), "Inverse bind matrix" );
 			var values = ReadFloatAccessor( accessorIndex );
 			if ( values.Length / 16 < joints.Length ) throw new GltfException( "There are fewer inverse bind matrices than joints." );
-			for ( var i = 0; i < matrices.Length; i++ ) matrices[i] = SceneMatrix( values.AsSpan( i * 16, 16 ) );
+			for ( var i = 0; i < matrices.Length; i++ )
+			{
+				var matrix = SceneMatrix( values.AsSpan( i * 16, 16 ) );
+				if ( matrix.M14 != 0 || matrix.M24 != 0 || matrix.M34 != 0 || matrix.M44 != 1 )
+					throw new GltfException( "An inverse bind matrix must have an affine fourth row." );
+				matrices[i] = matrix;
+			}
 		}
 		return new GltfSkin { Joints = joints, Skeleton = skeleton, InverseBindMatrices = matrices };
 	}
@@ -215,7 +236,9 @@ public sealed partial class GltfDocument
 		if ( hasMatrix )
 		{
 			if ( hasTranslation || hasRotation || hasScale ) throw new GltfException( "A node cannot combine matrix and TRS." );
-			return SceneMatrix( SceneFloatArray( matrix, 16, "node matrix" ) );
+			var transform = SceneMatrix( SceneFloatArray( matrix, 16, "node matrix" ) );
+			ValidateLocalNodeMatrix( transform );
+			return transform;
 		}
 		var t = hasTranslation ? SceneFloatArray( translation, 3, "node translation" ) : [0f, 0f, 0f];
 		var r = hasRotation ? SceneFloatArray( rotation, 4, "node rotation" ) : [0f, 0f, 0f, 1f];

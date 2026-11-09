@@ -38,7 +38,12 @@ public class Tonemapping : BasePostProcess<Tonemapping>
 		/// Similar to ACES - very realistic, but handles lower and higher brightness ranges better.
 		/// Uses the Punchy AgX look.
 		/// </summary>
-		AgX
+		AgX,
+		/// <summary>
+		/// Khronos PBR Neutral. Keeps base colors unchanged up to 0.76 and compresses
+		/// only highlights. Matches the default of the Khronos glTF Sample Viewer.
+		/// </summary>
+		KhronosPbrNeutral
 	}
 
 	public enum ExposureColorSpaceEnum
