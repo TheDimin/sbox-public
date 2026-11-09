@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Runtime.InteropServices;
 
 namespace Editor;
@@ -31,20 +32,22 @@ internal class FileAssociations
 			if ( string.IsNullOrEmpty( data ) )
 				data = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), ".local", "share" );
 
-			// Raw strings keep the source file's line endings, and desktop files need LF.
-			void Write( string path, string text )
+			// Writes a file only when its content changes, so a normal start does not refresh the desktop caches.
+			var changed = false;
+			void Write( string path, byte[] content )
 			{
 				path = Path.Combine( data, path );
+				if ( File.Exists( path ) && File.ReadAllBytes( path ).AsSpan().SequenceEqual( content ) ) return;
+
 				Directory.CreateDirectory( Path.GetDirectoryName( path ) );
-				File.WriteAllText( path, text.ReplaceLineEndings( "\n" ) );
+				File.WriteAllBytes( path, content );
+				changed = true;
 			}
 
-			// The file manager finds the MIME icon by name in the hicolor theme.
-			var icon = Path.Combine( data, "icons/hicolor/128x128/mimetypes/application-x-sbproj.png" );
-			Directory.CreateDirectory( Path.GetDirectoryName( icon ) );
-			File.Copy( FileSystem.Root.GetFullPath( "core/tools/images/logo_rounded.png" ), icon, true );
+			// Raw strings keep the source file's line endings, and desktop files need LF.
+			void WriteText( string path, string text ) => Write( path, Encoding.UTF8.GetBytes( text.ReplaceLineEndings( "\n" ) ) );
 
-			Write( "mime/packages/sandbox-project.xml", """
+			WriteText( "mime/packages/sandbox-project.xml", """
 				<?xml version="1.0" encoding="UTF-8"?>
 				<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
 				  <mime-type type="application/x-sbproj">
@@ -55,10 +58,10 @@ internal class FileAssociations
 				</mime-info>
 				""" );
 
-			// Exec values are double quoted, and \ " ` $ must be escaped inside the quotes.
-			var editor = FileSystem.Root.GetFullPath( "sbox-dev" ).Replace( "\\", "\\\\" ).Replace( "\"", "\\\"" ).Replace( "`", "\\`" ).Replace( "$", "\\$" );
+			// Exec values are double quoted. \ " ` $ must be escaped inside the quotes, and a literal % is written %%.
+			var editor = FileSystem.Root.GetFullPath( "sbox-dev" ).Replace( "\\", "\\\\" ).Replace( "\"", "\\\"" ).Replace( "`", "\\`" ).Replace( "$", "\\$" ).Replace( "%", "%%" );
 
-			Write( "applications/sandbox-project.desktop", $"""
+			WriteText( "applications/sandbox-project.desktop", $"""
 				[Desktop Entry]
 				Type=Application
 				Name=s&box
@@ -69,8 +72,14 @@ internal class FileAssociations
 				NoDisplay=true
 				""" );
 
-			// Refresh the desktop caches. Each tool is optional, so one shell runs them all and ignores failures.
-			Process.Start( "sh", ["-c", "update-mime-database \"$0/mime\"; gtk-update-icon-cache -f -t \"$0/icons/hicolor\"; xdg-mime default sandbox-project.desktop application/x-sbproj", data] );
+			// The file manager finds the MIME icon by name in the hicolor theme. A missing logo must not block the association.
+			var logo = FileSystem.Root.GetFullPath( "core/tools/images/logo_rounded.png" );
+			if ( File.Exists( logo ) ) Write( "icons/hicolor/128x128/mimetypes/application-x-sbproj.png", File.ReadAllBytes( logo ) );
+
+			if ( !changed ) return;
+
+			// Refresh the desktop caches. Each tool is optional, so one shell runs them in order and ignores failures.
+			Process.Start( "sh", ["-c", "update-mime-database \"$0/mime\"; gtk-update-icon-cache -f -t \"$0/icons/hicolor\"; xdg-mime default sandbox-project.desktop application/x-sbproj", data] )?.Dispose();
 		}
 		catch ( Exception ex )
 		{
