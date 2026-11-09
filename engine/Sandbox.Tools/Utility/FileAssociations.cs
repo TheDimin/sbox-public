@@ -3,7 +3,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
 namespace Editor;
 
@@ -24,102 +23,58 @@ internal class FileAssociations
 		}
 	}
 
-	internal const string DesktopFileName = "sandbox-project.desktop";
-	private const string MimeType = "application/x-sbproj";
-
-	/// <summary>
-	/// Writes the shared-mime-info type, icon and desktop entry that make .sbproj files open in the editor.
-	/// Returns the commands that refresh the desktop caches. The caller runs them.
-	/// </summary>
-	internal static string[][] WriteLinuxFiles( string dataHome, string editorPath, string iconSourcePath )
-	{
-		var mimeRoot = Path.Combine( dataHome, "mime" );
-		var iconRoot = Path.Combine( dataHome, "icons", "hicolor" );
-		var mimePackages = Path.Combine( mimeRoot, "packages" );
-		var applications = Path.Combine( dataHome, "applications" );
-		var iconFolder = Path.Combine( iconRoot, "128x128", "mimetypes" );
-
-		foreach ( var folder in new[] { mimePackages, applications, iconFolder } )
-			Directory.CreateDirectory( folder );
-
-		// The file manager finds the MIME icon by name in the hicolor theme.
-		File.Copy( iconSourcePath, Path.Combine( iconFolder, "application-x-sbproj.png" ), true );
-
-		WriteUnixText( Path.Combine( mimePackages, "sandbox-project.xml" ), """
-			<?xml version="1.0" encoding="UTF-8"?>
-			<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
-			  <mime-type type="application/x-sbproj">
-			    <comment>Sandbox Project File</comment>
-			    <icon name="application-x-sbproj"/>
-			    <glob pattern="*.sbproj"/>
-			  </mime-type>
-			</mime-info>
-			""" );
-
-		// Desktop entry values are quoted with double quotes, and \ " ` $ must be escaped inside them.
-		var quotedPath = editorPath.Replace( "\\", "\\\\" ).Replace( "\"", "\\\"" ).Replace( "`", "\\`" ).Replace( "$", "\\$" );
-
-		WriteUnixText( Path.Combine( applications, DesktopFileName ), $"""
-			[Desktop Entry]
-			Type=Application
-			Name=s&box
-			Comment=Open a Sandbox project
-			Icon=application-x-sbproj
-			Exec="{quotedPath}" -project %f
-			MimeType={MimeType};
-			NoDisplay=true
-			Terminal=false
-			Categories=Development;Game;
-			""" );
-
-		return
-		[
-			["update-mime-database", mimeRoot],
-			["gtk-update-icon-cache", "-f", "-t", iconRoot],
-			["xdg-mime", "default", DesktopFileName, MimeType],
-		];
-	}
-
-	/// <summary>
-	/// Desktop files need LF line endings, and source files may use CRLF inside raw strings.
-	/// </summary>
-	private static void WriteUnixText( string path, string text )
-	{
-		File.WriteAllText( path, text.ReplaceLineEndings( "\n" ) + "\n" );
-	}
-
 	private static void CreateLinux()
 	{
 		try
 		{
-			var dataHome = Environment.GetEnvironmentVariable( "XDG_DATA_HOME" );
-			if ( string.IsNullOrEmpty( dataHome ) )
-				dataHome = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), ".local", "share" );
+			var data = Environment.GetEnvironmentVariable( "XDG_DATA_HOME" );
+			if ( string.IsNullOrEmpty( data ) )
+				data = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), ".local", "share" );
 
-			var commands = WriteLinuxFiles( dataHome, FileSystem.Root.GetFullPath( "sbox-dev" ), FileSystem.Root.GetFullPath( "core/tools/images/logo_rounded.png" ) );
+			// Raw strings keep the source file's line endings, and desktop files need LF.
+			void Write( string path, string text )
+			{
+				path = Path.Combine( data, path );
+				Directory.CreateDirectory( Path.GetDirectoryName( path ) );
+				File.WriteAllText( path, text.ReplaceLineEndings( "\n" ) );
+			}
 
-			// Every tool is optional, and each can take seconds, so keep them off the startup path.
-			_ = Task.Run( () => Array.ForEach( commands, RunTool ) );
+			// The file manager finds the MIME icon by name in the hicolor theme.
+			var icon = Path.Combine( data, "icons/hicolor/128x128/mimetypes/application-x-sbproj.png" );
+			Directory.CreateDirectory( Path.GetDirectoryName( icon ) );
+			File.Copy( FileSystem.Root.GetFullPath( "core/tools/images/logo_rounded.png" ), icon, true );
+
+			Write( "mime/packages/sandbox-project.xml", """
+				<?xml version="1.0" encoding="UTF-8"?>
+				<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+				  <mime-type type="application/x-sbproj">
+				    <comment>Sandbox Project File</comment>
+				    <icon name="application-x-sbproj"/>
+				    <glob pattern="*.sbproj"/>
+				  </mime-type>
+				</mime-info>
+				""" );
+
+			// Exec values are double quoted, and \ " ` $ must be escaped inside the quotes.
+			var editor = FileSystem.Root.GetFullPath( "sbox-dev" ).Replace( "\\", "\\\\" ).Replace( "\"", "\\\"" ).Replace( "`", "\\`" ).Replace( "$", "\\$" );
+
+			Write( "applications/sandbox-project.desktop", $"""
+				[Desktop Entry]
+				Type=Application
+				Name=s&box
+				Comment=Open a Sandbox project
+				Icon=application-x-sbproj
+				Exec="{editor}" -project %f
+				MimeType=application/x-sbproj;
+				NoDisplay=true
+				""" );
+
+			// Refresh the desktop caches. Each tool is optional, so one shell runs them all and ignores failures.
+			Process.Start( "sh", ["-c", "update-mime-database \"$0/mime\"; gtk-update-icon-cache -f -t \"$0/icons/hicolor\"; xdg-mime default sandbox-project.desktop application/x-sbproj", data] );
 		}
 		catch ( Exception ex )
 		{
 			Log.Warning( ex, "Failed to associate project file extension" );
-		}
-	}
-
-	private static void RunTool( string[] command )
-	{
-		try
-		{
-			using var process = Process.Start( new ProcessStartInfo( command[0], command[1..] ) { UseShellExecute = false } );
-			if ( process is null || process.WaitForExit( 5000 ) ) return;
-
-			process.Kill();
-			process.WaitForExit();
-		}
-		catch ( Exception ex )
-		{
-			Log.Info( $"Could not run {command[0]}: {ex.Message}" );
 		}
 	}
 
