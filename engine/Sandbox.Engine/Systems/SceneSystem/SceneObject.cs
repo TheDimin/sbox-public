@@ -96,6 +96,7 @@ public partial class SceneObject : IHandle
 		{
 			CSceneSystem.DeleteSceneObjectAtFrameEnd( this );
 			native = IntPtr.Zero; // avoid double delete etc
+			DependentStateChanged?.Invoke( Rendering.SceneObjectChange.Removed );
 		}
 	}
 
@@ -126,6 +127,7 @@ public partial class SceneObject : IHandle
 		}
 
 		native = IntPtr.Zero;
+		DependentStateChanged?.Invoke( Rendering.SceneObjectChange.Removed );
 
 		if ( _attributes != null )
 		{
@@ -148,7 +150,14 @@ public partial class SceneObject : IHandle
 	/// <summary>
 	/// Tell the world's <see cref="SceneWorld.ChangeListener"/>, if it has one, that something changed.
 	/// </summary>
-	internal void NotifyChanged( Rendering.SceneObjectChange change ) => World?.ChangeListener?.OnChanged( this, change );
+	internal event Action<Rendering.SceneObjectChange> DependentStateChanged;
+	internal Action<Transform?, Color?, Material> ManualRenderScope;
+	internal Action<bool> FrameBufferCopyRequest;
+	internal void NotifyChanged( Rendering.SceneObjectChange change )
+	{
+		World?.ChangeListener?.OnChanged( this, change );
+		if ( change != Rendering.SceneObjectChange.Removed ) DependentStateChanged?.Invoke( change );
+	}
 
 	/// <summary>
 	/// Transform of this scene object, relative to its <see cref="Parent"/>, or <see cref="SceneWorld"/> if parent is not set.
@@ -464,8 +473,10 @@ public partial class SceneObject : IHandle
 		get => _component;
 		set
 		{
+			var changed = !ReferenceEquals( _component, value ) || !ReferenceEquals( GameObject, value?.GameObject );
 			_component = value;
 			GameObject = _component?.GameObject;
+			if ( changed ) DependentStateChanged?.Invoke( Rendering.SceneObjectChange.Settings );
 		}
 	}
 
@@ -592,7 +603,11 @@ public partial class SceneObject : IHandle
 		public bool WantsFrameBufferCopy
 		{
 			get => HasFlag( Rendering.SceneObjectFlags.WantsFrameBufferCopyTexture );
-			set => SetFlag( Rendering.SceneObjectFlags.WantsFrameBufferCopyTexture, value );
+			set
+			{
+				if ( Object.FrameBufferCopyRequest is { } request ) request( value );
+				else SetFlag( Rendering.SceneObjectFlags.WantsFrameBufferCopyTexture, value );
+			}
 		}
 
 		/// <summary>

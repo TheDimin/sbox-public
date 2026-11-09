@@ -162,6 +162,14 @@ public sealed class PhysicsGroupDescription : Resource
 	public IEnumerable<Surface> Surfaces => Enumerable.Range( 0, _surfaces.Count )
 		.Select( x => GetSurface( (uint)x ) );
 
+	// Rebuild the managed description after a newly constructed runtime model's
+	// native body metadata has been explicitly set by ModelBuilder.
+	internal void RefreshBuilderOverrides()
+	{
+		Dispose();
+		Refresh();
+	}
+
 	void Refresh()
 	{
 		var surfaceCount = _native.GetSurfacePropertiesCount();

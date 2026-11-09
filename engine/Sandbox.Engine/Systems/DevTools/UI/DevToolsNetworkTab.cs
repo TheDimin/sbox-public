@@ -52,11 +52,12 @@ internal sealed class DevToolsNetworkTab : DevToolsTab
 
 		_session = toolbar.AddChild( new Label( "", "net-session" ) );
 		toolbar.AddChild( new Panel( null, "grow" ) );
-		_record = Button( toolbar, "fiber_manual_record", "Capture", () => Capturing = !Capturing );
+		var controls = toolbar.AddChild( new Panel( null, "net-actions" ) );
+		_record = Button( controls, "fiber_manual_record", "Capture", () => Capturing = !Capturing );
 		_record.AddClass( "record" );
-		_pause = Button( toolbar, "pause", "Hold the list where it is. Capture carries on.", () => _paused = !_paused );
-		Button( toolbar, "delete", "Clear", () => { DevTools.NetworkLog.Clear(); _paused = false; } );
-		Button( toolbar, "content_copy", "Copy the events shown, tab separated", CopyShown );
+		_pause = Button( controls, "pause", "Hold the list where it is. Capture carries on.", () => _paused = !_paused );
+		Button( controls, "delete", "Clear", () => { DevTools.NetworkLog.Clear(); _paused = false; } );
+		Button( controls, "content_copy", "Copy the events shown, tab separated", CopyShown );
 
 		// Traffic: what went where, newest first
 		var traffic = AddView( View.Traffic );
@@ -82,6 +83,7 @@ internal sealed class DevToolsNetworkTab : DevToolsTab
 		_footerRate = footer.AddChild( new Label( "", "net-footer-rate" ) );
 
 		_peers = AddView( View.Peers, scrolls: true ).AddChild( new DevToolsTable( "minmax(0, 1fr) 64px 52px 64px 64px 52px 64px 104px", "Peers", "Role", "#ping", "#in/s", "#out/s", "#quality", "#connected", "#messages" ).Banded() );
+		_peers.AddClass( "net-peers" );
 		_objects = AddView( View.Objects, scrolls: true ).AddChild( new DevToolsTable( "minmax(0, 1fr) minmax(0, 0.6fr) 56px 64px", "Networked objects", "Owner", "Mode", "Culled" ).Banded() );
 
 		var bandwidth = AddView( View.Bandwidth, scrolls: true );

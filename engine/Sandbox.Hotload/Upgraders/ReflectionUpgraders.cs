@@ -127,15 +127,15 @@ namespace Sandbox.Upgraders
 			if ( oldMember.DeclaringType == null )
 				return true;
 
+			var declaringType = GetNewType( oldMember.DeclaringType );
+			if ( declaringType == oldMember.DeclaringType && oldMember is not MethodBase { IsConstructedGenericMethod: true } )
+				return true;
+
 			if ( oldMember is MethodInfo oldMethod && DelegateUpgrader.IsCompilerGenerated( oldMethod ) )
 			{
 				newInstance = GetUpgrader<DelegateUpgrader>().GetMatchingLambdaMethod( oldMethod );
 				return true;
 			}
-
-			var declaringType = GetNewType( oldMember.DeclaringType );
-			if ( declaringType == oldMember.DeclaringType && oldMember is not MethodBase { IsConstructedGenericMethod: true } )
-				return true;
 
 			newInstance = GetMatchingMember( oldMember, declaringType );
 			return true;

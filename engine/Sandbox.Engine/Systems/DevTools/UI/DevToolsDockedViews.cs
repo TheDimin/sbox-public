@@ -531,7 +531,7 @@ internal sealed class DevToolsGlanceTab : DevToolsTab
 			none || s.MeetingTarget ? null : s.Rating );
 
 		Set( _p99, none ? "-" : $"{s.FrameP99:0.0}", "ms",
-			$"99% of frames come in under this\nHitches (over {s.HitchMs:0.0} ms): {s.Spikes}{(s.Spikes > 0 ? $", worst {s.WorstSpikeMs:0} ms" : "")}\nFrame time spread, the budget dashed",
+			$"99% of sampled frames come in under this. Background-cap frames are excluded.\nHitches (over {s.HitchMs:0.0} ms): {s.Spikes}{(s.Spikes > 0 ? $", worst {s.WorstSpikeMs:0} ms" : "")}\nFrame time spread, the budget dashed",
 			s.Spikes > 4 || s.WorstSpikeMs > 100 ? DevTools.Severity.Bad : s.Spikes > 0 || s.FrameP99 > s.TargetMs * 1.25f ? DevTools.Severity.Warning : null );
 
 		Set( _cpu, none ? "-" : $"{s.CpuWorkAvg:0.00}", "ms",

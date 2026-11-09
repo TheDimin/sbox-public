@@ -71,9 +71,14 @@ public partial class TagPicker : Widget
 		popup.Layout.Margin = 16;
 		popup.MinimumSize = new Vector2( 650, 480 );
 
+		var search = popup.Layout.Add( new LineEdit( popup ) );
+		search.PlaceholderText = "⌕  Search types and tags";
+		search.HorizontalSizeMode = SizeMode.Flexible;
+
 		var topColumns = popup.Layout.AddRow( 1 );
 
 		TagOptions.Clear();
+		var tagGroups = new List<TagGroup>();
 
 		foreach ( var groups in Options.GroupBy( x => x.Column ) )
 		{
@@ -98,6 +103,7 @@ public partial class TagPicker : Widget
 				{
 					currentGroup = new TagGroup( entry.Group, MultiSelect );
 					layout.Add( currentGroup );
+					tagGroups.Add( currentGroup );
 				}
 
 				var option = currentGroup.Add( new TagOption( container, entry ) );
@@ -154,6 +160,22 @@ public partial class TagPicker : Widget
 
 		}
 
+		search.TextChanged += value =>
+		{
+			var query = value.Trim();
+			foreach ( var option in TagOptions )
+			{
+				var entry = option.Option;
+				option.Visible = query.Length == 0
+					|| (entry.Title?.Contains( query, StringComparison.OrdinalIgnoreCase ) ?? false)
+					|| (entry.Tag?.Contains( query, StringComparison.OrdinalIgnoreCase ) ?? false)
+					|| (entry.Group?.Contains( query, StringComparison.OrdinalIgnoreCase ) ?? false);
+			}
+
+			foreach ( var group in tagGroups )
+				group.Visible = group.Children.OfType<TagOption>().Any( option => !option.Hidden );
+		};
+
 		var footer = popup.Layout.AddRow();
 		footer.Margin = new Margin( 0, 8, 0, 0 );
 		footer.Spacing = 4;
@@ -171,6 +193,7 @@ public partial class TagPicker : Widget
 		popup.Position = ScreenRect.BottomRight;
 		popup.Position -= new Vector2( popup.MinimumWidth * 0.5f, popup.Height + Height );
 		popup.ConstrainToScreen();
+		search.Focus();
 	}
 
 	void SelectAll()
@@ -201,9 +224,11 @@ public partial class TagPicker : Widget
 
 		if ( popup.IsValid() )
 		{
-			foreach ( var c in popup.Children.OfType<TagOption>() )
+			foreach ( var c in TagOptions )
 			{
 				c.IsSelected = false;
+				c.IsExcluded = false;
+				c.Update();
 			}
 
 			popup.Update();

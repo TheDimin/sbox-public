@@ -18,10 +18,12 @@ static class RunningEditors
 	{
 		var running = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
 
-		foreach ( var process in Process.GetProcessesByName( "sbox-dev" ) )
+		foreach ( var process in OperatingSystem.IsLinux() ? Process.GetProcesses() : Process.GetProcessesByName( "sbox-dev" ) )
 		{
 			try
 			{
+				var name = process.ProcessName;
+				if ( name != "sbox-dev" && !(OperatingSystem.IsLinux() && name.StartsWith( "sbox:", StringComparison.Ordinal )) ) continue;
 				var path = ProjectFromCommandLine( GetCommandLine( process ) );
 				if ( path is not null ) running.Add( System.IO.Path.GetFullPath( path ) );
 			}

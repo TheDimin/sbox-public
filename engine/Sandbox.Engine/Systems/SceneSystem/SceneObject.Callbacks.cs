@@ -8,7 +8,17 @@ public partial class SceneObject
 		void OnAfterObjectRender();
 	}
 
-	internal SceneObjectCallbacks CallbackTarget;
+	private SceneObjectCallbacks callbackTarget;
+	internal SceneObjectCallbacks CallbackTarget
+	{
+		get => callbackTarget;
+		set
+		{
+			if ( ReferenceEquals( callbackTarget, value ) ) return;
+			callbackTarget = value;
+			DependentStateChanged?.Invoke( Rendering.SceneObjectChange.Settings );
+		}
+	}
 
 	internal void ExecuteBefore()
 	{

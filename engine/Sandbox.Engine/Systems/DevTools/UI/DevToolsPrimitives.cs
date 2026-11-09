@@ -469,7 +469,7 @@ internal sealed class DevToolsHistogram : Panel
 
 	public override void OnDraw( Painter painter )
 	{
-		var frames = DevTools.ShownFrames;
+		var frames = DevTools.ShownAnalysisFrames;
 		var summary = DevTools.Current;
 		var scale = ScaleToScreen;
 		var w = Box.Rect.Width / scale;

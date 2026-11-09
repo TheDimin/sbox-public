@@ -138,12 +138,22 @@ internal static class DevToolsStyles
 			font-weight: 600;
 		}
 
+		.devtools .sampling-notice
+		{
+			align-items: center;
+			flex-shrink: 0;
+			padding: 0px 8px;
+			font-size: 11px;
+			color: $dim;
+		}
+
 		.devtools .tabs
 		{
 			flex-grow: 1;
 			flex-shrink: 1;
 			min-width: 0px;
-			overflow: hidden;
+			overflow-x: scroll;
+			overflow-y: hidden;
 		}
 
 		.devtools .tab
@@ -506,15 +516,16 @@ internal static class DevToolsStyles
 
 		.devtools .glance-gauges
 		{
-			flex-direction: row;
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
 			flex-shrink: 0;
-			height: 92px;
 			min-width: 0px;
 			border-bottom: 1px solid $line;
 		}
 
 		.devtools .glance-gauges .gauge
 		{
+			min-height: 92px;
 			padding: 6px 12px 8px 12px;
 		}
 
@@ -591,11 +602,11 @@ internal static class DevToolsStyles
 		// Pages: sections stacked edge to edge, split into columns where there's room
 		//
 
-		// Sections flow into columns rather than down: the dev tools are wide and short
+		// Major sections stack; explicit splits arrange related tables into responsive columns.
 		.devtools .page
 		{
 			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(440px, 1fr));
+			grid-template-columns: minmax(0, 1fr);
 			grid-auto-rows: auto;
 			flex-shrink: 0;
 			min-width: 0px;
@@ -606,6 +617,7 @@ internal static class DevToolsStyles
 			display: grid;
 			grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 			grid-auto-rows: auto;
+			align-items: flex-start;
 			min-width: 0px;
 			margin-left: -1px;
 		}
@@ -615,19 +627,29 @@ internal static class DevToolsStyles
 			border-left: 1px solid $line;
 		}
 
+		.devtools .split.resource-indexes
+		{
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.devtools.narrow .split.resource-indexes
+		{
+			grid-template-columns: minmax(0, 1fr);
+		}
+
 		.devtools .span-all
 		{
 			grid-column: 1 / -1;
 		}
 
-		.devtools .render-submission
+		.devtools .split.render-details
 		{
-			grid-column: 1 / -1;
+			grid-template-columns: minmax(0, 1fr);
 		}
 
-		.devtools.wide .render-submission
+		.devtools.wide .split.render-details
 		{
-			grid-column: span 2;
+			grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr));
 		}
 
 		.devtools .good { color: $good; }
@@ -752,7 +774,7 @@ internal static class DevToolsStyles
 		.devtools .facts
 		{
 			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 			grid-auto-rows: 24px;
 			min-width: 0px;
 			border-bottom: 1px solid $line;
@@ -900,6 +922,7 @@ internal static class DevToolsStyles
 		.devtools .cell-text
 		{
 			min-width: 0px;
+			flex-grow: 1;
 			flex-shrink: 1;
 			white-space: nowrap;
 			overflow: hidden;
@@ -1158,6 +1181,13 @@ internal static class DevToolsStyles
 			flex-grow: 1;
 		}
 
+		.devtools .net-actions
+		{
+			flex-shrink: 0;
+			align-items: center;
+			gap: 6px;
+		}
+
 		.devtools .net-toolbar .icon-button
 		{
 			height: 26px;
@@ -1219,6 +1249,24 @@ internal static class DevToolsStyles
 		.devtools .net-view.scrolls
 		{
 			overflow-y: scroll;
+			overflow-x: scroll;
+		}
+
+		.devtools .net-peers
+		{
+			min-width: 720px;
+		}
+
+		.devtools.narrow .net-toolbar, .devtools.narrow .net-filters
+		{
+			flex-wrap: wrap;
+			height: auto;
+			min-height: 34px;
+		}
+
+		.devtools.narrow .net-search
+		{
+			min-width: 140px;
 		}
 
 		// A scrolling column's sections keep their height and scroll, rather than squash
@@ -1413,6 +1461,20 @@ internal static class DevToolsStyles
 			flex-shrink: 1;
 			min-width: 0px;
 			overflow-y: scroll;
+		}
+
+		.devtools.narrow .ui-inspector
+		{
+			flex-direction: column;
+		}
+
+		.devtools.narrow .ui-tree-pane
+		{
+			width: 100%;
+			height: 40%;
+			min-height: 120px;
+			border-right: 0px;
+			border-bottom: 1px solid $line;
 		}
 
 		.devtools .ui-details > .quiet

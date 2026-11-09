@@ -84,8 +84,7 @@ public class ControlSheetGroup : Widget
 		Body.HorizontalSizeMode = SizeMode.Flexible;
 
 		Body.Layout = Layout.Column();
-		// Open groups use whitespace instead of an indented tree bracket.
-		Body.Layout.Margin = new Margin( 0, 4, 0, hasHeader ? 12 : 4 );
+		Body.Layout.Margin = new Margin( hasHeader ? 12 : 0, 4, 0, 4 );
 		Body.Layout.Spacing = 0;
 
 		Layout.Add( Body );
@@ -198,11 +197,36 @@ public class ControlSheetGroup : Widget
 		}
 	}
 
+	protected override void OnPaint()
+	{
+		base.OnPaint();
+
+		if ( hasHeader && !Body.Hidden )
+		{
+			{
+				var r = LocalRect.Shrink( 8, 4, 0, 0 );
+				r.Width = 3;
+
+				Paint.SetBrushAndPen( Theme.WindowBackground );
+				Paint.DrawRect( r, 5 );
+			}
+
+			{
+				var r = LocalRect.Shrink( 10, 0, 0, 0 );
+				r.Top = r.Bottom - 3;
+				r.Width = 8;
+
+				Paint.SetBrushAndPen( Theme.WindowBackground );
+				Paint.DrawRect( r, 5 );
+			}
+		}
+
+	}
 }
 
 
 /// <summary>
-/// Compact uppercase heading with an aligned solid divider and a muted folded state.
+/// Collapsible group heading with a disclosure button and label.
 /// </summary>
 class GroupHeader : Widget
 {
@@ -222,7 +246,8 @@ class GroupHeader : Widget
 		Cursor = CursorShape.Finger;
 		Layout = Layout.Row();
 		Layout.Spacing = 5;
-		Layout.Margin = new Margin( 6, 0, 24, 0 );
+		Layout.Margin = new Margin( 16, 0, 0, 0 );
+		Layout.AddSpacingCell( 10 );
 
 		groupControl = group;
 		toggleLayout = Layout.AddColumn();
@@ -359,45 +384,50 @@ class GroupHeader : Widget
 
 	protected override void OnPaint()
 	{
-		var textLeft = toggleControl.IsValid() ? toggleLayout.OuterRect.Right + 5 : 6;
-		var dividerLeft = 6 + ControlSheetRow.LabelColumnWidth;
-		var dividerRight = LocalRect.Right - 28;
-		var textBounds = LocalRect.Shrink( textLeft, 0, 28, 0 );
-		textBounds.Width = Math.Max( 0, Math.Min( textBounds.Right, dividerLeft - 12 ) - textLeft );
+		float spacing = toggleControl is BoolControlWidget ? 5 : 0;
 
-		// Bright neutral foreground when expanded, with a quieter neutral tone when folded.
-		var headerColor = state ? Color.FromBytes( 240, 240, 237 ) : Color.FromBytes( 175, 175, 172 );
-		var textColor = IsUnderMouse ? Color.Lerp( headerColor, Color.White, 0.22f ) : headerColor;
+		var textRect = Paint.MeasureText( LocalRect.Shrink( toggleLayout.OuterRect.Right + spacing, 0, 0, 0 ), Title, TextFlag.LeftCenter );
 
-		Paint.SetDefaultFont( 10, weight: 600, sizeInPixels: true );
+		var backgroundRect = LocalRect.Shrink( 3, 4, 4, 4 );
+		backgroundRect.Height = 22 - 8;
+		backgroundRect.Right = textRect.Right + 8;
+		backgroundRect.Width = backgroundRect.Height;
 
-		// Keep even long titles inside the label column so every divider starts at the same position.
-		var title = Paint.GetElidedText( Title?.ToUpperInvariant() ?? "", Math.Max( 0, textBounds.Width ), flags: TextFlag.LeftCenter );
-		Paint.SetPen( textColor );
-		Paint.DrawText( textBounds, title, TextFlag.LeftCenter );
-
-		if ( dividerRight > dividerLeft )
+		// Background
 		{
-			var dividerAlpha = state ? 0.4f : 0.3f;
+			if ( toggleProperty != null && EditorUtility.Prefabs.IsPropertyOverridden( toggleProperty ) )
+			{
+				var overrideIndicatorRect = backgroundRect;
+				overrideIndicatorRect.Left += backgroundRect.Width + 1;
+				overrideIndicatorRect.Width = 2;
+				Paint.SetBrushAndPen( Theme.Blue.Darken( 0.25f ) );
+				Paint.DrawRect( overrideIndicatorRect );
+			}
 
-			Paint.SetBrushAndPen( textColor.WithAlpha( dividerAlpha ) );
-			Paint.DrawRect( new Rect( dividerLeft, LocalRect.Center.y, dividerRight - dividerLeft, 1 ) );
+			var backgroundColor = Theme.WindowBackground.Lighten( 0.2f ).WithAlphaMultiplied( state ? 1 : 0.5f );
+
+			Paint.SetBrushAndPen( backgroundColor );
+			Paint.DrawRect( backgroundRect, 6 );
 		}
 
-		var iconRect = LocalRect.Shrink( 0, 0, 4, 0 );
-		iconRect.Left = iconRect.Right - 16;
+		Paint.ClearBrush();
 
-		Paint.SetPen( textColor );
-		Paint.DrawIcon( iconRect, state ? "expand_more" : "chevron_right", 12, TextFlag.Center );
-
-		// Keep prefab override feedback beside the toggle, independent of disclosure.
-		if ( toggleProperty is not null && EditorUtility.Prefabs.IsPropertyOverridden( toggleProperty ) )
+		var iconIntensity = IsUnderMouse ? 1.5f : 1f;
+		if ( state )
 		{
-			var overrideIndicatorRect = LocalRect.Shrink( 1, 5, 0, 5 );
-			overrideIndicatorRect.Width = 2;
-			Paint.SetBrushAndPen( Theme.Blue.Darken( 0.25f ) );
-			Paint.DrawRect( overrideIndicatorRect );
+			Paint.Pen = Theme.TextControl.WithAlpha( 0.2f * iconIntensity );
+			Paint.DrawIcon( backgroundRect, "remove", 12, TextFlag.Center );
 		}
+		else
+		{
+			Paint.Pen = Theme.TextControl.WithAlpha( 0.4f * iconIntensity );
+			Paint.DrawIcon( backgroundRect, "add", 12, TextFlag.Center );
+		}
+
+		Paint.Pen = Theme.TextControl.WithAlpha( state ? 1 : 0.8f );
+
+		Paint.SetDefaultFont( 11, weight: 400, sizeInPixels: true );
+		Paint.DrawText( LocalRect.Shrink( toggleLayout.OuterRect.Right + spacing, 0, 0, 0 ), Title, TextFlag.LeftCenter );
 	}
 
 	bool state = false;

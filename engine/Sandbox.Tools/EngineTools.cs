@@ -30,20 +30,34 @@
 
 		internal static bool IsAvailable( string library )
 		{
-			return !UnavailableTools.Contains( library );
+			if ( UnavailableTools.Contains( library ) )
+				return false;
+
+			// Material Editor has no managed interop initialization to report a missing
+			// native module. The native tool loader aborts if this Linux library is absent.
+			if ( System.OperatingSystem.IsLinux() && library.Equals( "met", System.StringComparison.OrdinalIgnoreCase ) )
+			{
+				var path = System.IO.Path.Combine( System.Environment.CurrentDirectory, NetCore.NativeDllPath, "tools", "libmet.so" );
+				return System.IO.File.Exists( path );
+			}
+
+			return true;
 		}
 
 		internal static bool EnsureAvailable( string library )
 		{
-			if ( !UnavailableTools.Contains( library ) )
+			if ( IsAvailable( library ) )
 			{
 				return true;
 			}
 
 			var tool = All.FirstOrDefault( x => x.Library.Equals( library, System.StringComparison.OrdinalIgnoreCase ) );
+			var message = System.OperatingSystem.IsLinux() && library.Equals( "met", System.StringComparison.OrdinalIgnoreCase )
+				? "The Material Editor native library is not available in this engine installation."
+				: GetUnavailableMessage();
 			EditorUtility.DisplayDialog(
 				$"{tool?.Name ?? "Editor"} Unavailable",
-				GetUnavailableMessage() );
+				message );
 			return false;
 		}
 

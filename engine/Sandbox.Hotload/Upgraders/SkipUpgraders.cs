@@ -48,6 +48,12 @@ namespace Sandbox.Upgraders
 		{
 			if ( SkipableTypes.Contains( type ) ) return true;
 
+			// The Unix socket thread caches this engine's event queue on its stack.
+			// Replacing the queue splits its producer from the thread-pool consumer,
+			// leaving pending socket operations stuck even though the editor keeps running.
+			if ( type.Assembly == typeof( System.Net.Sockets.Socket ).Assembly
+				&& type.FullName == "System.Net.Sockets.SocketAsyncEngine" ) return true;
+
 			if ( GetNewType( type ) != type ) return false;
 
 			if ( type.IsConstructedGenericType )

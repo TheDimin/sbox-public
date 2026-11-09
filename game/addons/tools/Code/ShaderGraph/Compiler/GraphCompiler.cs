@@ -171,6 +171,8 @@ public sealed partial class GraphCompiler
 	/// </summary>
 	public (string, int) ResultTexture( Sampler sampler, TextureInput input, Texture texture )
 	{
+		sampler.ValidateAttribute();
+
 		var name = CleanName( input.Name );
 		name = string.IsNullOrWhiteSpace( name ) ? $"Texture_{StageName}_{ShaderResult.TextureInputs.Count}" : name;
 
@@ -940,11 +942,14 @@ public sealed partial class GraphCompiler
 		for ( int i = 0; i < ShaderResult.SamplerStates.Count; ++i )
 		{
 			var sampler = ShaderResult.SamplerStates[i];
+			sampler.ValidateAttribute();
 			sb.Append( $"SamplerState g_sSampler{i} <" )
 			  .Append( $" Filter( {sampler.Filter.ToString().ToUpper()} );" )
 			  .Append( $" AddressU( {sampler.AddressU.ToString().ToUpper()} );" )
-			  .Append( $" AddressV( {sampler.AddressV.ToString().ToUpper()} ); >;" )
-			  .AppendLine();
+			  .Append( $" AddressV( {sampler.AddressV.ToString().ToUpper()} );" );
+			if ( sampler.Attribute is not null )
+				sb.Append( $" Attribute( \"{sampler.Attribute}\" );" );
+			sb.AppendLine( " >;" );
 		}
 
 		// Support for color buffer in post-process shaders

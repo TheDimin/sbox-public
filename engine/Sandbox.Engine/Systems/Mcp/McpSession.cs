@@ -7,6 +7,8 @@ namespace Editor.Mcp;
 /// <summary>
 /// Connection-local context flows through async tools, including calls queued on the main thread.
 /// </summary>
+// Keep the live transport cancellation and socket callbacks intact across game hotloads.
+[Sandbox.SkipHotload]
 internal sealed class McpSession
 {
 	static readonly AsyncLocal<McpSession> current = new();

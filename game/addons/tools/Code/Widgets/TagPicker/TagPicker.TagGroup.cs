@@ -23,7 +23,7 @@ partial class TagPicker
 		{
 			foreach ( var child in Children )
 			{
-				if ( child is TagOption option )
+				if ( child is TagOption { Visible: true } option )
 				{
 					option.MouseLeftPress();
 					option.Update();

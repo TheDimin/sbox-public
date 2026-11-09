@@ -89,17 +89,20 @@ public sealed class MaterialAccessor : IJsonPopulator
 	/// </summary>
 	public void SetOverride( int i, Material material )
 	{
+		var hadPrevious = _overrides.TryGetValue( i, out var previous );
 		if ( material is null )
 		{
-			if ( !_overrides.Remove( i ) )
-				return;
+			if ( !_overrides.Remove( i ) ) return;
 		}
-		else
-		{
-			_overrides[i] = material;
-		}
+		else _overrides[i] = material;
 
-		_target.SetOverride( i, material );
+		try { _target.SetOverride( i, material ); }
+		catch
+		{
+			if ( hadPrevious ) _overrides[i] = previous;
+			else _overrides.Remove( i );
+			throw;
+		}
 	}
 
 

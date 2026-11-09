@@ -29,6 +29,9 @@ internal sealed class SteamRichPresenceSystem : IRichPresenceSystem
 
 	void IRichPresenceSystem.Poll()
 	{
+		if ( !Steam.SteamFriends().IsValid )
+			return;
+
 		// Friends' menus group everyone sharing a party_id, and use the rest to label it "X's party 2/16"
 		if ( PartyRoom.Current is PartyRoom party )
 		{

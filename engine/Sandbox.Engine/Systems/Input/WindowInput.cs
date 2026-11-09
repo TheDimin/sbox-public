@@ -34,7 +34,7 @@ internal static class WindowInput
 	}
 
 	internal static bool UsesQtInput => OperatingSystem.IsLinux() && IToolsDll.Current is not null
-		&& Environment.GetEnvironmentVariable( "SBOX_LINUX_QT_INPUT" ) == "1";
+		&& Environment.GetEnvironmentVariable( "SBOX_LINUX_QT_INPUT" ) != "0";
 
 	internal static bool HasMouseFocus() => focused;
 	internal static bool IsAppActive() => active;

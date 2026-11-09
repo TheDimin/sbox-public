@@ -127,8 +127,8 @@ public sealed partial class PanelDockWindows : IDisposable
 		var window = new FloatingWindow( title, size, position, owner, ReturnItems );
 		try
 		{
-			window.RoundedCorners = true;
-			window.ResizeBorder = 4;
+			window.RoundedCorners = window.Borderless;
+			window.ResizeBorder = window.Borderless ? 4 : 0;
 			PanelWindowDesktop.SetOwner( window, owner );
 			var host = new FloatingHost( this );
 			host.AddClass( "floating" );
@@ -510,6 +510,8 @@ public sealed partial class PanelDockWindows : IDisposable
 		internal FloatingHost( PanelDockWindows owner )
 		{
 			this.owner = owner;
+			if ( OperatingSystem.IsLinux() ) return;
+
 			// Moving the window must not tear its contents into another drag window.
 			// Tabs below this native hit-test region remain dedicated docking handles.
 			var title = AddChild<Sandbox.UI.Label>();
@@ -540,7 +542,7 @@ public sealed partial class PanelDockWindows : IDisposable
 	}
 
 	sealed class FloatingWindow( string title, Vector2 size, Vector2 position, PanelWindow owner, Action<FloatingWindow> closing )
-		: PanelWindow( title, size, position, borderless: true )
+		: PanelWindow( title, size, position, borderless: !OperatingSystem.IsLinux() )
 	{
 		internal override PanelWindow ParentWindow => owner;
 

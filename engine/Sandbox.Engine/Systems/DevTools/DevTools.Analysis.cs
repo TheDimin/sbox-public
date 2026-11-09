@@ -71,6 +71,7 @@ internal static partial class DevTools
 		/// </summary>
 		public int Frames;
 		public float WindowMs;
+		public bool BackgroundThrottled;
 
 		/// <summary>
 		/// Observed frame intervals.
@@ -184,6 +185,7 @@ internal static partial class DevTools
 			if ( field == value ) return;
 			field = value;
 			_frozenFrames = value ? Frames.Clone() : null;
+			_frozenAnalysisFrames = value ? AnalysisFrames.Clone() : null;
 			PausedAt = value ? DateTime.Now : default;
 
 			// A selected frame is only somewhere in the frozen frames
@@ -194,11 +196,13 @@ internal static partial class DevTools
 	internal static DateTime PausedAt { get; private set; }
 
 	static FrameHistory _frozenFrames;
+	static FrameHistory _frozenAnalysisFrames;
 
 	/// <summary>
 	/// The frames to draw: the live ring, or the copy taken when the dev tools was paused.
 	/// </summary>
 	internal static FrameHistory ShownFrames => _frozenFrames ?? Frames;
+	internal static FrameHistory ShownAnalysisFrames => _frozenAnalysisFrames ?? AnalysisFrames;
 
 	const float AnalysisWindowMs = 2000f;
 	const float AnalysisInterval = 0.25f;
@@ -233,7 +237,7 @@ internal static partial class DevTools
 	{
 		UpdateRates();
 
-		var s = new Summary();
+		var s = new Summary { BackgroundThrottled = BackgroundThrottled };
 		AnalyseFrames( s );
 		AnalyseCosts( s );
 		FindIssues( s );
@@ -331,7 +335,7 @@ internal static partial class DevTools
 
 	static void AnalyseFrames( Summary s )
 	{
-		var frames = Frames;
+		var frames = AnalysisFrames;
 		var n = frames.FramesCovering( AnalysisWindowMs );
 		s.Frames = n;
 		s.NotRendered = _notRendered;
@@ -380,7 +384,7 @@ internal static partial class DevTools
 		Judge( s );
 	}
 
-	static Stat Measure( int n, Func<int, float> sample, bool skipZero = false )
+	internal static Stat Measure( int n, Func<int, float> sample, bool skipZero = false )
 	{
 		var count = 0;
 		double sum = 0;
@@ -404,7 +408,8 @@ internal static partial class DevTools
 	/// </summary>
 	static (float Ms, string Source) GetTarget()
 	{
-		var limit = EngineLoop.FrameRateLimit;
+		// Match the samples being judged, rather than the current background cap while their stats are held.
+		var limit = _analysisFrameRateLimit;
 		if ( limit.FramesPerSecond > 0 )
 			return ((float)(1000.0 / limit.FramesPerSecond), limit.Source);
 

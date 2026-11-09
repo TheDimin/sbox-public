@@ -56,7 +56,7 @@ namespace Steamworks
 		/// <summary>
 		/// Check if Steam is loaded and accessible.
 		/// </summary>		
-		internal static bool IsValid => initialized;
+		internal static bool IsValid => initialized && NativeEngine.Steam.SteamUser().IsValid;
 
 		internal static void Cleanup()
 		{

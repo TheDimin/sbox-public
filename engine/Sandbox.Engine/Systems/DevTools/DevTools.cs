@@ -49,7 +49,8 @@ internal static partial class DevTools
 	/// <summary>
 	/// The size the popped out window opens at: wide and short, to sit under the game.
 	/// </summary>
-	static readonly Vector2 WindowSize = new( 1560, 340 );
+	static readonly Vector2 WindowSize = new( 1560, 560 );
+	static readonly Vector2 WindowMinSize = new( 1000, 400 );
 
 	/// <summary>
 	/// Whether the developer tabs are available. Players get the overview; the rest needs the editor, cheats, or
@@ -282,6 +283,7 @@ internal static partial class DevTools
 		var window = new SurfaceWindow( "Dev Tools", WindowSize, _windowPosition, borderless: true )
 		{
 			MaxFramesPerSecond = WindowFrameRate,
+			MinSize = WindowMinSize,
 			RoundedCorners = true,
 			FrameTiming = Timing,
 			BackgroundColor = new Color( 0.086f, 0.086f, 0.086f ),

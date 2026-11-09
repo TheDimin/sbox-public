@@ -220,11 +220,13 @@ public partial class SkinnedModelRenderer
 	/// leave behind (even a fade) would drive random morphs on the new model.
 	/// </summary>
 	internal void ReleaseVoiceMorphs()
+		=> ReleaseVoiceMorphs( SceneModel );
+
+	private void ReleaseVoiceMorphs( SceneModel sceneModel )
 	{
 		if ( _voiceMorphModel is null || _voiceMorphModel == Model )
 			return;
 
-		var sceneModel = SceneModel;
 		if ( sceneModel.IsValid() )
 		{
 			foreach ( var morphIndex in _voiceMorphModel.Morphs.VisemeMorphIndices )

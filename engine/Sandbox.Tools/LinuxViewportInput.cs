@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 namespace Editor;
 
 /// <summary>
-/// Opt-in Linux editor input: XInput2 owns key/button delivery and Qt owns viewport capture.
+/// Linux editor input: XInput2 owns key/button delivery and Qt owns viewport capture.
 /// SDL continues to own standalone and panel windows and controller input.
 /// </summary>
 [SkipHotload]

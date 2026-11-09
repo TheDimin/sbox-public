@@ -42,6 +42,12 @@ internal static class DLLImportResolver
 		return handle;
 	}
 
+	[DllImport( "libdl.so.2", EntryPoint = "dlopen" )]
+	private static extern IntPtr LinuxDlopen( [MarshalAs( UnmanagedType.LPUTF8Str )] string path, int flags );
+
+	[DllImport( "libdl.so.2", EntryPoint = "dlerror" )]
+	private static extern IntPtr LinuxDlerror();
+
 	private static IntPtr Load( string libraryName )
 	{
 		// Specifically for fucking steam_api without using a preprocessor if statement on Platform.cs
@@ -59,7 +65,24 @@ internal static class DLLImportResolver
 			_ => libraryName
 		};
 
-		if ( NativeLibrary.TryLoad( Path.Combine( NetCore.NativeDllPath, nativeName ), out var handle ) )
+		var path = Path.Combine( NetCore.NativeDllPath, nativeName );
+		if ( OperatingSystem.IsLinux() && libraryName == "libHarfBuzzSharp" )
+		{
+			// HarfBuzzSharp bundles its own HarfBuzz. Prefer that copy for its internal
+			// calls even when a different system HarfBuzz was loaded earlier by Qt.
+			const int rtldNow = 2;
+			const int rtldDeepBind = 8;
+			var bundled = LinuxDlopen( path, rtldNow | rtldDeepBind );
+			if ( bundled == IntPtr.Zero )
+			{
+				var error = Marshal.PtrToStringUTF8( LinuxDlerror() ) ?? "unknown error";
+				throw new DllNotFoundException( $"Could not load bundled HarfBuzzSharp from '{path}': {error}" );
+			}
+
+			return bundled;
+		}
+
+		if ( NativeLibrary.TryLoad( path, out var handle ) )
 		{
 			return handle;
 		}

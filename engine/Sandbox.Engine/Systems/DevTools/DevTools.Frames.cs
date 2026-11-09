@@ -1,3 +1,5 @@
+using Sandbox.Engine;
+
 namespace Sandbox.Diagnostics;
 
 internal static partial class DevTools
@@ -28,6 +30,15 @@ internal static partial class DevTools
 	internal static FrameHistory Frames { get; } = new();
 
 	/// <summary>
+	/// Frames used for performance statistics. Background-cap waits stay in <see cref="Frames"/>, but do not
+	/// displace the last foreground samples or inflate their percentiles.
+	/// </summary>
+	internal static FrameHistory AnalysisFrames { get; } = new( excludeBackgroundThrottled: true );
+
+	internal static bool BackgroundThrottled { get; private set; }
+	static FrameRateLimit _analysisFrameRateLimit;
+
+	/// <summary>
 	/// The GPU times are the graphics queue's busy time from its passes, not the whole frame's.
 	/// </summary>
 	internal static bool GpuFromPasses { get; private set; }
@@ -40,7 +51,7 @@ internal static partial class DevTools
 	/// <paramref name="frameMs"/> is the whole loop iteration, <paramref name="idleMs"/> the part of it spent waiting on the
 	/// frame rate cap.
 	/// </summary>
-	internal static void SampleFrame( double frameMs, double idleMs )
+	internal static void SampleFrame( double frameMs, double idleMs, FrameRateLimit frameRateLimit )
 	{
 		if ( Application.IsHeadless )
 			return;
@@ -68,13 +79,16 @@ internal static partial class DevTools
 		GpuFromPasses = gpuMs <= 0 && GpuProfilerStats.BusyMs > 0;
 		if ( GpuFromPasses ) gpuMs = GpuProfilerStats.BusyMs;
 
-		Frames.Push( (float)frameMs, (float)idleMs, gpuMs, selfMs, allocKb, gcMs, gcGen );
+		BackgroundThrottled = frameRateLimit.Source == "fps_max_inactive";
+		if ( !BackgroundThrottled ) _analysisFrameRateLimit = frameRateLimit;
+		Frames.Push( (float)frameMs, (float)idleMs, gpuMs, selfMs, allocKb, gcMs, gcGen, BackgroundThrottled );
+		AnalysisFrames.Push( (float)frameMs, (float)idleMs, gpuMs, selfMs, allocKb, gcMs, gcGen, BackgroundThrottled );
 	}
 
 	/// <summary>
 	/// A ring of per-frame timings.
 	/// </summary>
-	internal sealed class FrameHistory
+	internal sealed class FrameHistory( bool excludeBackgroundThrottled = false )
 	{
 		public const int Capacity = 512;
 
@@ -85,6 +99,7 @@ internal static partial class DevTools
 		readonly float[] _allocKb = new float[Capacity];
 		readonly float[] _gcMs = new float[Capacity];
 		readonly sbyte[] _gcGen = new sbyte[Capacity];
+		readonly bool[] _backgroundThrottled = new bool[Capacity];
 		readonly float[] _categories = new float[Capacity * Categories.Length];
 		readonly long[] _number = new long[Capacity];
 		long _pushed;
@@ -95,8 +110,10 @@ internal static partial class DevTools
 		/// </summary>
 		public int Count { get; private set; }
 
-		public void Push( float frameMs, float idleMs, float gpuMs, float selfMs, float allocKb = 0, float gcMs = 0, int gcGen = -1 )
+		public void Push( float frameMs, float idleMs, float gpuMs, float selfMs, float allocKb = 0, float gcMs = 0, int gcGen = -1, bool backgroundThrottled = false )
 		{
+			if ( excludeBackgroundThrottled && backgroundThrottled ) return;
+
 			_frame[_head] = frameMs;
 			_idle[_head] = idleMs;
 			_gpu[_head] = gpuMs;
@@ -104,6 +121,7 @@ internal static partial class DevTools
 			_allocKb[_head] = allocKb;
 			_gcMs[_head] = gcMs;
 			_gcGen[_head] = (sbyte)gcGen;
+			_backgroundThrottled[_head] = backgroundThrottled;
 			_number[_head] = ++_pushed;
 
 			// The categories haven't flipped yet, so what they hold now is this frame's
@@ -124,6 +142,11 @@ internal static partial class DevTools
 		/// Whole frame time, <paramref name="age"/> frames ago. 0 is the newest.
 		/// </summary>
 		public float FrameMs( int age ) => _frame[Index( age )];
+
+		/// <summary>
+		/// Whether this frame was limited by the background frame-rate cap.
+		/// </summary>
+		public bool IsBackgroundThrottled( int age ) => _backgroundThrottled[Index( age )];
 
 		/// <summary>
 		/// Time spent waiting on the frame rate cap, <paramref name="age"/> frames ago.
@@ -186,7 +209,7 @@ internal static partial class DevTools
 		/// </summary>
 		public FrameHistory Clone()
 		{
-			var copy = new FrameHistory();
+			var copy = new FrameHistory( excludeBackgroundThrottled );
 			Array.Copy( _frame, copy._frame, Capacity );
 			Array.Copy( _idle, copy._idle, Capacity );
 			Array.Copy( _gpu, copy._gpu, Capacity );
@@ -194,6 +217,7 @@ internal static partial class DevTools
 			Array.Copy( _allocKb, copy._allocKb, Capacity );
 			Array.Copy( _gcMs, copy._gcMs, Capacity );
 			Array.Copy( _gcGen, copy._gcGen, Capacity );
+			Array.Copy( _backgroundThrottled, copy._backgroundThrottled, Capacity );
 			Array.Copy( _categories, copy._categories, _categories.Length );
 			Array.Copy( _number, copy._number, Capacity );
 			copy._pushed = _pushed;

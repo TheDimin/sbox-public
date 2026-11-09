@@ -93,4 +93,29 @@ public partial class DockWidget : Frame
 
 	internal CDockManager GetDockManager() => _nativeDockWidget.dockManager();
 	internal CDockAreaWidget GetDockAreaWidget() => _nativeDockWidget.dockAreaWidget();
+
+	[EditorEvent.Frame]
+	void UpdateFloatingWindowBorder()
+	{
+		if ( !OperatingSystem.IsLinux() || !Visible ) return;
+
+		// Native docking also creates containers when dragging tabs or restoring a layout.
+		// Use their top-level window, including containers holding multiple dock groups.
+		var manager = GetDockManager();
+		if ( manager.IsNull || _widget.window() == manager.window() ) return;
+
+		var window = GetWindow();
+		if ( !window.IsValid() || (window.WindowFlags & WindowFlags.FramelessWindowHint) == 0 ) return;
+
+		var position = window.Position;
+		var size = window.Size;
+		window.WindowFlags = (window.WindowFlags & ~(WindowFlags.WindowType_Mask | WindowFlags.FramelessWindowHint
+			| WindowFlags.BypassWindowManagerHint | WindowFlags.Customized))
+			| WindowFlags.Window | WindowFlags.WindowTitle | WindowFlags.WindowSystemMenuHint
+			| WindowFlags.MinMaxButtons | WindowFlags.CloseButton;
+		// Qt hides a window when its flags change. Restore the existing container and geometry.
+		window.Show();
+		window.Size = size;
+		window.Position = position;
+	}
 }

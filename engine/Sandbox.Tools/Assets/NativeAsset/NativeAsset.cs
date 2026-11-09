@@ -145,6 +145,10 @@ internal class NativeAsset : Asset
 		{
 			return;
 		}
+		if ( AssetType == AssetType.Material && !EngineTools.EnsureAvailable( "met" ) )
+		{
+			return;
+		}
 
 		native.OpenInTool();
 	}

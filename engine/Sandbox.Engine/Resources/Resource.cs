@@ -9,6 +9,10 @@ namespace Sandbox;
 [Expose]
 public abstract partial class Resource : IValid, IJsonConvert, BytePack.ISerializer
 {
+	private long reloadRevision;
+	/// <summary>Changes when the native reload callback updates this wrapper in place.</summary>
+	internal long ReloadRevision => System.Threading.Volatile.Read( ref reloadRevision );
+
 	/// <summary>
 	/// ID of this resource,
 	/// </summary>
@@ -146,6 +150,7 @@ public abstract partial class Resource : IValid, IJsonConvert, BytePack.ISeriali
 
 		if ( NativeResourceCache.TryGetValue( nativePointer.ToInt64(), out Resource resource ) )
 		{
+			System.Threading.Interlocked.Increment( ref resource.reloadRevision );
 			var library = Engine.GlobalContext.Game.ResourceSystem ?? Engine.GlobalContext.Menu.ResourceSystem;
 
 			library.MoveResource( resource, resourceName );

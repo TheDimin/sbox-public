@@ -368,6 +368,11 @@ public class DefaultUpgrader : Hotload.InstanceUpgrader
 			foreach ( var dstField in newBaseType.GetFields( flags ) )
 			{
 				if ( dstField.DeclaringType != newBaseType ) continue;
+				// Timer queue links connect unrelated runtime timers; keep this timer's
+				// callback/state upgradeable without walking the process-wide queue.
+				if ( dstField.DeclaringType.Assembly == typeof( System.Threading.Timer ).Assembly
+					&& dstField.DeclaringType.FullName == "System.Threading.TimerQueueTimer"
+					&& dstField.Name is "_prev" or "_next" or "_associatedTimerQueue" ) continue;
 				if ( dstField.FieldType.IsPointer ) continue;
 				if ( dstField.HasAttribute<SkipHotloadAttribute>() ) continue;
 

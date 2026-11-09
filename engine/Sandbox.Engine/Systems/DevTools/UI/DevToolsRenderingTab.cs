@@ -49,15 +49,16 @@ internal sealed class DevToolsRenderingTab : DevToolsTab
 		_context = AddChild( new DevToolsFacts() );
 		_findings = AddChild( new DevToolsFindings() );
 
-		var split = AddChild( new Panel( null, "split" ) );
+		var split = AddChild( new Panel( null, "split render-details" ) );
 
-		_submission = Pane( split, "render-submission" ).AddChild( new DevToolsTable( Columns, "Submission", "#count", "" ).Banded() );
+		_submission = Pane( split ).AddChild( new DevToolsTable( Columns, "Submission", "#count", "" ).Banded() );
 		var visibility = Pane( split );
 		_visibility = visibility.AddChild( new DevToolsTable( "minmax(0, 1fr) 64px 40px 64px", "Visibility", "#objects", "#%", "" ).Banded() );
 		_occlusion = visibility.AddChild( new DevToolsTable( "minmax(0, 1fr) 64px 40px 64px", "GPU occlusion", "#count", "#%", "" ).Banded() );
 		_occlusionSettings = visibility.AddChild( new DevToolsTable( "minmax(0, 1fr) 96px", "Occlusion settings", "" ).Banded() );
-		_lights = Pane( split ).AddChild( new DevToolsTable( "minmax(0, 1fr) 64px", "Lights and shadows", "#count" ).Banded() );
-		_textures = Pane( split ).AddChild( new DevToolsTable( "minmax(0, 1fr) minmax(0, 130px) 64px", "Texture pool", "#", "" ).Banded() );
+		var resources = Pane( split );
+		_lights = resources.AddChild( new DevToolsTable( "minmax(0, 1fr) 64px", "Lights and shadows", "#count" ).Banded() );
+		_textures = resources.AddChild( new DevToolsTable( "minmax(0, 1fr) minmax(0, 130px) 64px", "Texture pool", "#", "" ).Banded() );
 
 		_postProcess = Pane( split, "span-all" ).AddChild( new DevToolsTable( "minmax(0, 1fr) minmax(0, 1fr) 48px minmax(0, 1fr)", "Post-processing", "stage", "#order", "flags" ).Banded() );
 

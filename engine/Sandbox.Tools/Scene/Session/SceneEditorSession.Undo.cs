@@ -13,7 +13,7 @@ public partial class SceneEditorSession
 
 	bool _suppressUndoSounds = false;
 
-	private void InitUndo()
+	private protected void InitUndo()
 	{
 		UndoSystem.Initialize();
 
@@ -145,6 +145,9 @@ internal sealed class SceneUndoSnapshot : IDisposable
 		{
 			public Type Type;
 			public JsonNode Node;
+
+			/// <summary>Set for objects that are not JSON data, such as glTF elements. Restore reuses the same instance.</summary>
+			public object Instance;
 		}
 
 		public readonly ObjectReference[] SelectedObjectRefs;
@@ -158,7 +161,7 @@ internal sealed class SceneUndoSnapshot : IDisposable
 			SelectedComponentRefs = _session.Selection.OfType<Component>().Select( ComponentReference.FromInstance ).ToArray();
 			SelectedObjectRefs = _session.Selection
 				.Where( x => x is not GameObject and not Component and not null )
-				.Select( x => new ObjectReference { Type = x.GetType(), Node = Json.ToNode( x ) } )
+				.Select( x => x is GltfElement ? new ObjectReference { Type = x.GetType(), Instance = x } : new ObjectReference { Type = x.GetType(), Node = Json.ToNode( x ) } )
 				.ToArray();
 		}
 
@@ -186,7 +189,7 @@ internal sealed class SceneUndoSnapshot : IDisposable
 			// We have not garantuee those are still exist and are valid but we try
 			foreach ( var objRef in SelectedObjectRefs )
 			{
-				var obj = Json.FromNode( objRef.Node, objRef.Type );
+				var obj = objRef.Instance ?? Json.FromNode( objRef.Node, objRef.Type );
 				if ( obj is IValid x && !x.IsValid() )
 				{
 					continue;

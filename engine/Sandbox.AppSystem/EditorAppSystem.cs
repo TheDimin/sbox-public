@@ -5,6 +5,11 @@
 /// </summary>
 public class EditorAppSystem : AppSystem
 {
+	public EditorAppSystem()
+	{
+		EditorProcessName.SetFromProjectPath( Utility.CommandLine.GetSwitch( "-project", "" ).TrimQuoted() );
+	}
+
 	public override void Init()
 	{
 		LoadSteamDll();

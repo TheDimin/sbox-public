@@ -54,6 +54,7 @@ internal sealed class DevToolsWindow : Panel
 	readonly Label _pause;
 	readonly Panel _tabBar;
 	readonly Panel _badges;
+	readonly Label _sampling;
 	readonly Label _errors, _warnings;
 	readonly Panel _pageScroll;
 	readonly List<(DevToolsTab Tab, Label Button)> _tabs = new();
@@ -78,6 +79,8 @@ internal sealed class DevToolsWindow : Panel
 		_errors = Badge( "error", "bad" );
 		_warnings = Badge( "warning", "warning" );
 		_badges.AddEventListener( "onclick", () => DevTools.ActiveTab = DevTools.OverviewTabId );
+		_sampling = _strip.AddChild( new Label( "Background cap", "sampling-notice window-nodrag hidden" ) );
+		_sampling.Tooltip = "Frame statistics are held at the last foreground samples. Background-throttled frames remain in the history, but are excluded from averages, percentiles and the frame-time distribution.";
 
 		var controls = _strip.AddChild( new Panel( null, "host-controls" ) );
 
@@ -156,6 +159,7 @@ internal sealed class DevToolsWindow : Panel
 		base.Tick();
 
 		var advanced = DevTools.ShowAdvanced;
+		_sampling.SetClass( "hidden", !DevTools.Current.BackgroundThrottled );
 
 		// Width classes: grids rearrange themselves to fit
 		var width = Box.Rect.Width / ScaleToScreen;

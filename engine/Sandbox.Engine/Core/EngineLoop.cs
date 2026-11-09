@@ -98,9 +98,10 @@ internal static class EngineLoop
 			}
 		}
 
-		var idleMs = framePacer.Wait( FrameRateLimit.FramesPerSecond );
+		var frameRateLimit = FrameRateLimit;
+		var idleMs = framePacer.Wait( frameRateLimit.FramesPerSecond );
 		PerformanceStats.Timings.Idle.AddMilliseconds( idleMs );
-		DevTools.SampleFrame( frameTimer.ElapsedMilliSeconds, idleMs );
+		DevTools.SampleFrame( frameTimer.ElapsedMilliSeconds, idleMs, frameRateLimit );
 
 		previousTime = time;
 	}

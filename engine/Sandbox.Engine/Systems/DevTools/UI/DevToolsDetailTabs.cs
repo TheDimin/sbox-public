@@ -75,14 +75,16 @@ internal sealed class DevToolsGpuTab : DevToolsTab
 
 	public DevToolsGpuTab()
 	{
-		_facts = AddChild( new DevToolsFacts() );
+		AddChild( new DevToolsSection( "Timeline", "span-all" ) ).Body.AddChild( new DevToolsTimelineView() );
 
-		var passes = AddChild( new Panel( null, "section" ) );
+		var details = AddChild( new Panel( null, "split span-all" ) );
+		_facts = details.AddChild( new DevToolsFacts() );
+
+		var passes = details.AddChild( new Panel( null, "section" ) );
 		_passes = passes.AddChild( DevToolsTable.ForCosts( "Leaf passes" ) );
 		_passes.Tooltip = "Passes with no measured children, so inclusive time is their own";
 
-		AddChild( new DevToolsSection( "Timeline" ) ).Body.AddChild( new DevToolsTimelineView() );
-		_tree = AddChild( new Panel( null, "section" ) ).AddChild( new DevToolsTable( "minmax(0, 1fr) 52px 52px 40px 56px", "Pass tree", "#avg", "#max", "#%", "" ).Banded() );
+		_tree = details.AddChild( new Panel( null, "section" ) ).AddChild( new DevToolsTable( "minmax(0, 1fr) 52px 52px 40px 56px", "Pass tree", "#avg", "#max", "#%", "" ).Banded() );
 	}
 
 	public override void Refresh( DevTools.Summary s )
@@ -153,7 +155,7 @@ internal sealed class DevToolsMemoryTab : DevToolsTab
 		_allocSection = AddChild( new DevToolsSection( "Allocations by type" ) );
 		_allocs = _allocSection.Body.AddChild( new DevToolsTable( "minmax(0, 1fr) 72px 56px 64px", "type", "#bytes", "#count", "" ) );
 
-		var split = AddChild( new Panel( null, "split" ) );
+		var split = AddChild( new Panel( null, "split resource-indexes" ) );
 		_strong = split.AddChild( new Panel( null, "section" ) ).AddChild( new DevToolsTable( "minmax(0, 1fr) 56px 56px", "Resource index", "#live", "#max" ).Banded() );
 		_weak = split.AddChild( new Panel( null, "section" ) ).AddChild( new DevToolsTable( "minmax(0, 1fr) 56px 56px", "Weak index", "#live", "#max" ).Banded() );
 		_native = split.AddChild( new Panel( null, "section span-all" ) ).AddChild( new DevToolsTable( "minmax(0, 1fr) 56px 56px", "Native resource cache", "#live", "#max" ).Banded() );
