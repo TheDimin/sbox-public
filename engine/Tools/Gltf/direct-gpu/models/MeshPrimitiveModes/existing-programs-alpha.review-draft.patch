@@ -1,0 +1,236 @@
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuAsset.Variants.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuAsset.Variants.cs
+@@ -211,7 +211,7 @@
+ 				var (baked, _) = projected.CreateLegacyUvPlans( materialIndex );
+ 				if ( baked is not null ) { projected = baked; ownInput = true; }
+ 			}
+-			var tangent = GltfGpuGeneratedTangentRoute.Prepare( projected, hasSkin );
++			var tangent = projected.Mode is 0 or 1 && !projected.Upload.Attributes.ContainsKey( "NORMAL" ) ? null : GltfGpuGeneratedTangentRoute.Prepare( projected, hasSkin );
+ 			var lease = acquireMaterial( materialIndex, projected, images );
+ 			var packet = GltfProjectedMaterialPacket.Acquire( projected, lease, tangent, ownInput );
+ 			return new GltfMaterialLease<GltfProjectedMaterialPacket>( packet, packet.Dispose, () => ThreadSafe.AssertIsMainThread() );
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs
+@@ -798,6 +798,8 @@
+ 					else { draw.HasVertexState = true; draw.ComputedRevision = PoseRevision; draw.ComputedPacket = packet; }
+ 				}
+ 				draw.RenderAttributes.Clear(); material.Attributes.MergeTo( draw.RenderAttributes ); Graphics.Attributes.MergeTo( draw.RenderAttributes );
++				if ( overridden is null && (material.ShaderName.Equals( "shaders/gltf_stock_sampler.shader", StringComparison.OrdinalIgnoreCase ) || material.ShaderName.Equals( "shaders/gltf_surface_five_uv.shader", StringComparison.OrdinalIgnoreCase ) || material.ShaderName.Equals( "shaders/gltf_diffuse_transmission.shader", StringComparison.OrdinalIgnoreCase )) )
++					draw.RenderAttributes.Set( "GltfPointLineNoNormal", plan.Mode is 0 or 1 && !plan.Upload.Attributes.ContainsKey( "NORMAL" ) ? 1f : 0f );
+ 				if ( !RenderTools.SetRenderState( Graphics.Context, draw.RenderAttributes.Get(), Graphics.ModeFor( material ), layout, Graphics.Stats ) ) throw new GltfException( "Stock material rejected the runtime GPU vertex declaration." );
+ 				Graphics.Context.BindVertexBuffer( 0, output.native, 0, plan.VertexStride );
+ 				Graphics.Context.BindIndexBuffer( draw.Indices.native, 4, 0 );
+--- a/game/core/shaders/gltf_stock_sampler.shader
++++ b/game/core/shaders/gltf_stock_sampler.shader
+@@ -97,6 +97,7 @@
+ 	#undef g_sAniso
+ 	#undef g_sTrilinearWrap
+ 
++	float g_flGltfPointLineNoNormal < Attribute( "GltfPointLineNoNormal" ); Default( 0 ); >;
+ 	PS_OUTPUT MainPs( PS_INPUT i )
+ 	{
+ 		FinalCombinerInput_t finalCombinerInput = PS_SharedStandardProcessing( i );
+@@ -104,7 +105,10 @@
+ 		LightingTerms_t lightingTerms = InitLightingTerms();
+ 
+ 		PS_OUTPUT ps_output;
+-		ps_output = PS_FinalCombinerDoLighting( finalCombinerInput, lightingTerms );
++		if ( g_flGltfPointLineNoNormal > .5 )
++			ps_output.vColor = float4( SampleColorTexture( i.vTextureCoords.xy ).rgb * i.vVertexColor.rgb, i.vVertexColor.a );
++		else
++			ps_output = PS_FinalCombinerDoLighting( finalCombinerInput, lightingTerms );
+ 		ps_output = PS_FinalCombinerDoPostProcessing( finalCombinerInput, lightingTerms, ps_output );
+ 
+ 		return ps_output;
+--- a/game/core/shaders/gltf_surface_five_uv.shader
++++ b/game/core/shaders/gltf_surface_five_uv.shader
+@@ -6,6 +6,8 @@
+ {
+ 	#include "common/features.hlsl"
+ 	Feature( F_ALPHA_TEST, 0..1, "Rendering" );
++	Feature( F_TRANSLUCENT, 0..1, "Rendering" );
++	FeatureRule( Allow1( F_ALPHA_TEST, F_TRANSLUCENT ), "Mask and blend are exclusive" );
+ }
+ MODES
+ {
+@@ -17,9 +19,7 @@
+ {
+ 	StaticCombo( S_RENDER_BACKFACES, F_RENDER_BACKFACES, Sys( ALL ) );
+ 	StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( ALL ) );
+-	#ifndef S_TRANSLUCENT
+-	#define S_TRANSLUCENT 0
+-	#endif
++	StaticCombo( S_TRANSLUCENT, F_TRANSLUCENT, Sys( ALL ) );
+ 	#include "common/shared.hlsl"
+ 	#include "procedural.hlsl"
+ 	#define S_UV2 1
+@@ -56,7 +56,24 @@
+ }
+ PS
+ {
++	#define DEPTH_STATE_ALREADY_SET
++	#define BLEND_MODE_ALREADY_SET
+ 	#include "common/pixel.hlsl"
++	RenderState( DepthEnable, true );
++	RenderState( DepthFunc, GREATER_EQUAL );
++	#if S_TRANSLUCENT
++		RenderState( BlendEnable, true );
++		RenderState( SrcBlend, SRC_ALPHA );
++		RenderState( DstBlend, INV_SRC_ALPHA );
++		RenderState( BlendOp, ADD );
++		RenderState( SrcBlendAlpha, ONE );
++		RenderState( DstBlendAlpha, INV_SRC_ALPHA );
++		RenderState( BlendOpAlpha, ADD );
++		RenderState( DepthWriteEnable, false );
++	#else
++		RenderState( BlendEnable, false );
++		RenderState( DepthWriteEnable, true );
++	#endif
+ 	RenderState( CullMode, F_RENDER_BACKFACES ? NONE : BACK );
+ 	SamplerState g_sGltfBaseColor < Filter( BILINEAR ); AddressU( WRAP ); AddressV( WRAP ); Attribute( "GltfBaseColorSampler" ); >;
+ 	SamplerState g_sGltfMetallicRoughness < Filter( BILINEAR ); AddressU( WRAP ); AddressV( WRAP ); Attribute( "GltfMetallicRoughnessSampler" ); >;
+@@ -75,6 +92,7 @@
+ 	Texture2D g_tGltfOcclusionTexture < Channel( RGBA, Box( GltfOcclusionTexture ), Linear ); OutputFormat( RGBA8888 ); SrgbRead( False ); >;
+ 	Texture2D g_tGltfEmissiveTexture < Channel( RGBA, Box( GltfEmissiveTexture ), Srgb ); OutputFormat( RGBA8888 ); SrgbRead( True ); >;
+ 
++	float g_flGltfPointLineNoNormal < Attribute( "GltfPointLineNoNormal" ); Default( 0 ); >;
+ 	float4 g_vGltfBaseColor < Default4( 1, 1, 1, 1 ); >;
+ 	float3 g_vGltfEmissiveFactor < Default3( 0, 0, 0 ); >;
+ 	float g_flGltfMetallicFactor < Default1( 1 ); >;
+@@ -124,10 +142,31 @@
+ 		float2 uvOcclusion = GltfUv( i, g_flGltfOcclusionUvSlot, g_vGltfOcclusionUvRowU, g_vGltfOcclusionUvRowV );
+ 		float2 uvEmissive = GltfUv( i, g_flGltfEmissiveUvSlot, g_vGltfEmissiveUvRowU, g_vGltfEmissiveUvRowV );
+ 		float4 sampleBaseColor = g_flGltfHasBaseColorTexture > 0.5 ? g_tGltfBaseColorTexture.Sample( g_sGltfBaseColor, uvBaseColor ) : float4( 1, 1, 1, 1 );
++		float4 sampleEmissive = g_flGltfHasEmissiveTexture > 0.5 ? g_tGltfEmissiveTexture.Sample( g_sGltfEmissive, uvEmissive ) : float4( 1, 1, 1, 1 );
++		float sourceAlpha = sampleBaseColor.a * g_vGltfBaseColor.a * saturate( i.vColor.a );
++		#if S_ALPHA_TEST
++			clip( sourceAlpha - g_flGltfAlphaCutoff );
++		#endif
++		if ( g_flGltfPointLineNoNormal > .5 && !DepthNormals::WantsDepthNormals() && !ToolsVis::WantsToolsVis() )
++		{
++			m.Albedo = sampleBaseColor.rgb * g_vGltfBaseColor.rgb * saturate( i.vColor.rgb ) * i.vVertexColor.rgb;
++			m.Emission = sampleEmissive.rgb * g_vGltfEmissiveFactor;
++			#if S_TRANSLUCENT
++				m.Opacity = sourceAlpha * i.vVertexColor.a;
++			#else
++				m.Opacity = i.vVertexColor.a;
++			#endif
++			m.TextureCoords = uvBaseColor;
++			float4 color = float4( m.Albedo + m.Emission, m.Opacity );
++			if ( DepthNormals::WantsDepthNormals() ) return DepthNormals::Output( m.Normal, m.Roughness, color.a );
++			if ( g_bWireframeMode ) return g_vWireframeColor;
++			if ( ToolsVis::WantsToolsVis() ) return ShadingModelStandard::DoToolsVis( color, m, InitLightingTerms() );
++			if ( g_bFogEnabled ) color.rgb = Fog::Apply( m.WorldPosition, m.ScreenPosition.xy, color.rgb );
++			return color;
++		}
+ 		float4 sampleMetallicRoughness = g_flGltfHasMetallicRoughnessTexture > 0.5 ? g_tGltfMetallicRoughnessTexture.Sample( g_sGltfMetallicRoughness, uvMetallicRoughness ) : float4( 1, 1, 1, 1 );
+ 		float4 sampleNormal = g_flGltfHasNormalTexture > 0.5 ? g_tGltfNormalTexture.Sample( g_sGltfNormal, uvNormal ) : float4( 1, 1, 1, 1 );
+ 		float4 sampleOcclusion = g_flGltfHasOcclusionTexture > 0.5 ? g_tGltfOcclusionTexture.Sample( g_sGltfOcclusion, uvOcclusion ) : float4( 1, 1, 1, 1 );
+-		float4 sampleEmissive = g_flGltfHasEmissiveTexture > 0.5 ? g_tGltfEmissiveTexture.Sample( g_sGltfEmissive, uvEmissive ) : float4( 1, 1, 1, 1 );
+ 		float3 normalTs = float3( 0, 0, 1 );
+ 		if ( g_flGltfHasNormalTexture > 0.5 )
+ 		{
+@@ -140,13 +179,11 @@
+ 		m.Metalness = saturate( sampleMetallicRoughness.b * g_flGltfMetallicFactor );
+ 		m.AmbientOcclusion = saturate( lerp( 1, sampleOcclusion.r, g_flGltfOcclusionStrength ) );
+ 		m.Emission = sampleEmissive.rgb * g_vGltfEmissiveFactor;
+-		#if S_ALPHA_TEST
+-			// glTF base color factor and vertex alpha are linear. Texture alpha is
+-			// coverage data and is not sRGB-decoded; equality passes the cutoff.
+-			float sourceAlpha = sampleBaseColor.a * g_vGltfBaseColor.a * saturate( i.vColor.a );
+-			clip( sourceAlpha - g_flGltfAlphaCutoff );
++		#if S_TRANSLUCENT
++			m.Opacity = sourceAlpha * i.vVertexColor.a;
++		#else
++			m.Opacity = i.vVertexColor.a;
+ 		#endif
+-		m.Opacity = i.vVertexColor.a; // accepted mask samples write full source coverage; instance tint remains separate.
+ 		// Stock TransformNormal flips Y for legacy Source1 textures; pre-flip
+ 		// exactly once because glTF uses the tangent.w * cross(N,T) basis.
+ 		normalTs.y = -normalTs.y;
+@@ -161,6 +198,17 @@
+ 		m.WorldTangentU = i.vTangentUWs;
+ 		m.WorldTangentV = i.vTangentVWs;
+ 		m.TextureCoords = uvBaseColor;
++		// Debug/depth visualizations need the complete original material state.
++		// Normal forward rendering took the early branch before sampling lit roles.
++		if ( g_flGltfPointLineNoNormal > .5 )
++		{
++			float4 pointLineColor = float4( m.Albedo + m.Emission, m.Opacity );
++			if ( DepthNormals::WantsDepthNormals() ) return DepthNormals::Output( m.Normal, m.Roughness, pointLineColor.a );
++			if ( g_bWireframeMode ) return g_vWireframeColor;
++			if ( ToolsVis::WantsToolsVis() ) return ShadingModelStandard::DoToolsVis( pointLineColor, m, InitLightingTerms() );
++			if ( g_bFogEnabled ) pointLineColor.rgb = Fog::Apply( m.WorldPosition, m.ScreenPosition.xy, pointLineColor.rgb );
++			return pointLineColor;
++		}
+ 		return ShadingModelStandard::Shade( m );
+ 	}
+ }
+--- a/game/core/shaders/gltf_diffuse_transmission.shader
++++ b/game/core/shaders/gltf_diffuse_transmission.shader
+@@ -79,6 +79,7 @@
+ 	Texture2D g_tGltfOcclusionTexture < Channel( RGBA, Box( GltfOcclusionTexture ), Linear ); OutputFormat( RGBA8888 ); SrgbRead( False ); >;
+ 	Texture2D g_tGltfEmissiveTexture < Channel( RGBA, Box( GltfEmissiveTexture ), Srgb ); OutputFormat( RGBA8888 ); SrgbRead( True ); >;
+ 
++	float g_flGltfPointLineNoNormal < Attribute( "GltfPointLineNoNormal" ); Default( 0 ); >;
+ 	float4 g_vGltfBaseColor < Default4( 1, 1, 1, 1 ); >;
+ 	float3 g_vGltfEmissiveFactor < Default3( 0, 0, 0 ); >;
+ 	float g_flGltfMetallicFactor < Default1( 1 ); >;
+@@ -219,10 +220,27 @@
+ 		float2 uvOcclusion = GltfUv( i, g_flGltfOcclusionUvSlot, g_vGltfOcclusionUvRowU, g_vGltfOcclusionUvRowV );
+ 		float2 uvEmissive = GltfUv( i, g_flGltfEmissiveUvSlot, g_vGltfEmissiveUvRowU, g_vGltfEmissiveUvRowV );
+ 		float4 sampleBaseColor = g_flGltfHasBaseColorTexture > 0.5 ? g_tGltfBaseColorTexture.Sample( g_sGltfBaseColor, uvBaseColor ) : float4( 1, 1, 1, 1 );
++		float4 sampleEmissive = g_flGltfHasEmissiveTexture > 0.5 ? g_tGltfEmissiveTexture.Sample( g_sGltfEmissive, uvEmissive ) : float4( 1, 1, 1, 1 );
++		#if ( S_ALPHA_TEST )
++		float sourceAlpha = sampleBaseColor.a * g_vGltfBaseColor.a * saturate( i.vColor.a );
++		clip( sourceAlpha - g_flGltfAlphaCutoff );
++		#endif
++		if ( g_flGltfPointLineNoNormal > .5 && !DepthNormals::WantsDepthNormals() && !ToolsVis::WantsToolsVis() )
++		{
++			m.Albedo = sampleBaseColor.rgb * g_vGltfBaseColor.rgb * saturate( i.vColor.rgb ) * i.vVertexColor.rgb;
++			m.Emission = sampleEmissive.rgb * g_vGltfEmissiveFactor;
++			m.Opacity = i.vVertexColor.a;
++			m.TextureCoords = uvBaseColor;
++			float4 color = float4( m.Albedo + m.Emission, m.Opacity );
++			if ( DepthNormals::WantsDepthNormals() ) return DepthNormals::Output( m.Normal, m.Roughness, color.a );
++			if ( g_bWireframeMode ) return g_vWireframeColor;
++			if ( ToolsVis::WantsToolsVis() ) return ShadingModelStandard::DoToolsVis( color, m, InitLightingTerms() );
++			if ( g_bFogEnabled ) color.rgb = Fog::Apply( m.WorldPosition, m.ScreenPosition.xy, color.rgb );
++			return color;
++		}
+ 		float4 sampleMetallicRoughness = g_flGltfHasMetallicRoughnessTexture > 0.5 ? g_tGltfMetallicRoughnessTexture.Sample( g_sGltfMetallicRoughness, uvMetallicRoughness ) : float4( 1, 1, 1, 1 );
+ 		float4 sampleNormal = g_flGltfHasNormalTexture > 0.5 ? g_tGltfNormalTexture.Sample( g_sGltfNormal, uvNormal ) : float4( 1, 1, 1, 1 );
+ 		float4 sampleOcclusion = g_flGltfHasOcclusionTexture > 0.5 ? g_tGltfOcclusionTexture.Sample( g_sGltfOcclusion, uvOcclusion ) : float4( 1, 1, 1, 1 );
+-		float4 sampleEmissive = g_flGltfHasEmissiveTexture > 0.5 ? g_tGltfEmissiveTexture.Sample( g_sGltfEmissive, uvEmissive ) : float4( 1, 1, 1, 1 );
+ 		float3 normalTs = float3( 0, 0, 1 );
+ 		if ( g_flGltfHasNormalTexture > 0.5 )
+ 		{
+@@ -235,10 +253,6 @@
+ 		m.Metalness = saturate( sampleMetallicRoughness.b * g_flGltfMetallicFactor );
+ 		m.AmbientOcclusion = saturate( lerp( 1, sampleOcclusion.r, g_flGltfOcclusionStrength ) );
+ 		m.Emission = sampleEmissive.rgb * g_vGltfEmissiveFactor;
+-		#if ( S_ALPHA_TEST )
+-		float sourceAlpha = sampleBaseColor.a * g_vGltfBaseColor.a * saturate( i.vColor.a );
+-		clip( sourceAlpha - g_flGltfAlphaCutoff );
+-		#endif
+ 		m.Opacity = i.vVertexColor.a; // OPAQUE ignores alpha; accepted MASK samples retain full coverage.
+ 		// Stock TransformNormal flips Y for legacy Source1 textures; pre-flip
+ 		// exactly once because glTF uses the tangent.w * cross(N,T) basis.
+@@ -254,6 +268,17 @@
+ 		m.WorldTangentU = i.vTangentUWs;
+ 		m.WorldTangentV = i.vTangentVWs;
+ 		m.TextureCoords = uvBaseColor;
++		// Debug/depth visualizations need the complete original material state.
++		// Normal forward rendering took the early branch before sampling lit roles.
++		if ( g_flGltfPointLineNoNormal > .5 )
++		{
++			float4 pointLineColor = float4( m.Albedo + m.Emission, m.Opacity );
++			if ( DepthNormals::WantsDepthNormals() ) return DepthNormals::Output( m.Normal, m.Roughness, pointLineColor.a );
++			if ( g_bWireframeMode ) return g_vWireframeColor;
++			if ( ToolsVis::WantsToolsVis() ) return ShadingModelStandard::DoToolsVis( pointLineColor, m, InitLightingTerms() );
++			if ( g_bFogEnabled ) pointLineColor.rgb = Fog::Apply( m.WorldPosition, m.ScreenPosition.xy, pointLineColor.rgb );
++			return pointLineColor;
++		}
+ 		float2 uvStrength = GltfUv( i, g_flGltfDiffuseTransmissionUvSlot, g_vGltfDiffuseTransmissionUvRowU, g_vGltfDiffuseTransmissionUvRowV );
+ 		float2 uvColor = GltfUv( i, g_flGltfDiffuseTransmissionColorUvSlot, g_vGltfDiffuseTransmissionColorUvRowU, g_vGltfDiffuseTransmissionColorUvRowV );
+ 		float alpha = g_flGltfHasDiffuseTransmissionTexture > 0.5 ? g_tGltfDiffuseTransmissionTexture.Sample( g_sGltfDiffuseTransmission, uvStrength ).a : 1;

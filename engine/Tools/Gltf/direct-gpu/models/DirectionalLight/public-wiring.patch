@@ -1,0 +1,452 @@
+diff --git a/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs b/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs
+index af613fa47..731232544 100644
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs
+@@ -263,6 +263,7 @@ internal sealed partial class GltfGpuAsset : IDisposable
+ 	}
+ 	internal GltfDocument Document { get; private set; }
+ 	internal int? SelectedSceneIndex { get; private set; }
++	internal bool DirectionalLightsEnabled { get; set; }
+ 	internal readonly List<Node> Nodes = new();
+ 	internal readonly List<Primitive> Primitives = new();
+ 	internal const string DefaultComputeShaderPath = "shaders/gltf_deform_cs.shader";
+@@ -528,6 +529,32 @@ internal sealed partial class GltfGpuInstance : IDisposable
+ 	private readonly GpuBuffer placementBuffer;
+ 	private readonly Material[] materialOverrides;
+ 	private bool[] nodeVisibility;
++	private Sandbox.Gltf.DirectGpu.Lighting.GltfDirectionalLightBinding directionalLights;
++	private bool directionalLightsVisible = true;
++
++	// An arbitrary native presentation multiplier; authored lux remains in the document.
++	internal void SetDirectionalLightScale( float? scale, bool visible = true, Sandbox.Gltf.DirectGpu.Lighting.GltfPunctualLightInstances.IFactory factory = null )
++	{
++		ObjectDisposedException.ThrowIf( disposed, this ); ThreadSafe.AssertIsMainThread();
++		if ( scale.HasValue && (!float.IsFinite( scale.Value ) || scale.Value <= 0) ) throw new ArgumentOutOfRangeException( nameof( scale ) );
++		if ( scale.HasValue && !asset.DirectionalLightsEnabled ) throw new GltfException( "This model was not loaded with directional-light opt-in." );
++		Sandbox.Gltf.DirectGpu.Lighting.GltfDirectionalLightBinding candidate = null;
++		if ( scale.HasValue ) candidate = Sandbox.Gltf.DirectGpu.Lighting.GltfDirectionalLightBinding.Create( asset.Document,
++			asset.SelectedSceneIndex, sceneObject.World, scale.Value, pose, placement, visible ? nodeVisibility : new bool[nodeVisibility.Length], factory );
++		var previous = directionalLights; directionalLights = candidate; directionalLightsVisible = visible;
++		previous?.Dispose();
++	}
++
++	internal void SetDirectionalLightsVisible( bool visible )
++	{
++		ObjectDisposedException.ThrowIf( disposed, this ); ThreadSafe.AssertIsMainThread();
++		if ( directionalLightsVisible == visible ) return;
++		directionalLights?.Update( pose, placement, visible ? nodeVisibility : new bool[nodeVisibility.Length] );
++		directionalLightsVisible = visible;
++	}
++
++	private void UpdateDirectionalLights() => directionalLights?.Update( pose, placement,
++		directionalLightsVisible ? nodeVisibility : new bool[nodeVisibility.Length] );
+ 	private GltfPose pose;
+ 	private NMatrix placement = NMatrix.Identity;
+ 	private bool disposed;
+@@ -648,6 +675,7 @@ internal sealed partial class GltfGpuInstance : IDisposable
+ 	{
+ 		ObjectDisposedException.ThrowIf( disposed, this ); ThreadSafe.AssertIsMainThread();
+ 		var next = asset.Document.EvaluateNodeVisibility( overrides );
++		directionalLights?.Update( pose, placement, directionalLightsVisible ? next : new bool[next.Length] );
+ 		var changed = false;
+ 		foreach ( var draw in draws )
+ 		{
+@@ -679,21 +707,31 @@ internal sealed partial class GltfGpuInstance : IDisposable
+ 		// Compute before publishing the pose so invalid bounds cannot partially update it.
+ 		var drawBounds = updates.Select( x => GltfGpuRig.Bounds( [(x.Draw.Rig, x.Matrices, x.Weights)], nextPlacement ) ).ToArray();
+ 		var bounds = drawBounds.Length == 0 ? new BBox( global::Vector3.Zero, global::Vector3.Zero ) : BBox.FromBoxes( drawBounds );
+-		placementBuffer.SetData<GltfGpuMatrix>( new[] { new GltfGpuMatrix( nextPlacement ) } );
+-		for ( var updateIndex = 0; updateIndex < updates.Length; updateIndex++ )
++		// A light failure must not publish a new GPU pose. If a later upload fails,
++		// restore the previous native light state; GPU upload rollback remains separate.
++		directionalLights?.Update( value, nextPlacement, directionalLightsVisible ? nodeVisibility : new bool[nodeVisibility.Length] );
++		try
+ 		{
+-			var update = updates[updateIndex];
+-			update.Draw.WorldBounds = drawBounds[updateIndex];
+-			update.Draw.Palette.SetData<GltfGpuMatrix>( update.Matrices );
+-			if ( update.Weights.Length != 0 ) update.Draw.Weights.SetData<float>( update.Weights );
+-			if ( update.Draw.Reversed != update.Reversed )
++			placementBuffer.SetData<GltfGpuMatrix>( new[] { new GltfGpuMatrix( nextPlacement ) } );
++			for ( var updateIndex = 0; updateIndex < updates.Length; updateIndex++ )
+ 			{
+-				var indices = (uint[])update.Draw.Node.Primitive.Plan.Indices.Clone();
+-				if ( update.Reversed && update.Draw.Node.Primitive.Plan.Mode == 4 )
+-					for ( var i = 0; i < indices.Length; i += 3 ) (indices[i + 1], indices[i + 2]) = (indices[i + 2], indices[i + 1]);
+-				update.Draw.Indices.SetData<uint>( indices ); update.Draw.Reversed = update.Reversed;
++				var update = updates[updateIndex];
++				update.Draw.WorldBounds = drawBounds[updateIndex];
++				update.Draw.Palette.SetData<GltfGpuMatrix>( update.Matrices );
++				if ( update.Weights.Length != 0 ) update.Draw.Weights.SetData<float>( update.Weights );
++				if ( update.Draw.Reversed != update.Reversed )
++				{
++					var indices = (uint[])update.Draw.Node.Primitive.Plan.Indices.Clone();
++					if ( update.Reversed && update.Draw.Node.Primitive.Plan.Mode == 4 )
++						for ( var i = 0; i < indices.Length; i += 3 ) (indices[i + 1], indices[i + 2]) = (indices[i + 2], indices[i + 1]);
++					update.Draw.Indices.SetData<uint>( indices ); update.Draw.Reversed = update.Reversed;
++				}
+ 			}
+ 		}
++		catch ( Exception error )
++		{
++			GltfGpuCleanup.Rollback( error, [() => UpdateDirectionalLights()] ); throw;
++		}
+ 		pose = value; placement = nextPlacement; PoseRevision++;
+ 		// Empty instances have no required GPU rows; readiness is vacuous,
+ 		// and DrawCalls stays zero rather than fabricating a submission.
+@@ -854,7 +892,7 @@ internal sealed partial class GltfGpuInstance : IDisposable
+ 					try
+ 					{
+ 						GltfGpuCleanup.ReleaseAll( new Action[] { () => { if ( sceneObject.IsValid() ) sceneObject.Delete(); } }
+-							.Concat( draws.Select<Draw, Action>( x => x.Dispose ) ).Concat( new Action[] { () => variantState?.Dispose(), placementBuffer.Dispose, asset.ReleaseInstance } ) );
++							.Concat( draws.Select<Draw, Action>( x => x.Dispose ) ).Concat( new Action[] { () => directionalLights?.Dispose(), () => variantState?.Dispose(), placementBuffer.Dispose, asset.ReleaseInstance } ) );
+ 					}
+ 					finally { draws.Clear(); pose = null; }
+ 				} );
+diff --git a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs
+index 210d3e847..60f812755 100644
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs
+@@ -25,16 +25,18 @@ internal sealed class GltfManagedModelResource
+ 	internal int? SelectedSceneIndex => Asset.SelectedSceneIndex;
+ 	internal int? DefaultSceneIndex { get; }
+ 	internal int SceneCount { get; }
++	internal bool DirectionalLightsEnabled { get; }
+ 
+ 	/// <summary>
+ 	/// Ownership of document transfers only after the backend has prepared
+ 	/// successfully. The caller still owns it if this constructor throws.
+ 	/// </summary>
+-	internal GltfManagedModelResource( GltfDocument document, int? sceneIndex = null )
++	internal GltfManagedModelResource( GltfDocument document, int? sceneIndex = null, bool directionalLightsEnabled = false )
+ 	{
+ 		ArgumentNullException.ThrowIfNull( document );
+ 		ThreadSafe.AssertIsMainThread();
+ 		Context = GlobalContext.Current;
++		DirectionalLightsEnabled = directionalLightsEnabled;
+ 		DefaultSceneIndex = document.GetDefaultScene();
+ 		SceneCount = document.Root.TryGetProperty( "scenes", out var scenes ) ? scenes.GetArrayLength() : 0;
+ 		Variants = new GltfVariantCatalog( document.ReadMaterialVariantNames() );
+@@ -69,6 +71,7 @@ internal sealed class GltfManagedModelResource
+ 				SelectTemplate, GltfUnlitMaterialPlan.Features.All, ReleaseProjected, sceneIndex, allowUnselected: true, legacyLit: true, sourceLitFeatureSidedness: true );
+ 		}
+ 		else Asset = GltfGpuAsset.Prepare( document, ComputeShaderPath, finalRelease: Metadata.ReleaseDocument, sceneIndex: sceneIndex, allowUnselected: true );
++		Asset.DirectionalLightsEnabled = directionalLightsEnabled;
+ 	}
+ 
+ 	/// <summary>
+diff --git a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfModelLoader.cs b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfModelLoader.cs
+index 8bc6d28ff..ed7c0ecb3 100644
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfModelLoader.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfModelLoader.cs
+@@ -21,8 +21,10 @@ internal static class GltfModelLoader
+ 	};
+ 
+ 	/// <summary>The loader's document policy, shared by source and compiled input.</summary>
+-	internal static GltfDocument ReadDocument( byte[] source, Func<string, byte[]> resolve = null ) =>
+-		GltfReader.Read( source, resolve, supportedExtensions: SupportedExtensions );
++	internal static GltfDocument ReadDocument( byte[] source, Func<string, byte[]> resolve = null, bool directional = false ) =>
++		GltfReader.Read( source, resolve, supportedExtensions: directional ? DirectionalExtensions : SupportedExtensions );
++
++	private static readonly IReadOnlySet<string> DirectionalExtensions = new HashSet<string>( SupportedExtensions, StringComparer.Ordinal ) { "KHR_lights_punctual" };
+ 
+ 	internal static bool IsGltfPath( string path )
+ 	{
+@@ -37,15 +39,15 @@ internal static class GltfModelLoader
+ 	internal static string CompiledPath( string path ) => path.EndsWith( ".gltf", StringComparison.OrdinalIgnoreCase )
+ 		? path + ".glb_c" : path.EndsWith( ".glb", StringComparison.OrdinalIgnoreCase ) ? path + "_c" : path;
+ 
+-	internal static Model Load( string path, int? sceneIndex = null )
++	internal static Model Load( string path, int? sceneIndex = null, bool directional = false )
+ 	{
+ 		ThreadSafe.AssertIsMainThread();
+-		var selection = ParseScenePath( path, sceneIndex );
++		var selection = ParseScenePath( path, sceneIndex, directional );
+ 		var mountedPath = NormalizeMountedPath( selection.Path );
+-		var canonical = SceneResourcePath( mountedPath, selection.Scene );
++		var canonical = SceneResourcePath( mountedPath, selection.Scene, selection.Directional );
+ 		if ( Game.Resources.TryGet<Model>( canonical, out var cached ) && cached.IsValid && !cached.IsError )
+ 			return cached;
+-		var resource = Prepare( mountedPath, sceneIndex: selection.Scene );
++		var resource = Prepare( mountedPath, sceneIndex: selection.Scene, directional: selection.Directional );
+ 		try { return Model.FromGltfResource( resource, canonical ); }
+ 		catch { resource.ReleaseOwner(); throw; }
+ 	}
+@@ -55,9 +57,9 @@ internal static class GltfModelLoader
+ 		ThreadSafe.AssertIsMainThread();
+ 		var selection = ParseScenePath( path );
+ 		var mountedPath = NormalizeMountedPath( selection.Path );
+-		var canonical = SceneResourcePath( mountedPath, selection.Scene );
++		var canonical = SceneResourcePath( mountedPath, selection.Scene, selection.Directional );
+ 		if ( !Game.Resources.TryGet<Model>( canonical, out var model ) || model.GltfResource is null ) return default;
+-		return (model, Prepare( mountedPath, compiled, selection.Scene ));
++		return (model, Prepare( mountedPath, compiled, selection.Scene, selection.Directional ));
+ 	}
+ 
+ 	/// <summary>Prepare all live resource selections belonging to exactly one logical source.</summary>
+@@ -78,7 +80,7 @@ internal static class GltfModelLoader
+ 			foreach ( var model in models )
+ 			{
+ 				var selection = ParseScenePath( model.ResourcePath );
+-				prepared.Add( (model, Prepare( NormalizeMountedPath( selection.Path ), compiled, selection.Scene )) );
++				prepared.Add( (model, Prepare( NormalizeMountedPath( selection.Path ), compiled, selection.Scene, selection.Directional )) );
+ 			}
+ 			return prepared;
+ 		}
+@@ -89,7 +91,7 @@ internal static class GltfModelLoader
+ 		}
+ 	}
+ 
+-	private static GltfManagedModelResource Prepare( string mountedPath, byte[] preparedBytes = null, int? sceneIndex = null )
++	private static GltfManagedModelResource Prepare( string mountedPath, byte[] preparedBytes = null, int? sceneIndex = null, bool directional = false )
+ 	{
+ 		if ( Graphics.IsActive ) throw new GltfException( "glTF models cannot be constructed during rendering." );
+ 
+@@ -109,11 +111,19 @@ internal static class GltfModelLoader
+ 			return fs.ReadAllBytes( dependency ).ToArray();
+ 		}
+ 
+-		using var sourceOwner = new DocumentOwner( ReadDocument( source, Resolve ) );
++		using var sourceOwner = new DocumentOwner( ReadDocument( source, Resolve, directional ) );
+ 		var document = sourceOwner.Document;
+ 		if ( document.UnsupportedOptionalExtensions.Count > 0 )
+ 			Log.Warning( $"glTF '{mountedPath}' uses unsupported optional extensions: {string.Join( ", ", document.UnsupportedOptionalExtensions )}. The standard core fallback is used where available." );
+-		var resource = new GltfManagedModelResource( document, sceneIndex );
++		if ( directional && document.Root.TryGetProperty( "extensions", out var extensions ) &&
++			extensions.TryGetProperty( "KHR_lights_punctual", out var punctual ) &&
++			punctual.TryGetProperty( "lights", out var definitions ) )
++		{
++			if ( definitions.ValueKind != System.Text.Json.JsonValueKind.Array ) throw new GltfException( "Punctual light definitions must be an array." );
++			for ( var i = 0; i < definitions.GetArrayLength(); i++ )
++				if ( document.ReadLight( i ).Type != "directional" ) throw new GltfException( "Directional-only import does not support point or spot lights." );
++		}
++		var resource = new GltfManagedModelResource( document, sceneIndex, directional );
+ 		sourceOwner.Release(); // Successful preparation now owns this document generation.
+ 		// A selected scene may legally contain no drawable primitives. Preserve it
+ 		// as an empty model; HasRenderMeshes reports whether anything can render.
+@@ -122,22 +132,34 @@ internal static class GltfModelLoader
+ 
+ 	// Selection is an identity fragment, never a mounted filename or a URI base.
+ 	// Canonicalize it before cache lookup so source/compiled aliases share one view.
+-	internal static (string Path, int? Scene) ParseScenePath( string path, int? sceneIndex = null )
++	internal static (string Path, int? Scene, bool Directional) ParseScenePath( string path, int? sceneIndex = null, bool directional = false )
+ 	{
+ 		if ( sceneIndex < 0 ) throw new ArgumentOutOfRangeException( nameof( sceneIndex ) );
+ 		if ( path is null ) throw new ArgumentNullException( nameof( path ) );
+ 		var fragment = path.IndexOf( '#' );
+-		if ( fragment < 0 ) return (path, sceneIndex);
+-		var suffix = path[(fragment + 1)..];
+-		if ( !suffix.StartsWith( "scene=", StringComparison.Ordinal ) ||
+-			!int.TryParse( suffix.AsSpan( 6 ), System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var selected ) || selected < 0 )
+-			throw new GltfException( "Invalid glTF scene selection fragment; expected #scene=<nonnegative index>." );
+-		if ( sceneIndex.HasValue && sceneIndex.Value != selected ) throw new ArgumentException( "Conflicting glTF scene selections.", nameof( sceneIndex ) );
+-		return (path[..fragment], selected);
++		if ( fragment < 0 ) return (path, sceneIndex, directional);
++		var seenScene = false; var seenDirectional = false;
++		foreach ( var part in path[(fragment + 1)..].Split( '&' ) )
++		{
++			if ( part.StartsWith( "scene=", StringComparison.Ordinal ) && !seenScene &&
++				int.TryParse( part.AsSpan( 6 ), System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var selected ) && selected >= 0 )
++			{
++				if ( sceneIndex.HasValue && sceneIndex.Value != selected ) throw new ArgumentException( "Conflicting glTF scene selections.", nameof( sceneIndex ) );
++				sceneIndex = selected; seenScene = true;
++			}
++			else if ( part == "directional=1" && !seenDirectional ) { directional = true; seenDirectional = true; }
++			else throw new GltfException( "Invalid glTF resource selection fragment." );
++		}
++		return (path[..fragment], sceneIndex, directional);
+ 	}
+ 
+-	internal static string SceneResourcePath( string mountedPath, int? sceneIndex ) =>
+-		(mountedPath.EndsWith( ".gltf.glb_c", StringComparison.OrdinalIgnoreCase ) ? Resource.FixPath( mountedPath[..^6] ) : Resource.FixPath( mountedPath )) + (sceneIndex.HasValue ? "#scene=" + sceneIndex.Value.ToString( System.Globalization.CultureInfo.InvariantCulture ) : "");
++	internal static string SceneResourcePath( string mountedPath, int? sceneIndex, bool directional = false )
++	{
++		var path = mountedPath.EndsWith( ".gltf.glb_c", StringComparison.OrdinalIgnoreCase ) ? Resource.FixPath( mountedPath[..^6] ) : Resource.FixPath( mountedPath );
++		if ( sceneIndex.HasValue ) path += "#scene=" + sceneIndex.Value.ToString( System.Globalization.CultureInfo.InvariantCulture );
++		if ( directional ) path += sceneIndex.HasValue ? "&directional=1" : "#directional=1";
++		return path;
++	}
+ 
+ 	private sealed class DocumentOwner( GltfDocument document ) : IDisposable
+ 	{
+diff --git a/engine/Sandbox.Engine/Resources/Model/Gltf/Lighting/GltfDirectionalLightBinding.cs b/engine/Sandbox.Engine/Resources/Model/Gltf/Lighting/GltfDirectionalLightBinding.cs
+index 3c3a1af46..7efd3098b 100644
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/Lighting/GltfDirectionalLightBinding.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/Lighting/GltfDirectionalLightBinding.cs
+@@ -21,7 +21,7 @@ internal sealed class GltfDirectionalLightBinding : IDisposable
+ 	}
+ 
+ 	internal static GltfDirectionalLightBinding Create( GltfDocument document, int? selectedScene, SceneWorld world,
+-		float nativeColorPerLux, GltfPose pose, Matrix4x4 placement, IReadOnlyList<bool> visibility )
++		float nativeColorPerLux, GltfPose pose, Matrix4x4 placement, IReadOnlyList<bool> visibility, GltfPunctualLightInstances.IFactory factory = null )
+ 	{
+ 		ArgumentNullException.ThrowIfNull( document );
+ 		var plan = GltfPunctualLightPlan.CreateForScene( document, selectedScene, allowUnselected: true );
+@@ -29,7 +29,7 @@ internal sealed class GltfDirectionalLightBinding : IDisposable
+ 			throw new GltfException( "Directional native presentation requires the punctual-light extension to be selected while reading the document." );
+ 		if ( plan.Bindings.Any( x => x.Kind != GltfPunctualLightPlan.LightKind.Directional ) )
+ 			throw new GltfException( "The opted-in native directional presentation does not support point or spot lights." );
+-		var factory = new GltfDirectionalLightFactory( world, nativeColorPerLux );
++		factory ??= new GltfDirectionalLightFactory( world, nativeColorPerLux );
+ 		var instances = GltfPunctualLightInstances.Create( plan, factory, pose, placement, visibility );
+ 		return new( plan, instances );
+ 	}
+diff --git a/engine/Sandbox.Engine/Resources/Model/Gltf/Lighting/GltfPunctualLightInstances.cs b/engine/Sandbox.Engine/Resources/Model/Gltf/Lighting/GltfPunctualLightInstances.cs
+index 14b03dbb4..521e2dc16 100644
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/Lighting/GltfPunctualLightInstances.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/Lighting/GltfPunctualLightInstances.cs
+@@ -22,6 +22,8 @@ internal sealed class GltfPunctualLightInstances : IDisposable
+ 	private readonly GltfPunctualLightPlan plan;
+ 	private readonly List<ILight> lights = new();
+ 	private bool disposed;
++	private GltfPunctualLightPlan.State[] appliedStates;
++	private bool[] appliedVisibility;
+ 
+ 	private GltfPunctualLightInstances( GltfPunctualLightPlan plan ) => this.plan = plan;
+ 
+@@ -38,6 +40,8 @@ internal sealed class GltfPunctualLightInstances : IDisposable
+ 				owner.lights.Add( light );
+ 				light.Apply( state, visibility[state.Binding.Node] );
+ 			}
++			owner.appliedStates = states.ToArray();
++			owner.appliedVisibility = states.Select( state => visibility[state.Binding.Node] ).ToArray();
+ 			return owner;
+ 		}
+ 		catch
+@@ -52,7 +56,23 @@ internal sealed class GltfPunctualLightInstances : IDisposable
+ 	{
+ 		ObjectDisposedException.ThrowIf( disposed, this );
+ 		var states = Preflight( plan, pose, placement, visibility );
+-		for ( var i = 0; i < states.Count; i++ ) lights[i].Apply( states[i], visibility[states[i].Binding.Node] );
++		var attempted = -1;
++		try
++		{
++			for ( var i = 0; i < states.Count; i++ )
++			{
++				attempted = i;
++				lights[i].Apply( states[i], visibility[states[i].Binding.Node] );
++			}
++		}
++		catch ( Exception error )
++		{
++			// Include the failing light: a native setter may mutate before it throws.
++			var rollback = Enumerable.Range( 0, attempted + 1 ).Reverse().Select<int, Action>( i => () => lights[i].Apply( appliedStates[i], appliedVisibility[i] ) );
++			Sandbox.Gltf.DirectGpu.GltfGpuCleanup.Rollback( error, rollback ); throw;
++		}
++		appliedStates = states.ToArray();
++		appliedVisibility = states.Select( state => visibility[state.Binding.Node] ).ToArray();
+ 	}
+ 
+ 	private static IReadOnlyList<GltfPunctualLightPlan.State> Preflight( GltfPunctualLightPlan plan, GltfPose pose, Matrix4x4 placement, IReadOnlyList<bool> visibility )
+diff --git a/engine/Sandbox.Engine/Resources/Model/Model.GltfDirectionalLights.cs b/engine/Sandbox.Engine/Resources/Model/Model.GltfDirectionalLights.cs
+new file mode 100644
+index 000000000..e72ee9a1c
+--- /dev/null
++++ b/engine/Sandbox.Engine/Resources/Model/Model.GltfDirectionalLights.cs
+@@ -0,0 +1,32 @@
++using Sandbox.Gltf.DirectGpu.Lighting;
++
++namespace Sandbox;
++
++/// <summary>Authored directional light values, before the native rendering scale.</summary>
++public readonly record struct GltfDirectionalLightInfo( int Node, int Light, Vector3 LinearColor, float IntensityLux );
++
++public partial class Model
++{
++	/// <summary>
++	/// Opt into directional-only native glTF lights. The renderer must also set
++	/// an explicit native light scale. This does not enable point or spot lights
++	/// or claim physical calibration of the engine renderer.
++	/// </summary>
++	public static Model LoadGltf( string filename, int? sceneIndex, bool enableDirectionalLights )
++	{
++		if ( !GltfModelLoader.IsGltfPath( filename ) ) throw new ArgumentException( "Expected a glTF path.", nameof( filename ) );
++		return GltfModelLoader.Load( filename, sceneIndex, enableDirectionalLights );
++	}
++
++	/// <summary>Raw directional light values for this model's selected scene.</summary>
++	public IReadOnlyList<GltfDirectionalLightInfo> GltfDirectionalLights
++	{
++		get
++		{
++			if ( GltfResource is not { DirectionalLightsEnabled: true } resource ) return Array.Empty<GltfDirectionalLightInfo>();
++			var plan = GltfPunctualLightPlan.CreateForScene( resource.Asset.Document, resource.SelectedSceneIndex, allowUnselected: true );
++			return Array.AsReadOnly( plan.Bindings.Select( b => new GltfDirectionalLightInfo( b.Node, b.Light,
++				new Vector3( b.LinearColor.X, b.LinearColor.Y, b.LinearColor.Z ), b.Intensity ) ).ToArray() );
++		}
++	}
++}
+diff --git a/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.Gltf.cs b/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.Gltf.cs
+index b1d7a8ade..49963d16b 100644
+--- a/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.Gltf.cs
++++ b/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.Gltf.cs
+@@ -9,6 +9,24 @@ public partial class ModelRenderer
+ 	private object gltfPendingCreationVariant;
+ 	internal GltfGpuInstance GltfInstance => gltfInstance;
+ 
++	/// <summary>
++	/// Explicit native directional-light multiplier. Null disables glTF lights.
++	/// This scale is an engine presentation control, not a lux calibration.
++	/// </summary>
++	public float? GltfDirectionalLightScale
++	{
++		get => gltfDirectionalLightScale;
++		set
++		{
++			if ( value.HasValue && (!float.IsFinite( value.Value ) || value.Value <= 0) ) throw new ArgumentOutOfRangeException( nameof( value ) );
++			if ( gltfDirectionalLightScale == value ) return;
++			if ( gltfReloadPlan is not null ) throw new InvalidOperationException( "Cannot change directional lights during a model reload." );
++			gltfInstance?.SetDirectionalLightScale( gltfInstanceResource?.DirectionalLightsEnabled == true ? value : null );
++			gltfDirectionalLightScale = value;
++		}
++	}
++	private float? gltfDirectionalLightScale;
++
+ 	private SceneObject CreateGltfSceneObject( GltfManagedModelResource resource )
+ 	{
+ 		var variant = PrepareGltfVariantReload( resource );
+@@ -18,6 +36,7 @@ public partial class ModelRenderer
+ 		{
+ 			instance = resource.CreateInstance( Scene.SceneWorld );
+ 			instance.Placement = Matrix.FromTransform( Transform.InterpolatedWorld );
++			instance.SetDirectionalLightScale( resource.DirectionalLightsEnabled ? gltfDirectionalLightScale : null );
+ 			ApplyGltfVariantReload( variant, instance );
+ 			gltfInstance = instance;
+ 			gltfInstanceResource = resource;
+@@ -67,6 +86,7 @@ public partial class ModelRenderer
+ 			{
+ 				replacement = resource.CreateInstance( Scene.SceneWorld );
+ 				replacement.Placement = Matrix.FromTransform( Transform.InterpolatedWorld );
++				replacement.SetDirectionalLightScale( resource.DirectionalLightsEnabled ? gltfDirectionalLightScale : null );
+ 				ApplyGltfVariantReload( variant, replacement );
+ 				ReplaceGltfSceneObject( replacement.SceneObject, replacement, resource );
+ 				CommitGltfVariantReload( variant );
+diff --git a/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.GltfReload.cs b/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.GltfReload.cs
+index c1dbd4b06..71d6aa2ad 100644
+--- a/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.GltfReload.cs
++++ b/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.GltfReload.cs
+@@ -36,6 +36,7 @@ public partial class ModelRenderer
+ 				{
+ 					plan.Candidate = replacement.CreateInstance( Scene.SceneWorld, initiallyVisible: false );
+ 					plan.Candidate.Placement = Matrix.FromTransform( Transform.InterpolatedWorld );
++					plan.Candidate.SetDirectionalLightScale( replacement.DirectionalLightsEnabled ? gltfDirectionalLightScale : null, visible: false );
+ 					plan.CandidateObject = plan.Candidate.SceneObject;
+ 					ApplyGltfVariantReload( plan.Variant, plan.Candidate );
+ 				}
+@@ -71,6 +72,8 @@ public partial class ModelRenderer
+ 		if ( plan.Variant is not null ) CommitGltfVariantReload( plan.Variant ); else ClearGltfVariantSelection();
+ 		if ( plan.Applied )
+ 		{
++			plan.PreviousInstance?.SetDirectionalLightsVisible( false );
++			plan.Candidate?.SetDirectionalLightsVisible( true );
+ 			plan.PreviousObject.RenderingEnabled = false;
+ 			plan.CandidateObject.RenderingEnabled = plan.PreviousRendering && (Model ?? Model.Load( "models/dev/box.vmdl" )).HasRenderMeshes();
+ 		}
+@@ -97,6 +100,7 @@ public partial class ModelRenderer
+ 			if ( plan.Applied )
+ 			{
+ 				gltfInstance = plan.PreviousInstance; gltfInstanceResource = plan.PreviousResource; _sceneObject = plan.PreviousObject;
++				plan.PreviousInstance?.SetDirectionalLightsVisible( true );
+ 				if ( plan.PreviousObject.IsValid() ) { base.OnSceneObjectCreated( plan.PreviousObject ); plan.PreviousObject.RenderingEnabled = plan.PreviousRendering; }
+ 			}
+ 		}

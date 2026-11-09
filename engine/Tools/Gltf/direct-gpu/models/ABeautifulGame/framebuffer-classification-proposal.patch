@@ -1,0 +1,27 @@
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs
+@@ -584,7 +584,7 @@
+ 	}
+ 	private void RefreshMaterialClassification()
+ 	{
+-		var opaque = false; var translucent = false; var alphaTest = false; var changed = false;
++		var opaque = false; var translucent = false; var alphaTest = false; var wantsFrameBufferCopy = false; var changed = false;
+ 		var selected = variantState?.Current;
+ 		foreach ( var draw in draws )
+ 		{
+@@ -595,6 +595,7 @@
+ 			var isTranslucent = material.Flags.IsTranslucent; var isAlphaTest = material.Flags.IsAlphaTest;
+ 			opaque |= !isTranslucent; translucent |= isTranslucent;
+ 			alphaTest |= !isTranslucent && isAlphaTest;
++			wantsFrameBufferCopy |= isTranslucent && material.Flags.GetInt( "bWantsFBCopyTexture" ) != 0;
+ 			var rawRoute = asset.HasRawVariantRoute( primitive ) && materialOverrides[primitive.MaterialSlot] is not null;
+ 			if ( ReferenceEquals( draw.EffectiveMaterial, material ) && draw.IsTranslucent == isTranslucent && draw.IsAlphaTest == isAlphaTest && draw.LastRawRoute == rawRoute ) continue;
+ 			draw.EffectiveMaterial = material; draw.IsTranslucent = isTranslucent; draw.IsAlphaTest = isAlphaTest;
+@@ -604,6 +605,7 @@
+ 		}
+ 		if ( sceneObject.Flags.IsOpaque != opaque ) sceneObject.Flags.IsOpaque = opaque;
+ 		if ( sceneObject.Flags.IsTranslucent != translucent ) sceneObject.Flags.IsTranslucent = translucent;
++		if ( sceneObject.Flags.WantsFrameBufferCopy != wantsFrameBufferCopy ) sceneObject.Flags.WantsFrameBufferCopy = wantsFrameBufferCopy;
+ 		if ( sceneObject.Flags.HasFlag( SceneObjectFlags.AlphaTestZPrepass ) != alphaTest ) sceneObject.Flags.SetFlag( SceneObjectFlags.AlphaTestZPrepass, alphaTest );
+ 		if ( changed ) SubmittedRevision = -1;
+ 	}

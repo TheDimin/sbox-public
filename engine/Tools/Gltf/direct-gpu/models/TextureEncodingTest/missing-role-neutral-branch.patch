@@ -1,0 +1,375 @@
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfStockMaterialAdapter.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfStockMaterialAdapter.cs
+@@ -108,6 +108,11 @@
+ 			new( "g_flGltfMetallicFactor", prepared.MetallicFactor ), new( "g_flGltfRoughnessFactor", prepared.RoughnessFactor ),
+ 			new( "g_flGltfOcclusionStrength", prepared.OcclusionStrength )
+ 		};
++		// Missing glTF textures multiply by one; anonymous shader input defaults
++		// are not a realized material resource. Freeze every exact presence flag
++		// into the same scalar/key/readback path as the authored factors.
++		foreach ( var role in SourceRoles )
++			scalars.Add( new( "g_flGltfHas" + role + "Texture", prepared.Resources.ContainsKey( role ) ? 1f : 0f ) );
+ 		foreach ( var (role, source) in prepared.Resources )
+ 		{
+ 			if ( !uv.Bindings.TryGetValue( role, out var selected ) || !SameTextureInfo( source.Encoding.TextureInfo, selected.TextureInfo ) )
+--- a/research/gltf-validation/direct-gpu/models/TextureEncodingTest/author_surface_orm_candidate.py
++++ b/research/gltf-validation/direct-gpu/models/TextureEncodingTest/author_surface_orm_candidate.py
+@@ -36,13 +36,20 @@
+         u = add("DotProduct", key + "_u", InputA=link(affine_input, "Output"), InputB=link(row_u))
+         v = add("DotProduct", key + "_v", InputA=link(affine_input, "Output"), InputB=link(row_v))
+         transformed = add("CombineVector", key + "_uv", X=link(u), Y=link(v))
+-        return add("TextureSampler", key + "_texture", Image="", Coords=link(transformed, "XY"),
++        sampled = add("TextureSampler", key + "_texture", Image="", Coords=link(transformed, "XY"),
+                    Sampler={"Filter": "Bilinear", "AddressU": "Wrap", "AddressV": "Wrap", "Attribute": "Gltf" + role + "Sampler"},
+                    UI={"Name": "Gltf" + role + "Texture", "IsAttribute": False, "Default": "1,1,1,1", "Extension": "Color", "CustomExtension": "gltf_" + key,
+                        "Processor": "None", "ColorSpace": "Srgb" if srgb else "Linear", "ImageFormat": "RGBA8888", "SrgbRead": srgb})
++        present = parameter("Float", key + "_has_texture", "GltfHas" + role + "Texture", 0)
++        # Conditional selection keeps an unselected nonfinite texel from
++        # contaminating the neutral value; arithmetic lerp cannot do that.
++        # This is a provided dynamic Branch, without static shader variants.
++        selected = add("Branch", key + "_present_or_one", Name="", Operator="GreaterThan",
++                       A=link(present), B={}, **{"True": link(sampled), "False": link(one)})
++        return add("SplitVector", key + "_effective", Input=link(selected))
+ 
+     def rgb(identifier, texture_id):
+-        return add("CombineVector", identifier, X=link(texture_id, "R"), Y=link(texture_id, "G"), Z=link(texture_id, "B"))
++        return add("CombineVector", identifier, X=link(texture_id, "X"), Y=link(texture_id, "Y"), Z=link(texture_id, "Z"))
+ 
+     base = texture("BaseColor", True)
+     mr = texture("MetallicRoughness", False)
+@@ -57,9 +64,9 @@
+     vertex_clamped = add("Saturate", "vertex_rgb", Input=link(vertex, "RGB"))
+     base_product = add("Multiply", "base_texture_factor", A=link(rgb("base_rgb", base), "XYZ"), B=link(base_factor))
+     albedo = add("Multiply", "base_product", A=link(base_product), B=link(vertex_clamped))
+-    roughness = add("Multiply", "roughness_product", A=link(mr, "G"), B=link(roughness_factor))
+-    metallic = add("Multiply", "metallic_product", A=link(mr, "B"), B=link(metallic_factor))
+-    ao = add("Lerp", "occlusion_product", A=link(one), B=link(occlusion, "R"), C=link(occlusion_strength))
++    roughness = add("Multiply", "roughness_product", A=link(mr, "Y"), B=link(roughness_factor))
++    metallic = add("Multiply", "metallic_product", A=link(mr, "Z"), B=link(metallic_factor))
++    ao = add("Lerp", "occlusion_product", A=link(one), B=link(occlusion, "X"), C=link(occlusion_strength))
+     emission = add("Multiply", "emissive_product", A=link(rgb("emissive_rgb", emissive), "XYZ"), B=link(emissive_factor))
+     add("Result", "surface", Albedo=link(albedo), Roughness=link(roughness), Metalness=link(metallic), AmbientOcclusion=link(ao), Emission=link(emission), Opacity={}, DefaultOpacity=1)
+     identifiers = {node["Identifier"] for node in nodes}
+--- a/research/gltf-validation/direct-gpu/models/TextureEncodingTest/surface_orm_candidate.shdrgrph
++++ b/research/gltf-validation/direct-gpu/models/TextureEncodingTest/surface_orm_candidate.shdrgrph
+@@ -157,6 +157,45 @@
+     },
+     {
+       "_class": "Float",
++      "Identifier": "basecolor_has_texture",
++      "Name": "GltfHasBaseColorTexture",
++      "Value": 0,
++      "Min": 0,
++      "Max": 0,
++      "IsAttribute": false,
++      "UI": {
++        "Type": "Default"
++      }
++    },
++    {
++      "_class": "Branch",
++      "Identifier": "basecolor_present_or_one",
++      "Name": "",
++      "Operator": "GreaterThan",
++      "A": {
++        "Identifier": "basecolor_has_texture",
++        "Output": "Result"
++      },
++      "B": {},
++      "True": {
++        "Identifier": "basecolor_texture",
++        "Output": "Result"
++      },
++      "False": {
++        "Identifier": "constant_one",
++        "Output": "Result"
++      }
++    },
++    {
++      "_class": "SplitVector",
++      "Identifier": "basecolor_effective",
++      "Input": {
++        "Identifier": "basecolor_present_or_one",
++        "Output": "Result"
++      }
++    },
++    {
++      "_class": "Float",
+       "Identifier": "metallicroughness_uv1",
+       "Name": "GltfMetallicRoughnessUv1",
+       "Value": 0,
+@@ -283,6 +322,45 @@
+     },
+     {
+       "_class": "Float",
++      "Identifier": "metallicroughness_has_texture",
++      "Name": "GltfHasMetallicRoughnessTexture",
++      "Value": 0,
++      "Min": 0,
++      "Max": 0,
++      "IsAttribute": false,
++      "UI": {
++        "Type": "Default"
++      }
++    },
++    {
++      "_class": "Branch",
++      "Identifier": "metallicroughness_present_or_one",
++      "Name": "",
++      "Operator": "GreaterThan",
++      "A": {
++        "Identifier": "metallicroughness_has_texture",
++        "Output": "Result"
++      },
++      "B": {},
++      "True": {
++        "Identifier": "metallicroughness_texture",
++        "Output": "Result"
++      },
++      "False": {
++        "Identifier": "constant_one",
++        "Output": "Result"
++      }
++    },
++    {
++      "_class": "SplitVector",
++      "Identifier": "metallicroughness_effective",
++      "Input": {
++        "Identifier": "metallicroughness_present_or_one",
++        "Output": "Result"
++      }
++    },
++    {
++      "_class": "Float",
+       "Identifier": "occlusion_uv1",
+       "Name": "GltfOcclusionUv1",
+       "Value": 0,
+@@ -409,6 +487,45 @@
+     },
+     {
+       "_class": "Float",
++      "Identifier": "occlusion_has_texture",
++      "Name": "GltfHasOcclusionTexture",
++      "Value": 0,
++      "Min": 0,
++      "Max": 0,
++      "IsAttribute": false,
++      "UI": {
++        "Type": "Default"
++      }
++    },
++    {
++      "_class": "Branch",
++      "Identifier": "occlusion_present_or_one",
++      "Name": "",
++      "Operator": "GreaterThan",
++      "A": {
++        "Identifier": "occlusion_has_texture",
++        "Output": "Result"
++      },
++      "B": {},
++      "True": {
++        "Identifier": "occlusion_texture",
++        "Output": "Result"
++      },
++      "False": {
++        "Identifier": "constant_one",
++        "Output": "Result"
++      }
++    },
++    {
++      "_class": "SplitVector",
++      "Identifier": "occlusion_effective",
++      "Input": {
++        "Identifier": "occlusion_present_or_one",
++        "Output": "Result"
++      }
++    },
++    {
++      "_class": "Float",
+       "Identifier": "emissive_uv1",
+       "Name": "GltfEmissiveUv1",
+       "Value": 0,
+@@ -534,6 +651,45 @@
+       }
+     },
+     {
++      "_class": "Float",
++      "Identifier": "emissive_has_texture",
++      "Name": "GltfHasEmissiveTexture",
++      "Value": 0,
++      "Min": 0,
++      "Max": 0,
++      "IsAttribute": false,
++      "UI": {
++        "Type": "Default"
++      }
++    },
++    {
++      "_class": "Branch",
++      "Identifier": "emissive_present_or_one",
++      "Name": "",
++      "Operator": "GreaterThan",
++      "A": {
++        "Identifier": "emissive_has_texture",
++        "Output": "Result"
++      },
++      "B": {},
++      "True": {
++        "Identifier": "emissive_texture",
++        "Output": "Result"
++      },
++      "False": {
++        "Identifier": "constant_one",
++        "Output": "Result"
++      }
++    },
++    {
++      "_class": "SplitVector",
++      "Identifier": "emissive_effective",
++      "Input": {
++        "Identifier": "emissive_present_or_one",
++        "Output": "Result"
++      }
++    },
++    {
+       "_class": "Float3",
+       "Identifier": "base_factor",
+       "Name": "GltfBaseColor",
+@@ -609,16 +765,16 @@
+       "_class": "CombineVector",
+       "Identifier": "base_rgb",
+       "X": {
+-        "Identifier": "basecolor_texture",
+-        "Output": "R"
++        "Identifier": "basecolor_effective",
++        "Output": "X"
+       },
+       "Y": {
+-        "Identifier": "basecolor_texture",
+-        "Output": "G"
++        "Identifier": "basecolor_effective",
++        "Output": "Y"
+       },
+       "Z": {
+-        "Identifier": "basecolor_texture",
+-        "Output": "B"
++        "Identifier": "basecolor_effective",
++        "Output": "Z"
+       }
+     },
+     {
+@@ -649,8 +805,8 @@
+       "_class": "Multiply",
+       "Identifier": "roughness_product",
+       "A": {
+-        "Identifier": "metallicroughness_texture",
+-        "Output": "G"
++        "Identifier": "metallicroughness_effective",
++        "Output": "Y"
+       },
+       "B": {
+         "Identifier": "roughness_factor",
+@@ -661,8 +817,8 @@
+       "_class": "Multiply",
+       "Identifier": "metallic_product",
+       "A": {
+-        "Identifier": "metallicroughness_texture",
+-        "Output": "B"
++        "Identifier": "metallicroughness_effective",
++        "Output": "Z"
+       },
+       "B": {
+         "Identifier": "metallic_factor",
+@@ -677,8 +833,8 @@
+         "Output": "Result"
+       },
+       "B": {
+-        "Identifier": "occlusion_texture",
+-        "Output": "R"
++        "Identifier": "occlusion_effective",
++        "Output": "X"
+       },
+       "C": {
+         "Identifier": "occlusion_strength",
+@@ -689,16 +845,16 @@
+       "_class": "CombineVector",
+       "Identifier": "emissive_rgb",
+       "X": {
+-        "Identifier": "emissive_texture",
+-        "Output": "R"
++        "Identifier": "emissive_effective",
++        "Output": "X"
+       },
+       "Y": {
+-        "Identifier": "emissive_texture",
+-        "Output": "G"
++        "Identifier": "emissive_effective",
++        "Output": "Y"
+       },
+       "Z": {
+-        "Identifier": "emissive_texture",
+-        "Output": "B"
++        "Identifier": "emissive_effective",
++        "Output": "Z"
+       }
+     },
+     {
+--- a/research/gltf-validation/direct-gpu/models/TextureEncodingTest/SurfaceOrmCandidateGate.cs
++++ b/research/gltf-validation/direct-gpu/models/TextureEncodingTest/SurfaceOrmCandidateGate.cs
+@@ -21,7 +21,7 @@
+ /// </summary>
+ public static class SurfaceOrmCandidateGate
+ {
+-	public const string GraphSha256 = "e1c057c47c7fe9e68d62a2acdbfe4b2634814779aa513344cc6b6f6efb89b0d8";
++	public const string GraphSha256 = "1f2860b53fe1c3a377515d915e19bcf12b872a12ae94ec5fa84e9a6436fcbb0e";
+ 	private static readonly string[] Roles = ["BaseColor", "MetallicRoughness", "Occlusion", "Emissive"];
+ 	public sealed record Generation( string GraphSha256, string ToolsMvid, object[] Producers, string SourcePath, string SourceSha256, int NodeCount, string Scope );
+ 
+@@ -77,6 +77,7 @@
+ 			Require( Regex.IsMatch( source, @"SamplerState\s+g_sSampler\d+\s*<[^>]*Attribute\s*\(\s*""Gltf" + role + @"Sampler""\s*\)", RegexOptions.CultureInvariant ), "Generated sampler declaration has no exact per-role typed attribute: " + role );
+ 			var srgb = role is "BaseColor" or "Emissive";
+ 			Require( Regex.IsMatch( source, @"Texture2D\s+g_tGltf" + role + @"Texture\s*<[^>]*SrgbRead\s*\(\s*" + (srgb ? "true" : "false") + @"\s*\)", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase ), "Generated texture declaration contradicted its canonical transfer role: " + role );
++			Require( source.Contains( "g_flGltfHas" + role + "Texture", StringComparison.Ordinal ), "Generated role lacks its explicit exact0/1 texture-presence parameter: " + role );
+ 			Require( source.Contains( "g_flGltf" + role + "Uv1", StringComparison.Ordinal ) && source.Contains( "g_vGltf" + role + "UvRowU", StringComparison.Ordinal ) && source.Contains( "g_vGltf" + role + "UvRowV", StringComparison.Ordinal ), "Generated role lacks independent selected UV and affine rows: " + role );
+ 		}
+ 		foreach ( var parameter in new[] { "g_vGltfBaseColor", "g_flGltfMetallicFactor", "g_flGltfRoughnessFactor", "g_flGltfOcclusionStrength", "g_vGltfEmissiveFactor" } ) Require( source.Contains( parameter, StringComparison.Ordinal ), "Generated source lost linear authored factor " + parameter );
+--- /dev/null
++++ b/engine/Tests/Sandbox.Test.Unit/Resources/GltfSourceTexturePresenceKeyTests.cs
+@@ -0,0 +1,36 @@
++using System.Collections.Generic;
++using System.Linq;
++
++namespace Sandbox.Tests;
++
++using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
++
++[TestClass]
++public sealed class GltfSourceTexturePresenceKeyTests
++{
++	[TestMethod]
++	[DataRow( "g_flGltfHasBaseColorTexture" )]
++	[DataRow( "g_flGltfHasMetallicRoughnessTexture" )]
++	[DataRow( "g_flGltfHasOcclusionTexture" )]
++	[DataRow( "g_flGltfHasEmissiveTexture" )]
++	public void ExactRolePresenceValuesAreFrozenAndSeparateCachedMaterials( string changedRole )
++	{
++		var template = new object(); var creations = 0;
++		var values = new List<KeyValuePair<string, float>>
++		{
++			new( "g_flGltfHasBaseColorTexture", 0 ), new( "g_flGltfHasMetallicRoughnessTexture", 0 ),
++			new( "g_flGltfHasOcclusionTexture", 0 ), new( "g_flGltfHasEmissiveTexture", 0 )
++		};
++		var absent = new GltfMaterialKey( template, 0, [], [], [], values );
++		var sameAbsent = new GltfMaterialKey( template, 0, [], [], [], values );
++		values[values.FindIndex( value => value.Key == changedRole )] = new( changedRole, 1 );
++		var present = new GltfMaterialKey( template, 0, [], [], [], values );
++		Assert.IsTrue( absent.Scalars.ToArray().All( value => value.Value == 0 ), "Caller mutation must not change an existing snapshot." );
++		Assert.AreEqual( 1f, present.Scalars.ToArray().Single( value => value.Key == changedRole ).Value );
++		Assert.AreNotEqual( absent, present, "Every exact role flag changes material identity independently of texture/uniform peers." );
++		using var cache = new GltfMaterialCacheCore<object>( _ => { creations++; return new object(); }, _ => { }, _ => true );
++		using var first = cache.Acquire( absent ); using var second = cache.Acquire( sameAbsent ); using var changed = cache.Acquire( present );
++		Assert.AreSame( first.Value, second.Value ); Assert.AreNotSame( first.Value, changed.Value ); Assert.AreEqual( 2, creations );
++		var retained = second.Value; first.Dispose(); Assert.AreSame( retained, second.Value, "A live equal-key peer survives another lease's release." );
++	}
++}

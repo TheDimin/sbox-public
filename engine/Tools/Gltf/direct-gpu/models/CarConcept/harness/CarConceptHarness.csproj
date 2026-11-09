@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>disable</Nullable></PropertyGroup>
+ <ItemGroup><Reference Include="Sandbox.Gltf"><HintPath>$(GltfAssembly)</HintPath></Reference><Compile Include="../CarConceptTests.cs" Link="CarConceptTests.cs"/></ItemGroup>
+</Project>

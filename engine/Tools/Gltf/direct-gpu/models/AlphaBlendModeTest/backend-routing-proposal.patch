@@ -1,0 +1,123 @@
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs
+@@ -419,6 +419,9 @@
+ 		internal RenderAttributes Attributes = new();
+ 		internal RenderAttributes RenderAttributes = new();
+ 		internal bool HasVertexState;
++		internal long ComputedRevision = -1;
++		internal Material EffectiveMaterial;
++		internal bool IsTranslucent, IsAlphaTest;
+ 		internal int DrawCalls;
+ 		internal long SubmittedRevision = -1;
+ 		internal Graphics.PrimitiveType? SubmittedPrimitiveType;
+@@ -453,17 +456,39 @@
+ 	// component facade owns persistent whole-versus-slot override precedence.
+ 	public void ClearMaterialOverrides()
+ 	{
+-		ObjectDisposedException.ThrowIf( disposed, this ); ThreadSafe.AssertIsMainThread(); Array.Clear( materialOverrides );
++		ObjectDisposedException.ThrowIf( disposed, this ); ThreadSafe.AssertIsMainThread(); Array.Clear( materialOverrides ); RefreshMaterialClassification();
+ 	}
+ 	public void SetMaterialOverride( Material material )
+ 	{
+-		ObjectDisposedException.ThrowIf( disposed, this ); ThreadSafe.AssertIsMainThread(); ValidateMaterial( material ); Array.Fill( materialOverrides, material );
++		ObjectDisposedException.ThrowIf( disposed, this ); ThreadSafe.AssertIsMainThread(); ValidateMaterial( material ); Array.Fill( materialOverrides, material ); RefreshMaterialClassification();
+ 	}
+ 	public void SetMaterialOverride( int slot, Material material )
+ 	{
+ 		ObjectDisposedException.ThrowIf( disposed, this ); ThreadSafe.AssertIsMainThread();
+ 		if ( (uint)slot >= materialOverrides.Length ) throw new ArgumentOutOfRangeException( nameof( slot ) );
+-		ValidateMaterial( material ); materialOverrides[slot] = material;
++		ValidateMaterial( material ); materialOverrides[slot] = material; RefreshMaterialClassification();
++	}
++	private void RefreshMaterialClassification()
++	{
++		var opaque = false; var translucent = false; var alphaTest = false; var changed = false;
++		foreach ( var draw in draws )
++		{
++			var primitive = draw.Node.Primitive;
++			var material = materialOverrides[primitive.MaterialSlot] ?? primitive.Material;
++			// Native flags are live: assigning the same material must still detect
++			// an in-place feature change when this explicit refresh is invoked.
++			var isTranslucent = material.Flags.IsTranslucent; var isAlphaTest = material.Flags.IsAlphaTest;
++			opaque |= !isTranslucent; translucent |= isTranslucent;
++			alphaTest |= !isTranslucent && isAlphaTest;
++			if ( ReferenceEquals( draw.EffectiveMaterial, material ) && draw.IsTranslucent == isTranslucent && draw.IsAlphaTest == isAlphaTest ) continue;
++			draw.EffectiveMaterial = material; draw.IsTranslucent = isTranslucent; draw.IsAlphaTest = isAlphaTest;
++			// Geometry is unchanged, but a changed material/pass must actually submit.
++			draw.SubmittedRevision = -1; changed = true;
++		}
++		if ( sceneObject.Flags.IsOpaque != opaque ) sceneObject.Flags.IsOpaque = opaque;
++		if ( sceneObject.Flags.IsTranslucent != translucent ) sceneObject.Flags.IsTranslucent = translucent;
++		if ( sceneObject.Flags.HasFlag( SceneObjectFlags.AlphaTestZPrepass ) != alphaTest ) sceneObject.Flags.SetFlag( SceneObjectFlags.AlphaTestZPrepass, alphaTest );
++		if ( changed ) SubmittedRevision = -1;
+ 	}
+ 	private static void ValidateMaterial( Material material )
+ 	{
+@@ -495,7 +520,7 @@
+ 				attributes.Set( "OutputCount", plan.OutputDescriptors.Length ); attributes.Set( "JointCount", draw.Rig.JointCount );
+ 				attributes.Set( "GenerateFlatNormals", plan.GenerateFlatNormals ? 1 : 0 );
+ 			}
+-			sceneObject = new SceneCustomObject( world ); sceneObject.Flags.IsOpaque = true; sceneObject.Flags.IsTranslucent = false;
++			sceneObject = new SceneCustomObject( world ); RefreshMaterialClassification();
+ 			sceneObject.RenderOverride = _ => Render();
+ 			SetPose( asset.Document.EvaluatePose() );
+ 		}
+@@ -536,27 +561,45 @@
+ 			}
+ 		}
+ 		pose = value; placement = nextPlacement; PoseRevision++;
++		// Empty instances have no required GPU rows; readiness is vacuous,
++		// and DrawCalls stays zero rather than fabricating a submission.
++		if ( draws.Count == 0 ) SubmittedRevision = PoseRevision;
+ 		// Keep per-instance conservative full-affine bounds. This avoids a GPU
+ 		// readback in the animation loop; exact bounds are tested on diagnostics.
+ 		sceneObject.Bounds = bounds;
+ 	}
+ 
++	private IEnumerable<Draw> DrawsForCurrentView()
++	{
++		// Filter this actual native view without mutating the shared draw order.
++		// Transparent geometry ordering is a separate, still-unproven gate.
++		var layer = Graphics.LayerType;
++		if ( layer is SceneLayerType.Translucent or SceneLayerType.EffectsTranslucent )
++			return draws.Where( x => x.IsTranslucent );
++		if ( layer is SceneLayerType.Opaque or SceneLayerType.DepthPrepass or SceneLayerType.EffectsOpaque or SceneLayerType.Shadow )
++			return draws.Where( x => !x.IsTranslucent );
++		// Preserve explicit/manual submission contexts with no native layer.
++		// These do not establish native alpha pass or shadow conformance.
++		return draws;
++	}
++
+ 	private void Render()
+ 	{
+ 		if ( disposed ) return;
+ 		try
+ 		{
+ 			if ( !Graphics.IsActive ) throw new InvalidOperationException( "Direct GPU draw callback has no graphics context." );
+-			foreach ( var draw in draws )
++			foreach ( var draw in DrawsForCurrentView() )
+ 			{
+ 				var primitive = draw.Node.Primitive; var plan = primitive.Plan;
+-				if ( SubmittedRevision != PoseRevision )
++				if ( draw.ComputedRevision != PoseRevision )
+ 				{
+ 					Graphics.ResourceBarrierTransition( draw.Output, draw.HasVertexState ? ResourceState.VertexOrIndexBuffer : ResourceState.GenericRead, ResourceState.UnorderedAccess );
+ 					RenderTools.Compute( Graphics.Context, draw.Attributes.Get(), asset.ComputeMaterial.native.GetMode(), plan.SourceVertices.Length, 1, 1 );
+ 					Graphics.ResourceBarrierTransition( draw.Output, ResourceState.UnorderedAccess, ResourceState.VertexOrIndexBuffer ); draw.HasVertexState = true;
++					draw.ComputedRevision = PoseRevision;
+ 				}
+-				var material = materialOverrides[primitive.MaterialSlot] ?? primitive.Material;
++				var material = draw.EffectiveMaterial;
+ 				draw.RenderAttributes.Clear(); material.Attributes.MergeTo( draw.RenderAttributes ); Graphics.Attributes.MergeTo( draw.RenderAttributes );
+ 				if ( !RenderTools.SetRenderState( Graphics.Context, draw.RenderAttributes.Get(), Graphics.ModeFor( material ), primitive.Layout, Graphics.Stats ) ) throw new GltfException( "Stock material rejected the runtime GPU vertex declaration." );
+ 				Graphics.Context.BindVertexBuffer( 0, draw.Output.native, 0, plan.VertexStride );
+@@ -565,7 +608,8 @@
+ 				Graphics.Context.DrawIndexed( (RenderPrimitiveType)mode, 0, plan.Indices.Length, 0, 0 ); DrawCalls++;
+ 				draw.DrawCalls++; draw.SubmittedPrimitiveType = mode; draw.SubmittedRevision = PoseRevision;
+ 			}
+-			SubmittedRevision = PoseRevision;
++			// Compute success or a partial pass must not claim every row submitted.
++			if ( draws.All( x => x.SubmittedRevision == PoseRevision ) ) SubmittedRevision = PoseRevision;
+ 		}
+ 		catch ( Exception exception ) { if ( errors.Count < 16 ) errors.Enqueue( exception.ToString() ); }
+ 	}

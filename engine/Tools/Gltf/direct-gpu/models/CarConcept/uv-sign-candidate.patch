@@ -1,0 +1,27 @@
+--- a/engine/Sandbox.Gltf/GltfDocument.Materials.cs
++++ b/engine/Sandbox.Gltf/GltfDocument.Materials.cs
+@@ -235,7 +235,7 @@
+ 		var scaled = uv * Tiling;
+ 		var cosine = MathF.Cos( Rotation );
+ 		var sine = MathF.Sin( Rotation );
+-		// Match the Khronos Sample Renderer texture-coordinate rotation convention.
+-		return new Vector2( cosine * scaled.X + sine * scaled.Y, -sine * scaled.X + cosine * scaled.Y ) + Offset;
++		// Apply the KHR_texture_transform counter-clockwise rotation.
++		return new Vector2( cosine * scaled.X - sine * scaled.Y, sine * scaled.X + cosine * scaled.Y ) + Offset;
+ 	}
+ }
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/Materials/GltfMaterialUvPlan.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/Materials/GltfMaterialUvPlan.cs
+@@ -42,9 +42,9 @@
+ 		Rotation = texture.Rotation;
+ 		var cosine = MathF.Cos( Rotation );
+ 		var sine = MathF.Sin( Rotation );
+-		// Match GltfTextureInfo.TransformUv and the Khronos Sample Renderer.
+-		RowU = new NVector3( cosine * Tiling.X, sine * Tiling.Y, Offset.X );
+-		RowV = new NVector3( -sine * Tiling.X, cosine * Tiling.Y, Offset.Y );
++		// Apply the KHR_texture_transform counter-clockwise rotation.
++		RowU = new NVector3( cosine * Tiling.X, -sine * Tiling.Y, Offset.X );
++		RowV = new NVector3( sine * Tiling.X, cosine * Tiling.Y, Offset.Y );
+ 	}
+ 
+ 	/// <summary>Evaluate the declared map; this never modifies or repacks a source stream.</summary>

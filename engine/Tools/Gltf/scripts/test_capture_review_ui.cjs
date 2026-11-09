@@ -1,0 +1,24 @@
+const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert');
+const base=path.resolve(__dirname,'../../../../Temp/gltf-validation/comparison-site/dist'),html=fs.readFileSync(base+'/review.html','utf8'),source=fs.readFileSync(base+'/review.js','utf8');
+class Element{constructor(tag){this.tagName=tag;this.children=[];this.hidden=false;this._text='';}set textContent(value){this._text=String(value);this.children=[];}get textContent(){return this._text+this.children.map(c=>c.textContent).join('');}append(...children){this.children.push(...children);}replaceChildren(...children){this.children=children;this._text='';}}
+const ids={};for(const m of html.matchAll(/<([a-z][\w-]*)\b[^>]*\bid="([^"]+)"[^>]*>/g)){assert(!ids[m[2]]);const el=new Element(m[1]);el.hidden=/\shidden\b/.test(m[0]);ids[m[2]]=el;}
+const row=(id,group)=>({caseId:id,modelId:id.split('/')[0],variant:id.split('/')[1],group,comparisonFingerprint:id+'-fingerprint',captureSha256:group==='blocked-or-not-run'?null:id+'-pixels',captureKind:'image',loadStatus:group==='blocked-or-not-run'?'blocked':'passed',renderStatus:group==='blocked-or-not-run'?'blocked':'passed',freshness:{nativeRecaptureVerified:group.startsWith('fresh-')},check:'Inspect the intended shape and material.',limitations:'A still cannot prove motion.',relatedFeedback:[],reviewHoldReason:group==='fresh-held-known-issues'?'Renders solid black.':null});
+const queue={schemaVersion:2,corpusPin:'pin',runId:'run',queue:[row('Cube/glTF','fresh-ready-for-review'),row('Colors/glTF','fresh-held-known-issues'),row('Fox/glTF','blocked-or-not-run'),row('Box/glTF','approved-current')]};
+const data={corpusPin:'pin',run:{id:'run'},cases:queue.queue.map(r=>({id:r.caseId,modelId:r.modelId,variant:r.variant,comparisonFingerprint:r.comparisonFingerprint,capture:r.captureSha256?{sha256:r.captureSha256}:null,load:{status:r.loadStatus},render:{status:r.renderStatus}}))};
+let fail=false;const context=vm.createContext({document:{getElementById:id=>{assert(ids[id],id);return ids[id];},createElement:tag=>new Element(tag)},URLSearchParams,fetch:async url=>({ok:!fail,json:async()=>structuredClone(url==='data.json'?data:queue)}),console});
+(async()=>{
+ await vm.runInContext(source,context);
+ assert(!ids['queue-content'].hidden);assert.equal(ids['ready-count'].textContent,'1');assert.equal(ids['held-count'].textContent,'1');assert.equal(ids['waiting-count'].textContent,'1');
+ assert(ids['ready-cards'].textContent.includes('Cube'));assert(!ids['ready-cards'].textContent.includes('Colors'));assert(ids['held-cards'].textContent.includes('Renders solid black.'));assert(ids['waiting-list'].textContent.includes('Fox'));assert(ids['other-note'].textContent.startsWith('1 existing'));
+ const links=el=>el.children.flatMap(c=>[...(c.tagName==='a'?[c]:[]),...links(c)]);assert.equal(links(ids['ready-cards'])[0].href,'index.html#model=Cube&variant=Cube%2FglTF');assert(links(ids['held-cards'])[0].textContent.startsWith('View known issue'));
+ context.q=queue;context.d=data;
+ const bad=structuredClone(queue);bad.queue[0].comparisonFingerprint='stale';context.bad=bad;assert.throws(()=>vm.runInContext('validateQueue(bad,d)',context),/changed/);
+ bad.queue[0]=structuredClone(queue.queue[0]);bad.queue[0].reviewHoldReason='Known problem';assert.throws(()=>vm.runInContext('validateQueue(bad,d)',context),/Known issue/);
+ bad.queue[0]=structuredClone(queue.queue[0]);bad.queue[0].freshness.nativeRecaptureVerified=false;assert.throws(()=>vm.runInContext('validateQueue(bad,d)',context),/not verified/);
+ queue.queue[0].check='<script>not executed</script>';await vm.runInContext('loadQueue()',context);assert(ids['ready-cards'].textContent.includes('<script>not executed</script>'));
+ queue.queue[0].group='existing-unreviewed';await vm.runInContext('loadQueue()',context);assert.equal(ids['ready-count'].textContent,'0');assert(!ids['ready-empty'].hidden);assert.equal(ids['ready-cards'].children.length,0);
+ fail=true;await vm.runInContext('loadQueue()',context);assert(ids['queue-content'].hidden);assert(!ids['queue-error'].hidden);
+ assert(!/localStorage|\.innerHTML|decide\(/.test(source),'Review list must not write decisions or inject HTML');
+ if(process.argv.includes('--current-data')){context.actualQueue=JSON.parse(fs.readFileSync(base+'/review-queue.json'));const dataArg=process.argv.indexOf('--website-data');context.actualData=JSON.parse(fs.readFileSync(dataArg>=0?process.argv[dataArg+1]:base+'/data.json'));vm.runInContext('validateQueue(actualQueue,actualData);renderQueue(actualQueue)',context);assert(!ids['queue-content'].hidden);}
+ console.log(JSON.stringify({passed:10,scope:'DOM state, freshness separation, links, stale data, errors, empty state, literal text and no decision writes',actualDataChecked:process.argv.includes('--current-data'),browserVisualQA:'Not performed'},null,2));
+})().catch(error=>{console.error(error);process.exitCode=1;});

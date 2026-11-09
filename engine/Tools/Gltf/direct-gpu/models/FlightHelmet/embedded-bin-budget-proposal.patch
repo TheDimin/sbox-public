@@ -1,0 +1,89 @@
+--- a/engine/Sandbox.Gltf/GltfCompiler.cs
++++ b/engine/Sandbox.Gltf/GltfCompiler.cs
+@@ -183,8 +183,11 @@
+ 		using var document = GltfReader.Read( packaged, resolve, supportedExtensions );
+ 		if ( !document.Root.TryGetProperty( "images", out var images ) ) return packaged;
+ 		if ( images.ValueKind != JsonValueKind.Array ) throw new GltfException( "'images' must be an array." );
++		var orphan = FindOrphanBinary( packaged, document );
++		var appendBin = !orphan.HasValue && (document.CompilerBufferCount == 0 || !document.ElementAt( "buffers", 0 ).TryGetProperty( "uri", out _ ));
+ 		var embedded = new List<(int Index, GltfImage Image)>();
+ 		long imageBytes = 0;
++		long imageCharge = 0;
+ 		long validationCharge = 0;
+ 		for ( var i = 0; i < images.GetArrayLength(); i++ )
+ 		{
+@@ -193,7 +196,7 @@
+ 			if ( !image.TryGetProperty( "uri", out _ ) )
+ 			{
+ 				validationCharge = checked(validationCharge + document.ReadImage( i ).Bytes.LongLength);
+-				if ( validationCharge > budget - packagingCharge ) throw new GltfException( "Image packaging budget exceeded." );
++				if ( validationCharge > budget - packagingCharge - imageCharge ) throw new GltfException( "Image packaging budget exceeded." );
+ 				continue;
+ 			}
+ 			// Image-level extensions may attach semantics to URI storage. Do not
+@@ -206,8 +209,14 @@
+ 			var data = document.ReadImage( i );
+ 			if ( GltfDocument.ImageMimeType( data.Bytes ) is null )
+ 				throw new GltfException( $"Image {i} has an unrecognized or truncated encoded image signature." );
+-			imageBytes = checked(imageBytes + ((data.Bytes.LongLength + 3) & ~3L));
+-			if ( imageBytes > (budget - packagingCharge - validationCharge) / 12 ) throw new GltfException( "Image packaging budget exceeded." );
++			var paddedLength = (data.Bytes.LongLength + 3) & ~3L;
++			imageBytes = checked(imageBytes + paddedLength);
++			// External bytes appended to BIN use the resolved image, the combined
++			// BIN and the final GLB. Data URIs require additional encoding or
++			// decoding allocations, so keep their conservative allowance.
++			var externalToBin = appendBin && !GltfJson.String( image, "uri" ).StartsWith( "data:", StringComparison.OrdinalIgnoreCase );
++			imageCharge = checked(imageCharge + (externalToBin ? 3L : 12L) * paddedLength);
++			if ( imageCharge > budget - packagingCharge - validationCharge ) throw new GltfException( "Image packaging budget exceeded." );
+ 			embedded.Add( (i, data) );
+ 		}
+ 		if ( embedded.Count == 0 ) return packaged;
+@@ -217,14 +226,12 @@
+ 		if ( root["buffers"] is null ) root["buffers"] = buffers;
+ 		var views = root["bufferViews"] as JsonArray ?? new JsonArray();
+ 		if ( root["bufferViews"] is null ) root["bufferViews"] = views;
+-		var orphan = FindOrphanBinary( packaged, document );
+ 		// Repackaging copies the existing BIN or orphan and reserializes any
+ 		// retained data-URI buffers as well as adding the new image payloads.
+ 		var repackCharge = CheckBufferBudget( document, false, budget, orphan?.Length ?? -1 );
+-		var appendBin = !orphan.HasValue && (document.CompilerBufferCount == 0 || !document.ElementAt( "buffers", 0 ).TryGetProperty( "uri", out _ ));
+ 		var original = appendBin && document.CompilerBufferCount > 0 ? document.CompilerBuffer( 0 ) : ReadOnlyMemory<byte>.Empty;
+ 		var total = checked(((long)original.Length + 3 & ~3L) + imageBytes);
+-		if ( total > Array.MaxLength || checked(packagingCharge + repackCharge + validationCharge + 12L * imageBytes) > budget )
++		if ( total > Array.MaxLength || checked(packagingCharge + repackCharge + validationCharge + imageCharge) > budget )
+ 			throw new GltfException( "Image packaging budget exceeded." );
+ 		var binary = new byte[(int)total];
+ 		original.Span.CopyTo( binary );
+--- a/engine/Tests/Sandbox.Test.Gltf/GltfCompilerImageTests.cs
++++ b/engine/Tests/Sandbox.Test.Gltf/GltfCompilerImageTests.cs
+@@ -71,11 +71,15 @@
+   Assert.ThrowsException<GltfException>(()=>GltfCompiler.CompileWithEmbeddedImages(source,_=>Fixture("compiler.png")));
+  }
+  [TestMethod]
+- public void GeometryAndImageShareOnePackagingBudget()
++ [DataRow(false,3)]
++ [DataRow(true,12)]
++ public void GeometryAndImageShareOnePackagingBudget(bool dataUri,int copies)
+  {
+-  var source=Encoding.UTF8.GetBytes("""{"asset":{"version":"2.0"},"buffers":[{"uri":"x.bin","byteLength":20}],"images":[{"uri":"a.png"}]}""");
+-  var png=Fixture("compiler.png");byte[] Resolve(string uri)=>uri=="x.bin"?new byte[20]:png;
+-  long imageCharge=12L*((png.Length+3)&~3);
++  var png=Fixture("compiler.png");
++  var imageUri=dataUri?"data:image/png;base64,"+Convert.ToBase64String(png):"a.png";
++  var source=Encoding.UTF8.GetBytes($$"""{"asset":{"version":"2.0"},"buffers":[{"uri":"x.bin","byteLength":20}],"images":[{"uri":"{{imageUri}}"}]}""");
++  byte[] Resolve(string uri)=>uri=="x.bin"?new byte[20]:png;
++  long imageCharge=(long)copies*((png.Length+3)&~3);
+   Assert.ThrowsException<GltfException>(()=>GltfCompiler.CompileWithEmbeddedImages(source,Resolve,maxBufferBytes:imageCharge+79));
+   using var document=GltfReader.Read(GltfCompiler.CompileWithEmbeddedImages(source,Resolve,maxBufferBytes:imageCharge+80));
+   CollectionAssert.AreEqual(png,document.ReadImage(0).Bytes);
+@@ -100,7 +104,9 @@
+   BinaryPrimitives.WriteUInt32LittleEndian(source.AsSpan(16),0x4e4f534a);source.AsSpan(20,jsonLength).Fill(32);json.CopyTo(source,20);
+   int bin=20+jsonLength;BinaryPrimitives.WriteUInt32LittleEndian(source.AsSpan(bin),4);BinaryPrimitives.WriteUInt32LittleEndian(source.AsSpan(bin+4),0x004e4942);
+   source[bin+8]=1;source[bin+9]=2;source[bin+10]=3;source[bin+11]=4;
+-  var png=Fixture("compiler.png");var output=GltfCompiler.CompileWithEmbeddedImages(source,_=>png);
++  var png=Fixture("compiler.png");long budget=16+12L*((png.Length+3)&~3);
++  Assert.ThrowsException<GltfException>(()=>GltfCompiler.CompileWithEmbeddedImages(source,_=>png,maxBufferBytes:budget-1));
++  var output=GltfCompiler.CompileWithEmbeddedImages(source,_=>png,maxBufferBytes:budget);
+   int outputBin=20+(int)BinaryPrimitives.ReadUInt32LittleEndian(output.AsSpan(12));
+   CollectionAssert.AreEqual(new byte[]{1,2,3,4},output.AsSpan(outputBin+8,4).ToArray());
+   using var document=GltfReader.Read(output);CollectionAssert.AreEqual(png,document.ReadImage(0).Bytes);

@@ -1,0 +1,129 @@
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs
+@@ -36,8 +36,9 @@
+ 
+ internal sealed class GltfGpuPrimitiveSnapshot
+ {
+ 	public int Node { get; init; }
++	public int? InstanceIndex { get; init; }
+ 	public int Mesh { get; init; }
+ 	public int Primitive { get; init; }
+ 	public int VertexCount { get; init; }
+ 	public int VertexStride { get; init; }
+@@ -175,9 +176,13 @@
+ 			GltfGpuCleanup.ReleaseAll( buffers.Where( x => x is not null ).Select<GpuBuffer, Action>( x => x.Dispose )
+ 				.Concat( layout.IsValid ? new Action[] { () => layout.Free(), () => layout.Destroy() } : Array.Empty<Action>() ) );
+ 		}
+ 	}
+-	internal sealed record Node( int Index, int? Skin, Primitive Primitive, GltfGpuRig Rig );
++	internal sealed record Node( int Index, int? Skin, Primitive Primitive, GltfGpuRig Rig, GltfGpuInstancingRow Instance )
++	{
++		public int? InstanceIndex => Instance.InstanceIndex;
++		public NMatrix LocalTransform => Instance.LocalTransform;
++	}
+ 	internal readonly GltfDocument Document;
+ 	internal readonly List<Node> Nodes = new();
+ 	internal readonly List<Primitive> Primitives = new();
+ 	internal const string DefaultComputeShaderPath = "shaders/gltf_deform_cs.shader";
+@@ -233,13 +238,13 @@
+ 			{
+ 				var nodeIndex = pending.Pop(); if ( !selected.Add( nodeIndex ) ) throw new GltfException( "Selected node is repeated." );
+ 				var node = document.Root.GetProperty( "nodes" )[nodeIndex];
+ 				if ( node.TryGetProperty( "children", out var children ) ) foreach ( var child in children.EnumerateArray().Reverse() ) pending.Push( child.GetInt32() );
+-				if ( !node.TryGetProperty( "mesh", out var meshValue ) ) continue;
+-				// The reader returns no instances for an unselected optional extension.
+-				// Preserve its ordinary-node fallback until expansion is integrated.
+-				if ( document.ReadInstances( nodeIndex ).Length != 0 ) throw new GltfException( "Direct GPU instancing expansion is not implemented yet." );
+-				var mesh = meshValue.GetInt32(); var primitives = document.Root.GetProperty( "meshes" )[mesh].GetProperty( "primitives" );
++				if ( !node.TryGetProperty( "mesh", out _ ) ) continue;
++				var instancing = GltfGpuInstancingPlan.Create( document, nodeIndex );
++				if ( instancing.AppliesInstancing && node.TryGetProperty( "skin", out _ ) )
++					throw new GltfException( "EXT_mesh_gpu_instancing with a skinned mesh node is not implemented; instance transforms cannot be ignored." );
++				var mesh = instancing.Mesh; var primitives = document.Root.GetProperty( "meshes" )[mesh].GetProperty( "primitives" );
+ 				for ( var index = 0; index < primitives.GetArrayLength(); index++ )
+ 				{
+ 					// Core recommends skipping primitives with no POSITION; their
+ 					// source metadata remains in Document rather than fake geometry.
+@@ -250,16 +255,19 @@
+ 						primitive = new Primitive { Mesh = mesh, Index = index, Plan = plan };
+ 						asset.Primitives.Add( primitive ); cache.Add( (mesh, index), primitive );
+ 					}
+ 					int? skinIndex = node.TryGetProperty( "skin", out var skin ) ? skin.GetInt32() : null;
+-					asset.Nodes.Add( new Node( nodeIndex, skinIndex, primitive, new GltfGpuRig( document, nodeIndex, skinIndex, index, primitive.Plan ) ) );
++					var rig = new GltfGpuRig( document, nodeIndex, skinIndex, index, primitive.Plan );
++					// One primitive and base rig own immutable input once. Row expansion
++					// preserves semantics; it is not hardware-instancing performance proof.
++					foreach ( var row in instancing.Instances ) asset.Nodes.Add( new Node( nodeIndex, skinIndex, primitive, rig, row ) );
+ 				}
+ 			}
+ 			asset.MaterialSlotSourceIndices = Array.AsReadOnly( asset.Primitives.Select( x => x.Plan.Material ).Distinct().OrderBy( x => x.HasValue ? 0 : 1 ).ThenBy( x => x ?? 0 ).ToArray() );
+ 			foreach ( var primitive in asset.Primitives ) primitive.MaterialSlot = asset.MaterialSlotSourceIndices.ToList().IndexOf( primitive.Plan.Material );
+ 			if ( materialResolver is null )
+ 				foreach ( var index in asset.MaterialSlotSourceIndices ) asset.preparedMaterials.Add( index ?? -1, GltfStockMaterialAdapter.Prepare( document, index.HasValue ? document.ReadMaterial( index.Value ) : null ) );
+-			asset.RestBounds = GltfGpuRig.Bounds( asset.Nodes.Select( x => (x.Rig, x.Rig.Evaluate( rest ), rest.GetMorphWeights( x.Index )) ), NMatrix.Identity, padding: false );
++			asset.RestBounds = GltfGpuRig.Bounds( asset.Nodes.Select( x => (x.Rig, x.Rig.Evaluate( rest, x.LocalTransform ), rest.GetMorphWeights( x.Index )) ), NMatrix.Identity, padding: false );
+ 			asset.finalRelease = finalRelease;
+ 			return asset;
+ 		}
+ 		catch ( Exception error ) { GltfGpuCleanup.Rollback( error, [asset.Dispose] ); throw; }
+@@ -481,9 +489,9 @@
+ 	{
+ 		ThreadSafe.AssertIsMainThread();
+ 		asset.Document.ValidatePoseOwnership( value );
+ 		// Preflight all rows before publishing a new revision or touching GPU state.
+-		var updates = draws.Select( draw => (Draw: draw, Matrices: draw.Rig.Evaluate( value ), Weights: value.GetMorphWeights( draw.Node.Index ), Reversed: draw.Rig.ReverseWinding( value, nextPlacement )) ).ToArray();
++		var updates = draws.Select( draw => (Draw: draw, Matrices: draw.Rig.Evaluate( value, draw.Node.LocalTransform ), Weights: value.GetMorphWeights( draw.Node.Index ), Reversed: draw.Rig.ReverseWinding( value, nextPlacement, draw.Node.LocalTransform )) ).ToArray();
+ 		foreach ( var update in updates )
+ 			if ( update.Weights.Length != update.Draw.Node.Primitive.Plan.MorphTargetCount ) throw new GltfException( "Morph weight count does not match GPU target streams." );
+ 		var bounds = GltfGpuRig.Bounds( updates.Select( x => (x.Draw.Rig, x.Matrices, x.Weights) ), nextPlacement );
+ 		placementBuffer.SetData<GltfGpuMatrix>( new[] { new GltfGpuMatrix( nextPlacement ) } );
+@@ -543,9 +551,9 @@
+ 		{
+ 			var plan = draw.Node.Primitive.Plan; var bytes = new byte[checked(plan.SourceVertices.Length * plan.VertexStride)];
+ 			draw.Output.GetData<byte>( bytes );
+ 			var indices = new uint[plan.Indices.Length]; draw.Indices.GetData<uint>( indices );
+-			rows.Add( new GltfGpuPrimitiveSnapshot { Node = draw.Node.Index, Mesh = draw.Node.Primitive.Mesh, Primitive = draw.Node.Primitive.Index,
++			rows.Add( new GltfGpuPrimitiveSnapshot { Node = draw.Node.Index, InstanceIndex = draw.Node.InstanceIndex, Mesh = draw.Node.Primitive.Mesh, Primitive = draw.Node.Primitive.Index,
+ 				VertexCount = plan.SourceVertices.Length, VertexStride = plan.VertexStride, Fields = plan.Fields, Bytes = bytes,
+ 				SourceVertices = (uint[])plan.SourceVertices.Clone(), Indices = indices, IndexDataOrigin = "gpu-readback",
+ 				SourceMode = plan.SourceMode, SubmittedPrimitiveType = draw.SubmittedPrimitiveType, DrawCalls = draw.DrawCalls, SubmittedRevision = draw.SubmittedRevision } );
+ 		}
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuRig.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuRig.cs
+@@ -87,21 +87,32 @@
+ 			}
+ 		}
+ 		influences = sets.ToArray();
+ 	}
+-	internal GltfGpuMatrix[] Evaluate( GltfPose pose )
++	internal GltfGpuMatrix[] Evaluate( GltfPose pose, NMatrix? instanceLocal = null )
+ 	{
+ 		document.ValidatePoseOwnership( pose );
+-		if ( skin is null ) return [new GltfGpuMatrix( pose.GetWorldTransform( node ) * Basis )];
++		var local = InstanceTransform( instanceLocal );
++		if ( skin is null ) return [new GltfGpuMatrix( local * pose.GetWorldTransform( node ) * Basis )];
+ 		var result = new GltfGpuMatrix[skin.Joints.Length];
+ 		for ( var i = 0; i < result.Length; i++ ) result[i] = new GltfGpuMatrix( skin.InverseBindMatrices[i] * pose.GetWorldTransform( skin.Joints[i] ) * Basis );
+ 		return result;
+ 	}
+-	internal bool ReverseWinding( GltfPose pose, NMatrix placement )
++	internal bool ReverseWinding( GltfPose pose, NMatrix placement, NMatrix? instanceLocal = null )
+ 	{
++		var localSign = Orientation( InstanceTransform( instanceLocal ) );
+ 		var nodeSign = skin is null ? Orientation( pose.GetWorldTransform( node ) ) : 1;
++		var sign = localSign * nodeSign;
+ 		var placementSign = Orientation( placement );
+-		return nodeSign != 0 && placementSign != 0 && nodeSign != placementSign;
++		return sign != 0 && placementSign != 0 && sign != placementSign;
++	}
++	private NMatrix InstanceTransform( NMatrix? instanceLocal )
++	{
++		var local = instanceLocal ?? NMatrix.Identity;
++		RequireAffine( local );
++		if ( skin is not null && local != NMatrix.Identity )
++			throw new GltfException( "Skinned instance-local transforms are not implemented; no transform was applied partially." );
++		return local;
+ 	}
+ 	private static int Orientation( NMatrix value )
+ 	{
+ 		var maximum = new[] { value.M11, value.M12, value.M13, value.M21, value.M22, value.M23, value.M31, value.M32, value.M33 }.Max( x => Math.Abs( (double)x ) );

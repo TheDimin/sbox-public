@@ -1,0 +1,81 @@
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfPublicMaterialRoute.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfPublicMaterialRoute.cs
+@@ -6,7 +6,7 @@
+ internal static class GltfPublicMaterialRoute
+ {
+ 	internal static bool NeedsSourceLit( GltfMaterial material ) => material is not null && !material.Unlit &&
+-		(material.DiffuseTransmission is not null || material.AlphaMode == "MASK" || material.NormalTexture is not null || material.OcclusionTexture is not null || material.EmissiveTexture is not null || material.EmissiveFactor != System.Numerics.Vector3.Zero);
++		(material.DiffuseTransmission is not null || material.AlphaMode is "MASK" or "BLEND" || material.NormalTexture is not null || material.OcclusionTexture is not null || material.EmissiveTexture is not null || material.EmissiveFactor != System.Numerics.Vector3.Zero);
+ 
+ 	internal static bool RequiresProjected( GltfDocument document, int? sceneIndex )
+ 	{
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs
+@@ -46,7 +46,7 @@
+ 			{
+ 				if ( material is null ) throw new GltfException( "A projected source material must be explicit." );
+ 				var mode = material.AlphaMode;
+-				if ( !material.Unlit && mode == "BLEND" ) throw new GltfException( "Source-lit BLEND is not yet supported." );
++				if ( !material.Unlit && mode == "BLEND" && material.DiffuseTransmission is not null ) throw new GltfException( "Source-lit BLEND with diffuse transmission is not yet supported." );
+ 				var key = (material.Unlit ? "unlit:" : "lit:") + mode + (material.DoubleSided ? ":double" : ":single") + (material.DiffuseTransmission is null ? "" : ":diffuse-transmission");
+ 				if ( templates.TryGetValue( key, out var existing ) ) return existing;
+ 				var source = Material.FromShader( material.Unlit ? "shaders/gltf_unlit_five_uv.shader" : material.DiffuseTransmission is not null ? "shaders/gltf_diffuse_transmission.shader" : "shaders/gltf_surface_five_uv.shader" );
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfStockMaterialAdapter.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfStockMaterialAdapter.cs
+@@ -32,6 +32,7 @@
+ 		internal float NormalScale { get; init; }
+ 		internal bool DoubleSided { get; init; }
+ 		internal bool AlphaMask { get; init; }
++		internal bool AlphaBlend { get; init; }
+ 		internal float AlphaCutoff { get; init; }
+ 		internal GltfDiffuseTransmission DiffuseTransmission { get; init; }
+ 	}
+@@ -55,8 +56,10 @@
+ 	{
+ 		ArgumentNullException.ThrowIfNull( document );
+ 		imageReader ??= document.ReadImage;
+-		if ( material is not null && (material.Unlit || material.AlphaMode is not ("OPAQUE" or "MASK")) )
+-			throw new GltfException( "The provided Surface/Lit source-texture candidate does not yet support unlit or BLEND materials." );
++		if ( material is not null && (material.Unlit || material.AlphaMode is not ("OPAQUE" or "MASK" or "BLEND")) )
++			throw new GltfException( "The provided Surface/Lit source-texture candidate does not support unlit or unknown alpha modes." );
++		if ( material?.AlphaMode == "BLEND" && material.DiffuseTransmission is not null )
++			throw new GltfException( "Source-lit BLEND with diffuse transmission is not yet supported." );
+ 		if ( material?.AlphaMode == "MASK" && (!float.IsFinite( material.AlphaCutoff ) || material.AlphaCutoff < 0) )
+ 			throw new GltfException( "MASK alpha cutoff must be finite and non-negative." );
+ 		var factor = material?.BaseColorFactor ?? System.Numerics.Vector4.One;
+@@ -104,7 +107,7 @@
+ 			Textures = textures, Resources = new ReadOnlyDictionary<GltfMaterialTextureRole, SourceTexture>( resources ),
+ 			LinearBaseColorFactor = factor, EmissiveFactor = emissive, MetallicFactor = metallic, RoughnessFactor = roughness,
+ 			OcclusionStrength = strength, NormalScale = normalScale, DoubleSided = material?.DoubleSided ?? false,
+-			AlphaMask = material?.AlphaMode == "MASK", AlphaCutoff = material?.AlphaCutoff ?? .5f, DiffuseTransmission = material?.DiffuseTransmission
++			AlphaMask = material?.AlphaMode == "MASK", AlphaBlend = material?.AlphaMode == "BLEND", AlphaCutoff = material?.AlphaCutoff ?? .5f, DiffuseTransmission = material?.DiffuseTransmission
+ 		};
+ 	}
+ 
+@@ -122,6 +125,8 @@
+ 		if ( !template.IsValid || template.IsError ) throw new GltfException( "The provided source-texture template is unavailable." );
+ 		if ( prepared.AlphaMask && (template.GetFeature( "F_ALPHA_TEST" ) != 1 || !template.Flags.IsAlphaTest || template.Flags.IsTranslucent) )
+ 			throw new GltfException( "The source MASK template must have an actual opaque alpha-test permutation." );
++		if ( prepared.AlphaBlend && (template.GetFeature( "F_TRANSLUCENT" ) != 1 || !template.Flags.IsTranslucent || template.Flags.IsAlphaTest) )
++			throw new GltfException( "The source BLEND template must have an actual translucent permutation." );
+ 		if ( prepared.DoubleSided && template.GetFeature( "F_RENDER_BACKFACES" ) != 1 )
+ 			throw new GltfException( "The provided source-texture template must enable backfaces for a double-sided material." );
+ 		if ( prepared.Resources.Count != uv.Bindings.Count ) throw new GltfException( "Source material and canonical per-slot UV roles disagree." );
+@@ -129,7 +134,7 @@
+ 			throw new GltfException( "The five-input shader projection does not match its material UV bindings." );
+ 		var vectors = new List<KeyValuePair<string, Vector4>>
+ 		{
+-			new( "g_vGltfBaseColor", new( prepared.LinearBaseColorFactor.X, prepared.LinearBaseColorFactor.Y, prepared.LinearBaseColorFactor.Z, prepared.AlphaMask ? prepared.LinearBaseColorFactor.W : 1 ) ),
++			new( "g_vGltfBaseColor", new( prepared.LinearBaseColorFactor.X, prepared.LinearBaseColorFactor.Y, prepared.LinearBaseColorFactor.Z, (prepared.AlphaMask || prepared.AlphaBlend) ? prepared.LinearBaseColorFactor.W : 1 ) ),
+ 			new( "g_vGltfEmissiveFactor", new( prepared.EmissiveFactor.X, prepared.EmissiveFactor.Y, prepared.EmissiveFactor.Z, 0 ) )
+ 		};
+ 		var scalars = new List<KeyValuePair<string, float>>
+@@ -193,7 +198,7 @@
+ 				bindings.Add( new( "g_tGltf" + role + "Texture", texture.Value, texture.Value.DirtyVersion, source.Sampling.State, "Gltf" + role + "Sampler" ) );
+ 			}
+ 			var key = new GltfMaterialKey( template, 0,
+-				[new( "F_RENDER_BACKFACES", prepared.DoubleSided ? 1 : 0 ), new( "F_ALPHA_TEST", prepared.AlphaMask ? 1 : 0 ), new( "F_TRANSLUCENT", 0 )], vectors, bindings, scalars );
++				[new( "F_RENDER_BACKFACES", prepared.DoubleSided ? 1 : 0 ), new( "F_ALPHA_TEST", prepared.AlphaMask ? 1 : 0 ), new( "F_TRANSLUCENT", prepared.AlphaBlend ? 1 : 0 )], vectors, bindings, scalars );
+ 			material = GltfMaterialCache.Shared.Acquire( key );
+ 			foreach ( var value in vectors )
+ 			{

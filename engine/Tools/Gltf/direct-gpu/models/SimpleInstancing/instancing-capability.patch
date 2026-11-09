@@ -1,0 +1,13 @@
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfModelLoader.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfModelLoader.cs
+@@ -16,9 +16,9 @@
+ 	// Material/deformation extensions remain separate rendering capabilities.
+ 	private static readonly IReadOnlySet<string> SupportedExtensions = new HashSet<string>( StringComparer.Ordinal )
+ 	{
+ 		"KHR_mesh_quantization", "KHR_texture_transform", "KHR_draco_mesh_compression",
+-		"KHR_meshopt_compression", "EXT_meshopt_compression"
++		"KHR_meshopt_compression", "EXT_meshopt_compression", "EXT_mesh_gpu_instancing"
+ 	};
+ 
+ 	/// <summary>The loader's document policy, shared by source and compiled input.</summary>
+ 	internal static GltfDocument ReadDocument( byte[] source, Func<string, byte[]> resolve = null ) =>

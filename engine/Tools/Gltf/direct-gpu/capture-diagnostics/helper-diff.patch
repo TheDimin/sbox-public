@@ -1,0 +1,80 @@
+--- research/gltf-validation/direct-gpu/GltfGpuTriangleGateTests.cs
++++ research/gltf-validation/direct-gpu/capture-diagnostics/GltfGpuTriangleGateTests.cs
+@@ -152,6 +152,7 @@
+ 		private readonly Action onFrame;
+ 		private readonly Stopwatch stopwatch = Stopwatch.StartNew();
+ 		private int frames;
++		public System.Threading.CancellationToken Cancellation { get; set; }
+ 		private const int Size = 192;
+ 
+ 		public NativeCapture( string output, global::Vector3? position = null, global::Vector3? target = null, float orthographicHeight = 100 )
+@@ -182,16 +183,16 @@
+ 			var property = type.GetProperty( "Enabled", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public );
+ 			Assert.IsFalse( (bool)property.GetValue( null ), "Keep the existing native renderer; this probe never changes the global renderer." );
+ 		}
+-		private static async Task Safe()
+-		{
+-			await MainThread.Wait(); Assert.IsTrue( Application.IsEditor && !Game.IsPlaying ); RequireNativeRenderer();
++		private async Task Safe()
++		{
++			Cancellation.ThrowIfCancellationRequested(); await MainThread.Wait(); Cancellation.ThrowIfCancellationRequested(); Assert.IsTrue( Application.IsEditor && !Game.IsPlaying ); RequireNativeRenderer();
+ 			var timer = Stopwatch.StartNew();
+-			while ( Graphics.IsActive ) { Assert.IsTrue( timer.Elapsed < TimeSpan.FromSeconds( 5 ) ); await Task.Delay( 20 ); await MainThread.Wait(); }
++			while ( Graphics.IsActive ) { Assert.IsTrue( timer.Elapsed < TimeSpan.FromSeconds( 5 ) ); await Task.Delay( 20, Cancellation ); await MainThread.Wait(); }
+ 		}
+ 		public async Task WaitFrames()
+ 		{
+ 			await Safe(); var start = frames; var timer = Stopwatch.StartNew();
+-			while ( frames < start + 3 ) { Assert.IsTrue( timer.Elapsed < TimeSpan.FromSeconds( 10 ), "Visible preview stopped receiving real frames." ); await Task.Delay( 20 ); await Safe(); }
++			while ( frames < start + 3 ) { Assert.IsTrue( timer.Elapsed < TimeSpan.FromSeconds( 10 ), "Visible preview stopped receiving real frames." ); await Task.Delay( 20, Cancellation ); await Safe(); }
+ 		}
+ 		public async Task<Frame> Take( string name )
+ 		{
+--- research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MergedDrawAttributeTests.cs
++++ research/gltf-validation/direct-gpu/capture-diagnostics/MergedDrawAttributeTests.cs
+@@ -20,10 +20,10 @@
+   await MainThread.Wait();var bytes=File.ReadAllBytes(Path.Combine(checkout,"research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/combined_alpha_pointline_candidate.shader"));Require(Hash(bytes)=="bf6c5e6f16c801a9892a485a53bc4c6b6bef85d4a86c98232af8139187630ed9","Combined shader changed.");
+   var output=Path.Combine(checkout,"Temp/gltf-validation/direct-gpu/MeshPrimitiveModes/combined-attribute",Guid.NewGuid().ToString("N"));Directory.CreateDirectory(output);var frames=new List<object>();Shader shader=null;Material material=null;SceneCustomObject sceneObject=null;var errors=new ConcurrentQueue<string>();int draws=0;
+   using var capture=new GltfGpuTriangleGateTests.NativeCapture(output,new Vector3(200,0,0),Vector3.Zero,140);
+-  capture.Camera.AutoExposure.Enabled=false;capture.Camera.AutoExposure.MinimumExposure=1;capture.Camera.AutoExposure.MaximumExposure=1;capture.Camera.AutoExposure.Compensation=0;
++  capture.Cancellation=CaptureShaderBatch.Cancellation; capture.Camera.AutoExposure.Enabled=false;capture.Camera.AutoExposure.MinimumExposure=1;capture.Camera.AutoExposure.MaximumExposure=1;capture.Camera.AutoExposure.Compensation=0;
+   try
+   {
+-   using(var timeout=new CancellationTokenSource(TimeSpan.FromSeconds(90)))shader=await Shader.CompileAsync(Encoding.UTF8.GetString(bytes),timeout.Token);await MainThread.Wait();Require(shader is {IsValid:true,IsAnonymous:true},"Combined shader compile failed.");material=Material.Create("mixed_draw_attribute_"+Guid.NewGuid().ToString("N"),shader);Require(material is {IsValid:true,IsError:false},"Combined material invalid.");
++   shader=await CaptureShaderBatch.AcquireAsync(bytes);await MainThread.Wait();Require(shader is {IsValid:true,IsAnonymous:true},"Combined shader compile failed.");material=Material.Create("mixed_draw_attribute_"+Guid.NewGuid().ToString("N"),shader);Require(material is {IsValid:true,IsError:false},"Combined material invalid.");
+    material.Set("g_vGltfBaseColor",new Vector4(1,1,1,1));material.Set("g_flGltfMetallicFactor",0f);material.Set("g_flGltfRoughnessFactor",1f);material.Attributes.Set("GltfPointLineNoNormal",0f);
+    Vertex V(float y,float z)=>new(new Vector3(0,y,z)){Normal=Vector3.Forward,Tangent=new Vector4(0,1,0,1),Color=Color32.White};
+    var line=new[]{V(-30,-25),V(-30,25)};var tri=new[]{V(15,-25),V(55,-25),V(35,25)};var lineAttrs=new RenderAttributes();var triAttrs=new RenderAttributes();
+@@ -42,7 +42,7 @@
+    Require(resetDiff[^1].line==0 && resetDiff[^1].triangle==0,"Shared material reset did not converge to original pixels after four captures.");
+    sceneObject.RenderOverride=null;sceneObject.Delete();sceneObject=null;using(capture.Scene.Push())capture.Scene.ProcessDeletes();Require((await Take("empty_after_delete")).Coverage==0,"Delete failed.");Measurements.Add(new{passed=true,frames});
+   }
+-  finally{await MainThread.Wait();if(sceneObject.IsValid()){sceneObject.RenderOverride=null;sceneObject.Delete();}material?.Destroy();shader?.Destroy();Measurements.Add(new{frames,output});}
++  finally{await MainThread.Wait();if(sceneObject.IsValid()){sceneObject.RenderOverride=null;sceneObject.Delete();}material?.Destroy();Measurements.Add(new{frames,output});}
+   async Task<GltfGpuTriangleGateTests.NativeCapture.Frame> Take(string label){var f=await capture.Take(label);frames.Add(new{label,f.Path,f.Sha256,f.Coverage,f.CameraStateJson});return f;}
+  }
+  static int Coverage(GltfGpuTriangleGateTests.NativeCapture.Frame f,int x0,int x1){int count=0;for(int y=0;y<192;y++)for(int x=x0;x<x1;x++){var p=f.Pixels[y*192+x];if(p.r>.03f||p.g>.03f||p.b>.03f)count++;}return count;}
+--- research/gltf-validation/direct-gpu/models/MeshPrimitiveModes/MergedLineBlendTests.cs
++++ research/gltf-validation/direct-gpu/capture-diagnostics/MergedLineBlendTests.cs
+@@ -21,11 +21,11 @@
+   Require(Hash(bytes)=="bf6c5e6f16c801a9892a485a53bc4c6b6bef85d4a86c98232af8139187630ed9","Merged shader changed.");
+   var output=Path.Combine(checkout,"Temp/gltf-validation/direct-gpu/MeshPrimitiveModes/merged-line-blend",Guid.NewGuid().ToString("N"));Directory.CreateDirectory(output);
+   using var capture=new GltfGpuTriangleGateTests.NativeCapture(output,new Vector3(200,0,0),Vector3.Zero,140);
+-  capture.Camera.AutoExposure.Enabled=false;capture.Camera.AutoExposure.MinimumExposure=1;capture.Camera.AutoExposure.MaximumExposure=1;capture.Camera.AutoExposure.Compensation=0;
++  capture.Cancellation=CaptureShaderBatch.Cancellation; capture.Camera.AutoExposure.Enabled=false;capture.Camera.AutoExposure.MinimumExposure=1;capture.Camera.AutoExposure.MaximumExposure=1;capture.Camera.AutoExposure.Compensation=0;
+   Shader shader=null;Material material=null;SceneCustomObject obj=null;var errors=new ConcurrentQueue<string>();var attrs=new RenderAttributes();int calls=0;
+   try
+   {
+-   using(var timeout=new CancellationTokenSource(TimeSpan.FromSeconds(90)))shader=await Shader.CompileAsync(Encoding.UTF8.GetString(bytes),timeout.Token);await MainThread.Wait();Require(shader is {IsValid:true,IsAnonymous:true},"Compile failed.");
++   shader=await CaptureShaderBatch.AcquireAsync(bytes);await MainThread.Wait();Require(shader is {IsValid:true,IsAnonymous:true},"Compile failed.");
+    material=Material.Create("merged_line_blend_"+Guid.NewGuid().ToString("N"),shader);material.SetFeature("F_TRANSLUCENT",1);material.Set("g_vGltfBaseColor",new Vector4(1,1,1,1));
+    var verts=new[]{new Vertex(new Vector3(0,0,-25)){Normal=Vector3.Forward,Tangent=new Vector4(0,1,0,1),Color=Color32.White},new Vertex(new Vector3(0,0,25)){Normal=Vector3.Forward,Tangent=new Vector4(0,1,0,1),Color=Color32.White}};
+    obj=new SceneCustomObject(capture.Scene.SceneWorld);obj.Flags.IsTranslucent=true;obj.Flags.IsOpaque=false;obj.Bounds=new BBox(new Vector3(-1,-1,-26),new Vector3(1,1,26));obj.RenderOverride=_=>{try{attrs.Clear();material.Attributes.MergeTo(attrs);Graphics.Attributes.MergeTo(attrs);attrs.Set("GltfPointLineNoNormal",1f);Graphics.Draw(verts.AsSpan(),verts.Length,material,attrs,Graphics.PrimitiveType.Lines);Interlocked.Increment(ref calls);}catch(Exception e){errors.Enqueue(e.ToString());}};
+@@ -37,6 +37,6 @@
+    var maskBelow=await Take("mask_below_cutoff",.4f);var maskAbove=await Take("mask_above_cutoff",.6f);Measurements.Add(new{maskBelow,maskAbove});Require(maskAbove.sum>1 && maskBelow.sum<maskAbove.sum*.05,"Flagged line mask cutoff failed.");
+    obj.RenderOverride=null;obj.Delete();obj=null;using(capture.Scene.Push())capture.Scene.ProcessDeletes();Require((await capture.Take("empty_after")).Coverage==0,"Delete failed.");
+   }
+-  finally{await MainThread.Wait();if(obj.IsValid()){obj.RenderOverride=null;obj.Delete();}material?.Destroy();shader?.Destroy();}
++  finally{await MainThread.Wait();if(obj.IsValid()){obj.RenderOverride=null;obj.Delete();}material?.Destroy();}
+  }
+ }

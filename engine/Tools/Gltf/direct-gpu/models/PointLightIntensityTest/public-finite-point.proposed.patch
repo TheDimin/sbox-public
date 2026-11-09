@@ -1,0 +1,483 @@
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfModelLoader.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfModelLoader.cs
+@@ -1,5 +1,6 @@
+ using Sandbox.Engine;
+ using Sandbox.Gltf;
++using Sandbox.Gltf.DirectGpu.Lighting;
+ 
+ namespace Sandbox;
+ 
+@@ -17,7 +18,7 @@
+ 	internal static readonly IReadOnlySet<string> SupportedExtensions = new HashSet<string>( StringComparer.Ordinal )
+ 	{
+ 		"KHR_mesh_quantization", "KHR_texture_transform", "KHR_draco_mesh_compression", "KHR_texture_basisu",
+-		"KHR_meshopt_compression", "EXT_meshopt_compression", "EXT_mesh_gpu_instancing", "KHR_materials_unlit", "KHR_materials_variants", "KHR_materials_diffuse_transmission"
++		"KHR_meshopt_compression", "EXT_meshopt_compression", "EXT_mesh_gpu_instancing", "KHR_materials_unlit", "KHR_materials_variants", "KHR_materials_diffuse_transmission", GltfPunctualLightPlan.Extension
+ 	};
+ 
+ 	/// <summary>The loader's document policy, shared by source and compiled input.</summary>
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs
+@@ -1,6 +1,7 @@
+ using Sandbox.Engine;
+ using Sandbox.Gltf;
+ using Sandbox.Gltf.DirectGpu;
++using Sandbox.Gltf.DirectGpu.Lighting;
+ using System.Threading;
+ 
+ namespace Sandbox;
+@@ -38,7 +39,9 @@
+ 		DefaultSceneIndex = document.GetDefaultScene();
+ 		SceneCount = document.Root.TryGetProperty( "scenes", out var scenes ) ? scenes.GetArrayLength() : 0;
+ 		Variants = new GltfVariantCatalog( document.ReadMaterialVariantNames() );
+-		Metadata = new GltfManagedModelMetadata( document, sceneIndex ?? document.GetDefaultScene() );
++		var selectedScene = sceneIndex ?? DefaultSceneIndex;
++		Metadata = new GltfManagedModelMetadata( document, selectedScene );
++		var finitePointLights = GltfFinitePointLightBinding.Prepare( document, selectedScene );
+ 		if ( GltfPublicMaterialRoute.RequiresProjected( document, sceneIndex ?? document.GetDefaultScene() ) )
+ 		{
+ 			var templates = new Dictionary<string, Material>( StringComparer.Ordinal );
+@@ -70,6 +73,7 @@
+ 				SelectTemplate, GltfUnlitMaterialPlan.Features.All, ReleaseProjected, sceneIndex, allowUnselected: true, legacyLit: true, sourceLitFeatureSidedness: true );
+ 		}
+ 		else Asset = GltfGpuAsset.Prepare( document, ComputeShaderPath, finalRelease: Metadata.ReleaseDocument, sceneIndex: sceneIndex, allowUnselected: true );
++		Asset.FinitePointLights = finitePointLights;
+ 	}
+ 
+ 	/// <summary>
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs
+@@ -263,6 +263,7 @@
+ 	}
+ 	internal GltfDocument Document { get; private set; }
+ 	internal int? SelectedSceneIndex { get; private set; }
++	internal Lighting.GltfPunctualLightPlan FinitePointLights { get; set; }
+ 	internal readonly List<Node> Nodes = new();
+ 	internal readonly List<Primitive> Primitives = new();
+ 	internal const string DefaultComputeShaderPath = "shaders/gltf_deform_cs.shader";
+@@ -535,6 +536,7 @@
+ 	private readonly GpuBuffer placementBuffer;
+ 	private readonly Material[] materialOverrides;
+ 	private bool[] nodeVisibility;
++	private readonly Lighting.GltfFinitePointLightBinding finitePointLights;
+ 	private GltfPose pose;
+ 	private NMatrix placement = NMatrix.Identity;
+ 	private bool disposed;
+@@ -543,6 +545,7 @@
+ 	public int DrawCalls { get; private set; }
+ 	public string[] CallbackErrors => errors.ToArray();
+ 	public SceneCustomObject SceneObject => sceneObject;
++	internal bool HasFinitePointLights => finitePointLights is not null;
+ 	public NMatrix Placement
+ 	{
+ 		get => placement;
+@@ -666,7 +669,13 @@
+ 			return;
+ 		}
+ 		if ( (change & (SceneObjectChange.Flags | SceneObjectChange.Visibility | SceneObjectChange.Tint | SceneObjectChange.Tags | SceneObjectChange.Settings)) == 0 ) return;
+-		submissionGate.Run( () => { if ( !disposed ) SyncSortObjects(); } );
++		submissionGate.Run( () =>
++		{
++			if ( disposed ) return;
++			if ( (change & SceneObjectChange.Visibility) != 0 )
++				finitePointLights?.SetEnabled( sceneObject.RenderingEnabled, pose, placement, nodeVisibility );
++			SyncSortObjects();
++		} );
+ 	}
+ 
+ 	internal void SyncSortObjects()
+@@ -729,13 +738,15 @@
+ 			sceneObject.DependentStateChanged += OnPrimaryStateChanged; sceneObject.ManualRenderScope = RenderManually; sceneObject.FrameBufferCopyRequest = RequestFrameBufferCopy; RefreshMaterialClassification();
+ 			sceneObject.RenderOverride = _ => Render();
+ 			SetPose( asset.Document.EvaluatePose() );
++			if ( asset.FinitePointLights is not null )
++				finitePointLights = new( asset.FinitePointLights, world, pose, placement, nodeVisibility );
+ 			sceneObject.RenderingEnabled = initiallyVisible;
+ 		}
+ 		catch ( Exception error )
+ 		{
+ 			GltfGpuCleanup.Rollback( error, draws.Select<Draw, Action>( x => x.Dispose ).Concat( new Action[]
+ 			{
+-				() => variantState?.Dispose(), () => placementBuffer?.Dispose(), () => { if ( sceneObject.IsValid() ) { sceneObject.DependentStateChanged -= OnPrimaryStateChanged; sceneObject.ManualRenderScope = null; sceneObject.FrameBufferCopyRequest = null; sceneObject.RenderOverride = null; sceneObject.Delete(); } }
++				() => finitePointLights?.Dispose(), () => variantState?.Dispose(), () => placementBuffer?.Dispose(), () => { if ( sceneObject.IsValid() ) { sceneObject.DependentStateChanged -= OnPrimaryStateChanged; sceneObject.ManualRenderScope = null; sceneObject.FrameBufferCopyRequest = null; sceneObject.RenderOverride = null; sceneObject.Delete(); } }
+ 			} ) ); throw;
+ 		}
+ 	}
+@@ -760,6 +771,7 @@
+ 			if ( isVisible ) { draw.ComputedRevision = -1; draw.RawComputedRevision = -1; }
+ 			draw.SubmittedRevision = -1; changed = true;
+ 		}
++		finitePointLights?.Update( pose, placement, next );
+ 		nodeVisibility = next;
+ 		if ( changed ) { SubmittedRevision = -1; SyncSortObjects(); }
+ 	}
+@@ -786,6 +798,7 @@
+ 		// Compute before publishing the pose so invalid bounds cannot partially update it.
+ 		var drawBounds = updates.Select( x => GltfGpuRig.Bounds( [(x.Draw.Rig, x.Matrices, x.Weights)], nextPlacement ) ).ToArray();
+ 		var bounds = drawBounds.Length == 0 ? new BBox( global::Vector3.Zero, global::Vector3.Zero ) : BBox.FromBoxes( drawBounds );
++		var preparedLights = finitePointLights?.PrepareUpdate( value, nextPlacement, nodeVisibility );
+ 		placementBuffer.SetData<GltfGpuMatrix>( new[] { new GltfGpuMatrix( nextPlacement ) } );
+ 		for ( var updateIndex = 0; updateIndex < updates.Length; updateIndex++ )
+ 		{
+@@ -805,6 +818,7 @@
+ 			updates[index].Draw.WorldBounds = drawBounds[index];
+ 			if ( updates[index].Draw.SortObject.IsValid() ) updates[index].Draw.SortObject.Bounds = drawBounds[index];
+ 		}
++		finitePointLights?.ApplyUpdate( preparedLights, nodeVisibility );
+ 		pose = value; placement = nextPlacement; PoseRevision++;
+ 		// Empty instances have no required GPU rows; readiness is vacuous,
+ 		// and DrawCalls stays zero rather than fabricating a submission.
+@@ -938,6 +952,8 @@
+ 				draw.RenderAttributes.Clear(); material.Attributes.MergeTo( draw.RenderAttributes );
+ 				if ( only is not null ) sceneObject.CreatedAttributes?.MergeTo( draw.RenderAttributes );
+ 				Graphics.Attributes.MergeTo( draw.RenderAttributes );
++				if ( overridden is null )
++					draw.RenderAttributes.Set( "GltfFinitePointMarker", Lighting.GltfFinitePointLightBinding.MarkerIndex( world ) );
+ 				if ( overridden is null && (material.ShaderName.Equals( "shaders/gltf_stock_sampler.shader", StringComparison.OrdinalIgnoreCase ) || material.ShaderName.Equals( "shaders/gltf_surface_five_uv.shader", StringComparison.OrdinalIgnoreCase ) || material.ShaderName.Equals( "shaders/gltf_diffuse_transmission.shader", StringComparison.OrdinalIgnoreCase )) )
+ 					draw.RenderAttributes.Set( "GltfPointLineNoNormal", plan.Mode is 0 or 1 && !plan.Upload.Attributes.ContainsKey( "NORMAL" ) ? 1f : 0f );
+ 				if ( !RenderTools.SetRenderState( Graphics.Context, draw.RenderAttributes.Get(), Graphics.ModeFor( material ), layout, Graphics.Stats ) ) throw new GltfException( "Stock material rejected the runtime GPU vertex declaration." );
+@@ -1006,7 +1022,7 @@
+ 					try
+ 					{
+ 						GltfGpuCleanup.ReleaseAll( new Action[] { () => { if ( sceneObject.IsValid() ) sceneObject.Delete(); } }
+-							.Concat( draws.Select<Draw, Action>( x => x.Dispose ) ).Concat( new Action[] { () => variantState?.Dispose(), placementBuffer.Dispose, asset.ReleaseInstance } ) );
++							.Concat( draws.Select<Draw, Action>( x => x.Dispose ) ).Concat( new Action[] { () => finitePointLights?.Dispose(), () => variantState?.Dispose(), placementBuffer.Dispose, asset.ReleaseInstance } ) );
+ 					}
+ 					finally { draws.Clear(); pose = null; }
+ 				} );
+--- a/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.Gltf.cs
++++ b/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.Gltf.cs
+@@ -79,7 +79,7 @@
+ 		_sceneObject.ColorTint = Tint;
+ 		_sceneObject.Flags.CastShadows = RenderType == ShadowRenderType.On || RenderType == ShadowRenderType.ShadowsOnly;
+ 		_sceneObject.Flags.IsStatic = GameObject.IsStatic;
+-		_sceneObject.RenderingEnabled = gltfReloadPlan?.Candidate == gltfInstance ? false : Model.HasRenderMeshes();
++		_sceneObject.RenderingEnabled = gltfReloadPlan?.Candidate == gltfInstance ? false : (Model.HasRenderMeshes() || gltfInstance.HasFinitePointLights);
+ 		RenderOptions.Apply( _sceneObject );
+ 		if ( RenderType == ShadowRenderType.ShadowsOnly ) _sceneObject.Flags.SetFlag( Rendering.SceneObjectFlags.ExcludeGameLayer, true );
+ 		ApplyGltfMaterialOverrides();
+--- a/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.GltfReload.cs
++++ b/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.GltfReload.cs
+@@ -72,7 +72,7 @@
+ 		if ( plan.Applied )
+ 		{
+ 			plan.PreviousObject.RenderingEnabled = false;
+-			plan.CandidateObject.RenderingEnabled = plan.PreviousRendering && (Model ?? Model.Load( "models/dev/box.vmdl" )).HasRenderMeshes();
++			plan.CandidateObject.RenderingEnabled = plan.PreviousRendering && ((Model ?? Model.Load( "models/dev/box.vmdl" )).HasRenderMeshes() || plan.Candidate?.HasFinitePointLights == true);
+ 		}
+ 	}
+ 	internal void FinishGltfReload()
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/Lighting/GltfPunctualLightInstances.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/Lighting/GltfPunctualLightInstances.cs
+@@ -51,7 +51,18 @@
+ 	internal void Update( GltfPose pose, Matrix4x4 placement, IReadOnlyList<bool> visibility )
+ 	{
+ 		ObjectDisposedException.ThrowIf( disposed, this );
+-		var states = Preflight( plan, pose, placement, visibility );
++		ApplyUpdate( PrepareUpdate( pose, placement, visibility ), visibility );
++	}
++
++	internal IReadOnlyList<GltfPunctualLightPlan.State> PrepareUpdate( GltfPose pose, Matrix4x4 placement, IReadOnlyList<bool> visibility )
++	{
++		ObjectDisposedException.ThrowIf( disposed, this );
++		return Preflight( plan, pose, placement, visibility );
++	}
++
++	internal void ApplyUpdate( IReadOnlyList<GltfPunctualLightPlan.State> states, IReadOnlyList<bool> visibility )
++	{
++		ObjectDisposedException.ThrowIf( disposed, this );
+ 		for ( var i = 0; i < states.Count; i++ ) lights[i].Apply( states[i], visibility[states[i].Binding.Node] );
+ 	}
+ 
+--- /dev/null
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/Lighting/GltfFinitePointLightBinding.cs
+@@ -0,0 +1,153 @@
++using System.Numerics;
++using System.Runtime.CompilerServices;
++using System.Threading;
++
++namespace Sandbox.Gltf.DirectGpu.Lighting;
++
++/// <summary>Finite authored point lights for the managed glTF material routes.</summary>
++internal sealed class GltfFinitePointLightBinding : IDisposable
++{
++	private sealed class WorldState
++	{
++		internal readonly int Marker;
++		internal int Owners;
++
++		internal WorldState( int marker ) => Marker = marker;
++	}
++
++	// Keep the private cookie index leased for the graphics session. Its index
++	// cannot be recycled into an ordinary cookie while queued draws retire.
++	private static Texture marker;
++	private static readonly ConditionalWeakTable<SceneWorld, WorldState> worlds = new();
++
++	private readonly WorldState worldState;
++	private readonly GltfPunctualLightInstances instances;
++	private readonly bool[] hidden;
++	private bool enabled;
++	private bool disposed;
++
++	internal static GltfPunctualLightPlan Prepare( GltfDocument document, int? selectedScene )
++	{
++		var root = document.Root;
++		if ( !root.TryGetProperty( "extensionsUsed", out var used ) ||
++			!used.EnumerateArray().Any( item => item.GetString() == GltfPunctualLightPlan.Extension ) ) return null;
++		var required = root.TryGetProperty( "extensionsRequired", out var requirements ) &&
++			requirements.EnumerateArray().Any( item => item.GetString() == GltfPunctualLightPlan.Extension );
++
++		// A required declaration applies to the asset even if this load selects
++		// a different scene. The compiler can preserve portable data that this
++		// runtime does not implement.
++		if ( required )
++		{
++			if ( !root.TryGetProperty( "extensions", out var extensions ) ||
++				!extensions.TryGetProperty( GltfPunctualLightPlan.Extension, out var lightExtension ) ||
++				!lightExtension.TryGetProperty( "lights", out var definitions ) ||
++				definitions.ValueKind != System.Text.Json.JsonValueKind.Array )
++				throw new GltfException( "Required KHR_lights_punctual must declare its light definitions." );
++			for ( int i = 0; i < definitions.GetArrayLength(); i++ )
++			{
++				var light = document.ReadLight( i );
++				if ( Unsupported( light.Type == "point", light.Range ) is { } reason )
++					throw new GltfException( $"Required KHR_lights_punctual contains unsupported {reason}." );
++			}
++		}
++
++		var plan = GltfPunctualLightPlan.CreateForScene( document, selectedScene, allowUnselected: true );
++		if ( plan.UsesUnsupportedOptionalFallback || plan.Bindings.Count == 0 ) return null;
++		var unsupported = plan.Bindings.Select( binding => Unsupported( binding.Kind == GltfPunctualLightPlan.LightKind.Point, binding.RangeMeters ) )
++			.FirstOrDefault( reason => reason is not null );
++		if ( unsupported is null ) return plan;
++		Log.Warning( $"KHR_lights_punctual contains unsupported {unsupported}. The selected scene uses the core no-light fallback." );
++		return null;
++	}
++
++	private static string Unsupported( bool point, float? range )
++	{
++		if ( !point ) return "spot or directional lights";
++		if ( !range.HasValue ) return "unbounded point lights";
++		float radius = (float)(range.Value / .0254);
++		float squaredRadius = radius * radius;
++		return squaredRadius > 0 && float.IsFinite( squaredRadius ) ? null : "point light ranges outside the finite native radius domain";
++	}
++
++	internal static int MarkerIndex( SceneWorld world ) =>
++		worlds.TryGetValue( world, out var state ) && Volatile.Read( ref state.Owners ) > 0 ? state.Marker : -1;
++
++	internal GltfFinitePointLightBinding( GltfPunctualLightPlan plan, SceneWorld world, GltfPose pose, Matrix4x4 placement, IReadOnlyList<bool> visibility )
++	{
++		ThreadSafe.AssertIsMainThread();
++		hidden = new bool[visibility.Count];
++		marker ??= Texture.Create( 1, 1, ImageFormat.RGBA8888 ).WithMips( 1 )
++			.WithData( new byte[] { 255, 255, 255, 255 } ).WithStaticUsage().Finish();
++		if ( !marker.IsValid || marker.Index < 0 ) throw new GltfException( "The private glTF point light marker is unavailable." );
++		worldState = worlds.GetValue( world, _ => new WorldState( marker.Index ) );
++		instances = GltfPunctualLightInstances.Create( plan, new Factory( world ), pose, placement, hidden );
++		Interlocked.Increment( ref worldState.Owners );
++	}
++
++	internal void SetEnabled( bool next, GltfPose pose, Matrix4x4 placement, IReadOnlyList<bool> visibility )
++	{
++		if ( enabled == next ) return;
++		instances.Update( pose, placement, next ? visibility : hidden );
++		enabled = next;
++	}
++
++	internal IReadOnlyList<GltfPunctualLightPlan.State> PrepareUpdate( GltfPose pose, Matrix4x4 placement, IReadOnlyList<bool> visibility ) =>
++		instances.PrepareUpdate( pose, placement, enabled ? visibility : hidden );
++
++	internal void ApplyUpdate( IReadOnlyList<GltfPunctualLightPlan.State> states, IReadOnlyList<bool> visibility ) =>
++		instances.ApplyUpdate( states, enabled ? visibility : hidden );
++
++	internal void Update( GltfPose pose, Matrix4x4 placement, IReadOnlyList<bool> visibility ) =>
++		instances.Update( pose, placement, enabled ? visibility : hidden );
++
++	public void Dispose()
++	{
++		if ( disposed ) return;
++		disposed = true;
++		try { instances.Dispose(); }
++		finally { Interlocked.Decrement( ref worldState.Owners ); }
++	}
++
++	private sealed class Factory( SceneWorld world ) : GltfPunctualLightInstances.IFactory
++	{
++		public GltfPunctualLightInstances.ILight Create( GltfPunctualLightPlan.Binding binding ) => new OwnedPoint( world, binding );
++	}
++
++	private sealed class OwnedPoint : GltfPunctualLightInstances.ILight
++	{
++		private ScenePointLight light;
++		private readonly Color color;
++
++		internal OwnedPoint( SceneWorld world, GltfPunctualLightPlan.Binding binding )
++		{
++			var rgb = binding.LinearColor * binding.Intensity;
++			color = new Color( rgb.X, rgb.Y, rgb.Z );
++			light = new ScenePointLight( world, global::Vector3.Zero, (float)binding.RangeInches.Value, Color.Black );
++			try
++			{
++				light.RenderDiffuse = false;
++				light.RenderSpecular = false;
++				light.RenderTransmissive = false;
++				light.FogLighting = SceneLight.FogLightingMode.None;
++				light.ShadowsEnabled = false;
++				light.LightCookie = marker;
++			}
++			catch { Dispose(); throw; }
++		}
++
++		public void Apply( GltfPunctualLightPlan.State state, bool visible )
++		{
++			var position = state.PositionInches;
++			light.Position = new global::Vector3( position.X, position.Y, position.Z );
++			light.LightColor = visible ? color : Color.Black;
++		}
++
++		public void Dispose()
++		{
++			var owned = light;
++			light = null;
++			owned?.Delete();
++		}
++	}
++}
+--- a/game/core/shaders/gltf_stock_sampler.shader
++++ b/game/core/shaders/gltf_stock_sampler.shader
+@@ -83,6 +83,7 @@
+ 
+ 	// Compile common lighting and decals with their original stock sampler names.
+ 	// Only the material processing include below sees the aliases.
++	#define GLTF_FINITE_POINT_LIGHTS
+ 	#include "vr_common_ps_code.fxc"
+ 	#include "common_samplers.fxc"
+ 	#include "vr_detail_texture.fxc"
+--- a/game/core/shaders/gltf_surface_five_uv.shader
++++ b/game/core/shaders/gltf_surface_five_uv.shader
+@@ -58,6 +58,7 @@
+ {
+ 	#define DEPTH_STATE_ALREADY_SET
+ 	#define BLEND_MODE_ALREADY_SET
++	#define GLTF_FINITE_POINT_LIGHTS
+ 	#include "common/pixel.hlsl"
+ 	RenderState( DepthEnable, true );
+ 	RenderState( DepthFunc, GREATER_EQUAL );
+--- a/game/core/shaders/gltf_diffuse_transmission.shader
++++ b/game/core/shaders/gltf_diffuse_transmission.shader
+@@ -20,6 +20,7 @@
+ 	#ifndef S_TRANSLUCENT
+ 	#define S_TRANSLUCENT 0
+ 	#endif
++	#define GLTF_FINITE_POINT_LIGHTS
+ 	#include "common/shared.hlsl"
+ 	#include "procedural.hlsl"
+ 	#define S_UV2 1
+--- a/game/core/shaders/vr_lighting.fxc
++++ b/game/core/shaders/vr_lighting.fxc
+@@ -9,6 +9,9 @@
+ #include "Shadows/ProjectedShadow.hlsl"
+ #include "Shadows/Obsolete.hlsl"
+ #include "common/lightbinner.hlsl"
++#ifdef GLTF_FINITE_POINT_LIGHTS
++	#include "common/gltf/FinitePointLighting.hlsl"
++#endif
+ 
+ //-------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+@@ -312,11 +315,17 @@
+ }
+ 
+ //---------------------------------------------------------------------------------------------------------------------------------------------------------
++#ifdef GLTF_FINITE_POINT_LIGHTS
++void ComputeDirectLightingForLight( const FinalCombinerInput_t f, float3 vReceiverNormalWs, BinnedLight lightData, inout float3 vDiffuse, inout float3 vSpecular, inout float3 vTransmissive, bool bBaked = false, bool bModulators = false )
++#else
+ void ComputeDirectLightingForLight( const FinalCombinerInput_t f, float3 vReceiverNormalWs, const BinnedLight lightData, inout float3 vDiffuse, inout float3 vSpecular, inout float3 vTransmissive, bool bBaked = false, bool bModulators = false )
++#endif
+ {
+ 	const float2 vDiffuseExponent = ( ( 1.0 - f.vRoughness.xy ) * 0.8 ) + 0.6; // 0.8 and 0.6 are magic numbers;
+ 
++#ifndef GLTF_FINITE_POINT_LIGHTS
+ 	float3 vLightColor		= lightData.Color;
++#endif
+ 	float3 vLightPositionWs = lightData.GetPosition();
+ 	float3 vPositionToLightRayWs = vLightPositionWs - f.vPositionWs.xyz; // "L"
+ 	float flDistToLightSq = dot( vPositionToLightRayWs.xyz, vPositionToLightRayWs.xyz );
+@@ -324,6 +333,11 @@
+ 	// Reject before any other work: clusters are coarse, so many pixels in a light's list are out of its range
+ 	if ( flDistToLightSq > lightData.RadiusSquared && !bBaked )
+ 		return;
++#ifdef GLTF_FINITE_POINT_LIGHTS
++	if ( !bBaked && !GltfAdjustFinitePointLight( lightData, flDistToLightSq ) )
++		return;
++	float3 vLightColor = lightData.Color;
++#endif
+ 
+ 	float3 vPositionToCameraDirWs = CalculatePositionToCameraDirWs( f.vPositionWs.xyz);
+ 	float3 vPositionToLightDirWs = vPositionToLightRayWs * rsqrt( flDistToLightSq );
+--- a/game/core/shaders/common/classes/Light.hlsl
++++ b/game/core/shaders/common/classes/Light.hlsl
+@@ -3,6 +3,9 @@
+ 
+ #include "common/Shadow.hlsl"
+ #include "common/lightbinner.hlsl"
++#ifdef GLTF_FINITE_POINT_LIGHTS
++    #include "common/gltf/FinitePointLighting.hlsl"
++#endif
+ #include "common/classes/LightModulators.hlsl"
+ #include "light_probe_volume.fxc"
+ #include "baked_lighting_constants.fxc"
+@@ -290,7 +293,14 @@
+ 
+             // Only clusters a modulated light reaches pay for the filter
+             bool bModulators = ( range.Features & ( LightModulators::Active() ? ClusterFeature_LightModulators : 0 ) ) != 0;
++#ifdef GLTF_FINITE_POINT_LIGHTS
++            BinnedLight data = DynamicLightConstantByIndex( lightIndex );
++            float3 ray = data.GetPosition() - vPositionWs;
++            if ( !GltfAdjustFinitePointLight( data, dot( ray, ray ) ) ) return light;
++            light.Init( vPositionWs, data, vPositionSs, vReceiverNormalWs, bModulators );
++#else
+             light.Init( vPositionWs, DynamicLightConstantByIndex( lightIndex ), vPositionSs, vReceiverNormalWs, bModulators );
++#endif
+             return light;
+         }
+ 
+--- /dev/null
++++ b/game/core/shaders/common/gltf/FinitePointLighting.hlsl
+@@ -0,0 +1,34 @@
++#ifndef GLTF_FINITE_POINT_LIGHTING_H
++#define GLTF_FINITE_POINT_LIGHTING_H
++
++// No per-draw binding means no marked light. The native no-cookie sentinel
++// cannot match this signed default.
++int g_nGltfFinitePointMarker < Attribute( "GltfFinitePointMarker" ); Default( -1 ); >;
++
++bool GltfAdjustFinitePointLight( inout BinnedLight data, float distanceSq )
++{
++	if ( g_nGltfFinitePointMarker < 0 || data.Type != LightType::LightTypePoint ||
++		!data.HasLightCookie() || data.LightCookieTextureIndex != (uint)g_nGltfFinitePointMarker )
++		return true;
++
++	// A point singularity has no finite receiver irradiance. Keep the stock
++	// BRDF normalization away from zero and reject pixels outside the range.
++	if ( distanceSq <= 0.0 || distanceSq >= data.RadiusSquared )
++		return false;
++
++	const float distanceRatioSq = distanceSq / data.RadiusSquared;
++	const float smoothRange = saturate( 1.0 - distanceRatioSq * distanceRatioSq );
++	const float metersSq = max( distanceSq * (0.0254 * 0.0254), 1e-12 );
++	data.Color *= (1.0 / 3.141592653589793) * smoothRange / metersSq;
++
++	// Change the shader-local copy only. Keep the native clustered list, BRDF,
++	// shadow index and modulator data. Stock material variants never enable this hook.
++	data.Flags &= ~(uint)LightFlags::LightCookieEnabled;
++	data.Flags |= (uint)LightFlags::DiffuseEnabled | (uint)LightFlags::SpecularEnabled | (uint)LightFlags::TransmissiveEnabled;
++	data.LinearFalloff = 0.0;
++	data.QuadraticFalloff = 1.0 / max( distanceSq, 1.0 );
++	data.FalloffBias = 0.0;
++	return true;
++}
++
++#endif

@@ -1,0 +1,454 @@
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs
+@@ -505,6 +505,7 @@
+ 		internal Material EffectiveMaterial;
+ 		internal bool IsTranslucent, IsAlphaTest;
+ 		internal BBox WorldBounds;
++		internal SceneCustomObject SortObject;
+ 		internal int DrawCalls;
+ 		internal long SubmittedRevision = -1;
+ 		internal Graphics.PrimitiveType? SubmittedPrimitiveType;
+@@ -516,11 +517,16 @@
+ 		public void Dispose()
+ 		{
+ 			var buffers = new[] { Output, Palette, Weights, Indices }; Output = Palette = Weights = Indices = null;
+-			GltfGpuCleanup.ReleaseAll( buffers.Where( x => x is not null ).Select<GpuBuffer, Action>( x => x.Dispose ).Concat( [DisposeRawOutput] ) );
++			var child = SortObject; SortObject = null;
++			GltfGpuCleanup.ReleaseAll( new Action[] { () => { if ( child.IsValid() ) { child.RenderOverride = null; child.Delete(); } } }
++				.Concat( buffers.Where( x => x is not null ).Select<GpuBuffer, Action>( x => x.Dispose ) ).Concat( [DisposeRawOutput] ) );
+ 		}
+ 	}
+ 	private readonly GltfGpuAsset asset;
+ 	private readonly GlobalContext ownerContext;
++	private readonly SceneWorld world;
++	private bool manualRendering;
++	private Material manualMaterial;
+ 	private readonly List<Draw> draws = new();
+ 	private readonly GltfGpuSubmissionGate submissionGate = new();
+ 	private readonly SceneCustomObject sceneObject;
+@@ -569,7 +575,9 @@
+ 		foreach ( var material in candidate ) ValidateMaterial( material );
+ 		ChangeOverrides( values => Array.Copy( candidate, values, values.Length ), candidate.Any( material => material is not null ) ? () => EnsureRawOverrideOutputs() : null );
+ 	}
+-	private void ChangeOverrides( Action<Material[]> change, Action prepare = null )
++	private void ChangeOverrides( Action<Material[]> change, Action prepare = null ) => submissionGate.Run( () => ChangeOverridesExclusive( change, prepare ) );
++
++	private void ChangeOverridesExclusive( Action<Material[]> change, Action prepare )
+ 	{
+ 		var before = (Material[])materialOverrides.Clone();
+ 		var candidate = (Material[])before.Clone(); change( candidate );
+@@ -582,31 +590,89 @@
+ 			GltfGpuCleanup.Rollback( error, [RefreshMaterialClassification] ); throw;
+ 		}
+ 	}
+-	private void RefreshMaterialClassification()
+-	{
+-		var opaque = false; var translucent = false; var alphaTest = false; var changed = false;
++	private void RefreshMaterialClassification() => submissionGate.Run( RefreshMaterialClassificationExclusive );
++
++	private void RefreshMaterialClassificationExclusive()
++	{
+ 		var selected = variantState?.Current;
+-		foreach ( var draw in draws )
++		var states = draws.Select( draw =>
+ 		{
+ 			var primitive = draw.Node.Primitive;
+ 			var material = materialOverrides[primitive.MaterialSlot] ?? selected?.Bindings[draw.VariantRow].Value.Material ?? primitive.Material;
+-			// Native flags are live: assigning the same material must still detect
+-			// an in-place feature change when this explicit refresh is invoked.
+-			var isTranslucent = material.Flags.IsTranslucent; var isAlphaTest = material.Flags.IsAlphaTest;
+-			opaque |= !isTranslucent; translucent |= isTranslucent;
+-			alphaTest |= !isTranslucent && isAlphaTest;
+-			var rawRoute = asset.HasRawVariantRoute( primitive ) && materialOverrides[primitive.MaterialSlot] is not null;
+-			if ( ReferenceEquals( draw.EffectiveMaterial, material ) && draw.IsTranslucent == isTranslucent && draw.IsAlphaTest == isAlphaTest && draw.LastRawRoute == rawRoute ) continue;
+-			draw.EffectiveMaterial = material; draw.IsTranslucent = isTranslucent; draw.IsAlphaTest = isAlphaTest;
+-			draw.LastRawRoute = rawRoute;
+-			// Geometry is unchanged, but a changed material/pass must actually submit.
+-			draw.SubmittedRevision = -1; changed = true;
+-		}
+-		if ( sceneObject.Flags.IsOpaque != opaque ) sceneObject.Flags.IsOpaque = opaque;
+-		if ( sceneObject.Flags.IsTranslucent != translucent ) sceneObject.Flags.IsTranslucent = translucent;
+-		if ( sceneObject.Flags.HasFlag( SceneObjectFlags.AlphaTestZPrepass ) != alphaTest ) sceneObject.Flags.SetFlag( SceneObjectFlags.AlphaTestZPrepass, alphaTest );
+-		if ( changed ) SubmittedRevision = -1;
+-	}
++			return (Draw: draw, Material: material, Translucent: material.Flags.IsTranslucent, AlphaTest: material.Flags.IsAlphaTest,
++				Raw: asset.HasRawVariantRoute( primitive ) && materialOverrides[primitive.MaterialSlot] is not null);
++		} ).ToArray();
++		var created = new List<(Draw Draw, SceneCustomObject Object)>();
++		try
++		{
++			// Allocate all required sort units before publishing any class change.
++			foreach ( var state in states )
++			{
++				if ( !state.Translucent || state.Draw.SortObject.IsValid() ) continue;
++				if ( Graphics.IsActive ) throw new GltfException( "Transparent sort objects cannot be created during rendering." );
++				var draw = state.Draw; var child = new SceneCustomObject( world ) { RenderingEnabled = false };
++				created.Add( (draw, child) ); child.Bounds = draw.WorldBounds; child.RenderOverride = _ => Render( draw );
++			}
++			foreach ( var item in created ) item.Draw.SortObject = item.Object;
++			var changed = false;
++			foreach ( var state in states )
++			{
++				var draw = state.Draw;
++				if ( ReferenceEquals( draw.EffectiveMaterial, state.Material ) && draw.IsTranslucent == state.Translucent && draw.IsAlphaTest == state.AlphaTest && draw.LastRawRoute == state.Raw ) continue;
++				draw.EffectiveMaterial = state.Material; draw.IsTranslucent = state.Translucent; draw.IsAlphaTest = state.AlphaTest; draw.LastRawRoute = state.Raw;
++				draw.SubmittedRevision = -1; changed = true;
++			}
++			var opaque = states.Any( x => !x.Translucent ); var translucent = states.Any( x => x.Translucent );
++			var alphaTest = states.Any( x => !x.Translucent && x.AlphaTest );
++			if ( sceneObject.Flags.IsOpaque != opaque ) sceneObject.Flags.IsOpaque = opaque;
++			if ( sceneObject.Flags.IsTranslucent != translucent ) sceneObject.Flags.IsTranslucent = translucent;
++			if ( sceneObject.Flags.HasFlag( SceneObjectFlags.AlphaTestZPrepass ) != alphaTest ) sceneObject.Flags.SetFlag( SceneObjectFlags.AlphaTestZPrepass, alphaTest );
++			SyncSortObjects();
++			if ( changed ) SubmittedRevision = -1;
++		}
++		catch
++		{
++			foreach ( var item in created ) { if ( ReferenceEquals( item.Draw.SortObject, item.Object ) ) item.Draw.SortObject = null; if ( item.Object.IsValid() ) { item.Object.RenderOverride = null; item.Object.Delete(); } }
++			throw;
++		}
++	}
++
++	// Mirror public primary presentation before native collection. Attributes are
++	// merged live from the primary in the callback; in-place edits need no copy.
++	private void OnPrimaryStateChanged( SceneObjectChange change )
++	{
++		if ( (change & SceneObjectChange.Removed) != 0 )
++		{
++			if ( ThreadSafe.IsMainThread ) Dispose(); else MainThread.Queue( () => Dispose() );
++			return;
++		}
++		if ( (change & (SceneObjectChange.Flags | SceneObjectChange.Visibility | SceneObjectChange.Tint | SceneObjectChange.Tags | SceneObjectChange.Settings)) == 0 ) return;
++		submissionGate.Run( () => { if ( !disposed ) SyncSortObjects(); } );
++	}
++
++	internal void SyncSortObjects()
++	{
++		if ( !sceneObject.IsValid() ) return;
++		const SceneObjectFlags mask = SceneObjectFlags.IsDecal | SceneObjectFlags.ViewModelLayer | SceneObjectFlags.Skybox3DLayer |
++			SceneObjectFlags.DisabledInLowQuality | SceneObjectFlags.EffectsBloomLayer | SceneObjectFlags.GameOverlayLayer | SceneObjectFlags.ExcludeGameLayer |
++			SceneObjectFlags.UIOverlayLayer | SceneObjectFlags.ToolsUnlitLayer | SceneObjectFlags.ToolSceneOverlayLayer |
++			SceneObjectFlags.HammerPrefabStencilLayer | SceneObjectFlags.HammerSelectionStencilLayer | SceneObjectFlags.HammerEnabledStencilLayer |
++			SceneObjectFlags.WantsFrameBufferCopyTexture | SceneObjectFlags.StaticObject | SceneObjectFlags.EnvironmentMapped |
++			SceneObjectFlags.DoesNotAcceptDecals | SceneObjectFlags.NoZPrepass | SceneObjectFlags.ForwardLayerOnly |
++			SceneObjectFlags.NoOcclusionCulling | SceneObjectFlags.NoPVSCulling | SceneObjectFlags.HideInCubemaps |
++			SceneObjectFlags.ExecuteBefore | SceneObjectFlags.ExecuteAfter | SceneObjectFlags.NeedsLightProbe;
++		var flags = sceneObject.native.GetFlags() & mask;
++		foreach ( var draw in draws )
++		{
++			var child = draw.SortObject; if ( !child.IsValid() ) continue;
++			child.native.ChangeFlags( flags, mask ); child.NotifyChanged( SceneObjectChange.Flags );
++			child.Flags.IsOpaque = false; child.Flags.IsTranslucent = true;
++			child.Flags.CastShadows = false; child.ColorTint = sceneObject.ColorTint;
++			child.Tags.SetFrom( sceneObject.Tags ); child.CallbackTarget = sceneObject.CallbackTarget; child.Component = sceneObject.Component;
++			child.RenderingEnabled = sceneObject.RenderingEnabled && draw.IsTranslucent && nodeVisibility[draw.Node.Index];
++		}
++	}
++
+ 	private static void ValidateMaterial( Material material )
+ 	{
+ 		if ( material is not null && (!material.IsValid || material.IsError) ) throw new GltfException( "Material override is invalid." );
+@@ -614,7 +680,7 @@
+ 
+ 	internal GltfGpuInstance( GltfGpuAsset asset, SceneWorld world, bool initiallyVisible = true )
+ 	{
+-		this.asset = asset; ownerContext = GlobalContext.Current;
++		this.asset = asset; this.world = world; ownerContext = GlobalContext.Current;
+ 		nodeVisibility = asset.Document.EvaluateNodeVisibility();
+ 		materialOverrides = new Material[asset.MaterialSlotSourceIndices.Count];
+ 		try
+@@ -639,15 +705,17 @@
+ 				attributes.Set( "GenerateFlatNormals", plan.GenerateFlatNormals ? 1 : 0 );
+ 			}
+ 			variantState = asset.CreateVariantState();
+-			sceneObject = new SceneCustomObject( world ) { RenderingEnabled = initiallyVisible }; RefreshMaterialClassification();
++			sceneObject = new SceneCustomObject( world ) { RenderingEnabled = false };
++			sceneObject.DependentStateChanged += OnPrimaryStateChanged; sceneObject.ManualRenderScope = RenderManually; RefreshMaterialClassification();
+ 			sceneObject.RenderOverride = _ => Render();
+ 			SetPose( asset.Document.EvaluatePose() );
++			sceneObject.RenderingEnabled = initiallyVisible;
+ 		}
+ 		catch ( Exception error )
+ 		{
+ 			GltfGpuCleanup.Rollback( error, draws.Select<Draw, Action>( x => x.Dispose ).Concat( new Action[]
+ 			{
+-				() => variantState?.Dispose(), () => placementBuffer?.Dispose(), () => { if ( sceneObject.IsValid() ) { sceneObject.RenderOverride = null; sceneObject.Delete(); } }
++				() => variantState?.Dispose(), () => placementBuffer?.Dispose(), () => { if ( sceneObject.IsValid() ) { sceneObject.DependentStateChanged -= OnPrimaryStateChanged; sceneObject.ManualRenderScope = null; sceneObject.RenderOverride = null; sceneObject.Delete(); } }
+ 			} ) ); throw;
+ 		}
+ 	}
+@@ -656,6 +724,11 @@
+ 	internal void SetNodeVisibilityOverrides( IReadOnlyDictionary<int, bool> overrides )
+ 	{
+ 		ObjectDisposedException.ThrowIf( disposed, this ); ThreadSafe.AssertIsMainThread();
++		submissionGate.Run( () => SetNodeVisibilityOverridesExclusive( overrides ) );
++	}
++
++	private void SetNodeVisibilityOverridesExclusive( IReadOnlyDictionary<int, bool> overrides )
++	{
+ 		var next = asset.Document.EvaluateNodeVisibility( overrides );
+ 		var changed = false;
+ 		foreach ( var draw in draws )
+@@ -668,7 +741,7 @@
+ 			draw.SubmittedRevision = -1; changed = true;
+ 		}
+ 		nodeVisibility = next;
+-		if ( changed ) SubmittedRevision = -1;
++		if ( changed ) { SubmittedRevision = -1; SyncSortObjects(); }
+ 	}
+ 
+ 	public void SetPose( GltfPose value )
+@@ -679,6 +752,11 @@
+ 	private void ApplyPose( GltfPose value, NMatrix nextPlacement )
+ 	{
+ 		ThreadSafe.AssertIsMainThread();
++		submissionGate.Run( () => ApplyPoseExclusive( value, nextPlacement ) );
++	}
++
++	private void ApplyPoseExclusive( GltfPose value, NMatrix nextPlacement )
++	{
+ 		asset.Document.ValidatePoseOwnership( value );
+ 		// Preflight all rows before publishing a new revision or touching GPU state.
+ 		var updates = draws.Select( draw => (Draw: draw, Matrices: draw.Rig.Evaluate( value, draw.Node.LocalTransform ), Weights: value.GetMorphWeights( draw.Node.Index ), Reversed: draw.Rig.ReverseWinding( value, nextPlacement, draw.Node.LocalTransform )) ).ToArray();
+@@ -692,7 +770,6 @@
+ 		for ( var updateIndex = 0; updateIndex < updates.Length; updateIndex++ )
+ 		{
+ 			var update = updates[updateIndex];
+-			update.Draw.WorldBounds = drawBounds[updateIndex];
+ 			update.Draw.Palette.SetData<GltfGpuMatrix>( update.Matrices );
+ 			if ( update.Weights.Length != 0 ) update.Draw.Weights.SetData<float>( update.Weights );
+ 			if ( update.Draw.Reversed != update.Reversed )
+@@ -702,6 +779,11 @@
+ 					for ( var i = 0; i < indices.Length; i += 3 ) (indices[i + 1], indices[i + 2]) = (indices[i + 2], indices[i + 1]);
+ 				update.Draw.Indices.SetData<uint>( indices ); update.Draw.Reversed = update.Reversed;
+ 			}
++		}
++		for ( var index = 0; index < updates.Length; index++ )
++		{
++			updates[index].Draw.WorldBounds = drawBounds[index];
++			if ( updates[index].Draw.SortObject.IsValid() ) updates[index].Draw.SortObject.Bounds = drawBounds[index];
+ 		}
+ 		pose = value; placement = nextPlacement; PoseRevision++;
+ 		// Empty instances have no required GPU rows; readiness is vacuous,
+@@ -737,15 +819,31 @@
+ 		return (uint)Math.Clamp( 100.0f * distance, 0, 4294967040.0f );
+ 	}
+ 
+-	private void Render()
++	internal void RenderManually( Transform? transform, Color? color, Material material )
++	{
++		// The current output has world placement baked in. Do not silently ignore
++		// caller overrides until a temporary placement/tint path is implemented.
++		if ( transform.HasValue || color.HasValue )
++			throw new GltfException( "Manual glTF transform/color overrides are not yet supported." );
++		submissionGate.Run( () =>
++		{
++			if ( material is not null && draws.Any( draw => asset.HasRawVariantRoute( draw.Node.Primitive ) && draw.RawOutput is null ) )
++				throw new GltfException( "Manual material override requires a prepared raw route; assign the override before entering a render block." );
++			var previous = manualRendering; var previousMaterial = manualMaterial;
++			manualRendering = true; manualMaterial = material;
++			try { RenderExclusive( null ); } finally { manualRendering = previous; manualMaterial = previousMaterial; }
++		} );
++	}
++
++	private void Render( Draw only = null )
+ 	{
+ 		// A native frame can submit the same custom object concurrently for
+ 		// different views. Draw attributes, compute revisions and counters are
+ 		// mutable per instance, so keep the whole callback in one CPU boundary.
+-		submissionGate.Run( RenderExclusive );
+-	}
+-
+-	private void RenderExclusive()
++		submissionGate.Run( () => RenderExclusive( only ) );
++	}
++
++	private void RenderExclusive( Draw only )
+ 	{
+ 		// A callback already queued by native can enter after Dispose detached
+ 		// RenderOverride. Check under the same gate that protects retirement.
+@@ -760,20 +858,35 @@
+ 			// still resolved below from the captured effective variant/override,
+ 			// rather than trusting cached flags during a material transition.
+ 			IEnumerable<Draw> submission = draws;
+-			if ( layer is SceneLayerType.Translucent or SceneLayerType.EffectsTranslucent )
++			if ( manualRendering )
++			{
++				var camera = Graphics.CameraPosition;
++				bool IsManualTranslucent( Draw draw )
++				{
++					var primitive = draw.Node.Primitive;
++					return (manualMaterial ?? overrides[primitive.MaterialSlot] ?? selected?.Bindings[draw.VariantRow].Value.Material ?? primitive.Material).Flags.IsTranslucent;
++				}
++				submission = draws.OrderBy( x => IsManualTranslucent( x ) ? 1 : 0 )
++					.ThenByDescending( x => IsManualTranslucent( x ) ? TranslucentDistance( x.WorldBounds, camera ) : 0 );
++			}
++			else if ( layer is SceneLayerType.Translucent or SceneLayerType.EffectsTranslucent )
+ 			{
+ 				var camera = Graphics.CameraPosition;
+ 				submission = draws.OrderByDescending( x => TranslucentDistance( x.WorldBounds, camera ) );
+ 			}
+ 			foreach ( var draw in submission )
+ 			{
++				if ( only is not null && !ReferenceEquals( only, draw ) ) continue;
+ 				if ( !nodeVisibility[draw.Node.Index] ) continue;
+ 				var primitive = draw.Node.Primitive;
+ 				var packet = selected?.Bindings[draw.VariantRow].Value;
+-				var overridden = overrides[primitive.MaterialSlot]; var material = overridden ?? packet?.Material ?? primitive.Material;
++				var overridden = manualRendering && manualMaterial is not null ? manualMaterial : overrides[primitive.MaterialSlot];
++				var material = overridden ?? packet?.Material ?? primitive.Material;
+ 				var translucent = material.Flags.IsTranslucent;
+-				if ( (layer is SceneLayerType.Translucent or SceneLayerType.EffectsTranslucent) && !translucent ) continue;
+-				if ( (layer is SceneLayerType.Opaque or SceneLayerType.DepthPrepass or SceneLayerType.EffectsOpaque or SceneLayerType.Shadow) && translucent ) continue;
++				if ( only is not null && (!translucent || layer is not (SceneLayerType.Translucent or SceneLayerType.EffectsTranslucent)) ) continue;
++				if ( only is null && !manualRendering && translucent && layer is (SceneLayerType.Translucent or SceneLayerType.EffectsTranslucent) ) continue;
++				if ( (layer is SceneLayerType.Translucent or SceneLayerType.EffectsTranslucent) && !translucent && !manualRendering ) continue;
++				if ( (layer is SceneLayerType.Opaque or SceneLayerType.DepthPrepass or SceneLayerType.EffectsOpaque or SceneLayerType.Shadow) && translucent && !manualRendering ) continue;
+ 				var raw = overridden is not null && asset.HasRawVariantRoute( primitive );
+ 				var plan = raw ? asset.GetRawVariantPlan( primitive ) : packet?.Plan ?? primitive.Plan;
+ 				var output = raw ? draw.RawOutput : draw.Output;
+@@ -797,7 +910,9 @@
+ 					if ( raw ) { draw.RawHasVertexState = true; draw.RawComputedRevision = PoseRevision; }
+ 					else { draw.HasVertexState = true; draw.ComputedRevision = PoseRevision; draw.ComputedPacket = packet; }
+ 				}
+-				draw.RenderAttributes.Clear(); material.Attributes.MergeTo( draw.RenderAttributes ); Graphics.Attributes.MergeTo( draw.RenderAttributes );
++				draw.RenderAttributes.Clear(); material.Attributes.MergeTo( draw.RenderAttributes );
++				if ( only is not null ) sceneObject.CreatedAttributes?.MergeTo( draw.RenderAttributes );
++				Graphics.Attributes.MergeTo( draw.RenderAttributes );
+ 				if ( !RenderTools.SetRenderState( Graphics.Context, draw.RenderAttributes.Get(), Graphics.ModeFor( material ), layout, Graphics.Stats ) ) throw new GltfException( "Stock material rejected the runtime GPU vertex declaration." );
+ 				Graphics.Context.BindVertexBuffer( 0, output.native, 0, plan.VertexStride );
+ 				Graphics.Context.BindIndexBuffer( draw.Indices.native, 4, 0 );
+@@ -854,7 +969,8 @@
+ 			disposed = true;
+ 			// Prevent new callbacks immediately. A previously captured callback
+ 			// waits for this gate and observes disposed before touching any draw.
+-			if ( sceneObject.IsValid() ) sceneObject.RenderOverride = null;
++			if ( sceneObject is not null ) { sceneObject.DependentStateChanged -= OnPrimaryStateChanged; sceneObject.ManualRenderScope = null; sceneObject.RenderOverride = null; }
++			foreach ( var draw in draws ) if ( draw.SortObject.IsValid() ) draw.SortObject.RenderOverride = null;
+ 			void Release()
+ 			{
+ 				submissionGate.Run( () =>
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuInstance.Variants.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuInstance.Variants.cs
+@@ -21,6 +21,11 @@
+ 	public void SetVariant( int? variant )
+ 	{
+ 		ObjectDisposedException.ThrowIf( disposed, this ); ThreadSafe.AssertIsMainThread();
++		submissionGate.Run( () => SetVariantExclusive( variant ) );
++	}
++
++	private void SetVariantExclusive( int? variant )
++	{
+ 		using var scope = new GlobalContext.GlobalContextScope( ownerContext );
+ 		if ( variantState is null )
+ 		{
+--- a/engine/Sandbox.Engine/Systems/SceneSystem/SceneObject.cs
++++ b/engine/Sandbox.Engine/Systems/SceneSystem/SceneObject.cs
+@@ -96,6 +96,7 @@
+ 		{
+ 			CSceneSystem.DeleteSceneObjectAtFrameEnd( this );
+ 			native = IntPtr.Zero; // avoid double delete etc
++			DependentStateChanged?.Invoke( Rendering.SceneObjectChange.Removed );
+ 		}
+ 	}
+ 
+@@ -126,6 +127,7 @@
+ 		}
+ 
+ 		native = IntPtr.Zero;
++		DependentStateChanged?.Invoke( Rendering.SceneObjectChange.Removed );
+ 
+ 		if ( _attributes != null )
+ 		{
+@@ -148,7 +150,13 @@
+ 	/// <summary>
+ 	/// Tell the world's <see cref="SceneWorld.ChangeListener"/>, if it has one, that something changed.
+ 	/// </summary>
+-	internal void NotifyChanged( Rendering.SceneObjectChange change ) => World?.ChangeListener?.OnChanged( this, change );
++	internal event Action<Rendering.SceneObjectChange> DependentStateChanged;
++	internal Action<Transform?, Color?, Material> ManualRenderScope;
++	internal void NotifyChanged( Rendering.SceneObjectChange change )
++	{
++		World?.ChangeListener?.OnChanged( this, change );
++		if ( change != Rendering.SceneObjectChange.Removed ) DependentStateChanged?.Invoke( change );
++	}
+ 
+ 	/// <summary>
+ 	/// Transform of this scene object, relative to its <see cref="Parent"/>, or <see cref="SceneWorld"/> if parent is not set.
+@@ -464,8 +472,10 @@
+ 		get => _component;
+ 		set
+ 		{
++			var changed = !ReferenceEquals( _component, value ) || !ReferenceEquals( GameObject, value?.GameObject );
+ 			_component = value;
+ 			GameObject = _component?.GameObject;
++			if ( changed ) DependentStateChanged?.Invoke( Rendering.SceneObjectChange.Settings );
+ 		}
+ 	}
+ 
+--- a/engine/Sandbox.Engine/Systems/SceneSystem/SceneObject.Callbacks.cs
++++ b/engine/Sandbox.Engine/Systems/SceneSystem/SceneObject.Callbacks.cs
+@@ -8,7 +8,17 @@
+ 		void OnAfterObjectRender();
+ 	}
+ 
+-	internal SceneObjectCallbacks CallbackTarget;
++	private SceneObjectCallbacks callbackTarget;
++	internal SceneObjectCallbacks CallbackTarget
++	{
++		get => callbackTarget;
++		set
++		{
++			if ( ReferenceEquals( callbackTarget, value ) ) return;
++			callbackTarget = value;
++			DependentStateChanged?.Invoke( Rendering.SceneObjectChange.Settings );
++		}
++	}
+ 
+ 	internal void ExecuteBefore()
+ 	{
+--- a/engine/Sandbox.Engine/Systems/Render/Graphics.Draw.cs
++++ b/engine/Sandbox.Engine/Systems/Render/Graphics.Draw.cs
+@@ -151,7 +151,8 @@
+ 		if ( !obj.IsValid() ) return;
+ 
+ 		// Native draws it through its layer's view; a managed frame (r_managed_scene) draws it from its own copy of the object
+-		_state.view?.RenderSceneObject( Context, obj, transform ?? obj.Transform, color ?? Color.White, material, Attributes );
++		if ( obj.ManualRenderScope is { } scope ) scope( transform, color, material );
++		else _state.view?.RenderSceneObject( Context, obj, transform ?? obj.Transform, color ?? Color.White, material, Attributes );
+ 	}
+ 
+ 	/// <summary>
+--- a/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.cs
++++ b/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.cs
+@@ -337,7 +337,9 @@
+ 		ApplyMaterialOverrides();
+ 		UpdateObject();
+ 		OnTransformChanged();
+-	}
++		gltfInstance?.SyncSortObjects();
++	}
++
+ 
+ 	internal override void OnDisabledInternal()
+ 	{
+--- a/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.Gltf.cs
++++ b/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.Gltf.cs
+@@ -16,7 +16,7 @@
+ 		GltfGpuInstance instance = null;
+ 		try
+ 		{
+-			instance = resource.CreateInstance( Scene.SceneWorld );
++			instance = resource.CreateInstance( Scene.SceneWorld, initiallyVisible: false );
+ 			instance.Placement = Matrix.FromTransform( Transform.InterpolatedWorld );
+ 			ApplyGltfVariantReload( variant, instance );
+ 			gltfInstance = instance;
+@@ -65,7 +65,7 @@
+ 			GltfGpuInstance replacement = null;
+ 			try
+ 			{
+-				replacement = resource.CreateInstance( Scene.SceneWorld );
++				replacement = resource.CreateInstance( Scene.SceneWorld, initiallyVisible: false );
+ 				replacement.Placement = Matrix.FromTransform( Transform.InterpolatedWorld );
+ 				ApplyGltfVariantReload( variant, replacement );
+ 				ReplaceGltfSceneObject( replacement.SceneObject, replacement, resource );

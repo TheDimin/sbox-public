@@ -1,0 +1,328 @@
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfPublicMaterialRoute.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfPublicMaterialRoute.cs
+@@ -1,4 +1,5 @@
+ using Sandbox.Gltf;
++using Sandbox.Gltf.DirectGpu;
+ 
+ namespace Sandbox;
+ 
+@@ -7,6 +8,9 @@
+ {
+ 	internal static bool NeedsSourceLit( GltfMaterial material ) => material is not null && !material.Unlit &&
+ 		(material.DiffuseTransmission is not null || material.AlphaMode == "MASK" || material.NormalTexture is not null || material.OcclusionTexture is not null || material.EmissiveTexture is not null || material.EmissiveFactor != System.Numerics.Vector3.Zero);
++
++	internal static bool NoNormalPointLine( GltfGpuPrimitivePlan plan ) =>
++		plan.Mode is 0 or 1 && !plan.Upload.Attributes.ContainsKey( "NORMAL" );
+ 
+ 	internal static bool RequiresProjected( GltfDocument document, int? sceneIndex )
+ 	{
+@@ -33,7 +37,10 @@
+ 			var primitives = root.GetProperty( "meshes" )[mesh].GetProperty( "primitives" );
+ 			for ( var primitive = 0; primitive < primitives.GetArrayLength(); primitive++ )
+ 			{
+-				if ( !primitives[primitive].GetProperty( "attributes" ).TryGetProperty( "POSITION", out _ ) ) continue;
++				var item = primitives[primitive]; var attributes = item.GetProperty( "attributes" );
++				if ( !attributes.TryGetProperty( "POSITION", out _ ) ) continue;
++				var sourceMode = item.TryGetProperty( "mode", out var mode ) ? mode.GetInt32() : 4;
++				if ( sourceMode is >= 0 and <= 3 && !attributes.TryGetProperty( "NORMAL", out _ ) ) projected = true;
+ 				for ( var variant = -1; variant < variants.Count; variant++ )
+ 				{
+ 					var material = document.GetMaterialForVariant( mesh, primitive, variant < 0 ? null : variant );
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs
+@@ -42,14 +42,16 @@
+ 		if ( GltfPublicMaterialRoute.RequiresProjected( document, sceneIndex ?? document.GetDefaultScene() ) )
+ 		{
+ 			var templates = new Dictionary<string, Material>( StringComparer.Ordinal );
+-			Material SelectTemplate( GltfMaterial material, GltfGpuPrimitivePlan _ )
++			Material SelectTemplate( GltfMaterial material, GltfGpuPrimitivePlan plan )
+ 			{
+-				if ( material is null ) throw new GltfException( "A projected source material must be explicit." );
++				var pointLine = GltfPublicMaterialRoute.NoNormalPointLine( plan ) && material?.Unlit != true;
++				if ( material is null && !pointLine ) throw new GltfException( "A projected source material must be explicit." );
++				material ??= new GltfMaterial { BaseColorFactor = System.Numerics.Vector4.One, AlphaMode = "OPAQUE", AlphaCutoff = .5f };
+ 				var mode = material.AlphaMode;
+ 				if ( !material.Unlit && mode == "BLEND" ) throw new GltfException( "Source-lit BLEND is not yet supported." );
+-				var key = (material.Unlit ? "unlit:" : "lit:") + mode + (material.DoubleSided ? ":double" : ":single") + (material.DiffuseTransmission is null ? "" : ":diffuse-transmission");
++				var key = (material.Unlit ? "unlit:" : pointLine ? "point-line:" : "lit:") + mode + (material.DoubleSided ? ":double" : ":single") + (material.DiffuseTransmission is null ? "" : ":diffuse-transmission");
+ 				if ( templates.TryGetValue( key, out var existing ) ) return existing;
+-				var source = Material.FromShader( material.Unlit ? "shaders/gltf_unlit_five_uv.shader" : material.DiffuseTransmission is not null ? "shaders/gltf_diffuse_transmission.shader" : "shaders/gltf_surface_five_uv.shader" );
++				var source = Material.FromShader( material.Unlit ? "shaders/gltf_unlit_five_uv.shader" : pointLine ? "shaders/gltf_point_line.shader" : material.DiffuseTransmission is not null ? "shaders/gltf_diffuse_transmission.shader" : "shaders/gltf_surface_five_uv.shader" );
+ 				if ( source is not { IsValid: true, IsError: false } ) throw new GltfException( "The glTF source material template is unavailable." );
+ 				var template = source.CreateCopy( "gltf_unlit_template_" + Guid.NewGuid().ToString( "N" ) );
+ 				try
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuAsset.Variants.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuAsset.Variants.cs
+@@ -108,6 +108,12 @@
+ 		ConfigureProjectedVariants( encodedImageBudget, (index, plan, images) =>
+ 		{
+ 			var material = index is int source ? Document.ReadMaterial( source ) : null;
++			if ( legacyLit && material?.Unlit != true && GltfPublicMaterialRoute.NoNormalPointLine( plan ) )
++			{
++				var template = selectTemplate( material, plan ) ?? throw new GltfException( "No point/line material template is available." );
++				var prepared = GltfPointLineSourceMaterialAdapter.Prepare( Document, material, index, images.ReadImage );
++				return GltfPointLineSourceMaterialAdapter.Acquire( prepared, template, plan.MaterialUv, plan.UvProjection );
++			}
+ 			if ( legacyLit && material?.Unlit != true && !GltfPublicMaterialRoute.NeedsSourceLit( material ) )
+ 			{
+ 				var stock = Material.FromShader( "shaders/gltf_stock_sampler.shader" );
+@@ -124,7 +130,7 @@
+ 			}
+ 			var lit = batchMaterials.TryGetValue( index ?? -1, out var cached ) ? cached : GltfStockMaterialAdapter.PrepareSource( Document, material, images.ReadImage );
+ 			return GltfStockMaterialAdapter.AcquireSource( lit, template, plan.MaterialUv, plan.UvProjection, sourceLitFeatureSidedness );
+-		}, legacyLit ? index => index is not int source || (Document.ReadMaterial( source ) is var selected && !selected.Unlit && !GltfPublicMaterialRoute.NeedsSourceLit( selected )) : null,
++		}, legacyLit ? (index, plan) => !GltfPublicMaterialRoute.NoNormalPointLine( plan ) && (index is not int source || (Document.ReadMaterial( source ) is var selected && !selected.Unlit && !GltfPublicMaterialRoute.NeedsSourceLit( selected ))) : null,
+ 		(pending, images) =>
+ 		{
+ 			if ( batchMaterials.Count != 0 ) throw new InvalidOperationException( "A material preparation batch is already active." );
+@@ -145,7 +151,7 @@
+ 				}, () => ThreadSafe.AssertIsMainThread() );
+ 			}
+ 			catch { batchMaterials.Clear(); throw; }
+-		} );
++		}, pointLinePolicy: legacyLit );
+ 	}
+ 
+ 	/// <summary>
+@@ -155,8 +161,8 @@
+ 	/// </summary>
+ 	internal void ConfigureProjectedVariants( long encodedImageBudget,
+ 		Func<int?, GltfGpuPrimitivePlan, GltfMaterialImageSnapshot, GltfMaterialLease<Material>> acquireMaterial,
+-		Func<int?, bool> useLegacy = null,
+-		Func<IReadOnlyList<(GltfMaterialVariantSlot Slot, int? Material)>, GltfMaterialImageSnapshot, IDisposable> prepareBatch = null )
++		Func<int?, GltfGpuPrimitivePlan, bool> useLegacy = null,
++		Func<IReadOnlyList<(GltfMaterialVariantSlot Slot, int? Material)>, GltfMaterialImageSnapshot, IDisposable> prepareBatch = null, bool pointLinePolicy = false )
+ 	{
+ 		ObjectDisposedException.ThrowIf( ownerReleased || disposed, this ); ThreadSafe.AssertIsMainThread();
+ 		ArgumentNullException.ThrowIfNull( acquireMaterial );
+@@ -186,27 +192,28 @@
+ 			}
+ 			rawPlans.Add( primitive, raw );
+ 		}
+-		IEnumerable<GltfMaterialTextureRole> Roles( int? materialIndex ) => useLegacy?.Invoke( materialIndex ) == true
+-			? [GltfMaterialTextureRole.BaseColor, GltfMaterialTextureRole.MetallicRoughness]
+-			: materialIndex is int index && Document.ReadMaterial( index ).Unlit ? [GltfMaterialTextureRole.BaseColor] : null;
++		IEnumerable<GltfMaterialTextureRole> Roles( int? materialIndex, GltfGpuPrimitivePlan plan ) =>
++			materialIndex is int source && Document.ReadMaterial( source ).Unlit ? [GltfMaterialTextureRole.BaseColor] :
++			pointLinePolicy && GltfPublicMaterialRoute.NoNormalPointLine( plan ) ? GltfPointLineSourceMaterialAdapter.Roles :
++			useLegacy?.Invoke( materialIndex, plan ) == true ? [GltfMaterialTextureRole.BaseColor, GltfMaterialTextureRole.MetallicRoughness] : null;
+ 		// Every reachable variant uses one compatible vertex declaration. Core
+ 		// templates ignore the two additional fields when a diffuse-transmission
+ 		// variant needs all seven independently selected source UV sets.
+ 		var uvCount = requested.Any( index => index is int source && Document.ReadMaterial( source ).DiffuseTransmission is not null ) ? 7 : 5;
+ 		int[] uvSemantics = uvCount == 7 ? [0, 1, 4, 5, 6, 7, 8] : [0, 1, 4, 5, 6];
+-		var projections = Primitives.ToDictionary( x => x, x => rawPlans[x].ProjectMaterial( rawPlans[x].Material, uvCount, Roles( rawPlans[x].Material ), uvSemantics ) );
++		var projections = Primitives.ToDictionary( x => x, x => rawPlans[x].ProjectMaterial( rawPlans[x].Material, uvCount, Roles( rawPlans[x].Material, rawPlans[x] ), uvSemantics ) );
+ 		var slots = Nodes.Select( x => new GltfMaterialVariantSlot( x.Index, x.Primitive.Mesh, x.Primitive.Index ) ).ToArray();
+ 		var byPrimitive = Primitives.ToDictionary( x => (x.Mesh, x.Index) );
+ 		var packets = new GltfVariantDrawAsset<GltfProjectedMaterialPacket>( Document, slots, (slot, materialIndex) =>
+ 		{
+ 			var primitive = byPrimitive[(slot.Mesh, slot.Primitive)];
+-			var projected = rawPlans[primitive].ProjectMaterial( materialIndex, uvCount, Roles( materialIndex ), uvSemantics );
++			var projected = rawPlans[primitive].ProjectMaterial( materialIndex, uvCount, Roles( materialIndex, rawPlans[primitive] ), uvSemantics );
+ 			projected.RequireSourceOwnership( Document, slot.Mesh, slot.Primitive, rawPlans[primitive].Upload );
+ 			if ( !projected.Fields.SequenceEqual( projections[primitive].Fields ) || projected.VertexStride != projections[primitive].VertexStride )
+ 				throw new GltfException( "Variant output layout differs from its primitive's projected declaration." );
+ 			var hasSkin = Nodes.Any( x => ReferenceEquals( x.Primitive, primitive ) && x.Skin.HasValue );
+ 			var ownInput = false;
+-			if ( useLegacy?.Invoke( materialIndex ) == true )
++			if ( useLegacy?.Invoke( materialIndex, projected ) == true )
+ 			{
+ 				var (baked, _) = projected.CreateLegacyUvPlans( materialIndex );
+ 				if ( baked is not null ) { projected = baked; ownInput = true; }
+--- /dev/null
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/Materials/GltfPointLineSourceMaterialAdapter.cs
+@@ -0,0 +1,70 @@
++using Sandbox.Engine;
++using Sandbox.Gltf;
++using Sandbox.Gltf.DirectGpu;
++
++namespace Sandbox;
++
++/// <summary>Per-primitive no-normal point/line source program. Does not implement KHR_materials_unlit.</summary>
++internal static class GltfPointLineSourceMaterialAdapter
++{
++ internal static readonly GltfMaterialTextureRole[] Roles = [GltfMaterialTextureRole.BaseColor, GltfMaterialTextureRole.Emissive];
++ internal sealed class Prepared
++ {
++  internal GltfMaterial Material;
++  internal float EmissiveStrength;
++  internal Dictionary<GltfMaterialTextureRole,GltfStockMaterialAdapter.SourceTexture> Textures = new();
++ }
++ internal static Prepared Prepare(GltfDocument document, GltfMaterial material, int? index, Func<int,GltfImage> imageReader)
++ {
++  ArgumentNullException.ThrowIfNull(document);ArgumentNullException.ThrowIfNull(imageReader);
++  material ??= new GltfMaterial { BaseColorFactor=System.Numerics.Vector4.One, AlphaMode="OPAQUE", AlphaCutoff=.5f };
++  if(material.Unlit)throw new GltfException("KHR_materials_unlit uses its own material program.");
++  if(material.AlphaMode=="BLEND")throw new GltfException("No-normal point/line BLEND is not yet supported.");
++  if(material.AlphaMode is not ("OPAQUE" or "MASK"))throw new GltfException("Unsupported point/line alpha mode.");
++  var result=new Prepared { Material=material, EmissiveStrength=index.HasValue?document.ReadMaterialEmissiveStrength(index.Value):1 };
++  foreach(var (role,binding) in GltfMaterialTextureEncodingPlan.CreateForRoles(document,material,Roles).Bindings)
++  {
++   if(binding.ImageIndex is not int image)throw new GltfException($"Point/line {role} has no supported image source.");
++   var sampling=GltfSamplerMapping.Map(binding.Sampler,9987,9729);var encoded=imageReader(image);document.ValidateTextureImage(binding.TextureInfo.Index,encoded);
++   var resource=sampling.RequiresBaseMipOnly?GltfTextureCompiler.Compile(encoded,true):GltfTextureCompiler.CompileWithMipmaps(encoded,true);
++   result.Textures.Add(role,new(binding,sampling,resource));
++  }
++  return result;
++ }
++ internal static GltfMaterialLease<Material> Acquire(Prepared prepared,Material template,GltfMaterialUvPlan uv,GltfMaterialUvProjection projection)
++ {
++  ArgumentNullException.ThrowIfNull(prepared);ArgumentNullException.ThrowIfNull(template);ArgumentNullException.ThrowIfNull(uv);ArgumentNullException.ThrowIfNull(projection);
++  ThreadSafe.AssertIsMainThread();if(Graphics.IsActive)throw new GltfException("Point/line materials cannot be realized during rendering.");
++  if(!template.IsValid || template.IsError)throw new GltfException("Point/line source template unavailable.");
++  if(projection.Sources.Count>5 || uv.Bindings.Count!=projection.Slots.Count || uv.Bindings.Count!=prepared.Textures.Count)throw new GltfException("Point/line UV projection differs from source texture roles.");
++  var source=prepared.Material;var factor=source.BaseColorFactor;var emission=source.EmissiveFactor*prepared.EmissiveStrength;var mask=source.AlphaMode=="MASK";
++  if(template.GetFeature("F_ALPHA_TEST")!=(mask?1:0) || template.GetFeature("F_TRANSLUCENT")!=0)throw new GltfException("Point/line source template alpha permutation differs.");
++  var vectors=new List<KeyValuePair<string,Vector4>>{new("g_vGltfBaseColor",new(factor.X,factor.Y,factor.Z,mask?factor.W:1)),new("g_vGltfEmissiveFactor",new(emission.X,emission.Y,emission.Z,0))};
++  var scalars=new List<KeyValuePair<string,float>>{new("g_flGltfHasBaseColorTexture",prepared.Textures.ContainsKey(GltfMaterialTextureRole.BaseColor)?1:0),new("g_flGltfHasEmissiveTexture",prepared.Textures.ContainsKey(GltfMaterialTextureRole.Emissive)?1:0)};
++  if(mask)scalars.Add(new("g_flGltfAlphaCutoff",source.AlphaCutoff));
++  var owner=GlobalContext.Current;var textures=new List<GltfMaterialLease<Texture>>();GltfMaterialLease<Material> material=null;
++  try
++  {
++   var bindings=new List<GltfMaterialTextureBinding>();
++   foreach(var (role,texture) in prepared.Textures)
++   {
++    if(!uv.Bindings.TryGetValue(role,out var selected) || !projection.Slots.TryGetValue(role,out var slot) || slot<0 || slot>=projection.Sources.Count || slot>=5 || projection.Sources[slot].TexCoord!=selected.TexCoord || !ReferenceEquals(projection.Sources[slot].Stream,selected.Source) || selected.TextureInfo.Index!=texture.Encoding.TextureInfo.Index || selected.TextureInfo.TexCoord!=texture.Encoding.TextureInfo.TexCoord || selected.TextureInfo.Offset!=texture.Encoding.TextureInfo.Offset || selected.TextureInfo.Tiling!=texture.Encoding.TextureInfo.Tiling || selected.TextureInfo.Rotation!=texture.Encoding.TextureInfo.Rotation)throw new GltfException($"Point/line {role} UV provenance differs.");
++    var name=role==GltfMaterialTextureRole.BaseColor?"BaseColor":"Emissive";
++    vectors.Add(new($"g_vGltf{name}UvRowU",new(selected.Transform.RowU.X,selected.Transform.RowU.Y,selected.Transform.RowU.Z,0)));
++    vectors.Add(new($"g_vGltf{name}UvRowV",new(selected.Transform.RowV.X,selected.Transform.RowV.Y,selected.Transform.RowV.Z,0)));
++    scalars.Add(new($"g_flGltf{name}UvSlot",slot));
++    var lease=GltfNativeTextureCache.Acquire(texture.Resource);textures.Add(lease);
++    bindings.Add(new($"g_tGltf{name}Texture",lease.Value,lease.Value.DirtyVersion,texture.Sampling.State,$"Gltf{name}Sampler"));
++   }
++   foreach(var v in vectors)if(!template.HasParameter(v.Key))throw new GltfException($"Point/line template missing {v.Key}.");
++   foreach(var v in scalars)if(!template.HasParameter(v.Key))throw new GltfException($"Point/line template missing {v.Key}.");
++   foreach(var v in bindings)if(!template.HasParameter(v.Parameter))throw new GltfException($"Point/line template missing {v.Parameter}.");
++   var key=new GltfMaterialKey(template,0,[new("F_RENDER_BACKFACES",source.DoubleSided?1:0),new("F_ALPHA_TEST",mask?1:0),new("F_TRANSLUCENT",0)],vectors,bindings,scalars);
++   material=GltfMaterialCache.Shared.Acquire(key);
++   if(material.Value.Flags.IsTranslucent || material.Value.Flags.IsAlphaTest!=mask)throw new GltfException("Point/line material classification differs.");
++   var retained=material;var retainedTextures=textures.ToArray();
++   return new GltfMaterialLease<Material>(material.Value,()=>{using var scope=new GlobalContext.GlobalContextScope(owner);GltfGpuCleanup.ReleaseAll(new Action[]{retained.Dispose}.Concat(retainedTextures.Select<GltfMaterialLease<Texture>,Action>(t=>t.Dispose)));},()=>ThreadSafe.AssertIsMainThread());
++  }
++  catch(Exception original){GltfGpuCleanup.Rollback(original,(material is null?Array.Empty<Action>():new Action[]{material.Dispose}).Concat(textures.Select<GltfMaterialLease<Texture>,Action>(t=>t.Dispose)));throw;}
++ }
++}
+--- /dev/null
++++ b/game/core/shaders/gltf_point_line.shader
+@@ -0,0 +1,120 @@
++HEADER
++{
++	Description = "Isolated point/line no-normal base plus emissive candidate";
++}
++FEATURES
++{
++	#include "common/features.hlsl"
++	Feature( F_ALPHA_TEST, 0..1, "Rendering" );
++	Feature( F_TRANSLUCENT, 0..1, "Rendering" );
++	FeatureRule( Allow1( F_ALPHA_TEST, F_TRANSLUCENT ), "Mask and blend are exclusive" );
++}
++MODES
++{
++	Forward();
++	Depth();
++	ToolsShadingComplexity( "tools_shading_complexity.shader" );
++}
++COMMON
++{
++	#include "common/shared.hlsl"
++	#include "procedural.hlsl"
++	#define S_UV2 1
++}
++struct VertexInput
++{
++	#include "common/vertexinput.hlsl"
++	float4 vColor : COLOR0 < Semantic( Color ); >;
++	float2 vGltfUv2 : TEXCOORD4;
++	float2 vGltfUv3 : TEXCOORD5;
++	float2 vGltfUv4 : TEXCOORD6;
++};
++struct PixelInput
++{
++	#include "common/pixelinput.hlsl"
++	float4 vGltfUv23 : TEXCOORD8;
++	float2 vGltfUv4 : TEXCOORD9;
++	float4 vColor : COLOR0;
++};
++VS
++{
++	#include "common/vertex.hlsl"
++	PixelInput MainVs( VertexInput v )
++	{
++		PixelInput i = ProcessVertex( v );
++		i.vColor = v.vColor;
++		i.vGltfUv23 = float4( v.vGltfUv2, v.vGltfUv3 );
++		i.vGltfUv4 = v.vGltfUv4;
++		return FinalizeVertex( i );
++	}
++}
++PS
++{
++	StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( ALL ) );
++	StaticCombo( S_TRANSLUCENT, F_TRANSLUCENT, Sys( ALL ) );
++	#define DEPTH_STATE_ALREADY_SET
++	#define BLEND_MODE_ALREADY_SET
++	#include "common/pixel.hlsl"
++	RenderState( CullMode, F_RENDER_BACKFACES ? NONE : BACK );
++	RenderState( DepthEnable, true );
++	RenderState( DepthFunc, GREATER_EQUAL );
++	#if S_TRANSLUCENT
++		RenderState( BlendEnable, true );
++		RenderState( SrcBlend, SRC_ALPHA );
++		RenderState( DstBlend, INV_SRC_ALPHA );
++		RenderState( BlendOp, ADD );
++		RenderState( SrcBlendAlpha, ONE );
++		RenderState( DstBlendAlpha, INV_SRC_ALPHA );
++		RenderState( BlendOpAlpha, ADD );
++		RenderState( DepthWriteEnable, false );
++	#else
++		RenderState( BlendEnable, false );
++		RenderState( DepthWriteEnable, true );
++	#endif
++	SamplerState g_sGltfBaseColor < Filter( BILINEAR ); AddressU( WRAP ); AddressV( WRAP ); Attribute( "GltfBaseColorSampler" ); >;
++	CreateInputTexture2D( GltfBaseColorTexture, Srgb, 8, "None", "_gltf_basecolor", ",0/,0/0", Default4( 1, 1, 1, 1 ) );
++	Texture2D g_tGltfBaseColorTexture < Channel( RGBA, Box( GltfBaseColorTexture ), Srgb ); OutputFormat( RGBA8888 ); SrgbRead( True ); >;
++	float4 g_vGltfBaseColor < Default4( 1, 1, 1, 1 ); >;
++	float g_flGltfHasBaseColorTexture < Default1( 0 ); >;
++	float g_flGltfBaseColorUvSlot < Default1( 0 ); >;
++	float3 g_vGltfBaseColorUvRowU < Default3( 1, 0, 0 ); >;
++	float3 g_vGltfBaseColorUvRowV < Default3( 0, 1, 0 ); >;
++	float g_flGltfAlphaCutoff < Default1( 0.5 ); >;
++	SamplerState g_sGltfEmissive < Filter( BILINEAR ); AddressU( WRAP ); AddressV( WRAP ); Attribute( "GltfEmissiveSampler" ); >;
++	CreateInputTexture2D( GltfEmissiveTexture, Srgb, 8, "None", "_gltf_emissive", ",0/,0/0", Default4( 1, 1, 1, 1 ) );
++	Texture2D g_tGltfEmissiveTexture < Channel( RGBA, Box( GltfEmissiveTexture ), Srgb ); OutputFormat( RGBA8888 ); SrgbRead( True ); >;
++	float3 g_vGltfEmissiveFactor < Default3( 0, 0, 0 ); >;
++	float g_flGltfHasEmissiveTexture < Default1( 0 ); >;
++	float g_flGltfEmissiveUvSlot < Default1( 0 ); >;
++	float3 g_vGltfEmissiveUvRowU < Default3( 1, 0, 0 ); >;
++	float3 g_vGltfEmissiveUvRowV < Default3( 0, 1, 0 ); >;
++	float4 MainPs( PixelInput i ) : SV_Target0
++	{
++		float2 uv;
++		if ( g_flGltfBaseColorUvSlot < 0.5 ) uv = i.vTextureCoords.xy;
++		else if ( g_flGltfBaseColorUvSlot < 1.5 ) uv = i.vTextureCoords.zw;
++		else if ( g_flGltfBaseColorUvSlot < 2.5 ) uv = i.vGltfUv23.xy;
++		else if ( g_flGltfBaseColorUvSlot < 3.5 ) uv = i.vGltfUv23.zw;
++		else uv = i.vGltfUv4;
++		uv = float2( dot( float3( uv, 1 ), g_vGltfBaseColorUvRowU ), dot( float3( uv, 1 ), g_vGltfBaseColorUvRowV ) );
++		float4 texel = g_flGltfHasBaseColorTexture > 0.5 ? g_tGltfBaseColorTexture.Sample( g_sGltfBaseColor, uv ) : float4( 1, 1, 1, 1 );
++		float4 source = texel * g_vGltfBaseColor * saturate( i.vColor );
++		float2 euv;
++		if ( g_flGltfEmissiveUvSlot < 0.5 ) euv = i.vTextureCoords.xy;
++		else if ( g_flGltfEmissiveUvSlot < 1.5 ) euv = i.vTextureCoords.zw;
++		else if ( g_flGltfEmissiveUvSlot < 2.5 ) euv = i.vGltfUv23.xy;
++		else if ( g_flGltfEmissiveUvSlot < 3.5 ) euv = i.vGltfUv23.zw;
++		else euv = i.vGltfUv4;
++		euv = float2( dot( float3( euv, 1 ), g_vGltfEmissiveUvRowU ), dot( float3( euv, 1 ), g_vGltfEmissiveUvRowV ) );
++		float3 emissiveTexel = g_flGltfHasEmissiveTexture > 0.5 ? g_tGltfEmissiveTexture.Sample( g_sGltfEmissive, euv ).rgb : float3( 1, 1, 1 );
++		source.rgb += emissiveTexel * g_vGltfEmissiveFactor;
++		#if S_ALPHA_TEST
++			clip( source.a - g_flGltfAlphaCutoff );
++		#endif
++		#if S_TRANSLUCENT
++			return float4( source.rgb * i.vVertexColor.rgb, source.a * i.vVertexColor.a );
++		#else
++			return float4( source.rgb * i.vVertexColor.rgb, i.vVertexColor.a );
++		#endif
++	}
++}

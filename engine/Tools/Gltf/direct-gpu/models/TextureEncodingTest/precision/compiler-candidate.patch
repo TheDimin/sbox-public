@@ -1,0 +1,73 @@
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfTextureCompiler.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfTextureCompiler.cs
+@@ -22,6 +22,7 @@
+ 	{
+ 		if ( maxDecodedBytes <= 0 ) throw new GltfException( "Texture decoded-byte budget must be positive." );
+ 		if ( IsBasisImage( image ) ) return GltfBasisTexturePlan.Create( image, isSrgb, mipmaps, maxDecodedBytes ).Compile();
++		if ( !isSrgb && IsPng16( image ) ) return CompilePng16Data( image, mipmaps, maxDecodedBytes );
+ 		var codec = OpenImage( image, out var input );
+ 		using var ownedInput = input;
+ 		using var ownedCodec = codec;
+@@ -96,6 +97,47 @@
+ 		if ( (long)width * height * 4 + chainBytes * 3 > budget ) throw new GltfException( "Image mip chain and serialization copies exceed the decoded-byte budget." );
+ 	}
+ 
++	private static bool IsPng16( GltfImage image ) => string.Equals( image?.MimeType, "image/png", StringComparison.OrdinalIgnoreCase ) && image.Bytes is { Length: >= 29 } bytes && bytes[24] == 16;
++
++	private static byte[] CompilePng16Data( GltfImage image, bool mipmaps, long budget )
++	{
++		ValidatePng16WorkingSet( image.Bytes, mipmaps, budget );
++		var decoded = GltfPng16Decoder.Decode( image.Bytes, budget );
++		var pixels = new float[decoded.Rgba.Length];
++		for ( var i = 0; i < pixels.Length; i++ ) pixels[i] = decoded.Rgba[i] / 65535f;
++		return CompileLinearFloatTexture( pixels, decoded.Width, decoded.Height, mipmaps );
++	}
++
++	private static float[] PackPng16MetallicRoughness( ushort[] source, float factor, bool roughness )
++	{
++		var pixels = new float[source.Length];
++		for ( var i = 0; i < pixels.Length; i += 4 )
++		{
++			if ( roughness ) { pixels[i] = pixels[i + 1] = 1.00392163f * .5f; pixels[i + 2] = source[i + 1] / 65535f * factor; }
++			else pixels[i + 1] = source[i + 2] / 65535f * factor;
++			pixels[i + 3] = 1;
++		}
++		return pixels;
++	}
++
++	private static void ValidatePng16WorkingSet( byte[] bytes, bool mipmaps, long budget )
++	{
++		if ( bytes is not { Length: >= 29 } || budget <= 0 || !bytes.AsSpan( 0, 8 ).SequenceEqual( new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 } ) || BinaryPrimitives.ReadUInt32BigEndian( bytes.AsSpan( 8 ) ) != 13 || !bytes.AsSpan( 12, 4 ).SequenceEqual( "IHDR"u8 ) ) throw new GltfException( "Invalid PNG16 header or budget." );
++		var width = BinaryPrimitives.ReadUInt32BigEndian( bytes.AsSpan( 16 ) ); var height = BinaryPrimitives.ReadUInt32BigEndian( bytes.AsSpan( 20 ) );
++		if ( width == 0 || height == 0 || width > 16384 || height > 16384 ) throw new GltfException( "Invalid PNG16 dimensions." );
++		long chain = 0;
++		for ( long w = width, h = height; ; w = Math.Max( 1, w / 2 ), h = Math.Max( 1, h / 2 ) )
++		{
++			chain = checked(chain + w * h * 16);
++			if ( !mipmaps || w == 1 && h == 1 ) break;
++		}
++		// Bound encoded data, decode buffers, source 16-bit pixels, float working
++		// images, both material resources and serialization copies conservatively.
++		var pixels = (long)width * height;
++		var peak = checked(3L * bytes.Length + pixels * 40 + chain * 4 + 1024 * 1024);
++		if ( chain > int.MaxValue || pixels * 4 > int.MaxValue || peak > budget ) throw new GltfException( "PNG16 texture working set exceeds the decoded-byte budget." );
++	}
++
+ 	private static bool IsBasisImage( GltfImage image ) => string.Equals( image?.MimeType, "image/ktx2", StringComparison.OrdinalIgnoreCase );
+ 
+ 	private static SKCodec OpenImage( GltfImage image, out SKMemoryStream input )
+@@ -136,6 +178,14 @@
+ 			// The authored compressed image remains owned by the source plan.
+ 			ValidateMetallicRoughnessBudget( plan.Width, plan.Height, mipmaps, maxDecodedBytes - retainedSourceBytes );
+ 			return CompileMetallicRoughnessLevels( plan.DecodeRgba32().Levels, metallicFactor, roughnessFactor, mipmaps, maxDecodedBytes - retainedSourceBytes );
++		}
++		if ( IsPng16( image ) )
++		{
++			ValidatePng16WorkingSet( image.Bytes, mipmaps, maxDecodedBytes );
++			var decoded = GltfPng16Decoder.Decode( image.Bytes, maxDecodedBytes );
++			var roughness = CompileLinearFloatTexture( PackPng16MetallicRoughness( decoded.Rgba, roughnessFactor, true ), decoded.Width, decoded.Height, mipmaps );
++			var metalness = CompileLinearFloatTexture( PackPng16MetallicRoughness( decoded.Rgba, metallicFactor, false ), decoded.Width, decoded.Height, mipmaps );
++			return new( roughness, metalness );
+ 		}
+ 		var codec = OpenImage( image, out var input );
+ 		using var ownedInput = input;

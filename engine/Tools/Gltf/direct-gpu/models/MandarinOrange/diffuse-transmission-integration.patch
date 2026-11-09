@@ -1,0 +1,263 @@
+--- a/engine/Sandbox.Gltf/GltfContracts.cs
++++ b/engine/Sandbox.Gltf/GltfContracts.cs
+@@ -44,11 +44,22 @@
+ 	public float AlphaCutoff { get; init; }
+ 	public bool DoubleSided { get; init; }
+ 	public bool Unlit { get; init; }
++	/// <summary>Supported thin-surface diffuse transmission; null for absent or unsupported extension.</summary>
++	public GltfDiffuseTransmission DiffuseTransmission { get; init; }
+ 	public GltfTextureInfo BaseColorTexture { get; init; }
+ 	public GltfTextureInfo MetallicRoughnessTexture { get; init; }
+ 	public GltfTextureInfo NormalTexture { get; init; }
+ 	public GltfTextureInfo OcclusionTexture { get; init; }
+ 	public GltfTextureInfo EmissiveTexture { get; init; }
++}
++
++/// <summary>Standard KHR_materials_diffuse_transmission Release Candidate parameters.</summary>
++public sealed class GltfDiffuseTransmission
++{
++	public float Factor { get; init; }
++	public Vector3 ColorFactor { get; init; } = Vector3.One;
++	public GltfTextureInfo Texture { get; init; }
++	public GltfTextureInfo ColorTexture { get; init; }
+ }
+ 
+ public sealed partial class GltfTextureInfo
+--- a/engine/Sandbox.Gltf/GltfDocument.Materials.cs
++++ b/engine/Sandbox.Gltf/GltfDocument.Materials.cs
+@@ -151,6 +151,7 @@
+ 			AlphaCutoff = MaterialOptionalNumber( value, "alphaCutoff", 0.5f, 0 ),
+ 			DoubleSided = sidedElement.ValueKind == JsonValueKind.True,
+ 			Unlit = unlit,
++			DiffuseTransmission = MaterialDiffuseTransmission( value ),
+ 			BaseColorTexture = MaterialTexture( pbr, "baseColorTexture", true ),
+ 			MetallicRoughnessTexture = MaterialTexture( pbr, "metallicRoughnessTexture", false ),
+ 			NormalTexture = MaterialTexture( value, "normalTexture", false ),
+--- a/engine/Sandbox.Gltf/GltfDocument.DiffuseTransmission.cs
++++ b/engine/Sandbox.Gltf/GltfDocument.DiffuseTransmission.cs
+@@ -0,0 +1,29 @@
++using System.Numerics;
++using System.Text.Json;
++
++namespace Sandbox.Gltf;
++
++public sealed partial class GltfDocument
++{
++	private GltfDiffuseTransmission MaterialDiffuseTransmission( JsonElement material )
++	{
++		const string name = "KHR_materials_diffuse_transmission";
++		if ( !SupportsExtension( name ) ) return null;
++		var value = MaterialExtension( material, name );
++		if ( value.ValueKind == JsonValueKind.Undefined ) return null;
++		if ( !ExtensionNames( "extensionsUsed" ).Contains( name, StringComparer.Ordinal ) )
++			throw new GltfException( $"{name} must be listed in extensionsUsed." );
++		MaterialRequireObject( value, name );
++		foreach ( var excluded in new[] { "KHR_materials_unlit", "KHR_materials_pbrSpecularGlossiness" } )
++			if ( MaterialExtension( material, excluded ).ValueKind != JsonValueKind.Undefined )
++				throw new GltfException( $"{name} cannot be used with {excluded}." );
++		var color = MaterialVector( value, "diffuseTransmissionColorFactor", [1, 1, 1], 0, 1 );
++		return new GltfDiffuseTransmission
++		{
++			Factor = MaterialOptionalNumber( value, "diffuseTransmissionFactor", 0, 0, 1 ),
++			ColorFactor = new Vector3( color[0], color[1], color[2] ),
++			Texture = MaterialTexture( value, "diffuseTransmissionTexture", false ),
++			ColorTexture = MaterialTexture( value, "diffuseTransmissionColorTexture", true )
++		};
++	}
++}
+--- a/engine/Sandbox.Gltf/GltfDocument.MaterialImages.cs
++++ b/engine/Sandbox.Gltf/GltfDocument.MaterialImages.cs
+@@ -59,6 +59,12 @@
+ 			}
+ 			Add( pbr, "metallicRoughnessTexture" ); Add( material, "normalTexture" );
+ 			Add( material, "occlusionTexture" ); Add( material, "emissiveTexture" );
++			if ( SupportsExtension( "KHR_materials_diffuse_transmission" ) )
++			{
++				var transmission = MaterialExtension( material, "KHR_materials_diffuse_transmission" );
++				Add( transmission, "diffuseTransmissionTexture" );
++				Add( transmission, "diffuseTransmissionColorTexture" );
++			}
+ 		}
+ 		var retained = new Dictionary<int, (byte[] Bytes, string Mime)>();
+ 		var failures = new Dictionary<int, GltfException>();
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/Materials/GltfMaterialUvPlan.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/Materials/GltfMaterialUvPlan.cs
+@@ -13,7 +13,9 @@
+ 	MetallicRoughness,
+ 	Normal,
+ 	Occlusion,
+-	Emissive
++	Emissive,
++	DiffuseTransmission,
++	DiffuseTransmissionColor
+ }
+ 
+ /// <summary>
+@@ -90,7 +92,9 @@
+ 		GltfMaterialTextureRole.MetallicRoughness,
+ 		GltfMaterialTextureRole.Normal,
+ 		GltfMaterialTextureRole.Occlusion,
+-		GltfMaterialTextureRole.Emissive
++		GltfMaterialTextureRole.Emissive,
++		GltfMaterialTextureRole.DiffuseTransmission,
++		GltfMaterialTextureRole.DiffuseTransmissionColor
+ 	];
+ 
+ 	internal int? MaterialIndex { get; }
+@@ -170,6 +174,8 @@
+ 		GltfMaterialTextureRole.Normal => material?.NormalTexture,
+ 		GltfMaterialTextureRole.Occlusion => material?.OcclusionTexture,
+ 		GltfMaterialTextureRole.Emissive => material?.EmissiveTexture,
++		GltfMaterialTextureRole.DiffuseTransmission => material?.DiffuseTransmission?.Texture,
++		GltfMaterialTextureRole.DiffuseTransmissionColor => material?.DiffuseTransmission?.ColorTexture,
+ 		_ => throw new ArgumentOutOfRangeException( nameof( role ) )
+ 	};
+ }
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/Materials/GltfMaterialTextureEncodingPlan.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/Materials/GltfMaterialTextureEncodingPlan.cs
+@@ -36,7 +36,7 @@
+ 		// Components defined by this texture role; material alphaMode separately
+ 		// determines whether its linear base-color alpha affects coverage.
+ 		internal GltfMaterialTextureChannels Channels { get; init; }
+-		internal bool HasLinearAlpha => Role == GltfMaterialTextureRole.BaseColor;
++		internal bool HasLinearAlpha => Role is GltfMaterialTextureRole.BaseColor or GltfMaterialTextureRole.DiffuseTransmission;
+ 		internal bool UsesAlphaCoverage { get; init; }
+ 		/// <summary>
+ 		/// PNG/JPEG ICC, gamma and intent metadata cannot change a material role's
+@@ -52,7 +52,7 @@
+ 	private GltfMaterialTextureEncodingPlan( Dictionary<GltfMaterialTextureRole, Binding> bindings ) => Bindings = new ReadOnlyDictionary<GltfMaterialTextureRole, Binding>( bindings );
+ 
+ 	internal static GltfMaterialTextureEncodingPlan Create( GltfDocument document, GltfMaterial material ) => CreateForRoles( document, material,
+-		[GltfMaterialTextureRole.BaseColor, GltfMaterialTextureRole.MetallicRoughness, GltfMaterialTextureRole.Normal, GltfMaterialTextureRole.Occlusion, GltfMaterialTextureRole.Emissive] );
++		[GltfMaterialTextureRole.BaseColor, GltfMaterialTextureRole.MetallicRoughness, GltfMaterialTextureRole.Normal, GltfMaterialTextureRole.Occlusion, GltfMaterialTextureRole.Emissive, GltfMaterialTextureRole.DiffuseTransmission, GltfMaterialTextureRole.DiffuseTransmissionColor] );
+ 
+ 	/// <summary>
+ 	/// Plans only roles consumed by the selected material model. For example,
+@@ -99,6 +99,8 @@
+ 		GltfMaterialTextureRole.Normal => (material?.NormalTexture, false, GltfMaterialTextureChannels.Rgb),
+ 		GltfMaterialTextureRole.Occlusion => (material?.OcclusionTexture, false, GltfMaterialTextureChannels.Red),
+ 		GltfMaterialTextureRole.Emissive => (material?.EmissiveTexture, true, GltfMaterialTextureChannels.Rgb),
++		GltfMaterialTextureRole.DiffuseTransmission => (material?.DiffuseTransmission?.Texture, false, GltfMaterialTextureChannels.Alpha),
++		GltfMaterialTextureRole.DiffuseTransmissionColor => (material?.DiffuseTransmission?.ColorTexture, true, GltfMaterialTextureChannels.Rgb),
+ 		_ => throw new ArgumentOutOfRangeException( nameof( role ), role, "Unknown core glTF material texture role." )
+ 	};
+ }
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfStockMaterialAdapter.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfStockMaterialAdapter.cs
+@@ -33,6 +33,7 @@
+ 		internal bool DoubleSided { get; init; }
+ 		internal bool AlphaMask { get; init; }
+ 		internal float AlphaCutoff { get; init; }
++		internal GltfDiffuseTransmission DiffuseTransmission { get; init; }
+ 	}
+ 
+ 	internal sealed record SourceTexture( GltfMaterialTextureEncodingPlan.Binding Encoding, GltfSamplerMapping.Result Sampling, byte[] Resource );
+@@ -63,6 +64,11 @@
+ 		var metallic = material?.MetallicFactor ?? 1;
+ 		var roughness = material?.RoughnessFactor ?? 1;
+ 		var strength = material?.OcclusionTexture?.Strength ?? 1;
++		if ( material?.DiffuseTransmission is { } transmission )
++		{
++			foreach ( var value in new[] { transmission.Factor, transmission.ColorFactor.X, transmission.ColorFactor.Y, transmission.ColorFactor.Z } )
++				if ( !float.IsFinite( value ) || value < 0 || value > 1 ) throw new GltfException( "Diffuse transmission factors must contain finite linear values in [0,1]." );
++		}
+ 		var normalScale = material?.NormalTexture?.Scale ?? 1;
+ 		if ( !float.IsFinite( normalScale ) ) throw new GltfException( "Normal texture scale must be finite." );
+ 		foreach ( var value in new[] { factor.X, factor.Y, factor.Z, factor.W, emissive.X, emissive.Y, emissive.Z, metallic, roughness, strength } )
+@@ -70,6 +76,7 @@
+ 		// Existing four-role templates remain usable. A normal map requires a
+ 		// separately generated template with explicit normal sampling support.
+ 		GltfMaterialTextureRole[] roles = material?.NormalTexture is null ? SourceRoles : [.. SourceRoles, GltfMaterialTextureRole.Normal];
++		if ( material?.DiffuseTransmission is not null ) roles = [.. roles, GltfMaterialTextureRole.DiffuseTransmission, GltfMaterialTextureRole.DiffuseTransmissionColor];
+ 		var textures = GltfMaterialTextureEncodingPlan.CreateForRoles( document, material, roles );
+ 		var encodedResources = new Dictionary<(int Image, bool IsSrgb, bool Mipmaps), byte[]>();
+ 		var images = new Dictionary<int, GltfImage>();
+@@ -97,7 +104,7 @@
+ 			Textures = textures, Resources = new ReadOnlyDictionary<GltfMaterialTextureRole, SourceTexture>( resources ),
+ 			LinearBaseColorFactor = factor, EmissiveFactor = emissive, MetallicFactor = metallic, RoughnessFactor = roughness,
+ 			OcclusionStrength = strength, NormalScale = normalScale, DoubleSided = material?.DoubleSided ?? false,
+-			AlphaMask = material?.AlphaMode == "MASK", AlphaCutoff = material?.AlphaCutoff ?? .5f
++			AlphaMask = material?.AlphaMode == "MASK", AlphaCutoff = material?.AlphaCutoff ?? .5f, DiffuseTransmission = material?.DiffuseTransmission
+ 		};
+ 	}
+ 
+@@ -118,7 +125,7 @@
+ 		if ( prepared.DoubleSided && template.GetFeature( "F_RENDER_BACKFACES" ) != 1 )
+ 			throw new GltfException( "The provided source-texture template must enable backfaces for a double-sided material." );
+ 		if ( prepared.Resources.Count != uv.Bindings.Count ) throw new GltfException( "Source material and canonical per-slot UV roles disagree." );
+-		if ( projection is not null && (projection.Sources.Count > 5 || projection.Slots.Count != uv.Bindings.Count) )
++		if ( projection is not null && (projection.Sources.Count > (prepared.DiffuseTransmission is null ? 5 : 7) || projection.Slots.Count != uv.Bindings.Count) )
+ 			throw new GltfException( "The five-input shader projection does not match its material UV bindings." );
+ 		var vectors = new List<KeyValuePair<string, Vector4>>
+ 		{
+@@ -130,6 +137,13 @@
+ 			new( "g_flGltfMetallicFactor", prepared.MetallicFactor ), new( "g_flGltfRoughnessFactor", prepared.RoughnessFactor ),
+ 			new( "g_flGltfOcclusionStrength", prepared.OcclusionStrength )
+ 		};
++		if ( prepared.DiffuseTransmission is { } transmission )
++		{
++			scalars.Add( new( "g_flGltfDiffuseTransmissionFactor", transmission.Factor ) );
++			vectors.Add( new( "g_vGltfDiffuseTransmissionColorFactor", new( transmission.ColorFactor.X, transmission.ColorFactor.Y, transmission.ColorFactor.Z, 0 ) ) );
++			foreach ( var role in new[] { GltfMaterialTextureRole.DiffuseTransmission, GltfMaterialTextureRole.DiffuseTransmissionColor } )
++				scalars.Add( new( "g_flGltfHas" + role + "Texture", prepared.Resources.ContainsKey( role ) ? 1f : 0f ) );
++		}
+ 		if ( prepared.AlphaMask ) scalars.Add( new( "g_flGltfAlphaCutoff", prepared.AlphaCutoff ) );
+ 		// Missing glTF textures multiply by one; anonymous shader input defaults
+ 		// are not a realized material resource. Freeze every exact presence flag
+@@ -154,7 +168,7 @@
+ 			{
+ 				if ( slot is < 0 or > 1 ) throw new GltfException( $"Provided source-texture role {role} requires TEXCOORD_{slot}; this candidate currently exposes only UV0 and UV1." );
+ 			}
+-			else if ( !projection.Slots.TryGetValue( role, out slot ) || slot is < 0 or > 4 || slot >= projection.Sources.Count ||
++			else if ( !projection.Slots.TryGetValue( role, out slot ) || slot < 0 || slot >= (prepared.DiffuseTransmission is null ? 5 : 7) || slot >= projection.Sources.Count ||
+ 				projection.Sources[slot].TexCoord != selected.TexCoord || !ReferenceEquals( projection.Sources[slot].Stream, selected.Source ) )
+ 				throw new GltfException( $"Source material role {role} does not match the retained projected UV stream." );
+ 			var name = "Gltf" + role;
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfPublicMaterialRoute.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfPublicMaterialRoute.cs
+@@ -6,7 +6,7 @@
+ internal static class GltfPublicMaterialRoute
+ {
+ 	internal static bool NeedsSourceLit( GltfMaterial material ) => material is not null && !material.Unlit &&
+-		(material.AlphaMode == "MASK" || material.NormalTexture is not null || material.OcclusionTexture is not null || material.EmissiveTexture is not null || material.EmissiveFactor != System.Numerics.Vector3.Zero);
++		(material.DiffuseTransmission is not null || material.AlphaMode == "MASK" || material.NormalTexture is not null || material.OcclusionTexture is not null || material.EmissiveTexture is not null || material.EmissiveFactor != System.Numerics.Vector3.Zero);
+ 
+ 	internal static bool RequiresProjected( GltfDocument document, int? sceneIndex )
+ 	{
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuAsset.Variants.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuAsset.Variants.cs
+@@ -189,13 +189,18 @@
+ 		IEnumerable<GltfMaterialTextureRole> Roles( int? materialIndex ) => useLegacy?.Invoke( materialIndex ) == true
+ 			? [GltfMaterialTextureRole.BaseColor, GltfMaterialTextureRole.MetallicRoughness]
+ 			: materialIndex is int index && Document.ReadMaterial( index ).Unlit ? [GltfMaterialTextureRole.BaseColor] : null;
+-		var projections = Primitives.ToDictionary( x => x, x => rawPlans[x].ProjectMaterial( rawPlans[x].Material, 5, Roles( rawPlans[x].Material ), [0, 1, 4, 5, 6] ) );
++		// Every reachable variant uses one compatible vertex declaration. Core
++		// templates ignore the two additional fields when a diffuse-transmission
++		// variant needs all seven independently selected source UV sets.
++		var uvCount = requested.Any( index => index is int source && Document.ReadMaterial( source ).DiffuseTransmission is not null ) ? 7 : 5;
++		int[] uvSemantics = uvCount == 7 ? [0, 1, 4, 5, 6, 7, 8] : [0, 1, 4, 5, 6];
++		var projections = Primitives.ToDictionary( x => x, x => rawPlans[x].ProjectMaterial( rawPlans[x].Material, uvCount, Roles( rawPlans[x].Material ), uvSemantics ) );
+ 		var slots = Nodes.Select( x => new GltfMaterialVariantSlot( x.Index, x.Primitive.Mesh, x.Primitive.Index ) ).ToArray();
+ 		var byPrimitive = Primitives.ToDictionary( x => (x.Mesh, x.Index) );
+ 		var packets = new GltfVariantDrawAsset<GltfProjectedMaterialPacket>( Document, slots, (slot, materialIndex) =>
+ 		{
+ 			var primitive = byPrimitive[(slot.Mesh, slot.Primitive)];
+-			var projected = rawPlans[primitive].ProjectMaterial( materialIndex, 5, Roles( materialIndex ), [0, 1, 4, 5, 6] );
++			var projected = rawPlans[primitive].ProjectMaterial( materialIndex, uvCount, Roles( materialIndex ), uvSemantics );
+ 			projected.RequireSourceOwnership( Document, slot.Mesh, slot.Primitive, rawPlans[primitive].Upload );
+ 			if ( !projected.Fields.SequenceEqual( projections[primitive].Fields ) || projected.VertexStride != projections[primitive].VertexStride )
+ 				throw new GltfException( "Variant output layout differs from its primitive's projected declaration." );
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs
+@@ -47,9 +47,9 @@
+ 				if ( material is null ) throw new GltfException( "A projected source material must be explicit." );
+ 				var mode = material.AlphaMode;
+ 				if ( !material.Unlit && mode == "BLEND" ) throw new GltfException( "Source-lit BLEND is not yet supported." );
+-				var key = (material.Unlit ? "unlit:" : "lit:") + mode + (material.DoubleSided ? ":double" : ":single");
++				var key = (material.Unlit ? "unlit:" : "lit:") + mode + (material.DoubleSided ? ":double" : ":single") + (material.DiffuseTransmission is null ? "" : ":diffuse-transmission");
+ 				if ( templates.TryGetValue( key, out var existing ) ) return existing;
+-				var source = Material.FromShader( material.Unlit ? "shaders/gltf_unlit_five_uv.shader" : "shaders/gltf_surface_five_uv.shader" );
++				var source = Material.FromShader( material.Unlit ? "shaders/gltf_unlit_five_uv.shader" : material.DiffuseTransmission is not null ? "shaders/gltf_diffuse_transmission.shader" : "shaders/gltf_surface_five_uv.shader" );
+ 				if ( source is not { IsValid: true, IsError: false } ) throw new GltfException( "The glTF source material template is unavailable." );
+ 				var template = source.CreateCopy( "gltf_unlit_template_" + Guid.NewGuid().ToString( "N" ) );
+ 				try

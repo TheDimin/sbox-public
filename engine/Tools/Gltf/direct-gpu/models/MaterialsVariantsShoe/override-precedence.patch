@@ -1,0 +1,122 @@
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs
+@@ -559,6 +559,15 @@
+ 		if ( (uint)slot >= materialOverrides.Length ) throw new ArgumentOutOfRangeException( nameof( slot ) );
+ 		ValidateMaterial( material );
+ 		ChangeOverrides( values => values[slot] = material, material is null ? null : () => EnsureRawOverrideOutputs( slot ) );
++	}
++	internal void SetMaterialOverrides( IReadOnlyList<Material> overrides )
++	{
++		ObjectDisposedException.ThrowIf( disposed, this ); ThreadSafe.AssertIsMainThread();
++		ArgumentNullException.ThrowIfNull( overrides );
++		if ( overrides.Count != materialOverrides.Length ) throw new ArgumentException( "Override vector does not match material slots.", nameof( overrides ) );
++		var candidate = overrides.ToArray();
++		foreach ( var material in candidate ) ValidateMaterial( material );
++		ChangeOverrides( values => Array.Copy( candidate, values, values.Length ), candidate.Any( material => material is not null ) ? () => EnsureRawOverrideOutputs() : null );
+ 	}
+ 	private void ChangeOverrides( Action<Material[]> change, Action prepare = null )
+ 	{
+--- a/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.Gltf.cs
++++ b/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.Gltf.cs
+@@ -137,9 +137,10 @@
+ 		if ( gltfInstance is null ) return false;
+ 		if ( taggedMaterialOverrides is { Count: > 0 } )
+ 			throw new NotSupportedException( "Tagged material overrides for managed glTF models are not implemented yet." );
+-		gltfInstance.ClearMaterialOverrides();
+-		gltfInstance.SetMaterialOverride( MaterialOverride );
+-		_materialAccessor?.Apply();
++		var overrides = new Material[gltfInstanceResource.MaterialSlotSourceIndices.Count];
++		for ( var i = 0; i < overrides.Length; i++ )
++			overrides[i] = MaterialOverride ?? _materialAccessor?.GetOverride( i );
++		gltfInstance.SetMaterialOverrides( overrides );
+ 		return true;
+ 	}
+ 
+--- a/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.Materials.cs
++++ b/engine/Sandbox.Engine/Scene/Components/Render/ModelRenderer.Materials.cs
+@@ -19,9 +19,12 @@
+ 		set
+ 		{
+ 			if ( field == value ) return;
++			if ( Model?.GltfResource is not null && value is not null && (!value.IsValid || value.IsError) )
++				throw new Sandbox.Gltf.GltfException( "Material override is invalid." );
++			var previous = field;
+ 			field = value;
+-
+-			UpdateObject();
++			try { UpdateObject(); }
++			catch { field = previous; throw; }
+ 		}
+ 	}
+ 
+@@ -32,9 +35,15 @@
+ 	/// </summary>
+ 	public void ClearMaterialOverrides()
+ 	{
++		if ( gltfInstance is not null )
++		{
++			// The setter commits the complete effective vector before state is cleared.
++			MaterialOverride = null;
++			taggedMaterialOverrides = null;
++			return;
++		}
+ 		taggedMaterialOverrides = null;
+ 		MaterialOverride = null;
+-		if ( gltfInstance is not null ) { gltfInstance.ClearMaterialOverrides(); return; }
+ 		_sceneObject?.ClearMaterialOverride();
+ 	}
+ 
+@@ -111,7 +120,13 @@
+ 
+ 	void MaterialAccessor.ITarget.SetOverride( int index, Material material )
+ 	{
+-		if ( gltfInstance is not null ) { gltfInstance.SetMaterialOverride( index, material ); return; }
++		if ( Model?.GltfResource is { } gltf )
++		{
++			if ( (uint)index >= gltf.MaterialSlotSourceIndices.Count ) throw new ArgumentOutOfRangeException( nameof( index ) );
++			if ( material is not null && (!material.IsValid || material.IsError) ) throw new Sandbox.Gltf.GltfException( "Material override is invalid." );
++			if ( gltfInstance is not null ) ApplyGltfMaterialOverrides();
++			return;
++		}
+ 		if ( !_sceneObject.IsValid() ) return;
+ 
+ 		_sceneObject.native.SetMaterialOverrideByIndex( index, material?.native ?? default );
+@@ -122,8 +137,7 @@
+ 	{
+ 		if ( gltfInstance is not null )
+ 		{
+-			gltfInstance.ClearMaterialOverrides();
+-			gltfInstance.SetMaterialOverride( MaterialOverride );
++			ApplyGltfMaterialOverrides();
+ 			return;
+ 		}
+ 		if ( !_sceneObject.IsValid() ) return;
+--- a/engine/Sandbox.Engine/Scene/Components/Render/MaterialAccessor.cs
++++ b/engine/Sandbox.Engine/Scene/Components/Render/MaterialAccessor.cs
+@@ -89,17 +89,20 @@
+ 	/// </summary>
+ 	public void SetOverride( int i, Material material )
+ 	{
++		var hadPrevious = _overrides.TryGetValue( i, out var previous );
+ 		if ( material is null )
+ 		{
+-			if ( !_overrides.Remove( i ) )
+-				return;
++			if ( !_overrides.Remove( i ) ) return;
+ 		}
+-		else
++		else _overrides[i] = material;
++
++		try { _target.SetOverride( i, material ); }
++		catch
+ 		{
+-			_overrides[i] = material;
++			if ( hadPrevious ) _overrides[i] = previous;
++			else _overrides.Remove( i );
++			throw;
+ 		}
+-
+-		_target.SetOverride( i, material );
+ 	}
+ 
+ 

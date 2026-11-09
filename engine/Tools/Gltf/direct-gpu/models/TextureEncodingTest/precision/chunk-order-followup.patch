@@ -1,0 +1,11 @@
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfPng16Decoder.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfPng16Decoder.cs
+@@ -50,7 +50,7 @@
+ 			}
+ 			else if ( name.SequenceEqual( "PLTE"u8 ) )
+ 			{
+-				if ( palette || idat || type is 0 or 4 || len == 0 || len > 768 || len % 3 != 0 ) throw new GltfException( "Invalid PLTE." );
++				if ( palette || transparency || idat || type is 0 or 4 || len == 0 || len > 768 || len % 3 != 0 ) throw new GltfException( "Invalid PLTE." );
+ 				palette = true;
+ 			}
+ 			else if ( name.SequenceEqual( "tRNS"u8 ) )

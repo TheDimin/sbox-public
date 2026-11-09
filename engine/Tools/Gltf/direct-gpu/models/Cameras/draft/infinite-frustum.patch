@@ -1,0 +1,16 @@
+diff --git a/engine/Sandbox.System/Math/Frustum.cs b/engine/Sandbox.System/Math/Frustum.cs
+--- a/engine/Sandbox.System/Math/Frustum.cs
++++ b/engine/Sandbox.System/Math/Frustum.cs
+@@ -161,7 +161,11 @@ public unsafe struct Frustum : System.IEquatable<Frustum>
+ 		f.RightPlane = new Plane( br.Position, Vector3.Cross( tr.Forward, br.Forward ) );
+ 		f.BottomPlane = new Plane( br.Position, Vector3.Cross( br.Forward, bl.Forward ) );
+ 		f.NearPlane = new Plane( tl.Position + forward * near, forward );
+-		f.FarPlane = new Plane( tl.Position + forward * far, -forward );
++		// An infinite far plane has no finite point. Construct its equation
++		// directly so zero direction components never multiply infinity.
++		f.FarPlane = float.IsPositiveInfinity( far )
++			? new Plane( -forward, float.NegativeInfinity )
++			: new Plane( tl.Position + forward * far, -forward );
+ 
+ 		return f;
+ 	}

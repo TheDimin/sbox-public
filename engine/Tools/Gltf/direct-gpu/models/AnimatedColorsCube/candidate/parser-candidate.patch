@@ -1,0 +1,153 @@
+--- a/engine/Sandbox.Gltf/GltfReader.cs
++++ b/engine/Sandbox.Gltf/GltfReader.cs
+@@ -12,6 +12,13 @@
+ 	/// Capability declarations belong to the caller; declaring a codec does not implement it.
+ 	/// </summary>
+ 	public static GltfDocument Read( byte[] data, Func<string, byte[]> resolve = null, IReadOnlySet<string> supportedExtensions = null, long maxDecodedBufferBytes = long.MaxValue )
++		=> ReadCore( data, resolve, supportedExtensions, maxDecodedBufferBytes, false );
++
++	/// <summary>Enables only optional material base-colour pointer channels; this does not declare full KHR_animation_pointer support.</summary>
++	public static GltfDocument ReadWithPartialMaterialColorAnimation( byte[] data, Func<string, byte[]> resolve = null, IReadOnlySet<string> supportedExtensions = null, long maxDecodedBufferBytes = long.MaxValue )
++		=> ReadCore( data, resolve, supportedExtensions, maxDecodedBufferBytes, true );
++
++	private static GltfDocument ReadCore( byte[] data, Func<string, byte[]> resolve, IReadOnlySet<string> supportedExtensions, long maxDecodedBufferBytes, bool enablePartialMaterialColorAnimation )
+ 	{
+ 		if ( data is null || data.Length == 0 ) throw new GltfException( "glTF input is empty." );
+ 		JsonDocument json = null;
+@@ -22,7 +29,7 @@
+ 			if ( data.Length >= 4 && BinaryPrimitives.ReadUInt32LittleEndian( data ) == 0x46546c67 )
+ 				(jsonBytes, binary) = ReadGlb( data );
+ 			json = JsonDocument.Parse( jsonBytes );
+-			var document = new GltfDocument( json, binary, resolve, supportedExtensions, maxDecodedBufferBytes );
++			var document = new GltfDocument( json, binary, resolve, supportedExtensions, maxDecodedBufferBytes, enablePartialMaterialColorAnimation );
+ 			return document;
+ 		}
+ 		catch ( Exception e ) when ( e is JsonException or InvalidOperationException or FormatException or OverflowException or ArgumentException )
+--- a/engine/Sandbox.Gltf/GltfDocument.cs
++++ b/engine/Sandbox.Gltf/GltfDocument.cs
+@@ -7,6 +7,7 @@
+ {
+ 	private readonly JsonDocument json;
+ 	private readonly HashSet<string> supported;
++	private readonly bool partialMaterialColorAnimation;
+ 	private readonly string[] unsupportedOptional;
+ 	private Func<string, byte[]> resolver;
+ 	private ReadOnlyMemory<byte>[] buffers;
+@@ -26,9 +27,10 @@
+ 	public IReadOnlyList<string> UnsupportedOptionalExtensions => Array.AsReadOnly( unsupportedOptional );
+ 	internal long MaxDecodedBufferBytes { get; }
+ 
+-	internal GltfDocument( JsonDocument json, ReadOnlyMemory<byte>? binary, Func<string, byte[]> resolve, IReadOnlySet<string> supportedExtensions, long maxDecodedBufferBytes )
++	internal GltfDocument( JsonDocument json, ReadOnlyMemory<byte>? binary, Func<string, byte[]> resolve, IReadOnlySet<string> supportedExtensions, long maxDecodedBufferBytes, bool partialMaterialColorAnimation )
+ 	{
+ 		this.json = json;
++		this.partialMaterialColorAnimation = partialMaterialColorAnimation;
+ 		if ( maxDecodedBufferBytes < 0 ) throw new GltfException( "Decoded buffer budget cannot be negative." );
+ 		MaxDecodedBufferBytes = maxDecodedBufferBytes;
+ 		resolver = resolve;
+--- a/engine/Sandbox.Gltf/GltfDocument.Pose.cs
++++ b/engine/Sandbox.Gltf/GltfDocument.Pose.cs
+@@ -58,6 +58,7 @@
+ 		var weights = new float[count][];
+ 		// Parent links are immutable and validated for cycles and multiple parents.
+ 		var parents = NodeParents();
++		var materialColors = new Dictionary<int, Vector4>();
+ 		for ( var i = 0; i < count; i++ )
+ 		{
+ 			var node = SceneObject( nodeArray[i], "node" );
+@@ -85,6 +86,7 @@
+ 						if ( SupportsExtension( "KHR_animation_pointer" ) && target.TryGetProperty( "extensions", out var extensions ) &&
+ 							extensions.ValueKind == JsonValueKind.Object && extensions.TryGetProperty( "KHR_animation_pointer", out _ ) )
+ 							throw new GltfException( "KHR_animation_pointer was declared supported, but its animation targets are not implemented." );
++						if ( partialMaterialColorAnimation ) TrySampleMaterialColor( target, channel, samplers, time, materialColors );
+ 						continue;
+ 					}
+ 					var nodeIndex = SceneIndex( targetNode, "animation target node" );
+@@ -138,7 +140,7 @@
+ 			for ( var current = i; current >= 0; current = parents[current] ) world *= locals[current];
+ 			worlds[i] = world;
+ 		}
+-		return new GltfPose( this, worlds, weights );
++		return new GltfPose( this, worlds, weights, materialColors );
+ 	}
+ 
+ 	private static float[] PoseTrs( Dictionary<(int Node, string Path), float[]> updates, int index, string name, JsonElement node, float[] defaults )
+@@ -152,9 +154,13 @@
+ {
+ 	private readonly Matrix4x4[] poseWorlds;
+ 	private readonly float[][] poseWeights;
++	private readonly IReadOnlyDictionary<int, Vector4> materialColors;
+ 	internal GltfDocument Owner { get; }
+ 
+-	internal GltfPose( GltfDocument owner, Matrix4x4[] worlds, float[][] weights ) => (Owner, poseWorlds, poseWeights) = (owner, worlds, weights);
++	internal GltfPose( GltfDocument owner, Matrix4x4[] worlds, float[][] weights, IReadOnlyDictionary<int, Vector4> materialColors ) => (Owner, poseWorlds, poseWeights, this.materialColors) = (owner, worlds, weights, materialColors);
++
++	/// <summary>Gets a sampled optional material-colour channel, when partial pointer support was requested.</summary>
++	public bool TryGetAnimatedBaseColorFactor( int material, out Vector4 value ) => materialColors.TryGetValue( material, out value );
+ 
+ 	public Matrix4x4 GetWorldTransform( int node )
+ 	{
+--- a/engine/Sandbox.Gltf/GltfPose.MorphOverrides.cs
++++ b/engine/Sandbox.Gltf/GltfPose.MorphOverrides.cs
+@@ -25,6 +25,6 @@
+ 				if ( !float.IsFinite( weight ) ) throw new GltfException( "Morph override weights must be finite." );
+ 			weights[node] = copy;
+ 		}
+-		return new GltfPose( Owner, poseWorlds, weights );
++		return new GltfPose( Owner, poseWorlds, weights, materialColors );
+ 	}
+ }
+--- /dev/null
++++ b/engine/Sandbox.Gltf/GltfDocument.PartialMaterialColorAnimation.cs
+@@ -0,0 +1,51 @@
++using System.Globalization;
++using System.Numerics;
++using System.Text.Json;
++
++namespace Sandbox.Gltf;
++
++public sealed partial class GltfDocument
++{
++    // Deliberately only a partial optional-extension implementation. Required
++    // KHR_animation_pointer is still rejected by normal capability validation.
++    private void TrySampleMaterialColor( JsonElement target, JsonElement channel, JsonElement samplers, float time, Dictionary<int, Vector4> updates )
++    {
++        if ( !target.TryGetProperty( "extensions", out var extensions ) || extensions.ValueKind != JsonValueKind.Object ||
++            !extensions.TryGetProperty( "KHR_animation_pointer", out var extension ) ) return;
++        if ( GltfJson.String( target, "path" ) != "pointer" || extension.ValueKind != JsonValueKind.Object )
++            throw new GltfException( "Invalid animation pointer target." );
++        var pointer = GltfJson.String( extension, "pointer" );
++        var parts = pointer.Split( '/' );
++        if ( parts.Length != 5 || parts[0] != "" || parts[1] != "materials" || parts[3] != "pbrMetallicRoughness" || parts[4] != "baseColorFactor" ) return;
++        // JSON Pointer array indices are canonical decimal, without signs or leading zeros.
++        if ( parts[2].Length == 0 || (parts[2].Length > 1 && parts[2][0] == '0') ||
++            !int.TryParse( parts[2], NumberStyles.None, CultureInfo.InvariantCulture, out var material ) )
++            throw new GltfException( "Invalid animated material index." );
++        var definition = ElementAt( "materials", material );
++        if ( !definition.TryGetProperty( "pbrMetallicRoughness", out var pbr ) || pbr.ValueKind != JsonValueKind.Object )
++            throw new GltfException( "Animated baseColorFactor requires a defined pbrMetallicRoughness object." );
++        var samplerIndex = GltfJson.Int( channel, "sampler" );
++        if ( (uint)samplerIndex >= (uint)samplers.GetArrayLength() ) throw new GltfException( "Animation sampler index is out of range." );
++        var sampler = SceneObject( samplers[samplerIndex], "animation sampler" );
++        var inputIndex = GltfJson.Int( sampler, "input" ); var outputIndex = GltfJson.Int( sampler, "output" );
++        var input = Accessor( inputIndex ); var output = Accessor( outputIndex );
++        if ( GltfJson.String( input.Json, "type" ) != "SCALAR" || input.ComponentType != 5126 || input.Normalized )
++            throw new GltfException( "Animation input must be a FLOAT SCALAR accessor." );
++        if ( GltfJson.String( output.Json, "type" ) != "VEC4" ) throw new GltfException( "Animated baseColorFactor requires a VEC4 accessor." );
++        ValidateNonVertexAccessor( output, "Animation output" );
++        var interpolation = GltfJson.String( sampler, "interpolation", "LINEAR" );
++        var outputValues = ReadFloatAccessor( outputIndex );
++        var times = ReadAnimationInput( input, inputIndex );
++        var values = GltfAnimationSampler.Sample( times, outputValues, 4, interpolation, time );
++        // Only vertex values represent the constrained property. Cubic in/out
++        // tangents may be signed and larger than one. The pointer spec does not
++        // specify clamping of interpolated overshoot; preserve the sampled value.
++        var stride = interpolation == "CUBICSPLINE" ? 12 : 4;
++        var offset = interpolation == "CUBICSPLINE" ? 4 : 0;
++        for ( var key = 0; key < times.Length; key++ )
++            for ( var c = 0; c < 4; c++ )
++                if ( outputValues[key * stride + offset + c] is < 0 or > 1 ) throw new GltfException( "Animated baseColorFactor key must be in [0,1]." );
++        if ( !updates.TryAdd( material, new Vector4( values[0], values[1], values[2], values[3] ) ) )
++            throw new GltfException( "An animation cannot target the same material colour twice." );
++    }
++}

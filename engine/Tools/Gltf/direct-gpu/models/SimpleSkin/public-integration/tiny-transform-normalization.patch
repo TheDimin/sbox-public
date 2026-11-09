@@ -1,0 +1,45 @@
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfModelRig.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfModelRig.cs
+@@ -205,7 +205,41 @@
+ 	{
+ 		transform = default;
+ 		if ( matrix.M14 != 0 || matrix.M24 != 0 || matrix.M34 != 0 || matrix.M44 != 1 ) return false;
+-		if ( !NMatrix.Decompose( matrix, out var scale, out var rotation, out var position ) ) return false;
++		// Preserve the measured ordinary/zero/reflected path exactly. Retry only
++		// when Numerics' fixed small-basis threshold or float row norms lose data.
++		if ( NMatrix.Decompose( matrix, out var scale, out var rotation, out var position ) &&
++			TryCreateNativeTransform( matrix, scale, rotation, position, out transform ) ) return true;
++
++		if ( !TryNormalizeTrsRow( matrix.M11, matrix.M12, matrix.M13, out var x, out var sx ) ||
++			!TryNormalizeTrsRow( matrix.M21, matrix.M22, matrix.M23, out var y, out var sy ) ||
++			!TryNormalizeTrsRow( matrix.M31, matrix.M32, matrix.M33, out var z, out var sz ) ) return false;
++		var basis = matrix;
++		basis.M11 = x.X; basis.M12 = x.Y; basis.M13 = x.Z;
++		basis.M21 = y.X; basis.M22 = y.Y; basis.M23 = y.Z;
++		basis.M31 = z.X; basis.M32 = z.Y; basis.M33 = z.Z;
++		if ( !NMatrix.Decompose( basis, out scale, out rotation, out position ) ) return false;
++		scale *= new NVector( sx, sy, sz );
++		// Validate against the original affine rows, not the normalized basis.
++		// The same measured per-row guard rejects shear at every source scale.
++		return TryCreateNativeTransform( matrix, scale, rotation, position, out transform );
++	}
++
++	private static bool TryNormalizeTrsRow( float a, float b, float c, out NVector row, out float scale )
++	{
++		row = default; scale = 0;
++		// Every finite float square fits in double, including subnormal inputs.
++		// This avoids both float underflow and overflow without a scale epsilon.
++		var length = Math.Sqrt( (double)a * a + (double)b * b + (double)c * c );
++		if ( !double.IsFinite( length ) || length > float.MaxValue ) return false;
++		scale = (float)length;
++		if ( length == 0 ) return true;
++		row = new NVector( (float)(a / length), (float)(b / length), (float)(c / length) );
++		return true;
++	}
++
++	private static bool TryCreateNativeTransform( NMatrix matrix, NVector scale, System.Numerics.Quaternion rotation, NVector position, out Transform transform )
++	{
++		transform = default;
+ 		var reconstructed = NMatrix.CreateScale( scale ) * NMatrix.CreateFromQuaternion( rotation ) * NMatrix.CreateTranslation( position );
+ 		// A pure TRS at scale100 reconstructs with observed row errors up to
+ 		// 2.384e-5 (2.384e-7 relative) in the real engine. Bound float roundoff

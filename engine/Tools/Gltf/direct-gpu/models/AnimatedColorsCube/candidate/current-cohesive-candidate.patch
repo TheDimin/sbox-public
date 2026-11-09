@@ -1,0 +1,471 @@
+--- /dev/null
++++ b/engine/Sandbox.Gltf/GltfDocument.PartialMaterialColorAnimation.cs
+@@ -0,0 +1,52 @@
++using System.Globalization;
++using System.Numerics;
++using System.Text.Json;
++
++namespace Sandbox.Gltf;
++
++public sealed partial class GltfDocument
++{
++    // Deliberately only a partial optional-extension implementation. Required
++    // KHR_animation_pointer is still rejected by normal capability validation.
++    private void TrySampleMaterialColor( JsonElement target, JsonElement channel, JsonElement samplers, float time, ref Dictionary<int, Vector4> updates )
++    {
++        if ( !target.TryGetProperty( "extensions", out var extensions ) || extensions.ValueKind != JsonValueKind.Object ||
++            !extensions.TryGetProperty( "KHR_animation_pointer", out var extension ) ) return;
++        if ( GltfJson.String( target, "path" ) != "pointer" || extension.ValueKind != JsonValueKind.Object )
++            throw new GltfException( "Invalid animation pointer target." );
++        var pointer = GltfJson.String( extension, "pointer" );
++        var parts = pointer.Split( '/' );
++        if ( parts.Length != 5 || parts[0] != "" || parts[1] != "materials" || parts[3] != "pbrMetallicRoughness" || parts[4] != "baseColorFactor" ) return;
++        // JSON Pointer array indices are canonical decimal, without signs or leading zeros.
++        if ( parts[2].Length == 0 || (parts[2].Length > 1 && parts[2][0] == '0') ||
++            !int.TryParse( parts[2], NumberStyles.None, CultureInfo.InvariantCulture, out var material ) )
++            throw new GltfException( "Invalid animated material index." );
++        var definition = ElementAt( "materials", material );
++        if ( !definition.TryGetProperty( "pbrMetallicRoughness", out var pbr ) || pbr.ValueKind != JsonValueKind.Object )
++            throw new GltfException( "Animated baseColorFactor requires a defined pbrMetallicRoughness object." );
++        var samplerIndex = GltfJson.Int( channel, "sampler" );
++        if ( (uint)samplerIndex >= (uint)samplers.GetArrayLength() ) throw new GltfException( "Animation sampler index is out of range." );
++        var sampler = SceneObject( samplers[samplerIndex], "animation sampler" );
++        var inputIndex = GltfJson.Int( sampler, "input" ); var outputIndex = GltfJson.Int( sampler, "output" );
++        var input = Accessor( inputIndex ); var output = Accessor( outputIndex );
++        if ( GltfJson.String( input.Json, "type" ) != "SCALAR" || input.ComponentType != 5126 || input.Normalized )
++            throw new GltfException( "Animation input must be a FLOAT SCALAR accessor." );
++        if ( GltfJson.String( output.Json, "type" ) != "VEC4" ) throw new GltfException( "Animated baseColorFactor requires a VEC4 accessor." );
++        ValidateNonVertexAccessor( output, "Animation output" );
++        var interpolation = GltfJson.String( sampler, "interpolation", "LINEAR" );
++        var outputValues = ReadFloatAccessor( outputIndex );
++        var times = ReadAnimationInput( input, inputIndex );
++        var values = GltfAnimationSampler.Sample( times, outputValues, 4, interpolation, time );
++        // Only vertex values represent the constrained property. Cubic in/out
++        // tangents may be signed and larger than one. The pointer spec does not
++        // specify clamping of interpolated overshoot; preserve the sampled value.
++        var stride = interpolation == "CUBICSPLINE" ? 12 : 4;
++        var offset = interpolation == "CUBICSPLINE" ? 4 : 0;
++        for ( var key = 0; key < times.Length; key++ )
++            for ( var c = 0; c < 4; c++ )
++                if ( outputValues[key * stride + offset + c] is < 0 or > 1 ) throw new GltfException( "Animated baseColorFactor key must be in [0,1]." );
++        updates ??= new();
++        if ( !updates.TryAdd( material, new Vector4( values[0], values[1], values[2], values[3] ) ) )
++            throw new GltfException( "An animation cannot target the same material colour twice." );
++    }
++}
+--- a/engine/Sandbox.Gltf/GltfDocument.Pose.cs
++++ b/engine/Sandbox.Gltf/GltfDocument.Pose.cs
+@@ -58,6 +58,7 @@
+ 		var weights = new float[count][];
+ 		// Parent links are immutable and validated for cycles and multiple parents.
+ 		var parents = NodeParents();
++		Dictionary<int, Vector4> materialColors = null;
+ 		for ( var i = 0; i < count; i++ )
+ 		{
+ 			var node = SceneObject( nodeArray[i], "node" );
+@@ -85,6 +86,7 @@
+ 						if ( SupportsExtension( "KHR_animation_pointer" ) && target.TryGetProperty( "extensions", out var extensions ) &&
+ 							extensions.ValueKind == JsonValueKind.Object && extensions.TryGetProperty( "KHR_animation_pointer", out _ ) )
+ 							throw new GltfException( "KHR_animation_pointer was declared supported, but its animation targets are not implemented." );
++						if ( partialMaterialColorAnimation ) TrySampleMaterialColor( target, channel, samplers, time, ref materialColors );
+ 						continue;
+ 					}
+ 					var nodeIndex = SceneIndex( targetNode, "animation target node" );
+@@ -138,7 +140,7 @@
+ 			for ( var current = i; current >= 0; current = parents[current] ) world *= locals[current];
+ 			worlds[i] = world;
+ 		}
+-		return new GltfPose( this, worlds, weights );
++		return new GltfPose( this, worlds, weights, materialColors );
+ 	}
+ 
+ 	private static float[] PoseTrs( Dictionary<(int Node, string Path), float[]> updates, int index, string name, JsonElement node, float[] defaults )
+@@ -152,9 +154,20 @@
+ {
+ 	private readonly Matrix4x4[] poseWorlds;
+ 	private readonly float[][] poseWeights;
++	private readonly IReadOnlyDictionary<int, Vector4> materialColors;
+ 	internal GltfDocument Owner { get; }
+ 
+-	internal GltfPose( GltfDocument owner, Matrix4x4[] worlds, float[][] weights ) => (Owner, poseWorlds, poseWeights) = (owner, worlds, weights);
++	internal GltfPose( GltfDocument owner, Matrix4x4[] worlds, float[][] weights, IReadOnlyDictionary<int, Vector4> materialColors ) => (Owner, poseWorlds, poseWeights, this.materialColors) = (owner, worlds, weights, materialColors);
++
++	/// <summary>Whether this snapshot contains any sampled optional material-colour channels.</summary>
++	public bool HasAnimatedBaseColorFactors => materialColors is { Count: > 0 };
++
++	/// <summary>Gets a sampled optional material-colour channel, when partial pointer support was requested.</summary>
++	public bool TryGetAnimatedBaseColorFactor( int material, out Vector4 value )
++	{
++		if ( materialColors is not null ) return materialColors.TryGetValue( material, out value );
++		value = default; return false;
++	}
+ 
+ 	public Matrix4x4 GetWorldTransform( int node )
+ 	{
+--- a/engine/Sandbox.Gltf/GltfDocument.cs
++++ b/engine/Sandbox.Gltf/GltfDocument.cs
+@@ -7,6 +7,7 @@
+ {
+ 	private readonly JsonDocument json;
+ 	private readonly HashSet<string> supported;
++	private readonly bool partialMaterialColorAnimation;
+ 	private readonly string[] unsupportedOptional;
+ 	private Func<string, byte[]> resolver;
+ 	private ReadOnlyMemory<byte>[] buffers;
+@@ -26,9 +27,10 @@
+ 	public IReadOnlyList<string> UnsupportedOptionalExtensions => Array.AsReadOnly( unsupportedOptional );
+ 	internal long MaxDecodedBufferBytes { get; }
+ 
+-	internal GltfDocument( JsonDocument json, ReadOnlyMemory<byte>? binary, Func<string, byte[]> resolve, IReadOnlySet<string> supportedExtensions, long maxDecodedBufferBytes )
++	internal GltfDocument( JsonDocument json, ReadOnlyMemory<byte>? binary, Func<string, byte[]> resolve, IReadOnlySet<string> supportedExtensions, long maxDecodedBufferBytes, bool partialMaterialColorAnimation )
+ 	{
+ 		this.json = json;
++		this.partialMaterialColorAnimation = partialMaterialColorAnimation;
+ 		if ( maxDecodedBufferBytes < 0 ) throw new GltfException( "Decoded buffer budget cannot be negative." );
+ 		MaxDecodedBufferBytes = maxDecodedBufferBytes;
+ 		resolver = resolve;
+--- a/engine/Sandbox.Gltf/GltfPose.MorphOverrides.cs
++++ b/engine/Sandbox.Gltf/GltfPose.MorphOverrides.cs
+@@ -25,6 +25,6 @@
+ 				if ( !float.IsFinite( weight ) ) throw new GltfException( "Morph override weights must be finite." );
+ 			weights[node] = copy;
+ 		}
+-		return new GltfPose( Owner, poseWorlds, weights );
++		return new GltfPose( Owner, poseWorlds, weights, materialColors );
+ 	}
+ }
+--- a/engine/Sandbox.Gltf/GltfReader.cs
++++ b/engine/Sandbox.Gltf/GltfReader.cs
+@@ -12,6 +12,13 @@
+ 	/// Capability declarations belong to the caller; declaring a codec does not implement it.
+ 	/// </summary>
+ 	public static GltfDocument Read( byte[] data, Func<string, byte[]> resolve = null, IReadOnlySet<string> supportedExtensions = null, long maxDecodedBufferBytes = long.MaxValue )
++		=> ReadCore( data, resolve, supportedExtensions, maxDecodedBufferBytes, false );
++
++	/// <summary>Enables only optional material base-colour pointer channels; this does not declare full KHR_animation_pointer support.</summary>
++	public static GltfDocument ReadWithPartialMaterialColorAnimation( byte[] data, Func<string, byte[]> resolve = null, IReadOnlySet<string> supportedExtensions = null, long maxDecodedBufferBytes = long.MaxValue )
++		=> ReadCore( data, resolve, supportedExtensions, maxDecodedBufferBytes, true );
++
++	private static GltfDocument ReadCore( byte[] data, Func<string, byte[]> resolve, IReadOnlySet<string> supportedExtensions, long maxDecodedBufferBytes, bool enablePartialMaterialColorAnimation )
+ 	{
+ 		if ( data is null || data.Length == 0 ) throw new GltfException( "glTF input is empty." );
+ 		JsonDocument json = null;
+@@ -22,7 +29,7 @@
+ 			if ( data.Length >= 4 && BinaryPrimitives.ReadUInt32LittleEndian( data ) == 0x46546c67 )
+ 				(jsonBytes, binary) = ReadGlb( data );
+ 			json = JsonDocument.Parse( jsonBytes );
+-			var document = new GltfDocument( json, binary, resolve, supportedExtensions, maxDecodedBufferBytes );
++			var document = new GltfDocument( json, binary, resolve, supportedExtensions, maxDecodedBufferBytes, enablePartialMaterialColorAnimation );
+ 			return document;
+ 		}
+ 		catch ( Exception e ) when ( e is JsonException or InvalidOperationException or FormatException or OverflowException or ArgumentException )
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuBackend.cs
+@@ -442,6 +442,13 @@
+ 		EnsureGpuResources();
+ 		var instance = new GltfGpuInstance( this, world, initiallyVisible ); instances++; return instance;
+ 	}
++	internal void RetainInstance()
++	{
++		ThreadSafe.AssertIsMainThread();
++		if ( disposed || instances <= 0 ) throw new InvalidOperationException( "A live glTF instance lease is required to retain resources." );
++		instances = checked( instances + 1 );
++	}
++
+ 	internal void ReleaseInstance()
+ 	{
+ 		ThreadSafe.AssertIsMainThread();
+@@ -503,6 +510,7 @@
+ 		internal bool HasVertexState;
+ 		internal long ComputedRevision = -1;
+ 		internal Material EffectiveMaterial;
++		internal Material AnimatedMaterial, AnimatedParent;
+ 		internal bool IsTranslucent, IsAlphaTest;
+ 		internal BBox WorldBounds;
+ 		internal SceneCustomObject SortObject;
+@@ -518,8 +526,9 @@
+ 		{
+ 			var buffers = new[] { Output, Palette, Weights, Indices }; Output = Palette = Weights = Indices = null;
+ 			var child = SortObject; SortObject = null;
++			var animated = AnimatedMaterial; AnimatedMaterial = AnimatedParent = null;
+ 			GltfGpuCleanup.ReleaseAll( new Action[] { () => { if ( child.IsValid() ) { child.RenderOverride = null; child.Delete(); } } }
+-				.Concat( buffers.Where( x => x is not null ).Select<GpuBuffer, Action>( x => x.Dispose ) ).Concat( [DisposeRawOutput] ) );
++				.Concat( buffers.Where( x => x is not null ).Select<GpuBuffer, Action>( x => x.Dispose ) ).Concat( [DisposeRawOutput, () => animated?.Destroy()] ) );
+ 		}
+ 	}
+ 	private readonly GltfGpuAsset asset;
+@@ -786,25 +795,45 @@
+ 		// Compute before publishing the pose so invalid bounds cannot partially update it.
+ 		var drawBounds = updates.Select( x => GltfGpuRig.Bounds( [(x.Draw.Rig, x.Matrices, x.Weights)], nextPlacement ) ).ToArray();
+ 		var bounds = drawBounds.Length == 0 ? new BBox( global::Vector3.Zero, global::Vector3.Zero ) : BBox.FromBoxes( drawBounds );
+-		placementBuffer.SetData<GltfGpuMatrix>( new[] { new GltfGpuMatrix( nextPlacement ) } );
+-		for ( var updateIndex = 0; updateIndex < updates.Length; updateIndex++ )
+-		{
+-			var update = updates[updateIndex];
+-			update.Draw.Palette.SetData<GltfGpuMatrix>( update.Matrices );
+-			if ( update.Weights.Length != 0 ) update.Draw.Weights.SetData<float>( update.Weights );
+-			if ( update.Draw.Reversed != update.Reversed )
+-			{
+-				var indices = (uint[])update.Draw.Node.Primitive.Plan.Indices.Clone();
+-				if ( update.Reversed && update.Draw.Node.Primitive.Plan.Mode == 4 )
+-					for ( var i = 0; i < indices.Length; i += 3 ) (indices[i + 1], indices[i + 2]) = (indices[i + 2], indices[i + 1]);
+-				update.Draw.Indices.SetData<uint>( indices ); update.Draw.Reversed = update.Reversed;
+-			}
+-		}
+-		for ( var index = 0; index < updates.Length; index++ )
+-		{
+-			updates[index].Draw.WorldBounds = drawBounds[index];
+-			if ( updates[index].Draw.SortObject.IsValid() ) updates[index].Draw.SortObject.Bounds = drawBounds[index];
+-		}
++		var animated = value.HasAnimatedBaseColorFactors || hasAnimatedMaterials ? PrepareAnimatedMaterials( value, variantState?.Current ) : null;
++		var colorsApplied = false;
++		try
++		{
++			if ( animated is not null )
++			{
++				ApplyAnimatedMaterialValues( animated );
++				colorsApplied = true;
++			}
++			placementBuffer.SetData<GltfGpuMatrix>( new[] { new GltfGpuMatrix( nextPlacement ) } );
++			for ( var updateIndex = 0; updateIndex < updates.Length; updateIndex++ )
++			{
++				var update = updates[updateIndex];
++				update.Draw.Palette.SetData<GltfGpuMatrix>( update.Matrices );
++				if ( update.Weights.Length != 0 ) update.Draw.Weights.SetData<float>( update.Weights );
++				if ( update.Draw.Reversed != update.Reversed )
++				{
++					var indices = (uint[])update.Draw.Node.Primitive.Plan.Indices.Clone();
++					if ( update.Reversed && update.Draw.Node.Primitive.Plan.Mode == 4 )
++						for ( var i = 0; i < indices.Length; i += 3 ) (indices[i + 1], indices[i + 2]) = (indices[i + 2], indices[i + 1]);
++					update.Draw.Indices.SetData<uint>( indices ); update.Draw.Reversed = update.Reversed;
++				}
++			}
++			for ( var index = 0; index < updates.Length; index++ )
++			{
++				updates[index].Draw.WorldBounds = drawBounds[index];
++				if ( updates[index].Draw.SortObject.IsValid() ) updates[index].Draw.SortObject.Bounds = drawBounds[index];
++			}
++			if ( animated is not null )
++			{
++				PublishAnimatedMaterials( animated );
++				animated = null;
++			}
++		}
++		catch ( Exception cause ) when ( colorsApplied )
++		{
++			GltfGpuCleanup.Rollback( cause, [() => RollbackAnimatedMaterialValues( animated )] ); throw;
++		}
++		finally { DestroyStagedAnimatedMaterials( animated ); }
+ 		pose = value; placement = nextPlacement; PoseRevision++;
+ 		// Empty instances have no required GPU rows; readiness is vacuous,
+ 		// and DrawCalls stays zero rather than fabricating a submission.
+@@ -906,7 +935,7 @@
+ 				var primitive = draw.Node.Primitive;
+ 				var packet = selected?.Bindings[draw.VariantRow].Value;
+ 				var overridden = manualRendering && manualMaterial is not null ? manualMaterial : overrides[primitive.MaterialSlot];
+-				var material = overridden ?? packet?.Material ?? primitive.Material;
++				var material = overridden ?? draw.AnimatedMaterial ?? packet?.Material ?? primitive.Material;
+ 				var translucent = material.Flags.IsTranslucent;
+ 				if ( only is not null && (!translucent || layer is not (SceneLayerType.Translucent or SceneLayerType.EffectsTranslucent)) ) continue;
+ 				if ( only is null && !manualRendering && !batchTranslucent && translucent && layer is (SceneLayerType.Translucent or SceneLayerType.EffectsTranslucent) ) continue;
+@@ -1008,12 +1037,16 @@
+ 						GltfGpuCleanup.ReleaseAll( new Action[] { () => { if ( sceneObject.IsValid() ) sceneObject.Delete(); } }
+ 							.Concat( draws.Select<Draw, Action>( x => x.Dispose ) ).Concat( new Action[] { () => variantState?.Dispose(), placementBuffer.Dispose, asset.ReleaseInstance } ) );
+ 					}
+-					finally { draws.Clear(); pose = null; }
++					finally
++					{
++						draws.Clear(); pose = null;
++						hasAnimatedMaterials = false; opaqueMaterials = null; materialColorParameters = null; AnimatedMaterialWriter = null;
++					}
+ 				} );
+ 			}
+ 			// Preserve the existing native GPU retirement path. The CPU gate
+ 			// prevents concurrent access; it does not wait for GPU execution.
+-			if ( Graphics.IsActive ) EngineLoop.DisposeAtFrameEnd( Sandbox.Utility.DisposeAction.Create( Release ) ); else Release();
++			if ( Graphics.IsActive || hasAnimatedMaterials ) EngineLoop.DisposeAtFrameEnd( Sandbox.Utility.DisposeAction.Create( Release ) ); else Release();
+ 		} );
+ 	}
+ }
+--- /dev/null
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuInstance.PartialMaterialColorAnimation.cs
+@@ -0,0 +1,132 @@
++using Sandbox.Engine;
++
++namespace Sandbox.Gltf.DirectGpu;
++
++internal sealed partial class GltfGpuInstance
++{
++	private bool hasAnimatedMaterials;
++	private Dictionary<int, bool> opaqueMaterials;
++	private Dictionary<Material, string> materialColorParameters;
++	internal int AnimatedMaterialCopyCount { get; private set; }
++	internal int AnimatedMaterialRetiredPending { get; private set; }
++	private sealed record AnimatedMaterialEntry( Material Parent, Material Material, string Parameter, global::Vector4 Tint, bool New );
++	private sealed class AnimatedMaterialStage
++	{
++		internal readonly AnimatedMaterialEntry[] Entries;
++		internal readonly global::Vector4[] Previous;
++		internal readonly List<int> Changed = new();
++		internal readonly List<Material> Retired = new();
++		internal bool RetireLease;
++		internal AnimatedMaterialStage( AnimatedMaterialEntry[] entries ) { Entries = entries; Previous = new global::Vector4[entries.Length]; }
++	}
++	// Test-only failure injection is instance scoped; restoration bypasses it.
++	internal Action<Material, string, global::Vector4> AnimatedMaterialWriter;
++
++	// Called only on the main thread under the instance submission gate. Reuse
++	// an instance-owned copy across pose changes; create a replacement only for
++	// a newly animated effective source binding. Asset/variant leases retain all
++	// parent material and texture resources through the instance lifetime.
++	private AnimatedMaterialStage PrepareAnimatedMaterials( GltfPose nextPose, GltfVariantDrawSnapshot<GltfProjectedMaterialPacket> selected )
++	{
++		var entries = new AnimatedMaterialEntry[draws.Count];
++		try
++		{
++			for ( var i = 0; i < draws.Count; i++ )
++			{
++				var draw = draws[i]; var primitive = draw.Node.Primitive;
++				var binding = selected?.Bindings[draw.VariantRow];
++				var index = binding is null ? primitive.Plan.Material : binding.MaterialIndex;
++				if ( !index.HasValue || !nextPose.TryGetAnimatedBaseColorFactor( index.Value, out var color ) ) continue;
++				// Alpha is ignored for OPAQUE glTF; other modes retain fallback
++				// until their material factor and classification path is proven.
++				opaqueMaterials ??= new();
++				if ( !opaqueMaterials.TryGetValue( index.Value, out var opaque ) )
++					opaqueMaterials.Add( index.Value, opaque = asset.Document.ReadMaterial( index.Value ).AlphaMode == "OPAQUE" );
++				if ( !opaque ) continue;
++				var parent = binding?.Value.Material ?? primitive.Material;
++				materialColorParameters ??= new();
++				if ( !materialColorParameters.TryGetValue( parent, out var parameter ) )
++				{
++					parameter = parent.HasParameter( "g_vGltfBaseColor" ) ? "g_vGltfBaseColor" : parent.HasParameter( "g_vColorTint" ) ? "g_vColorTint" : "";
++					materialColorParameters.Add( parent, parameter );
++				}
++				if ( parameter.Length == 0 ) continue;
++				var projected = parameter == "g_vGltfBaseColor";
++				var tint = projected ? new global::Vector4( color.X, color.Y, color.Z, 1 ) :
++					new global::Vector4( GltfStockMaterialAdapter.EncodeTint( color.X ), GltfStockMaterialAdapter.EncodeTint( color.Y ), GltfStockMaterialAdapter.EncodeTint( color.Z ), 1 );
++				var reuse = ReferenceEquals( draw.AnimatedParent, parent ) && draw.AnimatedMaterial is { IsValid: true, IsError: false };
++				var copy = reuse ? draw.AnimatedMaterial : parent.CreateCopy();
++				if ( !reuse ) AnimatedMaterialCopyCount++;
++				entries[i] = new( parent, copy, parameter, tint, !reuse );
++				if ( copy is not { IsValid: true, IsError: false } ) throw new GltfException( "Could not copy animated glTF material." );
++			}
++			var stage = new AnimatedMaterialStage( entries );
++			for ( var i = 0; i < draws.Count; i++ )
++				if ( draws[i].AnimatedMaterial is { } previous && !ReferenceEquals( previous, entries[i]?.Material ) ) stage.Retired.Add( previous );
++			if ( stage.Retired.Count != 0 )
++			{
++				_ = checked( AnimatedMaterialRetiredPending + stage.Retired.Count );
++				asset.RetainInstance(); stage.RetireLease = true;
++			}
++			return stage;
++		}
++		catch ( Exception cause ) { GltfGpuCleanup.Rollback( cause, entries.Where( x => x is { New: true, Material: not null } ).Select<AnimatedMaterialEntry, Action>( x => x.Material.Destroy ) ); throw; }
++	}
++	private void ApplyAnimatedMaterialValues( AnimatedMaterialStage stage )
++	{
++		try
++		{
++			for ( var i = 0; i < stage.Entries.Length; i++ )
++			{
++				var entry = stage.Entries[i]; if ( entry is null ) continue;
++				stage.Previous[i] = entry.Material.GetVector4( entry.Parameter );
++				if ( stage.Previous[i] == entry.Tint ) continue;
++				stage.Changed.Add( i );
++				if ( AnimatedMaterialWriter is null ) entry.Material.Set( entry.Parameter, entry.Tint );
++				else AnimatedMaterialWriter( entry.Material, entry.Parameter, entry.Tint );
++			}
++		}
++		catch ( Exception cause )
++		{
++			try { RollbackAnimatedMaterialValues( stage ); }
++			catch ( Exception rollback ) { throw new AggregateException( cause, rollback ); }
++			throw;
++		}
++	}
++	private static void RollbackAnimatedMaterialValues( AnimatedMaterialStage stage )
++	{
++		GltfGpuCleanup.ReleaseAll( stage.Changed.AsEnumerable().Reverse().Select<int, Action>( i => () => stage.Entries[i].Material.Set( stage.Entries[i].Parameter, stage.Previous[i] ) ) );
++		stage.Changed.Clear();
++	}
++	private void PublishAnimatedMaterials( AnimatedMaterialStage stage )
++	{
++		if ( stage.RetireLease ) { RetireAnimatedMaterials( stage.Retired ); stage.RetireLease = false; }
++		hasAnimatedMaterials = false;
++		for ( var i = 0; i < draws.Count; i++ )
++		{
++			var draw = draws[i]; var entry = stage.Entries[i];
++			hasAnimatedMaterials |= entry is not null;
++			draw.AnimatedMaterial = entry?.Material; draw.AnimatedParent = entry?.Parent; stage.Entries[i] = null;
++		}
++		stage.Changed.Clear();
++	}
++	private void RetireAnimatedMaterials( List<Material> retired )
++	{
++		// The frame-end queue is drained after view rendering completes. A
++		// separate asset lease retains variant packet materials and textures if
++		// this instance is disposed before the queued release executes.
++		AnimatedMaterialRetiredPending += retired.Count;
++		EngineLoop.DisposeAtFrameEnd( Sandbox.Utility.DisposeAction.Create( () =>
++		{
++			using var scope = new GlobalContext.GlobalContextScope( ownerContext );
++			try { GltfGpuCleanup.ReleaseAll( retired.Select<Material, Action>( x => x.Destroy ) ); }
++			finally { AnimatedMaterialRetiredPending -= retired.Count; asset.ReleaseInstance(); }
++		} ) );
++	}
++	private void DestroyStagedAnimatedMaterials( AnimatedMaterialStage stage )
++	{
++		if ( stage is null ) return;
++		try { GltfGpuCleanup.ReleaseAll( stage.Entries.Where( x => x is { New: true, Material: not null } ).Select<AnimatedMaterialEntry, Action>( x => x.Material.Destroy ) ); }
++		finally { if ( stage.RetireLease ) { stage.RetireLease = false; asset.ReleaseInstance(); } }
++	}
++}
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuInstance.Variants.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuInstance.Variants.cs
+@@ -32,18 +32,29 @@
+ 			if ( variant is not null ) throw new NotSupportedException( "Projected glTF material variants are not configured for this asset." );
+ 			return;
+ 		}
+-		var before = variantState.Current; variantState.SetVariant( variant, next => PreflightClassification( next, materialOverrides ) );
+-		if ( ReferenceEquals( before, variantState.Current ) ) return;
++		var before = variantState.Current; AnimatedMaterialStage animated = null; var colorsApplied = false;
+ 		try
+ 		{
++			variantState.SetVariant( variant, next =>
++			{
++				PreflightClassification( next, materialOverrides );
++				if ( pose.HasAnimatedBaseColorFactors || hasAnimatedMaterials )
++				{
++					animated = PrepareAnimatedMaterials( pose, next ); ApplyAnimatedMaterialValues( animated ); colorsApplied = true;
++				}
++			} );
++			if ( ReferenceEquals( before, variantState.Current ) ) return;
++			RefreshMaterialClassification();
++			if ( animated is not null ) { PublishAnimatedMaterials( animated ); animated = null; }
+ 			foreach ( var draw in draws ) { draw.ComputedRevision = -1; draw.SubmittedRevision = -1; }
+-			SubmittedRevision = -1; RefreshMaterialClassification();
++			SubmittedRevision = -1;
+ 		}
+ 		catch ( Exception error )
+ 		{
+ 			variantState.Publish( before );
+-			GltfGpuCleanup.Rollback( error, [RefreshMaterialClassification] ); throw;
++			GltfGpuCleanup.Rollback( error, colorsApplied ? [() => RollbackAnimatedMaterialValues( animated ), RefreshMaterialClassification] : [RefreshMaterialClassification] ); throw;
+ 		}
++		finally { DestroyStagedAnimatedMaterials( animated ); }
+ 	}
+ 
+ 	private void PreflightClassification( GltfVariantDrawSnapshot<GltfProjectedMaterialPacket> selected, Material[] overrides )
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfModelLoader.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfModelLoader.cs
+@@ -22,7 +22,7 @@
+ 
+ 	/// <summary>The loader's document policy, shared by source and compiled input.</summary>
+ 	internal static GltfDocument ReadDocument( byte[] source, Func<string, byte[]> resolve = null ) =>
+-		GltfReader.Read( source, resolve, supportedExtensions: SupportedExtensions );
++		GltfReader.ReadWithPartialMaterialColorAnimation( source, resolve, supportedExtensions: SupportedExtensions );
+ 
+ 	internal static bool IsGltfPath( string path )
+ 	{

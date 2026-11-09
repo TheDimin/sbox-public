@@ -1,0 +1,70 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace Sandbox.Gltf.DirectGpu.AlphaBlendModeValidation;
+[TestClass]
+public sealed class AlphaCallbackFallbackGpuTests
+{
+ public static string CheckoutRoot {get;set;}
+ public static string OutputDirectory {get;set;}
+ public static string ShaderSha256 {get;set;}
+ public static List<object> Measurements {get;}=new();
+ [TestMethod]
+ public async Task CallbackFallbackDoesNotDuplicateAroundForeignObject()
+ {
+  
+  Assert.IsFalse(Directory.Exists(OutputDirectory));Directory.CreateDirectory(OutputDirectory);
+  Shader shader=null;Material root=null;Scene scene=null;Editor.SceneRenderingWidget widget=null;SceneDirectionalLight light=null;Action pre=null;int frames=0;
+  try
+  {
+   root=Material.Load("materials/default/white.vmat").CreateCopy();Assert.IsTrue(root is {IsValid:true,IsError:false});
+   scene=Scene.CreateEditorScene();CameraComponent camera;using(scene.Push())camera=scene.CreateObject().Components.Create<CameraComponent>();
+   camera.WorldPosition=new global::Vector3(200,0,0);camera.WorldRotation=Rotation.FromYaw(180);camera.Orthographic=true;camera.OrthographicHeight=60;camera.ZNear=1;camera.ZFar=1000;camera.CustomSize=new global::Vector2(192,192);camera.ClearFlags=ClearFlags.All;camera.EnablePostProcessing=true;camera.DebugMode=SceneCameraDebugMode.Normal;camera.AutoExposure.Enabled=false;camera.AutoExposure.MinimumExposure=1;camera.AutoExposure.MaximumExposure=1;camera.AutoExposure.Compensation=0;
+   light=new SceneDirectionalLight(scene.SceneWorld,camera.WorldRotation,Color.White){ShadowsEnabled=false};widget=new Editor.SceneRenderingWidget{Scene=scene,Camera=camera,WindowTitle="glTF alpha candidate controls",Size=new global::Vector2(192,192)};pre=()=>frames++;widget.OnPreFrame+=pre;widget.Show();
+   async Task Wait(){await MainThread.Wait();var start=frames;var watch=Stopwatch.StartNew();while(frames<start+3){if(watch.Elapsed>TimeSpan.FromSeconds(10))throw new InvalidOperationException("Capture preview did not render.");await Task.Delay(20);await MainThread.Wait();}}
+   async Task<float[]> Capture(string label,Color background)
+   {
+    await MainThread.Wait();camera.BackgroundColor=background;await Wait();using(scene.Push()){scene.PreCameraRender();camera.InitializeRendering(false);if(camera.SceneCamera is not null)camera.SceneCamera.Tonemap.Enabled=false;}
+    using var target=Texture.CreateRenderTarget().WithSize(192,192).WithFormat(ImageFormat.RGBA32323232F).WithInitialColor(Color.Magenta).Create("alpha_lit_"+Guid.NewGuid().ToString("N"));
+    bool submitted;using(scene.Push()){target.Clear(Color.Magenta);submitted=camera.RenderToTexture(target);}Assert.IsTrue(submitted);await Wait();Graphics.FlushGPU();var pixels=new float[192*192*4];target.GetPixels((0,0,192,192),0,0,pixels.AsSpan(),ImageFormat.RGBA32323232F);using var bitmap=target.GetBitmap();var png=bitmap.ToPng();var pngPath=Path.Combine(OutputDirectory,label+".png");File.WriteAllBytes(pngPath,png);var center=pixels.Skip((96*192+96)*4).Take(4).ToArray();Assert.IsTrue(center.All(float.IsFinite));Measurements.Add(new{phase="float_capture",label,path=pngPath,sha256=Convert.ToHexStringLower(SHA256.HashData(png)),center});return center;
+   }
+   var events=new System.Collections.Concurrent.ConcurrentQueue<CallbackEvent>();var errors=new System.Collections.Concurrent.ConcurrentQueue<string>();long sequence=0;var objects=new List<SceneCustomObject>();var counters=new List<CallbackCounter>();
+   root.SetFeature("F_TRANSLUCENT",1);Assert.IsTrue(root.Flags.IsTranslucent);
+   var vertices=new[]{new Vertex(new global::Vector3(0,-20,-20),global::Vector3.Forward,global::Vector3.Left,new global::Vector4(0,0,0,0)),new Vertex(new global::Vector3(0,20,-20),global::Vector3.Forward,global::Vector3.Left,new global::Vector4(1,0,0,0)),new Vertex(new global::Vector3(0,20,20),global::Vector3.Forward,global::Vector3.Left,new global::Vector4(1,1,0,0)),new Vertex(new global::Vector3(0,-20,-20),global::Vector3.Forward,global::Vector3.Left,new global::Vector4(0,0,0,0)),new Vertex(new global::Vector3(0,20,20),global::Vector3.Forward,global::Vector3.Left,new global::Vector4(1,1,0,0)),new Vertex(new global::Vector3(0,-20,20),global::Vector3.Forward,global::Vector3.Left,new global::Vector4(0,1,0,0))};
+   void Record(int id,string kind){var view=Graphics.NativeViewIdentity;events.Enqueue(new(Interlocked.Increment(ref sequence),Application.FrameCount,view?.CameraId,view?.ViewId,Graphics.LayerType.ToString(),id,kind));}
+   SceneCustomObject Add(int id,float x,bool callbacks){var obj=new SceneCustomObject(scene.SceneWorld);objects.Add(obj);obj.Flags.IsOpaque=false;obj.Flags.IsTranslucent=true;obj.Flags.CastShadows=false;obj.Flags.WantsExecuteBefore=callbacks;obj.Flags.WantsExecuteAfter=callbacks;Assert.AreEqual(callbacks,obj.Flags.WantsExecuteBefore);Assert.AreEqual(callbacks,obj.Flags.WantsExecuteAfter);obj.Bounds=new BBox(new global::Vector3(x-.01f,-20,-20),new global::Vector3(x+.01f,20,20));var counter=new CallbackCounter(()=>Record(id,"before"),()=>Record(id,"after"));counters.Add(counter);obj.CallbackTarget=counter;obj.RenderOverride=_=>{Record(id,"draw");try{Graphics.Draw(vertices.AsSpan(),vertices.Length,root);}catch(Exception e){errors.Enqueue(e.ToString());}};return obj;}
+   SceneModel foreign=null;GltfGpuAsset asset=null;GltfGpuInstance instance=null;GltfDocument doc=null;
+   try
+   {
+    var model=Model.Load("models/dev/box.vmdl");Assert.IsTrue(model is {IsValid:true,IsError:false}&&!model.native.IsNull&&model.HasRenderMeshes());
+    foreign=new SceneModel(scene.SceneWorld,model,new Transform(global::Vector3.Zero,Rotation.Identity,.1f));foreign.SetMaterialOverride(root);foreign.ColorTint=new Color(1,.2f,.2f,.5f);foreign.Flags.CastShadows=false;foreign.Flags.WantsExecuteBefore=true;foreign.Flags.WantsExecuteAfter=true;foreign.CallbackTarget=new CallbackCounter(()=>Record(9,"before"),()=>Record(9,"after"));
+    var foreignOnly=await Capture("fallback_foreign_only",Color.Black);Assert.IsTrue(foreignOnly.Take(3).Sum()>.1f,"Native vmdl independent foreground is missing");
+    var source=AlphaControlFixtures.All().Single(x=>x.Name=="two_separated_blend_layers_near_first");doc=GltfReader.Read(source.Bytes);asset=GltfGpuAsset.Create(doc,"shaders/gltf_deform_cs.shader",_=>root);instance=asset.CreateInstance(scene.SceneWorld);
+    var primary=instance.SceneObject;var original=primary.RenderOverride;primary.CallbackTarget=new CallbackCounter(()=>Record(0,"before"),()=>Record(0,"after"));primary.Flags.WantsExecuteBefore=true;primary.Flags.WantsExecuteAfter=true;primary.RenderOverride=o=>{Record(0,"draw");original(o);};
+    events.Clear();var together=await Capture("fallback_together",Color.Black);Assert.IsTrue(instance.DrawCalls>0&&instance.CallbackErrors.Length==0,"Fallback must render its actual GPU draws");var rows=events.ToArray();
+    var groups=rows.Where(e=>e.Layer=="Translucent"&&e.Camera.HasValue&&e.View.HasValue).GroupBy(e=>(e.Frame,e.Camera,e.View)).Where(g=>g.Any(e=>e.Kind=="draw"&&e.Id==0)&&g.Any(e=>e.Kind=="before"&&e.Id==9)).Select(g=>g.OrderBy(e=>e.Sequence).ToArray()).ToArray();Assert.IsTrue(groups.Length>0,"No common view contains fallback and foreign object");
+    Measurements.Add(new{phase="fallback_with_foreign",foreignOnly,together,groups,allRows=rows,drawCalls=instance.DrawCalls,scope="Callback-present single-object fallback; not cross-instance ordering acceptance."});
+    Assert.IsTrue(groups.All(g=>g.Count(e=>e.Id==0&&e.Kind=="before")==1&&g.Count(e=>e.Id==0&&e.Kind=="after")==1),"Fallback command callbacks duplicated or missing");
+    instance.Dispose();instance=null;asset.Dispose();asset=null;doc.Dispose();doc=null;foreign.Delete();foreign=null;using(scene.Push())scene.ProcessDeletes();await Wait();using(scene.Push())scene.ProcessDeletes();var empty=await Capture("fallback_deleted",Color.Black);Assert.IsTrue(empty.Take(3).All(x=>Math.Abs(x)<.02),"Fallback/native cleanup retained foreground");
+   }
+   finally{instance?.Dispose();asset?.Dispose();doc?.Dispose();if(foreign.IsValid())foreign.Delete();using(scene.Push())scene.ProcessDeletes();}
+
+  }
+  finally{await MainThread.Wait();if(widget is not null&&widget.IsValid){widget.OnPreFrame-=pre;widget.Close();widget.Destroy();}if(light.IsValid())light.Delete();scene?.Destroy();root?.Destroy();shader?.Destroy();}
+ }
+ private sealed record CallbackEvent(long Sequence,ulong Frame,int? Camera,int? View,string Layer,int Id,string Kind);
+ private sealed class CallbackCounter : SceneObject.SceneObjectCallbacks
+ {
+  private readonly Action before,after;public CallbackCounter(Action before,Action after){this.before=before;this.after=after;}
+  public bool IsValid=>true;public void OnBeforeObjectRender()=>before();public void OnAfterObjectRender()=>after();
+ }
+
+}

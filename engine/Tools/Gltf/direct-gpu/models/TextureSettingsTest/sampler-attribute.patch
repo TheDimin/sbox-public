@@ -1,0 +1,72 @@
+--- a/game/addons/tools/Code/ShaderGraph/Sampler.cs
++++ b/game/addons/tools/Code/ShaderGraph/Sampler.cs
+@@ -1,4 +1,5 @@
+-﻿
++﻿using System.Text.Json.Serialization;
++
+ namespace Editor.ShaderGraph;
+ 
+ public enum SamplerFilter
+@@ -34,4 +35,34 @@
+ 	/// Vertical wrapping, repeating or stretched
+ 	/// </summary>
+ 	public SamplerAddress AddressV { get; set; }
++
++	/// <summary>
++	/// Optional render attribute containing the runtime sampler state. When
++	/// omitted, filtering and addressing use this sampler's static settings.
++	/// Names must be ASCII identifiers, starting with a letter or underscore.
++	/// </summary>
++	[JsonIgnore( Condition = JsonIgnoreCondition.WhenWritingNull )]
++	public string Attribute
++	{
++		readonly get => attribute;
++		set => attribute = string.IsNullOrEmpty( value ) ? null : value;
++	}
++
++	private string attribute;
++
++	internal readonly void ValidateAttribute()
++	{
++		if ( attribute is null ) return;
++
++		if ( !IsAttributeStart( attribute[0] ) )
++			throw new ArgumentException( "Sampler attribute names must be ASCII identifiers.", nameof( Attribute ) );
++
++		foreach ( var character in attribute )
++		{
++			if ( !IsAttributeStart( character ) && character is not (>= '0' and <= '9') )
++				throw new ArgumentException( "Sampler attribute names must be ASCII identifiers.", nameof( Attribute ) );
++		}
++	}
++
++	private static bool IsAttributeStart( char value ) => value is >= 'A' and <= 'Z' or >= 'a' and <= 'z' or '_';
+ }
+--- a/game/addons/tools/Code/ShaderGraph/Compiler/GraphCompiler.cs
++++ b/game/addons/tools/Code/ShaderGraph/Compiler/GraphCompiler.cs
+@@ -171,6 +171,8 @@
+ 	/// </summary>
+ 	public (string, int) ResultTexture( Sampler sampler, TextureInput input, Texture texture )
+ 	{
++		sampler.ValidateAttribute();
++
+ 		var name = CleanName( input.Name );
+ 		name = string.IsNullOrWhiteSpace( name ) ? $"Texture_{StageName}_{ShaderResult.TextureInputs.Count}" : name;
+ 
+@@ -940,11 +942,14 @@
+ 		for ( int i = 0; i < ShaderResult.SamplerStates.Count; ++i )
+ 		{
+ 			var sampler = ShaderResult.SamplerStates[i];
++			sampler.ValidateAttribute();
+ 			sb.Append( $"SamplerState g_sSampler{i} <" )
+ 			  .Append( $" Filter( {sampler.Filter.ToString().ToUpper()} );" )
+ 			  .Append( $" AddressU( {sampler.AddressU.ToString().ToUpper()} );" )
+-			  .Append( $" AddressV( {sampler.AddressV.ToString().ToUpper()} ); >;" )
+-			  .AppendLine();
++			  .Append( $" AddressV( {sampler.AddressV.ToString().ToUpper()} );" );
++			if ( sampler.Attribute is not null )
++				sb.Append( $" Attribute( \"{sampler.Attribute}\" );" );
++			sb.AppendLine( " >;" );
+ 		}
+ 
+ 		// Support for color buffer in post-process shaders

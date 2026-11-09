@@ -1,0 +1,58 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Sandbox;
+using Sandbox.Gltf;
+using Assert=Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+namespace Sandbox.Gltf.DirectGpu.ABeautifulGameValidation;
+[TestClass]
+internal sealed class FramebufferClassificationTests
+{
+ static string checkout,configPath;public static List<object> Measurements {get;}=new();public static void Configure(string root,string path){checkout=root;configPath=path;Measurements.Clear();}
+ [TestMethod]
+ public async Task AutomaticFramebufferClassificationTransitions()
+ {
+  await MainThread.Wait();using var config=JsonDocument.Parse(File.ReadAllBytes(configPath));var c=config.RootElement;string texturePath=c.GetProperty("texturePath").GetString(),sourcePath=c.GetProperty("sourcePath").GetString(),compiledPath=c.GetProperty("compiledPath").GetString();Assert.AreEqual(c.GetProperty("sourceSha256").GetString(),Hash(File.ReadAllBytes(sourcePath)));Assert.AreEqual(c.GetProperty("compiledSha256").GetString(),Hash(File.ReadAllBytes(compiledPath)));
+  string sourceDir=Path.Combine(checkout,"Temp/gltf-reference/glTF-Sample-Assets/Models/ABeautifulGame/glTF");byte[] source=File.ReadAllBytes(Path.Combine(sourceDir,"ABeautifulGame.gltf"));Assert.AreEqual("2e1b63ae34173c6e3251f749b1b8b97a32e92517aab2cfd4bfffd9158f4dd278",Hash(source));byte[] Resolve(string uri)=>File.ReadAllBytes(Path.Combine(sourceDir,uri));byte[] compiled=GltfCompiler.Compile(source,Resolve);
+  string output=Path.Combine(checkout,"Temp/gltf-validation/direct-gpu/ABeautifulGame/framebuffer-classification",Guid.NewGuid().ToString("N"));Directory.CreateDirectory(output);string dir=Path.Combine(Path.GetTempPath(),"gltf_beautiful_glass_"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(dir);LocalFileSystem mount=null;Model model=null;ModelRenderer renderer=null;SceneCubemap probe=null;Material glass=null;Action<SceneObject> previous=null;using var capture=new Capture(output);
+  int offCallbacks=0,offTexture=0,onCallbacks=0,onTexture=0,flagged=0;
+  try
+  {
+   string bundle="beautiful_glass_"+Guid.NewGuid().ToString("N"),bundleDir=Path.Combine(dir,bundle);Directory.CreateDirectory(bundleDir);foreach(var path in Directory.GetFiles(sourceDir))if(Path.GetExtension(path)==".jpg")File.Copy(path,Path.Combine(bundleDir,Path.GetFileName(path)));File.WriteAllBytes(Path.Combine(bundleDir,"model.glb_c"),compiled);mount=new LocalFileSystem(dir);FileSystem.Mounted.Mount(mount);model=Model.Load(bundle+"/model.glb_c");Assert.IsTrue(model is {IsValid:true,IsError:false} && model.native.IsNull && model.MeshCount==49);Assert.IsTrue(model.GltfResource.MaterialSlotSourceIndices.SequenceEqual(Enumerable.Range(0,15).Select(i=>(int?)i)));Assert.AreEqual(15,model.Materials.Length);
+   var env=Texture.Load(texturePath);Assert.IsTrue(env is {IsValid:true,IsError:false} && env.Depth==6);probe=new SceneCubemap(capture.Scene.SceneWorld,env,BBox.FromPositionAndSize(Vector3.Zero,1000));probe.Projection=SceneCubemap.ProjectionMode.Sphere;probe.Feathering=.01f;probe.RenderDirty();capture.View(new Vector3(-20.13f,-12.29f,5.10f),new Vector3(-1.65f,-5.55f,1.52f),27.2f);await capture.Settle();_ = await capture.Take("bootstrap");await capture.Settle();var empty=await capture.Take("empty_before");
+   using(capture.Scene.Push()){renderer=capture.Scene.CreateObject().Components.Create<ModelRenderer>(false);renderer.Model=model;renderer.Enabled=true;capture.Scene.EditorTick(0,0);}var instance=renderer.GltfInstance;Assert.IsNotNull(instance);await capture.Settle();var original=await capture.Take("source_opaque_fallback");
+   var shader=Shader.Load("shaders/glass.shader");Assert.IsTrue(shader is {IsValid:true,IsError:false});glass=Material.Create("beautiful_native_glass_diagnostic_"+Guid.NewGuid().ToString("N"),shader);Assert.IsTrue(glass is {IsValid:true,IsError:false});glass.SetFeature("F_GLASS_QUALITY",0);glass.SetFeature("F_TRANSLUCENT",1);glass.Set("g_flRefractionStrength",1.05f);glass.Set("g_flBlurAmount",.5f);Assert.IsTrue(glass.Flags.IsTranslucent,"Stock glass material did not classify as translucent");int declared=glass.native.GetIntAttributeOrDefault("bWantsFBCopyTexture",0);Assert.AreNotEqual(0,declared,"Stock glass material did not advertise framebuffer-copy requirement");
+   Assert.IsFalse(instance.SceneObject.Flags.WantsFrameBufferCopy,"Baseline source materials must not request copy");
+   instance.SetMaterialOverride(5,glass);Assert.IsTrue(instance.SceneObject.Flags.WantsFrameBufferCopy,"First glass slot must request copy");
+   instance.SetMaterialOverride(7,glass);Assert.IsTrue(instance.SceneObject.Flags.WantsFrameBufferCopy,"Two glass slots must request copy");
+   instance.SetMaterialOverride(5,null);Assert.IsTrue(instance.SceneObject.Flags.WantsFrameBufferCopy,"Remaining glass slot must retain copy request");
+   Assert.ThrowsException<ArgumentOutOfRangeException>(()=>instance.SetMaterialOverride(100,glass));Assert.IsTrue(instance.SceneObject.Flags.WantsFrameBufferCopy,"Rejected override must retain prior copy request");
+   instance.SetMaterialOverride(7,null);Assert.IsFalse(instance.SceneObject.Flags.WantsFrameBufferCopy,"Last glass removal must clear copy request");
+   instance.SetMaterialOverride(5,glass);glass.SetFeature("F_GLASS_QUALITY",1);Assert.AreEqual(0,glass.Flags.GetInt("bWantsFBCopyTexture"),"Cheap glass must not advertise framebuffer copy");instance.SetMaterialOverride(5,glass);Assert.IsFalse(instance.SceneObject.Flags.WantsFrameBufferCopy,"Refreshing the same changed material must clear copy request");glass.SetFeature("F_GLASS_QUALITY",0);instance.SetMaterialOverride(5,glass);Assert.IsTrue(instance.SceneObject.Flags.WantsFrameBufferCopy,"Refreshing restored glass must request copy");instance.SetMaterialOverride(5,null);Assert.IsFalse(instance.SceneObject.Flags.WantsFrameBufferCopy);
+   previous=instance.SceneObject.RenderOverride;Assert.IsNotNull(previous);var originalCallback=previous;instance.SceneObject.RenderOverride=obj=>{if(Graphics.LayerType==SceneLayerType.Translucent){var texture=Graphics.Attributes.GetTexture("FrameBufferCopyTexture");Interlocked.Increment(ref onCallbacks);if(texture is {IsValid:true,IsError:false})Interlocked.Increment(ref onTexture);}originalCallback(obj);};
+   instance.SetMaterialOverride(5,glass);instance.SetMaterialOverride(7,glass);await capture.Settle();var automatic=await capture.Take("glass_automatic_copy");Assert.IsTrue(onCallbacks>0 && onTexture>0,"Automatically classified translucent pass must expose the framebuffer copy");Measurements.Add(new{on_callbacks=onCallbacks,on_texture=onTexture,path=automatic.Path,sha256=automatic.Sha,scope="Automatic framebuffer classification override transitions; stock glass diagnostic only, no KHR optical implementation claim"});
+   instance.SceneObject.RenderOverride=previous;previous=null;instance.ClearMaterialOverrides();Assert.IsFalse(instance.SceneObject.Flags.WantsFrameBufferCopy,"Clear overrides must clear copy request");var actualObject=instance.SceneObject;using(capture.Scene.Push()){renderer.GameObject.Destroy();capture.Scene.EditorTick(0,0);capture.Scene.ProcessDeletes();}renderer=null;Assert.IsFalse(actualObject.IsValid(),"Public scene object survived deletion");int finalCalls=instance.DrawCalls;var after=await capture.Take("empty_after");Assert.AreEqual(finalCalls,instance.DrawCalls,"Deleted public callback continued drawing");var background=after.Pixels[0];int nonuniform=after.Pixels.Count(a=>Math.Abs(a.r-background.r)>.01f||Math.Abs(a.g-background.g)>.01f||Math.Abs(a.b-background.b)>.01f);Measurements.Add(new{phase="deletion_control",path=after.Path,sha256=after.Sha,nonuniform_pixels=nonuniform,scene_object_invalid=true,draw_calls_stopped=true});Assert.IsTrue(nonuniform<100,"Post-deletion frame is not an independently uniform background");
+  }
+  finally{await MainThread.Wait();try{if(renderer!=null){if(previous!=null && renderer.GltfInstance?.SceneObject is { } sceneObject)sceneObject.RenderOverride=previous;using var scope=capture.Scene.Push();renderer.GameObject.Destroy();capture.Scene.EditorTick(0,0);capture.Scene.ProcessDeletes();}if(probe.IsValid())probe.Delete();glass?.Destroy();model?.Destroy();}finally{try{if(mount!=null)FileSystem.Mounted.UnMount(mount);}finally{mount?.Dispose();Directory.Delete(dir,true);}}}
+ }
+ static string Hash(byte[] b)=>Convert.ToHexStringLower(SHA256.HashData(b));
+ sealed class Capture:IDisposable
+ {
+  public record Frame(Color[] Pixels,string Path,string Sha);public readonly Scene Scene;readonly CameraComponent camera;readonly Tonemapping tone;readonly Editor.SceneRenderingWidget widget;readonly string output;readonly Action onFrame;int frames;
+  public Capture(string path){output=path;Scene=Scene.CreateEditorScene();using(Scene.Push()){camera=Scene.CreateObject().Components.Create<CameraComponent>();camera.Orthographic=false;camera.FovAxis=CameraComponent.Axis.Vertical;camera.ZNear=.1f;camera.ZFar=1000;camera.CustomSize=new Vector2(800,620);camera.BackgroundColor=new Color(.65f,.62f,.58f,1);camera.ClearFlags=ClearFlags.All;camera.EnablePostProcessing=true;camera.DebugMode=SceneCameraDebugMode.Normal;tone=camera.GameObject.Components.Create<Tonemapping>();tone.Mode=Tonemapping.TonemappingMode.ACES;tone.AutoExposureEnabled=true;tone.MinimumExposure=1;tone.MaximumExposure=1;tone.ExposureCompensation=2;Scene.EditorTick(0,0);}widget=new Editor.SceneRenderingWidget{Scene=Scene,Camera=camera,WindowTitle="A Beautiful Game reference reconstruction",Size=new Vector2(800,620)};onFrame=()=>frames++;widget.OnPreFrame+=onFrame;widget.Show();}
+  public void SetExposure(float value){using(Scene.Push()){tone.ExposureCompensation=value;Scene.EditorTick(0,0);}}
+  public object VerifyExposure(){var e=camera.AutoExposure;Assert.IsTrue(e.Enabled && Math.Abs(e.MinimumExposure-1)<.0001f && Math.Abs(e.MaximumExposure-1)<.0001f && Math.Abs(e.Compensation-2)<.0001f,"ACES exposure settings were overwritten at render time");return new{e.Enabled,e.MinimumExposure,e.MaximumExposure,e.Compensation,e.Rate,scope="Camera settings observed after render; not photometric proof of Babylon tone-curve equivalence"};}
+  public void View(Vector3 pos,Vector3 target,float fov){using(Scene.Push()){camera.WorldPosition=pos;camera.WorldRotation=Rotation.LookAt(target-pos,Vector3.Up);camera.FieldOfView=fov;Scene.EditorTick(0,0);}}
+  async Task Wait(){await MainThread.Wait();var start=frames;var timer=Stopwatch.StartNew();while(frames<start+3||Graphics.IsActive){Assert.IsTrue(timer.Elapsed<TimeSpan.FromSeconds(15),"Preview frames stalled");await Task.Delay(20);await MainThread.Wait();}}
+  public async Task Settle(){for(int i=0;i<20;i++)await Wait();}
+  public async Task<Frame> Take(string name){await Wait();using(Scene.Push()){Scene.PreCameraRender();camera.InitializeRendering(false);}using var target=Texture.CreateRenderTarget().WithSize(800,620).WithFormat(ImageFormat.RGBA8888).WithInitialColor(Color.Magenta).Create("beautiful_reference_"+Guid.NewGuid().ToString("N"));bool ok;using(Scene.Push()){target.Clear(Color.Magenta);ok=camera.RenderToTexture(target);}Assert.IsTrue(ok);await Wait();using var bitmap=target.GetBitmap();var pixels=bitmap.GetPixels();Assert.AreEqual(800*620,pixels.Length);byte[] png=bitmap.ToPng();string path=Path.Combine(output,name+".png");File.WriteAllBytes(path,png);return new(pixels,path,Hash(png));}
+  public void Dispose(){if(widget.IsValid){widget.OnPreFrame-=onFrame;widget.Close();widget.Destroy();}Scene.Destroy();}
+ }
+}

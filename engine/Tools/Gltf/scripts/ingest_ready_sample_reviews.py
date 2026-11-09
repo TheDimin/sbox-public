@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+"""Add one canonical comparison per newly completed sample, retaining all older rows."""
+import copy,json,shutil
+from collections import Counter
+from urllib.parse import urlencode
+from PIL import Image
+from ingest_completed_model import ROOT,DIST,CORPUS,read,write,verified,sha
+from visual_comparison_identity import comparison_identity,decoded_media,digest
+from group_visual_reviews import group_identity
+
+def ingest(models):
+ data=read(DIST/'data.json');before=copy.deepcopy(data);cases={r['id']:r for r in data['cases']};changed=[];manifests={}
+ for name in models:
+  manifest=ROOT/f'research/gltf-validation/direct-gpu/models/{name}/result.json';owner=read(manifest);manifests[name]=sha(manifest)
+  if name=='MorphPrimitivesTest':
+   forms=owner['public_forms'];f=forms[1];source=forms[0];cap=f['capture'];receiptpath=f['receipt'];receipthash=f['receipt_sha256'];camera={'recipe':owner['capture_purpose']};limits=owner['known_limits'];scope='Original POSITION-only primitive-local morph defaults, signed public weights and lifetime controls. No authored animation or target NORMAL/TANGENT streams.';sourceid=name+'/glTF';inputhash=f['input_sha256'];notice='Actual default0.5 morph pose, source material,192px inferred framing. External JPEG mounted for compiled load; self-contained packaging unproven. Literal raster is close but not exact (IoU0.9980;558pixels differ by>8RGB); human appearance/PBR approval pending.'
+  elif name=='TextureLinearInterpolationTest':
+   forms=owner['forms'];f=forms[1];source=forms[0];cap={'path':f['Path'],'sha256':f['Sha256'],'width':192,'height':192};receiptpath=owner['executed']['public']['receipt'];receipthash=owner['executed']['public']['sha256'];camera=json.loads(f['CameraStateJson']);limits=owner['limits'];scope=f['scope'];sourceid=name+'/glTF-Binary';inputhash=f['input_sha256'];notice='Both green spheres should match: native linear samples0.5; wrong transfer0.21404819. Actual public source-material192px capture, inferred camera/black background/exposure. User appearance approval pending; no broad parity claim.'
+  else:raise ValueError(name)
+  receipt=read(verified(receiptpath,receipthash));assert receipt['failed_cases']==0 and receipt['incomplete_cases']==0 and not receipt.get('cleanup_errors')
+  sourcecap=source.get('capture')or{'path':source['Path'],'sha256':source['Sha256']};assert decoded_media(verified(sourcecap['path'],sourcecap['sha256']))==decoded_media(verified(cap['path'],cap['sha256']))
+  base=cases[sourceid];ref=base['reference'];refpixels=decoded_media(verified(CORPUS/ref['path'],ref['sha256']));target=DIST/'assets/completed'/f"{cap['sha256']}.png";shutil.copy2(verified(cap['path'],cap['sha256']),target);pixels=decoded_media(target);assert pixels['frames'][0]['size']==[cap['width'],cap['height']]
+  caseid=sourceid+'::canonical-compiled';row=copy.deepcopy(base);row.update(id=caseid,sourceCaseId=sourceid,variant='Canonical compiled .glb_c',coverageRole='canonical-compiled',capture={'url':str(target.relative_to(DIST)),'sha256':cap['sha256'],'kind':'image','frames':1,'duration':0},recipeApplied={'camera':camera,'complete':True,'limitations':limits},recipe={'camera':camera,'matchStatus':'needs-tuning','provenance':'Actual public owner execution, inferred presentation','limitations':limits},referenceNotice=notice,load={'status':'passed','error':None},render={'status':'passed','error':None},reason=None,visualReview={'status':'pending','reviewer':None},updated=True,visualChanged=True,compatibleReviewFingerprints=[],visualIdentityVersion=2)
+  row['evidence']={'type':'isolated-model-execution','sourceForm':sourceid,'derivedCompiled':True,'canonicalCompiled':True,'manifestSha256':manifests[name],'receiptSha256':receipthash,'producer':{'engine_mvid':receipt['engine_mvid'],'gltf_mvid':receipt['gltf_mvid']},'inputSha256':inputhash,'identicalSourceCaptureSha256':sourcecap['sha256'],'sourceAndCompiledShareOneReview':True,'scope':scope,'limitations':limits};row['comparisonFingerprint']=comparison_identity(row,pixels,refpixels);row['reviewGroupFingerprint']=group_identity(row,pixels,refpixels);row['provenanceFingerprint']=digest(row['evidence']);row['whatChanged']=notice;cases[caseid]=row;changed.append(caseid)
+ for old in before['cases']:assert cases[old['id']]==old
+ assert data['savedReviews']==before['savedReviews'];data['cases']=list(cases.values());isolated=[r for r in cases.values()if r.get('evidence',{}).get('type')=='isolated-model-execution'];data['evidenceCollection'].update(isolatedForms=len(isolated),isolatedModels=len({r['modelId']for r in isolated}));data['summary'].update(captures=sum(bool(r.get('capture'))for r in cases.values()),variants=len(cases),load=dict(Counter(r['load']['status']for r in cases.values())),render=dict(Counter(r['render']['status']for r in cases.values())))
+ queue=read(DIST/'review-queue.json');queued={r['caseId']:r for r in queue['queue']}
+ for caseid in changed:
+  r=cases[caseid];guide=next(m for m in data['models']if m['id']==r['modelId'])['reviewGuidance'];queued[caseid]={'caseId':caseid,'modelId':r['modelId'],'variant':r['variant'],'group':'fresh-ready-for-review','url':'/#'+urlencode({'model':r['modelId'],'variant':caseid}),'comparisonFingerprint':r['comparisonFingerprint'],'reviewGroupFingerprint':r['reviewGroupFingerprint'],'captureSha256':r['capture']['sha256'],'captureKind':r['capture']['kind'],'loadStatus':'passed','renderStatus':'passed','freshness':{'nativeRecaptureVerified':True,'fingerprintChanged':True},'check':guide['checks'][0],'limitations':' '.join(r['recipeApplied']['limitations']),'source':r['sourceUrl'],'evidence':r['evidence'],'savedReviewStillMatches':False,'savedReview':None,'relatedFeedback':[]}
+ queue['queue']=list(queued.values());queue['summary']=dict(Counter(r['group']for r in queued.values()));write(DIST/'data.json',data);write(DIST/'review-queue.json',queue);report={'changedCases':changed,'manifestSha256':manifests,'newVisualGroups':len(changed),'totalCaptures':data['summary']['captures'],'totalCases':len(cases),'unchangedExistingRows':len(before['cases']),'savedVerdictsUnchanged':True};write(ROOT/'Temp/gltf-validation/sample-reviews-site-ingest.json',report);print(json.dumps(report))
+if __name__=='__main__':ingest(['MorphPrimitivesTest','TextureLinearInterpolationTest'])

@@ -273,7 +273,7 @@ internal sealed class TestGltfCorpus
 
 	private static byte[] FreshInventory( string corpus )
 	{
-		var script = Path.GetFullPath( "research/gltf-validation/validate.py" );
+		var script = Path.GetFullPath( "engine/Tools/Gltf/scripts/validate.py" );
 		var info = new ProcessStartInfo( "python3" )
 		{
 			RedirectStandardOutput = true,

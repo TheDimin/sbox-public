@@ -1,0 +1,109 @@
+--- a/engine/Sandbox.Gltf/GltfContracts.cs
++++ b/engine/Sandbox.Gltf/GltfContracts.cs
+@@ -46,6 +46,8 @@
+ 	public bool Unlit { get; init; }
+ 	/// <summary>Supported thin-surface diffuse transmission; null for absent or unsupported extension.</summary>
+ 	public GltfDiffuseTransmission DiffuseTransmission { get; init; }
++	public GltfOpticalTransmission OpticalTransmission { get; init; }
++	public GltfVolume Volume { get; init; }
+ 	public GltfTextureInfo BaseColorTexture { get; init; }
+ 	public GltfTextureInfo MetallicRoughnessTexture { get; init; }
+ 	public GltfTextureInfo NormalTexture { get; init; }
+@@ -60,6 +62,20 @@
+ 	public Vector3 ColorFactor { get; init; } = Vector3.One;
+ 	public GltfTextureInfo Texture { get; init; }
+ 	public GltfTextureInfo ColorTexture { get; init; }
++}
++
++public sealed class GltfOpticalTransmission
++{
++	public float Factor { get; init; }
++	public GltfTextureInfo Texture { get; init; }
++}
++
++public sealed class GltfVolume
++{
++	public float ThicknessFactor { get; init; }
++	public GltfTextureInfo ThicknessTexture { get; init; }
++	public float AttenuationDistance { get; init; } = float.PositiveInfinity;
++	public Vector3 AttenuationColor { get; init; } = Vector3.One;
+ }
+ 
+ public sealed partial class GltfTextureInfo
+--- a/engine/Sandbox.Gltf/GltfDocument.Materials.cs
++++ b/engine/Sandbox.Gltf/GltfDocument.Materials.cs
+@@ -152,6 +152,8 @@
+ 			DoubleSided = sidedElement.ValueKind == JsonValueKind.True,
+ 			Unlit = unlit,
+ 			DiffuseTransmission = MaterialDiffuseTransmission( value ),
++			OpticalTransmission = MaterialOpticalTransmission( value ),
++			Volume = MaterialVolume( value ),
+ 			BaseColorTexture = MaterialTexture( pbr, "baseColorTexture", true ),
+ 			MetallicRoughnessTexture = MaterialTexture( pbr, "metallicRoughnessTexture", false ),
+ 			NormalTexture = MaterialTexture( value, "normalTexture", false ),
+--- /dev/null
++++ b/engine/Sandbox.Gltf/GltfDocument.Optical.cs
+@@ -0,0 +1,50 @@
++using System.Numerics;
++using System.Text.Json;
++
++namespace Sandbox.Gltf;
++
++// Isolated review candidate. No capability is advertised until the complete
++// reader, texture, material, and native render path pass their public gates.
++public sealed partial class GltfDocument
++{
++	private JsonElement OpticalExtension( JsonElement material, string name )
++	{
++		if ( !SupportsExtension( name ) ) return default;
++		var value = MaterialExtension( material, name );
++		if ( value.ValueKind == JsonValueKind.Undefined ) return default;
++		if ( !ExtensionNames( "extensionsUsed" ).Contains( name, StringComparer.Ordinal ) )
++			throw new GltfException( $"{name} must be listed in extensionsUsed." );
++		MaterialRequireObject( value, name );
++		foreach ( var excluded in new[] { "KHR_materials_unlit", "KHR_materials_pbrSpecularGlossiness" } )
++			if ( MaterialExtension( material, excluded ).ValueKind != JsonValueKind.Undefined )
++				throw new GltfException( $"{name} cannot be used with {excluded}." );
++		return value;
++	}
++
++	private GltfOpticalTransmission MaterialOpticalTransmission( JsonElement material )
++	{
++		var value = OpticalExtension( material, "KHR_materials_transmission" );
++		if ( value.ValueKind == JsonValueKind.Undefined ) return null;
++		return new GltfOpticalTransmission
++		{
++			Factor = MaterialOptionalNumber( value, "transmissionFactor", 0, 0, 1 ),
++			Texture = MaterialTexture( value, "transmissionTexture", false )
++		};
++	}
++
++	private GltfVolume MaterialVolume( JsonElement material )
++	{
++		var value = OpticalExtension( material, "KHR_materials_volume" );
++		if ( value.ValueKind == JsonValueKind.Undefined ) return null;
++		var distance = MaterialOptionalNumber( value, "attenuationDistance", float.PositiveInfinity, 0 );
++		if ( distance <= 0 ) throw new GltfException( "attenuationDistance must be strictly positive." );
++		var color = MaterialVector( value, "attenuationColor", [1, 1, 1], 0, 1 );
++		return new GltfVolume
++		{
++			ThicknessFactor = MaterialOptionalNumber( value, "thicknessFactor", 0, 0 ),
++			ThicknessTexture = MaterialTexture( value, "thicknessTexture", false ),
++			AttenuationDistance = distance,
++			AttenuationColor = new Vector3( color[0], color[1], color[2] )
++		};
++	}
++}
+--- a/engine/Sandbox.Gltf/GltfDocument.MaterialImages.cs
++++ b/engine/Sandbox.Gltf/GltfDocument.MaterialImages.cs
+@@ -59,6 +59,10 @@
+ 			}
+ 			Add( pbr, "metallicRoughnessTexture" ); Add( material, "normalTexture" );
+ 			Add( material, "occlusionTexture" ); Add( material, "emissiveTexture" );
++			if ( SupportsExtension( "KHR_materials_transmission" ) )
++				Add( MaterialExtension( material, "KHR_materials_transmission" ), "transmissionTexture" );
++			if ( SupportsExtension( "KHR_materials_volume" ) )
++				Add( MaterialExtension( material, "KHR_materials_volume" ), "thicknessTexture" );
+ 			if ( SupportsExtension( "KHR_materials_diffuse_transmission" ) )
+ 			{
+ 				var transmission = MaterialExtension( material, "KHR_materials_diffuse_transmission" );

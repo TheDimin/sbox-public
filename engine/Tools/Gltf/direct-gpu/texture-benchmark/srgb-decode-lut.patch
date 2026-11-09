@@ -1,0 +1,27 @@
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfTextureCompiler.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfTextureCompiler.cs
+@@ -9,6 +9,13 @@
+ /// <summary>Compiles image bytes to a native texture resource without creating a GPU texture.</summary>
+ internal static class GltfTextureCompiler
+ {
++	// Compute the exact double-precision sRGB decode once for each possible byte.
++	private static readonly double[] SrgbDecode = Enumerable.Range( 0, 256 ).Select( i =>
++	{
++		var value = i / 255.0;
++		return value <= .04045 ? value / 12.92 : Math.Pow( (value + .055) / 1.055, 2.4 );
++	} ).ToArray();
++
+ 	internal readonly record struct MetallicRoughnessResources( byte[] NormalRoughness, byte[] Metalness );
+ 
+ 	internal static unsafe byte[] Compile( GltfImage image, bool isSrgb, long maxDecodedBytes = 256L * 1024 * 1024 )
+@@ -304,8 +311,8 @@
+ 					for ( var sy = y * height / targetHeight; sy < (y + 1) * height / targetHeight; sy++ )
+ 						for ( var sx = x * width / targetWidth; sx < (x + 1) * width / targetWidth; sx++ )
+ 						{
+-							var value = pixels[(sy * width + sx) * 4 + channel] / 255.0;
+-							if ( isSrgb && channel < 3 ) value = value <= .04045 ? value / 12.92 : Math.Pow( (value + .055) / 1.055, 2.4 );
++							var texel = pixels[(sy * width + sx) * 4 + channel];
++							var value = isSrgb && channel < 3 ? SrgbDecode[texel] : texel / 255.0;
+ 							total += value;
+ 							samples++;
+ 						}

@@ -1,0 +1,85 @@
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfStockMaterialAdapter.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfStockMaterialAdapter.cs
+@@ -31,6 +31,8 @@
+ 		internal float OcclusionStrength { get; init; }
+ 		internal float NormalScale { get; init; }
+ 		internal bool DoubleSided { get; init; }
++		internal bool AlphaMask { get; init; }
++		internal float AlphaCutoff { get; init; }
+ 	}
+ 
+ 	internal sealed record SourceTexture( GltfMaterialTextureEncodingPlan.Binding Encoding, GltfSamplerMapping.Result Sampling, byte[] Resource );
+@@ -52,8 +54,10 @@
+ 	{
+ 		ArgumentNullException.ThrowIfNull( document );
+ 		imageReader ??= document.ReadImage;
+-		if ( material is not null && (material.Unlit || material.AlphaMode != "OPAQUE") )
+-			throw new GltfException( "The provided Surface/Lit source-texture candidate does not yet support unlit or non-opaque materials." );
++		if ( material is not null && (material.Unlit || material.AlphaMode is not ("OPAQUE" or "MASK")) )
++			throw new GltfException( "The provided Surface/Lit source-texture candidate does not yet support unlit or BLEND materials." );
++		if ( material?.AlphaMode == "MASK" && (!float.IsFinite( material.AlphaCutoff ) || material.AlphaCutoff < 0) )
++			throw new GltfException( "MASK alpha cutoff must be finite and non-negative." );
+ 		var factor = material?.BaseColorFactor ?? System.Numerics.Vector4.One;
+ 		var emissive = material?.EmissiveFactor ?? System.Numerics.Vector3.Zero;
+ 		var metallic = material?.MetallicFactor ?? 1;
+@@ -91,7 +95,8 @@
+ 		{
+ 			Textures = textures, Resources = new ReadOnlyDictionary<GltfMaterialTextureRole, SourceTexture>( resources ),
+ 			LinearBaseColorFactor = factor, EmissiveFactor = emissive, MetallicFactor = metallic, RoughnessFactor = roughness,
+-			OcclusionStrength = strength, NormalScale = normalScale, DoubleSided = material?.DoubleSided ?? false
++			OcclusionStrength = strength, NormalScale = normalScale, DoubleSided = material?.DoubleSided ?? false,
++			AlphaMask = material?.AlphaMode == "MASK", AlphaCutoff = material?.AlphaCutoff ?? .5f
+ 		};
+ 	}
+ 
+@@ -107,6 +112,8 @@
+ 		ThreadSafe.AssertIsMainThread();
+ 		if ( Graphics.IsActive ) throw new GltfException( "Source material resources cannot be realized during rendering." );
+ 		if ( !template.IsValid || template.IsError ) throw new GltfException( "The provided source-texture template is unavailable." );
++		if ( prepared.AlphaMask && (template.GetFeature( "F_ALPHA_TEST" ) != 1 || !template.Flags.IsAlphaTest || template.Flags.IsTranslucent) )
++			throw new GltfException( "The source MASK template must have an actual opaque alpha-test permutation." );
+ 		if ( prepared.DoubleSided && template.GetFeature( "F_RENDER_BACKFACES" ) != 1 )
+ 			throw new GltfException( "The provided source-texture template must enable backfaces for a double-sided material." );
+ 		if ( prepared.Resources.Count != uv.Bindings.Count ) throw new GltfException( "Source material and canonical per-slot UV roles disagree." );
+@@ -114,7 +121,7 @@
+ 			throw new GltfException( "The five-input shader projection does not match its material UV bindings." );
+ 		var vectors = new List<KeyValuePair<string, Vector4>>
+ 		{
+-			new( "g_vGltfBaseColor", new( prepared.LinearBaseColorFactor.X, prepared.LinearBaseColorFactor.Y, prepared.LinearBaseColorFactor.Z, 1 ) ),
++			new( "g_vGltfBaseColor", new( prepared.LinearBaseColorFactor.X, prepared.LinearBaseColorFactor.Y, prepared.LinearBaseColorFactor.Z, prepared.AlphaMask ? prepared.LinearBaseColorFactor.W : 1 ) ),
+ 			new( "g_vGltfEmissiveFactor", new( prepared.EmissiveFactor.X, prepared.EmissiveFactor.Y, prepared.EmissiveFactor.Z, 0 ) )
+ 		};
+ 		var scalars = new List<KeyValuePair<string, float>>
+@@ -122,6 +129,7 @@
+ 			new( "g_flGltfMetallicFactor", prepared.MetallicFactor ), new( "g_flGltfRoughnessFactor", prepared.RoughnessFactor ),
+ 			new( "g_flGltfOcclusionStrength", prepared.OcclusionStrength )
+ 		};
++		if ( prepared.AlphaMask ) scalars.Add( new( "g_flGltfAlphaCutoff", prepared.AlphaCutoff ) );
+ 		// Missing glTF textures multiply by one; anonymous shader input defaults
+ 		// are not a realized material resource. Freeze every exact presence flag
+ 		// into the same scalar/key/readback path as the authored factors.
+@@ -167,12 +175,12 @@
+ 				bindings.Add( new( "g_tGltf" + role + "Texture", texture.Value, texture.Value.DirtyVersion, source.Sampling.State, "Gltf" + role + "Sampler" ) );
+ 			}
+ 			var key = new GltfMaterialKey( template, 0,
+-				[new( "F_RENDER_BACKFACES", prepared.DoubleSided ? 1 : 0 ), new( "F_ALPHA_TEST", 0 ), new( "F_TRANSLUCENT", 0 )], vectors, bindings, scalars );
++				[new( "F_RENDER_BACKFACES", prepared.DoubleSided ? 1 : 0 ), new( "F_ALPHA_TEST", prepared.AlphaMask ? 1 : 0 ), new( "F_TRANSLUCENT", 0 )], vectors, bindings, scalars );
+ 			material = GltfMaterialCache.Shared.Acquire( key );
+ 			foreach ( var value in vectors )
+ 			{
+ 				var actual = material.Value.GetVector4( value.Key );
+-				if ( actual.x != value.Value.x || actual.y != value.Value.y || actual.z != value.Value.z ) throw new GltfException( $"Source material vector {value.Key} did not retain its exact linear/affine values." );
++				if ( actual.x != value.Value.x || actual.y != value.Value.y || actual.z != value.Value.z || (prepared.AlphaMask && value.Key == "g_vGltfBaseColor" && actual.w != value.Value.w) ) throw new GltfException( $"Source material vector {value.Key} did not retain its exact linear/affine values." );
+ 			}
+ 			foreach ( var value in scalars )
+ 				if ( material.Value.GetVector4( value.Key ).x != value.Value ) throw new GltfException( $"Source material scalar {value.Key} did not retain its exact float value." );
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfManagedModelResource.cs
+@@ -46,6 +46,7 @@
+ 			{
+ 				if ( material is null ) throw new GltfException( "A projected source material must be explicit." );
+ 				var mode = material.AlphaMode;
++				if ( !material.Unlit && mode == "BLEND" ) throw new GltfException( "Source-lit BLEND is not yet supported." );
+ 				var key = (material.Unlit ? "unlit:" : "lit:") + mode + (material.DoubleSided ? ":double" : ":single");
+ 				if ( templates.TryGetValue( key, out var existing ) ) return existing;
+ 				var source = Material.FromShader( material.Unlit ? "shaders/gltf_unlit_five_uv.shader" : "shaders/gltf_surface_five_uv.shader" );

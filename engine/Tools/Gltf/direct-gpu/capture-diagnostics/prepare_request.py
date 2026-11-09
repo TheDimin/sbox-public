@@ -1,0 +1,12 @@
+import hashlib,json,pathlib,uuid
+root=pathlib.Path(__file__).resolve().parents[5];d=pathlib.Path(__file__).resolve().parent
+ready=json.loads((root/'Temp/gltf-validation/editor-session-ready.json').read_text());mods={x['name']:x['sha256'] for x in ready['loaded']['modules']}
+b='research/gltf-validation/direct-gpu/'
+files=[b+'capture-diagnostics/'+n for n in ['GltfGpuTriangleGateTests.cs','CaptureShaderBatch.cs','RemainingControlsBatch.cs','MergedDrawAttributeTests.cs','MergedLineBlendTests.cs']]+[b+'models/Fox/GltfGpuRawTriangleChecks.cs',b+'models/Fox/GltfGpuBackendContractTests.cs',b+'models/MeshPrimitiveModes/MeshPrimitiveModesReference.cs']
+def source(path):return {'path':path,'sha256':hashlib.sha256((root/path).read_bytes()).hexdigest()}
+journal=str(root/'Temp/gltf-validation/direct-gpu/capture-diagnostics'/('journal-'+uuid.uuid4().hex+'.json'))
+r={'version':1,'engine_sha256':mods['Sandbox.Engine'],'gltf_sha256':mods['Sandbox.Gltf'],'tools_sha256':mods['Sandbox.Tools'],'framework_sha256':'81048167804a8d178ecd712dae394aca647bd1560c0406f3eabe2e596b465fad','sources':[source(x) for x in files],'suites':[{'type':'Sandbox.Gltf.DirectGpu.MeshPrimitiveModesValidation.RemainingControlsBatch','kind':'static_results','method':'Run','arguments':['$checkout','$cancellationToken'],'expected_cases':2,'setup':[{'kind':'property','name':'JournalPath','arguments':[journal]}]}]}
+p=(pathlib.Path(__file__).resolve().parents[5]/'research/gltf-validation/direct-gpu/capture-diagnostics') / 'native-request.json';p.write_text(json.dumps(r,indent=2)+'\n')
+inputs=[b+'models/MeshPrimitiveModes/MergedDrawAttributeTests.cs',b+'models/MeshPrimitiveModes/MergedLineBlendTests.cs',b+'GltfGpuTriangleGateTests.cs',b+'models/MeshPrimitiveModes/combined_alpha_pointline_candidate.shader',b+'capture-diagnostics/helper-diff.patch']
+((pathlib.Path(__file__).resolve().parents[5]/'research/gltf-validation/direct-gpu/capture-diagnostics') / 'native-freeze.json').write_text(json.dumps({'request':source(str(p.relative_to(root))),'inputs':[source(x) for x in inputs],'journal_path':journal,'scope':'Only two incomplete real-render cases; one byte-identical request-scoped anonymous shader compile; no altered assertions.'},indent=2)+'\n')
+print(json.dumps({'request_sha256':source(str(p.relative_to(root)))['sha256'],'freeze_sha256':source(str(((pathlib.Path(__file__).resolve().parents[5]/'research/gltf-validation/direct-gpu/capture-diagnostics') / 'native-freeze.json').relative_to(root)))['sha256'],'journal':journal,'engine_sha256':mods['Sandbox.Engine']}))

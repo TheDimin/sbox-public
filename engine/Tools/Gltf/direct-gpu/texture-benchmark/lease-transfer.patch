@@ -1,0 +1,137 @@
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfNativeTextureCache.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfNativeTextureCache.cs
+@@ -3,6 +3,7 @@
+ using Sandbox.Gltf.DirectGpu;
+ using System.IO;
+ using System.Security.Cryptography;
++using System.Runtime.CompilerServices;
+ 
+ namespace Sandbox;
+ 
+@@ -23,6 +24,8 @@
+ 	}
+ 
+ 	private static readonly Dictionary<GlobalContext, Dictionary<string, Entry>> contexts = new( ReferenceEqualityComparer.Instance );
++	private sealed record LeaseOwner( GlobalContext Context, Dictionary<string, Entry> Entries, string Hash, Entry Entry );
++	private static readonly ConditionalWeakTable<GltfMaterialLease<Texture>, LeaseOwner> leaseOwners = new();
+ 
+ 	internal static GltfMaterialLease<Texture> Acquire( byte[] compiled )
+ 		=> AcquireBatch( [compiled] )[0];
+@@ -129,8 +132,7 @@
+ 
+ 	private static GltfMaterialLease<Texture> CreateLease( GlobalContext context, Dictionary<string, Entry> entries, string hash, Entry entry )
+ 	{
+-		entry.Users++;
+-		return new GltfMaterialLease<Texture>( entry.Texture, () =>
++		var result = new GltfMaterialLease<Texture>( entry.Texture, () =>
+ 		{
+ 			if ( --entry.Users != 0 ) return;
+ 			if ( entries.TryGetValue( hash, out var current ) && ReferenceEquals( current, entry ) ) entries.Remove( hash );
+@@ -140,6 +142,26 @@
+ 				if ( entries.Count == 0 && contexts.TryGetValue( context, out var currentEntries ) && ReferenceEquals( currentEntries, entries ) ) contexts.Remove( context );
+ 			}
+ 		}, AssertMainThread );
++		leaseOwners.Add( result, new( context, entries, hash, entry ) );
++		result.Disposed += ForgetLease;
++		entry.Users++;
++		return result;
++	}
++
++	private static void ForgetLease( GltfMaterialLease<Texture> lease ) => leaseOwners.Remove( lease );
++
++	/// <summary>Fork a live cache-owned lease without recomputing a content digest.</summary>
++	internal static GltfMaterialLease<Texture> Retain( GltfMaterialLease<Texture> lease )
++	{
++		AssertMainThread(); ArgumentNullException.ThrowIfNull( lease );
++		var texture = lease.Value; // A disposed lease must never be resurrected.
++		if ( !leaseOwners.TryGetValue( lease, out var owner ) ) throw new InvalidOperationException( "The texture lease is not owned by this cache." );
++		if ( !ReferenceEquals( owner.Context, GlobalContext.Current ) ||
++			!contexts.TryGetValue( owner.Context, out var current ) || !ReferenceEquals( current, owner.Entries ) ||
++			!owner.Entries.TryGetValue( owner.Hash, out var entry ) || !ReferenceEquals( entry, owner.Entry ) ||
++			!ReferenceEquals( texture, entry.Texture ) || !texture.IsValid || texture.IsError )
++			throw new InvalidOperationException( "The texture lease is not live in the current cache context." );
++		return CreateLease( owner.Context, owner.Entries, owner.Hash, entry );
+ 	}
+ 
+ 	private static void Destroy( Entry entry )
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/GltfStockMaterialAdapter.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/GltfStockMaterialAdapter.cs
+@@ -114,7 +114,8 @@
+ 	/// cache; every material-bound affine row and selector does enter its key.
+ 	/// The caller owns the borrowed proven template and the published slot packet.
+ 	/// </summary>
+-	internal static GltfMaterialLease<Material> AcquireSource( SourcePrepared prepared, Material template, GltfMaterialUvPlan uv, GltfMaterialUvProjection projection = null, bool featureSidedness = false )
++	internal static GltfMaterialLease<Material> AcquireSource( SourcePrepared prepared, Material template, GltfMaterialUvPlan uv, GltfMaterialUvProjection projection = null, bool featureSidedness = false,
++		Func<GltfMaterialTextureRole, GltfMaterialLease<Texture>> retainPreparedTexture = null )
+ 	{
+ 		ArgumentNullException.ThrowIfNull( prepared ); ArgumentNullException.ThrowIfNull( template ); ArgumentNullException.ThrowIfNull( uv );
+ 		ThreadSafe.AssertIsMainThread();
+@@ -184,12 +185,13 @@
+ 		try
+ 		{
+ 			var bindings = new List<GltfMaterialTextureBinding>();
+-			var acquired = GltfNativeTextureCache.AcquireBatch( prepared.Resources.Values.Select( source => source.Resource ).ToArray() );
+-			textures.AddRange( acquired );
++			var acquired = retainPreparedTexture is null ? GltfNativeTextureCache.AcquireBatch( prepared.Resources.Values.Select( source => source.Resource ).ToArray() ) : null;
++			if ( acquired is not null ) textures.AddRange( acquired );
+ 			var textureIndex = 0;
+ 			foreach ( var (role, source) in prepared.Resources )
+ 			{
+-				var texture = acquired[textureIndex++];
++				var texture = acquired is null ? retainPreparedTexture( role ) ?? throw new GltfException( $"Missing retained texture lease for {role}." ) : acquired[textureIndex++];
++				if ( acquired is null ) textures.Add( texture );
+ 				bindings.Add( new( "g_tGltf" + role + "Texture", texture.Value, texture.Value.DirtyVersion, source.Sampling.State, "Gltf" + role + "Sampler" ) );
+ 			}
+ 			var key = new GltfMaterialKey( template, 0,
+--- a/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuAsset.Variants.cs
++++ b/engine/Sandbox.Engine/Resources/Model/Gltf/DirectGpu/GltfGpuAsset.Variants.cs
+@@ -105,6 +105,7 @@
+ 	{
+ 		ArgumentNullException.ThrowIfNull( selectTemplate );
+ 		var batchMaterials = new Dictionary<int, GltfStockMaterialAdapter.SourcePrepared>();
++		var batchTextures = new Dictionary<int, Dictionary<GltfMaterialTextureRole, GltfMaterialLease<Texture>>>();
+ 		ConfigureProjectedVariants( encodedImageBudget, (index, plan, images) =>
+ 		{
+ 			var material = index is int source ? Document.ReadMaterial( source ) : null;
+@@ -123,11 +124,14 @@
+ 				return GltfUnlitSourceMaterialAdapter.Acquire( prepared, template, plan.MaterialUv, plan.UvProjection );
+ 			}
+ 			var lit = batchMaterials.TryGetValue( index ?? -1, out var cached ) ? cached : GltfStockMaterialAdapter.PrepareSource( Document, material, images.ReadImage );
+-			return GltfStockMaterialAdapter.AcquireSource( lit, template, plan.MaterialUv, plan.UvProjection, sourceLitFeatureSidedness );
++			Func<GltfMaterialTextureRole, GltfMaterialLease<Texture>> retain = batchTextures.TryGetValue( index ?? -1, out var selectedTextures )
++				? role => GltfNativeTextureCache.Retain( selectedTextures[role] ) : null;
++			return GltfStockMaterialAdapter.AcquireSource( lit, template, plan.MaterialUv, plan.UvProjection, sourceLitFeatureSidedness, retain );
+ 		}, legacyLit ? index => index is not int source || (Document.ReadMaterial( source ) is var selected && !selected.Unlit && !GltfPublicMaterialRoute.NeedsSourceLit( selected )) : null,
+ 		(pending, images) =>
+ 		{
+-			if ( batchMaterials.Count != 0 ) throw new InvalidOperationException( "A material preparation batch is already active." );
++			if ( batchMaterials.Count != 0 || batchTextures.Count != 0 ) throw new InvalidOperationException( "A material preparation batch is already active." );
++			GltfMaterialLease<Texture>[] leases = null;
+ 			try
+ 			{
+ 				foreach ( var (_, index) in pending )
+@@ -138,13 +142,21 @@
+ 					if ( material?.Unlit == true || legacyLit && !GltfPublicMaterialRoute.NeedsSourceLit( material ) ) continue;
+ 					batchMaterials.Add( key, GltfStockMaterialAdapter.PrepareSource( Document, material, images.ReadImage ) );
+ 				}
+-				var leases = GltfNativeTextureCache.AcquireBatch( batchMaterials.Values.SelectMany( x => x.Resources.Values ).Select( x => x.Resource ).ToArray() );
++				var roles = batchMaterials.SelectMany( material => material.Value.Resources.Select( role => (Material: material.Key, Role: role.Key, Resource: role.Value.Resource) ) ).ToArray();
++				leases = GltfNativeTextureCache.AcquireBatch( roles.Select( x => x.Resource ).ToArray() );
++				foreach ( var key in batchMaterials.Keys ) batchTextures.Add( key, new() );
++				for ( var i = 0; i < roles.Length; i++ ) batchTextures[roles[i].Material].Add( roles[i].Role, leases[i] );
+ 				return new GltfMaterialLease<object>( new object(), () =>
+ 				{
+-					batchMaterials.Clear(); GltfGpuCleanup.ReleaseAll( leases.Select<GltfMaterialLease<Texture>, Action>( x => x.Dispose ) );
++					batchTextures.Clear(); batchMaterials.Clear(); GltfGpuCleanup.ReleaseAll( leases.Select<GltfMaterialLease<Texture>, Action>( x => x.Dispose ) );
+ 				}, () => ThreadSafe.AssertIsMainThread() );
+ 			}
+-			catch { batchMaterials.Clear(); throw; }
++			catch ( Exception error )
++			{
++				batchTextures.Clear(); batchMaterials.Clear();
++				if ( leases is not null ) GltfGpuCleanup.Rollback( error, leases.Select<GltfMaterialLease<Texture>, Action>( x => x.Dispose ) );
++				throw;
++			}
+ 		} );
+ 	}
+ 

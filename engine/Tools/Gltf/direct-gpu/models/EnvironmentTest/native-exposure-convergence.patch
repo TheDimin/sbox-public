@@ -1,0 +1,74 @@
+--- a/research/gltf-validation/editor_corpus.csx
++++ b/research/gltf-validation/editor_corpus.csx
+@@ -35,6 +35,20 @@
+ void Require( bool value, string message ) { if ( !value ) throw new InvalidOperationException( message ); }
+ string Hash( byte[] bytes ) => Convert.ToHexStringLower( System.Security.Cryptography.SHA256.HashData( bytes ) );
+ string HashFile( string path ) { using var stream = System.IO.File.OpenRead( path ); return Convert.ToHexStringLower( System.Security.Cryptography.SHA256.HashData( stream ) ); }
++// Read-only native scalar query: the managed renderer uses this same function
++// with update=false when native already advanced the exposure system.
++float NativeExposureScalar()
++{
++    var sceneCamera = typeof( CameraComponent ).GetProperty( "SceneCamera", flags ).GetValue( camera );
++    Require( sceneCamera is not null, "Capture SceneCamera is unavailable." );
++    var toneMapping = sceneCamera.GetType().GetField( "ToneMapping", flags ).GetValue( sceneCamera );
++    Require( toneMapping is not null, "Capture native ToneMapping is unavailable." );
++    var system = toneMapping.GetType().GetMethod( "GetNative", flags ).Invoke( toneMapping, null );
++    Require( (IntPtr)system.GetType().GetField( "self", flags ).GetValue( system ) != IntPtr.Zero, "Native exposure system is null." );
++    var tools = typeof( Model ).Assembly.GetType( "NativeEngine.RenderTools" );
++    var method = tools.GetMethod( "TonemapFrameUpdate", flags | System.Reflection.BindingFlags.Static );
++    return Convert.ToSingle( method.Invoke( null, new object[] { system, false } ) );
++}
+ string DiskMvid( string path )
+ {
+     using var stream = System.IO.File.OpenRead( path );
+@@ -383,6 +397,33 @@
+         await WaitFrames();
+         // Public RenderToTexture initializes the native camera outside Graphics.IsActive.
+         using var targetTexture = Texture.CreateRenderTarget().WithSize( width, height ).WithFormat( ImageFormat.RGBA8888 ).WithInitialColor( Color.Magenta ).Create( "gltf_run_" + Guid.NewGuid().ToString( "N" ) );
++        if ( explicitTonemapping is not null )
++        {
++            var expectedScalar = exposure * Math.Pow( 2, exposureCompensationEv );
++            var samples = new System.Collections.Generic.List<object>();
++            var settling = System.Diagnostics.Stopwatch.StartNew();
++            var converged = false;
++            // Only this branch installs fixed min=max exposure. Auto-exposure
++            // recipes without it keep their existing stable-output policy.
++            for ( var attempt = 0; attempt < 60 && settling.Elapsed.TotalSeconds < 20; attempt++ )
++            {
++                await SafePoint();
++                bool warmSubmitted; using ( scene.Push() ) { targetTexture.Clear( Color.Magenta ); warmSubmitted = camera.RenderToTexture( targetTexture ); }
++                Require( warmSubmitted, "Native exposure warmup rejected capture." );
++                var scalar = NativeExposureScalar();
++                samples.Add( new { attempt, scalar = float.IsFinite( scalar ) ? (object)scalar : scalar.ToString(), expectedScalar, frame = Application.FrameCount, wallSeconds = settling.Elapsed.TotalSeconds } );
++                exposureReceipt["nativeScalarSamples"] = samples;
++                Require( float.IsFinite( scalar ) && scalar > 0, "Native exposure scalar is invalid." );
++                if ( Math.Abs( scalar - expectedScalar ) <= Math.Max( .001, expectedScalar * .005 ) ) { converged = true; break; }
++                await WaitFrames();
++            }
++            exposureReceipt["nativeScalarConverged"] = converged;
++            exposureReceipt["expectedNativeScalar"] = expectedScalar;
++            Require( converged, "Native exposure failed to converge within 60 real captures/20 seconds." );
++            // Publish a subsequent frame, after the observed scalar became
++            // current, rather than the frame whose histogram advanced it.
++            await WaitFrames();
++        }
+         bool submitted; using ( scene.Push() ) { targetTexture.Clear( Color.Magenta ); submitted = camera.RenderToTexture( targetTexture ); }
+         Require( submitted, "Native camera rejected capture submission." );
+         exposureReceipt["observedAfterRender"] = new { frameIndex = index, enabled = camera.AutoExposure.Enabled, minimum = camera.AutoExposure.MinimumExposure, maximum = camera.AutoExposure.MaximumExposure, compensation = camera.AutoExposure.Compensation, rate = camera.AutoExposure.Rate, sceneMainCamera = ReferenceEquals( scene.Camera, camera ), engineFrame = Application.FrameCount };
+@@ -392,7 +433,15 @@
+                 && Math.Abs( camera.AutoExposure.MinimumExposure - exposure ) < 1e-5
+                 && Math.Abs( camera.AutoExposure.MaximumExposure - exposure ) < 1e-5
+                 && Math.Abs( camera.AutoExposure.Compensation - exposureCompensationEv ) < 1e-5;
+-            exposureReceipt["locked"] = retained; exposureReceipt["lockStatus"] = retained ? "component-settings-retained-after-render" : "failed";
++            var finalScalar = NativeExposureScalar();
++            var expectedScalar = exposure * Math.Pow( 2, exposureCompensationEv );
++            var finalConverged = float.IsFinite( finalScalar ) && finalScalar > 0
++                && Math.Abs( finalScalar - expectedScalar ) <= Math.Max( .001, expectedScalar * .005 );
++            exposureReceipt["nativeScalarAfterFinalRender"] = float.IsFinite( finalScalar ) ? (object)finalScalar : finalScalar.ToString();
++            exposureReceipt["nativeScalarAfterFinalRenderConverged"] = finalConverged;
++            Require( finalConverged, "Final native exposure scalar is outside the fixed target tolerance." );
++            exposureReceipt["locked"] = retained && finalConverged;
++            exposureReceipt["lockStatus"] = retained && finalConverged ? "native-scalar-converged-after-render" : "failed";
+             explicitPresentationReceipt["exposureLocked"] = retained; explicitPresentationReceipt["exposureLockStatus"] = exposureReceipt["lockStatus"];
+             Require( retained, "Native render did not retain the explicitly requested exposure settings." );
+         }

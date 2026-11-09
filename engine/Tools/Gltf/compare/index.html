@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>glTF Compare</title>
+<style>
+:root{--bg:#f6f6f4;--panel:#fff;--ink:#1d1d1b;--mute:#6b6b66;--line:#ddddd8;--ok:#2f7d4f;--bad:#b3392f;--warn:#a86b12;--acc:#2f5fb3;--chk:#e9e9e4}
+@media (prefers-color-scheme:dark){:root{--bg:#161615;--panel:#1f1f1d;--ink:#ecece8;--mute:#9a9a94;--line:#33332f;--ok:#5cbf83;--bad:#e2685d;--warn:#d9a14a;--acc:#7fa6ee;--chk:#2a2a27}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,sans-serif;display:grid;grid-template-columns:300px 1fr;height:100vh;overflow:hidden}
+aside{border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;background:var(--panel)}
+.filters{padding:12px;border-bottom:1px solid var(--line);display:grid;gap:8px}
+.filters input,.filters select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit}
+.stats{font-size:12px;color:var(--mute)}
+ul{list-style:none;margin:0;padding:0;overflow:auto;flex:1}
+li{padding:6px 12px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;gap:8px;align-items:center}
+li:hover{background:var(--bg)} li.sel{background:var(--chk)}
+li .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+li .v{font-size:11px;color:var(--mute)}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--line)}
+.dot.ok{background:var(--ok)}.dot.bad{background:var(--bad)}.dot.warn{background:var(--warn)}
+main{overflow:auto;padding:16px 20px;min-width:0}
+h1{font-size:18px;margin:0 0 2px} .sub{color:var(--mute);margin-bottom:12px;font-size:13px}
+.err{background:color-mix(in srgb,var(--bad) 12%,transparent);border-left:3px solid var(--bad);padding:8px 10px;margin-bottom:12px;font-family:ui-monospace,monospace;font-size:12px;white-space:pre-wrap}
+.modes{display:flex;gap:4px;margin-bottom:10px}
+button{font:inherit;padding:5px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);cursor:pointer}
+button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.side{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+figure{margin:0} figcaption{font-size:12px;color:var(--mute);margin-bottom:4px}
+.img{background:repeating-conic-gradient(var(--chk) 0 25%,transparent 0 50%) 0 0/16px 16px;border:1px solid var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;aspect-ratio:4/3;overflow:hidden;position:relative}
+.img img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.img .none{color:var(--mute)}
+.wipe{position:relative;max-width:900px}
+.wipe .layer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.wipe .img>img,.wipe .layer img{width:100%;height:100%;object-fit:contain}
+.side .img img{width:100%;height:100%}
+.wipe input{width:100%;margin-top:6px}
+form{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;max-width:900px;display:grid;gap:10px}
+.verdicts{display:flex;gap:6px;flex-wrap:wrap}
+.verdicts button.on[data-v=approved]{background:var(--ok);border-color:var(--ok);color:#fff}
+.verdicts button.on[data-v=rejected]{background:var(--bad);border-color:var(--bad);color:#fff}
+.verdicts button.on[data-v=close]{background:var(--warn);border-color:var(--warn);color:#fff}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tags label{border:1px solid var(--line);border-radius:999px;padding:3px 10px;cursor:pointer;font-size:13px;user-select:none}
+.tags input{display:none} .tags input:checked+span{color:var(--acc);font-weight:600}
+textarea{width:100%;min-height:80px;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit;resize:vertical}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap} .saved{color:var(--mute);font-size:12px}
+.legacy{font-size:12px;color:var(--mute);border-left:3px solid var(--line);padding-left:8px}
+kbd{border:1px solid var(--line);border-radius:3px;padding:0 4px;font-size:11px}
+@media (max-width:760px){body{grid-template-columns:1fr;grid-template-rows:40vh 1fr}aside{border-right:0;border-bottom:1px solid var(--line)}.side{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<aside>
+  <div class="filters">
+    <input id="q" placeholder="Search model…">
+    <select id="f">
+      <option value="all">All cases</option>
+      <option value="todo">Not reviewed (this capture)</option>
+      <option value="failed">Load or render failed</option>
+      <option value="rendered">Rendered</option>
+      <option value="rejected">Rejected / close</option>
+      <option value="approved">Approved</option>
+    </select>
+    <div class="stats" id="stats"></div>
+  </div>
+  <ul id="list"></ul>
+</aside>
+<main id="main"><p class="sub">Loading…</p></main>
+<script>
+const ISSUES=["geometry","orientation","camera","material","texture","normals","lighting","color","alpha","animation","morph/skin","missing parts"];
+let cases=[],fb={entries:{}},cur=null,mode="side",wipe=50,refSrc="viewer";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function entry(c){const e=fb.entries[c.id];return e&&e.captureSha256===c.captureSha?e:null}
+function stale(c){const e=fb.entries[c.id];return e&&e.captureSha256!==c.captureSha?e:null}
+function dot(c){if(c.load!=="passed"||c.render!=="passed")return"bad";const e=entry(c);if(!e)return"";return e.verdict==="approved"?"ok":e.verdict==="rejected"?"bad":"warn"}
+function filtered(){const q=$("#q").value.toLowerCase(),f=$("#f").value;return cases.filter(c=>{if(q&&!c.id.toLowerCase().includes(q))return false;const e=entry(c),ok=c.load==="passed"&&c.render==="passed";
+ return f==="all"||(f==="todo"&&ok&&!e)||(f==="failed"&&!ok)||(f==="rendered"&&ok)||(f==="rejected"&&e&&e.verdict!=="approved")||(f==="approved"&&e&&e.verdict==="approved")})}
+function renderList(){const l=filtered();
+ const ok=cases.filter(c=>c.load==="passed"&&c.render==="passed"),rv=ok.filter(entry),ap=rv.filter(c=>entry(c).verdict==="approved");
+ $("#stats").textContent=`${l.length} shown · ${ok.length}/${cases.length} rendered · ${rv.length} reviewed · ${ap.length} approved`;
+ $("#list").innerHTML=l.map(c=>`<li data-id="${esc(c.id)}" class="${cur&&cur.id===c.id?"sel":""}"><span class="dot ${dot(c)}"></span><span class="n">${esc(c.model)}</span><span class="v">${esc(c.variant)}</span></li>`).join("");}
+function img(src,alt){return src?`<img src="${src}" alt="${esc(alt)}">`:`<span class="none">${esc(alt)}</span>`}
+function show(c){cur=c;renderList();const sel=$("#list .sel");sel&&sel.scrollIntoView({block:"nearest"});
+ const useViewer=refSrc==="viewer"&&c.rendered,refLabel=useViewer?"Sample Viewer render (Cannon Exterior, PBR Neutral)":"Khronos screenshot"+(c.referenceAnimated?" (animated)":"");
+ const ref=useViewer?"/rend/"+encodeURI(c.rendered):c.reference?"/ref/"+encodeURI(c.reference):null,cap=c.capture?"/cap/"+encodeURI(c.capture)+"?"+(c.captureSha||"").slice(0,8):null;
+ const e=entry(c)||{},st=stale(c),err=c.loadError?`Load failed: ${c.loadError}`:c.renderError?`Render failed: ${c.renderError}`:"";
+ let view;
+ if(mode==="side")view=`<div class="side"><figure><figcaption>${esc(refLabel)}</figcaption><div class="img">${img(ref,"No reference")}</div></figure><figure><figcaption>s&box capture</figcaption><div class="img">${img(cap,"No capture")}</div></figure></div>`;
+ else view=`<div class="wipe"><div class="img" id="wb">${img(ref,"No reference")}<div class="layer" id="wl" style="clip-path:inset(0 0 0 ${wipe}%)">${cap?`<img src="${cap}">`:""}</div></div><input type="range" id="wr" min="0" max="100" value="${wipe}"><div class="sub">Left: ${esc(refLabel)} · Right: s&box. Drag to wipe.</div></div>`;
+ $("#main").innerHTML=`<h1>${esc(c.model)}</h1><div class="sub">${esc(c.variant)} · load ${esc(c.load)} · render ${esc(c.render)} · recipe ${esc(c.matchStatus||"")}</div>
+ ${err?`<div class="err">${esc(err)}</div>`:""}
+ <div class="modes"><button data-m="side" class="${mode==="side"?"on":""}">Side by side</button><button data-m="wipe" class="${mode==="wipe"?"on":""}">Wipe</button><span style="width:16px"></span><button data-r="viewer" class="${refSrc==="viewer"?"on":""}" ${c.rendered?"":"disabled"}>Sample Viewer</button><button data-r="khronos" class="${refSrc==="khronos"?"on":""}">Khronos screenshot</button></div>${view}
+ <form id="fbf"><div class="verdicts">${[["approved","Looks correct"],["close","Close, minor issues"],["rejected","Wrong"]].map(([v,t])=>`<button type="button" data-v="${v}" class="${e.verdict===v?"on":""}">${t}</button>`).join("")}</div>
+ <div class="tags">${ISSUES.map(i=>`<label><input type="checkbox" value="${i}" ${(e.issues||[]).includes(i)?"checked":""}><span>${i}</span></label>`).join("")}</div>
+ <textarea id="notes" placeholder="What is wrong, and what should it look like?">${esc(e.notes||"")}</textarea>
+ <div class="row"><button type="submit">Save <kbd>Ctrl+Enter</kbd></button><button type="button" id="clr">Clear</button><span class="saved" id="saved">${e.reviewedAt?"Saved "+esc(e.reviewedAt):""}</span></div>
+ ${st?`<div class="legacy">Earlier review of an older capture: <b>${esc(st.verdict)}</b> ${esc((st.issues||[]).join(", "))} — ${esc(st.notes)}</div>`:""}
+ ${c.legacy?`<div class="legacy">Older site verdict (${esc(c.legacy.at)}): <b>${esc(c.legacy.status)}</b> — ${esc(c.legacy.notes)}</div>`:""}
+ <div class="sub"><kbd>J</kbd>/<kbd>K</kbd> next/previous · <kbd>1</kbd> correct · <kbd>2</kbd> close · <kbd>3</kbd> wrong (outside text box)</div></form>`;
+ const wl=document.querySelector("#wl img");if(wl){const fit=()=>{if(wl.naturalWidth)$("#wb").style.aspectRatio=wl.naturalWidth+"/"+wl.naturalHeight};wl.complete?fit():wl.onload=fit}
+ const wr=$("#wr");if(wr)wr.oninput=()=>{wipe=wr.value;$("#wl").style.clipPath=`inset(0 0 0 ${wipe}%)`};
+ document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{mode=b.dataset.m;show(c)});
+ document.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{refSrc=b.dataset.r;show(c)});
+ document.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-v]").forEach(x=>x.classList.toggle("on",x===b&&!b.classList.contains("on")))});
+ $("#fbf").onsubmit=ev=>{ev.preventDefault();save()};
+ $("#clr").onclick=async()=>{await post({caseId:c.id,clear:true});show(c)};}
+async function post(body){const r=await fetch("/api/feedback",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});if(!r.ok)throw new Error("save failed");fb=await (await fetch("/api/feedback")).json();renderList()}
+async function save(){const c=cur,v=document.querySelector("[data-v].on");
+ try{await post({caseId:c.id,captureSha:c.captureSha,verdict:v?v.dataset.v:null,issues:[...document.querySelectorAll(".tags input:checked")].map(i=>i.value),notes:$("#notes").value});$("#saved").textContent="Saved";}catch(e){$("#saved").textContent="Save failed: is serve.py running?"}}
+function step(d){const l=filtered();if(!l.length)return;const i=cur?l.findIndex(c=>c.id===cur.id):-1;show(l[Math.max(0,Math.min(l.length-1,i+d))])}
+document.addEventListener("keydown",ev=>{const typing=ev.target.matches("textarea,input");
+ if(ev.key==="Enter"&&(ev.ctrlKey||ev.metaKey)&&cur){ev.preventDefault();save();return}
+ if(typing)return;if(ev.key==="j")step(1);if(ev.key==="k")step(-1);
+ const m={"1":"approved","2":"close","3":"rejected"}[ev.key];if(m&&cur){document.querySelector(`[data-v=${m}]`).click()}});
+$("#list").onclick=ev=>{const li=ev.target.closest("li");li&&show(cases.find(c=>c.id===li.dataset.id))};
+$("#q").oninput=renderList;$("#f").onchange=renderList;
+(async()=>{cases=(await (await fetch("/api/cases")).json()).cases;fb=await (await fetch("/api/feedback")).json();$("#f").value="todo";renderList();step(1)})();
+</script>
+</body>
+</html>

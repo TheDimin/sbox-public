@@ -1,0 +1,63 @@
+--- a/research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaMixedPassProbe.cs
++++ b/research/gltf-validation/direct-gpu/models/AlphaBlendModeTest/AlphaMixedPassProbe.cs
+@@ -24,7 +24,7 @@
+ 		var result=new List<object>();var errors=new ConcurrentQueue<string>();var callbacks=new ConcurrentQueue<string>();var seen=new HashSet<bool>();var sync=new object();
+ 		Require((await capture("mixed_empty_before")).All(c=>c.r<.03f&&c.g<.03f&&c.b<.03f),"Mixed empty-before is not empty.");
+ 		using var document=GltfReader.Read(Fixture());using var asset=GltfGpuAsset.Create(document,compute,index=>index==0?blend:opaque);using var instance=asset.CreateInstance(scene.SceneWorld);
+-		instance.SceneObject.Flags.CastShadows=false;
++		instance.SceneObject.Flags.CastShadows=false;instance.SceneObject.RenderingEnabled=false;
+ 		// Observe the actual installed producer's private rows/selection. This does
+ 		// not replace Render or lock around it, so callback overlap stays observable.
+ 		const BindingFlags fields=BindingFlags.Instance|BindingFlags.NonPublic;
+@@ -32,7 +32,8 @@
+ 		var rowType=actualRows[0].GetType();var rowFields=rowType.GetFields(fields).ToDictionary(f=>f.Name);
+ 		var select=typeof(GltfGpuInstance).GetMethod("DrawsForCurrentView",fields)!;
+ 		var transcript=new ConcurrentQueue<(long Sequence,object Value)>();long sequence=0,callbackSequence=0;int activeCallbacks=0,recordAttempts=0,droppedRecords=0;
+-		var activeRows=new int[actualRows.Length];var sameRowOverlaps=new ConcurrentQueue<object>();
++		var activeRows=new int[actualRows.Length];var completedRows=new int[actualRows.Length];var sameRowOverlaps=new ConcurrentQueue<object>();
++		var initialRowCalls=actualRows.Select(row=>(int)rowFields["DrawCalls"].GetValue(row)!).ToArray();
+ 		void Record(string kind,long callback,int? counterBefore=null,int? counterAfter=null)
+ 		{
+ 			if(Interlocked.Increment(ref recordAttempts)>256){Interlocked.Increment(ref droppedRecords);return;}
+@@ -64,14 +65,13 @@
+ 			{
+ 				if(Interlocked.Increment(ref activeRows[ordinal])<=1)continue;
+ 				if(sameRowOverlaps.Count<32)sameRowOverlaps.Enqueue(new{callback,ordinal,thread=Environment.CurrentManagedThreadId,frame=Application.FrameCount,layer=layer.ToString()});
+-				errors.Enqueue("Same-row native callback overlap prevents this probe from attributing a per-callback row counter; retain as unresolved concurrency evidence.");
+ 			}
+ 			var beforeRows=selected.Select(row=>(int)rowFields["DrawCalls"].GetValue(row)!).ToArray();
+ 			var before=instance.DrawCalls;var after=before;int[] afterRows=null;
+ 			try{original(obj);}finally
+ 			{
+ 				after=instance.DrawCalls;afterRows=selected.Select(row=>(int)rowFields["DrawCalls"].GetValue(row)!).ToArray();
+-				foreach(var ordinal in ordinals)Interlocked.Decrement(ref activeRows[ordinal]);
++				foreach(var ordinal in ordinals){Interlocked.Increment(ref completedRows[ordinal]);Interlocked.Decrement(ref activeRows[ordinal]);}
+ 				Record("exit",callback,before,after);Interlocked.Decrement(ref activeCallbacks);
+ 			}
+ 			var delta=after-before;
+@@ -83,7 +83,6 @@
+ 			{
+ 				var material=(Material)rowFields["EffectiveMaterial"].GetValue(selected[row])!;
+ 				if((bool)rowFields["IsTranslucent"].GetValue(selected[row])! != (layer==SceneLayerType.Translucent)||material.Flags.IsTranslucent!=(layer==SceneLayerType.Translucent))errors.Enqueue("Actual cached/native effective material disagrees with pass in "+layer);
+-				if(afterRows[row]-beforeRows[row]!=1)errors.Enqueue("Expected exactly one selected-row draw in "+layer+", got "+(afterRows[row]-beforeRows[row]));
+ 			}
+ 			// Other native classes may complete concurrently before this wrapper's
+ 			// bookkeeping. The producer's actual row revisions define completion.
+@@ -100,7 +99,16 @@
+ 			{
+ 				await MainThread.Wait();lock(sync){seen.Clear();callbacks.Clear();}instance.SetPose(document.EvaluatePose(0,time));Record("pose_applied",0);
+ 				Require(instance.SubmittedRevision!=instance.PoseRevision,"New nonempty pose was marked submitted without drawing.");
+-				var pixels=await capture("mixed_pose_"+time.ToString("0.0",System.Globalization.CultureInfo.InvariantCulture));await wait();
++				instance.SceneObject.RenderingEnabled=true;
++				var pixels=await capture("mixed_pose_"+time.ToString("0.0",System.Globalization.CultureInfo.InvariantCulture));
++				// Stop new submissions only after the normal concurrent capture. This
++				// establishes a readback/accounting boundary, not render serialization.
++				instance.SceneObject.RenderingEnabled=false;await wait();
++				var quietSequence=Interlocked.Read(ref callbackSequence);Require(Volatile.Read(ref activeCallbacks)==0,"Owned callbacks did not retire after disabling presentation.");
++				await wait();Require(Volatile.Read(ref activeCallbacks)==0&&Interlocked.Read(ref callbackSequence)==quietSequence,"No stable owned-callback boundary for row accounting.");
++				var actualCounts=actualRows.Select(row=>(int)rowFields["DrawCalls"].GetValue(row)!).ToArray();
++				for(var row=0;row<actualRows.Length;row++)Require(actualCounts[row]-initialRowCalls[row]==Volatile.Read(ref completedRows[row]),"Quiet-boundary actual row draw count differs from completed native selected-callback inventory for row "+row);
++				Record("quiet_boundary",0);report(new{phase="mixed_pass_quiet_accounting",time,callback_sequence=quietSequence,actual_row_calls=actualCounts,initial_row_calls=initialRowCalls,completed_selected_callbacks=(int[])completedRows.Clone(),same_row_overlap_observed=sameRowOverlaps.Count});
+ 				Require(pixels.Any(c=>c.r>.03f||c.g>.03f||c.b>.03f),"Mixed positive control rendered no pixels.");
+ 				Require(errors.IsEmpty,"Mixed native submission: "+string.Join("\n",errors));
+ 				Require(instance.CallbackErrors.Length==0&&instance.SubmittedRevision==instance.PoseRevision,"Both native classes did not complete current pose.");

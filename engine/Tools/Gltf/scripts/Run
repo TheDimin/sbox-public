@@ -1,0 +1,837 @@
+#!/usr/bin/env python3
+"""Run the pinned Khronos corpus in the existing visible editor; export current comparisons.
+
+Default: all 337 real source variants. No editor launch, material substitution,
+automatic visual approval, historical-result fallback, or automatic publication.
+"""
+from __future__ import annotations
+import argparse
+import copy
+from datetime import datetime, timezone
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import math
+import struct
+import subprocess
+import sys
+import tempfile
+import uuid
+import zlib
+from fractions import Fraction
+
+ROOT = Path(__file__).resolve().parents[4]
+BASE = ROOT / 'research/gltf-validation'
+CURRENT = ROOT / 'Temp/gltf-validation/current'
+PIN = '90d7ede14c7e280af263824604b427a1ca02cb66'
+MANIFEST = BASE / 'corpus-case-manifest.json'
+RECIPES = BASE / 'reference-recipes.json'
+DRIVER = ROOT / 'engine/Tools/Gltf/editor/editor_corpus.csx'
+GUARD = Path.home() / '.local/bin/codex-resource-guard'
+# Known default material family, including delegated modes and white.vmat RERL
+# textures. This is not exhaustive native camera/postprocessing provenance.
+STOCK_COMPILED_RESOURCES = (
+    'game/core/shaders/gltf_deform_cs.shader_c', 'game/core/shaders/complex.shader_c',
+    'game/core/shaders/vertex_color.shader_c', 'game/core/shaders/depth_only.shader_c',
+    'game/core/shaders/gltf_stock_sampler.shader_c',
+    'game/core/shaders/tools_shading_complexity.shader_c', 'game/core/materials/default/white.vmat_c',
+    'game/core/materials/default/default_ao_tga_7449568e.generated.vtex_c',
+    'game/core/materials/default/default_bentnormal_tga_8334dba4.generated.vtex_c',
+    'game/core/materials/default/white_vmat_g_tcolor_a0ce44b8.generated.vtex_c',
+    'game/core/materials/default/white_vmat_g_tnormal_7a668049.generated.vtex_c',
+    'game/core/materials/default/default_color_tga_29ae19a3.generated.vtex_c')
+STOCK_SOURCE_RESOURCES = (
+    'game/core/shaders/gltf_deform_cs.shader', 'game/core/shaders/complex.shader',
+    'game/core/shaders/vertex_color.shader', 'game/core/shaders/depth_only.shader',
+    'game/core/shaders/gltf_stock_sampler.shader',
+    'game/core/shaders/tools_shading_complexity.shader', 'game/core/materials/default/white.vmat')
+# Delegated modes live inside shader DATA, not the standard RERL table. Reuse
+# therefore requires these audited compiled parents; a shader rebuild needs a
+# fresh delegation audit. RERL children are discovered and hashed recursively.
+AUDITED_SHADER_RESOURCES = {
+    # 2026-11-09: deform_cs, vertex_color and stock_sampler re-pinned to the on-disk
+    # compiled bytes (11-06..11-08 compiles); delegation graph unchanged.
+    'game/core/shaders/gltf_deform_cs.shader_c': '4e5f9c9da78a82fcdef7ae72d0280a454697a0bf1eea6e46a83ca5a94c259c65',
+    'game/core/shaders/complex.shader_c': 'b30471c714e1828378b357d0e5c8ddb697b5a5acacee3b3da69973b21b172d9a',
+    # Selected compile (29.575062905s); FEATURE metadata retains Forward and
+    # delegated Depth/ToolsShadingComplexity, with unchanged child hashes.
+    # Container/dependency audit is not visual or runtime-mode acceptance.
+    'game/core/shaders/vertex_color.shader_c': 'bee584e6566632ceedebd5104df859ab5f22da5c4d4e371e7082f1b7cc37808c',
+    # New selected sampler family: 30.294253361s compile; bounded FEATURE/VS/PS
+    # and the same delegated modes audited. Sampler/native pixel controls are separate.
+    'game/core/shaders/gltf_stock_sampler.shader_c': '6d42bde0cc6424c257b0b0cab8907d1a6d769897c40266f58b41603f458f269f',
+    'game/core/shaders/depth_only.shader_c': '1a7704ac650c4b712f45ccb08e60750c29d18d4b048e4bb0bcec56c1619ed338',
+    'game/core/shaders/tools_shading_complexity.shader_c': '491aca41131266c08786f59a62a410aa62ec6dc4bc929cd9efcf276bdd686936'}
+SHADER_DELEGATIONS = {
+    'game/core/shaders/vertex_color.shader_c': [
+        'game/core/shaders/depth_only.shader_c', 'game/core/shaders/tools_shading_complexity.shader_c'],
+    'game/core/shaders/gltf_stock_sampler.shader_c': [
+        'game/core/shaders/depth_only.shader_c', 'game/core/shaders/tools_shading_complexity.shader_c']}
+STOCK_PROOF_FIELDS = ('stockResourceProofVersion', 'stockResources', 'stockDependencies', 'stockDependencyErrors')
+
+
+def sha(path):
+    h = hashlib.sha256()
+    with Path(path).open('rb') as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b''):
+            h.update(block)
+    return h.hexdigest()
+
+
+def read(path):
+    return json.loads(Path(path).read_text())
+
+
+def atomic_json(path, value):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name('.' + path.name + '.tmp')
+    temporary.write_text(json.dumps(value, indent=2, allow_nan=False) + '\n')
+    os.replace(temporary, path)
+
+
+def now():
+    return datetime.now(timezone.utc).isoformat()
+
+
+def require(ok, reason):
+    if not ok:
+        raise ValueError(reason)
+
+
+def inventory():
+    corpus, recipes = read(MANIFEST), read(RECIPES)
+    require(corpus['corpus']['commit'] == PIN == recipes['corpusPin'], 'Corpus/recipe pin mismatch')
+    entries = corpus['cases']
+    ids = [entry['id'] for entry in entries]
+    require(len(ids) == len(set(ids)) == 337, 'Expected exactly 337 unique corpus variants')
+    recipe_map = {row['id']: row for row in recipes['cases']}
+    require(len(recipe_map) == len(recipes['cases']) and set(recipe_map) == set(ids), 'Recipes must cover exactly all 337 cases')
+    return corpus, entries, recipes, recipe_map
+
+
+def select(entries, models, cases):
+    available = {row['id'] for row in entries}
+    require(set(cases) <= available, 'Unknown --case ID')
+    require(set(models) <= {row['model'] for row in entries}, 'Unknown --model ID')
+    return {row['id'] for row in entries if not models and not cases or row['model'] in models or row['id'] in cases}
+
+
+def initial_rows(corpus, entries):
+    return [{'id': row['id'], 'recipeId': row['id'],
+             'input': {'path': row['path'], 'sha256': corpus['files'][row['path']]['sha256'],
+                       'dependenciesVerified': False},
+             'load': {'status': 'not-run', 'error': None},
+             'render': {'status': 'not-run', 'error': None}, 'capture': None}
+            for row in entries]
+
+
+def recipe_fingerprint(recipe):
+    value = json.dumps(recipe, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False)
+    return hashlib.sha256(value.encode('utf-8')).hexdigest()
+
+
+def clear_case_result(row):
+    for key in list(row):
+        if key not in {'id', 'recipeId', 'input', 'recipeSnapshot', 'recipeSha256'}:
+            del row[key]
+    row.update(load={'status': 'not-run', 'error': None}, render={'status': 'not-run', 'error': None}, capture=None)
+
+
+def previous_recipe_rows(previous, entries, explicit_path=None):
+    ids = {entry['id'] for entry in entries}
+    prior = {row['id']: row for row in previous['cases']}
+    require(set(prior) == ids and len(previous['cases']) == len(ids), 'Previous run case inventory differs')
+    if explicit_path is None and all('recipeSnapshot' in row and 'recipeSha256' in row for row in prior.values()):
+        for row in prior.values():
+            require(row['recipeSnapshot'].get('id') == row['id'] and
+                    recipe_fingerprint(row['recipeSnapshot']) == row['recipeSha256'], 'Invalid previous recipe snapshot')
+        return {case_id: row['recipeSnapshot'] for case_id, row in prior.items()}
+    candidates = [Path(explicit_path)] if explicit_path else [CURRENT / 'recipes.json', RECIPES]
+    path = next((p for p in candidates if p.is_file() and sha(p) == previous['run'].get('recipesSha256')), None)
+    require(path is not None, 'Exact previous recipe document is required; use --previous-recipes with the prior pinned file')
+    doc = read(path)
+    recipes = {row['id']: row for row in doc.get('cases', [])}
+    require(doc.get('schemaVersion') == 1 and doc.get('corpusPin') == PIN and set(recipes) == ids and
+            len(doc['cases']) == len(ids), 'Invalid previous recipe document inventory')
+    return recipes
+
+
+def same_render_producer(previous, producer):
+    prior = previous['run'].get('producer', {})
+    return previous.get('corpusPin') == PIN and complete_stock_resource_proof(prior) and complete_stock_resource_proof(producer) and all(
+        previous['run'].get('producer', {}).get(key) == producer.get(key)
+        for key in ('binaries', 'driverSha256', 'deformShaderSha256', 'stockResourceProofVersion', 'stockResources', 'stockDependencies'))
+
+
+def complete_stock_resource_proof(producer):
+    resources = producer.get('stockResources', {})
+    graph = producer.get('stockDependencies', {})
+    if producer.get('stockResourceProofVersion') != 2 or producer.get('stockDependencyErrors') != [] or not isinstance(resources, dict) or not isinstance(graph, dict):
+        return False
+    compiled = set(resources) - set(STOCK_SOURCE_RESOURCES)
+    if not set(STOCK_COMPILED_RESOURCES) <= compiled or set(graph) != compiled or not set(STOCK_SOURCE_RESOURCES) <= set(resources):
+        return False
+    for name, value in resources.items():
+        if name not in STOCK_SOURCE_RESOURCES and (not name.startswith('game/core/') or not name.endswith('_c') or any(p in {'', '.', '..'} for p in name.split('/')) or '\\' in name):
+            return False
+        if not isinstance(value, dict) or type(value.get('present')) is not bool:
+            return False
+        if not value['present']:
+            if name in compiled or value.get('sha256') is not None or value.get('origin') != 'unavailable':
+                return False
+        elif value.get('origin') != 'loose-core' or not isinstance(value.get('sha256'), str) or len(value['sha256']) != 64 or any(c not in '0123456789abcdef' for c in value['sha256']):
+            return False
+        if name.endswith('.shader_c') and value.get('sha256') != AUDITED_SHADER_RESOURCES.get(name):
+            return False
+    for name, children in graph.items():
+        if not isinstance(children, list) or any(not isinstance(child, str) for child in children) or children != sorted(set(children)) or not set(children) <= compiled or not set(SHADER_DELEGATIONS.get(name, [])) <= set(children):
+            return False
+    reachable, pending = set(), list(STOCK_COMPILED_RESOURCES)
+    while pending:
+        name = pending.pop()
+        if name not in reachable:
+            reachable.add(name)
+            pending.extend(graph[name])
+    if reachable != compiled:
+        return False
+    return True
+
+
+def capture_stock_proof(producer):
+    return {key: copy.deepcopy(producer.get(key)) for key in STOCK_PROOF_FIELDS}
+
+
+def prepare_reuse_rows(previous, producer, corpus, entries, recipes, previous_recipes=None):
+    """Retain only exact, independently proven case inputs; never relabel old pixels."""
+    fresh = initial_rows(corpus, entries)
+    render_same = previous is not None and same_render_producer(previous, producer)
+    prior_recipes = previous_recipe_rows(previous, entries, previous_recipes) if render_same else {}
+    prior = {row['id']: row for row in previous['cases']} if previous else {}
+    module_keys = {'engine': 'Sandbox.Engine.dll', 'gltf': 'Sandbox.Gltf.dll', 'renderer': 'Sandbox.SceneRenderer.dll'}
+    rows = []
+    for entry, blank in zip(entries, fresh):
+        case_id = entry['id']
+        row = copy.deepcopy(prior.get(case_id, blank))
+        reason = None
+        if previous and not render_same:
+            reason = 'Rendering inputs or stock resource proof changed or unavailable; rerun required'
+        elif previous and recipe_fingerprint(prior_recipes[case_id]) != recipe_fingerprint(recipes[case_id]):
+            reason = 'Requested comparison recipe changed; rerun required'
+        elif previous and row['load']['status'] in {'passed', 'failed'}:
+            expected = {'path': entry['path'], 'sha256': corpus['files'][entry['path']]['sha256'],
+                        'dependenciesVerified': True,
+                        'dependencies': {path: corpus['files'][path]['sha256'] for path in entry.get('dependencies', [])}}
+            if row.get('capture') and row.get('stockResourceProof') != capture_stock_proof(producer):
+                reason = 'Previous capture stock resource proof differs; rerun required'
+            elif row.get('input') != expected:
+                reason = 'Previous source or dependency proof differs; rerun required'
+            elif row.get('execution', {}).get('driverSha256', previous['run']['producer']['driverSha256']) != producer['driverSha256']:
+                reason = 'Previous case capture driver differs; rerun required'
+            else:
+                actual = row.get('producer', {})
+                for key, filename in module_keys.items():
+                    module = actual.get(key, {})
+                    if module.get('diskSha256') != producer['binaries'].get(filename) or not module.get('mvid') or module.get('mvid') != module.get('diskMvid'):
+                        reason = 'Previous case producer identity is unverified; rerun required'
+                        break
+        if reason:
+            row = blank
+            row.update(load={'status': 'blocked', 'error': reason}, render={'status': 'blocked', 'error': reason}, reason=reason)
+        row.update(recipeSnapshot=copy.deepcopy(recipes[case_id]), recipeSha256=recipe_fingerprint(recipes[case_id]))
+        rows.append(row)
+    return rows
+
+
+def safe_case_directory(case_id):
+    parts = case_id.split('/')
+    require(len(parts) == 2 and all(p and p not in {'.', '..'} and '\\' not in p for p in parts), 'Unsafe corpus case ID')
+    path = CURRENT / 'assets' / parts[0] / parts[1]
+    require(path.resolve().is_relative_to((CURRENT / 'assets').resolve()), 'Case output escaped current directory')
+    return path
+
+
+def verify_inputs(corpus, entry, corpus_root):
+    actual = {}
+    for relative in [entry['path'], *entry.get('dependencies', [])]:
+        path = (corpus_root / relative).resolve(strict=True)
+        require(path.is_relative_to(corpus_root), 'Input dependency escaped the corpus')
+        expected = corpus['files'][relative]
+        require(path.stat().st_size == expected['bytes'], f'Pinned input length changed: {relative}')
+        actual[relative] = sha(path)
+        require(actual[relative] == expected['sha256'], f'Pinned input hash changed: {relative}')
+    return {'path': entry['path'], 'sha256': actual[entry['path']],
+            'dependenciesVerified': True,
+            'dependencies': {p: actual[p] for p in entry.get('dependencies', [])}}
+
+
+def find_editor(args):
+    state = json.loads(subprocess.check_output([str(GUARD), 'status', '--gui'], text=True))
+    matches = []
+    for editor in state['editors']:
+        if args.pid and editor['pid'] != args.pid:
+            continue
+        if args.project and Path(editor['project']).resolve() != Path(args.project).resolve():
+            continue
+        try:
+            executable = Path(f'/proc/{editor["pid"]}/exe').resolve(strict=True)
+        except OSError:
+            continue
+        if executable == (ROOT / 'game/sbox-dev').resolve():
+            matches.append(editor)
+    require(len(matches) == 1, 'Select one existing editor from this engine using --project or --pid; Run never launches an editor')
+    editor = matches[0]
+    require(editor.get('gui', {}).get('usable') is True and editor['gui'].get('state') == 'visible_window_verified', 'Existing editor must have a usable visible desktop window')
+    editor['bootId'] = Path('/proc/sys/kernel/random/boot_id').read_text().strip()
+    return editor
+
+
+def resource_references(data):
+    """Read bounded Source 2 ResourceFileHeader/RERL relative pointers."""
+    require(len(data) >= 16, 'Truncated resource header')
+    size, version, _, offset, count = struct.unpack_from('<IHH iI', data)
+    table = 8 + offset
+    require(version == 12 and 16 <= size <= len(data) and count <= 256 and
+            16 <= table <= size and table + count * 12 <= size, 'Unsupported resource block table')
+    result, seen = set(), False
+    for index in range(count):
+        entry = table + index * 12
+        tag, offset, length = struct.unpack_from('<4siI', data, entry)
+        start, end = entry + 4 + offset, entry + 4 + offset + length
+        require(table + count * 12 <= start <= end <= size, 'Invalid resource block bounds')
+        if tag != b'RERL':
+            continue
+        require(not seen and length >= 8, 'Invalid duplicate or truncated RERL')
+        seen = True
+        offset, count_refs = struct.unpack_from('<iI', data, start)
+        refs = start + offset
+        require(count_refs <= 256 and start + 8 <= refs and refs + count_refs * 16 <= end, 'Invalid RERL entries')
+        for ref_index in range(count_refs):
+            pointer = refs + ref_index * 16 + 8
+            text = pointer + struct.unpack_from('<i', data, pointer)[0]
+            require(refs + count_refs * 16 <= text < end, 'Invalid RERL name pointer')
+            stop = data.find(b'\0', text, min(end, text + 4097))
+            require(stop >= 0, 'Unterminated RERL name')
+            name = data[text:stop].decode('utf-8')
+            require(name and not name.startswith('/') and '\\' not in name and
+                    all(p not in {'', '.', '..'} for p in name.split('/')), 'Unsafe RERL resource path')
+            result.add('game/core/' + name + ('' if name.endswith('_c') else '_c'))
+    return sorted(result)
+
+
+def stock_resource_proof():
+    resources, graph, errors = {}, {}, []
+    pending = list(STOCK_COMPILED_RESOURCES + STOCK_SOURCE_RESOURCES)
+    while pending:
+        name = pending.pop()
+        if name in resources:
+            continue
+        if len(resources) >= 256:
+            errors.append('Stock resource dependency limit exceeded')
+            break
+        path = ROOT / name
+        linked = any(p.is_symlink() for p in [path, *path.parents] if p.is_relative_to(ROOT / 'game/core'))
+        readable = path.is_file() and not linked
+        value = {'present': path.exists() or path.is_symlink(), 'sha256': None,
+                 'origin': 'loose-core' if readable else 'unproven-link' if linked else 'unavailable'}
+        resources[name] = value
+        if name in STOCK_SOURCE_RESOURCES:
+            if readable:
+                value['sha256'] = sha(path)
+            continue
+        graph[name] = []
+        try:
+            require(readable, 'Missing or unproven compiled resource')
+            require(path.stat().st_size <= 64 * 1024 * 1024, 'Compiled resource exceeds inspection limit')
+            data = path.read_bytes()
+            value['sha256'] = hashlib.sha256(data).hexdigest()
+            graph[name] = sorted(set(resource_references(data) + SHADER_DELEGATIONS.get(name, [])))
+            pending.extend(graph[name])
+            if name.endswith('.shader_c'):
+                require(value['sha256'] == AUDITED_SHADER_RESOURCES.get(name), 'Shader delegation bytes require a new audit')
+        except (OSError, ValueError, UnicodeError, struct.error) as error:
+            errors.append(name + ': ' + str(error))
+    return {'stockResourceProofVersion': 2, 'stockResources': resources,
+            'stockDependencies': graph, 'stockDependencyErrors': sorted(errors)}
+
+
+def disk_producer():
+    proof = stock_resource_proof()
+    return {'binaries': {name: sha(ROOT / 'game/bin/managed' / name)
+                         for name in ('Sandbox.Engine.dll', 'Sandbox.Gltf.dll', 'Sandbox.SceneRenderer.dll')},
+            'driverSha256': sha(DRIVER), 'runnerSha256': sha(Path(__file__)),
+            'deformShaderSha256': proof['stockResources']['game/core/shaders/gltf_deform_cs.shader_c']['sha256'], **proof}
+
+
+def original_process_absent(identity):
+    """PID reuse is absence of the original process; an unreadable identity is uncertain."""
+    require(identity.get('pid') and identity.get('start'), 'Missing original editor process identity')
+    try:
+        value = Path(f'/proc/{identity["pid"]}/stat').read_text()
+    except FileNotFoundError:
+        return True
+    fields = value[value.rindex(')') + 2:].split()
+    return fields[19] != str(identity['start'])
+
+
+def verified_boot_id(value):
+    require(isinstance(value, str) and value, 'Pending runtime boot identity is not verified')
+    try:
+        canonical = str(uuid.UUID(value))
+    except ValueError:
+        raise ValueError('Pending runtime boot identity is not verified') from None
+    require(value == canonical, 'Pending runtime boot identity is not verified')
+    return value
+
+
+def observed_editor_exit(identity, case_id):
+    """Prove process retirement, without guessing a crash signal or cause."""
+    boot = verified_boot_id(identity.get('bootId'))
+    current_boot = verified_boot_id(Path('/proc/sys/kernel/random/boot_id').read_text().strip())
+    # A process from a verified previous boot cannot survive the reboot. Never
+    # inspect a reused current PID as if it were that historical process.
+    if boot == current_boot:
+        require(original_process_absent(identity), 'Original pending editor is still alive or uncertain')
+    return {'kind': 'editor-exited', 'pid': identity['pid'], 'start': identity['start'],
+            'bootId': boot, 'caseId': case_id,
+            'reason': 'Verified editor process exited during capture; native cause is unknown'}
+
+
+def verify_pending_retirement(previous):
+    pending = previous['run']['pendingCase']
+    old = previous['run']['editor']
+    require(type(old.get('pid')) is int and old['pid'] > 0 and
+            str(old.get('start', '')).isdigit() and int(old['start']) > 0,
+            'Pending runtime process identity is not verified')
+    event = previous['run'].get('interruption')
+    if event is None:
+        event = observed_editor_exit(old, pending)
+    require(isinstance(event, dict), 'Pending runtime process identity is not verified')
+    require(event.get('kind') in {'native-crash', 'editor-exited'} and event.get('caseId') == pending and
+            type(event.get('pid')) is int and event['pid'] == old['pid'] and
+            str(event.get('start')) == str(old['start']),
+            'Pending runtime process identity is not verified')
+    boot = verified_boot_id(event.get('bootId'))
+    if old.get('bootId') is not None:
+        require(verified_boot_id(old['bootId']) == boot, 'Pending runtime boot identities are inconsistent')
+    current_boot = verified_boot_id(Path('/proc/sys/kernel/random/boot_id').read_text().strip())
+    if boot == current_boot:
+        require(original_process_absent(old), 'Original pending editor is still alive or uncertain')
+    return event
+
+
+def compatible_render_inputs(previous, producer, corpus, entries):
+    if not previous or not same_render_producer(previous, producer):
+        return False
+    prior = {row['id']: row for row in previous['cases']}
+    return len(prior) == len(entries) and all(
+        prior.get(entry['id'], {}).get('input', {}).get('path') == entry['path'] and
+        prior[entry['id']]['input'].get('sha256') == corpus['files'][entry['path']]['sha256']
+        for entry in entries)
+
+
+def prepare_resume(previous, producer, corpus, entries, selected, proven_rows=None):
+    require(compatible_render_inputs(previous, producer, corpus, entries),
+            'Resume requires the same corpus, engine, shader and capture driver; recipe changes require per-case proof')
+    require(proven_rows is not None or previous['run'].get('recipesSha256') == sha(RECIPES),
+            'Changed recipes require per-case snapshot proof before resume')
+    rows = copy.deepcopy(proven_rows if proven_rows is not None else previous['cases'])
+    pending = previous['run'].get('pendingCase')
+    crash = previous['run'].get('interruption')
+    blocked_models = dict(previous['run'].get('blockedModels', {}))
+    recovered_crash = None
+    if pending:
+        pending_result = safe_case_directory(pending) / 'result.json'
+        confirmed = pending_result.exists() and read(pending_result).get('cleanupConfirmed') is True
+        if not confirmed:
+            crash = verify_pending_retirement(previous)
+            blocked_model = next(entry['model'] for entry in entries if entry['id'] == pending)
+            blocked_models[blocked_model] = crash['reason'] + '; this sweep does not retry variants of the interrupted model.'
+            recovered_crash = crash
+    selected = set(selected)
+    prior_producer = previous['run']['producer']
+    for row in rows:
+        # Preserve the actual capture invocation rather than relabel old pixels
+        # with this orchestration-only revision or the replacement editor.
+        if row['load']['status'] not in {'not-run', 'blocked'}:
+            row.setdefault('execution', {'runnerSha256': prior_producer.get('runnerSha256'),
+                                        'driverSha256': prior_producer.get('driverSha256')})
+        model = next(entry['model'] for entry in entries if entry['id'] == row['id'])
+        if model in blocked_models:
+            reason = blocked_models[model]
+            row.update(load={'status': 'blocked', 'error': reason}, render={'status': 'blocked', 'error': reason},
+                       capture=None, reason=reason, runtimeInterrupted=row['id'] == pending)
+            selected.discard(row['id'])
+        elif row['load']['status'] not in {'blocked', 'not-run'}:
+            require(row.get('cleanupConfirmed') is True, 'A completed case has unknown runtime cleanup')
+            selected.discard(row['id'])
+    return rows, selected, recovered_crash, blocked_models
+
+
+def export(state, args):
+    state['run']['updatedAt'] = now()
+    atomic_json(CURRENT / 'run.json', state)
+    try:
+        from export_current_comparison import export_current
+        export_current(MANIFEST, CURRENT / 'run.json', RECIPES, args.website_output)
+        state['run']['exportError'] = None
+    except Exception as error:
+        state['run']['exportError'] = f'{type(error).__name__}: {error}'
+        print(json.dumps({'exportError': state['run']['exportError']}), flush=True)
+        # An old successful dataset must never masquerade as this failed export.
+        (Path(args.website_output) / 'data.json').unlink(missing_ok=True)
+    atomic_json(CURRENT / 'run.json', state)
+    return state['run'].get('exportError') is None
+
+
+def prune_unreferenced_captures(state):
+    """Only after successful export; retain every media file still referenced by a case."""
+    for row in state['cases']:
+        output = safe_case_directory(row['id'])
+        if not output.is_dir():
+            continue
+        capture = row.get('capture') or {}
+        keep = {Path(capture[key]).resolve() for key in ('path', 'posterPath') if capture.get(key)}
+        for path in output.rglob('*'):
+            if path.is_file() and not path.is_symlink() and path.suffix.lower() in {'.png', '.apng'} and path.resolve() not in keep:
+                path.unlink()
+        for path in sorted((p for p in output.rglob('*') if p.is_dir() and not p.is_symlink()), reverse=True):
+            if not any(path.iterdir()):
+                path.rmdir()
+        atomic_json(output / 'result.json', row)
+
+
+def case_timeout(recipe, requested):
+    frames = recipe.get('animation', {}).get('recording', {}).get('frameCount', 1)
+    return min(590, max(requested, math.ceil(frames * .3 + 30)))
+
+
+def validate_capture_plan(recipe):
+    animation = recipe.get('animation', {})
+    recording = animation.get('recording', {})
+    if recording.get('kind') != 'apng':
+        return
+    times, durations = recording['sampleTimes'], recording['frameDurationsSeconds']
+    require(1 < len(times) <= 2048 and len(times) == len(durations) == recording['frameCount'], 'Animation plan inventory differs')
+    require(all(isinstance(t, (int, float)) and math.isfinite(t) and t >= 0 for t in times), 'Invalid animation seek time')
+    require(all(isinstance(t, (int, float)) and math.isfinite(t) and t > 0 for t in durations), 'Presentation frame durations must be positive')
+    require(animation.get('loop') or all(b > a for a, b in zip(times, times[1:])), 'Non-looping seek times must increase')
+    require(math.isclose(sum(durations), recording['duration'], rel_tol=1e-7, abs_tol=1e-7), 'Presentation timeline duration differs')
+
+
+def png_chunks(path):
+    with Path(path).open('rb') as stream:
+        require(stream.read(8) == b'\x89PNG\r\n\x1a\n', 'Invalid native PNG signature')
+        while True:
+            header = stream.read(8)
+            require(len(header) == 8, 'Truncated native PNG')
+            length, kind = struct.unpack('>I4s', header)
+            require(length <= 32 * 1024 * 1024, 'Native PNG chunk exceeds bound')
+            data, checksum = stream.read(length), stream.read(4)
+            require(len(data) == length and len(checksum) == 4, 'Truncated PNG chunk')
+            require(zlib.crc32(kind + data) & 0xffffffff == struct.unpack('>I', checksum)[0], 'Native PNG CRC differs')
+            yield kind, data
+            if kind == b'IEND':
+                break
+
+
+def stream_apng(frames, destination, durations, loop):
+    """Copy native compressed pixels; decode only one pair at a time for verification."""
+    require(len(frames) == len(durations) and 1 < len(frames) <= 2048, 'Invalid bounded APNG plan')
+    delays = [Fraction(str(value)).limit_denominator(65535) for value in durations]
+    require(all(0 < value.numerator <= 65535 and value.denominator <= 65535 for value in delays), 'Unrepresentable APNG frame delay')
+    temporary = destination.with_name('.' + destination.name + '.tmp')
+    sequence, first_header = 0, None
+    with temporary.open('wb') as output:
+        output.write(b'\x89PNG\r\n\x1a\n')
+        def chunk(kind, data):
+            output.write(struct.pack('>I', len(data)) + kind + data + struct.pack('>I', zlib.crc32(kind + data) & 0xffffffff))
+        for index, frame in enumerate(frames):
+            require(sha(frame['path']) == frame['sha256'], 'Captured frame changed before encoding')
+            parts = png_chunks(frame['path'])
+            kind, header = next(parts)
+            require(kind == b'IHDR' and len(header) == 13, 'Missing native PNG header')
+            if index == 0:
+                first_header = header
+                chunk(b'IHDR', header)
+                chunk(b'acTL', struct.pack('>II', len(frames), 0 if loop else 1))
+            require(header == first_header, 'Animation capture formats/extents differ')
+            width, height = struct.unpack('>II', header[:8])
+            delay = delays[index]
+            chunk(b'fcTL', struct.pack('>IIIIIHHBB', sequence, width, height, 0, 0, delay.numerator, delay.denominator, 0, 0))
+            sequence += 1
+            for kind, data in parts:
+                if kind == b'IDAT':
+                    if index == 0:
+                        chunk(kind, data)
+                    else:
+                        chunk(b'fdAT', struct.pack('>I', sequence) + data)
+                        sequence += 1
+                elif index == 0 and kind not in {b'IEND', b'acTL', b'fcTL', b'fdAT'}:
+                    chunk(kind, data)
+        chunk(b'IEND', b'')
+    # Existing parser verifies APNG CRC/control sequence; pixels are compared
+    # losslessly against actual frames with constant decoded-image memory.
+    from build_motion_media import read_apng_delays
+    from PIL import Image
+    require(read_apng_delays(temporary) == delays, 'Encoded APNG delays differ')
+    with Image.open(temporary) as encoded:
+        require(encoded.n_frames == len(frames), 'Encoded frame inventory differs')
+        for index, frame in enumerate(frames):
+            encoded.seek(index)
+            with Image.open(frame['path']) as original:
+                require(encoded.convert('RGBA').tobytes() == original.convert('RGBA').tobytes(), 'APNG pixels differ from native capture')
+    os.replace(temporary, destination)
+    return {'frames': len(frames), 'duration': float(sum(delays)), 'lossless': True}
+
+
+def encode_motion(result, recipe, output):
+    frames = result.pop('animationFrames', None)
+    recording = recipe.get('animation', {}).get('recording', {})
+    if recording.get('kind') != 'apng' or result['render']['status'] != 'passed':
+        return
+    require(isinstance(frames, list) and len(frames) == recording['frameCount'], 'Every planned animation sample needs an actual captured frame')
+    destination = output / 'capture.apng'
+    timing = stream_apng(frames, destination, recording['frameDurationsSeconds'], recipe['animation'].get('loop', True))
+    poster = output / 'poster.png'
+    shutil.copyfile(frames[0]['path'], poster)
+    result['capture'] = {'path': str(destination), 'sha256': sha(destination), 'kind': 'apng',
+                             'posterPath': str(poster), 'posterSha256': sha(poster),
+                             'frames': len(frames), 'duration': recording['duration'], 'sampled': True,
+                             'description': 'Actual public component samples at the declared recipe times; user judges visual matching.'}
+    result['animationEncoding'] = timing
+    for frame in frames:
+        Path(frame['path']).unlink()
+    (output / 'capture.png').unlink(missing_ok=True)
+    shutil.rmtree(output / 'frames', ignore_errors=True)
+
+
+def run_cases(args, state, corpus, entries, recipe_map, selected, editor):
+    from run_editor_tests import CliSession, discover, tool_value
+    corpus_root = Path(read(RECIPES)['corpusRoot']).resolve(strict=True)
+    head = subprocess.check_output(['git', '-C', str(corpus_root), 'rev-parse', 'HEAD'], text=True).strip()
+    require(head == PIN, 'Pinned Khronos checkout HEAD changed')
+    session = None
+    with tempfile.TemporaryDirectory(prefix='.transport-', dir=CURRENT) as transport:
+        session = CliSession(ROOT / 'game/bin/managed/sbox-cli', editor['pid'], Path(transport), 600)
+        session.timeout = 45
+        try:
+            live, exchange = discover(session, editor['pid'], Path(editor['project']).resolve(), {}, Path(transport))
+            driver = exchange / 'editor_corpus.csx'
+            driver.write_bytes(DRIVER.read_bytes())
+            for index, entry in enumerate(entries):
+                if entry['id'] not in selected:
+                    continue
+                row = state['cases'][index]
+                output = safe_case_directory(entry['id'])
+                if output.exists():
+                    shutil.rmtree(output)
+                output.mkdir(parents=True)
+                clear_case_result(row)
+                state['run']['pendingCase'] = entry['id']
+                export(state, args)
+                print(json.dumps({'case': entry['id'], 'caseN': index + 1, 'total': 337, 'phase': 'load/render'}), flush=True)
+                try:
+                    row['input'] = verify_inputs(corpus, entry, corpus_root)
+                except Exception as error:
+                    row.update(load={'status': 'failed', 'error': str(error)}, render={'status': 'not-run', 'error': 'Input verification failed'}, capture=None, cleanupConfirmed=True)
+                    state['run']['pendingCase'] = None
+                    state['run']['attempted'] += 1
+                    atomic_json(output / 'result.json', row)
+                    export(state, args)
+                    continue
+                try:
+                    fingerprint = disk_producer()
+                    require(fingerprint == {key: state['run']['producer'][key] for key in fingerprint}, 'Installed binary or Run driver changed; stop before another case')
+                    require(state['run']['recipesSha256'] == sha(RECIPES), 'Recipes changed during execution')
+                    recipe = copy.deepcopy(recipe_map[entry['id']])
+                    validate_capture_plan(recipe)
+                    recording = recipe.get('animation', {}).get('recording', {})
+                    if recording.get('kind') == 'apng':
+                        recipe['animation']['captureTimes'] = recording['sampleTimes']
+                    timeout = case_timeout(recipe, args.timeout)
+                    session.timeout = timeout + 10
+                    request = {'schemaVersion': 1, 'id': entry['id'], 'sourcePath': str(corpus_root / entry['path']),
+                               'corpusRoot': str(corpus_root), 'inputPath': entry['path'], 'outputDir': str(output),
+                               'recipe': recipe, 'timeoutSeconds': timeout}
+                    atomic_json(exchange / 'gltf-run-case.json', request)
+                    result = tool_value(session.call(live['tools']['run_csharp'], {'path': str(driver)}))
+                    require(result.get('id') == entry['id'], 'Returned a different corpus case')
+                    result['input'] = verify_inputs(corpus, entry, corpus_root)
+                    result['recipeId'] = entry['id']
+                    result['execution'] = {'runnerSha256': state['run']['producer'].get('runnerSha256'),
+                                           'driverSha256': state['run']['producer'].get('driverSha256')}
+                    row.update(result)
+                    require(not result.get('cleanup_errors'), 'Case cleanup failed; remaining cases will not be dispatched')
+                    runtime = result.get('producer')
+                    require(runtime, 'Actual loaded producer identity was not reported')
+                    prior_runtime = state['run']['producer'].get('runtime')
+                    require(prior_runtime is None or prior_runtime == runtime, 'Loaded producer changed during run')
+                    state['run']['producer']['runtime'] = runtime
+                    if result['render']['status'] == 'passed':
+                        result['stockResourceProof'] = capture_stock_proof(fingerprint)
+                    encode_motion(result, recipe, output)
+                    if result['render']['status'] != 'passed':
+                        result['capture'] = None
+                    row.update(result)
+                    row.pop('animationFrames', None)
+                    state['run']['pendingCase'] = None
+                    atomic_json(output / 'result.json', row)
+                    if result.get('stopReason'):
+                        raise RuntimeError('Runtime stopped safely: ' + result['stopReason'])
+                except (KeyboardInterrupt, Exception) as error:
+                    message = f'{type(error).__name__}: {error}'
+                    if row['render']['status'] not in {'blocked', 'failed'}:
+                        row['render'] = {'status': 'failed', 'error': message}
+                    row['capture'] = None
+                    row.pop('animationFrames', None)
+                    if row['load']['status'] == 'not-run':
+                        row['load'] = {'status': 'failed', 'error': message}
+                    # Transport, source/producer drift, encoding and unknown cleanup
+                    # stop the batch. No next case may overlap an uncertain script.
+                    state['run']['status'] = 'interrupted'
+                    state['run']['error'] = message
+                    if not row.get('cleanupConfirmed'):
+                        try:
+                            state['run']['interruption'] = observed_editor_exit(editor, entry['id'])
+                        except (OSError, ValueError):
+                            pass  # A live, unreadable or changed process is never retired by inference.
+                    for other in state['cases']:
+                        if other['id'] in selected and other['load']['status'] == 'not-run':
+                            other.update(load={'status': 'blocked', 'error': 'Batch stopped before dispatch: ' + message},
+                                         render={'status': 'blocked', 'error': message}, capture=None)
+                    export(state, args)
+                    raise
+                state['run']['attempted'] += 1
+                export(state, args)
+                print(json.dumps({'case': entry['id'], 'load': row['load']['status'], 'render': row['render']['status'],
+                                  'attempted': state['run']['attempted'], 'requested': len(selected)}), flush=True)
+            state['run']['status'] = 'complete'
+        finally:
+            # Publish partial state BEFORE waiting for a potentially pending CLI.
+            export(state, args)
+            if session:
+                session.close()  # normal cooperative disconnect; never kill/relaunch the editor
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--model', action='append', default=[])
+    parser.add_argument('--case', action='append', default=[])
+    parser.add_argument('--pid', type=int)
+    parser.add_argument('--project')
+    parser.add_argument('--resume', action='store_true', help='Resume unfinished or changed-recipe cases while retaining proven unchanged results; same rendering build required')
+    parser.add_argument('--previous-recipes', type=Path, help='Exact prior globally pinned recipe JSON for one-time legacy case-proof migration')
+    parser.add_argument('--timeout', type=int, default=180)
+    parser.add_argument('--budget-gib', type=float, default=5)
+    parser.add_argument('--website-output', type=Path, default=CURRENT / 'website')
+    parser.add_argument('--_guarded', action='store_true', help=argparse.SUPPRESS)
+    parser.add_argument('--_prepared', type=Path, help=argparse.SUPPRESS)
+    args = parser.parse_args(argv)
+    require(args.timeout >= 30 and args.budget_gib >= 2, 'Timeout >=30s and guard budget >=2GiB required')
+    CURRENT.mkdir(parents=True, exist_ok=True)
+    corpus, entries, recipes, recipe_map = inventory()
+    selected = select(entries, args.model, args.case)
+    if not args._guarded:
+        with (CURRENT / '.run.lock').open('a') as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            editor = find_editor(args)
+            previous = read(CURRENT / 'run.json') if (CURRENT / 'run.json').exists() else None
+            if previous and previous['run'].get('pendingCase') and not args.resume:
+                pending = safe_case_directory(previous['run']['pendingCase']) / 'result.json'
+                if not (pending.exists() and read(pending).get('cleanupConfirmed') is True):
+                    # A fresh Run after an installed fix may use new rendering
+                    # inputs, but never overlaps the original unknown runtime.
+                    verify_pending_retirement(previous)
+            producer = disk_producer()
+            recovery = None
+            blocked_models = {}
+            reuse = previous is not None and (args.resume or len(selected) < len(entries))
+            rows = prepare_reuse_rows(previous if reuse else None, producer, corpus, entries, recipe_map, args.previous_recipes)
+            if args.resume:
+                require(previous, 'No current run to resume')
+                rows, selected, recovery, blocked_models = prepare_resume(previous, producer, corpus, entries, selected, rows)
+            for row in rows:
+                if row['id'] in selected:
+                    clear_case_result(row)
+            state = {'schemaVersion': 1, 'corpusPin': PIN,
+                     'run': {'id': uuid.uuid4().hex, 'status': 'starting', 'startedAt': now(), 'completedAt': None,
+                             'producer': producer, 'recipesSha256': sha(RECIPES), 'recipeProofVersion': 1, 'editor': editor,
+                             'requested': len(selected), 'selectedCaseIds': sorted(selected), 'attempted': 0,
+                             'completedBeforeResume': sum(row.get('cleanupConfirmed') is True for row in rows) if args.resume else 0,
+                             'recoveredInterruption': recovery, 'blockedModels': blocked_models,
+                             'pendingCase': None, 'error': None},
+                     'cases': rows}
+            # Admission may fail: keep canonical run, snapshot, assets and website
+            # untouched until the guarded child verifies and commits this proposal.
+            with tempfile.TemporaryDirectory(prefix='.prepare-', dir=CURRENT.parent) as temporary:
+                prepared = Path(temporary) / 'run.json'
+                atomic_json(prepared, state)
+                command = [str(GUARD), 'run', '--budget-gib', str(args.budget_gib), '--', sys.executable,
+                           str(Path(__file__).resolve()), '--_guarded', '--_prepared', str(prepared),
+                           *(sys.argv[1:] if argv is None else argv)]
+                child = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+                tail = []
+                for line in child.stdout:
+                    print(line, end='', flush=True)
+                    tail = (tail + [line])[-40:]
+                code = child.wait()
+            committed = read(CURRENT / 'run.json') if (CURRENT / 'run.json').exists() else None
+            if not committed or committed['run']['id'] != state['run']['id']:
+                print(json.dumps({'status': 'blocked', 'currentResultsPreserved': True, 'error': ''.join(tail)[-8000:]}), flush=True)
+                return code or 2
+            state = committed
+            state['run']['completedAt'] = now()
+            exported = export(state, args)
+            print(json.dumps({'status': state['run']['status'], 'attempted': state['run']['attempted'],
+                              'completedBeforeResume': state['run'].get('completedBeforeResume', 0),
+                              'blocked': sum(row['load']['status'] == 'blocked' for row in state['cases']),
+                              'loadPassed': sum(row['load']['status'] == 'passed' for row in state['cases']),
+                              'renderCaptured': sum(row['render']['status'] == 'passed' for row in state['cases']),
+                              'visualApproval': 'user review only', 'websiteExported': exported}), flush=True)
+            return code if exported else 2
+    require(args._prepared and args._prepared.is_file(), 'Missing guarded preparation file')
+    state = read(args._prepared)
+    selected = set(state['run']['selectedCaseIds'])
+    committed = False
+    try:
+        editor = find_editor(args)
+        require(editor['pid'] == state['run']['editor']['pid'] and editor['start'] == state['run']['editor']['start'], 'Editor identity changed')
+        require(state['run']['recipesSha256'] == sha(RECIPES), 'Recipes changed before execution')
+        require(all(state['run']['producer'].get(key) == value for key, value in disk_producer().items()), 'Producer or Run source changed before admission')
+        corpus_root = Path(recipes['corpusRoot']).resolve(strict=True)
+        for entry, row in zip(entries, state['cases']):
+            require(row['id'] == entry['id'] and row['recipeSnapshot'].get('id') == entry['id'] and
+                    recipe_fingerprint(row['recipeSnapshot']) == row['recipeSha256'] == recipe_fingerprint(recipe_map[entry['id']]),
+                    'Prepared case recipe proof changed')
+            if row['load']['status'] in {'passed', 'failed'}:
+                require(row['input'] == verify_inputs(corpus, entry, corpus_root), 'Retained source changed before admission')
+        recipe_bytes = RECIPES.read_bytes()
+        require(hashlib.sha256(recipe_bytes).hexdigest() == state['run']['recipesSha256'], 'Recipe document changed before commit')
+        snapshot_temp = CURRENT / '.recipes.json.tmp'
+        snapshot_temp.write_bytes(recipe_bytes)
+        committed = True
+        if not export(state, args):
+            state['run'].update(status='blocked', error=state['run']['exportError'])
+            return 2
+        os.replace(snapshot_temp, CURRENT / 'recipes.json')
+        prune_unreferenced_captures(state)
+        state['run']['status'] = 'running'
+        run_cases(args, state, corpus, entries, recipe_map, selected, editor)
+        return 0
+    except BaseException as error:
+        state['run'].update(status='interrupted', error=f'{type(error).__name__}: {error}')
+        print(state['run']['error'], file=sys.stderr, flush=True)
+        return 1
+    finally:
+        (CURRENT / '.recipes.json.tmp').unlink(missing_ok=True)
+        if committed:
+            state['run']['completedAt'] = now()
+            export(state, args)
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
