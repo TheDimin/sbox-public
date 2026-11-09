@@ -42,6 +42,11 @@ public partial class SceneEditorSession : Scene.ISceneEditorSession, AssetSystem
 	/// </summary>
 	public bool IsPrefabSession => this is PrefabEditorSession;
 
+	/// <summary>
+	/// Path of the asset this session edits, or null if it is unsaved. Open sessions are restored by this path.
+	/// </summary>
+	public virtual string SourcePath => Scene?.Source?.ResourcePath;
+
 	public Scene Scene { get; private set; }
 
 	internal Widget SceneDock { get; set; }
@@ -79,7 +84,7 @@ public partial class SceneEditorSession : Scene.ISceneEditorSession, AssetSystem
 	void CreateSceneDock()
 	{
 		SceneDock = EditorTypeLibrary.Create<Widget>( "SceneDock", new object[] { this } );
-		SceneDock.Name = $"SceneDock:{(Scene.Source?.ResourcePath ?? "untitled")}";
+		SceneDock.Name = $"SceneDock:{(SourcePath ?? "untitled")}";
 
 		EditorWindow.SceneTabs.Open( this );
 
@@ -205,9 +210,14 @@ public partial class SceneEditorSession : Scene.ISceneEditorSession, AssetSystem
 
 		if ( SceneDock is not null )
 		{
-			SceneDock.Name = $"SceneDock:{(Scene.Source?.ResourcePath ?? "untitled")}";
+			SceneDock.Name = $"SceneDock:{(SourcePath ?? "untitled")}";
 
-			if ( IsPrefabSession )
+			if ( this is GltfEditorSession )
+			{
+				SceneDock.SetWindowIcon( "view_in_ar" );
+				SceneDock.WindowTitle = $"Model: {name}";
+			}
+			else if ( IsPrefabSession )
 			{
 				SceneDock.SetWindowIcon( "home_repair_service" );
 				SceneDock.WindowTitle = $"Prefab: {name}";
@@ -291,7 +301,7 @@ public partial class SceneEditorSession : Scene.ISceneEditorSession, AssetSystem
 
 	BaseFileSystem Scene.ISceneEditorSession.TransientFilesystem => FileSystem.Transient;
 
-	public void Reload()
+	public virtual void Reload()
 	{
 		if ( Scene.Source is null )
 			return;
@@ -308,7 +318,7 @@ public partial class SceneEditorSession : Scene.ISceneEditorSession, AssetSystem
 		Selection.Clear();
 	}
 
-	public void Save( bool saveAs )
+	public virtual void Save( bool saveAs )
 	{
 		// Mounted scenes live at a read-only mount:// path - they can't be saved or saved as.
 		if ( IsMounted )
@@ -466,13 +476,13 @@ public partial class SceneEditorSession : Scene.ISceneEditorSession, AssetSystem
 
 		var open = All
 			.Where( x => x is not GameEditorSession )
-			.Select( x => x.Scene.Source?.ResourcePath )
+			.Select( x => x.SourcePath )
 			.Where( x => !string.IsNullOrEmpty( x ) )
 			.Distinct()
 			.ToArray();
 
 		ProjectCookie?.Set( "editor.openscenes", open );
-		ProjectCookie?.Set( "editor.activescene", Active?.Scene.Source?.ResourcePath );
+		ProjectCookie?.Set( "editor.activescene", Active?.SourcePath );
 	}
 
 	/// <summary>
@@ -496,7 +506,7 @@ public partial class SceneEditorSession : Scene.ISceneEditorSession, AssetSystem
 		}
 
 		var activePath = ProjectCookie?.Get<string>( "editor.activescene", null );
-		var active = All.FirstOrDefault( x => x.Scene.Source?.ResourcePath == activePath ) ?? All[0];
+		var active = All.FirstOrDefault( x => x.SourcePath == activePath ) ?? All[0];
 		active.MakeActive();
 	}
 
@@ -532,6 +542,9 @@ public partial class SceneEditorSession : Scene.ISceneEditorSession, AssetSystem
 	/// </summary>
 	public static SceneEditorSession CreateFromPath( string path )
 	{
+		if ( GltfAssetImport.IsSource( path ) && AssetSystem.FindByPath( path ) is Asset gltfAsset )
+			return GltfEditorSession.Open( gltfAsset );
+
 		Resource resource = null;
 
 		if ( AssetSystem.FindByPath( path ) is Asset asset && asset.AssetType.FileExtension == "scene" && File.Exists( asset.GetSourceFile( true ) ) )

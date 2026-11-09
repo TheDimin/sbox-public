@@ -531,6 +531,16 @@ public partial class AssetBrowser : Widget, IBrowser, AssetSystem.IEventListener
 					{
 						continue;
 					}
+
+					// Compiled glTF: model.glb -> model.glb_c, model.gltf -> model.gltf.glb_c.
+					// Hide it only while its source exists; without the source, the game still loads it.
+					if ( file.Name.EndsWith( ".glb_c", StringComparison.OrdinalIgnoreCase ) )
+					{
+						var compiled = file.FullName;
+						var source = compiled.EndsWith( ".gltf.glb_c", StringComparison.OrdinalIgnoreCase ) ? compiled[..^6] : compiled[..^2];
+						if ( File.Exists( source ) )
+							continue;
+					}
 				}
 
 				if ( file.Exists && file.Attributes.HasFlag( FileAttributes.Hidden ) )

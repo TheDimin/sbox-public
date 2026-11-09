@@ -285,6 +285,7 @@ static class StartupLoadProject
 
 			Step( "Compiling assets" );
 			await CompileAllAssets();
+			GltfAssetImport.ImportAll();
 
 			FileWatch.Tick();
 

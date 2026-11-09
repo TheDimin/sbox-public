@@ -133,6 +133,7 @@ public partial class SceneTreeWidget : Widget
 	}
 
 	WeakReference<Scene> _lastScene = new( null );
+	GltfAuthoringDocument _lastGltfDocument;
 	bool queryDirty = false;
 
 	[EditorEvent.Frame]
@@ -147,7 +148,12 @@ public partial class SceneTreeWidget : Widget
 		var sceneChanged = !ReferenceEquals( last, session.Scene );
 
 		// if query AND scene is unchanged - no need to rebuild the tree
-		if ( !queryDirty && !sceneChanged )
+		// A glTF reload replaces the document, and the tree holds elements of the old one.
+		var gltfDocument = (session as GltfEditorSession)?.Document;
+		var documentChanged = !ReferenceEquals( gltfDocument, _lastGltfDocument );
+		_lastGltfDocument = gltfDocument;
+
+		if ( !queryDirty && !sceneChanged && !documentChanged )
 			return;
 
 		_lastScene.SetTarget( session.Scene );
@@ -197,6 +203,15 @@ public partial class SceneTreeWidget : Widget
 		// treeview will clear the selection, so give it a new one to clear
 		TreeView.Selection = new SelectionSystem();
 		TreeView.Clear();
+
+		if ( session is GltfEditorSession gltfSession )
+		{
+			// glTF elements are not GameObjects, so search does not apply to them.
+			SearchClear.Visible = false;
+			TreeView.Open( TreeView.AddItem( new GltfDocumentNode( gltfSession ) ) );
+			TreeView.Selection = session.Selection;
+			return;
+		}
 
 		if ( session is null )
 			return;

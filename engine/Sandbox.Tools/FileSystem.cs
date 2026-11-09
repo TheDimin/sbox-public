@@ -107,6 +107,7 @@ public static class FileSystem
 	private static void OnContentFileChanged( string filename )
 	{
 		ThreadSafe.AssertIsMainThread();
+		GltfAssetImport.ContentChanged( filename );
 
 		// Check to see if this asset was deleted from explorer - and mark it as deleted in the asset system.
 		if ( AssetSystem.FindByPath( filename ) is Asset asset )
