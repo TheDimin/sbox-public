@@ -23,6 +23,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<!-- Khronos KTX-Software test images, shared with Sandbox.Test.Gltf. -->
+		<None Include="..\Sandbox.Test.Gltf\Fixtures\Ktx\*.ktx2" Link="Fixtures\Ktx\%(Filename)%(Extension)">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="Resources\Audio\*">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

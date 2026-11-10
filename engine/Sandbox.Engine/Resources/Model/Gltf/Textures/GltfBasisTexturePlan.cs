@@ -6,12 +6,17 @@ using System.Text;
 namespace Sandbox;
 
 internal enum GltfBasisSourceCodec { Etc1S, Uastc }
-internal enum GltfBasisTargetCodec { Rgba32 }
+/// <summary>
+/// The texture format a Basis image is written as. Block formats stay compressed on the GPU, so they are the normal
+/// choice; RGBA32 is the exact fallback for images a block format cannot hold.
+/// </summary>
+internal enum GltfBasisTargetCodec { Rgba32, Bc7, Bc5 }
 
 /// <summary>
-/// CPU-owned portable Basis source and deterministic texture preparation. This
-/// selects only the RGBA32 target implemented by the existing KTX decoder; GPU
-/// block compression support is not inferred from the host OS or an image name.
+/// CPU-owned portable Basis source and deterministic texture preparation. The source is transcoded to BC7 (or BC5 on
+/// request) block by block and written as it is, so no RGBA image is built and the GPU samples compressed data.
+/// An image that cannot be written that way (smaller than 16 pixels, or missing mips that must be generated from
+/// pixels) is decoded to RGBA32 instead.
 /// Encoded source, DFD, key/value bytes and authored mip order remain intact.
 /// </summary>
 internal sealed class GltfBasisTexturePlan
@@ -35,7 +40,14 @@ internal sealed class GltfBasisTexturePlan
 	internal string Orientation { get; private init; }
 	internal string Swizzle { get; private init; }
 	internal GltfBasisSourceCodec SourceCodec { get; private init; }
-	internal GltfBasisTargetCodec TargetCodec => GltfBasisTargetCodec.Rgba32;
+	/// <summary>
+	/// True when the texture can be written as block data: at least 16 pixels each way (a 1x1 image would become a 4x4
+	/// block, which is what the engine's own texture writer avoids), and every output mip comes from the file. A mip that
+	/// has to be generated is made from pixels, which block data does not give.
+	/// </summary>
+	internal bool CanUseBlocks => Width >= 16 && Height >= 16 && Levels.Count >= OutputLevelCount;
+	/// <summary>The format <see cref="Compile"/> writes without a request: BC7 where possible, otherwise RGBA32.</summary>
+	internal GltfBasisTargetCodec TargetCodec => CanUseBlocks ? GltfBasisTargetCodec.Bc7 : GltfBasisTargetCodec.Rgba32;
 	internal uint SupercompressionScheme { get; private init; }
 	internal int OutputLevelCount { get; private init; }
 	internal long OutputRgbaBytes { get; private init; }
@@ -92,11 +104,21 @@ internal sealed class GltfBasisTexturePlan
 		if ( (long)bytes.Length + dfdLength + kvdLength > maxDecodedBytes || sourceRgbaBytes > maxDecodedBytes || outputBytes > maxDecodedBytes || outputBytes > int.MaxValue ) throw new GltfException( "Basis decoded mip chain exceeds the configured byte budget." );
 		return new()
 		{
-			encoded = (byte[])bytes.Clone(), budget = maxDecodedBytes,
-			DataFormatDescriptor = dfd.ToArray(), KeyValueData = kvd.ToArray(), Levels = Array.AsReadOnly( levels ),
-			Width = (int)width, Height = (int)height, ColorPrimaries = dfd[13], TransferFunction = dfd[14],
-			Orientation = orientation, Swizzle = swizzle, SourceCodec = sourceCodec, SupercompressionScheme = compression,
-			OutputLevelCount = outputCount, OutputRgbaBytes = outputBytes
+			encoded = (byte[])bytes.Clone(),
+			budget = maxDecodedBytes,
+			DataFormatDescriptor = dfd.ToArray(),
+			KeyValueData = kvd.ToArray(),
+			Levels = Array.AsReadOnly( levels ),
+			Width = (int)width,
+			Height = (int)height,
+			ColorPrimaries = dfd[13],
+			TransferFunction = dfd[14],
+			Orientation = orientation,
+			Swizzle = swizzle,
+			SourceCodec = sourceCodec,
+			SupercompressionScheme = compression,
+			OutputLevelCount = outputCount,
+			OutputRgbaBytes = outputBytes
 		};
 	}
 
@@ -123,7 +145,8 @@ internal sealed class GltfBasisTexturePlan
 				var previous = result[i - 1];
 				result[i] = new GltfKtxLevel
 				{
-					Width = Math.Max( 1, previous.Width / 2 ), Height = Math.Max( 1, previous.Height / 2 ),
+					Width = Math.Max( 1, previous.Width / 2 ),
+					Height = Math.Max( 1, previous.Height / 2 ),
 					Pixels = GltfTextureCompiler.Downsample( previous.Pixels, previous.Width, previous.Height, IsSrgb )
 				};
 			}
@@ -132,7 +155,54 @@ internal sealed class GltfBasisTexturePlan
 	}
 
 	/// <summary>CPU serialization through the established native texture resource format.</summary>
-	internal byte[] Compile()
+	/// <param name="requested">
+	/// The format to write, or null for <see cref="TargetCodec"/>. A block format that this texture cannot use falls
+	/// back to RGBA32. BC5 keeps red and green only, so request it only for two-channel data.
+	/// </param>
+	internal byte[] Compile( GltfBasisTargetCodec? requested = null )
+	{
+		var target = requested ?? TargetCodec;
+		if ( target != GltfBasisTargetCodec.Rgba32 && !CanUseBlocks ) target = GltfBasisTargetCodec.Rgba32;
+		if ( target == GltfBasisTargetCodec.Bc5 && IsSrgb ) throw new GltfException( "BC5 holds two channels of data; it cannot store an sRGB colour texture." );
+		return target == GltfBasisTargetCodec.Rgba32 ? CompileRgba32() : CompileBlocks( target );
+	}
+
+	private byte[] CompileBlocks( GltfBasisTargetCodec target )
+	{
+		long blockBytes = 0; ulong expandedBytes = 0;
+		for ( var i = 0; i < Levels.Count; i++ ) { blockBytes += GltfKtx.BlockLevelBytes( Levels[i].Width, Levels[i].Height ); expandedBytes += Levels[i].UncompressedByteLength; }
+		// Bound the native encoded and expanded copies, the transcoded levels, and the output chain with its serialization copies.
+		var peak = 2L * encoded.Length + (long)expandedBytes + 3 * blockBytes + 1024 * 1024;
+		if ( peak > budget ) throw new GltfException( "Basis texture transcoding and serialization copies exceed the decoded-byte budget." );
+		var image = GltfKtx.TranscodeToBlocks( encoded, target == GltfBasisTargetCodec.Bc5 ? GltfKtxBlockFormat.Bc5 : GltfKtxBlockFormat.Bc7, budget );
+		if ( image.Width != Width || image.Height != Height || image.IsSrgb != IsSrgb || image.Levels.Count != Levels.Count )
+			throw new GltfException( "Basis transcoder metadata disagrees with the texture plan." );
+		long chainBytes = 0;
+		for ( var i = 0; i < OutputLevelCount; i++ )
+		{
+			var level = image.Levels[i];
+			if ( level.Width != Levels[i].Width || level.Height != Levels[i].Height || level.Data?.LongLength != GltfKtx.BlockLevelBytes( level.Width, level.Height ) )
+				throw new GltfException( "Basis transcoded mip shape disagrees with the source descriptor." );
+			chainBytes += level.Data.Length;
+		}
+		// Smallest mip first, like every other texture resource.
+		var chain = new byte[checked((int)chainBytes)]; var offset = chain.Length;
+		for ( var i = 0; i < OutputLevelCount; i++ ) { var data = image.Levels[i].Data; offset -= data.Length; data.CopyTo( chain, offset ); }
+		var writer = new VTexWriter();
+		writer.Header.Width = (ushort)Width; writer.Header.Height = (ushort)Height; writer.Header.Depth = 1;
+		writer.Header.MipCount = (byte)OutputLevelCount;
+		writer.Header.Format = target == GltfBasisTargetCodec.Bc5 ? VTexWriter.VTEX_Format_t.VTEX_FORMAT_BC5 : VTexWriter.VTEX_Format_t.VTEX_FORMAT_BC7;
+		// The engine does not stream compressed textures whose mips are not all multiples of four.
+		var streams = OutputLevelCount > 1 && IsPowerOfTwo( Width ) && IsPowerOfTwo( Height );
+		writer.Header.Flags = (streams ? VTexWriter.VTEX_Flags_t.NONE : VTexWriter.VTEX_Flags_t.VTEX_FLAG_NO_LOD) |
+			(IsSrgb ? VTexWriter.VTEX_Flags_t.NONE : VTexWriter.VTEX_Flags_t.VTEX_FLAG_CREATE_LINEAR_API_TEXTURE);
+		var resource = new ResourceWriter { ResourceVersion = 1 }; resource.SetDataBlock( writer.GetData() ); resource.SetStreamingData( chain );
+		return resource.ToArray();
+	}
+
+	private static bool IsPowerOfTwo( int value ) => value > 0 && (value & (value - 1)) == 0;
+
+	private byte[] CompileRgba32()
 	{
 		long authoredRgbaBytes = 0; ulong expandedBytes = 0;
 		foreach ( var level in Levels ) { authoredRgbaBytes += (long)level.Width * level.Height * 4; expandedBytes += level.UncompressedByteLength; }
