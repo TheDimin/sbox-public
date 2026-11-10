@@ -21,6 +21,7 @@ public partial class ModelRenderer
 			ApplyGltfVariantReload( variant, instance );
 			gltfInstance = instance;
 			gltfInstanceResource = resource;
+			ApplyGltfLod();
 			gltfPendingCreationVariant = variant;
 			return instance.SceneObject;
 		}
@@ -94,6 +95,7 @@ public partial class ModelRenderer
 		BackupRenderAttributes( previous?.Attributes );
 		gltfInstance = replacementInstance;
 		gltfInstanceResource = resource;
+		ApplyGltfLod();
 		_sceneObject = replacement;
 		try { OnSceneObjectCreated( replacement ); }
 		catch

@@ -261,8 +261,15 @@ internal sealed partial class GltfGpuAsset : IDisposable
 		public int? InstanceIndex => Instance.InstanceIndex;
 		public NMatrix LocalTransform => Instance.LocalTransform;
 	}
+	/// <summary>One MSFT_lod chain. <see cref="Nodes"/> lists the base node first, then the lower levels.</summary>
+	internal sealed record LodGroup( IReadOnlyList<int> Nodes, float[] Thresholds );
 	internal GltfDocument Document { get; private set; }
 	internal int? SelectedSceneIndex { get; private set; }
+	internal readonly List<LodGroup> LodGroups = new();
+	/// <summary>Per glTF node: index into <see cref="LodGroups"/>, or -1.</summary>
+	internal int[] LodGroupOfNode = [];
+	/// <summary>Per glTF node: level inside its group (0 is the base node).</summary>
+	internal int[] LodLevelOfNode = [];
 	internal readonly List<Node> Nodes = new();
 	internal readonly List<Primitive> Primitives = new();
 	internal const string DefaultComputeShaderPath = "shaders/gltf_deform_cs.shader";
@@ -316,6 +323,8 @@ internal sealed partial class GltfGpuAsset : IDisposable
 			var cache = new Dictionary<(int, int), Primitive>();
 			var pending = new Stack<int>();
 			var selected = new HashSet<int>();
+			var lods = document.ReadNodeLods();
+			var levelNodes = lods.SelectMany( x => x.Levels ).ToHashSet();
 			if ( scene.HasValue )
 			{
 				var sceneJson = document.Root.GetProperty( "scenes" )[scene.Value];
@@ -326,7 +335,25 @@ internal sealed partial class GltfGpuAsset : IDisposable
 				var nodeIndex = pending.Pop(); if ( !selected.Add( nodeIndex ) ) throw new GltfException( "Selected node is repeated." );
 				var node = document.Root.GetProperty( "nodes" )[nodeIndex];
 				if ( node.TryGetProperty( "children", out var children ) ) foreach ( var child in children.EnumerateArray().Reverse() ) pending.Push( child.GetInt32() );
-				if ( !node.TryGetProperty( "mesh", out _ ) ) continue;
+				if ( !node.TryGetProperty( "mesh", out _ ) || levelNodes.Contains( nodeIndex ) ) continue;
+				AddMeshNode( nodeIndex, node );
+			}
+			// A LOD level draws as part of its chain, wherever the file places the node.
+			asset.LodGroupOfNode = Enumerable.Repeat( -1, document.Root.TryGetProperty( "nodes", out var allNodes ) ? allNodes.GetArrayLength() : 0 ).ToArray();
+			asset.LodLevelOfNode = new int[asset.LodGroupOfNode.Length];
+			foreach ( var lod in lods.Where( x => selected.Contains( x.Node ) ) )
+			{
+				var chain = lod.Levels.Prepend( lod.Node ).ToArray();
+				var thresholds = lod.ScreenCoverage.Count == chain.Length ? lod.ScreenCoverage.ToArray() : GltfLodSelector.DefaultThresholds( chain.Length );
+				for ( var level = 0; level < chain.Length; level++ )
+				{
+					asset.LodGroupOfNode[chain[level]] = asset.LodGroups.Count; asset.LodLevelOfNode[chain[level]] = level;
+					if ( level > 0 && document.Root.GetProperty( "nodes" )[chain[level]].TryGetProperty( "mesh", out _ ) ) AddMeshNode( chain[level], document.Root.GetProperty( "nodes" )[chain[level]] );
+				}
+				asset.LodGroups.Add( new LodGroup( chain, thresholds ) );
+			}
+			void AddMeshNode( int nodeIndex, JsonElement node )
+			{
 				var instancing = GltfGpuInstancingPlan.Create( document, nodeIndex );
 				if ( instancing.AppliesInstancing && node.TryGetProperty( "skin", out _ ) )
 					throw new GltfException( "EXT_mesh_gpu_instancing with a skinned mesh node is not implemented; instance transforms cannot be ignored." );
@@ -365,7 +392,7 @@ internal sealed partial class GltfGpuAsset : IDisposable
 				if ( rawPlans.Count != 0 ) asset.variantRawPlans = rawPlans;
 				foreach ( var index in asset.MaterialSlotSourceIndices ) asset.preparedMaterials.Add( index ?? -1, GltfStockMaterialAdapter.Prepare( document, index.HasValue ? document.ReadMaterial( index.Value ) : null ) );
 			}
-			asset.RestBounds = GltfGpuRig.Bounds( asset.Nodes.Select( x => (x.Rig, x.Rig.Evaluate( rest, x.LocalTransform ), rest.GetMorphWeights( x.Index )) ), NMatrix.Identity, padding: false );
+			asset.RestBounds = GltfGpuRig.Bounds( asset.Nodes.Where( x => asset.LodLevelOfNode[x.Index] <= 0 ).Select( x => (x.Rig, x.Rig.Evaluate( rest, x.LocalTransform ), rest.GetMorphWeights( x.Index )) ), NMatrix.Identity, padding: false );
 			asset.finalRelease = finalRelease;
 			return asset;
 		}
@@ -535,6 +562,9 @@ internal sealed partial class GltfGpuInstance : IDisposable
 	private readonly GpuBuffer placementBuffer;
 	private readonly Material[] materialOverrides;
 	private bool[] nodeVisibility;
+	private int[] lodLevels, lodNatural;
+	private int? forcedLod;
+	private int lodBias;
 	private GltfPose pose;
 	private NMatrix placement = NMatrix.Identity;
 	private bool disposed;
@@ -702,6 +732,7 @@ internal sealed partial class GltfGpuInstance : IDisposable
 	{
 		this.asset = asset; this.world = world; ownerContext = GlobalContext.Current;
 		nodeVisibility = asset.Document.EvaluateNodeVisibility();
+		lodLevels = new int[asset.LodGroups.Count]; lodNatural = new int[asset.LodGroups.Count];
 		materialOverrides = new Material[asset.MaterialSlotSourceIndices.Count];
 		try
 		{
@@ -863,6 +894,52 @@ internal sealed partial class GltfGpuInstance : IDisposable
 		submissionGate.Run( () => RenderExclusive( only ) );
 	}
 
+	/// <summary>Visible by the node tree, and the shown level of its LOD chain.</summary>
+	private bool IsDrawn( Draw draw )
+	{
+		var index = draw.Node.Index;
+		if ( !nodeVisibility[index] ) return false;
+		var group = asset.LodGroupOfNode[index];
+		return group < 0 || lodLevels[group] == asset.LodLevelOfNode[index];
+	}
+
+	/// <summary>Force one level of every LOD chain (null for automatic) and bias the automatic choice toward lower detail.</summary>
+	internal void SetLodOverride( int? forcedLevel, int bias = 0 ) => submissionGate.Run( () =>
+	{
+		ObjectDisposedException.ThrowIf( disposed, this );
+		if ( forcedLod == forcedLevel && lodBias == bias ) return;
+		forcedLod = forcedLevel; lodBias = bias; SubmittedRevision = -1;
+	} );
+
+	/// <summary>The level currently shown for a chain (-1 when hidden by its last threshold).</summary>
+	internal int GetLodLevel( int group ) => lodLevels[group];
+
+	private void UpdateLodLevels()
+	{
+		if ( lodLevels.Length == 0 ) return;
+		var camera = Graphics.CameraPosition;
+		var viewport = Graphics.Viewport;
+		var aspect = viewport.Height > 0 ? viewport.Width / viewport.Height : 1f;
+		var horizontal = Graphics.FieldOfView * MathF.PI / 180f;
+		var vertical = 2f * MathF.Atan( MathF.Tan( horizontal * 0.5f ) / MathF.Max( aspect, 0.01f ) ) * 180f / MathF.PI;
+		for ( var group = 0; group < lodLevels.Length; group++ )
+		{
+			var chain = asset.LodGroups[group];
+			var bounds = draws.Where( x => chain.Nodes.Contains( x.Node.Index ) ).Select( x => x.WorldBounds ).ToArray();
+			// Hysteresis follows the coverage choice, not the forced or biased level that is shown.
+			var level = lodNatural[group];
+			if ( bounds.Length != 0 )
+			{
+				var box = BBox.FromBoxes( bounds );
+				var coverage = GltfLodSelector.Coverage( box.Size.Length * 0.5f, Vector3.DistanceBetween( camera, box.Center ), vertical );
+				level = GltfLodSelector.Select( chain.Thresholds, coverage, level );
+			}
+			lodNatural[group] = level;
+			var adjusted = GltfLodSelector.Adjust( level, chain.Nodes.Count, forcedLod, lodBias );
+			if ( adjusted != lodLevels[group] ) { lodLevels[group] = adjusted; SubmittedRevision = -1; }
+		}
+	}
+
 	private void RenderExclusive( Draw only )
 	{
 		// A callback already queued by native can enter after Dispose detached
@@ -877,6 +954,8 @@ internal sealed partial class GltfGpuInstance : IDisposable
 			// Native command-list callbacks bracket one contiguous native batch.
 			// Retain the prior one-object path when callbacks are installed.
 			var batchTranslucent = sceneObject.Flags.WantsExecuteBefore || sceneObject.Flags.WantsExecuteAfter;
+			// Shadow views have the light as camera, so they reuse the levels chosen for the last main view.
+			if ( only is null && layer != SceneLayerType.Shadow ) UpdateLodLevels();
 			// A child callback may already be queued when a state transition hides it.
 			if ( only is not null && (batchTranslucent || !sceneObject.RenderingEnabled || !only.IsTranslucent) ) return;
 			// Sort the actual submission sequence for this view. Classification is
@@ -902,7 +981,7 @@ internal sealed partial class GltfGpuInstance : IDisposable
 			foreach ( var draw in submission )
 			{
 				if ( only is not null && !ReferenceEquals( only, draw ) ) continue;
-				if ( !nodeVisibility[draw.Node.Index] ) continue;
+				if ( !IsDrawn( draw ) ) continue;
 				var primitive = draw.Node.Primitive;
 				var packet = selected?.Bindings[draw.VariantRow].Value;
 				var overridden = manualRendering && manualMaterial is not null ? manualMaterial : overrides[primitive.MaterialSlot];
@@ -951,7 +1030,7 @@ internal sealed partial class GltfGpuInstance : IDisposable
 				draw.SubmittedVariantRevision = selected?.Revision; draw.SubmittedMaterialOverride = overridden is not null;
 			}
 			// Compute success or a partial pass must not claim every row submitted.
-			if ( draws.Where( x => nodeVisibility[x.Node.Index] ).All( x => x.SubmittedRevision == PoseRevision ) ) SubmittedRevision = PoseRevision;
+			if ( draws.Where( IsDrawn ).All( x => x.SubmittedRevision == PoseRevision ) ) SubmittedRevision = PoseRevision;
 		}
 		catch ( Exception exception ) { if ( errors.Count < 16 ) errors.Enqueue( exception.ToString() ); }
 	}
@@ -968,7 +1047,7 @@ internal sealed partial class GltfGpuInstance : IDisposable
 			var packet = selected?.Bindings[draw.VariantRow].Value;
 			var raw = materialOverrides[primitive.MaterialSlot] is not null && asset.HasRawVariantRoute( primitive );
 			var plan = raw ? asset.GetRawVariantPlan( primitive ) : packet?.Plan ?? primitive.Plan;
-			var output = raw ? draw.RawOutput : draw.Output; var visible = nodeVisibility[draw.Node.Index];
+			var output = raw ? draw.RawOutput : draw.Output; var visible = IsDrawn( draw );
 			byte[] bytes = null; uint[] indices = null;
 			if ( visible )
 			{
