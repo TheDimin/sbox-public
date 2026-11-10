@@ -33,7 +33,8 @@ public sealed partial class GltfDocument
 	/// Reads node-level MSFT_lod chains. Returns nothing when the extension is
 	/// unsupported, so the base node alone is used (the spec fallback). Chains are
 	/// validated: ids are in range, unique, never the base node, never shared by two
-	/// chains, and a LOD node cannot start its own chain.
+	/// chains, and chains never form a cycle. A level that starts its own chain is
+	/// ignored with a warning.
 	/// </summary>
 	public IReadOnlyList<GltfNodeLod> ReadNodeLods()
 	{
@@ -46,19 +47,30 @@ public sealed partial class GltfDocument
 			var ids = ReadLodIds( SceneObject( nodes[i], "node" ), "node", nodes.Length );
 			if ( ids is not null ) chains.Add( i, ids );
 		}
-		var owner = new Dictionary<int, int>();
 		foreach ( var (node, ids) in chains )
-		{
 			if ( Array.IndexOf( ids, node ) >= 0 ) throw new GltfException( "A node cannot be its own MSFT_lod level." );
-			foreach ( var id in ids )
-			{
-				if ( chains.ContainsKey( id ) ) throw new GltfException( "A MSFT_lod level cannot have its own MSFT_lod chain." );
-				if ( !owner.TryAdd( id, node ) ) throw new GltfException( "A node cannot be a MSFT_lod level of two chains." );
-			}
-		}
+		// First chain that lists each node as a level. A cycle of chains has no top chain.
+		var anyOwner = new Dictionary<int, int>();
 		foreach ( var (node, ids) in chains.OrderBy( x => x.Key ) )
+			foreach ( var id in ids ) anyOwner.TryAdd( id, node );
+		foreach ( var start in chains.Keys )
+		{
+			var seen = new HashSet<int> { start };
+			for ( var current = start; anyOwner.TryGetValue( current, out var parent ); current = parent )
+				if ( !seen.Add( parent ) ) throw new GltfException( "MSFT_lod chains must not form a cycle." );
+		}
+		// A recursive chain is not defined by the spec (KhronosGroup/glTF#1953). The top
+		// chain wins and nested chains are ignored, with a warning on the top chain.
+		var levelOwner = new Dictionary<int, int>();
+		foreach ( var (node, ids) in chains.OrderBy( x => x.Key ).Where( x => !anyOwner.ContainsKey( x.Key ) ) )
+			foreach ( var id in ids )
+				if ( !levelOwner.TryAdd( id, node ) ) throw new GltfException( "A node cannot be a MSFT_lod level of two chains." );
+		foreach ( var (node, ids) in chains.OrderBy( x => x.Key ).Where( x => !anyOwner.ContainsKey( x.Key ) ) )
 		{
 			var coverage = ReadScreenCoverage( SceneObject( nodes[node], "node" ), ids.Length + 1, out var warning );
+			var nested = ids.Where( chains.ContainsKey ).ToArray();
+			if ( nested.Length != 0 )
+				warning = (warning is null ? "" : warning + " ") + $"MSFT_lod on level node(s) {string.Join( ", ", nested )} is ignored; nested chains are not supported.";
 			result.Add( new GltfNodeLod { Node = node, Levels = ids, ScreenCoverage = coverage, Warning = warning } );
 		}
 		return result;
@@ -76,19 +88,13 @@ public sealed partial class GltfDocument
 			var ids = ReadLodIds( SceneObject( materials[i], "material" ), "material", materials.Length );
 			if ( ids is not null ) chains.Add( i, ids );
 		}
-		var owner = new Dictionary<int, int>();
 		foreach ( var (material, ids) in chains )
-		{
 			if ( Array.IndexOf( ids, material ) >= 0 ) throw new GltfException( "A material cannot be its own MSFT_lod level." );
-			foreach ( var id in ids )
-			{
-				if ( chains.ContainsKey( id ) ) throw new GltfException( "A MSFT_lod level cannot have its own MSFT_lod chain." );
-				// Lower materials may be shared by several chains; only chain recursion is invalid.
-				owner.TryAdd( id, material );
-			}
-		}
-		foreach ( var (material, ids) in chains.OrderBy( x => x.Key ) )
-			result.Add( new GltfMaterialLod { Material = material, Levels = ids } );
+		// Lower materials may be shared by several chains. A level that starts its own
+		// chain is ignored, as for nodes (KhronosGroup/glTF#1953).
+		var levels = new HashSet<int>( chains.Values.SelectMany( x => x ) );
+		foreach ( var (material, ids) in chains.OrderBy( x => x.Key ).Where( x => !levels.Contains( x.Key ) ) )
+			result.Add( new GltfMaterialLod { Material = material, Levels = ids.Where( id => !chains.ContainsKey( id ) ).ToArray() } );
 		return result;
 	}
 

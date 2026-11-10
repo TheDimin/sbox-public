@@ -48,13 +48,23 @@ public class GltfNodeLodTests
 			"[{\"extensions\":{\"MSFT_lod\":{\"ids\":[0]}}},{}]",                                  // self
 			"[{\"extensions\":{\"MSFT_lod\":{\"ids\":[1,1]}}},{}]",                                // duplicate
 			"[{\"extensions\":{\"MSFT_lod\":{\"ids\":[]}}},{}]",                                   // empty
-			"[{\"extensions\":{\"MSFT_lod\":{\"ids\":[1]}}},{\"extensions\":{\"MSFT_lod\":{\"ids\":[2]}}},{}]", // recursive
+			"[{\"extensions\":{\"MSFT_lod\":{\"ids\":[1]}}},{\"extensions\":{\"MSFT_lod\":{\"ids\":[0]}}}]", // cycle
 			"[{\"extensions\":{\"MSFT_lod\":{\"ids\":[2]}}},{\"extensions\":{\"MSFT_lod\":{\"ids\":[2]}}},{}]", // shared level
 		} )
 		{
 			using var document = Open( nodes );
 			Assert.ThrowsException<GltfException>( () => document.ReadNodeLods(), nodes );
 		}
+	}
+
+	[TestMethod]
+	public void NestedChainIsIgnoredWithWarning()
+	{
+		using var document = Open( "[{\"extensions\":{\"MSFT_lod\":{\"ids\":[1]}}},{\"extensions\":{\"MSFT_lod\":{\"ids\":[2]}}},{}]" );
+		var chain = document.ReadNodeLods().Single();
+		Assert.AreEqual( 0, chain.Node );
+		CollectionAssert.AreEqual( new[] { 1 }, chain.Levels.ToArray() );
+		StringAssert.Contains( chain.Warning, "ignored" );
 	}
 
 	[TestMethod]
