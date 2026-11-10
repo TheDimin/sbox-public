@@ -2,8 +2,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Editor;
 
@@ -28,9 +28,8 @@ internal class FileAssociations
 	{
 		try
 		{
-			var data = Environment.GetEnvironmentVariable( "XDG_DATA_HOME" );
-			if ( string.IsNullOrEmpty( data ) )
-				data = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), ".local", "share" );
+			// On Linux this is $XDG_DATA_HOME, or ~/.local/share when it is not set.
+			var data = Environment.GetFolderPath( Environment.SpecialFolder.LocalApplicationData );
 
 			// Writes a file only when its content changes, so a normal start does not refresh the desktop caches.
 			var changed = false;
