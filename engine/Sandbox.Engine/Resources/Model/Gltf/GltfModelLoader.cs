@@ -19,7 +19,7 @@ internal static class GltfModelLoader
 		"KHR_mesh_quantization", "KHR_texture_transform", "KHR_draco_mesh_compression", "KHR_texture_basisu",
 		"KHR_meshopt_compression", "EXT_meshopt_compression", "EXT_mesh_gpu_instancing", "KHR_materials_unlit", "KHR_materials_variants", "KHR_materials_diffuse_transmission",
 		"KHR_materials_emissive_strength", "KHR_node_visibility", "EXT_texture_webp",
-		"KHR_materials_clearcoat", "KHR_materials_anisotropy",
+		"KHR_materials_clearcoat", "KHR_materials_anisotropy", "MSFT_lod",
 		// Lights are scene data, not model data: the model loads and the lights are not instanced.
 		"KHR_lights_punctual"
 	};
@@ -117,6 +117,8 @@ internal static class GltfModelLoader
 		var document = sourceOwner.Document;
 		if ( document.UnsupportedOptionalExtensions.Count > 0 )
 			Log.Warning( $"glTF '{mountedPath}' uses unsupported optional extensions: {string.Join( ", ", document.UnsupportedOptionalExtensions )}. The standard core fallback is used where available." );
+		foreach ( var lod in document.ReadNodeLods().Where( x => x.Warning is not null ) )
+			Log.Warning( $"glTF '{mountedPath}' node {lod.Node} MSFT_lod: {lod.Warning}" );
 		var resource = new GltfManagedModelResource( document, sceneIndex );
 		sourceOwner.Release(); // Successful preparation now owns this document generation.
 		// A selected scene may legally contain no drawable primitives. Preserve it
