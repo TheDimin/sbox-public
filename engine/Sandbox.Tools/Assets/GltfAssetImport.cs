@@ -108,7 +108,7 @@ public static class GltfAssetImport
 			var source = GltfOverrides.ApplyToSource( File.ReadAllBytes( sourcePath ), GltfOverrides.Read( asset ), overrideWarnings );
 			foreach ( var warning in overrideWarnings ) Log.Warning( $"{relative}: {warning}" );
 			bytes = GltfCompiler.Compile( source, Resolve,
-				GltfModelLoader.SupportedExtensions, 256L * 1024 * 1024, consolidate );
+				GltfModelLoader.SupportedExtensions, 256L * 1024 * 1024, consolidate, orderForLodStreaming: true );
 			using var document = GltfModelLoader.ReadDocument( bytes, Resolve );
 			if ( document.Root.TryGetProperty( "images", out var images ) && images.ValueKind == System.Text.Json.JsonValueKind.Array )
 				foreach ( var image in images.EnumerateArray() )
