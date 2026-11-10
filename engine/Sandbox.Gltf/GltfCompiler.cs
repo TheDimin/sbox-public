@@ -88,11 +88,16 @@ public static class GltfCompiler
 	}
 
 	/// <summary>Packages a GLB with optional safe consolidation of geometry buffers.</summary>
-	public static byte[] Compile( byte[] source, Func<string, byte[]> resolve, IReadOnlySet<string> supportedExtensions, long maxBufferBytes, bool consolidateBuffers )
+	/// <param name="orderForLodStreaming">
+	/// Lay out buffer views so the lowest MSFT_lod levels come first and the most detailed level last, after the
+	/// data every level shares. Needs <paramref name="consolidateBuffers"/> and a file whose extensions are all
+	/// known to be safe to move; otherwise the layout is unchanged.
+	/// </param>
+	public static byte[] Compile( byte[] source, Func<string, byte[]> resolve, IReadOnlySet<string> supportedExtensions, long maxBufferBytes, bool consolidateBuffers, bool orderForLodStreaming = false )
 	{
 		try
 		{
-			return CompilePackage( source, resolve, supportedExtensions, maxBufferBytes, consolidateBuffers, out _ );
+			return CompilePackage( source, resolve, supportedExtensions, maxBufferBytes, consolidateBuffers, out _, orderForLodStreaming );
 		}
 		catch ( Exception e ) when ( e is JsonException or InvalidOperationException or ArgumentException or OverflowException )
 		{
@@ -100,7 +105,7 @@ public static class GltfCompiler
 		}
 	}
 
-	private static byte[] CompilePackage( byte[] source, Func<string, byte[]> resolve, IReadOnlySet<string> supportedExtensions, long maxBufferBytes, bool consolidateBuffers, out long packagingCharge )
+	private static byte[] CompilePackage( byte[] source, Func<string, byte[]> resolve, IReadOnlySet<string> supportedExtensions, long maxBufferBytes, bool consolidateBuffers, out long packagingCharge, bool orderForLodStreaming = false )
 	{
 		packagingCharge = 0;
 		if ( maxBufferBytes < 0 ) throw new GltfException( "Buffer packaging budget cannot be negative." );
@@ -117,7 +122,12 @@ public static class GltfCompiler
 			for ( var i = 0; i < bufferCount && merge; i++ )
 				if ( !document.CompilerBufferOrPlaceholder( i ).HasValue ) merge = false;
 			ValidateBufferViews( document );
-			packagingCharge = CheckBufferBudget( document, merge, maxBufferBytes, orphanBinary?.Length ?? -1 );
+			// Ordering by level rewrites every view offset, so it needs the same guarantees as merging, for one buffer too.
+			var streamKeys = orderForLodStreaming && consolidateBuffers && !orphanBinary.HasValue && bufferCount > 0 && CanMergeBuffers( document.Root )
+				&& Enumerable.Range( 0, bufferCount ).All( i => document.CompilerBufferOrPlaceholder( i ).HasValue )
+				? GltfStreamOrder.ViewKeys( document ) : null;
+			var relayout = streamKeys is not null && streamKeys.Any( x => x != GltfStreamOrder.Shared );
+			packagingCharge = CheckBufferBudget( document, merge || relayout, maxBufferBytes, orphanBinary?.Length ?? -1 );
 			if ( orphanBinary.HasValue )
 			{
 				// Keep the pre-existing unreferenced chunk, and embed every core
@@ -125,6 +135,7 @@ public static class GltfCompiler
 				_ = PreserveBuffers( root, document, embedFirstBufferAsUri: true );
 				return WriteGlb( JsonSerializer.SerializeToUtf8Bytes( root ), orphanBinary.Value.ToArray(), true );
 			}
+			if ( relayout ) return RelayoutByKey( root, document, streamKeys, bufferCount );
 			if ( !merge )
 			{
 				var preservedBinary = PreserveBuffers( root, document );
@@ -249,6 +260,42 @@ public static class GltfCompiler
 		return WriteGlb( JsonSerializer.SerializeToUtf8Bytes( root ), orphan?.ToArray() ?? [], orphan.HasValue );
 	}
 
+	/// <summary>Writes one buffer with the views sorted by key (stable), each aligned to four bytes.</summary>
+	private static byte[] RelayoutByKey( JsonObject root, GltfDocument document, int[] keys, int bufferCount )
+	{
+		var views = root["bufferViews"] as JsonArray ?? throw new GltfException( "'bufferViews' must be an array." );
+		var order = Enumerable.Range( 0, keys.Length ).OrderBy( i => keys[i] ).ThenBy( i => i ).ToArray();
+		var offsets = new int[keys.Length];
+		long length = 0;
+		foreach ( var i in order )
+		{
+			length = (length + 3) & ~3L;
+			var original = document.ElementAt( "bufferViews", i );
+			if ( length > Array.MaxLength ) throw new GltfException( "Ordered buffers exceed the supported length." );
+			offsets[i] = (int)length;
+			length += GltfJson.Int( original, "byteLength" );
+		}
+		if ( length > Array.MaxLength ) throw new GltfException( "Ordered buffers exceed the supported length." );
+		var binary = new byte[(int)length];
+		foreach ( var i in order )
+		{
+			var original = document.ElementAt( "bufferViews", i );
+			var buffer = GltfJson.Int( original, "buffer" );
+			var offset = GltfJson.Int( original, "byteOffset", 0 );
+			var size = GltfJson.Int( original, "byteLength" );
+			document.CompilerBuffer( buffer ).Span.Slice( offset, size ).CopyTo( binary.AsSpan( offsets[i] ) );
+			var view = views[i]!.AsObject();
+			view["buffer"] = 0;
+			if ( offsets[i] == 0 ) view.Remove( "byteOffset" ); else view["byteOffset"] = offsets[i];
+		}
+		var buffers = root["buffers"]!.AsArray();
+		var first = buffers[0]!.AsObject();
+		first.Remove( "uri" );
+		first["byteLength"] = binary.Length;
+		while ( buffers.Count > 1 ) buffers.RemoveAt( buffers.Count - 1 );
+		return WriteGlb( JsonSerializer.SerializeToUtf8Bytes( root ), binary, true );
+	}
+
 	private static bool CanMergeBuffers( JsonElement root )
 	{
 		if ( ContainsOpaqueData( root ) ) return false;
@@ -367,6 +414,19 @@ public static class GltfCompiler
 		return source.AsMemory( offset + 8, length );
 	}
 
+	// Extension payloads that hold indices of other elements, never a buffer index or a byte offset.
+	// Moving buffers cannot invalidate them, so they do not stop merging or ordering.
+	private static readonly HashSet<string> MovableExtensions = new( StringComparer.Ordinal )
+	{
+		"MSFT_lod", "KHR_materials_variants", "KHR_materials_unlit", "KHR_materials_clearcoat", "KHR_materials_anisotropy",
+		"KHR_materials_diffuse_transmission", "KHR_materials_emissive_strength", "KHR_texture_transform", "KHR_texture_basisu",
+		"EXT_texture_webp", "KHR_node_visibility", "KHR_lights_punctual", "KHR_mesh_quantization",
+		"KHR_draco_mesh_compression", "EXT_mesh_gpu_instancing"
+	};
+
+	// Keys of extras that the engine writes or reads and that carry only numbers.
+	private static readonly HashSet<string> MovableExtras = new( StringComparer.Ordinal ) { "MSFT_screencoverage" };
+
 	private static bool ContainsOpaqueData( JsonElement element )
 	{
 		if ( element.ValueKind == JsonValueKind.Array )
@@ -378,8 +438,27 @@ public static class GltfCompiler
 		{
 			foreach ( var property in element.EnumerateObject() )
 			{
-				if ( property.Name is "extensions" or "extras" ) return true;
-				if ( property.Name is "extensionsUsed" or "extensionsRequired" && property.Value.ValueKind == JsonValueKind.Array && property.Value.GetArrayLength() > 0 ) return true;
+				if ( property.Name is "extensions" )
+				{
+					// Unknown payloads may name a buffer or hold an offset; known ones cannot.
+					if ( property.Value.ValueKind != JsonValueKind.Object ) return true;
+					foreach ( var extension in property.Value.EnumerateObject() )
+						if ( !MovableExtensions.Contains( extension.Name ) ) return true;
+					continue;
+				}
+				if ( property.Name is "extras" )
+				{
+					if ( property.Value.ValueKind != JsonValueKind.Object ) return true;
+					foreach ( var extra in property.Value.EnumerateObject() )
+						if ( !MovableExtras.Contains( extra.Name ) ) return true;
+					continue;
+				}
+				if ( property.Name is "extensionsUsed" or "extensionsRequired" && property.Value.ValueKind == JsonValueKind.Array )
+				{
+					foreach ( var name in property.Value.EnumerateArray() )
+						if ( name.ValueKind != JsonValueKind.String || !MovableExtensions.Contains( name.GetString() ) ) return true;
+					continue;
+				}
 				if ( ContainsOpaqueData( property.Value ) ) return true;
 			}
 		}
