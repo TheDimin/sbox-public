@@ -11,9 +11,9 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
-RECIPES = ROOT / "Temp/gltf-validation/current/recipes.json"
+RECIPES = ROOT / "research/gltf-validation/reference-recipes.json"
 OUT = ROOT / "research/gltf-validation/reference-render-settings.json"
-SCALE = 2  # render references at twice the capture resolution
+SCALE = 1  # reference size equals capture size (1024 px longest edge)
 
 VIEWER_DEFAULTS = {
     "source": {
@@ -50,7 +50,7 @@ SBOX_ENVIRONMENT = {
     "cubeSize": 256,
     "mipCount": 7,
     "yawDegrees": 180.0,
-    "iblGain": 1.5,
+    "iblGain": 2.0,
     "tonemapping": "KhronosPbrNeutral",
     "gaps": [
         "The visible sky is the sharp cubemap; the Sample Viewer shows a blurred background.",

@@ -77,7 +77,7 @@ function entry(c){const e=fb.entries[c.id];return e&&e.captureSha256===c.capture
 function stale(c){const e=fb.entries[c.id];return e&&e.captureSha256!==c.captureSha?e:null}
 function dot(c){if(c.load!=="passed"||c.render!=="passed")return"bad";const e=entry(c);if(!e)return"";return e.verdict==="approved"?"ok":e.verdict==="rejected"?"bad":"warn"}
 function filtered(){const q=$("#q").value.toLowerCase(),f=$("#f").value;return cases.filter(c=>{if(q&&!c.id.toLowerCase().includes(q))return false;const e=entry(c),ok=c.load==="passed"&&c.render==="passed";
- return f==="all"||(f==="todo"&&ok&&!e)||(f==="failed"&&!ok)||(f==="rendered"&&ok)||(f==="rejected"&&e&&e.verdict!=="approved")||(f==="approved"&&e&&e.verdict==="approved")})}
+ return f==="all"||(f==="todo"&&ok&&c.capture&&!e)||(f==="failed"&&!ok)||(f==="rendered"&&ok)||(f==="rejected"&&e&&e.verdict!=="approved")||(f==="approved"&&e&&e.verdict==="approved")})}
 function renderList(){const l=filtered();
  const ok=cases.filter(c=>c.load==="passed"&&c.render==="passed"),rv=ok.filter(entry),ap=rv.filter(c=>entry(c).verdict==="approved");
  $("#stats").textContent=`${l.length} shown · ${ok.length}/${cases.length} rendered · ${rv.length} reviewed · ${ap.length} approved`;

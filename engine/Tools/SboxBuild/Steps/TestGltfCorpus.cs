@@ -144,9 +144,14 @@ internal sealed class TestGltfCorpus
 				AllRequiredDataReadersPass = prefix is null && pass && inventoryErrors == 0,
 				BasisuTranscode = "per-case bounded RGBA8 decode only; extension conformance and rendering not proven",
 				CompiledStageMeaning = "managed-container-roundtrip-from-packaged-artifact-and-core-image-sidecars",
-				IndependentCompiledValidation = "not-tested", PackagedDependencies = "core-image-sidecars-only; extension-specific-dependencies-not-audited",
-				ImageDecoding = "KTX2 Basis RGBA8 only; other image decoding not tested", NumericReferenceParity = "not-tested", RenderParity = "not-tested",
-				GpuLayoutOptimization = "not-tested", Performance = "not-tested", FullGoalPass = false,
+				IndependentCompiledValidation = "not-tested",
+				PackagedDependencies = "core-image-sidecars-only; extension-specific-dependencies-not-audited",
+				ImageDecoding = "KTX2 Basis RGBA8 only; other image decoding not tested",
+				NumericReferenceParity = "not-tested",
+				RenderParity = "not-tested",
+				GpuLayoutOptimization = "not-tested",
+				Performance = "not-tested",
+				FullGoalPass = false,
 				ReaderCapabilities = ReaderCapabilities.Order( StringComparer.Ordinal ),
 				Cases = results
 			}, JsonOptions ) );

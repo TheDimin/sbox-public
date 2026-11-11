@@ -121,8 +121,13 @@ internal sealed class BuildManagedStage
 				var final = Directory.EnumerateFiles( output ).Order( StringComparer.Ordinal ).ToDictionary( Path.GetFileName, Hash, StringComparer.Ordinal );
 				File.WriteAllText( Path.Combine( stage, "manifest.json" ), JsonSerializer.Serialize( new
 				{
-					passed = error is null && results.Count == selected.Length, error, selected, projects = results,
-					baseline_seed_sha256 = baseline, selected_project_inputs_sha256 = inputs, final_output_sha256 = final,
+					passed = error is null && results.Count == selected.Length,
+					error,
+					selected,
+					projects = results,
+					baseline_seed_sha256 = baseline,
+					selected_project_inputs_sha256 = inputs,
+					final_output_sha256 = final,
 					caveats = "Only selected project outputs were built; baseline files were copied from the existing deployment. Shared obj and CodeGen intermediates may be updated. No restore, deployment, editor restart or runtime validation was performed."
 				}, JsonOptions ) );
 			}

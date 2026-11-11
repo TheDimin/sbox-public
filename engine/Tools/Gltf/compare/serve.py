@@ -18,6 +18,7 @@ ASSETS = ROOT / "Temp/gltf-validation/current/assets"
 FEEDBACK = ROOT / "research/gltf-validation/review-feedback.json"
 RENDERED = ROOT / "Temp/gltf-reference/rendered"
 LEGACY = ROOT / "research/gltf-validation/user-feedback.json"
+REVIEW_SET = ROOT / "research/gltf-validation/review-set.json"  # optional: {"models": [...]} limits the site to those models
 LOCK = threading.Lock()
 
 
@@ -36,13 +37,24 @@ def first_line(text):
     return (text or "").strip().splitlines()[0][:300] if text else None
 
 
+def cap_rel(cap_path):
+    """Path of a capture below the assets folder, whatever folder the run wrote to; None when the file is absent."""
+    if not cap_path or "/assets/" not in cap_path:
+        return None
+    rel = cap_path.rsplit("/assets/", 1)[1]
+    return rel if (ASSETS / rel).is_file() else None
+
+
 def cases():
     run = load_json(RUN, {"cases": []})
     legacy = {}
     for d in load_json(LEGACY, {}).get("decisions", []):
         legacy[d["caseId"]] = {"status": d.get("status"), "notes": d.get("notes", ""), "at": d.get("reviewedAt")}
     out = []
+    only = set(load_json(REVIEW_SET, {}).get("models", []))
     for c in run["cases"]:
+        if only and (c["id"].split("/")[0] not in only or not (c.get("capture") or {}).get("path")):
+            continue
         ref = c.get("recipeSnapshot", {}).get("reference", {})
         cap = c.get("capture") or {}
         cap_path = cap.get("path")
@@ -58,7 +70,7 @@ def cases():
             "renderError": first_line(c.get("render", {}).get("error")),
             "reference": ref.get("path") if ref.get("animated") else large_reference(ref.get("path")),
             "referenceAnimated": bool(ref.get("animated")),
-            "capture": os.path.relpath(cap_path, ASSETS) if cap_path and Path(cap_path).exists() else None,
+            "capture": cap_rel(cap_path),
             "captureSha": cap.get("sha256"),
             "matchStatus": c.get("recipeSnapshot", {}).get("matchStatus"),
             "legacy": legacy.get(c["id"]),
