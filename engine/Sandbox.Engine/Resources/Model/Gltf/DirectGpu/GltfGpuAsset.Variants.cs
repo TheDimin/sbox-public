@@ -87,7 +87,7 @@ internal sealed partial class GltfGpuAsset
 	internal void ConfigureStockProjectedVariants( Material template, long encodedImageBudget )
 	{
 		ArgumentNullException.ThrowIfNull( template );
-		ConfigureProjectedVariants( encodedImageBudget, (index, plan, images) =>
+		ConfigureProjectedVariants( encodedImageBudget, ( index, plan, images ) =>
 		{
 			var material = index is int source ? Document.ReadMaterial( source ) : null;
 			var prepared = GltfStockMaterialAdapter.PrepareSource( Document, material, images.ReadImage );
@@ -105,7 +105,7 @@ internal sealed partial class GltfGpuAsset
 	{
 		ArgumentNullException.ThrowIfNull( selectTemplate );
 		var batchMaterials = new Dictionary<int, GltfStockMaterialAdapter.SourcePrepared>();
-		ConfigureProjectedVariants( encodedImageBudget, (index, plan, images) =>
+		ConfigureProjectedVariants( encodedImageBudget, ( index, plan, images ) =>
 		{
 			var material = index is int source ? Document.ReadMaterial( source ) : null;
 			if ( legacyLit && material?.Unlit != true && !GltfPublicMaterialRoute.NeedsSourceLit( material ) )
@@ -125,7 +125,7 @@ internal sealed partial class GltfGpuAsset
 			var lit = batchMaterials.TryGetValue( index ?? -1, out var cached ) ? cached : GltfStockMaterialAdapter.PrepareSource( Document, material, images.ReadImage );
 			return GltfStockMaterialAdapter.AcquireSource( lit, template, plan.MaterialUv, plan.UvProjection, sourceLitFeatureSidedness );
 		}, legacyLit ? index => index is not int source || (Document.ReadMaterial( source ) is var selected && !selected.Unlit && !GltfPublicMaterialRoute.NeedsSourceLit( selected )) : null,
-		(pending, images) =>
+		( pending, images ) =>
 		{
 			if ( batchMaterials.Count != 0 ) throw new InvalidOperationException( "A material preparation batch is already active." );
 			try
@@ -136,6 +136,8 @@ internal sealed partial class GltfGpuAsset
 					if ( batchMaterials.ContainsKey( key ) ) continue;
 					var material = index is int source ? Document.ReadMaterial( source ) : null;
 					if ( material?.Unlit == true || legacyLit && !GltfPublicMaterialRoute.NeedsSourceLit( material ) ) continue;
+					// Cheap capability check first: decoding images and generating tangents takes seconds.
+					GltfStockMaterialAdapter.RequireTemplateContract( selectTemplate( material, null ), material );
 					batchMaterials.Add( key, GltfStockMaterialAdapter.PrepareSource( Document, material, images.ReadImage ) );
 				}
 				var leases = GltfNativeTextureCache.AcquireBatch( batchMaterials.Values.SelectMany( x => x.Resources.Values ).Select( x => x.Resource ).ToArray() );
@@ -197,7 +199,7 @@ internal sealed partial class GltfGpuAsset
 		var projections = Primitives.ToDictionary( x => x, x => rawPlans[x].ProjectMaterial( rawPlans[x].Material, uvCount, Roles( rawPlans[x].Material ), uvSemantics ) );
 		var slots = Nodes.Select( x => new GltfMaterialVariantSlot( x.Index, x.Primitive.Mesh, x.Primitive.Index ) ).ToArray();
 		var byPrimitive = Primitives.ToDictionary( x => (x.Mesh, x.Index) );
-		var packets = new GltfVariantDrawAsset<GltfProjectedMaterialPacket>( Document, slots, (slot, materialIndex) =>
+		var packets = new GltfVariantDrawAsset<GltfProjectedMaterialPacket>( Document, slots, ( slot, materialIndex ) =>
 		{
 			var primitive = byPrimitive[(slot.Mesh, slot.Primitive)];
 			var projected = rawPlans[primitive].ProjectMaterial( materialIndex, uvCount, Roles( materialIndex ), uvSemantics );

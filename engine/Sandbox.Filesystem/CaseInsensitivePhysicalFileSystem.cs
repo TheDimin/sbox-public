@@ -30,8 +30,28 @@ internal sealed class CaseInsensitivePhysicalFileSystem : PhysicalFileSystem
 	// Retain the subscription so the shared backend can retry without recreating callers.
 	protected override bool CanWatchImpl( UPath path ) => !File.Exists( ConvertPathToInternal( path ) );
 
-	protected override IFileSystemWatcher WatchImpl( UPath path ) =>
-		new SharedPhysicalFileWatcher( this, path, WatchExclusions, WatchOwner );
+	protected override IFileSystemWatcher WatchImpl( UPath path )
+	{
+		var watcher = new SharedPhysicalFileWatcher( this, path, WatchExclusions, WatchOwner );
+		lock ( watchers ) watchers.Add( watcher );
+		return watcher;
+	}
+
+	// Watchers this filesystem made. A watcher that an aggregate made for this filesystem stays in the
+	// aggregate after an unmount (Zio does not match the wrapped watcher), and keeps retrying a folder
+	// that may be deleted. Disposing the filesystem releases them, so the shared backend lets go too.
+	private readonly List<SharedPhysicalFileWatcher> watchers = new();
+
+	protected override void Dispose( bool disposing )
+	{
+		if ( disposing )
+		{
+			SharedPhysicalFileWatcher[] owned;
+			lock ( watchers ) { owned = watchers.ToArray(); watchers.Clear(); }
+			foreach ( var watcher in owned ) watcher.Dispose();
+		}
+		base.Dispose( disposing );
+	}
 
 	protected override string ConvertPathToInternalImpl( UPath path )
 	{

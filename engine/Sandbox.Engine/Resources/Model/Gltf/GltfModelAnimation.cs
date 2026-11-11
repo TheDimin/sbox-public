@@ -23,6 +23,15 @@ internal sealed class GltfModelAnimation : IDisposable
 		ArgumentNullException.ThrowIfNull( document );
 		Document = document;
 		Rig = rig;
+		var clips = ReadClips( document );
+		Clips = clips;
+		SequenceNames = Array.AsReadOnly( clips.Select( clip => clip.Name ).ToArray() );
+	}
+
+	/// <summary>The validated clips of a document, with unique names. Borrows the document; takes no ownership.</summary>
+	internal static IReadOnlyList<Clip> ReadClips( GltfDocument document )
+	{
+		ArgumentNullException.ThrowIfNull( document );
 		var clips = new List<Clip>();
 		var names = new HashSet<string>( StringComparer.Ordinal );
 		if ( document.Root.TryGetProperty( "animations", out var animations ) )
@@ -46,8 +55,7 @@ internal sealed class GltfModelAnimation : IDisposable
 				clips.Add( new Clip( index, name, timing.Start, timing.Duration ) );
 			}
 		}
-		Clips = Array.AsReadOnly( clips.ToArray() );
-		SequenceNames = Array.AsReadOnly( clips.Select( clip => clip.Name ).ToArray() );
+		return Array.AsReadOnly( clips.ToArray() );
 	}
 
 	private static (float Start, float Duration) ReadTiming( GltfDocument document, JsonElement animation )
@@ -85,6 +93,12 @@ internal sealed class GltfModelAnimation : IDisposable
 	{
 		ObjectDisposedException.ThrowIf( disposed, this );
 		return Document.EvaluatePose( animation, time );
+	}
+
+	internal GltfPose CreatePose( Func<int, System.Numerics.Matrix4x4?> localTransform )
+	{
+		ObjectDisposedException.ThrowIf( disposed, this );
+		return Document.CreatePose( localTransform );
 	}
 
 	internal GltfPose EvaluatePoses( IReadOnlyList<int> animations, float time )

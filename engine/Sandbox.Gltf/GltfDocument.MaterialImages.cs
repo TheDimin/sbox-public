@@ -57,6 +57,11 @@ public sealed partial class GltfDocument
 				MaterialRequireObject( unlit, "KHR_materials_unlit" );
 				continue; // Those roles are fallback-only and are not consumed by supported unlit.
 			}
+			if ( SupportsExtension( "KHR_materials_pbrSpecularGlossiness" ) )
+			{
+				var gloss = MaterialExtension( material, "KHR_materials_pbrSpecularGlossiness" );
+				Add( gloss, "diffuseTexture" ); Add( gloss, "specularGlossinessTexture" );
+			}
 			Add( pbr, "metallicRoughnessTexture" ); Add( material, "normalTexture" );
 			Add( material, "occlusionTexture" ); Add( material, "emissiveTexture" );
 			if ( SupportsExtension( "KHR_materials_diffuse_transmission" ) )
@@ -70,6 +75,25 @@ public sealed partial class GltfDocument
 				var coat = MaterialExtension( material, "KHR_materials_clearcoat" );
 				Add( coat, "clearcoatTexture" ); Add( coat, "clearcoatRoughnessTexture" ); Add( coat, "clearcoatNormalTexture" );
 			}
+			if ( SupportsExtension( "KHR_materials_specular" ) )
+			{
+				var specular = MaterialExtension( material, "KHR_materials_specular" );
+				Add( specular, "specularTexture" ); Add( specular, "specularColorTexture" );
+			}
+			if ( SupportsExtension( "KHR_materials_sheen" ) )
+			{
+				var sheen = MaterialExtension( material, "KHR_materials_sheen" );
+				Add( sheen, "sheenColorTexture" ); Add( sheen, "sheenRoughnessTexture" );
+			}
+			if ( SupportsExtension( "KHR_materials_iridescence" ) )
+			{
+				var iridescence = MaterialExtension( material, "KHR_materials_iridescence" );
+				Add( iridescence, "iridescenceTexture" ); Add( iridescence, "iridescenceThicknessTexture" );
+			}
+			if ( SupportsExtension( "KHR_materials_transmission" ) )
+				Add( MaterialExtension( material, "KHR_materials_transmission" ), "transmissionTexture" );
+			if ( SupportsExtension( "KHR_materials_volume" ) )
+				Add( MaterialExtension( material, "KHR_materials_volume" ), "thicknessTexture" );
 			if ( SupportsExtension( "KHR_materials_anisotropy" ) )
 				Add( MaterialExtension( material, "KHR_materials_anisotropy" ), "anisotropyTexture" );
 		}

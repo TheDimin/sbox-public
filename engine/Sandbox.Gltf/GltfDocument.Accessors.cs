@@ -40,8 +40,13 @@ public sealed partial class GltfDocument
 		};
 		var (rows, columns) = GltfJson.String( value, "type" ) switch
 		{
-			"SCALAR" => (1, 1), "VEC2" => (2, 1), "VEC3" => (3, 1), "VEC4" => (4, 1),
-			"MAT2" => (2, 2), "MAT3" => (3, 3), "MAT4" => (4, 4),
+			"SCALAR" => (1, 1),
+			"VEC2" => (2, 1),
+			"VEC3" => (3, 1),
+			"VEC4" => (4, 1),
+			"MAT2" => (2, 2),
+			"MAT3" => (3, 3),
+			"MAT4" => (4, 4),
 			_ => throw new GltfException( $"Accessor {index} has invalid type." )
 		};
 		var normalized = GltfJson.Bool( value, "normalized" );

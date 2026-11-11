@@ -109,8 +109,12 @@ public sealed partial class GltfDocument
 		var decodedMode = dracoTopology ? 4 : mode;
 		return new GltfPrimitiveUploadLayout
 		{
-			Attributes = new ReadOnlyDictionary<string, GltfUploadBinding>( result ), Indices = indices,
-			VertexCount = count.Value, SourceMode = mode, DecodedMode = decodedMode, RequiresGeneratedIndices = indices is null && !dracoTopology,
+			Attributes = new ReadOnlyDictionary<string, GltfUploadBinding>( result ),
+			Indices = indices,
+			VertexCount = count.Value,
+			SourceMode = mode,
+			DecodedMode = decodedMode,
+			RequiresGeneratedIndices = indices is null && !dracoTopology,
 			RequiresDracoIndices = dracoTopology,
 			RequiresTopologyExpansion = decodedMode is 2 or 3 or 5 or 6
 		};
@@ -124,9 +128,18 @@ public sealed partial class GltfDocument
 		{
 			// Both fallback location fields are ignored by selected Draco; they may
 			// not describe any source storage used by this primitive.
-			return new GltfUploadBinding { AccessorIndex = index, ComponentType = layout.ComponentType,
-				Components = layout.Components, Rows = layout.Rows, Columns = layout.Columns, Count = layout.Count,
-				Normalized = layout.Normalized, ColumnStride = layout.ColumnStride, Materialization = materialization };
+			return new GltfUploadBinding
+			{
+				AccessorIndex = index,
+				ComponentType = layout.ComponentType,
+				Components = layout.Components,
+				Rows = layout.Rows,
+				Columns = layout.Columns,
+				Count = layout.Count,
+				Normalized = layout.Normalized,
+				ColumnStride = layout.ColumnStride,
+				Materialization = materialization
+			};
 		}
 		int? viewIndex = null, buffer = null, viewOffset = null, viewLength = null;
 		var accessorOffset = GltfJson.Int( layout.Json, "byteOffset", 0 );
@@ -164,10 +177,20 @@ public sealed partial class GltfDocument
 		}
 		return new GltfUploadBinding
 		{
-			AccessorIndex = index, SourceBufferView = viewIndex, SourceBuffer = buffer,
-			ViewByteOffset = viewOffset, ViewByteLength = viewLength, AccessorByteOffset = accessorOffset,
-			ByteStride = stride, ComponentType = layout.ComponentType, Components = layout.Components, Rows = layout.Rows, Columns = layout.Columns,
-			Count = layout.Count, Normalized = layout.Normalized, ColumnStride = layout.ColumnStride,
+			AccessorIndex = index,
+			SourceBufferView = viewIndex,
+			SourceBuffer = buffer,
+			ViewByteOffset = viewOffset,
+			ViewByteLength = viewLength,
+			AccessorByteOffset = accessorOffset,
+			ByteStride = stride,
+			ComponentType = layout.ComponentType,
+			Components = layout.Components,
+			Rows = layout.Rows,
+			Columns = layout.Columns,
+			Count = layout.Count,
+			Normalized = layout.Normalized,
+			ColumnStride = layout.ColumnStride,
 			Materialization = materialization
 		};
 	}

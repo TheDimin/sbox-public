@@ -19,7 +19,8 @@ internal static class GltfModelLoader
 		"KHR_mesh_quantization", "KHR_texture_transform", "KHR_draco_mesh_compression", "KHR_texture_basisu",
 		"KHR_meshopt_compression", "EXT_meshopt_compression", "EXT_mesh_gpu_instancing", "KHR_materials_unlit", "KHR_materials_variants", "KHR_materials_diffuse_transmission",
 		"KHR_materials_emissive_strength", "KHR_node_visibility", "EXT_texture_webp",
-		"KHR_materials_clearcoat", "KHR_materials_anisotropy", "MSFT_lod",
+		"KHR_materials_clearcoat", "KHR_materials_anisotropy", "MSFT_lod", "KHR_materials_ior", "KHR_materials_specular", "KHR_materials_sheen", "KHR_materials_iridescence", "KHR_materials_transmission", "KHR_materials_volume", "KHR_materials_dispersion",
+		"KHR_materials_pbrSpecularGlossiness",
 		// Lights are scene data, not model data: the model loads and the lights are not instanced.
 		"KHR_lights_punctual"
 	};
@@ -49,8 +50,103 @@ internal static class GltfModelLoader
 		var canonical = SceneResourcePath( mountedPath, selection.Scene );
 		if ( Game.Resources.TryGet<Model>( canonical, out var cached ) && cached.IsValid && !cached.IsError )
 			return cached;
+		if ( selection.Scene is null && TryLoadNative( mountedPath, canonical ) is { } native ) return native;
 		var resource = Prepare( mountedPath, sceneIndex: selection.Scene );
 		try { return Model.FromGltfResource( resource, canonical ); }
+		catch { resource.ReleaseOwner(); throw; }
+	}
+
+	/// <summary>
+	/// Build the native model stored in the compiled file, or null when it has no native data. The native data covers
+	/// the default scene. A file it cannot build falls back to the source path with a warning.
+	/// </summary>
+	internal static Model TryLoadNative( string mountedPath, string name )
+	{
+		var fs = EngineFileSystem.Mounted;
+		var compiledPath = CompiledPath( mountedPath );
+		if ( fs is null || !fs.FileExists( compiledPath ) ) return null;
+		return TryBuildNative( fs.ReadAllBytes( compiledPath ).ToArray(), name, mountedPath );
+	}
+
+	/// <summary>Read glTF bytes that are not on disk, resolving relative URIs against the asset path. Safe off the main thread.</summary>
+	internal static GltfDocument ReadPreviewDocument( string sourcePath, byte[] source )
+	{
+		var mountedPath = NormalizeMountedPath( ParseScenePath( sourcePath ).Path );
+		var fs = EngineFileSystem.Mounted;
+		byte[] Resolve( string uri )
+		{
+			var dependency = ResolveMountedUri( mountedPath, uri );
+			if ( fs is null || !fs.FileExists( dependency ) ) throw new GltfException( $"glTF dependency '{uri}' was not found at '{dependency}'." );
+			return fs.ReadAllBytes( dependency ).ToArray();
+		}
+		return ReadDocument( source, Resolve );
+	}
+
+	private static Model TryBuildNativePreview( string mountedPath, byte[] source, GltfNativeCompileCache cache )
+	{
+		try
+		{
+			using var document = ReadPreviewDocument( mountedPath, source );
+			var (header, blobs) = GltfNativeCompiler.Compile( document, cache: cache, compress: false, scene: false );
+			var name = $"gltf-preview/{Guid.NewGuid():N}/{System.IO.Path.GetFileName( mountedPath )}";
+			return GltfNativeModelBuilder.Build( GltfNativePack.InMemory( header, blobs ), name );
+		}
+		catch ( GltfNativeUnsupportedException ) { return null; }
+	}
+
+	internal static Model TryBuildNative( byte[] compiled, string name, string source )
+	{
+		try
+		{
+			var pack = GltfNativePack.TryRead( compiled );
+			if ( pack is null ) return null;
+			foreach ( var warning in pack.Header.Warnings ) Log.Warning( $"glTF '{source}': {warning}" );
+			return pack.Header.Nodes.Length != 0 ? GltfNativeModelBuilder.BuildScene( pack, name ) : GltfNativeModelBuilder.Build( pack, name );
+		}
+		catch ( Exception e ) when ( e is GltfException or System.Text.Json.JsonException or InvalidOperationException or ArgumentException )
+		{
+			Log.Warning( e, $"glTF '{source}': its compiled native model could not be built, so the source path loads it. {e.Message}" );
+			return null;
+		}
+	}
+
+	/// <summary>
+	/// After an import: give every live native model of this source the newly compiled data. Each component that
+	/// shows the old model gets the new one, then the old model is released.
+	/// </summary>
+	internal static void ReloadNative( string path, byte[] compiled )
+	{
+		ThreadSafe.AssertIsMainThread();
+		var canonical = SceneResourcePath( NormalizeMountedPath( ParseScenePath( path ).Path ), null );
+		if ( !Game.Resources.TryGet<Model>( canonical, out var previous ) || previous is null || !previous.IsGltfNative ) return;
+		var replacement = TryBuildNative( compiled, canonical, path );
+		if ( replacement is null ) return;
+		foreach ( var scene in Scene.AllActiveIncludingEditor )
+		{
+			using var scope = scene.Push();
+			foreach ( var renderer in scene.GetAllComponents<ModelRenderer>() )
+				if ( ReferenceEquals( renderer.Model, previous ) ) renderer.Model = replacement;
+		}
+		IToolsDll.Current?.RunEvent( "model.reload", replacement );
+	}
+
+	/// <summary>
+	/// Build a model from glTF bytes that are not on disk, such as an edited copy for the editor preview.
+	/// Relative URIs resolve against <paramref name="sourcePath"/>. The model is not cached and is
+	/// not affected by reloads of the source file.
+	/// With a native cache, the bytes compile to native model data and build a native model, as a compiled file loads.
+	/// A cache kept per edited asset recompiles only what an edit changed. Content the native compiler does not cover
+	/// yet uses the source path.
+	/// </summary>
+	internal static Model LoadPreview( string sourcePath, byte[] source, GltfNativeCompileCache nativeCache = null )
+	{
+		ThreadSafe.AssertIsMainThread();
+		ArgumentNullException.ThrowIfNull( source );
+		var mountedPath = NormalizeMountedPath( ParseScenePath( sourcePath ).Path );
+		if ( nativeCache is not null && TryBuildNativePreview( mountedPath, source, nativeCache ) is { } native ) return native;
+		var resource = Prepare( mountedPath, source );
+		var name = $"gltf-preview/{Guid.NewGuid():N}/{System.IO.Path.GetFileName( mountedPath )}";
+		try { return Model.FromGltfResource( resource, name ); }
 		catch { resource.ReleaseOwner(); throw; }
 	}
 
@@ -121,8 +217,8 @@ internal static class GltfModelLoader
 			Log.Warning( $"glTF '{mountedPath}' node {lod.Node} MSFT_lod: {lod.Warning}" );
 		var resource = new GltfManagedModelResource( document, sceneIndex );
 		sourceOwner.Release(); // Successful preparation now owns this document generation.
-		// A selected scene may legally contain no drawable primitives. Preserve it
-		// as an empty model; HasRenderMeshes reports whether anything can render.
+							   // A selected scene may legally contain no drawable primitives. Preserve it
+							   // as an empty model; HasRenderMeshes reports whether anything can render.
 		return resource;
 	}
 

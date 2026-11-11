@@ -141,6 +141,33 @@ public sealed partial class GltfDocument
 		return new GltfPose( this, worlds, weights );
 	}
 
+	/// <summary>
+	/// The rest pose with the local transforms of some nodes replaced, in glTF world coordinates. An editor
+	/// uses this to show a pose that it drives itself, such as node transforms on a timeline.
+	/// </summary>
+	public GltfPose CreatePose( Func<int, Matrix4x4?> localTransform )
+	{
+		ArgumentNullException.ThrowIfNull( localTransform );
+		var nodeArray = RootArray( "nodes" );
+		var count = nodeArray.Length;
+		var locals = new Matrix4x4[count];
+		var weights = new float[count][];
+		var parents = NodeParents();
+		for ( var i = 0; i < count; i++ )
+		{
+			locals[i] = localTransform( i ) ?? SceneLocalTransform( SceneObject( nodeArray[i], "node" ) );
+			weights[i] = GetMorphWeights( i );
+		}
+		var worlds = new Matrix4x4[count];
+		for ( var i = 0; i < count; i++ )
+		{
+			var world = Matrix4x4.Identity;
+			for ( var current = i; current >= 0; current = parents[current] ) world *= locals[current];
+			worlds[i] = world;
+		}
+		return new GltfPose( this, worlds, weights );
+	}
+
 	private static float[] PoseTrs( Dictionary<(int Node, string Path), float[]> updates, int index, string name, JsonElement node, float[] defaults )
 	{
 		if ( updates.TryGetValue( (index, name), out var value ) ) return value;

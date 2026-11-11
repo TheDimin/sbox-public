@@ -298,6 +298,7 @@ public partial class ModelRenderer : Renderer, ExecuteInEditor, ITintable, IMate
 			_sceneObject.SetMaterialOverride( MaterialOverride );
 		}
 
+		UpdateGltfScene();
 	}
 
 	protected override void OnEnabled()
@@ -352,6 +353,7 @@ public partial class ModelRenderer : Renderer, ExecuteInEditor, ITintable, IMate
 			Transform.OnTransformChanged -= OnTransformChanged;
 
 			BackupRenderAttributes( _sceneObject?.Attributes );
+			ClearGltfScene();
 			try { DisposeGltfInstance(); }
 			finally
 			{
@@ -371,6 +373,7 @@ public partial class ModelRenderer : Renderer, ExecuteInEditor, ITintable, IMate
 		{
 			_sceneObject.Transform = Transform.InterpolatedWorld;
 		}
+		UpdateGltfSceneTransforms();
 	}
 
 	/// <summary>
@@ -383,6 +386,7 @@ public partial class ModelRenderer : Renderer, ExecuteInEditor, ITintable, IMate
 		if ( !_sceneObject.IsValid() ) return;
 
 		_sceneObject.Tags.SetFrom( GameObject.Tags );
+		foreach ( var target in gltfSceneObjects ) if ( target.IsValid() ) target.Tags.SetFrom( GameObject.Tags );
 	}
 
 	public enum ShadowRenderType
@@ -411,6 +415,7 @@ public partial class ModelRenderer : Renderer, ExecuteInEditor, ITintable, IMate
 		{
 			RenderOptions.Apply( _sceneObject );
 		}
+		foreach ( var target in gltfSceneObjects ) if ( target.IsValid() ) RenderOptions.Apply( target );
 	}
 
 	public void SetMaterial( Material material, int triangle = -1 )

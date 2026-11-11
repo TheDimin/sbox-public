@@ -44,10 +44,27 @@ public sealed class GltfMaterial
 	public float AlphaCutoff { get; init; }
 	public bool DoubleSided { get; init; }
 	public bool Unlit { get; init; }
+	/// <summary>Material extensions this reader does not implement. A renderer must show an error material, not a guess.</summary>
+	public IReadOnlyList<string> UnsupportedExtensions { get; init; } = [];
 	/// <summary>Supported thin-surface diffuse transmission; null for absent or unsupported extension.</summary>
 	public GltfDiffuseTransmission DiffuseTransmission { get; init; }
 	/// <summary>KHR_materials_clearcoat; null for absent or unsupported extension.</summary>
 	public GltfClearcoat Clearcoat { get; init; }
+	/// <summary>KHR_materials_ior; null when absent. 1.5 is the glTF default.</summary>
+	public float? Ior { get; init; }
+	public GltfSpecular Specular { get; init; }
+	/// <summary>
+	/// Glossiness factor of KHR_materials_pbrSpecularGlossiness; null for a metal/rough material. When set, the
+	/// base colour fields hold the diffuse colour, and <see cref="Specular"/> holds the specular colour factor and
+	/// the specular-glossiness texture (sRGB specular in RGB, linear glossiness in A) as its colour texture.
+	/// </summary>
+	public float? Glossiness { get; init; }
+	public GltfSheen Sheen { get; init; }
+	public GltfIridescence Iridescence { get; init; }
+	public GltfTransmission Transmission { get; init; }
+	public GltfVolume Volume { get; init; }
+	/// <summary>KHR_materials_dispersion; 0 when absent.</summary>
+	public float Dispersion { get; init; }
 	/// <summary>KHR_materials_anisotropy; null for absent or unsupported extension.</summary>
 	public GltfAnisotropy Anisotropy { get; init; }
 	public GltfTextureInfo BaseColorTexture { get; init; }
@@ -138,4 +155,49 @@ public sealed class GltfLight
 	public float? Range { get; init; }
 	public float InnerConeAngle { get; init; }
 	public float OuterConeAngle { get; init; }
+}
+
+/// <summary>KHR_materials_specular. Factor is texture A; colour is texture RGB (sRGB).</summary>
+public sealed class GltfSpecular
+{
+	public float Factor { get; init; } = 1;
+	public GltfTextureInfo Texture { get; init; }
+	public Vector3 ColorFactor { get; init; } = Vector3.One;
+	public GltfTextureInfo ColorTexture { get; init; }
+}
+
+/// <summary>KHR_materials_sheen. Colour is texture RGB (sRGB); roughness is texture A.</summary>
+public sealed class GltfSheen
+{
+	public Vector3 ColorFactor { get; init; }
+	public GltfTextureInfo ColorTexture { get; init; }
+	public float RoughnessFactor { get; init; }
+	public GltfTextureInfo RoughnessTexture { get; init; }
+}
+
+/// <summary>KHR_materials_iridescence. Factor is texture R; thickness is texture G mixed between min and max (nm).</summary>
+public sealed class GltfIridescence
+{
+	public float Factor { get; init; }
+	public GltfTextureInfo Texture { get; init; }
+	public float Ior { get; init; } = 1.3f;
+	public float ThicknessMinimum { get; init; } = 100;
+	public float ThicknessMaximum { get; init; } = 400;
+	public GltfTextureInfo ThicknessTexture { get; init; }
+}
+
+/// <summary>KHR_materials_transmission. Factor is texture R.</summary>
+public sealed class GltfTransmission
+{
+	public float Factor { get; init; }
+	public GltfTextureInfo Texture { get; init; }
+}
+
+/// <summary>KHR_materials_volume. Thickness is texture G in model units. Distance +infinity means no absorption.</summary>
+public sealed class GltfVolume
+{
+	public float ThicknessFactor { get; init; }
+	public GltfTextureInfo ThicknessTexture { get; init; }
+	public float AttenuationDistance { get; init; } = float.PositiveInfinity;
+	public Vector3 AttenuationColor { get; init; } = Vector3.One;
 }

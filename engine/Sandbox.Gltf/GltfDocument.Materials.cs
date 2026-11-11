@@ -141,6 +141,37 @@ public sealed partial class GltfDocument
 				unlit = true;
 			}
 		}
+		// KHR_materials_pbrSpecularGlossiness replaces pbrMetallicRoughness. It reads into the same fields: diffuse is
+		// the base colour of a non-metal, and specular colour with glossiness is a specular layer.
+		var gloss = !unlit && SupportsExtension( "KHR_materials_pbrSpecularGlossiness" ) ? MaterialExtension( value, "KHR_materials_pbrSpecularGlossiness" ) : default;
+		if ( gloss.ValueKind != JsonValueKind.Undefined )
+		{
+			MaterialRequireObject( gloss, "KHR_materials_pbrSpecularGlossiness" );
+			var diffuse = MaterialVector( gloss, "diffuseFactor", [1, 1, 1, 1], 0, 1 );
+			var specularColor = MaterialVector( gloss, "specularFactor", [1, 1, 1], 0, 1 );
+			var glossiness = MaterialOptionalNumber( gloss, "glossinessFactor", 1, 0, 1 );
+			return new GltfMaterial
+			{
+				BaseColorFactor = new Vector4( diffuse[0], diffuse[1], diffuse[2], diffuse[3] ),
+				MetallicFactor = 0,
+				RoughnessFactor = 1 - glossiness,
+				EmissiveFactor = new Vector3( emissive[0], emissive[1], emissive[2] ) * ReadMaterialEmissiveStrength( index ),
+				AlphaMode = alpha,
+				AlphaCutoff = MaterialOptionalNumber( value, "alphaCutoff", 0.5f, 0 ),
+				DoubleSided = sidedElement.ValueKind == JsonValueKind.True,
+				UnsupportedExtensions = UnsupportedMaterialExtensions( value ),
+				Specular = new GltfSpecular
+				{
+					ColorFactor = new Vector3( specularColor[0], specularColor[1], specularColor[2] ),
+					ColorTexture = MaterialTexture( gloss, "specularGlossinessTexture", true )
+				},
+				Glossiness = glossiness,
+				BaseColorTexture = MaterialTexture( gloss, "diffuseTexture", true ),
+				NormalTexture = MaterialTexture( value, "normalTexture", false ),
+				OcclusionTexture = MaterialTexture( value, "occlusionTexture", false ),
+				EmissiveTexture = MaterialTexture( value, "emissiveTexture", true )
+			};
+		}
 		return new GltfMaterial
 		{
 			BaseColorFactor = new Vector4( color[0], color[1], color[2], color[3] ),
@@ -151,8 +182,16 @@ public sealed partial class GltfDocument
 			AlphaCutoff = MaterialOptionalNumber( value, "alphaCutoff", 0.5f, 0 ),
 			DoubleSided = sidedElement.ValueKind == JsonValueKind.True,
 			Unlit = unlit,
+			UnsupportedExtensions = UnsupportedMaterialExtensions( value ),
 			DiffuseTransmission = MaterialDiffuseTransmission( value ),
 			Clearcoat = MaterialClearcoat( value ),
+			Ior = MaterialIor( value ),
+			Specular = MaterialSpecular( value ),
+			Sheen = MaterialSheen( value ),
+			Iridescence = MaterialIridescence( value ),
+			Transmission = MaterialTransmission( value ),
+			Volume = MaterialVolume( value ),
+			Dispersion = MaterialDispersion( value ),
 			Anisotropy = MaterialAnisotropy( value ),
 			BaseColorTexture = MaterialTexture( pbr, "baseColorTexture", true ),
 			MetallicRoughnessTexture = MaterialTexture( pbr, "metallicRoughnessTexture", false ),
@@ -160,6 +199,13 @@ public sealed partial class GltfDocument
 			OcclusionTexture = MaterialTexture( value, "occlusionTexture", false ),
 			EmissiveTexture = MaterialTexture( value, "emissiveTexture", true )
 		};
+	}
+
+	private IReadOnlyList<string> UnsupportedMaterialExtensions( JsonElement material )
+	{
+		var extensions = MaterialProperty( material, "extensions" );
+		if ( extensions.ValueKind != JsonValueKind.Object ) return [];
+		return [.. extensions.EnumerateObject().Select( property => property.Name ).Where( name => !SupportsExtension( name ) ).Order( StringComparer.Ordinal )];
 	}
 
 	public GltfSampler ReadSampler( int index )

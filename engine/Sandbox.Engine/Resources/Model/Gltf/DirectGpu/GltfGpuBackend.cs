@@ -120,9 +120,17 @@ internal sealed partial class GltfGpuPrimitivePlan
 			var (role, semanticIndex) = Semantic( name );
 			var offset = checked(start + stream.ByteOffset);
 			var binding = new GltfGpuSourceBinding( stream, offset, inputs.Count );
-			inputs.Add( new GltfGpuInputDescriptor { ByteOffset = (uint)offset, ByteStride = (uint)stream.ByteStride,
-				ComponentType = (uint)stream.ComponentType, Components = (uint)stream.Components, Normalized = stream.Normalized ? 1u : 0,
-				Role = role, SemanticIndex = (uint)semanticIndex, Target = target } );
+			inputs.Add( new GltfGpuInputDescriptor
+			{
+				ByteOffset = (uint)offset,
+				ByteStride = (uint)stream.ByteStride,
+				ComponentType = (uint)stream.ComponentType,
+				Components = (uint)stream.Components,
+				Normalized = stream.Normalized ? 1u : 0,
+				Role = role,
+				SemanticIndex = (uint)semanticIndex,
+				Target = target
+			} );
 			return binding;
 		}
 		foreach ( var pair in source.Attributes.OrderBy( x => x.Key, StringComparer.Ordinal ) ) bindings.Add( pair.Key, Append( pair.Key, pair.Value, uint.MaxValue ) );
@@ -153,10 +161,27 @@ internal sealed partial class GltfGpuPrimitivePlan
 		var flat = !source.Attributes.ContainsKey( "NORMAL" ) && mode == 4;
 		var sourceVertices = flat ? indices.ToArray() : Enumerable.Range( 0, source.Layout.VertexCount ).Select( x => (uint)x ).ToArray();
 		if ( flat ) indices = Enumerable.Range( 0, indices.Length ).Select( x => (uint)x ).ToArray();
-		var plan = new GltfGpuPrimitivePlan { OwnerDocument = document, Mesh = mesh, Primitive = primitive, Upload = source,
-			InputBytes = bytes, Sources = bindings, Fields = fields.AsReadOnly(), SourceVertices = sourceVertices,
-			Indices = indices, VertexStride = stride, GenerateFlatNormals = flat, Mode = mode, SourceMode = source.Layout.SourceMode, Material = geometry.Material,
-			InputDescriptors = inputs.ToArray(), OutputDescriptors = output.ToArray(), BaseAttributeCount = baseCount, MorphTargetCount = targets.Targets.Count };
+		var plan = new GltfGpuPrimitivePlan
+		{
+			OwnerDocument = document,
+			Mesh = mesh,
+			Primitive = primitive,
+			Upload = source,
+			InputBytes = bytes,
+			Sources = bindings,
+			Fields = fields.AsReadOnly(),
+			SourceVertices = sourceVertices,
+			Indices = indices,
+			VertexStride = stride,
+			GenerateFlatNormals = flat,
+			Mode = mode,
+			SourceMode = source.Layout.SourceMode,
+			Material = geometry.Material,
+			InputDescriptors = inputs.ToArray(),
+			OutputDescriptors = output.ToArray(),
+			BaseAttributeCount = baseCount,
+			MorphTargetCount = targets.Targets.Count
+		};
 		return shaderUvInputs.HasValue
 			? plan.ProjectMaterial( geometry.Material, shaderUvInputs.Value, consumedRoles )
 			: plan;
@@ -199,11 +224,29 @@ internal sealed partial class GltfGpuPrimitivePlan
 			output.Add( new GltfGpuOutputDescriptor { Source = sourceIndex, ByteOffset = (uint)stride, Components = 2, Role = 4, SemanticIndex = (uint)semanticIndex } );
 			stride = checked(stride + 8);
 		}
-		return new GltfGpuPrimitivePlan { OwnerDocument = OwnerDocument, Mesh = Mesh, Primitive = Primitive, Upload = Upload,
-			InputBytes = InputBytes, Sources = Sources, Fields = fields.AsReadOnly(), SourceVertices = SourceVertices, Indices = Indices,
-			VertexStride = stride, GenerateFlatNormals = GenerateFlatNormals, Mode = Mode, SourceMode = SourceMode, Material = materialIndex,
-			InputDescriptors = InputDescriptors, OutputDescriptors = output.ToArray(), BaseAttributeCount = BaseAttributeCount,
-			MorphTargetCount = MorphTargetCount, MaterialUv = materialUv, UvProjection = projection };
+		return new GltfGpuPrimitivePlan
+		{
+			OwnerDocument = OwnerDocument,
+			Mesh = Mesh,
+			Primitive = Primitive,
+			Upload = Upload,
+			InputBytes = InputBytes,
+			Sources = Sources,
+			Fields = fields.AsReadOnly(),
+			SourceVertices = SourceVertices,
+			Indices = Indices,
+			VertexStride = stride,
+			GenerateFlatNormals = GenerateFlatNormals,
+			Mode = Mode,
+			SourceMode = SourceMode,
+			Material = materialIndex,
+			InputDescriptors = InputDescriptors,
+			OutputDescriptors = output.ToArray(),
+			BaseAttributeCount = BaseAttributeCount,
+			MorphTargetCount = MorphTargetCount,
+			MaterialUv = materialUv,
+			UvProjection = projection
+		};
 	}
 
 	/// <summary>
@@ -1054,14 +1097,31 @@ internal sealed partial class GltfGpuInstance : IDisposable
 				bytes = new byte[checked(plan.SourceVertices.Length * plan.VertexStride)]; output.GetData<byte>( bytes );
 				indices = new uint[plan.Indices.Length]; draw.Indices.GetData<uint>( indices );
 			}
-			rows.Add( new GltfGpuPrimitiveSnapshot { Node = draw.Node.Index, InstanceIndex = draw.Node.InstanceIndex, Mesh = draw.Node.Primitive.Mesh, Primitive = draw.Node.Primitive.Index,
-				VertexCount = plan.SourceVertices.Length, VertexStride = plan.VertexStride, Fields = plan.Fields, Bytes = bytes,
-				SourceVertices = (uint[])plan.SourceVertices.Clone(), Indices = indices, IndexDataOrigin = visible ? "gpu-readback" : null,
-				SourceMode = plan.SourceMode, SubmittedPrimitiveType = draw.SubmittedPrimitiveType, DrawCalls = draw.DrawCalls,
-				Visible = visible, ComputedRevision = raw ? draw.RawComputedRevision : draw.ComputedRevision, SubmittedRevision = draw.SubmittedRevision,
-				SubmittedMaterialIndex = draw.SubmittedMaterialIndex, SubmittedMaterial = draw.SubmittedMaterial,
-				SubmittedMaterialFrame = draw.SubmittedMaterialFrame, SubmittedVariantRevision = draw.SubmittedVariantRevision,
-				SubmittedMaterialOverride = draw.SubmittedMaterialOverride } );
+			rows.Add( new GltfGpuPrimitiveSnapshot
+			{
+				Node = draw.Node.Index,
+				InstanceIndex = draw.Node.InstanceIndex,
+				Mesh = draw.Node.Primitive.Mesh,
+				Primitive = draw.Node.Primitive.Index,
+				VertexCount = plan.SourceVertices.Length,
+				VertexStride = plan.VertexStride,
+				Fields = plan.Fields,
+				Bytes = bytes,
+				SourceVertices = (uint[])plan.SourceVertices.Clone(),
+				Indices = indices,
+				IndexDataOrigin = visible ? "gpu-readback" : null,
+				SourceMode = plan.SourceMode,
+				SubmittedPrimitiveType = draw.SubmittedPrimitiveType,
+				DrawCalls = draw.DrawCalls,
+				Visible = visible,
+				ComputedRevision = raw ? draw.RawComputedRevision : draw.ComputedRevision,
+				SubmittedRevision = draw.SubmittedRevision,
+				SubmittedMaterialIndex = draw.SubmittedMaterialIndex,
+				SubmittedMaterial = draw.SubmittedMaterial,
+				SubmittedMaterialFrame = draw.SubmittedMaterialFrame,
+				SubmittedVariantRevision = draw.SubmittedVariantRevision,
+				SubmittedMaterialOverride = draw.SubmittedMaterialOverride
+			} );
 		}
 		return rows.AsReadOnly();
 	}

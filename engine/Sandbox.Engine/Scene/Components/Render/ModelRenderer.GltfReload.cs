@@ -24,9 +24,16 @@ public partial class ModelRenderer
 	private void PrepareGltfChange( Model target, GltfManagedModelResource replacement )
 	{
 		if ( gltfReloadPlan is not null ) throw new InvalidOperationException( "A glTF renderer reload is already in progress." );
-		var plan = new GltfReloadPlan { Replacement = replacement, PreviousResource = gltfInstanceResource,
-			PreviousInstance = gltfInstance, PreviousObject = _sceneObject, Animation = CaptureGltfReloadAnimation(),
-			VariantState = CaptureGltfVariantState(), Variant = replacement is null ? null : PrepareGltfVariantReload( replacement ) };
+		var plan = new GltfReloadPlan
+		{
+			Replacement = replacement,
+			PreviousResource = gltfInstanceResource,
+			PreviousInstance = gltfInstance,
+			PreviousObject = _sceneObject,
+			Animation = CaptureGltfReloadAnimation(),
+			VariantState = CaptureGltfVariantState(),
+			Variant = replacement is null ? null : PrepareGltfVariantReload( replacement )
+		};
 		try
 		{
 			if ( Active && _sceneObject.IsValid() )

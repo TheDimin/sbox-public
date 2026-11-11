@@ -19,6 +19,14 @@ internal enum GltfMaterialTextureRole
 	Clearcoat,
 	ClearcoatRoughness,
 	ClearcoatNormal,
+	SheenColor,
+	SheenRoughness,
+	Specular,
+	SpecularColor,
+	Iridescence,
+	IridescenceThickness,
+	Transmission,
+	Thickness,
 	Anisotropy
 }
 
@@ -102,7 +110,15 @@ internal sealed class GltfMaterialUvPlan
 		GltfMaterialTextureRole.Clearcoat,
 		GltfMaterialTextureRole.ClearcoatRoughness,
 		GltfMaterialTextureRole.ClearcoatNormal,
-		GltfMaterialTextureRole.Anisotropy
+		GltfMaterialTextureRole.Anisotropy,
+		GltfMaterialTextureRole.SheenColor,
+		GltfMaterialTextureRole.SheenRoughness,
+		GltfMaterialTextureRole.Specular,
+		GltfMaterialTextureRole.SpecularColor,
+		GltfMaterialTextureRole.Iridescence,
+		GltfMaterialTextureRole.IridescenceThickness,
+		GltfMaterialTextureRole.Transmission,
+		GltfMaterialTextureRole.Thickness
 	];
 
 	internal int? MaterialIndex { get; }
@@ -188,6 +204,14 @@ internal sealed class GltfMaterialUvPlan
 		GltfMaterialTextureRole.ClearcoatRoughness => material?.Clearcoat?.RoughnessTexture,
 		GltfMaterialTextureRole.ClearcoatNormal => material?.Clearcoat?.NormalTexture,
 		GltfMaterialTextureRole.Anisotropy => material?.Anisotropy?.Texture,
+		GltfMaterialTextureRole.SheenColor => material?.Sheen?.ColorTexture,
+		GltfMaterialTextureRole.SheenRoughness => material?.Sheen?.RoughnessTexture,
+		GltfMaterialTextureRole.Specular => material?.Specular?.Texture,
+		GltfMaterialTextureRole.SpecularColor => material?.Specular?.ColorTexture,
+		GltfMaterialTextureRole.Iridescence => material?.Iridescence?.Texture,
+		GltfMaterialTextureRole.IridescenceThickness => material?.Iridescence?.ThicknessTexture,
+		GltfMaterialTextureRole.Transmission => material?.Transmission?.Texture,
+		GltfMaterialTextureRole.Thickness => material?.Volume?.ThicknessTexture,
 		_ => throw new ArgumentOutOfRangeException( nameof( role ) )
 	};
 }

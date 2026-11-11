@@ -34,7 +34,7 @@ internal sealed class GltfMaterialUvProjection
 		var sets = uv.Bindings.Values.Select( x => x.TexCoord ).Distinct().Order().ToArray();
 		if ( sets.Length > shaderInputCount )
 			throw new GltfException( $"Material requires {sets.Length} distinct UV sets, but the selected shader exposes {shaderInputCount} UV inputs." );
-		var indices = sets.Select( (set, index) => (set, index) ).ToDictionary( x => x.set, x => x.index );
+		var indices = sets.Select( ( set, index ) => (set, index) ).ToDictionary( x => x.set, x => x.index );
 		var sources = new Source[sets.Length];
 		var slots = new Dictionary<GltfMaterialTextureRole, int>();
 		foreach ( var (role, binding) in uv.Bindings )

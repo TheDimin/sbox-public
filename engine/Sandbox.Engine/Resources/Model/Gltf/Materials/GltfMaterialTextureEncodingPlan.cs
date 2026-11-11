@@ -53,7 +53,8 @@ internal sealed class GltfMaterialTextureEncodingPlan
 
 	internal static GltfMaterialTextureEncodingPlan Create( GltfDocument document, GltfMaterial material ) => CreateForRoles( document, material,
 		[GltfMaterialTextureRole.BaseColor, GltfMaterialTextureRole.MetallicRoughness, GltfMaterialTextureRole.Normal, GltfMaterialTextureRole.Occlusion, GltfMaterialTextureRole.Emissive, GltfMaterialTextureRole.DiffuseTransmission, GltfMaterialTextureRole.DiffuseTransmissionColor,
-		GltfMaterialTextureRole.Clearcoat, GltfMaterialTextureRole.ClearcoatRoughness, GltfMaterialTextureRole.ClearcoatNormal, GltfMaterialTextureRole.Anisotropy] );
+		GltfMaterialTextureRole.Clearcoat, GltfMaterialTextureRole.ClearcoatRoughness, GltfMaterialTextureRole.ClearcoatNormal, GltfMaterialTextureRole.Anisotropy,
+		GltfMaterialTextureRole.SheenColor, GltfMaterialTextureRole.SheenRoughness, GltfMaterialTextureRole.Specular, GltfMaterialTextureRole.SpecularColor, GltfMaterialTextureRole.Iridescence, GltfMaterialTextureRole.IridescenceThickness, GltfMaterialTextureRole.Transmission, GltfMaterialTextureRole.Thickness] );
 
 	/// <summary>
 	/// Plans only roles consumed by the selected material model. For example,
@@ -84,9 +85,13 @@ internal sealed class GltfMaterialTextureEncodingPlan
 			var texture = document.ReadTexture( info.Index );
 			bindings.Add( role, new Binding
 			{
-				Role = role, TextureInfo = info, ImageIndex = texture.Image,
-				SamplerIndex = texture.Sampler, Sampler = texture.Sampler is int sampler ? document.ReadSampler( sampler ) : null,
-				IsSrgb = srgb, Channels = channels,
+				Role = role,
+				TextureInfo = info,
+				ImageIndex = texture.Image,
+				SamplerIndex = texture.Sampler,
+				Sampler = texture.Sampler is int sampler ? document.ReadSampler( sampler ) : null,
+				IsSrgb = srgb,
+				Channels = channels,
 				UsesAlphaCoverage = role == GltfMaterialTextureRole.BaseColor && (material?.AlphaMode is "MASK" or "BLEND")
 			} );
 		}
@@ -107,6 +112,14 @@ internal sealed class GltfMaterialTextureEncodingPlan
 		GltfMaterialTextureRole.ClearcoatNormal => (material?.Clearcoat?.NormalTexture, false, GltfMaterialTextureChannels.Rgb),
 		// Direction RG and strength B are linear data, never sRGB.
 		GltfMaterialTextureRole.Anisotropy => (material?.Anisotropy?.Texture, false, GltfMaterialTextureChannels.Rgb),
+		GltfMaterialTextureRole.SheenColor => (material?.Sheen?.ColorTexture, true, GltfMaterialTextureChannels.Rgb),
+		GltfMaterialTextureRole.SheenRoughness => (material?.Sheen?.RoughnessTexture, false, GltfMaterialTextureChannels.Alpha),
+		GltfMaterialTextureRole.Specular => (material?.Specular?.Texture, false, GltfMaterialTextureChannels.Alpha),
+		GltfMaterialTextureRole.SpecularColor => (material?.Specular?.ColorTexture, true, GltfMaterialTextureChannels.Rgb),
+		GltfMaterialTextureRole.Iridescence => (material?.Iridescence?.Texture, false, GltfMaterialTextureChannels.Red),
+		GltfMaterialTextureRole.IridescenceThickness => (material?.Iridescence?.ThicknessTexture, false, GltfMaterialTextureChannels.Green),
+		GltfMaterialTextureRole.Transmission => (material?.Transmission?.Texture, false, GltfMaterialTextureChannels.Red),
+		GltfMaterialTextureRole.Thickness => (material?.Volume?.ThicknessTexture, false, GltfMaterialTextureChannels.Green),
 		_ => throw new ArgumentOutOfRangeException( nameof( role ), role, "Unknown core glTF material texture role." )
 	};
 }

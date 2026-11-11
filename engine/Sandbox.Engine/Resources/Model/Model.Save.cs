@@ -19,7 +19,7 @@ partial class Model
 	{
 		if ( physicsSource == null || !physicsSource.IsValid || physicsSource.IsError ) throw new ArgumentException( "A valid physics source is required.", nameof( physicsSource ) );
 		if ( BoneCount != 0 || physicsSource.BoneCount != 0 ) throw new InvalidOperationException( "Preserved physics requires static source and destination skeletons." );
-		if ( originalPhysicsBlock != null && (originalPhysicsBlock.Length < 8 || originalPhysicsBlock.Length > 128 * 1024 * 1024) ) throw new ArgumentOutOfRangeException( nameof(originalPhysicsBlock) );
+		if ( originalPhysicsBlock != null && (originalPhysicsBlock.Length < 8 || originalPhysicsBlock.Length > 128 * 1024 * 1024) ) throw new ArgumentOutOfRangeException( nameof( originalPhysicsBlock ) );
 		return new VmdlWriter( this, physicsSource, originalPhysicsBlock ).Write();
 	}
 

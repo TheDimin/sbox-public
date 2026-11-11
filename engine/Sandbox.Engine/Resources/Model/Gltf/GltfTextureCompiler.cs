@@ -255,19 +255,19 @@ internal static class GltfTextureCompiler
 		long chain = 0;
 		for ( int w = width, h = height; ; w = Math.Max( 1, w / 2 ), h = Math.Max( 1, h / 2 ) )
 		{
-			chain += (long)w * h * 4 * sizeof(float);
+			chain += (long)w * h * 4 * sizeof( float );
 			if ( !mipmaps || w == 1 && h == 1 ) break;
 		}
 		// Retained first resource + current chain + ResourceWriter's temporary
 		// stream and final copy, one float working image, decoder/base image, headers.
-		var peak = chain * 4 + (long)width * height * (4 * sizeof(float) + 8) + 1024 * 1024;
+		var peak = chain * 4 + (long)width * height * (4 * sizeof( float ) + 8) + 1024 * 1024;
 		if ( chain > int.MaxValue || peak > budget ) throw new GltfException( "Metallic-roughness native float texture working set exceeds the decoded-byte budget." );
 	}
 
 	internal static float[] PackMetallicRoughnessPixels( ReadOnlySpan<byte> pixels, float factor, bool roughness )
 	{
 		ValidateFactor( factor );
-		if ( pixels.Length == 0 || pixels.Length % 4 != 0 || (long)pixels.Length * sizeof(float) > int.MaxValue ) throw new GltfException( "Invalid or oversized metallic-roughness RGBA pixel stream." );
+		if ( pixels.Length == 0 || pixels.Length % 4 != 0 || (long)pixels.Length * sizeof( float ) > int.MaxValue ) throw new GltfException( "Invalid or oversized metallic-roughness RGBA pixel stream." );
 		var result = new float[pixels.Length];
 		for ( var i = 0; i < pixels.Length; i += 4 )
 		{
@@ -287,7 +287,7 @@ internal static class GltfTextureCompiler
 		var chainBytes = 0; var count = 0;
 		for ( int w = width, h = height; ; w = Math.Max( 1, w / 2 ), h = Math.Max( 1, h / 2 ) )
 		{
-			chainBytes = checked(chainBytes + w * h * 4 * sizeof(float)); count++;
+			chainBytes = checked(chainBytes + w * h * 4 * sizeof( float )); count++;
 			if ( !mipmaps || w == 1 && h == 1 ) break;
 		}
 		var chain = new byte[chainBytes]; var offset = chainBytes;
@@ -306,7 +306,7 @@ internal static class GltfTextureCompiler
 		var chainBytes = 0; var count = 0;
 		for ( int w = width, h = height; ; w = Math.Max( 1, w / 2 ), h = Math.Max( 1, h / 2 ) )
 		{
-			chainBytes = checked(chainBytes + w * h * 4 * sizeof(float)); count++;
+			chainBytes = checked(chainBytes + w * h * 4 * sizeof( float )); count++;
 			if ( !mipmaps || w == 1 && h == 1 ) break;
 		}
 		var chain = new byte[chainBytes]; var offset = chainBytes; float[] pixels = null;
@@ -331,7 +331,7 @@ internal static class GltfTextureCompiler
 
 	internal static float[] DownsampleLinearRgba( ReadOnlySpan<float> pixels, int width, int height )
 	{
-		if ( width <= 0 || height <= 0 || (long)width * height * 4 != pixels.Length || pixels.Length > int.MaxValue / sizeof(float) ) throw new GltfException( "Invalid linear RGBA image dimensions." );
+		if ( width <= 0 || height <= 0 || (long)width * height * 4 != pixels.Length || pixels.Length > int.MaxValue / sizeof( float ) ) throw new GltfException( "Invalid linear RGBA image dimensions." );
 		var targetWidth = Math.Max( 1, width / 2 ); var targetHeight = Math.Max( 1, height / 2 );
 		var result = new float[checked(targetWidth * targetHeight * 4)];
 		for ( var y = 0; y < targetHeight; y++ ) for ( var x = 0; x < targetWidth; x++ ) for ( var channel = 0; channel < 4; channel++ )

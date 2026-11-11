@@ -8,11 +8,11 @@ namespace Sandbox.Gltf.Internal.MikkTSpaceSharp
 	partial class MikkTSpace
 	{
 		public delegate int getNumFacesDelegate();
-		public delegate int getNumVerticesOfFaceDelegate(int face);
-		public delegate SVec3 getPositionDelegate(int face, int vertex);
-		public delegate SVec2 getTexCoordDelegate(int face, int vertex);
-		public delegate void setTSpaceBasicDelegate(SVec3 tangent, float orient, int face, int vertex);
-		public delegate void setTSpaceDelegate(SVec3 tangent, SVec3 bitangent, float magS, float magT, bool orient, int face, int vertex);
+		public delegate int getNumVerticesOfFaceDelegate( int face );
+		public delegate SVec3 getPositionDelegate( int face, int vertex );
+		public delegate SVec2 getTexCoordDelegate( int face, int vertex );
+		public delegate void setTSpaceBasicDelegate( SVec3 tangent, float orient, int face, int vertex );
+		public delegate void setTSpaceDelegate( SVec3 tangent, SVec3 bitangent, float magS, float magT, bool orient, int face, int vertex );
 
 		public class SMikkTSpaceContext
 		{
@@ -72,7 +72,7 @@ namespace Sandbox.Gltf.Internal.MikkTSpaceSharp
 			{
 				get
 				{
-					switch(idx)
+					switch ( idx )
 					{
 						case 0: return v1;
 						case 1: return v2;
@@ -83,7 +83,7 @@ namespace Sandbox.Gltf.Internal.MikkTSpaceSharp
 
 				set
 				{
-					switch (idx)
+					switch ( idx )
 					{
 						case 0: v1 = value; break;
 						case 1: v2 = value; break;

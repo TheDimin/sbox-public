@@ -19,6 +19,13 @@ public sealed partial class Model : Resource
 		gltfLifetime = new GltfModelLifetime( context, leases, meshes );
 	}
 
+	/// <summary>A native model built from the native data of a compiled glTF.</summary>
+	internal bool IsGltfNative => gltfLifetime is not null;
+
+	/// <summary>The placed geometries of a static compiled glTF scene, or null. This model draws nothing itself.</summary>
+	internal GltfNativeScene GltfNativeScene { get => gltfScene; set { gltfScene = value; gltfSceneToDestroy = value; } }
+	private GltfNativeScene gltfScene, gltfSceneToDestroy;
+
 	public override bool IsValid => GltfResource?.IsValid ?? native.IsValid;
 
 	/// <summary>
@@ -38,6 +45,7 @@ public sealed partial class Model : Resource
 	internal override void Destroy()
 	{
 		if ( DestroyGltfResource() ) return;
+		System.Threading.Interlocked.Exchange( ref gltfSceneToDestroy, null )?.Destroy();
 		// Evict while the binding is still available, before publishing an invalid
 		// wrapper or queuing release. A newer wrapper at this address owns its
 		// own entry and must survive this model's finalizer/queued cleanup.

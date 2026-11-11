@@ -9,7 +9,7 @@ namespace Sandbox.Gltf.Internal.MikkTSpaceSharp
 		public float y;
 		public float z;
 
-		public SVec3(float xx, float yy, float zz)
+		public SVec3( float xx, float yy, float zz )
 		{
 			x = xx;
 			y = yy;
@@ -25,7 +25,7 @@ namespace Sandbox.Gltf.Internal.MikkTSpaceSharp
 
 		public float Length()
 		{
-			return (float)Math.Sqrt(LengthSquared());
+			return (float)Math.Sqrt( LengthSquared() );
 		}
 
 		public bool VNotZero()
@@ -35,7 +35,7 @@ namespace Sandbox.Gltf.Internal.MikkTSpaceSharp
 
 		public void Normalize()
 		{
-			if (!VNotZero())
+			if ( !VNotZero() )
 			{
 				return;
 			}
@@ -47,42 +47,42 @@ namespace Sandbox.Gltf.Internal.MikkTSpaceSharp
 			z *= scale;
 		}
 
-		public static bool operator ==(SVec3 v1, SVec3 v2)
+		public static bool operator ==( SVec3 v1, SVec3 v2 )
 		{
 			return (v1.x == v2.x) && (v1.y == v2.y) && (v1.z == v2.z);
 		}
 
-		public static bool operator !=(SVec3 v1, SVec3 v2)
+		public static bool operator !=( SVec3 v1, SVec3 v2 )
 		{
 			return !(v1 == v2);
 		}
 
-		public static SVec3 operator +(SVec3 v1, SVec3 v2)
+		public static SVec3 operator +( SVec3 v1, SVec3 v2 )
 		{
-			return new SVec3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
+			return new SVec3( v1.x + v2.x, v1.y + v2.y, v1.z + v2.z );
 		}
 
-		public static SVec3 operator -(SVec3 v1, SVec3 v2)
+		public static SVec3 operator -( SVec3 v1, SVec3 v2 )
 		{
-			return new SVec3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
+			return new SVec3( v1.x - v2.x, v1.y - v2.y, v1.z - v2.z );
 		}
 
-		public static SVec3 operator *(SVec3 v, float scale)
+		public static SVec3 operator *( SVec3 v, float scale )
 		{
-			return new SVec3(v.x * scale, v.y * scale, v.z * scale);
+			return new SVec3( v.x * scale, v.y * scale, v.z * scale );
 		}
 
-		public static SVec3 operator *(float scale, SVec3 v)
+		public static SVec3 operator *( float scale, SVec3 v )
 		{
-			return new SVec3(v.x * scale, v.y * scale, v.z * scale);
+			return new SVec3( v.x * scale, v.y * scale, v.z * scale );
 		}
 
-		public static float Dot(SVec3 v1, SVec3 v2)
+		public static float Dot( SVec3 v1, SVec3 v2 )
 		{
 			return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 		}
 
-		public override bool Equals(object obj)
+		public override bool Equals( object obj )
 		{
 			return obj is SVec3 vec && (this == vec);
 		}

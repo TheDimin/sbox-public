@@ -129,7 +129,7 @@ internal sealed class GltfModelRig
 			foreach ( var target in morphBindings.SelectMany( binding => binding.Targets ) )
 				if ( !names.Contains( target.PositiveName ) || !names.Contains( target.NegativeName ) ) throw new GltfException( "Native model construction dropped a glTF morph controller; target limits must be resolved before this asset can load." );
 		}
-		var byName = bones.Select( (bone, index) => (bone.Name, index) ).ToDictionary( x => x.Name, x => x.index, StringComparer.Ordinal );
+		var byName = bones.Select( ( bone, index ) => (bone.Name, index) ).ToDictionary( x => x.Name, x => x.index, StringComparer.Ordinal );
 		nativeToPalette = new int[model.BoneCount];
 		for ( var i = 0; i < nativeToPalette.Length; i++ )
 			if ( !byName.TryGetValue( model.GetBoneName( i ), out nativeToPalette[i] ) ) throw new GltfException( "Native model construction introduced an unknown glTF palette bone." );

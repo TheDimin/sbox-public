@@ -13,7 +13,7 @@ namespace Sandbox.Gltf.Internal.MikkTSpaceSharp
 			{
 				get
 				{
-					switch(index)
+					switch ( index )
 					{
 						case 0: return i0;
 						case 1: return i1;
@@ -24,7 +24,7 @@ namespace Sandbox.Gltf.Internal.MikkTSpaceSharp
 
 				set
 				{
-					switch (index)
+					switch ( index )
 					{
 						case 0: i0 = value; break;
 						case 1: i1 = value; break;

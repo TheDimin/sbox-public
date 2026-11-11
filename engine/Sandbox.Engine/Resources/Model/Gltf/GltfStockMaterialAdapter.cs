@@ -13,6 +13,9 @@ namespace Sandbox;
 /// Float32 repacking is an intermediate stock-shader adapter, not proof of the
 /// final compiled GLB load-time or GPU-memory parity targets.
 /// </summary>
+/// <summary>Compile one image to a native texture resource: the image, sRGB, mipmaps and the function that compiles it. A cache may return a stored result.</summary>
+internal delegate byte[] GltfTextureCompile( GltfImage image, bool srgb, bool mipmaps, Func<byte[]> compile );
+
 internal static class GltfStockMaterialAdapter
 {
 	/// <summary>
@@ -36,10 +39,27 @@ internal static class GltfStockMaterialAdapter
 		internal float AlphaCutoff { get; init; }
 		internal GltfDiffuseTransmission DiffuseTransmission { get; init; }
 		internal GltfClearcoat Clearcoat { get; init; }
+		internal float? Ior { get; init; }
+		internal GltfSpecular Specular { get; init; }
+		/// <summary>Glossiness factor of a KHR_materials_pbrSpecularGlossiness material; null for metal/rough.</summary>
+		internal float? Glossiness { get; init; }
+		internal GltfSheen Sheen { get; init; }
+		internal GltfIridescence Iridescence { get; init; }
+		internal GltfTransmission Transmission { get; init; }
+		internal GltfVolume Volume { get; init; }
+		internal float Dispersion { get; init; }
+		/// <summary>Material uses an extension the reader lacks; the surface shader draws the error pattern.</summary>
+		internal bool Unsupported { get; init; }
 		internal GltfAnisotropy Anisotropy { get; init; }
 	}
 
 	internal sealed record SourceTexture( GltfMaterialTextureEncodingPlan.Binding Encoding, GltfSamplerMapping.Result Sampling, byte[] Resource );
+	private static readonly GltfMaterialTextureRole[] SpecularRoles = [GltfMaterialTextureRole.Specular, GltfMaterialTextureRole.SpecularColor];
+	private static readonly GltfMaterialTextureRole[] TransmissionRoles = [GltfMaterialTextureRole.Transmission];
+	private static readonly GltfMaterialTextureRole[] VolumeRoles = [GltfMaterialTextureRole.Thickness];
+	private static readonly GltfMaterialTextureRole[] SheenRoles = [GltfMaterialTextureRole.SheenColor, GltfMaterialTextureRole.SheenRoughness];
+	private static readonly GltfMaterialTextureRole[] IridescenceRoles = [GltfMaterialTextureRole.Iridescence, GltfMaterialTextureRole.IridescenceThickness];
+
 	private static readonly GltfMaterialTextureRole[] ClearcoatRoles =
 		[GltfMaterialTextureRole.Clearcoat, GltfMaterialTextureRole.ClearcoatRoughness, GltfMaterialTextureRole.ClearcoatNormal];
 	private static readonly GltfMaterialTextureRole[] SourceRoles =
@@ -56,7 +76,7 @@ internal static class GltfStockMaterialAdapter
 	/// transfer and mip demands share one owned resource; role samplers remain
 	/// independent. This does not change default Prepare/Acquire behavior.
 	/// </summary>
-	internal static SourcePrepared PrepareSource( GltfDocument document, GltfMaterial material, Func<int, GltfImage> imageReader = null )
+	internal static SourcePrepared PrepareSource( GltfDocument document, GltfMaterial material, Func<int, GltfImage> imageReader = null, GltfTextureCompile compileTexture = null )
 	{
 		ArgumentNullException.ThrowIfNull( document );
 		imageReader ??= document.ReadImage;
@@ -92,6 +112,15 @@ internal static class GltfStockMaterialAdapter
 		var anisotropy = material?.DiffuseTransmission is null ? material?.Anisotropy : null;
 		if ( clearcoat is not null ) roles = [.. roles, .. ClearcoatRoles];
 		if ( anisotropy is not null ) roles = [.. roles, GltfMaterialTextureRole.Anisotropy];
+		// Layers that apply to the surface shader only, like the coat.
+		var plain = material?.DiffuseTransmission is null;
+		var specular = plain ? material?.Specular : null; var sheen = plain ? material?.Sheen : null; var iridescence = plain ? material?.Iridescence : null;
+		if ( specular is not null ) roles = [.. roles, .. SpecularRoles];
+		if ( sheen is not null ) roles = [.. roles, .. SheenRoles];
+		if ( iridescence is not null ) roles = [.. roles, .. IridescenceRoles];
+		var transmissionLayer = plain ? material?.Transmission : null; var volumeLayer = transmissionLayer is null ? null : material?.Volume;
+		if ( transmissionLayer is not null ) roles = [.. roles, .. TransmissionRoles];
+		if ( volumeLayer is not null ) roles = [.. roles, .. VolumeRoles];
 		var textures = GltfMaterialTextureEncodingPlan.CreateForRoles( document, material, roles );
 		var encodedResources = new Dictionary<(int Image, bool IsSrgb, bool Mipmaps), byte[]>();
 		var images = new Dictionary<int, GltfImage>();
@@ -108,7 +137,7 @@ internal static class GltfStockMaterialAdapter
 			document.ValidateTextureImage( binding.TextureInfo.Index, encoded );
 			if ( !encodedResources.TryGetValue( key, out var resource ) )
 			{
-				resource = GltfPreparedTextureCache.Shared.GetOrCreate( encoded, binding.IsSrgb, mipmaps,
+				resource = (compileTexture ?? GltfPreparedTextureCache.Shared.GetOrCreate)( encoded, binding.IsSrgb, mipmaps,
 					() => mipmaps ? GltfTextureCompiler.CompileWithMipmaps( encoded, binding.IsSrgb ) : GltfTextureCompiler.Compile( encoded, binding.IsSrgb ) );
 				encodedResources.Add( key, resource );
 			}
@@ -116,21 +145,39 @@ internal static class GltfStockMaterialAdapter
 		}
 		return new()
 		{
-			Textures = textures, Resources = new ReadOnlyDictionary<GltfMaterialTextureRole, SourceTexture>( resources ),
-			LinearBaseColorFactor = factor, EmissiveFactor = emissive, MetallicFactor = metallic, RoughnessFactor = roughness,
-			OcclusionStrength = strength, NormalScale = normalScale, DoubleSided = material?.DoubleSided ?? false,
-			AlphaMask = material?.AlphaMode == "MASK", AlphaBlend = material?.AlphaMode == "BLEND", AlphaCutoff = material?.AlphaCutoff ?? .5f, DiffuseTransmission = material?.DiffuseTransmission,
-			Clearcoat = clearcoat, Anisotropy = anisotropy
+			Textures = textures,
+			Resources = new ReadOnlyDictionary<GltfMaterialTextureRole, SourceTexture>( resources ),
+			LinearBaseColorFactor = factor,
+			EmissiveFactor = emissive,
+			MetallicFactor = metallic,
+			RoughnessFactor = roughness,
+			OcclusionStrength = strength,
+			NormalScale = normalScale,
+			DoubleSided = material?.DoubleSided ?? false,
+			AlphaMask = material?.AlphaMode == "MASK",
+			AlphaBlend = material?.AlphaMode == "BLEND",
+			AlphaCutoff = material?.AlphaCutoff ?? .5f,
+			DiffuseTransmission = material?.DiffuseTransmission,
+			Clearcoat = clearcoat,
+			Anisotropy = anisotropy,
+			Ior = plain ? material?.Ior : null,
+			Specular = specular,
+			Glossiness = specular is null ? null : material.Glossiness,
+			Sheen = sheen,
+			Iridescence = iridescence,
+			Transmission = transmissionLayer,
+			Volume = volumeLayer,
+			Dispersion = transmissionLayer is null ? 0 : material.Dispersion,
+			Unsupported = material is { Unlit: false, DiffuseTransmission: null, UnsupportedExtensions.Count: > 0 }
 		};
 	}
 
 	/// <summary>
-	/// Bind the explicit provided source-texture template to a completed canonical
-	/// per-slot UV selection. No source stream identity enters the shared material
-	/// cache; every material-bound affine row and selector does enter its key.
-	/// The caller owns the borrowed proven template and the published slot packet.
+	/// The values, features and textures that bind the provided source-texture template to a completed canonical
+	/// per-slot UV selection. No source stream identity enters the recipe; every material-bound affine row and
+	/// selector does. Allocates no native resource.
 	/// </summary>
-	internal static GltfMaterialLease<Material> AcquireSource( SourcePrepared prepared, Material template, GltfMaterialUvPlan uv, GltfMaterialUvProjection projection = null, bool featureSidedness = false )
+	internal static GltfNativeMaterialRecipe BuildSourceRecipe( SourcePrepared prepared, Material template, GltfMaterialUvPlan uv, GltfMaterialUvProjection projection = null, bool featureSidedness = false )
 	{
 		ArgumentNullException.ThrowIfNull( prepared ); ArgumentNullException.ThrowIfNull( template ); ArgumentNullException.ThrowIfNull( uv );
 		ThreadSafe.AssertIsMainThread();
@@ -162,6 +209,7 @@ internal static class GltfStockMaterialAdapter
 			foreach ( var role in new[] { GltfMaterialTextureRole.DiffuseTransmission, GltfMaterialTextureRole.DiffuseTransmissionColor } )
 				scalars.Add( new( "g_flGltfHas" + role + "Texture", prepared.Resources.ContainsKey( role ) ? 1f : 0f ) );
 		}
+		if ( prepared.Unsupported ) scalars.Add( new( "g_flGltfUnsupported", 1 ) );
 		if ( prepared.Clearcoat is { } coat )
 		{
 			scalars.Add( new( "g_flGltfClearcoatFactor", coat.Factor ) );
@@ -169,6 +217,40 @@ internal static class GltfStockMaterialAdapter
 			scalars.Add( new( "g_flGltfClearcoatNormalScale", coat.NormalTexture?.Scale ?? 1 ) );
 			foreach ( var role in ClearcoatRoles )
 				scalars.Add( new( "g_flGltfHas" + role + "Texture", prepared.Resources.ContainsKey( role ) ? 1f : 0f ) );
+		}
+		if ( prepared.Ior is { } ior ) { scalars.Add( new( "g_flGltfIorOn", 1 ) ); scalars.Add( new( "g_flGltfIor", ior ) ); }
+		if ( prepared.Specular is { } spec )
+		{
+			scalars.Add( new( "g_flGltfSpecularOn", 1 ) ); scalars.Add( new( "g_flGltfSpecularFactor", spec.Factor ) );
+			vectors.Add( new( "g_vGltfSpecularColorFactor", new( spec.ColorFactor.X, spec.ColorFactor.Y, spec.ColorFactor.Z, 0 ) ) );
+			foreach ( var role in SpecularRoles ) scalars.Add( new( "g_flGltfHas" + role + "Texture", prepared.Resources.ContainsKey( role ) ? 1f : 0f ) );
+			// Spec/gloss arrives as a specular layer: specular colour in RGB and glossiness in A of the colour texture.
+			if ( prepared.Glossiness is { } glossiness ) { scalars.Add( new( "g_flGltfSpecGloss", 1 ) ); scalars.Add( new( "g_flGltfGlossinessFactor", glossiness ) ); }
+		}
+		if ( prepared.Sheen is { } sheen )
+		{
+			scalars.Add( new( "g_flGltfSheenOn", 1 ) ); scalars.Add( new( "g_flGltfSheenRoughnessFactor", sheen.RoughnessFactor ) );
+			vectors.Add( new( "g_vGltfSheenColorFactor", new( sheen.ColorFactor.X, sheen.ColorFactor.Y, sheen.ColorFactor.Z, 0 ) ) );
+			foreach ( var role in SheenRoles ) scalars.Add( new( "g_flGltfHas" + role + "Texture", prepared.Resources.ContainsKey( role ) ? 1f : 0f ) );
+		}
+		if ( prepared.Iridescence is { } irid )
+		{
+			scalars.Add( new( "g_flGltfIridescenceOn", 1 ) ); scalars.Add( new( "g_flGltfIridescenceFactor", irid.Factor ) ); scalars.Add( new( "g_flGltfIridescenceIor", irid.Ior ) );
+			scalars.Add( new( "g_flGltfIridescenceThicknessMin", irid.ThicknessMinimum ) ); scalars.Add( new( "g_flGltfIridescenceThicknessMax", irid.ThicknessMaximum ) );
+			foreach ( var role in IridescenceRoles ) scalars.Add( new( "g_flGltfHas" + role + "Texture", prepared.Resources.ContainsKey( role ) ? 1f : 0f ) );
+		}
+		if ( prepared.Transmission is { } transmissionLayer )
+		{
+			scalars.Add( new( "g_flGltfTransmissionFactor", transmissionLayer.Factor ) );
+			scalars.Add( new( "g_flGltfHasTransmissionTexture", prepared.Resources.ContainsKey( GltfMaterialTextureRole.Transmission ) ? 1f : 0f ) );
+			scalars.Add( new( "g_flGltfDispersion", prepared.Dispersion ) );
+			var volume = prepared.Volume;
+			scalars.Add( new( "g_flGltfThicknessFactor", volume?.ThicknessFactor ?? 0 ) );
+			scalars.Add( new( "g_flGltfHasThicknessTexture", prepared.Resources.ContainsKey( GltfMaterialTextureRole.Thickness ) ? 1f : 0f ) );
+			// Beer's law coefficient per metre: -ln(colour) / distance; zero when there is no absorption.
+			var color = volume?.AttenuationColor ?? System.Numerics.Vector3.One; var distance = volume?.AttenuationDistance ?? float.PositiveInfinity;
+			float Coefficient( float c ) => float.IsInfinity( distance ) ? 0 : -MathF.Log( MathF.Max( c, 1e-4f ) ) / distance;
+			vectors.Add( new( "g_vGltfAttenuationCoefficient", new( Coefficient( color.X ), Coefficient( color.Y ), Coefficient( color.Z ), 0 ) ) );
 		}
 		if ( prepared.Anisotropy is { } aniso )
 		{
@@ -212,49 +294,70 @@ internal static class GltfStockMaterialAdapter
 		}
 		foreach ( var value in vectors ) RequireSourceParameter( template, value.Key );
 		foreach ( var value in scalars ) RequireSourceParameter( template, value.Key );
-		var ownerContext = GlobalContext.Current;
-		var textures = new List<GltfMaterialLease<Texture>>(); GltfMaterialLease<Material> material = null;
-		try
+		var slots = new List<GltfNativeTextureSlot>();
+		var familySamplers = new Dictionary<string, (GltfMaterialTextureRole Role, Rendering.SamplerState State)>();
+		foreach ( var (role, source) in prepared.Resources )
 		{
-			var bindings = new List<GltfMaterialTextureBinding>();
-			var acquired = GltfNativeTextureCache.AcquireBatch( prepared.Resources.Values.Select( source => source.Resource ).ToArray() );
-			textures.AddRange( acquired );
-			var textureIndex = 0;
-			foreach ( var (role, source) in prepared.Resources )
-			{
-				var texture = acquired[textureIndex++];
-				bindings.Add( new( "g_tGltf" + role + "Texture", texture.Value, texture.Value.DirtyVersion, source.Sampling.State, "Gltf" + role + "Sampler" ) );
-			}
-			var features = new List<KeyValuePair<string, int>> { new( "F_RENDER_BACKFACES", prepared.DoubleSided ? 1 : 0 ), new( "F_ALPHA_TEST", prepared.AlphaMask ? 1 : 0 ), new( "F_TRANSLUCENT", prepared.AlphaBlend ? 1 : 0 ) };
-			if ( prepared.Clearcoat is not null ) features.Add( new( "F_GLTF_CLEARCOAT", 1 ) );
-			if ( prepared.Anisotropy is not null ) features.Add( new( "F_GLTF_ANISOTROPY", 1 ) );
-			var key = new GltfMaterialKey( template, 0, [.. features], vectors, bindings, scalars );
-			material = GltfMaterialCache.Shared.Acquire( key );
-			foreach ( var value in vectors )
-			{
-				var actual = material.Value.GetVector4( value.Key );
-				if ( actual.x != value.Value.x || actual.y != value.Value.y || actual.z != value.Value.z || (prepared.AlphaMask && value.Key == "g_vGltfBaseColor" && actual.w != value.Value.w) ) throw new GltfException( $"Source material vector {value.Key} did not retain its exact linear/affine values." );
-			}
-			foreach ( var value in scalars )
-				if ( material.Value.GetVector4( value.Key ).x != value.Value ) throw new GltfException( $"Source material scalar {value.Key} did not retain its exact float value." );
-			var retained = material;
-			return new GltfMaterialLease<Material>( material.Value, () =>
-			{
-				using var ownerScope = new GlobalContext.GlobalContextScope( ownerContext );
-				GltfGpuCleanup.ReleaseAll( ReleaseSteps( retained, textures ) );
-			}, () => ThreadSafe.AssertIsMainThread() );
+			var samplerName = SamplerFamily( role );
+			// The shader has one sampler per extension family (the pixel shader has 32 bindings). Textures of one
+			// family must therefore agree on their glTF sampler; they nearly always do.
+			if ( familySamplers.TryGetValue( samplerName, out var first ) && first.State != source.Sampling.State )
+				throw new GltfException( $"Material textures {first.Role} and {role} use different glTF samplers; the stock shader shares one sampler between them." );
+			familySamplers[samplerName] = (role, source.Sampling.State);
+			slots.Add( new( "g_tGltf" + role + "Texture", source.Resource, source.Sampling.State, "Gltf" + samplerName + "Sampler" ) );
 		}
-		catch ( Exception original )
+		var features = new List<KeyValuePair<string, int>> { new( "F_RENDER_BACKFACES", prepared.DoubleSided ? 1 : 0 ), new( "F_ALPHA_TEST", prepared.AlphaMask ? 1 : 0 ), new( "F_TRANSLUCENT", prepared.AlphaBlend || prepared.Transmission is not null ? 1 : 0 ) };
+		if ( prepared.Transmission is not null ) features.Add( new( "F_GLTF_TRANSMISSION", 1 ) );
+		if ( prepared.Anisotropy is not null ) features.Add( new( "F_GLTF_ANISOTROPY", 1 ) );
+		return new GltfNativeMaterialRecipe( null, [], [.. features], [.. vectors], [.. scalars], [.. slots] );
+	}
+
+	/// <summary>
+	/// Bind the explicit provided source-texture template to a completed canonical
+	/// per-slot UV selection. The caller owns the borrowed proven template and the published slot packet.
+	/// </summary>
+	internal static GltfMaterialLease<Material> AcquireSource( SourcePrepared prepared, Material template, GltfMaterialUvPlan uv, GltfMaterialUvProjection projection = null, bool featureSidedness = false )
+	{
+		var recipe = BuildSourceRecipe( prepared, template, uv, projection, featureSidedness );
+		return recipe.Realize( template, material => VerifySourceValues( recipe, material, prepared.AlphaMask ) );
+	}
+
+	/// <summary>The material kept the exact linear and affine values of its recipe.</summary>
+	internal static void VerifySourceValues( GltfNativeMaterialRecipe recipe, Material material, bool alphaMask )
+	{
+		foreach ( var value in recipe.Vectors )
 		{
-			GltfGpuCleanup.Rollback( original, ReleaseSteps( material, textures ) );
-			throw;
+			var actual = material.GetVector4( value.Key );
+			if ( actual.x != value.Value.x || actual.y != value.Value.y || actual.z != value.Value.z || (alphaMask && value.Key == "g_vGltfBaseColor" && actual.w != value.Value.w) ) throw new GltfException( $"Source material vector {value.Key} did not retain its exact linear/affine values." );
 		}
+		foreach ( var value in recipe.Scalars )
+			if ( material.GetVector4( value.Key ).x != value.Value ) throw new GltfException( $"Source material scalar {value.Key} did not retain its exact float value." );
 	}
 
 	private static bool SameTextureInfo( GltfTextureInfo a, GltfTextureInfo b ) => a.Index == b.Index && a.TexCoord == b.TexCoord && a.IsSrgb == b.IsSrgb && a.Offset == b.Offset && a.Tiling == b.Tiling && a.Rotation == b.Rotation;
 	private static void RequireSourceParameter( Material template, string name )
 	{
 		if ( !template.HasParameter( name ) ) throw new GltfException( $"The provided source-texture template does not declare required parameter {name}. A writable property alone is not a capability proof." );
+	}
+
+	/// <summary>
+	/// Check that a lit source template declares the parameters its material will set, before any image is decoded or
+	/// tangent generated. A template from an older or failed shader compile otherwise fails only after all of that work.
+	/// </summary>
+	internal static void RequireTemplateContract( Material template, GltfMaterial material )
+	{
+		if ( template is null || material is null || material.Unlit || material.DiffuseTransmission is not null ) return;
+		var names = new List<string> { "g_vGltfBaseColor" };
+		if ( material.Clearcoat is not null ) names.Add( "g_flGltfClearcoatFactor" );
+		if ( material.Anisotropy is not null ) names.Add( "g_flGltfAnisotropyStrength" );
+		if ( material.Transmission is not null ) names.AddRange( ["g_flGltfTransmissionFactor", "g_flGltfThicknessFactor", "g_vGltfAttenuationCoefficient"] );
+		if ( material.Sheen is not null ) names.Add( "g_flGltfSheenOn" );
+		if ( material.Specular is not null ) names.Add( "g_flGltfSpecularOn" );
+		if ( material.Glossiness is not null ) names.Add( "g_flGltfSpecGloss" );
+		if ( material.Iridescence is not null ) names.Add( "g_flGltfIridescenceOn" );
+		foreach ( var name in names )
+			if ( !template.HasParameter( name ) )
+				throw new GltfException( $"The glTF source shader is older than the loader (it does not declare {name}). A shader is recompiled when its source changes; if that compile failed, the console says why." );
 	}
 
 	internal sealed class Prepared
@@ -269,6 +372,20 @@ internal static class GltfStockMaterialAdapter
 		internal Rendering.SamplerState ColorSampler { get; init; }
 		internal Rendering.SamplerState MetallicRoughnessSampler { get; init; }
 	}
+
+	/// <summary>
+	/// Name of the sampler a texture role binds to in the source shader. Extension roles share one sampler per
+	/// extension, which keeps the pixel shader inside its 32 sampler bindings.
+	/// </summary>
+	internal static string SamplerFamily( GltfMaterialTextureRole role ) => role switch
+	{
+		GltfMaterialTextureRole.ClearcoatRoughness or GltfMaterialTextureRole.ClearcoatNormal => nameof( GltfMaterialTextureRole.Clearcoat ),
+		GltfMaterialTextureRole.SheenColor or GltfMaterialTextureRole.SheenRoughness => "Sheen",
+		GltfMaterialTextureRole.SpecularColor => nameof( GltfMaterialTextureRole.Specular ),
+		GltfMaterialTextureRole.IridescenceThickness => nameof( GltfMaterialTextureRole.Iridescence ),
+		GltfMaterialTextureRole.Thickness => nameof( GltfMaterialTextureRole.Transmission ),
+		_ => role.ToString()
+	};
 
 	/// <summary>CPU validation and native texture serialization, without GPU allocation.</summary>
 	internal static Prepared Prepare( GltfDocument document, GltfMaterial material, Func<int, GltfImage> imageReader = null )
@@ -324,10 +441,15 @@ internal static class GltfStockMaterialAdapter
 		}
 		return new Prepared
 		{
-			ColorTint = tint, MetallicFactor = metallic, RoughnessFactor = roughness,
-			DoubleSided = material?.DoubleSided ?? false, BaseColorResource = colorResource,
-			ColorSampler = sampler.State, NormalRoughnessResource = normalRoughnessResource ?? CompileFlatNormalRoughness( roughness ),
-			MetalnessResource = metalnessResource, MetallicRoughnessSampler = metallicRoughnessSampler.State
+			ColorTint = tint,
+			MetallicFactor = metallic,
+			RoughnessFactor = roughness,
+			DoubleSided = material?.DoubleSided ?? false,
+			BaseColorResource = colorResource,
+			ColorSampler = sampler.State,
+			NormalRoughnessResource = normalRoughnessResource ?? CompileFlatNormalRoughness( roughness ),
+			MetalnessResource = metalnessResource,
+			MetallicRoughnessSampler = metallicRoughnessSampler.State
 		};
 	}
 

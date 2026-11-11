@@ -17,7 +17,7 @@ public static class GltfGeneratedTangents
 	/// estimate, not a measured memory cap or a bound on other loader allocations.
 	/// </summary>
 	public static GltfGeneratedTangentResult Generate( Vector3[] positions, Vector3[] normals, Vector2[] texcoords, uint[] indices, int mode,
-		Vector3 uvRowU, Vector3 uvRowV, long maxWorkspaceBytes = 256L * 1024 * 1024 )
+		Vector3 uvRowU, Vector3 uvRowV, long maxWorkspaceBytes = 1024L * 1024 * 1024 )
 	{
 		ArgumentNullException.ThrowIfNull( positions ); ArgumentNullException.ThrowIfNull( texcoords ); ArgumentNullException.ThrowIfNull( indices );
 		if ( positions.Length == 0 || texcoords.Length != positions.Length || (normals is not null && normals.Length != positions.Length) )

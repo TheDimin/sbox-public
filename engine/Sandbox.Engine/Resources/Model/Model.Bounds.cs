@@ -6,7 +6,7 @@ public partial class Model
 	/// <summary>
 	/// Total bounds of all the meshes.
 	/// </summary>
-	public BBox Bounds => GltfResource?.Bounds ?? native.GetMeshBounds();
+	public BBox Bounds => GltfResource?.Bounds ?? GltfNativeScene?.Bounds ?? native.GetMeshBounds();
 
 	/// <summary>
 	/// Total bounds of all the physics shapes.
@@ -16,5 +16,5 @@ public partial class Model
 	/// <summary>
 	/// Render view bounds.
 	/// </summary>
-	public BBox RenderBounds => GltfResource?.Bounds ?? native.GetModelRenderBounds();
+	public BBox RenderBounds => GltfResource?.Bounds ?? GltfNativeScene?.Bounds ?? native.GetModelRenderBounds();
 }

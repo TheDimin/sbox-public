@@ -416,7 +416,7 @@ public static class GltfCompiler
 
 	// Extension payloads that hold indices of other elements, never a buffer index or a byte offset.
 	// Moving buffers cannot invalidate them, so they do not stop merging or ordering.
-	private static readonly HashSet<string> MovableExtensions = new( StringComparer.Ordinal )
+	internal static readonly HashSet<string> MovableExtensions = new( StringComparer.Ordinal )
 	{
 		"MSFT_lod", "KHR_materials_variants", "KHR_materials_unlit", "KHR_materials_clearcoat", "KHR_materials_anisotropy",
 		"KHR_materials_diffuse_transmission", "KHR_materials_emissive_strength", "KHR_texture_transform", "KHR_texture_basisu",
@@ -479,7 +479,7 @@ public static class GltfCompiler
 		}
 	}
 
-	private static byte[] WriteGlb( byte[] json, byte[] binary, bool hasBinary )
+	internal static byte[] WriteGlb( byte[] json, byte[] binary, bool hasBinary )
 	{
 		var jsonLength = (json.LongLength + 3) & ~3L;
 		var binaryLength = (binary.LongLength + 3) & ~3L;

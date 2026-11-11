@@ -45,7 +45,8 @@ public sealed class GltfAnimationController : Component, Component.ExecuteInEdit
 	[Hide] public string ValidationError { get; private set; }
 	[Hide] public float Duration => IsBound ? target.GltfControllerDuration( this ) : 0;
 	[Hide] public bool IsFinished => !IsBound || target.GltfControllerFinished( this );
-	[Hide] public float Time
+	[Hide]
+	public float Time
 	{
 		get => IsBound ? target.GltfControllerTime( this ) : 0;
 		set

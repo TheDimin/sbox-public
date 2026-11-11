@@ -48,7 +48,7 @@ internal sealed class GltfManagedModelResource
 				var mode = material.AlphaMode;
 				if ( !material.Unlit && mode == "BLEND" && material.DiffuseTransmission is not null ) throw new GltfException( "Source-lit BLEND with diffuse transmission is not yet supported." );
 				var key = (material.Unlit ? "unlit:" : "lit:") + mode + (material.DoubleSided ? ":double" : ":single") + (material.DiffuseTransmission is null ? "" : ":diffuse-transmission")
-					+ (material.Clearcoat is null ? "" : ":clearcoat") + (material.Anisotropy is null ? "" : ":anisotropy");
+					+ (material.Transmission is null ? "" : ":transmission") + (material.Anisotropy is null ? "" : ":anisotropy");
 				if ( templates.TryGetValue( key, out var existing ) ) return existing;
 				var source = Material.FromShader( material.Unlit ? "shaders/gltf_unlit_five_uv.shader" : material.DiffuseTransmission is not null ? "shaders/gltf_diffuse_transmission.shader" : "shaders/gltf_surface_five_uv.shader" );
 				if ( source is not { IsValid: true, IsError: false } ) throw new GltfException( "The glTF source material template is unavailable." );
@@ -56,11 +56,12 @@ internal sealed class GltfManagedModelResource
 				try
 				{
 					template.SetFeature( "F_ALPHA_TEST", mode == "MASK" ? 1 : 0 );
-					template.SetFeature( "F_TRANSLUCENT", mode == "BLEND" ? 1 : 0 );
+					template.SetFeature( "F_TRANSLUCENT", mode == "BLEND" || (material.Transmission is not null && material.DiffuseTransmission is null && !material.Unlit) ? 1 : 0 );
 					template.SetFeature( "F_RENDER_BACKFACES", material.DoubleSided ? 1 : 0 );
 					if ( material.DiffuseTransmission is null && !material.Unlit )
 					{
-						template.SetFeature( "F_GLTF_CLEARCOAT", material.Clearcoat is null ? 0 : 1 );
+						template.SetFeature( "F_GLTF_TRANSMISSION", material.Transmission is null ? 0 : 1 );
+						// Only transmission and anisotropy select a shader variant; every other layer is a uniform branch.
 						template.SetFeature( "F_GLTF_ANISOTROPY", material.Anisotropy is null ? 0 : 1 );
 					}
 					templates.Add( key, template ); return template;

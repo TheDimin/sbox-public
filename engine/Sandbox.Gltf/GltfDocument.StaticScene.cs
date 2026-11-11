@@ -115,11 +115,23 @@ public static class GltfStaticSceneAssembler
 				var indices = source.Indices.ToArray();
 				if ( determinant < 0 && source.Mode == 4 )
 					for ( var i = 0; i < indices.Length; i += 3 ) (indices[i + 1], indices[i + 2]) = (indices[i + 2], indices[i + 1]);
-				output.Add( new GltfStaticScenePrimitive { Node = nodeIndex, Mesh = meshIndex, Primitive = primitiveIndex, Data = new GltfDrawData
+				output.Add( new GltfStaticScenePrimitive
 				{
-					Mode = source.Mode, Material = source.Material, Indices = indices, Positions = positions,
-					Normals = normals, Tangents = tangents, Colors = source.Colors, TexCoords = source.TexCoords
-				} } );
+					Node = nodeIndex,
+					Mesh = meshIndex,
+					Primitive = primitiveIndex,
+					Data = new GltfDrawData
+					{
+						Mode = source.Mode,
+						Material = source.Material,
+						Indices = indices,
+						Positions = positions,
+						Normals = normals,
+						Tangents = tangents,
+						Colors = source.Colors,
+						TexCoords = source.TexCoords
+					}
+				} );
 			}
 		}
 		return new GltfStaticScene { Primitives = output.AsReadOnly(), HasBounds = hasBounds, BoundsMin = min, BoundsMax = max };

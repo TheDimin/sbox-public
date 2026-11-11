@@ -6,7 +6,7 @@ namespace Sandbox.Gltf.Internal.MikkTSpaceSharp
 		public float x;
 		public float y;
 
-		public SVec2(float xx, float yy)
+		public SVec2( float xx, float yy )
 		{
 			x = xx;
 			y = yy;

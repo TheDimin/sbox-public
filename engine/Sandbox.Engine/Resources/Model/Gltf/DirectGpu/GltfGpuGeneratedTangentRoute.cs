@@ -29,7 +29,7 @@ internal sealed class GltfGpuGeneratedTangentRoute
 	/// tangent; morph targets remain blocked until their tangent frames are
 	/// generated from the updated morph attributes.
 	/// </summary>
-	internal static GltfGpuGeneratedTangentRoute Prepare( GltfGpuPrimitivePlan plan, bool hasSkin, long maxWorkspaceBytes = 256L * 1024 * 1024 )
+	internal static GltfGpuGeneratedTangentRoute Prepare( GltfGpuPrimitivePlan plan, bool hasSkin, long maxWorkspaceBytes = 1024L * 1024 * 1024 )
 	{
 		ArgumentNullException.ThrowIfNull( plan );
 		if ( plan.MaterialUv is null ) throw new GltfException( "Generated tangent routing requires a projected material packet." );

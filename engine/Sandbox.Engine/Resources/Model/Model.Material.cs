@@ -49,7 +49,7 @@ namespace Sandbox
 			{
 				if ( _materials.IsDefault )
 				{
-					_materials = GltfResource is { } gltf ? gltf.GetMaterials().ToImmutableArray() : Enumerable.Range( 0, native.GetMaterialIndexCount() )
+					_materials = GltfResource is { } gltf ? gltf.GetMaterials().ToImmutableArray() : GltfNativeScene is { } scene ? scene.Materials.ToImmutableArray() : Enumerable.Range( 0, native.GetMaterialIndexCount() )
 						.Select( i => Material.FromNative( native.GetMaterialByIndex( i ) ) )
 						.ToImmutableArray();
 				}

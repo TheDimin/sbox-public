@@ -16,7 +16,7 @@ internal static class GltfUnlitSourceMaterialAdapter
 		internal GltfStockMaterialAdapter.SourceTexture BaseColor { get; init; }
 	}
 
-	internal static Prepared Prepare( GltfDocument document, GltfMaterial material, int? materialIndex = null, Func<int, GltfImage> imageReader = null )
+	internal static Prepared Prepare( GltfDocument document, GltfMaterial material, int? materialIndex = null, Func<int, GltfImage> imageReader = null, GltfTextureCompile compileTexture = null )
 	{
 		ArgumentNullException.ThrowIfNull( document );
 		imageReader ??= document.ReadImage;
@@ -29,13 +29,15 @@ internal static class GltfUnlitSourceMaterialAdapter
 			var sampling = GltfSamplerMapping.Map( binding.Sampler, 9987, 9729 );
 			var encoded = imageReader( image );
 			document.ValidateTextureImage( binding.TextureInfo.Index, encoded );
-			var resource = sampling.RequiresBaseMipOnly ? GltfTextureCompiler.Compile( encoded, true ) : GltfTextureCompiler.CompileWithMipmaps( encoded, true );
+			var mipmaps = !sampling.RequiresBaseMipOnly;
+			byte[] Create() => mipmaps ? GltfTextureCompiler.CompileWithMipmaps( encoded, true ) : GltfTextureCompiler.Compile( encoded, true );
+			var resource = compileTexture is null ? Create() : compileTexture( encoded, true, mipmaps, Create );
 			color = new( binding, sampling, resource );
 		}
 		return new() { Plan = plan, BaseColor = color };
 	}
 
-	internal static GltfMaterialLease<Material> Acquire( Prepared prepared, Material template, GltfMaterialUvPlan uv, GltfMaterialUvProjection projection )
+	internal static GltfNativeMaterialRecipe BuildRecipe( Prepared prepared, Material template, GltfMaterialUvPlan uv, GltfMaterialUvProjection projection )
 	{
 		ArgumentNullException.ThrowIfNull( prepared ); ArgumentNullException.ThrowIfNull( template );
 		ArgumentNullException.ThrowIfNull( uv ); ArgumentNullException.ThrowIfNull( projection );
@@ -69,50 +71,36 @@ internal static class GltfUnlitSourceMaterialAdapter
 		}
 		foreach ( var value in vectors ) Require( template, value.Key );
 		foreach ( var value in scalars ) Require( template, value.Key );
-		var ownerContext = GlobalContext.Current;
-		GltfMaterialLease<Texture> texture = null; GltfMaterialLease<Material> material = null;
-		try
+		var slots = prepared.BaseColor is { } source ? new[] { new GltfNativeTextureSlot( "g_tGltfBaseColorTexture", source.Resource, source.Sampling.State, "GltfBaseColorSampler" ) } : [];
+		return new GltfNativeMaterialRecipe( null, [],
+			[new( "F_RENDER_BACKFACES", prepared.Plan.CullBackFaces ? 0 : 1 ), new( "F_ALPHA_TEST", mask ? 1 : 0 ), new( "F_TRANSLUCENT", blend ? 1 : 0 )], [.. vectors], [.. scalars], slots );
+	}
+
+	internal static GltfMaterialLease<Material> Acquire( Prepared prepared, Material template, GltfMaterialUvPlan uv, GltfMaterialUvProjection projection )
+	{
+		var recipe = BuildRecipe( prepared, template, uv, projection );
+		var mask = prepared.Plan.AlphaMode == GltfUnlitMaterialPlan.CoverageMode.Mask;
+		var blend = prepared.Plan.AlphaMode == GltfUnlitMaterialPlan.CoverageMode.Blend;
+		return recipe.Realize( template, material => VerifyValues( recipe, material, mask, blend ) );
+	}
+
+	/// <summary>The unlit material kept its alpha classification and the exact values of its recipe.</summary>
+	internal static void VerifyValues( GltfNativeMaterialRecipe recipe, Material material, bool mask, bool blend )
+	{
+		if ( material.Flags.IsTranslucent != blend || material.Flags.IsAlphaTest != mask )
+			throw new GltfException( "The unlit material did not retain its requested native alpha classification." );
+		foreach ( var value in recipe.Vectors )
 		{
-			var bindings = new List<GltfMaterialTextureBinding>();
-			if ( prepared.BaseColor is { } source )
-			{
-				texture = GltfNativeTextureCache.Acquire( source.Resource );
-				bindings.Add( new( "g_tGltfBaseColorTexture", texture.Value, texture.Value.DirtyVersion, source.Sampling.State, "GltfBaseColorSampler" ) );
-			}
-			var key = new GltfMaterialKey( template, 0,
-				[new( "F_RENDER_BACKFACES", prepared.Plan.CullBackFaces ? 0 : 1 ), new( "F_ALPHA_TEST", mask ? 1 : 0 ), new( "F_TRANSLUCENT", blend ? 1 : 0 )], vectors, bindings, scalars );
-			material = GltfMaterialCache.Shared.Acquire( key );
-			if ( material.Value.Flags.IsTranslucent != blend || material.Value.Flags.IsAlphaTest != mask )
-				throw new GltfException( "The unlit material did not retain its requested native alpha classification." );
-			foreach ( var value in vectors )
-			{
-				var actual = material.Value.GetVector4( value.Key );
-				if ( actual.x != value.Value.x || actual.y != value.Value.y || actual.z != value.Value.z || (value.Key == "g_vGltfBaseColor" && actual.w != value.Value.w) )
-					throw new GltfException( $"Unlit material vector {value.Key} did not retain its values." );
-			}
-			foreach ( var value in scalars )
-				if ( material.Value.GetVector4( value.Key ).x != value.Value ) throw new GltfException( $"Unlit material scalar {value.Key} did not retain its value." );
-			var retainedMaterial = material; var retainedTexture = texture;
-			return new GltfMaterialLease<Material>( material.Value, () =>
-			{
-				using var scope = new GlobalContext.GlobalContextScope( ownerContext );
-				GltfGpuCleanup.ReleaseAll( ReleaseSteps( retainedMaterial, retainedTexture ) );
-			}, () => ThreadSafe.AssertIsMainThread() );
+			var actual = material.GetVector4( value.Key );
+			if ( actual.x != value.Value.x || actual.y != value.Value.y || actual.z != value.Value.z || (value.Key == "g_vGltfBaseColor" && actual.w != value.Value.w) )
+				throw new GltfException( $"Unlit material vector {value.Key} did not retain its values." );
 		}
-		catch ( Exception original )
-		{
-			GltfGpuCleanup.Rollback( original, ReleaseSteps( material, texture ) );
-			throw;
-		}
+		foreach ( var value in recipe.Scalars )
+			if ( material.GetVector4( value.Key ).x != value.Value ) throw new GltfException( $"Unlit material scalar {value.Key} did not retain its value." );
 	}
 
 	private static void Require( Material template, string name )
 	{
 		if ( !template.HasParameter( name ) ) throw new GltfException( $"The provided unlit source template does not declare required parameter {name}." );
-	}
-	private static IEnumerable<Action> ReleaseSteps( GltfMaterialLease<Material> material, GltfMaterialLease<Texture> texture )
-	{
-		if ( material is not null ) yield return material.Dispose;
-		if ( texture is not null ) yield return texture.Dispose;
 	}
 }

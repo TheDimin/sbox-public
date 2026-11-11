@@ -128,8 +128,18 @@ public sealed partial class GltfDocument
 					storage = new GltfUploadStorage( MaterializeUploadAccessor( binding.AccessorIndex, accessorLengths[binding.AccessorIndex] ) );
 					accessors.Add( binding.AccessorIndex, storage );
 				}
-				return new GltfUploadStream { Binding = binding, Storage = storage, ByteOffset = 0, ByteStride = Accessor( binding.AccessorIndex ).Stride,
-					Count = binding.Count, ComponentType = binding.ComponentType, Components = binding.Components, Normalized = binding.Normalized, IsMaterialized = true };
+				return new GltfUploadStream
+				{
+					Binding = binding,
+					Storage = storage,
+					ByteOffset = 0,
+					ByteStride = Accessor( binding.AccessorIndex ).Stride,
+					Count = binding.Count,
+					ComponentType = binding.ComponentType,
+					Components = binding.Components,
+					Normalized = binding.Normalized,
+					IsMaterialized = true
+				};
 			}
 			var view = binding.SourceBufferView.Value;
 			if ( !views.TryGetValue( view, out var viewStorage ) )
@@ -139,10 +149,18 @@ public sealed partial class GltfDocument
 				viewStorage = new GltfUploadStorage( bytes.ToArray() );
 				views.Add( view, viewStorage );
 			}
-			return new GltfUploadStream { Binding = binding, Storage = viewStorage, ByteOffset = binding.AccessorByteOffset ?? throw new GltfException( "Upload source offset is unavailable." ),
+			return new GltfUploadStream
+			{
+				Binding = binding,
+				Storage = viewStorage,
+				ByteOffset = binding.AccessorByteOffset ?? throw new GltfException( "Upload source offset is unavailable." ),
 				ByteStride = binding.ByteStride ?? throw new GltfException( "Upload source stride is unavailable." ),
-				Count = binding.Count, ComponentType = binding.ComponentType, Components = binding.Components, Normalized = binding.Normalized,
-				IsMaterialized = (binding.Materialization & GltfUploadMaterialization.Meshopt) != 0 };
+				Count = binding.Count,
+				ComponentType = binding.ComponentType,
+				Components = binding.Components,
+				Normalized = binding.Normalized,
+				IsMaterialized = (binding.Materialization & GltfUploadMaterialization.Meshopt) != 0
+			};
 		}
 
 		var decodedStreams = new Dictionary<string, GltfUploadStream>( StringComparer.Ordinal );
@@ -167,8 +185,18 @@ public sealed partial class GltfDocument
 				{
 					var data = decoded.Attributes[item.Key];
 					var store = data.HasSparseOverrides ? sparseStores[item.Value.AccessorIndex] : baseStorage;
-					decodedStreams.Add( item.Key, new GltfUploadStream { Binding = item.Value, Storage = store, ByteOffset = 0,
-						ByteStride = data.ByteStride, Count = data.Count, ComponentType = data.ComponentType, Components = data.Components, Normalized = data.Normalized, IsMaterialized = true } );
+					decodedStreams.Add( item.Key, new GltfUploadStream
+					{
+						Binding = item.Value,
+						Storage = store,
+						ByteOffset = 0,
+						ByteStride = data.ByteStride,
+						Count = data.Count,
+						ComponentType = data.ComponentType,
+						Components = data.Components,
+						Normalized = data.Normalized,
+						IsMaterialized = true
+					} );
 				}
 			}
 		}
@@ -189,8 +217,18 @@ public sealed partial class GltfDocument
 					if ( index >= decoded.VertexCount || index >= restart ) throw new GltfException( "Sparse Draco index exceeds its vertex or component range." );
 				}
 			}
-			indices = new GltfUploadStream { Binding = layout.Indices, Storage = new GltfUploadStorage( source.Bytes ), ByteOffset = 0,
-				ByteStride = source.ByteStride, Count = source.Count, ComponentType = source.ComponentType, Components = source.Components, Normalized = source.Normalized, IsMaterialized = true };
+			indices = new GltfUploadStream
+			{
+				Binding = layout.Indices,
+				Storage = new GltfUploadStorage( source.Bytes ),
+				ByteOffset = 0,
+				ByteStride = source.ByteStride,
+				Count = source.Count,
+				ComponentType = source.ComponentType,
+				Components = source.Components,
+				Normalized = source.Normalized,
+				IsMaterialized = true
+			};
 		}
 		else indices = layout.Indices is null ? null : Copy( layout.Indices );
 		return new GltfPrimitiveUploadData { Layout = layout, Attributes = new ReadOnlyDictionary<string, GltfUploadStream>( attributes ), Indices = indices, OwnedBytes = required };
@@ -202,14 +240,14 @@ public sealed partial class GltfDocument
 		var binding = stream.Binding;
 		var bytes = stream.Storage.Bytes.Span;
 		for ( var element = 0; element < stream.Count; element++ )
-		for ( var column = 0; column < binding.Columns; column++ )
-		for ( var row = 0; row < binding.Rows; row++ )
-		{
-			var offset = stream.ByteOffset + element * stream.ByteStride + column * binding.ColumnStride + row * sizeof(float);
-			var bits = BinaryPrimitives.ReadInt32LittleEndian( bytes.Slice( offset, sizeof(float) ) );
-			if ( (bits & 0x7f800000) == 0x7f800000 )
-				throw new GltfException( $"Upload attribute '{semantic}' contains a non-finite floating-point value." );
-		}
+			for ( var column = 0; column < binding.Columns; column++ )
+				for ( var row = 0; row < binding.Rows; row++ )
+				{
+					var offset = stream.ByteOffset + element * stream.ByteStride + column * binding.ColumnStride + row * sizeof( float );
+					var bits = BinaryPrimitives.ReadInt32LittleEndian( bytes.Slice( offset, sizeof( float ) ) );
+					if ( (bits & 0x7f800000) == 0x7f800000 )
+						throw new GltfException( $"Upload attribute '{semantic}' contains a non-finite floating-point value." );
+				}
 	}
 
 	private byte[] MaterializeUploadAccessor( int index, int byteLength )

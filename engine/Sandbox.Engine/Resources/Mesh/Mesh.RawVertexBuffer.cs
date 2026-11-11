@@ -91,7 +91,7 @@ public partial class Mesh
 		if ( vb.IsValid ) throw new InvalidOperationException( "Vertex buffer has already been created." );
 		var snapshot = fields.ToArray();
 		RawVertexLayout.Validate( stride, vertexCount, data.Length, snapshot );
-		var capacity = checked( stride * vertexCount );
+		var capacity = checked(stride * vertexCount);
 		// Complete only missing tail padding. Preserve all supplied source bytes.
 		if ( data.Length != capacity ) data = RawVertexLayout.PadTrailingBytes( data, capacity );
 		vb = VertexBufferHandle.CreateRaw( stride, vertexCount, snapshot );

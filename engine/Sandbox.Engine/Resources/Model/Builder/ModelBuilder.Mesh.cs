@@ -118,6 +118,9 @@ public sealed partial class ModelBuilder
 		return AddMesh( mesh, 1 << lod, groupMask );
 	}
 
+	/// <summary>Add a mesh to the LOD levels in a mask, one bit per level. A mesh outside every LOD chain uses all levels.</summary>
+	internal ModelBuilder AddMeshWithLodMask( Mesh mesh, int lodMask ) => AddMesh( mesh, lodMask, ulong.MaxValue );
+
 	private ModelBuilder AddMesh( Mesh mesh, int lodMask, ulong bodyGroupMask )
 	{
 		if ( mesh == null || !mesh.IsValid )

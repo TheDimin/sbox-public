@@ -66,9 +66,13 @@ public sealed partial class GltfDocument
 		{
 			Mode = source.Mode == 0 ? 0 : source.Mode <= 3 ? 1 : 4,
 			Material = source.Material,
-			HasSkinning = source.Attributes.ContainsKey( "JOINTS_0" ), HasMorphTargets = hasMorphTargets,
+			HasSkinning = source.Attributes.ContainsKey( "JOINTS_0" ),
+			HasMorphTargets = hasMorphTargets,
 			Indices = GltfGeometry.ExpandIndices( source.Indices, source.Mode ),
-			Positions = positions, Normals = normals, Tangents = tangents, Colors = colors,
+			Positions = positions,
+			Normals = normals,
+			Tangents = tangents,
+			Colors = colors,
 			TexCoords = new ReadOnlyDictionary<int, ReadOnlyMemory<Vector2>>( coordinates )
 		};
 	}

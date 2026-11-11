@@ -28,7 +28,8 @@ internal struct GltfGpuMatrix
 
 internal sealed class GltfGpuRig
 {
-	private static readonly NMatrix Basis = new( 0, 1f / .0254f, 0, 0, 0, 0, 1f / .0254f, 0, 1f / .0254f, 0, 0, 0, 0, 0, 0, 1 );
+	/// <summary>glTF metres, Y up, to engine inches, Z up.</summary>
+	internal static readonly NMatrix Basis = new( 0, 1f / .0254f, 0, 0, 0, 0, 1f / .0254f, 0, 1f / .0254f, 0, 0, 0, 0, 0, 0, 1 );
 	private readonly GltfDocument document;
 	private readonly int node;
 	private readonly GltfSkin skin;
@@ -168,9 +169,13 @@ internal sealed class GltfGpuRig
 		var offset = checked((int)descriptor.ByteOffset + vertex * (int)descriptor.ByteStride + component * size);
 		var value = descriptor.ComponentType switch
 		{
-			5120 => (float)(sbyte)data[offset], 5121 => data[offset], 5122 => BinaryPrimitives.ReadInt16LittleEndian( data.AsSpan( offset ) ),
-			5123 => BinaryPrimitives.ReadUInt16LittleEndian( data.AsSpan( offset ) ), 5125 => BinaryPrimitives.ReadUInt32LittleEndian( data.AsSpan( offset ) ),
-			5126 => BinaryPrimitives.ReadSingleLittleEndian( data.AsSpan( offset ) ), _ => throw new GltfException( "Unknown GPU input component type." )
+			5120 => (float)(sbyte)data[offset],
+			5121 => data[offset],
+			5122 => BinaryPrimitives.ReadInt16LittleEndian( data.AsSpan( offset ) ),
+			5123 => BinaryPrimitives.ReadUInt16LittleEndian( data.AsSpan( offset ) ),
+			5125 => BinaryPrimitives.ReadUInt32LittleEndian( data.AsSpan( offset ) ),
+			5126 => BinaryPrimitives.ReadSingleLittleEndian( data.AsSpan( offset ) ),
+			_ => throw new GltfException( "Unknown GPU input component type." )
 		};
 		return descriptor.Normalized == 0 ? value : descriptor.ComponentType switch { 5120 => Math.Max( value / 127f, -1f ), 5121 => value / 255f, 5122 => Math.Max( value / 32767f, -1f ), 5123 => value / 65535f, _ => throw new GltfException( "Invalid normalized GPU component type." ) };
 	}

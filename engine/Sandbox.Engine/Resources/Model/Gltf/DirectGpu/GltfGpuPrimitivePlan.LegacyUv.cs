@@ -26,8 +26,14 @@ internal sealed partial class GltfGpuPrimitivePlan
 		Array.Copy( InputDescriptors, 0, descriptors, 0, BaseAttributeCount );
 		descriptors[BaseAttributeCount] = new GltfGpuInputDescriptor
 		{
-			ByteOffset = (uint)InputBytes.Length, ByteStride = 8, ComponentType = 5126, Components = 2,
-			Normalized = 0, Role = 4, SemanticIndex = 0, Target = uint.MaxValue
+			ByteOffset = (uint)InputBytes.Length,
+			ByteStride = 8,
+			ComponentType = 5126,
+			Components = 2,
+			Normalized = 0,
+			Role = 4,
+			SemanticIndex = 0,
+			Target = uint.MaxValue
 		};
 		Array.Copy( InputDescriptors, BaseAttributeCount, descriptors, BaseAttributeCount + 1, InputDescriptors.Length - BaseAttributeCount );
 		var rawOutput = (GltfGpuOutputDescriptor[])OutputDescriptors.Clone();
@@ -47,12 +53,26 @@ internal sealed partial class GltfGpuPrimitivePlan
 
 		GltfGpuPrimitivePlan Copy( GltfGpuOutputDescriptor[] output ) => new()
 		{
-			OwnerDocument = OwnerDocument, Mesh = Mesh, Primitive = Primitive, Upload = Upload,
-			InputBytes = bytes, Sources = Sources, Fields = Fields, SourceVertices = SourceVertices, Indices = Indices,
-			VertexStride = VertexStride, GenerateFlatNormals = GenerateFlatNormals, Mode = Mode, SourceMode = SourceMode,
-			Material = Material, InputDescriptors = descriptors, OutputDescriptors = output,
-			BaseAttributeCount = checked(BaseAttributeCount + 1), MorphTargetCount = MorphTargetCount,
-			MaterialUv = MaterialUv, UvProjection = UvProjection
+			OwnerDocument = OwnerDocument,
+			Mesh = Mesh,
+			Primitive = Primitive,
+			Upload = Upload,
+			InputBytes = bytes,
+			Sources = Sources,
+			Fields = Fields,
+			SourceVertices = SourceVertices,
+			Indices = Indices,
+			VertexStride = VertexStride,
+			GenerateFlatNormals = GenerateFlatNormals,
+			Mode = Mode,
+			SourceMode = SourceMode,
+			Material = Material,
+			InputDescriptors = descriptors,
+			OutputDescriptors = output,
+			BaseAttributeCount = checked(BaseAttributeCount + 1),
+			MorphTargetCount = MorphTargetCount,
+			MaterialUv = MaterialUv,
+			UvProjection = UvProjection
 		};
 	}
 }

@@ -6,6 +6,7 @@ public partial class ModelRenderer
 {
 	private GltfVariantCatalog.Selection gltfVariantSelection;
 	private GltfManagedModelResource gltfVariantResource;
+	private int? nativeVariant;
 
 	/// <summary>
 	/// Select one authored glTF material variant by source index for this renderer.
@@ -13,11 +14,21 @@ public partial class ModelRenderer
 	/// </summary>
 	public int? MaterialVariant
 	{
-		get => gltfVariantSelection?.Index;
+		get => Model?.GltfResource is null && Model?.GltfNativeVariants is not null ? nativeVariant : gltfVariantSelection?.Index;
 		set
 		{
 			ThreadSafe.AssertIsMainThread();
 			var resource = Model?.GltfResource;
+			if ( resource is null && Model?.GltfNativeVariants is { } variants )
+			{
+				// A compiled native model keeps each variant as a native material group.
+				if ( value is int index && (uint)index >= (uint)variants.Count ) throw new ArgumentOutOfRangeException( nameof( value ) );
+				nativeVariant = value;
+				// A scene shows the variant through each node's material group; a single model through its own groups.
+				if ( Model.GltfNativeScene is not null ) UpdateGltfScene();
+				else MaterialGroup = value is int chosen ? GltfNativeCompiler.GroupName( chosen ) : "default";
+				return;
+			}
 			if ( resource is null )
 			{
 				if ( value is not null ) throw new NotSupportedException( "Material variants require a managed glTF model." );

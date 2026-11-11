@@ -17,6 +17,12 @@ public sealed partial class SkinnedModelRenderer
 	private GltfAnimationController gltfController;
 	private GltfAnimationMixer gltfMixer;
 	private Model gltfControllerModel;
+
+	/// <summary>
+	/// Editor hook: glTF node local transforms (glTF space, null keeps the rest transform) that replace the
+	/// animation every frame. The glTF editor uses it to pose the model from node GameObjects on a timeline.
+	/// </summary>
+	internal Func<int, NMatrix?> GltfNodeLocalOverride { get; set; }
 	private sealed record GltfAnimationState( GltfAnimationSequence Sequence, GltfManagedModelResource Resource,
 		GltfGpuInstance Instance, GltfPose Pose, double Delta, bool Pending, bool BindPose, bool ShowingRest, Dictionary<int, GltfMorphFade> MorphOverrides,
 		GltfAnimationController Controller, GltfAnimationMixer Mixer, Model ControllerModel );
@@ -127,7 +133,7 @@ public sealed partial class SkinnedModelRenderer
 				{
 					var changed = gltfMixer is null ? gltfSequence.Advance( delta, PlaybackRate ) : gltfMixer.Advance( delta, gltfController.PlaybackRate );
 					changed |= AdvanceGltfMorphs( delta );
-					if ( changed || gltfShowingRestPose ) ApplyGltfPose();
+					if ( changed || gltfShowingRestPose || GltfNodeLocalOverride is not null ) ApplyGltfPose();
 				}
 			}
 			UpdateGltfBoneObjects();
@@ -139,7 +145,9 @@ public sealed partial class SkinnedModelRenderer
 		ThreadSafe.AssertIsMainThread();
 		if ( gltfSequence is null || !ReferenceEquals( gltfAnimationInstance, GltfInstance ) ) return;
 		var animation = gltfAnimationResource.Metadata.Animation;
-		var pose = rest ? animation.EvaluatePose( null, 0 ) : gltfMixer is not null ? gltfMixer.EvaluatePose() : animation.EvaluatePose( gltfSequence.Clip, gltfSequence.Time );
+		var pose = rest ? animation.EvaluatePose( null, 0 )
+			: GltfNodeLocalOverride is { } local ? animation.CreatePose( local )
+			: gltfMixer is not null ? gltfMixer.EvaluatePose() : animation.EvaluatePose( gltfSequence.Clip, gltfSequence.Time );
 		if ( !rest ) pose = ApplyGltfMorphs( pose );
 		gltfAnimationInstance.SetPose( pose );
 		gltfPose = pose;

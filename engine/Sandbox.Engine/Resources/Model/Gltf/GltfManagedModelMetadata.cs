@@ -63,7 +63,7 @@ internal sealed class GltfManagedModelMetadata
 			if ( parents[node] >= 0 ) AddParentFirst( parents[node] );
 			ordered.Add( node );
 		}
-		var indices = ordered.Select( (node, index) => (node, index) ).ToDictionary( pair => pair.node, pair => pair.index );
+		var indices = ordered.Select( ( node, index ) => (node, index) ).ToDictionary( pair => pair.node, pair => pair.index );
 		var names = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
 		var bones = new List<Bone>();
 		foreach ( var node in ordered )

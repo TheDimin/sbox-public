@@ -93,9 +93,12 @@ public static class GltfDraco
 				if ( attribute.internalPtr == IntPtr.Zero ) throw new GltfException( "Draco returned an invalid attribute." );
 				var type = attribute.dataType switch
 				{
-					NativeDraco.DataType.DT_INT8 => 5120, NativeDraco.DataType.DT_UINT8 => 5121,
-					NativeDraco.DataType.DT_INT16 => 5122, NativeDraco.DataType.DT_UINT16 => 5123,
-					NativeDraco.DataType.DT_UINT32 => 5125, NativeDraco.DataType.DT_FLOAT32 => 5126,
+					NativeDraco.DataType.DT_INT8 => 5120,
+					NativeDraco.DataType.DT_UINT8 => 5121,
+					NativeDraco.DataType.DT_INT16 => 5122,
+					NativeDraco.DataType.DT_UINT16 => 5123,
+					NativeDraco.DataType.DT_UINT32 => 5125,
+					NativeDraco.DataType.DT_FLOAT32 => 5126,
 					_ => throw new GltfException( "Draco attribute type cannot be represented by a core glTF accessor." )
 				};
 				var components = attribute.numComponents;
@@ -135,7 +138,8 @@ public static class GltfDraco
 					if ( attributeData.dataType != descriptor.Native.dataType ) throw new GltfException( "Draco attribute data type changed during extraction." );
 					attributes.Add( descriptor.Id, new GltfDracoAttribute
 					{
-						ComponentType = descriptor.Type, Components = descriptor.Components,
+						ComponentType = descriptor.Type,
+						Components = descriptor.Components,
 						Bytes = CopyData( attributeData, descriptor.Bytes )
 					} );
 				}

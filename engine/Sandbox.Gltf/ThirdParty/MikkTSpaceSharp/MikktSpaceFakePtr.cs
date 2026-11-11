@@ -12,7 +12,7 @@ namespace Sandbox.Gltf.Internal.MikkTSpaceSharp
 			set => _data[index + _offset] = value;
 		}
 
-		public MikktSpaceFakePtr(T[] data, long offset = 0)
+		public MikktSpaceFakePtr( T[] data, long offset = 0 )
 		{
 			_data = data;
 			_offset = offset;

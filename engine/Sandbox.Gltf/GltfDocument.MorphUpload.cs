@@ -87,9 +87,18 @@ public sealed partial class GltfDocument
 					storage = new GltfUploadStorage( MaterializeUploadAccessor( binding.AccessorIndex, accessorLengths[binding.AccessorIndex] ) );
 					accessors.Add( binding.AccessorIndex, storage );
 				}
-				return new GltfUploadStream { Binding = binding, Storage = storage, ByteOffset = 0,
-					ByteStride = Accessor( binding.AccessorIndex ).Stride, Count = binding.Count, ComponentType = binding.ComponentType,
-					Components = binding.Components, Normalized = binding.Normalized, IsMaterialized = true };
+				return new GltfUploadStream
+				{
+					Binding = binding,
+					Storage = storage,
+					ByteOffset = 0,
+					ByteStride = Accessor( binding.AccessorIndex ).Stride,
+					Count = binding.Count,
+					ComponentType = binding.ComponentType,
+					Components = binding.Components,
+					Normalized = binding.Normalized,
+					IsMaterialized = true
+				};
 			}
 			var view = binding.SourceBufferView.Value;
 			if ( !views.TryGetValue( view, out var viewStorage ) )
@@ -99,11 +108,18 @@ public sealed partial class GltfDocument
 				viewStorage = new GltfUploadStorage( bytes.ToArray() );
 				views.Add( view, viewStorage );
 			}
-			return new GltfUploadStream { Binding = binding, Storage = viewStorage,
+			return new GltfUploadStream
+			{
+				Binding = binding,
+				Storage = viewStorage,
 				ByteOffset = binding.AccessorByteOffset ?? throw new GltfException( "Morph upload source offset is unavailable." ),
 				ByteStride = binding.ByteStride ?? throw new GltfException( "Morph upload source stride is unavailable." ),
-				Count = binding.Count, ComponentType = binding.ComponentType, Components = binding.Components, Normalized = binding.Normalized,
-				IsMaterialized = (binding.Materialization & GltfUploadMaterialization.Meshopt) != 0 };
+				Count = binding.Count,
+				ComponentType = binding.ComponentType,
+				Components = binding.Components,
+				Normalized = binding.Normalized,
+				IsMaterialized = (binding.Materialization & GltfUploadMaterialization.Meshopt) != 0
+			};
 		}
 
 		var output = new List<IReadOnlyDictionary<string, GltfUploadStream>>( targets.Count );

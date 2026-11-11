@@ -31,7 +31,8 @@ public partial class Bitmap
 			}
 		}
 
-		return CreateFromTgaBytes( data )
+		return CreateFromKtx2Bytes( data )
+			?? CreateFromTgaBytes( data )
 			?? CreateFromPsdBytes( data )
 			?? CreateFromTifBytes( data )
 			?? CreateFromIesBytes( data );

@@ -5,14 +5,14 @@ namespace Sandbox.Gltf.Internal.MikkTSpaceSharp
 {
 	internal static class Utility
 	{
-		public static double ToRadians(double angles)
+		public static double ToRadians( double angles )
 		{
 			return angles * Math.PI / 180.0;
 		}
 
-		public static bool NotZero(this float fX)
+		public static bool NotZero( this float fX )
 		{
-			return Math.Abs(fX) > 1.1754943508222875E-38;
+			return Math.Abs( fX ) > 1.1754943508222875E-38;
 		}
 	}
 }

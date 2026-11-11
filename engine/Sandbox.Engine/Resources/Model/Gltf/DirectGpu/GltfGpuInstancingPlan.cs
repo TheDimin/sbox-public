@@ -58,14 +58,21 @@ internal sealed record GltfGpuInstancingAttribute
 		// This is metadata arithmetic only: no component bytes are read here.
 		var (rows, columns) = accessor.GetProperty( "type" ).GetString() switch
 		{
-			"SCALAR" => (1, 1), "VEC2" => (2, 1), "VEC3" => (3, 1), "VEC4" => (4, 1),
-			"MAT2" => (2, 2), "MAT3" => (3, 3), "MAT4" => (4, 4),
+			"SCALAR" => (1, 1),
+			"VEC2" => (2, 1),
+			"VEC3" => (3, 1),
+			"VEC4" => (4, 1),
+			"MAT2" => (2, 2),
+			"MAT3" => (3, 3),
+			"MAT4" => (4, 4),
 			_ => throw new GltfException( "Instance accessor has an invalid type." )
 		};
 		Components = rows * columns;
 		var componentBytes = ComponentType switch
 		{
-			5120 or 5121 => 1, 5122 or 5123 => 2, 5125 or 5126 => 4,
+			5120 or 5121 => 1,
+			5122 or 5123 => 2,
+			5125 or 5126 => 4,
 			_ => throw new GltfException( "Instance accessor has an invalid component type." )
 		};
 		var columnBytes = columns == 1 ? rows * componentBytes : (rows * componentBytes + 3) & ~3;
@@ -129,7 +136,7 @@ internal sealed class GltfGpuInstancingPlan
 			JsonElement? view = accessor.TryGetProperty( "bufferView", out var viewIndex ) ? document.Root.GetProperty( "bufferViews" )[viewIndex.GetInt32()] : null;
 			attributes.Add( attribute.Name, new( attribute.Name, index, accessor, view ) );
 		}
-		var instances = transforms.Select( (matrix, index) => new GltfGpuInstancingRow( node, index, matrix ) ).ToList();
+		var instances = transforms.Select( ( matrix, index ) => new GltfGpuInstancingRow( node, index, matrix ) ).ToList();
 		return new( node, mesh, true, true, instances, attributes );
 	}
 }

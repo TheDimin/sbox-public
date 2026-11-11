@@ -79,9 +79,17 @@ public sealed partial class GltfDocument
 			foreach ( var (semantic, mapping) in mappings )
 			{
 				var layout = mapping.Layout;
-				streams.Add( semantic, new GltfDracoStream { AccessorIndex = mapping.Accessor, Count = layout.Count,
-					ComponentType = layout.ComponentType, Components = layout.Components, Normalized = layout.Normalized,
-					ByteStride = layout.Size * layout.Components, HasSparseOverrides = layout.Json.TryGetProperty( "sparse", out _ ), Bytes = copies[mapping.Id] } );
+				streams.Add( semantic, new GltfDracoStream
+				{
+					AccessorIndex = mapping.Accessor,
+					Count = layout.Count,
+					ComponentType = layout.ComponentType,
+					Components = layout.Components,
+					Normalized = layout.Normalized,
+					ByteStride = layout.Size * layout.Components,
+					HasSparseOverrides = layout.Json.TryGetProperty( "sparse", out _ ),
+					Bytes = copies[mapping.Id]
+				} );
 			}
 			var packedIndices = new byte[(int)indexBytes];
 			for ( var i = 0; i < decoded.Indices.Length; i++ )
@@ -95,10 +103,24 @@ public sealed partial class GltfDocument
 					case 4: BinaryPrimitives.WriteUInt32LittleEndian( target, index ); break;
 				}
 			}
-			return new GltfDracoPrimitiveData { VertexCount = decoded.VertexCount, SourceMode = mode, OwnedBytes = ownedBytes,
+			return new GltfDracoPrimitiveData
+			{
+				VertexCount = decoded.VertexCount,
+				SourceMode = mode,
+				OwnedBytes = ownedBytes,
 				Attributes = new ReadOnlyDictionary<string, GltfDracoStream>( streams ),
-				Indices = new GltfDracoStream { AccessorIndex = indexAccessor, Count = decoded.Indices.Length, ComponentType = indexType,
-					Components = 1, Normalized = false, ByteStride = indexWidth, HasSparseOverrides = sparseIndices, Bytes = packedIndices } };
+				Indices = new GltfDracoStream
+				{
+					AccessorIndex = indexAccessor,
+					Count = decoded.Indices.Length,
+					ComponentType = indexType,
+					Components = 1,
+					Normalized = false,
+					ByteStride = indexWidth,
+					HasSparseOverrides = sparseIndices,
+					Bytes = packedIndices
+				}
+			};
 		}
 	}
 
@@ -324,7 +346,7 @@ public sealed partial class GltfDocument
 		if ( remaining < 0 ) throw new GltfException( "Decoded buffer budget exceeded." );
 		var decoded = GltfDraco.Decode( source.ToArray(), remaining );
 		if ( decoded.VertexCount <= 0 || decoded.Indices is null || decoded.Attributes is null ) throw new GltfException( "Draco decoder returned an invalid mesh." );
-		long size = (long)decoded.Indices.Length * sizeof(uint);
+		long size = (long)decoded.Indices.Length * sizeof( uint );
 		foreach ( var attribute in decoded.Attributes.Values )
 		{
 			if ( attribute?.Bytes is null ) throw new GltfException( "Draco decoder returned invalid attribute data." );

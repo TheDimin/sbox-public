@@ -56,9 +56,14 @@ internal sealed class GltfLegacyUvBakePlan
 			selected.Transform.Tiling == NVector2.One && selected.Transform.Rotation == 0;
 		if ( skipIdentity && identity ) return null;
 		var stream = selected.Source;
-		var componentSize = stream.ComponentType switch { 5120 or 5121 => 1, 5122 or 5123 => 2, 5125 or 5126 => 4,
-			_ => throw new GltfException( "Texture coordinates have an unsupported upload component type." ) };
-		var bytes = new byte[checked(stream.Count * 2 * sizeof(float))];
+		var componentSize = stream.ComponentType switch
+		{
+			5120 or 5121 => 1,
+			5122 or 5123 => 2,
+			5125 or 5126 => 4,
+			_ => throw new GltfException( "Texture coordinates have an unsupported upload component type." )
+		};
+		var bytes = new byte[checked(stream.Count * 2 * sizeof( float ))];
 		var source = stream.Storage.Bytes.Span;
 		for ( var vertex = 0; vertex < stream.Count; vertex++ )
 		{
