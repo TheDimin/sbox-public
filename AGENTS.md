@@ -42,3 +42,10 @@ Engine and Integration tests need the `FACEPUNCH_ENGINE` environment variable po
 - Keep pull requests small and in scope. Reference the issue you're fixing. Add a unit test where one fits.
 - The public API surface that addons compile against is deliberately controlled. Exposing a new .NET
   type to game code means adding it to the access allow-list in `engine/Sandbox.Access/`, not bypassing it.
+
+## Paused work: glTF runtime
+
+The glTF runtime work (direct GPU backend, MSFT_lod, `.glb_c` compiler, KTX/Basis textures) is paused since 2026-11-11.
+Before you continue it, read `research/gltf-direct-gpu-path.md`. It has the status, the resume steps
+(including how to find the stash), the engine API limits, the recommended vertex-pulling route, the
+performance evidence, and the next steps in order.

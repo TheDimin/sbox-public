@@ -72,9 +72,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -88,8 +88,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 397
+          "width": 1024,
+          "height": 794
         }
       },
       "animation": {
@@ -202,9 +202,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -218,8 +218,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 397
+          "width": 1024,
+          "height": 794
         }
       },
       "animation": {
@@ -332,9 +332,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -348,8 +348,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 397
+          "width": 1024,
+          "height": 794
         }
       },
       "animation": {
@@ -462,9 +462,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -478,8 +478,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 237
+          "width": 1024,
+          "height": 475
         }
       },
       "animation": {
@@ -592,9 +592,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -608,8 +608,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 237
+          "width": 1024,
+          "height": 475
         }
       },
       "animation": {
@@ -739,9 +739,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -755,8 +755,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 287
+          "width": 1024,
+          "height": 573
         }
       },
       "animation": {
@@ -1433,9 +1433,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -1449,8 +1449,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 287
+          "width": 1024,
+          "height": 573
         }
       },
       "animation": {
@@ -2140,9 +2140,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -2156,8 +2156,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 383
+          "width": 1024,
+          "height": 765
         }
       },
       "animation": {
@@ -2423,9 +2423,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -2439,8 +2439,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 485,
-          "height": 512
+          "width": 970,
+          "height": 1024
         }
       },
       "animation": {
@@ -2808,9 +2808,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -2824,8 +2824,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 485,
-          "height": 512
+          "width": 970,
+          "height": 1024
         }
       },
       "animation": {
@@ -3193,9 +3193,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -3209,8 +3209,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 485,
-          "height": 512
+          "width": 970,
+          "height": 1024
         }
       },
       "animation": {
@@ -3521,9 +3521,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -3537,8 +3537,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 481
+          "width": 1024,
+          "height": 963
         }
       },
       "animation": {
@@ -3862,9 +3862,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -3878,8 +3878,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 481
+          "width": 1024,
+          "height": 963
         }
       },
       "animation": {
@@ -4181,9 +4181,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -4197,8 +4197,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 273
+          "width": 1024,
+          "height": 546
         }
       },
       "animation": {
@@ -4321,9 +4321,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -4337,8 +4337,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 273
+          "width": 1024,
+          "height": 546
         }
       },
       "animation": {
@@ -4459,9 +4459,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -4475,8 +4475,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 451,
-          "height": 512
+          "width": 901,
+          "height": 1024
         }
       },
       "animation": {
@@ -4589,9 +4589,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -4605,8 +4605,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 451,
-          "height": 512
+          "width": 901,
+          "height": 1024
         }
       },
       "animation": {
@@ -4719,9 +4719,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -4735,8 +4735,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 451,
-          "height": 512
+          "width": 901,
+          "height": 1024
         }
       },
       "animation": {
@@ -4849,9 +4849,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -4865,8 +4865,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 218
+          "width": 1024,
+          "height": 437
         }
       },
       "animation": {
@@ -4979,9 +4979,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -4995,8 +4995,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 218
+          "width": 1024,
+          "height": 437
         }
       },
       "animation": {
@@ -5109,9 +5109,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -5125,8 +5125,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 276
+          "width": 1024,
+          "height": 553
         }
       },
       "animation": {
@@ -5239,9 +5239,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -5255,8 +5255,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 276
+          "width": 1024,
+          "height": 553
         }
       },
       "animation": {
@@ -5369,9 +5369,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -5385,8 +5385,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 484
+          "width": 1024,
+          "height": 968
         }
       },
       "animation": {
@@ -5499,9 +5499,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -5515,8 +5515,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 484
+          "width": 1024,
+          "height": 968
         }
       },
       "animation": {
@@ -5629,9 +5629,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -5645,8 +5645,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 266,
-          "height": 512
+          "width": 532,
+          "height": 1024
         }
       },
       "animation": {
@@ -5759,9 +5759,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -5775,8 +5775,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 266,
-          "height": 512
+          "width": 532,
+          "height": 1024
         }
       },
       "animation": {
@@ -5889,9 +5889,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -5905,8 +5905,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 489
+          "width": 1024,
+          "height": 978
         }
       },
       "animation": {
@@ -6019,9 +6019,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -6035,8 +6035,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 489
+          "width": 1024,
+          "height": 978
         }
       },
       "animation": {
@@ -6149,9 +6149,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -6165,8 +6165,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -6279,9 +6279,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -6295,8 +6295,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -6409,9 +6409,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -6425,8 +6425,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -6539,9 +6539,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -6555,8 +6555,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -6669,9 +6669,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -6685,8 +6685,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -6799,9 +6799,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -6815,8 +6815,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -6929,9 +6929,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -6945,8 +6945,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -7059,9 +7059,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -7075,8 +7075,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 474
+          "width": 1024,
+          "height": 949
         }
       },
       "animation": {
@@ -7189,9 +7189,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -7205,8 +7205,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 474
+          "width": 1024,
+          "height": 949
         }
       },
       "animation": {
@@ -7319,9 +7319,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -7335,8 +7335,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 474
+          "width": 1024,
+          "height": 949
         }
       },
       "animation": {
@@ -7449,9 +7449,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -7465,8 +7465,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 345,
-          "height": 512
+          "width": 689,
+          "height": 1024
         }
       },
       "animation": {
@@ -7579,9 +7579,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -7595,8 +7595,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -7709,9 +7709,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -7725,8 +7725,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -7839,9 +7839,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -7855,8 +7855,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -7969,9 +7969,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -7985,8 +7985,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -8099,9 +8099,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -8115,8 +8115,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -8303,9 +8303,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -8319,8 +8319,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -8667,9 +8667,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -8683,8 +8683,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -9031,9 +9031,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -9047,8 +9047,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -9321,9 +9321,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -9337,8 +9337,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -9451,9 +9451,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -9467,8 +9467,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -9581,9 +9581,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -9597,8 +9597,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -9711,9 +9711,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -9727,8 +9727,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -9841,9 +9841,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -9857,8 +9857,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -9971,9 +9971,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -9987,8 +9987,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -10101,9 +10101,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -10117,8 +10117,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -10231,9 +10231,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -10247,8 +10247,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -10361,9 +10361,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -10377,8 +10377,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -10491,9 +10491,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -10507,8 +10507,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -10621,9 +10621,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -10637,8 +10637,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -10751,9 +10751,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -10767,8 +10767,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -11272,9 +11272,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -11288,8 +11288,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -12587,9 +12587,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -12603,8 +12603,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -13902,9 +13902,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -13918,8 +13918,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -15217,9 +15217,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -15233,8 +15233,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -16532,9 +16532,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -16548,8 +16548,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -17847,9 +17847,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -17863,8 +17863,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -18773,9 +18773,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -18789,8 +18789,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -18904,9 +18904,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -18920,8 +18920,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -19033,9 +19033,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -19049,8 +19049,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 382
+          "width": 1024,
+          "height": 765
         }
       },
       "animation": {
@@ -19163,9 +19163,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -19179,8 +19179,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 382
+          "width": 1024,
+          "height": 765
         }
       },
       "animation": {
@@ -19293,9 +19293,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -19309,8 +19309,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 382
+          "width": 1024,
+          "height": 765
         }
       },
       "animation": {
@@ -19423,9 +19423,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -19439,8 +19439,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 382
+          "width": 1024,
+          "height": 765
         }
       },
       "animation": {
@@ -19553,9 +19553,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -19569,8 +19569,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 382
+          "width": 1024,
+          "height": 765
         }
       },
       "animation": {
@@ -19683,9 +19683,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -19699,8 +19699,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -19813,9 +19813,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -19829,8 +19829,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -20067,9 +20067,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -20083,8 +20083,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -20582,9 +20582,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -20598,8 +20598,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -21097,9 +21097,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -21113,8 +21113,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -21612,9 +21612,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -21628,8 +21628,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -22033,9 +22033,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -22049,8 +22049,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -22265,9 +22265,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -22281,8 +22281,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -22497,9 +22497,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -22513,8 +22513,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -22729,9 +22729,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -22745,8 +22745,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -22931,9 +22931,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -22947,8 +22947,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 389
+          "width": 1024,
+          "height": 778
         }
       },
       "animation": {
@@ -23061,9 +23061,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -23077,8 +23077,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 389
+          "width": 1024,
+          "height": 778
         }
       },
       "animation": {
@@ -23191,9 +23191,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -23207,8 +23207,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 480,
-          "height": 512
+          "width": 960,
+          "height": 1024
         }
       },
       "animation": {
@@ -23330,9 +23330,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -23346,8 +23346,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 480,
-          "height": 512
+          "width": 960,
+          "height": 1024
         }
       },
       "animation": {
@@ -23469,9 +23469,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -23485,8 +23485,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 480,
-          "height": 512
+          "width": 960,
+          "height": 1024
         }
       },
       "animation": {
@@ -23608,9 +23608,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -23624,8 +23624,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 480,
-          "height": 512
+          "width": 960,
+          "height": 1024
         }
       },
       "animation": {
@@ -23747,9 +23747,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -23763,8 +23763,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 492
+          "width": 1024,
+          "height": 984
         }
       },
       "animation": {
@@ -23877,9 +23877,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -23893,8 +23893,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 492
+          "width": 1024,
+          "height": 984
         }
       },
       "animation": {
@@ -24007,9 +24007,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -24023,8 +24023,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 449,
-          "height": 512
+          "width": 898,
+          "height": 1024
         }
       },
       "animation": {
@@ -24137,9 +24137,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -24153,8 +24153,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 449,
-          "height": 512
+          "width": 898,
+          "height": 1024
         }
       },
       "animation": {
@@ -24267,9 +24267,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -24283,8 +24283,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 494
+          "width": 1024,
+          "height": 988
         }
       },
       "animation": {
@@ -24397,9 +24397,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -24413,8 +24413,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 494
+          "width": 1024,
+          "height": 988
         }
       },
       "animation": {
@@ -24527,9 +24527,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -24543,8 +24543,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 263,
-          "height": 512
+          "width": 526,
+          "height": 1024
         }
       },
       "animation": {
@@ -24666,9 +24666,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -24682,8 +24682,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 263,
-          "height": 512
+          "width": 526,
+          "height": 1024
         }
       },
       "animation": {
@@ -24805,9 +24805,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -24821,8 +24821,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 150
+          "width": 1024,
+          "height": 300
         }
       },
       "animation": {
@@ -24935,9 +24935,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -24951,8 +24951,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 150
+          "width": 1024,
+          "height": 300
         }
       },
       "animation": {
@@ -25065,9 +25065,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -25081,8 +25081,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 259
+          "width": 1024,
+          "height": 519
         }
       },
       "animation": {
@@ -25195,9 +25195,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -25211,8 +25211,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 259
+          "width": 1024,
+          "height": 519
         }
       },
       "animation": {
@@ -25325,9 +25325,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -25341,8 +25341,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 266
+          "width": 1024,
+          "height": 532
         }
       },
       "animation": {
@@ -25455,9 +25455,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -25471,8 +25471,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 266
+          "width": 1024,
+          "height": 532
         }
       },
       "animation": {
@@ -25585,9 +25585,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -25601,8 +25601,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 167
+          "width": 1024,
+          "height": 335
         }
       },
       "animation": {
@@ -25715,9 +25715,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -25731,8 +25731,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 167
+          "width": 1024,
+          "height": 335
         }
       },
       "animation": {
@@ -25845,9 +25845,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -25861,8 +25861,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 174
+          "width": 1024,
+          "height": 348
         }
       },
       "animation": {
@@ -25975,9 +25975,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -25991,8 +25991,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 174
+          "width": 1024,
+          "height": 348
         }
       },
       "animation": {
@@ -26105,9 +26105,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -26121,8 +26121,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 259
+          "width": 1024,
+          "height": 519
         }
       },
       "animation": {
@@ -26235,9 +26235,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -26251,8 +26251,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 259
+          "width": 1024,
+          "height": 519
         }
       },
       "animation": {
@@ -26365,9 +26365,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -26381,8 +26381,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 253
+          "width": 1024,
+          "height": 505
         }
       },
       "animation": {
@@ -26495,9 +26495,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -26511,8 +26511,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 253
+          "width": 1024,
+          "height": 505
         }
       },
       "animation": {
@@ -26625,9 +26625,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -26641,8 +26641,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 263
+          "width": 1024,
+          "height": 526
         }
       },
       "animation": {
@@ -26755,9 +26755,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -26771,8 +26771,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 263
+          "width": 1024,
+          "height": 526
         }
       },
       "animation": {
@@ -26885,9 +26885,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -26901,8 +26901,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 263
+          "width": 1024,
+          "height": 526
         }
       },
       "animation": {
@@ -27015,9 +27015,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -27031,8 +27031,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 263
+          "width": 1024,
+          "height": 526
         }
       },
       "animation": {
@@ -27145,9 +27145,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -27161,8 +27161,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 253
+          "width": 1024,
+          "height": 505
         }
       },
       "animation": {
@@ -27275,9 +27275,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -27291,8 +27291,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 253
+          "width": 1024,
+          "height": 505
         }
       },
       "animation": {
@@ -27405,9 +27405,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -27421,8 +27421,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 246
+          "width": 1024,
+          "height": 492
         }
       },
       "animation": {
@@ -27535,9 +27535,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -27551,8 +27551,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 246
+          "width": 1024,
+          "height": 492
         }
       },
       "animation": {
@@ -27665,9 +27665,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -27681,8 +27681,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 253
+          "width": 1024,
+          "height": 505
         }
       },
       "animation": {
@@ -27795,9 +27795,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -27811,8 +27811,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 253
+          "width": 1024,
+          "height": 505
         }
       },
       "animation": {
@@ -27925,9 +27925,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -27941,8 +27941,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 253
+          "width": 1024,
+          "height": 505
         }
       },
       "animation": {
@@ -28055,9 +28055,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -28071,8 +28071,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 253
+          "width": 1024,
+          "height": 505
         }
       },
       "animation": {
@@ -28185,9 +28185,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -28201,8 +28201,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 259
+          "width": 1024,
+          "height": 519
         }
       },
       "animation": {
@@ -28315,9 +28315,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -28331,8 +28331,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 259
+          "width": 1024,
+          "height": 519
         }
       },
       "animation": {
@@ -28445,9 +28445,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -28461,8 +28461,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 256
+          "width": 1024,
+          "height": 512
         }
       },
       "animation": {
@@ -28575,9 +28575,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -28591,8 +28591,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 256
+          "width": 1024,
+          "height": 512
         }
       },
       "animation": {
@@ -28705,9 +28705,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -28721,8 +28721,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 256
+          "width": 1024,
+          "height": 512
         }
       },
       "animation": {
@@ -28835,9 +28835,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -28851,8 +28851,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 256
+          "width": 1024,
+          "height": 512
         }
       },
       "animation": {
@@ -28965,9 +28965,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -28981,8 +28981,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -29095,9 +29095,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -29111,8 +29111,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -29225,9 +29225,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -29241,8 +29241,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -29355,9 +29355,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -29371,8 +29371,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 384
+          "width": 1024,
+          "height": 768
         }
       },
       "animation": {
@@ -29486,9 +29486,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -29502,8 +29502,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 336
+          "width": 1024,
+          "height": 672
         }
       },
       "animation": {
@@ -29927,9 +29927,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -29943,8 +29943,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 336
+          "width": 1024,
+          "height": 672
         }
       },
       "animation": {
@@ -30367,9 +30367,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -30383,8 +30383,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 496
+          "width": 1024,
+          "height": 992
         }
       },
       "animation": {
@@ -30497,9 +30497,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -30513,8 +30513,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 496
+          "width": 1024,
+          "height": 992
         }
       },
       "animation": {
@@ -30627,9 +30627,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -30643,8 +30643,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 496
+          "width": 1024,
+          "height": 992
         }
       },
       "animation": {
@@ -30759,9 +30759,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -30775,8 +30775,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 477,
-          "height": 512
+          "width": 954,
+          "height": 1024
         }
       },
       "animation": {
@@ -30899,9 +30899,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -30915,8 +30915,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 477,
-          "height": 512
+          "width": 954,
+          "height": 1024
         }
       },
       "animation": {
@@ -31037,9 +31037,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -31053,8 +31053,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 444
+          "width": 1024,
+          "height": 887
         }
       },
       "animation": {
@@ -31167,9 +31167,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -31183,8 +31183,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 444
+          "width": 1024,
+          "height": 887
         }
       },
       "animation": {
@@ -31297,9 +31297,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -31313,8 +31313,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 331
+          "width": 1024,
+          "height": 662
         }
       },
       "animation": {
@@ -31427,9 +31427,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -31443,8 +31443,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 331
+          "width": 1024,
+          "height": 662
         }
       },
       "animation": {
@@ -31559,9 +31559,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -31575,8 +31575,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 296
+          "width": 1024,
+          "height": 592
         }
       },
       "animation": {
@@ -31690,9 +31690,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -31706,8 +31706,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 296
+          "width": 1024,
+          "height": 592
         }
       },
       "animation": {
@@ -31819,9 +31819,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -31835,8 +31835,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 401
+          "width": 1024,
+          "height": 801
         }
       },
       "animation": {
@@ -31949,9 +31949,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -31965,8 +31965,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 401
+          "width": 1024,
+          "height": 801
         }
       },
       "animation": {
@@ -32079,9 +32079,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -32095,8 +32095,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 405
+          "width": 1024,
+          "height": 811
         }
       },
       "animation": {
@@ -32209,9 +32209,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -32225,8 +32225,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 405
+          "width": 1024,
+          "height": 811
         }
       },
       "animation": {
@@ -32339,9 +32339,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -32355,8 +32355,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 405
+          "width": 1024,
+          "height": 811
         }
       },
       "animation": {
@@ -32469,9 +32469,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -32485,8 +32485,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 405
+          "width": 1024,
+          "height": 811
         }
       },
       "animation": {
@@ -32599,9 +32599,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -32615,8 +32615,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 370
+          "width": 1024,
+          "height": 740
         }
       },
       "animation": {
@@ -32729,9 +32729,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -32745,8 +32745,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 370
+          "width": 1024,
+          "height": 740
         }
       },
       "animation": {
@@ -32859,9 +32859,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -32875,8 +32875,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 508
+          "width": 1024,
+          "height": 1016
         }
       },
       "animation": {
@@ -32989,9 +32989,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -33005,8 +33005,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 508
+          "width": 1024,
+          "height": 1016
         }
       },
       "animation": {
@@ -33119,9 +33119,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -33135,8 +33135,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 508
+          "width": 1024,
+          "height": 1016
         }
       },
       "animation": {
@@ -33249,9 +33249,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -33265,8 +33265,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 508
+          "width": 1024,
+          "height": 1016
         }
       },
       "animation": {
@@ -33379,9 +33379,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -33395,8 +33395,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 508
+          "width": 1024,
+          "height": 1016
         }
       },
       "animation": {
@@ -33509,9 +33509,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -33525,8 +33525,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 375
+          "width": 1024,
+          "height": 750
         }
       },
       "animation": {
@@ -33639,9 +33639,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -33655,8 +33655,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 375
+          "width": 1024,
+          "height": 750
         }
       },
       "animation": {
@@ -33771,9 +33771,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -33787,8 +33787,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 293
+          "width": 1024,
+          "height": 586
         }
       },
       "animation": {
@@ -33902,9 +33902,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -33918,8 +33918,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 293
+          "width": 1024,
+          "height": 586
         }
       },
       "animation": {
@@ -34031,9 +34031,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -34047,8 +34047,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -34161,9 +34161,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -34177,8 +34177,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -34291,9 +34291,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -34307,8 +34307,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -35055,9 +35055,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -35071,8 +35071,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -35819,9 +35819,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -35835,8 +35835,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 211
+          "width": 1024,
+          "height": 422
         }
       },
       "animation": {
@@ -35949,9 +35949,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -35965,8 +35965,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 211
+          "width": 1024,
+          "height": 422
         }
       },
       "animation": {
@@ -36079,9 +36079,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -36095,8 +36095,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 510,
-          "height": 512
+          "width": 1020,
+          "height": 1024
         }
       },
       "animation": {
@@ -36209,9 +36209,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -36225,8 +36225,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 510,
-          "height": 512
+          "width": 1020,
+          "height": 1024
         }
       },
       "animation": {
@@ -36339,9 +36339,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -36355,8 +36355,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 306,
-          "height": 512
+          "width": 612,
+          "height": 1024
         }
       },
       "animation": {
@@ -36469,9 +36469,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -36485,8 +36485,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 306,
-          "height": 512
+          "width": 612,
+          "height": 1024
         }
       },
       "animation": {
@@ -36599,9 +36599,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -36615,8 +36615,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 494
+          "width": 1024,
+          "height": 988
         }
       },
       "animation": {
@@ -36729,9 +36729,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -36745,8 +36745,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 494
+          "width": 1024,
+          "height": 988
         }
       },
       "animation": {
@@ -36859,9 +36859,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -36875,8 +36875,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 471,
-          "height": 512
+          "width": 942,
+          "height": 1024
         }
       },
       "animation": {
@@ -36989,9 +36989,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -37005,8 +37005,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 471,
-          "height": 512
+          "width": 942,
+          "height": 1024
         }
       },
       "animation": {
@@ -37132,9 +37132,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -37148,8 +37148,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -37368,9 +37368,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -37384,8 +37384,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -37591,9 +37591,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -37607,8 +37607,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 310
+          "width": 1024,
+          "height": 620
         }
       },
       "animation": {
@@ -37721,9 +37721,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -37737,8 +37737,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 310
+          "width": 1024,
+          "height": 620
         }
       },
       "animation": {
@@ -37851,9 +37851,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -37867,8 +37867,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -37981,9 +37981,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -37997,8 +37997,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 288,
-          "height": 512
+          "width": 576,
+          "height": 1024
         }
       },
       "animation": {
@@ -38111,9 +38111,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -38127,8 +38127,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 288,
-          "height": 512
+          "width": 576,
+          "height": 1024
         }
       },
       "animation": {
@@ -38241,9 +38241,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -38257,8 +38257,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -38371,9 +38371,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -38387,8 +38387,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 205
+          "width": 1024,
+          "height": 410
         }
       },
       "animation": {
@@ -38501,9 +38501,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -38517,8 +38517,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 205
+          "width": 1024,
+          "height": 410
         }
       },
       "animation": {
@@ -38633,9 +38633,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -38649,8 +38649,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 467
+          "width": 1024,
+          "height": 934
         }
       },
       "animation": {
@@ -38773,9 +38773,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -38789,8 +38789,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 467
+          "width": 1024,
+          "height": 934
         }
       },
       "animation": {
@@ -38911,9 +38911,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -38927,8 +38927,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -39041,9 +39041,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -39057,8 +39057,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -39171,9 +39171,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -39187,8 +39187,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -39301,9 +39301,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -39317,8 +39317,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -39432,9 +39432,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -39448,8 +39448,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 335
+          "width": 1024,
+          "height": 670
         }
       },
       "animation": {
@@ -39873,9 +39873,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -39889,8 +39889,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 335
+          "width": 1024,
+          "height": 670
         }
       },
       "animation": {
@@ -40313,9 +40313,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -40329,8 +40329,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 440
+          "width": 1024,
+          "height": 881
         }
       },
       "animation": {
@@ -40443,9 +40443,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -40459,8 +40459,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 440
+          "width": 1024,
+          "height": 881
         }
       },
       "animation": {
@@ -40573,9 +40573,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -40589,8 +40589,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 451,
-          "height": 512
+          "width": 901,
+          "height": 1024
         }
       },
       "animation": {
@@ -40704,9 +40704,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -40720,8 +40720,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 452
+          "width": 1024,
+          "height": 905
         }
       },
       "animation": {
@@ -40834,9 +40834,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -40850,8 +40850,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 452
+          "width": 1024,
+          "height": 905
         }
       },
       "animation": {
@@ -40964,9 +40964,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -40980,8 +40980,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -41094,9 +41094,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -41110,8 +41110,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -41224,9 +41224,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -41240,8 +41240,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 461,
-          "height": 512
+          "width": 922,
+          "height": 1024
         }
       },
       "animation": {
@@ -41363,9 +41363,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -41379,8 +41379,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 461,
-          "height": 512
+          "width": 922,
+          "height": 1024
         }
       },
       "animation": {
@@ -41502,9 +41502,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -41518,8 +41518,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 498
+          "width": 1024,
+          "height": 997
         }
       },
       "animation": {
@@ -41632,9 +41632,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -41648,8 +41648,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 498
+          "width": 1024,
+          "height": 997
         }
       },
       "animation": {
@@ -41762,9 +41762,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -41778,8 +41778,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 498
+          "width": 1024,
+          "height": 997
         }
       },
       "animation": {
@@ -41892,9 +41892,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -41908,8 +41908,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -42022,9 +42022,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -42038,8 +42038,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -42152,9 +42152,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -42168,8 +42168,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 361
+          "width": 1024,
+          "height": 722
         }
       },
       "animation": {
@@ -42282,9 +42282,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -42298,8 +42298,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 361
+          "width": 1024,
+          "height": 722
         }
       },
       "animation": {
@@ -42412,9 +42412,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -42428,8 +42428,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 361
+          "width": 1024,
+          "height": 722
         }
       },
       "animation": {
@@ -42542,9 +42542,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -42558,8 +42558,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 288
+          "width": 1024,
+          "height": 576
         }
       },
       "animation": {
@@ -42691,9 +42691,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -42707,8 +42707,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 288
+          "width": 1024,
+          "height": 576
         }
       },
       "animation": {
@@ -42840,9 +42840,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -42856,8 +42856,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 286
+          "width": 1024,
+          "height": 572
         }
       },
       "animation": {
@@ -42970,9 +42970,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -42986,8 +42986,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 286
+          "width": 1024,
+          "height": 572
         }
       },
       "animation": {
@@ -43102,9 +43102,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -43118,8 +43118,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -43233,9 +43233,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -43249,8 +43249,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -43364,9 +43364,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -43380,8 +43380,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -43493,9 +43493,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -43509,8 +43509,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 455
+          "width": 1024,
+          "height": 909
         }
       },
       "animation": {
@@ -43623,9 +43623,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -43639,8 +43639,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 455
+          "width": 1024,
+          "height": 909
         }
       },
       "animation": {
@@ -43753,9 +43753,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -43769,8 +43769,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 446
+          "width": 1024,
+          "height": 892
         }
       },
       "animation": {
@@ -43883,9 +43883,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -43899,8 +43899,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 446
+          "width": 1024,
+          "height": 892
         }
       },
       "animation": {
@@ -44015,9 +44015,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -44031,8 +44031,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 288
+          "width": 1024,
+          "height": 575
         }
       },
       "animation": {
@@ -44146,9 +44146,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -44162,8 +44162,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 288
+          "width": 1024,
+          "height": 575
         }
       },
       "animation": {
@@ -44275,9 +44275,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -44291,8 +44291,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 107
+          "width": 1024,
+          "height": 214
         }
       },
       "animation": {
@@ -44405,9 +44405,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -44421,8 +44421,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 107
+          "width": 1024,
+          "height": 214
         }
       },
       "animation": {
@@ -44535,9 +44535,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -44551,8 +44551,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 386
+          "width": 1024,
+          "height": 772
         }
       },
       "animation": {
@@ -44665,9 +44665,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -44681,8 +44681,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 386
+          "width": 1024,
+          "height": 772
         }
       },
       "animation": {
@@ -44795,9 +44795,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -44811,8 +44811,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 483
+          "width": 1024,
+          "height": 966
         }
       },
       "animation": {
@@ -44925,9 +44925,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -44941,8 +44941,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 483
+          "width": 1024,
+          "height": 966
         }
       },
       "animation": {
@@ -45055,9 +45055,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -45071,8 +45071,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -45185,9 +45185,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -45201,8 +45201,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -45315,9 +45315,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -45331,8 +45331,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -45447,9 +45447,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -45463,8 +45463,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 296
+          "width": 1024,
+          "height": 592
         }
       },
       "animation": {
@@ -45578,9 +45578,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -45594,8 +45594,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 296
+          "width": 1024,
+          "height": 592
         }
       },
       "animation": {
@@ -45707,9 +45707,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -45723,8 +45723,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 375
+          "width": 1024,
+          "height": 751
         }
       },
       "animation": {
@@ -45837,9 +45837,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -45853,8 +45853,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 375
+          "width": 1024,
+          "height": 751
         }
       },
       "animation": {
@@ -45967,9 +45967,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -45983,8 +45983,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 461
+          "width": 1024,
+          "height": 922
         }
       },
       "animation": {
@@ -46097,9 +46097,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -46113,8 +46113,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 461
+          "width": 1024,
+          "height": 922
         }
       },
       "animation": {
@@ -46227,9 +46227,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -46243,8 +46243,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 451
+          "width": 1024,
+          "height": 901
         }
       },
       "animation": {
@@ -46366,9 +46366,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -46382,8 +46382,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 451
+          "width": 1024,
+          "height": 901
         }
       },
       "animation": {
@@ -46505,9 +46505,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -46521,8 +46521,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 364
+          "width": 1024,
+          "height": 728
         }
       },
       "animation": {
@@ -46635,9 +46635,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -46651,8 +46651,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -46775,9 +46775,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -46791,8 +46791,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -46938,9 +46938,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -46954,8 +46954,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -47149,9 +47149,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -47165,8 +47165,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -47360,9 +47360,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -47376,8 +47376,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -47571,9 +47571,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -47587,8 +47587,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -47800,9 +47800,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -47816,8 +47816,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -48065,9 +48065,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -48081,8 +48081,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -48330,9 +48330,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -48346,8 +48346,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -48595,9 +48595,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -48611,8 +48611,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -48819,9 +48819,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -48835,8 +48835,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 410
+          "width": 1024,
+          "height": 819
         }
       },
       "animation": {
@@ -48949,9 +48949,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -48965,8 +48965,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 410
+          "width": 1024,
+          "height": 819
         }
       },
       "animation": {
@@ -49079,9 +49079,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -49095,8 +49095,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 384
+          "width": 1024,
+          "height": 768
         }
       },
       "animation": {
@@ -49209,9 +49209,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -49225,8 +49225,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 401
+          "width": 1024,
+          "height": 802
         }
       },
       "animation": {
@@ -49339,9 +49339,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -49355,8 +49355,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 401
+          "width": 1024,
+          "height": 802
         }
       },
       "animation": {
@@ -49469,9 +49469,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -49485,8 +49485,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -49599,9 +49599,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -49615,8 +49615,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 372
+          "width": 1024,
+          "height": 744
         }
       },
       "animation": {
@@ -49729,9 +49729,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -49745,8 +49745,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 372
+          "width": 1024,
+          "height": 744
         }
       },
       "animation": {
@@ -49859,9 +49859,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -49875,8 +49875,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 229
+          "width": 1024,
+          "height": 457
         }
       },
       "animation": {
@@ -49989,9 +49989,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -50005,8 +50005,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 229
+          "width": 1024,
+          "height": 457
         }
       },
       "animation": {
@@ -50119,9 +50119,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -50135,8 +50135,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -50249,9 +50249,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -50265,8 +50265,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -50379,9 +50379,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -50395,8 +50395,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 435
+          "width": 1024,
+          "height": 870
         }
       },
       "animation": {
@@ -50509,9 +50509,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -50525,8 +50525,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 435
+          "width": 1024,
+          "height": 870
         }
       },
       "animation": {
@@ -50639,9 +50639,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -50655,8 +50655,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 490
+          "width": 1024,
+          "height": 979
         }
       },
       "animation": {
@@ -50769,9 +50769,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -50785,8 +50785,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 490
+          "width": 1024,
+          "height": 979
         }
       },
       "animation": {
@@ -50899,9 +50899,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -50915,8 +50915,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 461,
-          "height": 512
+          "width": 923,
+          "height": 1024
         }
       },
       "animation": {
@@ -51038,9 +51038,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -51054,8 +51054,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 461,
-          "height": 512
+          "width": 923,
+          "height": 1024
         }
       },
       "animation": {
@@ -51305,9 +51305,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -51321,8 +51321,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 303
+          "width": 1024,
+          "height": 606
         }
       },
       "animation": {
@@ -51832,9 +51832,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -51848,8 +51848,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 303
+          "width": 1024,
+          "height": 606
         }
       },
       "animation": {
@@ -52231,9 +52231,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -52247,8 +52247,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 345
+          "width": 1024,
+          "height": 691
         }
       },
       "animation": {
@@ -52361,9 +52361,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -52377,8 +52377,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 345
+          "width": 1024,
+          "height": 691
         }
       },
       "animation": {
@@ -52491,9 +52491,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -52507,8 +52507,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 434
+          "width": 1024,
+          "height": 869
         }
       },
       "animation": {
@@ -52621,9 +52621,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -52637,8 +52637,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 434
+          "width": 1024,
+          "height": 869
         }
       },
       "animation": {
@@ -52751,9 +52751,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -52767,8 +52767,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -52881,9 +52881,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -52897,8 +52897,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -53011,9 +53011,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -53027,8 +53027,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 341
+          "width": 1024,
+          "height": 683
         }
       },
       "animation": {
@@ -53142,9 +53142,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -53158,8 +53158,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 341
+          "width": 1024,
+          "height": 683
         }
       },
       "animation": {
@@ -53273,9 +53273,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -53289,8 +53289,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 339
+          "width": 1024,
+          "height": 678
         }
       },
       "animation": {
@@ -53403,9 +53403,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -53419,8 +53419,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 339
+          "width": 1024,
+          "height": 678
         }
       },
       "animation": {
@@ -53533,9 +53533,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -53549,8 +53549,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 386
+          "width": 1024,
+          "height": 772
         }
       },
       "animation": {
@@ -53663,9 +53663,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -53679,8 +53679,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 338,
-          "height": 512
+          "width": 676,
+          "height": 1024
         }
       },
       "animation": {
@@ -53793,9 +53793,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -53809,8 +53809,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 338,
-          "height": 512
+          "width": 676,
+          "height": 1024
         }
       },
       "animation": {
@@ -53923,9 +53923,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -53939,8 +53939,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 338,
-          "height": 512
+          "width": 676,
+          "height": 1024
         }
       },
       "animation": {
@@ -54053,9 +54053,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -54069,8 +54069,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 300
+          "width": 1024,
+          "height": 601
         }
       },
       "animation": {
@@ -54183,9 +54183,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -54199,8 +54199,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 300
+          "width": 1024,
+          "height": 601
         }
       },
       "animation": {
@@ -54313,9 +54313,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -54329,8 +54329,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 300
+          "width": 1024,
+          "height": 601
         }
       },
       "animation": {
@@ -54443,9 +54443,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -54459,8 +54459,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 384
+          "width": 1024,
+          "height": 768
         }
       },
       "animation": {
@@ -54573,9 +54573,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -54589,8 +54589,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -54703,9 +54703,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -54719,8 +54719,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -54833,9 +54833,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -54849,8 +54849,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -54963,9 +54963,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -54979,8 +54979,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 318
+          "width": 1024,
+          "height": 636
         }
       },
       "animation": {
@@ -55093,9 +55093,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -55109,8 +55109,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 318
+          "width": 1024,
+          "height": 636
         }
       },
       "animation": {
@@ -55223,9 +55223,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -55239,8 +55239,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 511,
-          "height": 512
+          "width": 1022,
+          "height": 1024
         }
       },
       "animation": {
@@ -55353,9 +55353,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -55369,8 +55369,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 511,
-          "height": 512
+          "width": 1022,
+          "height": 1024
         }
       },
       "animation": {
@@ -55483,9 +55483,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -55499,8 +55499,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 501
+          "width": 1024,
+          "height": 1002
         }
       },
       "animation": {
@@ -55613,9 +55613,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -55629,8 +55629,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 501
+          "width": 1024,
+          "height": 1002
         }
       },
       "animation": {
@@ -55743,9 +55743,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -55759,8 +55759,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 501
+          "width": 1024,
+          "height": 1002
         }
       },
       "animation": {
@@ -55873,9 +55873,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -55889,8 +55889,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 499,
-          "height": 512
+          "width": 997,
+          "height": 1024
         }
       },
       "animation": {
@@ -56003,9 +56003,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -56019,8 +56019,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 499,
-          "height": 512
+          "width": 997,
+          "height": 1024
         }
       },
       "animation": {
@@ -56133,9 +56133,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -56149,8 +56149,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 375
+          "width": 1024,
+          "height": 751
         }
       },
       "animation": {
@@ -56265,9 +56265,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -56281,8 +56281,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 282
+          "width": 1024,
+          "height": 564
         }
       },
       "animation": {
@@ -56396,9 +56396,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -56412,8 +56412,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 282
+          "width": 1024,
+          "height": 564
         }
       },
       "animation": {
@@ -56527,9 +56527,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -56543,8 +56543,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 270
+          "width": 1024,
+          "height": 539
         }
       },
       "animation": {
@@ -56656,9 +56656,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -56672,8 +56672,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 345
+          "width": 1024,
+          "height": 689
         }
       },
       "animation": {
@@ -56786,9 +56786,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -56802,8 +56802,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 345
+          "width": 1024,
+          "height": 689
         }
       },
       "animation": {
@@ -56916,9 +56916,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -56932,8 +56932,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 255
+          "width": 1024,
+          "height": 509
         }
       },
       "animation": {
@@ -57046,9 +57046,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -57062,8 +57062,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 255
+          "width": 1024,
+          "height": 509
         }
       },
       "animation": {
@@ -57178,9 +57178,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -57194,8 +57194,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 333
+          "width": 1024,
+          "height": 666
         }
       },
       "animation": {
@@ -57309,9 +57309,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -57325,8 +57325,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 333
+          "width": 1024,
+          "height": 666
         }
       },
       "animation": {
@@ -57438,9 +57438,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -57454,8 +57454,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 239
+          "width": 1024,
+          "height": 478
         }
       },
       "animation": {
@@ -57568,9 +57568,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -57584,8 +57584,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 239
+          "width": 1024,
+          "height": 478
         }
       },
       "animation": {
@@ -57698,9 +57698,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -57714,8 +57714,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 498,
-          "height": 512
+          "width": 996,
+          "height": 1024
         }
       },
       "animation": {
@@ -57828,9 +57828,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -57844,8 +57844,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 498,
-          "height": 512
+          "width": 996,
+          "height": 1024
         }
       },
       "animation": {
@@ -57958,9 +57958,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -57974,8 +57974,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 498,
-          "height": 512
+          "width": 996,
+          "height": 1024
         }
       },
       "animation": {
@@ -58088,9 +58088,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -58104,8 +58104,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 498,
-          "height": 512
+          "width": 996,
+          "height": 1024
         }
       },
       "animation": {
@@ -58218,9 +58218,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -58234,8 +58234,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 384
+          "width": 1024,
+          "height": 768
         }
       },
       "animation": {
@@ -58348,9 +58348,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -58364,8 +58364,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 290
+          "width": 1024,
+          "height": 580
         }
       },
       "animation": {
@@ -58478,9 +58478,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -58494,8 +58494,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 290
+          "width": 1024,
+          "height": 580
         }
       },
       "animation": {
@@ -58608,9 +58608,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -58624,8 +58624,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -58738,9 +58738,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -58754,8 +58754,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -58868,9 +58868,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -58884,8 +58884,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 374
+          "width": 1024,
+          "height": 748
         }
       },
       "animation": {
@@ -58998,9 +58998,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -59014,8 +59014,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 374
+          "width": 1024,
+          "height": 748
         }
       },
       "animation": {
@@ -59128,9 +59128,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -59144,8 +59144,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -59258,9 +59258,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -59274,8 +59274,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -59388,9 +59388,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -59404,8 +59404,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -59720,9 +59720,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -59736,8 +59736,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -60463,9 +60463,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -60479,8 +60479,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -61206,9 +61206,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -61222,8 +61222,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -61949,9 +61949,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -61965,8 +61965,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -62490,9 +62490,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -62506,8 +62506,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -62620,9 +62620,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -62636,8 +62636,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -62750,9 +62750,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -62766,8 +62766,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 512
+          "width": 1024,
+          "height": 1024
         }
       },
       "animation": {
@@ -62880,9 +62880,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -62896,8 +62896,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 322
+          "width": 1024,
+          "height": 644
         }
       },
       "animation": {
@@ -63010,9 +63010,9 @@
           "sizeInches": 100000,
           "yawDegrees": 180.0,
           "tint": [
-            1.5,
-            1.5,
-            1.5,
+            2.0,
+            2.0,
+            2.0,
             1
           ],
           "visibleSky": true,
@@ -63026,8 +63026,8 @@
           "exposureCompensationEv": 0
         },
         "resolution": {
-          "width": 512,
-          "height": 322
+          "width": 1024,
+          "height": 644
         }
       },
       "animation": {

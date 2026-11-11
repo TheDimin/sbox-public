@@ -10,15 +10,22 @@
       "reviewedAt": "2026-11-09T07:39:10+00:00",
       "verdict": "rejected"
     },
-    "AlphaBlendModeTest/glTF-Binary": {
-      "captureSha256": "705b3c5993a83008aa5994ba630994cfe131462ef73296b3a6f9a40748eaf22c",
+    "ABeautifulGame/glTF-Binary": {
+      "captureSha256": "695e3f5eb47a5c12a36b9493cf94673d1948099e0508dbfa3ced8190c6a9b4cb",
       "issues": [
-        "camera",
+        "material",
         "lighting"
       ],
-      "notes": "camera and light don't match reference, makes it hard to compare, and read. but blend looks correct",
-      "reviewedAt": "2026-11-09T05:04:39+00:00",
+      "notes": "Fix the missing material, the chess-board outline seems to dark, and white marble spots are too white aswell, this seems like some color correction post-proccesing should be added ",
+      "reviewedAt": "2026-11-10T07:24:57+00:00",
       "verdict": "close"
+    },
+    "AlphaBlendModeTest/glTF-Binary": {
+      "captureSha256": "3c16b308d891d8a8f6bd03b323188d3668a033272e60b979748f15dfdf90acc6",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:29:21+00:00",
+      "verdict": "approved"
     },
     "AnimatedColorsCube/glTF": {
       "captureSha256": "8ee865a93cdee99910744588c16ae6d1774b7e96ab7ca0d5eb20df9987599329",
@@ -30,14 +37,35 @@
       "verdict": "close"
     },
     "AnimatedColorsCube/glTF-Binary": {
-      "captureSha256": "8ee865a93cdee99910744588c16ae6d1774b7e96ab7ca0d5eb20df9987599329",
+      "captureSha256": "e49ced27d60923b4b5c2d3c7b06968f3990354cb253667a7ad35587f9d95ad7c",
       "issues": [
-        "color",
+        "lighting",
         "animation"
       ],
-      "notes": "The cube color is not lerping !",
-      "reviewedAt": "2026-11-09T07:39:30+00:00",
+      "notes": "Color is not lerping over time/distance like krhonos screenshot does",
+      "reviewedAt": "2026-11-10T07:25:24+00:00",
       "verdict": "rejected"
+    },
+    "AnimatedCube/glTF": {
+      "captureSha256": "68734e0a1dffb61671e58badc528d68482b6911dd16f3ceae6584a1d41ca4a11",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:29:55+00:00",
+      "verdict": "approved"
+    },
+    "AnimatedMorphCube/glTF-Binary": {
+      "captureSha256": "1a0c475492ec31f58c46d097f6897bff71f7eadf5a6f2f30b48b061b6796a3a0",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:30:02+00:00",
+      "verdict": "approved"
+    },
+    "AnimatedTriangle/glTF": {
+      "captureSha256": "fbbf8d43e766e4cedfac52b2b947a10aaad4b278cebda5c143d73b636c529fba",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:30:05+00:00",
+      "verdict": "approved"
     },
     "AnimationPointerUVs/glTF": {
       "captureSha256": "8b66c06a83e70651e06fe966a79b4030a9e4e83e98784b74a04b6b70135fa1d7",
@@ -47,13 +75,13 @@
       "verdict": "rejected"
     },
     "AnisotropyBarnLamp/glTF-Binary": {
-      "captureSha256": "54c3839c20fc9e1e50b6e0d6514f91cc04694125d63447d964ef01b023fc86f1",
+      "captureSha256": "bf0f09a848d2585a2e654a7ae87788fd92a178a2b8c4b453c65e66d371dfc868",
       "issues": [
         "material"
       ],
-      "notes": "Glass is white instead of transparrent",
-      "reviewedAt": "2026-11-09T07:40:45+00:00",
-      "verdict": "rejected"
+      "notes": "Glass, and metallic detail/flattness are incorrect",
+      "reviewedAt": "2026-11-10T05:31:10+00:00",
+      "verdict": null
     },
     "AnisotropyDiscTest/glTF": {
       "captureSha256": "123a42cb40ae187709422b4bd8cb4042024b5f8270b0964da0f775f4428de461",
@@ -498,8 +526,447 @@
       "notes": "Glass is white, and top part that looks like bronze? is black.",
       "reviewedAt": "2026-11-09T06:36:23+00:00",
       "verdict": "rejected"
+    },
+    "DragonDispersion/glTF-Binary": {
+      "captureSha256": "ac6b30afadd052a51c549b411a79c18db95a4733369d79dd11c3474ad0537fd9",
+      "issues": [
+        "material"
+      ],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:55:03+00:00",
+      "verdict": "rejected"
+    },
+    "Duck/glTF-Binary": {
+      "captureSha256": "0814d62396ca94ec5e80f5937ea65e7002eda11761955fe79cdd71198c380f4e",
+      "issues": [
+        "lighting"
+      ],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:54:58+00:00",
+      "verdict": "close"
+    },
+    "EmissiveStrengthTest/glTF-Binary": {
+      "captureSha256": "aa6259b948b5834a31e0aae6059281cc4159eac0b89d8fb0f1dc4531530a5c39",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:54:47+00:00",
+      "verdict": "approved"
+    },
+    "FlightHelmet/glTF": {
+      "captureSha256": "62eebe81290a481d54e7cdd4b824da3c2a362217ac093e313b096ef00b64d905",
+      "issues": [
+        "texture"
+      ],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:54:37+00:00",
+      "verdict": "close"
+    },
+    "Fox/glTF-Binary": {
+      "captureSha256": "313b502ab9a1d31bfe4606270d2d397307c4cdb9ca415e853dcd3038e5ed4ff3",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:54:26+00:00",
+      "verdict": "approved"
+    },
+    "GlamVelvetSofa/glTF-Binary": {
+      "captureSha256": "d40cdedb2cc3e827faab4c21ddcb0676b88055cf36800678c401da547b26cfb0",
+      "issues": [
+        "color"
+      ],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:54:23+00:00",
+      "verdict": "rejected"
+    },
+    "IORTestGrid/glTF-Binary": {
+      "captureSha256": "cf71fac6fe688249197612e1ab4779fb138be4387f73f43a3706a37b87d4b861",
+      "issues": [
+        "material",
+        "color"
+      ],
+      "notes": "Two on the right show white, other two need a better (studio) skybox to be even worth reviewing",
+      "reviewedAt": "2026-11-10T05:53:52+00:00",
+      "verdict": "rejected"
+    },
+    "InterpolationTest/glTF-Binary": {
+      "captureSha256": "3167d441cf155b0ddb5053d747f9c5d2f8632d9c92c2b96df94e53f4faedcd6a",
+      "issues": [
+        "animation"
+      ],
+      "notes": "ANIMATION does not even get close to matching the khronos reference anymore",
+      "reviewedAt": "2026-11-10T05:53:09+00:00",
+      "verdict": "rejected"
+    },
+    "IridescenceAbalone/glTF-Binary": {
+      "captureSha256": "b6eba9f51ecfaeb47a30d0f8ed7206d547eddd5964bc444bdcf358f41a075334",
+      "issues": [
+        "material",
+        "texture"
+      ],
+      "notes": "Seems as different texture resolution and color detail is lacking",
+      "reviewedAt": "2026-11-10T05:52:34+00:00",
+      "verdict": "rejected"
+    },
+    "IridescenceDielectricSpheres/glTF": {
+      "captureSha256": "e60d43c393191e8b307d7adc0d8dbcfa3353f64fcd02fd5f0a196e8b44e22ba9",
+      "issues": [
+        "material"
+      ],
+      "notes": "Color doesn't render all",
+      "reviewedAt": "2026-11-10T05:52:07+00:00",
+      "verdict": "rejected"
+    },
+    "IridescenceLamp/glTF-Binary": {
+      "captureSha256": "607a3cb89dc0c95a5bce3c7fd06b7cebf1becb9f6d6210a80c5a89ed4a11a1a2",
+      "issues": [
+        "material"
+      ],
+      "notes": "Glass doens't render",
+      "reviewedAt": "2026-11-10T05:51:29+00:00",
+      "verdict": "rejected"
+    },
+    "IridescenceMetallicSpheres/glTF": {
+      "captureSha256": "4597e62f52562f5f65ee80e9740295b0642b0ac6036fb0d2987e4e447eb0b350",
+      "issues": [
+        "material",
+        "color"
+      ],
+      "notes": "The colors don't render at all, metallic detail is off aswell",
+      "reviewedAt": "2026-11-10T05:51:08+00:00",
+      "verdict": "rejected"
+    },
+    "IridescentDishWithOlives/glTF-Binary": {
+      "captureSha256": "c4e3783a686820b80599f40a077042db3e3aab8055b27b1f2ec0a581dc1375e4",
+      "issues": [
+        "material",
+        "lighting"
+      ],
+      "notes": "Glass and plate don't render material at all!, olives render as flat material in-engine",
+      "reviewedAt": "2026-11-10T05:50:40+00:00",
+      "verdict": "rejected"
+    },
+    "Lantern/glTF-Binary": {
+      "captureSha256": "96677765b810b098e6074ff1d61fa469c5464ca8b6646dfbc7e35d7766e11a2b",
+      "issues": [
+        "material",
+        "texture"
+      ],
+      "notes": "Looks like super low quality",
+      "reviewedAt": "2026-11-10T05:49:21+00:00",
+      "verdict": "rejected"
+    },
+    "LightVisibility/glTF-Binary": {
+      "captureSha256": "2f545ebbd0dab8d9b00a7da53f4bc11b0c44132e6fb7303a0d0b0c0814f002ab",
+      "issues": [
+        "color",
+        "animation"
+      ],
+      "notes": "Should be a video, and no lights seem to work in engine",
+      "reviewedAt": "2026-11-10T05:49:01+00:00",
+      "verdict": "rejected"
+    },
+    "LightsPunctualLamp/glTF-Binary": {
+      "captureSha256": "523f9c65241dba8f8770d3e03b300df19e9818479c53db7072cc9a040a05e874",
+      "issues": [
+        "material",
+        "lighting"
+      ],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:48:40+00:00",
+      "verdict": "rejected"
+    },
+    "MaterialsVariantsShoe/glTF-Binary": {
+      "captureSha256": "afaaa16699c7e943a4def3a7af415c6800db4b2ee5c0c4d768b05117d598db8f",
+      "issues": [
+        "material",
+        "texture",
+        "lighting"
+      ],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:48:08+00:00",
+      "verdict": "close"
+    },
+    "MeshPrimitiveModes/glTF": {
+      "captureSha256": "94e98a12b97876b489310e331fb28a9d0f7757fd190435d9b5166de3bf943241",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:47:55+00:00",
+      "verdict": "approved"
+    },
+    "MeshoptCubeTest/glTF": {
+      "captureSha256": "5f001e6a728888ea58a0eb658570e457f762646acea6b61eebc87a2361465f12",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:47:49+00:00",
+      "verdict": "approved"
+    },
+    "MetalRoughSpheres/glTF-Binary": {
+      "captureSha256": "f3d0272099fe629ca68d3cf8323968deed95c1bd582018859780b81e21c8988a",
+      "issues": [
+        "material"
+      ],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:47:32+00:00",
+      "verdict": "close"
+    },
+    "MetalRoughSpheresNoTextures/glTF-Binary": {
+      "captureSha256": "ab4d64a5c22e8bd19bb5b0c330c658c5cce5fa6db180009be6592cc089c3a1e4",
+      "issues": [
+        "material"
+      ],
+      "notes": "HIGH PRIORITY: zoom in, adjust FOV so the row behind bercomes visible and then focus on figuring out why in-engine this is not metalic at all.",
+      "reviewedAt": "2026-11-10T05:47:17+00:00",
+      "verdict": "rejected"
+    },
+    "MorphPrimitivesTest/glTF-Binary": {
+      "captureSha256": "7e637e7837f8368f296c901cad4fb3520b0fcb418aeed20a21ff43082525ce6c",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:45:58+00:00",
+      "verdict": "approved"
+    },
+    "MorphStressTest/glTF-Binary": {
+      "captureSha256": "6f995edc34bca13f95f365dfc779673596445a1279f35700a0b7325af3940a5f",
+      "issues": [
+        "lighting"
+      ],
+      "notes": "Normals look flat/unlit in this scene, please re-render with a video ! as this should be animated scene",
+      "reviewedAt": "2026-11-10T05:45:52+00:00",
+      "verdict": "close"
+    },
+    "MosquitoInAmber/glTF-Binary": {
+      "captureSha256": "055182c9ff57e2c26ce9f1bc380976d8325d354f01725467f81a02444ff6438c",
+      "issues": [
+        "material"
+      ],
+      "notes": "sub-surface is not rendered at all in-engine. and cannot see the mosquito inside at all in engine or sample viewer !",
+      "reviewedAt": "2026-11-10T05:45:08+00:00",
+      "verdict": "rejected"
+    },
+    "MultiUVTest/glTF-Binary": {
+      "captureSha256": "281a2201b10a981b468b4e1c3a8ddbc0c4c5a05ec3ba763d84ba884641d6193d",
+      "issues": [],
+      "notes": "fuzzy",
+      "reviewedAt": "2026-11-10T05:44:24+00:00",
+      "verdict": "close"
+    },
+    "MultipleScenes/glTF": {
+      "captureSha256": "2a634a50ff6229641202f0a54566f18095ad15730d7def20688ce423e369eea3",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:44:01+00:00",
+      "verdict": "approved"
+    },
+    "NegativeScaleTest/glTF-Binary": {
+      "captureSha256": "7d9a3929e271d79bbc8e4ce3057c83c8c96820f094d43a33081609f8d0ab8176",
+      "issues": [
+        "material"
+      ],
+      "notes": "Compare white with the kronosh example, dark blue and metal are also off",
+      "reviewedAt": "2026-11-10T05:43:54+00:00",
+      "verdict": "rejected"
+    },
+    "NodePerformanceTest/glTF-Binary": {
+      "captureSha256": "db2a8e2037e55c70f23e3886ffb9b90f725a66c30743676ed2ebc60873877a31",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:42:18+00:00",
+      "verdict": "approved"
+    },
+    "NodeVisibilityTest/glTF-Binary": {
+      "captureSha256": "f70747216958f0942ab180405efe013730a3d306ca96ccf44be49414370ac0ed",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:41:56+00:00",
+      "verdict": "approved"
+    },
+    "NormalTangentMirrorTest/glTF-Binary": {
+      "captureSha256": "3dc0a612251e50b2cbfcc950403939baab1c8a568cdacf6765c8695dd01e3b3e",
+      "issues": [
+        "material",
+        "lighting"
+      ],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:41:42+00:00",
+      "verdict": "rejected"
+    },
+    "NormalTangentTest/glTF-Binary": {
+      "captureSha256": "22ba1a549d77f068bfc1c8b8705b1113f36a439892b3f2cef3a48fd1a1c846a8",
+      "issues": [
+        "material"
+      ],
+      "notes": "Only the gold has any kind of reflection/metallicness going on the other two are just fuzzy.",
+      "reviewedAt": "2026-11-10T05:41:20+00:00",
+      "verdict": "rejected"
+    },
+    "OrientationTest/glTF-Binary": {
+      "captureSha256": "4933a606c4cffe68bbb65b0e294531e7de34c54f332ee3daaef867f191a9ac5b",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:40:25+00:00",
+      "verdict": "approved"
+    },
+    "PlaysetLightTest/glTF-Binary": {
+      "captureSha256": "5b0ecb5f1aa188261218f9a39070f0640b3a663521af522cbace7357d420b4b2",
+      "issues": [
+        "lighting"
+      ],
+      "notes": "Khronos reference image is very dark on this one, the sample viewer is oversaturated, in-engine i honestly think it looks fine, maybe a bit to bright",
+      "reviewedAt": "2026-11-10T05:40:12+00:00",
+      "verdict": "close"
+    },
+    "PointLightIntensityTest/glTF-Binary": {
+      "captureSha256": "ec32d46e56ce2a95ecd8ce1a7f0da0b967dbc55d5f7602706c9c2ccc19b46c51",
+      "issues": [],
+      "notes": "No lights show up in-engine",
+      "reviewedAt": "2026-11-10T05:39:06+00:00",
+      "verdict": "rejected"
+    },
+    "PotOfCoals/glTF-Binary": {
+      "captureSha256": "db966d12d93619e8f4072c6e4a1181e09ee40df18c4c149e160c507e35c7c7fc",
+      "issues": [],
+      "notes": "GLTF logo is fuzzy, the sub-surface detail is lost in-engine",
+      "reviewedAt": "2026-11-10T05:38:52+00:00",
+      "verdict": "rejected"
+    },
+    "PrimitiveModeNormalsTest/glTF": {
+      "captureSha256": "1c1f7757af92683a62caff615a159045c438b3b06bd0e08c5062f7f787bebc1c",
+      "issues": [
+        "material"
+      ],
+      "notes": "in-engine its not as reflective, maybe missing hdri or enviroment probe ?",
+      "reviewedAt": "2026-11-10T05:38:15+00:00",
+      "verdict": "rejected"
+    },
+    "RiggedFigure/glTF-Binary": {
+      "captureSha256": "02330ac5e0bec5b49641e8c7c6395845873a553405c0437a79366f79ef9f5398",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:37:28+00:00",
+      "verdict": "approved"
+    },
+    "ScatteringSkull/glTF-Binary": {
+      "captureSha256": "814acef5174791860446452b943265db217edfe2a2941b270f241d78b8f0b622",
+      "issues": [
+        "material"
+      ],
+      "notes": "Khronos reference is blue with actual light scattering, sample viewer shows black, and in our engine its just white",
+      "reviewedAt": "2026-11-10T05:37:12+00:00",
+      "verdict": "rejected"
+    },
+    "SciFiHelmet/glTF": {
+      "captureSha256": "b4eee860f374a9076d778733d5e0407c12d742312b427f218593fae5f9dde299",
+      "issues": [
+        "geometry",
+        "texture"
+      ],
+      "notes": "Looks as if it rendered the lowest quality geomtry and textures.",
+      "reviewedAt": "2026-11-10T05:36:37+00:00",
+      "verdict": "rejected"
+    },
+    "SheenChair/glTF-Binary": {
+      "captureSha256": "0a83e6abe7208435d80c6399c43f357e2eb957b731413478eafa567bb4523a65",
+      "issues": [
+        "material"
+      ],
+      "notes": "No sheen material properties showup in-engine",
+      "reviewedAt": "2026-11-10T05:36:04+00:00",
+      "verdict": "rejected"
+    },
+    "SheenCloth/glTF": {
+      "captureSha256": "84a213abc5804559bc0618e1d4edae06da97092a2502d3f1405819fa64d0b22e",
+      "issues": [
+        "material",
+        "texture"
+      ],
+      "notes": "In engine the Texture filtering feels different ? Much more fuzzy and maybe different MIP level of the source texture",
+      "reviewedAt": "2026-11-10T05:35:42+00:00",
+      "verdict": "rejected"
+    },
+    "SheenWoodLeatherSofa/glTF-Binary": {
+      "captureSha256": "0b97e53aa4cd972db1dac5f0d65a8d85b4e8f49a4cc956beb2b7f46d31781b61",
+      "issues": [
+        "texture"
+      ],
+      "notes": "Texture detail and color is lost on cushens",
+      "reviewedAt": "2026-11-10T05:34:48+00:00",
+      "verdict": null
+    },
+    "SimpleInstancing/glTF-Binary": {
+      "captureSha256": "6e1eff235e8fabef057d985bd305203e10d210cb5787ef2b43e17b139994321b",
+      "issues": [
+        "geometry",
+        "orientation",
+        "missing parts"
+      ],
+      "notes": "Does not match khronos reference, sample viewer does seem to have instancing working at all !",
+      "reviewedAt": "2026-11-10T05:34:21+00:00",
+      "verdict": null
+    },
+    "SimpleMaterial/glTF": {
+      "captureSha256": "9b785ee56253b675a9a66864af74f7b4d2557b173c74411d3a14d52031340b1e",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:33:42+00:00",
+      "verdict": "close"
+    },
+    "SimpleMeshes/glTF": {
+      "captureSha256": "52d3d320b7c12a38d2c304108473b4fc98c7c9face3b825e284f635039a1d743",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:33:35+00:00",
+      "verdict": null
+    },
+    "SimpleMorph/glTF": {
+      "captureSha256": "c2a55a7a179cbaf407582156a2269afee7bb7c8daaf001a7115be4e9ebec8d72",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:33:28+00:00",
+      "verdict": "rejected"
+    },
+    "SimpleSparseAccessor/glTF": {
+      "captureSha256": "a96db4d60451c4953ad223ae7452a1cfd7ffc448c171f031788100360a630a32",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:33:09+00:00",
+      "verdict": "approved"
+    },
+    "SimpleTexture/glTF": {
+      "captureSha256": "1d443c49c738c985ed32cc6e3d7a5a21bfa841abd8b8defe28e6592d3f2d338f",
+      "issues": [],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:33:05+00:00",
+      "verdict": "approved"
+    },
+    "SpecularTest/glTF-Binary": {
+      "captureSha256": "5a5d7bc3015f8c9153f32f8d859d50317d7892e02aebf5da85f4c73edd5ee09c",
+      "issues": [
+        "material",
+        "lighting",
+        "color"
+      ],
+      "notes": "",
+      "reviewedAt": "2026-11-10T05:32:53+00:00",
+      "verdict": "rejected"
+    },
+    "Sponza/glTF": {
+      "captureSha256": "f5c9c4dc70b7cc8e19bdced89655bbf37539498c2100d95512e803aaf965429b",
+      "issues": [
+        "camera"
+      ],
+      "notes": "Camera location doesn't match in-engine",
+      "reviewedAt": "2026-11-10T05:32:20+00:00",
+      "verdict": "rejected"
+    },
+    "StainedGlassLamp/glTF": {
+      "captureSha256": "5376a7298fd1bd605f36f48b238b878bc9f060ee74b85c08f6195999470c0811",
+      "issues": [
+        "texture"
+      ],
+      "notes": "Texture resolution or filtering doesn't match in-engine ",
+      "reviewedAt": "2026-11-10T05:32:00+00:00",
+      "verdict": "close"
     }
   },
   "schemaVersion": 1,
-  "updatedAt": "2026-11-09T08:33:12+00:00"
+  "updatedAt": "2026-11-10T07:25:24+00:00"
 }

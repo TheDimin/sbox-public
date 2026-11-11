@@ -2,7 +2,7 @@
  "schemaVersion": 1,
  "corpusRoot": "/home/damian/projects/sbox-public/Temp/gltf-reference/glTF-Sample-Assets",
  "corpusPin": "90d7ede14c7e280af263824604b427a1ca02cb66",
- "recipesFile": "Temp/gltf-validation/current/recipes.json",
+ "recipesFile": "research/gltf-validation/reference-recipes.json",
  "viewerDefaults": {
   "source": {
    "viewer": "https://github.com/KhronosGroup/glTF-Sample-Viewer src/main.js, src/logic/uimodel.js (main, read 2026-11-09)",
@@ -35,7 +35,7 @@
   "cubeSize": 256,
   "mipCount": 7,
   "yawDegrees": 180.0,
-  "iblGain": 1.5,
+  "iblGain": 2.0,
   "tonemapping": "KhronosPbrNeutral",
   "gaps": [
    "The visible sky is the sharp cubemap; the Sample Viewer shows a blurred background.",
@@ -192,7 +192,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 474
+    "height": 475
    },
    "animation": {
     "clip": null,
@@ -232,7 +232,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 474
+    "height": 475
    },
    "animation": {
     "clip": null,
@@ -272,7 +272,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 574
+    "height": 573
    },
    "animation": {
     "clip": 0,
@@ -491,7 +491,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 574
+    "height": 573
    },
    "animation": {
     "clip": 0,
@@ -710,7 +710,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 766
+    "height": 765
    },
    "animation": {
     "clip": 0,
@@ -1143,7 +1143,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 962
+    "height": 963
    },
    "animation": {
     "clip": 0,
@@ -1242,7 +1242,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 962
+    "height": 963
    },
    "animation": {
     "clip": 0,
@@ -1420,7 +1420,7 @@
     "preset": "object-orbit"
    },
    "resolution": {
-    "width": 902,
+    "width": 901,
     "height": 1024
    },
    "animation": {
@@ -1460,7 +1460,7 @@
     "preset": "object-orbit"
    },
    "resolution": {
-    "width": 902,
+    "width": 901,
     "height": 1024
    },
    "animation": {
@@ -1500,7 +1500,7 @@
     "preset": "object-orbit"
    },
    "resolution": {
-    "width": 902,
+    "width": 901,
     "height": 1024
    },
    "animation": {
@@ -1541,7 +1541,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 436
+    "height": 437
    },
    "animation": {
     "clip": null,
@@ -1581,7 +1581,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 436
+    "height": 437
    },
    "animation": {
     "clip": null,
@@ -1621,7 +1621,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 552
+    "height": 553
    },
    "animation": {
     "clip": null,
@@ -1661,7 +1661,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 552
+    "height": 553
    },
    "animation": {
     "clip": null,
@@ -2221,7 +2221,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 948
+    "height": 949
    },
    "animation": {
     "clip": null,
@@ -2261,7 +2261,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 948
+    "height": 949
    },
    "animation": {
     "clip": null,
@@ -2301,7 +2301,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 948
+    "height": 949
    },
    "animation": {
     "clip": null,
@@ -2340,7 +2340,7 @@
     "preset": "object-orbit"
    },
    "resolution": {
-    "width": 690,
+    "width": 689,
     "height": 1024
    },
    "animation": {
@@ -6069,7 +6069,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 764
+    "height": 765
    },
    "animation": {
     "clip": null,
@@ -6109,7 +6109,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 764
+    "height": 765
    },
    "animation": {
     "clip": null,
@@ -6149,7 +6149,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 764
+    "height": 765
    },
    "animation": {
     "clip": null,
@@ -6189,7 +6189,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 764
+    "height": 765
    },
    "animation": {
     "clip": null,
@@ -6229,7 +6229,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 764
+    "height": 765
    },
    "animation": {
     "clip": null,
@@ -7925,7 +7925,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 518
+    "height": 519
    },
    "animation": {
     "clip": null,
@@ -7965,7 +7965,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 518
+    "height": 519
    },
    "animation": {
     "clip": null,
@@ -8085,7 +8085,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 334
+    "height": 335
    },
    "animation": {
     "clip": null,
@@ -8125,7 +8125,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 334
+    "height": 335
    },
    "animation": {
     "clip": null,
@@ -8245,7 +8245,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 518
+    "height": 519
    },
    "animation": {
     "clip": null,
@@ -8285,7 +8285,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 518
+    "height": 519
    },
    "animation": {
     "clip": null,
@@ -8325,7 +8325,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 506
+    "height": 505
    },
    "animation": {
     "clip": null,
@@ -8365,7 +8365,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 506
+    "height": 505
    },
    "animation": {
     "clip": null,
@@ -8565,7 +8565,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 506
+    "height": 505
    },
    "animation": {
     "clip": null,
@@ -8605,7 +8605,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 506
+    "height": 505
    },
    "animation": {
     "clip": null,
@@ -8725,7 +8725,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 506
+    "height": 505
    },
    "animation": {
     "clip": null,
@@ -8765,7 +8765,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 506
+    "height": 505
    },
    "animation": {
     "clip": null,
@@ -8805,7 +8805,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 506
+    "height": 505
    },
    "animation": {
     "clip": null,
@@ -8845,7 +8845,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 506
+    "height": 505
    },
    "animation": {
     "clip": null,
@@ -8885,7 +8885,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 518
+    "height": 519
    },
    "animation": {
     "clip": null,
@@ -8925,7 +8925,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 518
+    "height": 519
    },
    "animation": {
     "clip": null,
@@ -9863,7 +9863,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 888
+    "height": 887
    },
    "animation": {
     "clip": null,
@@ -9903,7 +9903,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 888
+    "height": 887
    },
    "animation": {
     "clip": null,
@@ -10103,7 +10103,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 802
+    "height": 801
    },
    "animation": {
     "clip": null,
@@ -10143,7 +10143,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 802
+    "height": 801
    },
    "animation": {
     "clip": null,
@@ -10183,7 +10183,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 810
+    "height": 811
    },
    "animation": {
     "clip": null,
@@ -10223,7 +10223,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 810
+    "height": 811
    },
    "animation": {
     "clip": null,
@@ -10263,7 +10263,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 810
+    "height": 811
    },
    "animation": {
     "clip": null,
@@ -10303,7 +10303,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 810
+    "height": 811
    },
    "animation": {
     "clip": null,
@@ -12797,7 +12797,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 880
+    "height": 881
    },
    "animation": {
     "clip": null,
@@ -12837,7 +12837,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 880
+    "height": 881
    },
    "animation": {
     "clip": null,
@@ -12876,7 +12876,7 @@
     "preset": "high-object"
    },
    "resolution": {
-    "width": 902,
+    "width": 901,
     "height": 1024
    },
    "animation": {
@@ -12917,7 +12917,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 904
+    "height": 905
    },
    "animation": {
     "clip": null,
@@ -12957,7 +12957,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 904
+    "height": 905
    },
    "animation": {
     "clip": null,
@@ -13157,7 +13157,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 996
+    "height": 997
    },
    "animation": {
     "clip": null,
@@ -13197,7 +13197,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 996
+    "height": 997
    },
    "animation": {
     "clip": null,
@@ -13237,7 +13237,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 996
+    "height": 997
    },
    "animation": {
     "clip": null,
@@ -13757,7 +13757,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 910
+    "height": 909
    },
    "animation": {
     "clip": null,
@@ -13797,7 +13797,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 910
+    "height": 909
    },
    "animation": {
     "clip": null,
@@ -13917,7 +13917,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 576
+    "height": 575
    },
    "animation": {
     "clip": null,
@@ -13957,7 +13957,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 576
+    "height": 575
    },
    "animation": {
     "clip": null,
@@ -14437,7 +14437,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 750
+    "height": 751
    },
    "animation": {
     "clip": null,
@@ -14477,7 +14477,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 750
+    "height": 751
    },
    "animation": {
     "clip": null,
@@ -14597,7 +14597,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 902
+    "height": 901
    },
    "animation": {
     "clip": 0,
@@ -14637,7 +14637,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 902
+    "height": 901
    },
    "animation": {
     "clip": 0,
@@ -15373,7 +15373,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 820
+    "height": 819
    },
    "animation": {
     "clip": null,
@@ -15413,7 +15413,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 820
+    "height": 819
    },
    "animation": {
     "clip": null,
@@ -15693,7 +15693,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 458
+    "height": 457
    },
    "animation": {
     "clip": null,
@@ -15733,7 +15733,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 458
+    "height": 457
    },
    "animation": {
     "clip": null,
@@ -15933,7 +15933,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 980
+    "height": 979
    },
    "animation": {
     "clip": null,
@@ -15973,7 +15973,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 980
+    "height": 979
    },
    "animation": {
     "clip": null,
@@ -16012,7 +16012,7 @@
     "preset": "front-flat"
    },
    "resolution": {
-    "width": 922,
+    "width": 923,
     "height": 1024
    },
    "animation": {
@@ -16052,7 +16052,7 @@
     "preset": "front-flat"
    },
    "resolution": {
-    "width": 922,
+    "width": 923,
     "height": 1024
    },
    "animation": {
@@ -16429,7 +16429,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 690
+    "height": 691
    },
    "animation": {
     "clip": null,
@@ -16469,7 +16469,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 690
+    "height": 691
    },
    "animation": {
     "clip": null,
@@ -16509,7 +16509,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 868
+    "height": 869
    },
    "animation": {
     "clip": null,
@@ -16549,7 +16549,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 868
+    "height": 869
    },
    "animation": {
     "clip": null,
@@ -16669,7 +16669,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 682
+    "height": 683
    },
    "animation": {
     "clip": null,
@@ -16709,7 +16709,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 682
+    "height": 683
    },
    "animation": {
     "clip": null,
@@ -16989,7 +16989,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 600
+    "height": 601
    },
    "animation": {
     "clip": null,
@@ -17029,7 +17029,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 600
+    "height": 601
    },
    "animation": {
     "clip": null,
@@ -17069,7 +17069,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 600
+    "height": 601
    },
    "animation": {
     "clip": null,
@@ -17548,7 +17548,7 @@
     "preset": "front-flat"
    },
    "resolution": {
-    "width": 998,
+    "width": 997,
     "height": 1024
    },
    "animation": {
@@ -17588,7 +17588,7 @@
     "preset": "front-flat"
    },
    "resolution": {
-    "width": 998,
+    "width": 997,
     "height": 1024
    },
    "animation": {
@@ -17629,7 +17629,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 750
+    "height": 751
    },
    "animation": {
     "clip": null,
@@ -17749,7 +17749,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 540
+    "height": 539
    },
    "animation": {
     "clip": null,
@@ -17789,7 +17789,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 690
+    "height": 689
    },
    "animation": {
     "clip": null,
@@ -17829,7 +17829,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 690
+    "height": 689
    },
    "animation": {
     "clip": null,
@@ -17869,7 +17869,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 510
+    "height": 509
    },
    "animation": {
     "clip": null,
@@ -17909,7 +17909,7 @@
    },
    "resolution": {
     "width": 1024,
-    "height": 510
+    "height": 509
    },
    "animation": {
     "clip": null,
