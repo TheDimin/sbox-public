@@ -65,7 +65,7 @@ public sealed class GltfStockSamplerLoadingTests
 	[DataRow( 9987, 9729, 2 )]
 	public async Task EveryFilterPairPreservesMagMinAndMipSelection( int min, int mag, int form )
 	{
-		var image = Image( 4, 4, (x, y) => x % 2 == 0 ? Color.Black : Color.White );
+		var image = Image( 4, 4, ( x, y ) => x % 2 == 0 ? Color.Black : Color.White );
 		foreach ( var lod in new[] { -1f, .25f } )
 		{
 			var baseValue = (lod < 0 ? mag == 9729 : min is 9729 or 9985 or 9987) ? .75f : 1f;
@@ -107,7 +107,7 @@ public sealed class GltfStockSamplerLoadingTests
 	public async Task WrapAxesSelectIndependentTexelsAcrossPositiveAndNegativeUv( int wrapS, int wrapT, int form )
 	{
 		Color[] colors = [Color.Red, Color.Green, Color.Blue, Color.Yellow];
-		var image = Image( 2, 2, (x, y) => colors[y * 2 + x] );
+		var image = Image( 2, 2, ( x, y ) => colors[y * 2 + x] );
 		foreach ( var uv in new[] { new Vector2( 1.25f, -.25f ), new Vector2( -.25f, 1.25f ) } )
 		{
 			var pixel = colors[Texel( uv.y, wrapT, 2 ) * 2 + Texel( uv.x, wrapS, 2 )];
@@ -122,7 +122,7 @@ public sealed class GltfStockSamplerLoadingTests
 	[DataRow( 2 )]
 	public async Task NonPowerOfTwoImagesRetainDimensionsAndWrapTexelCenters( int form )
 	{
-		var image = Image( 3, 5, (x, y) => new Color( x / 2f, y / 4f, 0 ) );
+		var image = Image( 3, 5, ( x, y ) => new Color( x / 2f, y / 4f, 0 ) );
 		using var fixture = new Fixture( image, 3, 5, 9987, 9728, 10497, 10497, form, 1 + 1f / 6, 1 + 1f / 10, 0 );
 		var texture = fixture.Model.Materials[0].GetTexture( "g_tColor" );
 		Assert.IsNotNull( texture );
@@ -137,7 +137,7 @@ public sealed class GltfStockSamplerLoadingTests
 	[DataRow( 2 )]
 	public async Task ColorTransferAndFactorsAreAppliedInLinearLight( int form )
 	{
-		var image = Image( 1, 1, (x, y) => new Color( 128f / 255, 128f / 255, 128f / 255 ) );
+		var image = Image( 1, 1, ( x, y ) => new Color( 128f / 255, 128f / 255, 128f / 255 ) );
 		using var fixture = new Fixture( image, 1, 1, 9728, 9728, 10497, 10497, form, .5f, .5f, 0, colorFactor: .5f );
 		await fixture.AssertAlbedo( new Vector3( Decode( 128f / 255 ) * .5f ), "sRGB image * linear material factor" );
 	}
@@ -148,7 +148,7 @@ public sealed class GltfStockSamplerLoadingTests
 	[DataRow( 2 )]
 	public async Task SharedImageKeepsPerRoleColorSpaceAndIndependentSamplers( int form )
 	{
-		var image = Image( 2, 1, (x, y) => x == 0 ? new Color( 1, 64f / 255, 32f / 255 ) : new Color( 0, 192f / 255, 224f / 255 ) );
+		var image = Image( 2, 1, ( x, y ) => x == 0 ? new Color( 1, 64f / 255, 32f / 255 ) : new Color( 0, 192f / 255, 224f / 255 ) );
 		using var fixture = new Fixture( image, 2, 1, 9728, 9728, 33071, 10497, form, 1.25f, .5f, 0, separateMetallicSampler: true );
 		await fixture.AssertAlbedo( new Vector3( 0, Decode( 192f / 255 ), Decode( 224f / 255 ) ), "Base color clamps the shared image and decodes sRGB." );
 		await fixture.AssertRoughness( 64f / 255, "Metallic/roughness repeats the shared image and reads G linearly." );
@@ -160,7 +160,7 @@ public sealed class GltfStockSamplerLoadingTests
 	[DataRow( 2 )]
 	public async Task ComponentOverrideDoesNotChangeAnotherInstanceOrStockTemplate( int form )
 	{
-		var image = Image( 2, 1, (x, y) => x == 0 ? Color.Red : Color.Blue );
+		var image = Image( 2, 1, ( x, y ) => x == 0 ? Color.Red : Color.Blue );
 		using var fixture = new Fixture( image, 2, 1, 9728, 9728, 33071, 10497, form, 1.25f, .5f, 0 );
 		await fixture.AssertIndependentInstances();
 	}
@@ -325,10 +325,18 @@ public sealed class GltfStockSamplerLoadingTests
 		if ( separateMetallicSampler ) { samplers.Add( new { minFilter = 9728, magFilter = 9728, wrapS = 10497, wrapT = 10497 } ); textureDefinitions.Add( new { source = 0, sampler = 1 } ); pbr["metallicRoughnessTexture"] = new { index = 1 }; }
 		return new Asset( JsonSerializer.SerializeToUtf8Bytes( new
 		{
-			asset = new { version = "2.0", generator = "Independent core stock sampler acceptance" }, buffers = new[] { buffer }, bufferViews = views,
+			asset = new { version = "2.0", generator = "Independent core stock sampler acceptance" },
+			buffers = new[] { buffer },
+			bufferViews = views,
 			accessors = new object[] { new { bufferView = 0, componentType = 5126, count = 4, type = "VEC3", min = new[] { -1, -1, 0 }, max = new[] { 1, 1, 0 } }, new { bufferView = 1, componentType = 5126, count = 4, type = "VEC2" }, new { bufferView = 2, componentType = 5126, count = 4, type = "VEC3" }, new { bufferView = 3, componentType = 5123, count = 6, type = "SCALAR" } },
-			images = new[] { imageDescriptor }, textures = textureDefinitions, samplers, materials = new[] { new { doubleSided = true, pbrMetallicRoughness = pbr } },
-			meshes = new[] { new { primitives = new[] { new { attributes = new Dictionary<string, int> { ["POSITION"] = 0, ["TEXCOORD_0"] = 1, ["NORMAL"] = 2 }, indices = 3, material = 0 } } } }, nodes = new[] { new { mesh = 0 } }, scenes = new[] { new { nodes = new[] { 0 } } }, scene = 0
+			images = new[] { imageDescriptor },
+			textures = textureDefinitions,
+			samplers,
+			materials = new[] { new { doubleSided = true, pbrMetallicRoughness = pbr } },
+			meshes = new[] { new { primitives = new[] { new { attributes = new Dictionary<string, int> { ["POSITION"] = 0, ["TEXCOORD_0"] = 1, ["NORMAL"] = 2 }, indices = 3, material = 0 } } } },
+			nodes = new[] { new { mesh = 0 } },
+			scenes = new[] { new { nodes = new[] { 0 } } },
+			scene = 0
 		} ), data );
 	}
 

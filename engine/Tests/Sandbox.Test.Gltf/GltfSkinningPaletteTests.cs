@@ -62,8 +62,8 @@ public class GltfSkinningPaletteTests
 			var a = original.Evaluate( source.EvaluatePose( 0, time ) );
 			var b = output.Evaluate( compiled.EvaluatePose( 0, time ) );
 			for ( var i = 0; i < a.Length; i++ )
-			foreach ( var point in new[] { NVector.Zero, NVector.UnitX, NVector.UnitY, NVector.UnitZ } )
-				AssertVector( NVector.Transform( point, a[i] ), NVector.Transform( point, b[i] ) );
+				foreach ( var point in new[] { NVector.Zero, NVector.UnitX, NVector.UnitY, NVector.UnitZ } )
+					AssertVector( NVector.Transform( point, a[i] ), NVector.Transform( point, b[i] ) );
 		}
 	}
 
@@ -92,12 +92,12 @@ public class GltfSkinningPaletteTests
 		var helper = new GltfSkinningPalette( document.ReadSkin( 0 ) );
 		var pose = document.EvaluatePose();
 		var sentinel = NMatrix.CreateTranslation( 123, 456, 789 );
-		var output = new[] { default(NMatrix), default(NMatrix), sentinel };
+		var output = new[] { default( NMatrix ), default( NMatrix ), sentinel };
 		helper.Write( pose, output );
 		Assert.AreEqual( helper.Evaluate( pose )[0], output[0] );
 		Assert.AreEqual( helper.Evaluate( pose )[1], output[1] );
 		Assert.AreEqual( sentinel, output[2] );
-		Assert.AreNotEqual( default(NMatrix), output[0] );
+		Assert.AreNotEqual( default( NMatrix ), output[0] );
 		Assert.ThrowsException<ArgumentException>( () => helper.Write( pose, new NMatrix[1] ) );
 		Assert.ThrowsException<ArgumentException>( () => helper.Write( pose, Array.Empty<NMatrix>() ) );
 	}
@@ -106,7 +106,7 @@ public class GltfSkinningPaletteTests
 	public void WriteValidationDoesNotPartiallyChangeDestination()
 	{
 		using var document = Fixture();
-		var helper = new GltfSkinningPalette( new GltfSkin { Joints = [1,99], InverseBindMatrices = [NMatrix.Identity,NMatrix.Identity] } );
+		var helper = new GltfSkinningPalette( new GltfSkin { Joints = [1, 99], InverseBindMatrices = [NMatrix.Identity, NMatrix.Identity] } );
 		var sentinel = NMatrix.CreateTranslation( 123, 456, 789 );
 		var output = new[] { sentinel, sentinel };
 		Assert.ThrowsException<GltfException>( () => helper.Write( document.EvaluatePose(), output ) );
@@ -131,16 +131,16 @@ public class GltfSkinningPaletteTests
 		var y = (6 - MathF.Sqrt( 2 )) / 0.0254f;
 		var z = (3 / MathF.Sqrt( 2 )) / 0.0254f;
 		var actual = NVector.Transform( GltfGeometry.ConvertPosition( new NVector( 2, 2, 0 ) ), output[0] );
-		var expected = new NVector( 10 - 3*y, 20, 30 + 4*z );
+		var expected = new NVector( 10 - 3 * y, 20, 30 + 4 * z );
 		Assert.IsTrue( NVector.Distance( expected, actual ) < 0.0005f, $"Expected {expected}, got {actual}." );
 	}
 
 	[TestMethod]
 	public void RejectsInvalidCountsIndicesAndNonAffineOrNonfiniteMatrices()
 	{
-		Assert.ThrowsException<GltfException>( () => new GltfSkinningPalette( new GltfSkin { Joints = [0,1], InverseBindMatrices = [NMatrix.Identity] } ) );
+		Assert.ThrowsException<GltfException>( () => new GltfSkinningPalette( new GltfSkin { Joints = [0, 1], InverseBindMatrices = [NMatrix.Identity] } ) );
 		Assert.ThrowsException<GltfException>( () => new GltfSkinningPalette( new GltfSkin { Joints = [-1], InverseBindMatrices = [NMatrix.Identity] } ) );
-		Assert.ThrowsException<GltfException>( () => new GltfSkinningPalette( new GltfSkin { Joints = [1,1], InverseBindMatrices = [NMatrix.Identity,NMatrix.Identity] } ) );
+		Assert.ThrowsException<GltfException>( () => new GltfSkinningPalette( new GltfSkin { Joints = [1, 1], InverseBindMatrices = [NMatrix.Identity, NMatrix.Identity] } ) );
 		var invalid = NMatrix.Identity; invalid.M14 = 1;
 		Assert.ThrowsException<GltfException>( () => new GltfSkinningPalette( new GltfSkin { Joints = [0], InverseBindMatrices = [invalid] } ) );
 		var helper = new GltfSkinningPalette( new GltfSkin { Joints = [99], InverseBindMatrices = [NMatrix.Identity] } );
@@ -165,25 +165,30 @@ public class GltfSkinningPaletteTests
 			if ( bounds ) { item["min"] = type == "SCALAR" ? new[] { 0f } : new[] { 1f, 0f, 0f }; item["max"] = type == "SCALAR" ? new[] { 2f } : new[] { 1f, 0f, 0f }; }
 			accessors.Add( item ); return accessors.Count - 1;
 		}
-		var ibm = Floats( [1,0,0,0, 0,1,0,0, 0,0,1,0, -1,0,0,1, 2,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1], "MAT4", 2 );
-		var position = Floats( [1,0,0], "VEC3", 1, true );
+		var ibm = Floats( [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 1, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1], "MAT4", 2 );
+		var position = Floats( [1, 0, 0], "VEC3", 1, true );
 		var offset = bytes.Count; bytes.AddRange( new byte[4] ); var jointView = views.Count;
 		views.Add( new { buffer = 0, byteOffset = offset, byteLength = 4 } ); var joints = accessors.Count;
 		accessors.Add( new { bufferView = jointView, componentType = 5121, count = 1, type = "VEC4" } );
-		var weights = Floats( [1,0,0,0], "VEC4", 1 );
-		var time = Floats( [0,2], "SCALAR", 2, true );
-		var translation = Floats( [0,3,0, 0,7,0], "VEC3", 2 );
+		var weights = Floats( [1, 0, 0, 0], "VEC4", 1 );
+		var time = Floats( [0, 2], "SCALAR", 2, true );
+		var translation = Floats( [0, 3, 0, 0, 7, 0], "VEC3", 2 );
 		var q = MathF.Sqrt( 0.5f );
 		var half45Sin = MathF.Sin( MathF.PI / 8 );
 		var half45Cos = MathF.Cos( MathF.PI / 8 );
-		return JsonSerializer.SerializeToUtf8Bytes( new {
-			asset = new { version = "2.0" }, scene = 0, scenes = new[] { new { nodes = new[] { 0,3,5 } } },
+		return JsonSerializer.SerializeToUtf8Bytes( new
+		{
+			asset = new { version = "2.0" },
+			scene = 0,
+			scenes = new[] { new { nodes = new[] { 0, 3, 5 } } },
 			nodes = new object[] { new { mesh = 0, skin = 0, translation = new[] { 100f,0f,0f } }, new { translation = new[] { 0f,3f,0f }, rotation = new[] { 0f,0f,q,q } },
 				new { rotation = new[] { 0f,0f,half45Sin,half45Cos }, translation = new[] { 3f,0f,0f } }, new { mesh = 0, skin = 0, translation = new[] { -100f,0f,0f } },
 				new { scale = new[] { 2f,1f,1f }, children = new[] { 2 } }, new { children = new[] { 1,4 } } },
-			skins = new[] { new { joints = new[] { 2,1 }, skeleton = 5, inverseBindMatrices = ibm } },
+			skins = new[] { new { joints = new[] { 2, 1 }, skeleton = 5, inverseBindMatrices = ibm } },
 			meshes = new[] { new { primitives = new[] { new { mode = 0, attributes = new Dictionary<string, int> { ["POSITION"] = position, ["JOINTS_0"] = joints, ["WEIGHTS_0"] = weights } } } } },
-			buffers = new[] { new { uri = "data:application/octet-stream;base64," + Convert.ToBase64String( bytes.ToArray() ), byteLength = bytes.Count } }, bufferViews = views, accessors,
+			buffers = new[] { new { uri = "data:application/octet-stream;base64," + Convert.ToBase64String( bytes.ToArray() ), byteLength = bytes.Count } },
+			bufferViews = views,
+			accessors,
 			animations = new[] { new { samplers = new[] { new { input = time, output = translation } }, channels = new[] { new { sampler = 0, target = new { node = 1, path = "translation" } } } } }
 		} );
 	}

@@ -210,7 +210,7 @@ public sealed class GltfAnimationControllerTests
 		using var fixture = new Fixture();
 		var directory = Path.Combine( Path.GetTempPath(), "gltf_publication_" + Guid.NewGuid().ToString( "N" ) );
 		Directory.CreateDirectory( directory );
-		void FailNotification() => throw new InvalidOperationException( "Injected post-commit notification failure." );
+		static void FailNotification() => throw new InvalidOperationException( "Injected post-commit notification failure." );
 		fixture.Renderer.ModelChanged += FailNotification;
 		try
 		{
@@ -312,7 +312,7 @@ public sealed class GltfAnimationControllerTests
 	{
 		using var fixture = new Fixture();
 		var controller = fixture.Controller( "Move" );
-		void FailNotification() => throw new InvalidOperationException( "Injected assignment notification failure." );
+		static void FailNotification() => throw new InvalidOperationException( "Injected assignment notification failure." );
 		fixture.Renderer.ModelChanged += FailNotification;
 		try
 		{
@@ -406,9 +406,9 @@ public sealed class GltfAnimationControllerTests
 		using var stream = new MemoryStream();
 		using ( var writer = new BinaryWriter( stream, Encoding.UTF8, leaveOpen: true ) )
 		{
-			foreach ( var value in new float[] { 0,0,0, 1,0,0, 0,1,0, 0,1, 0,0,0, 1,0,0 } ) writer.Write( value );
-			writer.Write( new byte[] { 1,0,0,0, 1,0,0,0, 1,0,0,0 } );
-			for ( var i = 0; i < 3; i++ ) foreach ( var value in new float[] { 1,0,0,0 } ) writer.Write( value );
+			foreach ( var value in new float[] { 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0 } ) writer.Write( value );
+			writer.Write( new byte[] { 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 } );
+			for ( var i = 0; i < 3; i++ ) foreach ( var value in new float[] { 1, 0, 0, 0 } ) writer.Write( value );
 		}
 		var bytes = stream.ToArray();
 		var json = "{\"asset\":{\"version\":\"2.0\"},\"buffers\":[{\"uri\":\"data:application/octet-stream;base64," + Convert.ToBase64String( bytes ) + "\",\"byteLength\":" + bytes.Length + "}],"
@@ -423,9 +423,9 @@ public sealed class GltfAnimationControllerTests
 	{
 		using var stream = new MemoryStream();
 		using ( var writer = new BinaryWriter( stream, Encoding.UTF8, leaveOpen: true ) )
-			foreach ( var value in new float[] { 0,0,0, 1,0,0, 0,1,0, 0,1, 0,0,0, 2,0,0, 1,1,1, 3,3,3 } ) writer.Write( value );
+			foreach ( var value in new float[] { 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 2, 0, 0, 1, 1, 1, 3, 3, 3 } ) writer.Write( value );
 		var bytes = stream.ToArray();
-		string Clip( string name, int output, int node, string path ) => "{\"name\":\"" + name + "\",\"samplers\":[{\"input\":1,\"output\":" + output + "}],\"channels\":[{\"sampler\":0,\"target\":{\"node\":" + node + ",\"path\":\"" + path + "\"}}]}";
+		static string Clip( string name, int output, int node, string path ) => "{\"name\":\"" + name + "\",\"samplers\":[{\"input\":1,\"output\":" + output + "}],\"channels\":[{\"sampler\":0,\"target\":{\"node\":" + node + ",\"path\":\"" + path + "\"}}]}";
 		var json = "{\"asset\":{\"version\":\"2.0\"},\"buffers\":[{\"uri\":\"data:application/octet-stream;base64," + Convert.ToBase64String( bytes ) + "\",\"byteLength\":" + bytes.Length + "}],"
 			+ "\"bufferViews\":[{\"buffer\":0,\"byteLength\":36},{\"buffer\":0,\"byteOffset\":36,\"byteLength\":8},{\"buffer\":0,\"byteOffset\":44,\"byteLength\":24},{\"buffer\":0,\"byteOffset\":68,\"byteLength\":24}],"
 			+ "\"accessors\":[{\"bufferView\":0,\"componentType\":5126,\"count\":3,\"type\":\"VEC3\",\"min\":[0,0,0],\"max\":[1,1,0]},{\"bufferView\":1,\"componentType\":5126,\"count\":2,\"type\":\"SCALAR\",\"min\":[0],\"max\":[1]},{\"bufferView\":2,\"componentType\":5126,\"count\":2,\"type\":\"VEC3\"},{\"bufferView\":3,\"componentType\":5126,\"count\":2,\"type\":\"VEC3\"}],"

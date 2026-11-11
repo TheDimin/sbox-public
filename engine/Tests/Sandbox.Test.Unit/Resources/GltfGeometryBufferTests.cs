@@ -24,8 +24,10 @@ public class GltfGeometryBufferTests
 		{
 			BaseColorTexture = new GltfTextureInfo
 			{
-				TexCoord = 2, Tiling = new System.Numerics.Vector2( 2, 3 ),
-				Rotation = MathF.PI / 2, Offset = new System.Numerics.Vector2( 1, 2 )
+				TexCoord = 2,
+				Tiling = new System.Numerics.Vector2( 2, 3 ),
+				Rotation = MathF.PI / 2,
+				Offset = new System.Numerics.Vector2( 1, 2 )
 			},
 			NormalTexture = new GltfTextureInfo { TexCoord = 1, Tiling = System.Numerics.Vector2.One }
 		};
@@ -45,7 +47,8 @@ public class GltfGeometryBufferTests
 
 	private static GltfDrawData Triangle() => new()
 	{
-		Mode = 4, Indices = new uint[] { 0, 1, 2 },
+		Mode = 4,
+		Indices = new uint[] { 0, 1, 2 },
 		Positions = new System.Numerics.Vector3[] { new( 1, 2, 3 ), new( 4, 5, 6 ), new( 7, 8, 9 ) },
 		Normals = new System.Numerics.Vector3[] { new( 0, 0, 1 ), new( 0, 0, 1 ), new( 0, 0, 1 ) },
 		Tangents = new System.Numerics.Vector4[] { new( 1, 0, 0, -1 ), new( 1, 0, 0, -1 ), new( 1, 0, 0, -1 ) },

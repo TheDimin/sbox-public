@@ -100,7 +100,7 @@ public class GltfStaticSceneAssemblyTests
 	public void RankTwoMirroredTransformPreservesSurvivingSurfaceFrame()
 	{
 		using var document = Fixture( "[{\"nodes\":[0]}]", "[{\"mesh\":0,\"scale\":[-2,3,0],\"rotation\":[0,0.70710677,0,0.70710677]}]",
-			normalValues: [0,0,1, 0,0,1, 0,0,1], tangentValues: [1,0,0,1, 1,0,0,1, 1,0,0,1] );
+			normalValues: [0, 0, 1, 0, 0, 1, 0, 0, 1], tangentValues: [1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1] );
 		var scene = GltfStaticSceneAssembler.Assemble( document );
 		var primitive = scene.Primitives[0].Data;
 		var positions = primitive.Positions.Span;
@@ -161,14 +161,14 @@ public class GltfStaticSceneAssemblyTests
 	private static GltfDocument Fixture( string scenes, string nodes, bool includeDefault = true, int? animationTarget = null, bool morph = false, bool skin = false, bool instancing = false, float[] normalValues = null, float[] tangentValues = null )
 	{
 		var unit = MathF.Sqrt( 0.5f );
-		float[] position = [0,0,0, 1,0,0, 0,1,0];
-		float[] normal = normalValues ?? [unit,unit,0, unit,unit,0, unit,unit,0];
-		float[] tangent = tangentValues ?? [unit,-unit,0,1, unit,-unit,0,1, unit,-unit,0,1];
-		float[] uv = [0.25f,0.75f, 1,0, 0,1];
-		float[] weights = [1,0,0,0, 1,0,0,0, 1,0,0,0];
-		float[] times = [0,1];
-		float[] translations = [0,0,0, 1,0,0];
-		float[] instanceTranslation = [0,0,0];
+		float[] position = [0, 0, 0, 1, 0, 0, 0, 1, 0];
+		float[] normal = normalValues ?? [unit, unit, 0, unit, unit, 0, unit, unit, 0];
+		float[] tangent = tangentValues ?? [unit, -unit, 0, 1, unit, -unit, 0, 1, unit, -unit, 0, 1];
+		float[] uv = [0.25f, 0.75f, 1, 0, 0, 1];
+		float[] weights = [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0];
+		float[] times = [0, 1];
+		float[] translations = [0, 0, 0, 1, 0, 0];
+		float[] instanceTranslation = [0, 0, 0];
 		var data = position.Concat( normal ).Concat( tangent ).Concat( uv ).SelectMany( BitConverter.GetBytes )
 			.Concat( new byte[12] ).Concat( weights.Concat( times ).Concat( translations ).Concat( instanceTranslation ).SelectMany( BitConverter.GetBytes ) ).ToArray();
 		var animations = animationTarget.HasValue ? $",\"animations\":[{{\"samplers\":[{{\"input\":6,\"output\":7}}],\"channels\":[{{\"sampler\":0,\"target\":{{\"node\":{animationTarget},\"path\":\"translation\"}}}}]}}]" : "";

@@ -38,7 +38,9 @@ public sealed class GltfBasisTexturePlanTests
 		var plan = GltfBasisTexturePlan.Create( Image( Container( levels: 2 ) ), true, true );
 		var decoded = new GltfKtxImage
 		{
-			Width = 4, Height = 4, IsSrgb = true,
+			Width = 4,
+			Height = 4,
+			IsSrgb = true,
 			Levels = [Level( 4, [255, 0, 0, 255] ), Level( 2, [0, 255, 0, 255] )]
 		};
 		var levels = plan.CompleteLevels( decoded );

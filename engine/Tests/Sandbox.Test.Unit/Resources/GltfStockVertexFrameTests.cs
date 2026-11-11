@@ -23,7 +23,9 @@ public class GltfStockVertexFrameTests
 		var data = Triangle();
 		data = new GltfDrawData
 		{
-			Mode = data.Mode, Positions = data.Positions, Indices = data.Indices,
+			Mode = data.Mode,
+			Positions = data.Positions,
+			Indices = data.Indices,
 			Normals = new System.Numerics.Vector3[] { new( 0, 0, 1 ), new( 0, 0, 1 ), new( 0, 0, 1 ) }
 		};
 		var prepared = GltfModelPrimitiveBuilder.Prepare( data );
@@ -40,7 +42,9 @@ public class GltfStockVertexFrameTests
 		var data = Triangle();
 		data = new GltfDrawData
 		{
-			Mode = data.Mode, Positions = data.Positions, Indices = data.Indices,
+			Mode = data.Mode,
+			Positions = data.Positions,
+			Indices = data.Indices,
 			Normals = new System.Numerics.Vector3[] { new( 1, 0, 0 ), new( 1, 0, 0 ), new( 1, 0, 0 ) },
 			Tangents = new System.Numerics.Vector4[] { new( 0, 1, 0, -1 ), new( 0, 1, 0, -1 ), new( 0, 1, 0, -1 ) }
 		};
@@ -54,7 +58,9 @@ public class GltfStockVertexFrameTests
 		var data = Triangle();
 		data = new GltfDrawData
 		{
-			Mode = data.Mode, Positions = data.Positions, Indices = data.Indices,
+			Mode = data.Mode,
+			Positions = data.Positions,
+			Indices = data.Indices,
 			Tangents = new System.Numerics.Vector4[] { new( 1, 0, 0, -1 ), new( 1, 0, 0, -1 ), new( 1, 0, 0, -1 ) }
 		};
 		foreach ( var vertex in GltfModelPrimitiveBuilder.Prepare( data ).Vertices )
@@ -75,7 +81,8 @@ public class GltfStockVertexFrameTests
 
 	private static GltfDrawData Triangle() => new()
 	{
-		Mode = 4, Indices = new uint[] { 0, 1, 2 },
+		Mode = 4,
+		Indices = new uint[] { 0, 1, 2 },
 		Positions = new System.Numerics.Vector3[] { new( 0, 0, 0 ), new( 0, 1, 0 ), new( 0, 0, 1 ) }
 	};
 }

@@ -45,7 +45,8 @@ public sealed class GltfModelPrimitiveBuilderTests
 	{
 		var data = new GltfDrawData
 		{
-			Mode = 4, Indices = new uint[] { 0, 1, 2 },
+			Mode = 4,
+			Indices = new uint[] { 0, 1, 2 },
 			Positions = new System.Numerics.Vector3[] { new( 0, 0, 0 ), new( 1e30f, 0, 0 ), new( 0, 1e30f, 0 ) }
 		};
 		var prepared = GltfModelPrimitiveBuilder.Prepare( data );
@@ -103,7 +104,9 @@ public sealed class GltfModelPrimitiveBuilderTests
 
 	private static GltfDrawData Triangle( bool skinning = false, bool morphs = false, uint[] indices = null ) => new()
 	{
-		Mode = 4, HasSkinning = skinning, HasMorphTargets = morphs,
+		Mode = 4,
+		HasSkinning = skinning,
+		HasMorphTargets = morphs,
 		Positions = new System.Numerics.Vector3[] { new( 0, 0, 0 ), new( 1, 0, 0 ), new( 0, 1, 0 ) },
 		Normals = new System.Numerics.Vector3[] { new( 0, 0, 1 ), new( 0, 0, 1 ), new( 0, 0, 1 ) },
 		Tangents = new System.Numerics.Vector4[] { new( 1, 0, 0, -1 ), new( 1, 0, 0, -1 ), new( 1, 0, 0, -1 ) },
@@ -120,7 +123,7 @@ public sealed class GltfModelPrimitiveBuilderTests
 	private static byte[] CreateSource( int mode )
 	{
 		float[] coordinates = [0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0, 0, 3, 0, 0, 2, 1, 0];
-		var bytes = new byte[coordinates.Length * sizeof(float)];
+		var bytes = new byte[coordinates.Length * sizeof( float )];
 		for ( var i = 0; i < coordinates.Length; i++ ) BinaryPrimitives.WriteSingleLittleEndian( bytes.AsSpan( i * 4, 4 ), coordinates[i] );
 		var json = "{\"asset\":{\"version\":\"2.0\"},\"buffers\":[{\"uri\":\"data:application/octet-stream;base64,"
 			+ Convert.ToBase64String( bytes ) + "\",\"byteLength\":" + bytes.Length + "}],\"bufferViews\":[{\"buffer\":0,\"byteLength\":" + bytes.Length

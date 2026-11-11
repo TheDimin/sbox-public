@@ -23,12 +23,12 @@ public sealed class GltfProjectedVariantSetupTests
 		using var document = GltfReader.Read( Encoding.UTF8.GetBytes( Source ), supportedExtensions: new HashSet<string> { "KHR_materials_variants" } );
 		using var asset = GltfGpuAsset.Prepare( document, GltfGpuAsset.DefaultComputeShaderPath, _ => null );
 		var primitive = asset.Primitives[0]; var raw = primitive.Plan; var acquired = 0;
-		Assert.ThrowsException<ArgumentOutOfRangeException>( () => asset.ConfigureProjectedVariants( -1, (_, _, _) => throw new InvalidOperationException() ) );
+		Assert.ThrowsException<ArgumentOutOfRangeException>( () => asset.ConfigureProjectedVariants( -1, ( _, _, _ ) => throw new InvalidOperationException() ) );
 		Assert.AreSame( raw, primitive.Plan );
-		asset.ConfigureProjectedVariants( 0, (_, _, _) => { acquired++; throw new InvalidOperationException( "No material should be acquired during setup." ); } );
+		asset.ConfigureProjectedVariants( 0, ( _, _, _ ) => { acquired++; throw new InvalidOperationException( "No material should be acquired during setup." ); } );
 		Assert.AreEqual( 0, acquired ); Assert.AreSame( raw, asset.GetRawVariantPlan( primitive ) ); Assert.AreNotSame( raw, primitive.Plan );
 		Assert.AreEqual( 5, primitive.Plan.Fields.Count( x => x.Semantic == "TEXCOORD" ) );
-		Assert.ThrowsException<InvalidOperationException>( () => asset.ConfigureProjectedVariants( 0, (_, _, _) => null ) );
+		Assert.ThrowsException<InvalidOperationException>( () => asset.ConfigureProjectedVariants( 0, ( _, _, _ ) => null ) );
 	}
 
 	private const string Source = """

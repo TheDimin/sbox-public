@@ -17,11 +17,11 @@ public class ModelPhysicsInertiaReadbackTests
 		var task = System.Threading.Tasks.Task.Run( () => ModelPhysicsInertiaReadback.Read( physics, 0, out _, out _ ) ); task.Wait();
 		Assert.AreEqual( ModelPhysicsInertiaReadback.Status.WrongThread, task.Result );
 		// Native zero is a serialized sentinel; the effective wrapper evaluates it to one.
-		var native=physics.Parts[0].native;native.m_flInertiaScale=0;
-		Assert.AreEqual(ModelPhysicsInertiaReadback.Status.Success,ModelPhysicsInertiaReadback.Read(physics,0,out raw,out effective));
-		Assert.AreEqual(0f,raw);Assert.AreEqual(1f,effective);
-		native.m_flInertiaScale=float.NaN;
-		Assert.AreEqual(ModelPhysicsInertiaReadback.Status.InvalidData,ModelPhysicsInertiaReadback.Read(physics,0,out _,out _));
-		native.m_flInertiaScale=2.5f;
+		var native = physics.Parts[0].native; native.m_flInertiaScale = 0;
+		Assert.AreEqual( ModelPhysicsInertiaReadback.Status.Success, ModelPhysicsInertiaReadback.Read( physics, 0, out raw, out effective ) );
+		Assert.AreEqual( 0f, raw ); Assert.AreEqual( 1f, effective );
+		native.m_flInertiaScale = float.NaN;
+		Assert.AreEqual( ModelPhysicsInertiaReadback.Status.InvalidData, ModelPhysicsInertiaReadback.Read( physics, 0, out _, out _ ) );
+		native.m_flInertiaScale = 2.5f;
 	}
 }

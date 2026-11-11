@@ -39,7 +39,9 @@ public class GltfStockMaterialTests
 		var prepared = GltfStockMaterialAdapter.Prepare( document, new GltfMaterial
 		{
 			BaseColorFactor = new System.Numerics.Vector4( .21404114f, 0, 1, .2f ),
-			MetallicFactor = .5f, RoughnessFactor = .25f, AlphaMode = "OPAQUE"
+			MetallicFactor = .5f,
+			RoughnessFactor = .25f,
+			AlphaMode = "OPAQUE"
 		} );
 		Assert.AreEqual( .5f, prepared.ColorTint.x, .000001f );
 		Assert.AreEqual( 0f, prepared.ColorTint.y );
@@ -55,13 +57,19 @@ public class GltfStockMaterialTests
 		using var document = GltfReader.Read( Encoding.UTF8.GetBytes( """{"asset":{"version":"2.0"}}""" ) );
 		Assert.ThrowsException<GltfException>( () => GltfStockMaterialAdapter.Prepare( document, new GltfMaterial
 		{
-			BaseColorFactor = System.Numerics.Vector4.One, MetallicFactor = 1, RoughnessFactor = 1, AlphaMode = alphaMode
+			BaseColorFactor = System.Numerics.Vector4.One,
+			MetallicFactor = 1,
+			RoughnessFactor = 1,
+			AlphaMode = alphaMode
 		} ) );
 	}
 
 	private static GltfMaterial Material( float metallic, float roughness ) => new()
 	{
-		BaseColorFactor = System.Numerics.Vector4.One, MetallicFactor = metallic, RoughnessFactor = roughness, AlphaMode = "OPAQUE"
+		BaseColorFactor = System.Numerics.Vector4.One,
+		MetallicFactor = metallic,
+		RoughnessFactor = roughness,
+		AlphaMode = "OPAQUE"
 	};
 
 	[TestMethod]
@@ -140,12 +148,12 @@ public class GltfStockMaterialTests
 		// Its smallest mip comes first, followed by the largest: 1+2 RGBA32F pixels.
 		var roughnessOffset = checked((int)BinaryPrimitives.ReadUInt32LittleEndian( resources.NormalRoughness.AsSpan() ));
 		var metalnessOffset = checked((int)BinaryPrimitives.ReadUInt32LittleEndian( resources.Metalness.AsSpan() ));
-		Assert.AreEqual( 3 * 4 * sizeof(float), resources.NormalRoughness.Length - roughnessOffset );
-		Assert.AreEqual( 3 * 4 * sizeof(float), resources.Metalness.Length - metalnessOffset );
-		Assert.AreEqual( .35f, BinaryPrimitives.ReadSingleLittleEndian( resources.NormalRoughness.AsSpan( roughnessOffset + 2 * sizeof(float) ) ), .0000001f );
-		Assert.AreEqual( .15f, BinaryPrimitives.ReadSingleLittleEndian( resources.Metalness.AsSpan( metalnessOffset + sizeof(float) ) ), .0000001f );
-		Assert.AreEqual( .7f, BinaryPrimitives.ReadSingleLittleEndian( resources.NormalRoughness.AsSpan( roughnessOffset + 8 * sizeof(float) + 2 * sizeof(float) ) ), .0000001f );
-		Assert.AreEqual( .3f, BinaryPrimitives.ReadSingleLittleEndian( resources.Metalness.AsSpan( metalnessOffset + 4 * sizeof(float) + sizeof(float) ) ), .0000001f );
+		Assert.AreEqual( 3 * 4 * sizeof( float ), resources.NormalRoughness.Length - roughnessOffset );
+		Assert.AreEqual( 3 * 4 * sizeof( float ), resources.Metalness.Length - metalnessOffset );
+		Assert.AreEqual( .35f, BinaryPrimitives.ReadSingleLittleEndian( resources.NormalRoughness.AsSpan( roughnessOffset + 2 * sizeof( float ) ) ), .0000001f );
+		Assert.AreEqual( .15f, BinaryPrimitives.ReadSingleLittleEndian( resources.Metalness.AsSpan( metalnessOffset + sizeof( float ) ) ), .0000001f );
+		Assert.AreEqual( .7f, BinaryPrimitives.ReadSingleLittleEndian( resources.NormalRoughness.AsSpan( roughnessOffset + 8 * sizeof( float ) + 2 * sizeof( float ) ) ), .0000001f );
+		Assert.AreEqual( .3f, BinaryPrimitives.ReadSingleLittleEndian( resources.Metalness.AsSpan( metalnessOffset + 4 * sizeof( float ) + sizeof( float ) ) ), .0000001f );
 	}
 
 	[TestMethod]
@@ -153,7 +161,7 @@ public class GltfStockMaterialTests
 	{
 		var resources = GltfTextureCompiler.CompileMetallicRoughnessPixels( new byte[12], 3, 1, 1, 1, false );
 		var offset = checked((int)BinaryPrimitives.ReadUInt32LittleEndian( resources.NormalRoughness.AsSpan() ));
-		Assert.AreEqual( 3 * 4 * sizeof(float), resources.NormalRoughness.Length - offset );
+		Assert.AreEqual( 3 * 4 * sizeof( float ), resources.NormalRoughness.Length - offset );
 	}
 
 	[TestMethod]
@@ -192,8 +200,12 @@ public class GltfStockMaterialTests
 			""" ) );
 		var error = Assert.ThrowsException<GltfException>( () => GltfStockMaterialAdapter.Prepare( document, new GltfMaterial
 		{
-			BaseColorFactor = System.Numerics.Vector4.One, MetallicFactor = 1, RoughnessFactor = 1, AlphaMode = "OPAQUE",
-			BaseColorTexture = new GltfTextureInfo { Index = 0 }, MetallicRoughnessTexture = new GltfTextureInfo { Index = 1 }
+			BaseColorFactor = System.Numerics.Vector4.One,
+			MetallicFactor = 1,
+			RoughnessFactor = 1,
+			AlphaMode = "OPAQUE",
+			BaseColorTexture = new GltfTextureInfo { Index = 0 },
+			MetallicRoughnessTexture = new GltfTextureInfo { Index = 1 }
 		} ) );
 		StringAssert.Contains( error.Message, "sampler" );
 	}

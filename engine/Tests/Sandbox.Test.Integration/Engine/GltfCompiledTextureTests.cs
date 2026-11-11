@@ -13,7 +13,7 @@ public class GltfCompiledTextureTests
 	private const string Png = "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAGklEQVR4nGP4UKHQIHAi4D+Dw4IPDgwMDAwARTgGQCHDUy8AAAAASUVORK5CYII=";
 	// Self-generated 2x2 JPEG from uniform (40,120,200), quality 95, no chroma subsampling.
 	private const string Jpeg = "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAIBAQEBAQIBAQECAgICAgQDAgICAgUEBAMEBgUGBgYFBgYGBwkIBgcJBwYGCAsICQoKCgoKBggLDAsKDAkKCgr/2wBDAQICAgICAgUDAwUKBwYHCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgr/wAARCAACAAIDAREAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAAB//EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAI/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AIzUEN//Z";
-	private static readonly byte[] Pixels = [240,120,32,128, 16,200,80,255, 64,160,240,64, 0,0,0,0];
+	private static readonly byte[] Pixels = [240, 120, 32, 128, 16, 200, 80, 255, 64, 160, 240, 64, 0, 0, 0, 0];
 	private static GltfImage Image() => new() { MimeType = "image/png", Bytes = Convert.FromBase64String( Png ) };
 
 	[TestMethod]

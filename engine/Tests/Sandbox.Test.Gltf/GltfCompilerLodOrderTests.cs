@@ -82,7 +82,7 @@ public class GltfCompilerLodOrderTests
 			 "bufferViews":[{"buffer":0,"byteLength":3},{"buffer":1,"byteLength":4}],
 			 "materials":[{"extensions":{"KHR_materials_unlit":{}},"extras":{"MSFT_screencoverage":[1]}}]}
 			""";
-		byte[] Files( string path ) => path == "a.bin" ? [1, 2, 3] : [4, 0, 5, 0];
+		static byte[] Files( string path ) => path == "a.bin" ? [1, 2, 3] : [4, 0, 5, 0];
 		using var merged = GltfReader.Read( GltfCompiler.Compile( Encoding.UTF8.GetBytes( two ), Files, Known ), supportedExtensions: Known );
 		Assert.AreEqual( 1, merged.Root.GetProperty( "buffers" ).GetArrayLength() );
 		var unknown = two.Replace( "KHR_materials_unlit\":{}", "KHR_materials_unlit\":{},\"EXT_unknown\":{\"buffer\":1}" );

@@ -13,8 +13,8 @@ public class ModelBodygroupReadbackTests
 	{
 		var mat = Material.Load( "materials/default/white.vmat" );
 		var mesh = new Mesh( mat );
-		mesh.CreateVertexBuffer( 3, new Vertex[] { new() { Position = new(0,0,0) }, new() { Position = new(1,0,0) }, new() { Position = new(0,1,0) } } );
-		mesh.CreateIndexBuffer( 3, new[] { 0,1,2 } ); mesh.Bounds = new BBox( Vector3.Zero, Vector3.One );
+		mesh.CreateVertexBuffer( 3, new Vertex[] { new() { Position = new( 0, 0, 0 ) }, new() { Position = new( 1, 0, 0 ) }, new() { Position = new( 0, 1, 0 ) } } );
+		mesh.CreateIndexBuffer( 3, new[] { 0, 1, 2 } ); mesh.Bounds = new BBox( Vector3.Zero, Vector3.One );
 		var model = Model.Builder.AddMesh( mesh, 0, "body", 0 ).AddMesh( mesh, 0, "body", 1 ).Create();
 		Assert.AreEqual( ModelBodygroupReadback.Status.Success, ModelBodygroupReadback.Read( model, 64, 64, out var result ) );
 		Assert.AreEqual( 2, result.MeshGroupCount ); Assert.AreEqual( 1, result.Groups.Length ); Assert.AreEqual( "body", result.Groups[0].Name ); Assert.AreEqual( 2, result.Groups[0].Choices.Length );

@@ -238,10 +238,16 @@ public sealed class GltfAuthoredSkeletonTests
 		var binary = stream.ToArray();
 		return JsonSerializer.SerializeToUtf8Bytes( new
 		{
-			asset = new { version = "2.0" }, buffers = new[] { new { byteLength = binary.Length, uri = "data:application/octet-stream;base64," + Convert.ToBase64String( binary ) } }, bufferViews = views, accessors,
-			meshes = new[] { new { primitives = new[] { new { attributes = new Dictionary<string, int> { ["POSITION"] = positions, ["JOINTS_0"] = joints, ["WEIGHTS_0"] = weights } } } } }, nodes, skins,
+			asset = new { version = "2.0" },
+			buffers = new[] { new { byteLength = binary.Length, uri = "data:application/octet-stream;base64," + Convert.ToBase64String( binary ) } },
+			bufferViews = views,
+			accessors,
+			meshes = new[] { new { primitives = new[] { new { attributes = new Dictionary<string, int> { ["POSITION"] = positions, ["JOINTS_0"] = joints, ["WEIGHTS_0"] = weights } } } } },
+			nodes,
+			skins,
 			animations = new[] { new { name = "Reach", samplers = new[] { new { input = times, output = translations } }, channels = new[] { new { sampler = 0, target = new { node = 2, path = "translation" } } } } },
-			scenes = new[] { new { nodes = multipleSkins ? new[] { 0, 3, 4 } : new[] { 0, 3 } } }, scene = 0
+			scenes = new[] { new { nodes = multipleSkins ? new[] { 0, 3, 4 } : new[] { 0, 3 } } },
+			scene = 0
 		} );
 	}
 }

@@ -92,11 +92,16 @@ public sealed class GltfDracoPrimitiveDataTests
 		using var document = Document(
 			"{\"componentType\":5123,\"count\":3,\"type\":\"VEC4\"},{\"componentType\":5121,\"normalized\":true,\"count\":3,\"type\":\"VEC4\"}",
 			"{\"attributes\":{\"JOINTS_0\":0,\"WEIGHTS_0\":1},\"extensions\":{\"KHR_draco_mesh_compression\":{\"bufferView\":0,\"attributes\":{\"JOINTS_0\":7,\"WEIGHTS_0\":8}}}}" );
-		Seed( document, 0, new GltfDracoMesh { VertexCount = 3, Indices = [2, 0, 1], Attributes = new Dictionary<uint, GltfDracoAttribute>
+		Seed( document, 0, new GltfDracoMesh
 		{
-			[7] = new() { ComponentType = 5123, Components = 4, Bytes = joints },
-			[8] = new() { ComponentType = 5121, Components = 4, Bytes = weights }
-		} } );
+			VertexCount = 3,
+			Indices = [2, 0, 1],
+			Attributes = new Dictionary<uint, GltfDracoAttribute>
+			{
+				[7] = new() { ComponentType = 5123, Components = 4, Bytes = joints },
+				[8] = new() { ComponentType = 5121, Components = 4, Bytes = weights }
+			}
+		} );
 		var data = document.ReadDracoPrimitiveData( 0, 0 );
 		var jointStream = data.Attributes["JOINTS_0"];
 		Assert.AreEqual( 5123, jointStream.ComponentType ); Assert.IsFalse( jointStream.Normalized );
@@ -277,10 +282,15 @@ public sealed class GltfDracoPrimitiveDataTests
 	}
 
 	private static GltfDracoMesh Mesh( byte[] bytes, int type, int components, uint id = 7, uint[] indices = null, int count = 3 )
-		=> new() { VertexCount = count, Indices = indices ?? [2, 0, 1], Attributes = new Dictionary<uint, GltfDracoAttribute>
+		=> new()
 		{
-			[id] = new() { ComponentType = type, Components = components, Bytes = bytes }
-		} };
+			VertexCount = count,
+			Indices = indices ?? [2, 0, 1],
+			Attributes = new Dictionary<uint, GltfDracoAttribute>
+			{
+				[id] = new() { ComponentType = type, Components = components, Bytes = bytes }
+			}
+		};
 
 	private static void Seed( GltfDocument document, int primitive, GltfDracoMesh decoded )
 	{

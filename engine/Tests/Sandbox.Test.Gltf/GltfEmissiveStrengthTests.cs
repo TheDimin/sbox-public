@@ -52,7 +52,7 @@ public sealed class GltfEmissiveStrengthTests
 	[DataRow( "1e100" )]
 	public void InvalidOrFloatUnrepresentableStrengthIsRejected( string value )
 	{
-		using var document = Read( "{\"asset\":{\"version\":\"2.0\"},\"extensionsUsed\":[\"KHR_materials_emissive_strength\"],\"materials\":[{\"extensions\":{\"KHR_materials_emissive_strength\":{\"emissiveStrength\":" + value + "}}}]}" , Extension );
+		using var document = Read( "{\"asset\":{\"version\":\"2.0\"},\"extensionsUsed\":[\"KHR_materials_emissive_strength\"],\"materials\":[{\"extensions\":{\"KHR_materials_emissive_strength\":{\"emissiveStrength\":" + value + "}}}]}", Extension );
 		Assert.ThrowsException<GltfException>( () => document.ReadMaterialEmissiveStrength( 0 ) );
 	}
 

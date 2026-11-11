@@ -51,7 +51,7 @@ public sealed class GltfKtxTests
 	public void TranscodesIndependentReferenceMipColorsInOrder()
 	{
 		var image = GltfKtx.DecodeRgba32( Fixture( "gltf-ktx-rgba-mipmap-reference-basis.ktx2" ) );
-		byte[][] colors = [[255,0,0,255], [255,102,0,255], [255,255,0,255], [0,255,0,255], [0,0,255,255], [0,255,255,255], [255,0,255,255]];
+		byte[][] colors = [[255, 0, 0, 255], [255, 102, 0, 255], [255, 255, 0, 255], [0, 255, 0, 255], [0, 0, 255, 255], [0, 255, 255, 255], [255, 0, 255, 255]];
 		Assert.AreEqual( colors.Length, image.Levels.Count );
 		for ( var i = 0; i < colors.Length; i++ )
 		{

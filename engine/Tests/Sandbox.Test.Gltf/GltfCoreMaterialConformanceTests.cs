@@ -91,7 +91,8 @@ public sealed class GltfCoreMaterialConformanceTests
 		new byte[] { 255, 128, 0, 64, 0, 255, 0, 128, 0, 0, 255, 255 }.CopyTo( data, 36 );
 		var json = JsonSerializer.SerializeToUtf8Bytes( new
 		{
-			asset = new { version = "2.0" }, buffers = new[] { new { uri = "data:application/octet-stream;base64," + Convert.ToBase64String( data ), byteLength = data.Length } },
+			asset = new { version = "2.0" },
+			buffers = new[] { new { uri = "data:application/octet-stream;base64," + Convert.ToBase64String( data ), byteLength = data.Length } },
 			bufferViews = new object[] { new { buffer = 0, byteOffset = 0, byteLength = 36 }, new { buffer = 0, byteOffset = 36, byteLength = 12 } },
 			accessors = new object[] { new { bufferView = 0, componentType = 5126, count = 3, type = "VEC3", min = new[] { 0, 0, 0 }, max = new[] { 1, 1, 0 } }, new { bufferView = 1, componentType = 5121, normalized = true, count = 3, type = "VEC4" } },
 			materials = new[] { new { alphaMode = "MASK", alphaCutoff = .4f, pbrMetallicRoughness = new { baseColorFactor = new[] { .5f, .25f, .75f, .3f } } } },

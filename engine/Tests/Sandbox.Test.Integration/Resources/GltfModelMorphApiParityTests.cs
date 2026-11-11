@@ -21,7 +21,7 @@ public sealed class GltfModelMorphApiParityTests
 	{
 		var root = JsonNode.Parse( GltfModelMorphLoadingTests.Source );
 		root["meshes"][0]["extras"] = new JsonObject { ["targetNames"] = new JsonArray( "Stretch" ) };
-		WithModel( compiled, root.ToJsonString(), (scene, model) =>
+		WithModel( compiled, root.ToJsonString(), ( scene, model ) =>
 		{
 			Assert.AreEqual( 1, model.MorphCount, "One source target must not appear as two public implementation controllers." );
 			Assert.AreEqual( "Stretch", model.GetMorphName( 0 ) );
@@ -33,7 +33,7 @@ public sealed class GltfModelMorphApiParityTests
 	[DataRow( true )]
 	public void ExplicitComponentMorphOverrideSurvivesNormalAnimationUpdates( bool compiled )
 	{
-		WithModel( compiled, GltfModelMorphLoadingTests.Source, (scene, model) =>
+		WithModel( compiled, GltfModelMorphLoadingTests.Source, ( scene, model ) =>
 		{
 			var renderer = scene.CreateObject().Components.Create<SkinnedModelRenderer>( false );
 			renderer.Model = model; renderer.UseAnimGraph = false; renderer.PlaybackRate = 0; renderer.Enabled = true;

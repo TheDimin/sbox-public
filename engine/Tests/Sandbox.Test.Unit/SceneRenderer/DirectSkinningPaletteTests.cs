@@ -158,17 +158,17 @@ public class DirectSkinningPaletteTests
 		// Include an invalid later bone, so preflight must finish before any
 		// matrix in the previous valid palette can change.
 		for ( var bone = 0; bone < 2; bone++ )
-		for ( var component = 0; component < 12; component++ )
-		{
-			var invalid = Palette( 5 );
-			var rows = new[] { invalid[bone].Row0, invalid[bone].Row1, invalid[bone].Row2 };
-			var row = component / 4; var column = component % 4;
-			var v = rows[row];
-			if ( column == 0 ) v.x = float.NaN; else if ( column == 1 ) v.y = float.PositiveInfinity; else if ( column == 2 ) v.z = float.NegativeInfinity; else v.w = float.NaN;
-			rows[row] = v; invalid[bone] = new Matrix3x4 { Row0 = rows[0], Row1 = rows[1], Row2 = rows[2] };
-			Rejected( () => obj.SetSkinningPalette( 0, invalid ), $"non-finite bone {bone}, component {component}" );
-			AssertPalette( obj, 0, expected ); Assert.AreEqual( 123, obj.SkinGeneration );
-		}
+			for ( var component = 0; component < 12; component++ )
+			{
+				var invalid = Palette( 5 );
+				var rows = new[] { invalid[bone].Row0, invalid[bone].Row1, invalid[bone].Row2 };
+				var row = component / 4; var column = component % 4;
+				var v = rows[row];
+				if ( column == 0 ) v.x = float.NaN; else if ( column == 1 ) v.y = float.PositiveInfinity; else if ( column == 2 ) v.z = float.NegativeInfinity; else v.w = float.NaN;
+				rows[row] = v; invalid[bone] = new Matrix3x4 { Row0 = rows[0], Row1 = rows[1], Row2 = rows[2] };
+				Rejected( () => obj.SetSkinningPalette( 0, invalid ), $"non-finite bone {bone}, component {component}" );
+				AssertPalette( obj, 0, expected ); Assert.AreEqual( 123, obj.SkinGeneration );
+			}
 		AssertPalette( obj, 0, expected ); Assert.AreEqual( 123, obj.SkinGeneration );
 		var rigid = new MeshObject( TestMesh( false ), Transform.Zero );
 		Rejected( () => rigid.SetSkinningPalette( 0, expected ), "rigid mesh" );

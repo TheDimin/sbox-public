@@ -269,6 +269,23 @@ public class SharedPhysicalFileWatcherTests
 	}
 
 	[TestMethod]
+	public void UnmountedAndDisposedMountReleasesItsWatchedRoot()
+	{
+		// A temporary mount (glTF corpus runs) is unmounted, disposed and its folder deleted.
+		// The aggregate's watcher for it must not keep retrying the deleted folder.
+		var aggregate = Own( new AggregateFileSystem() );
+		using var watch = aggregate.Watch();
+		var mount = new LocalFileSystem( root, true );
+		aggregate.Mount( mount );
+		Assert.AreEqual( 1, RootDiagnostics().Length );
+
+		aggregate.UnMount( mount );
+		mount.Dispose();
+
+		Assert.AreEqual( 0, RootDiagnostics().Length, "The root outlived its filesystem." );
+	}
+
+	[TestMethod]
 	public async Task DirectoryRenameNotifiesSubscriptionsMatchingOnlyTheNewPath()
 	{
 		var oldPath = Path.Combine( root, "old" );

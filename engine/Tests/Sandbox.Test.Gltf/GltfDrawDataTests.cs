@@ -111,8 +111,10 @@ public class GltfDrawDataTests
 			views.Add( new { buffer = 0, byteOffset = binary.Count, byteLength = entry.Value.Length * 4 } );
 			var accessor = new Dictionary<string, object>
 			{
-				["bufferView"] = accessors.Count, ["componentType"] = 5126,
-				["count"] = entry.Value.Length / components, ["type"] = "VEC" + components
+				["bufferView"] = accessors.Count,
+				["componentType"] = 5126,
+				["count"] = entry.Value.Length / components,
+				["type"] = "VEC" + components
 			};
 			if ( entry.Key == "POSITION" ) { accessor["min"] = new float[3]; accessor["max"] = new float[3]; }
 			accessors.Add( accessor );
@@ -120,8 +122,11 @@ public class GltfDrawDataTests
 		}
 		return GltfReader.Read( JsonSerializer.SerializeToUtf8Bytes( new
 		{
-			asset = new { version = "2.0" }, buffers = new[] { new { uri = "mesh.bin", byteLength = binary.Count } },
-			bufferViews = views, accessors, meshes = new[] { new { primitives = new[] { new { attributes = indices, mode } } } }
+			asset = new { version = "2.0" },
+			buffers = new[] { new { uri = "mesh.bin", byteLength = binary.Count } },
+			bufferViews = views,
+			accessors,
+			meshes = new[] { new { primitives = new[] { new { attributes = indices, mode } } } }
 		} ), _ => binary.ToArray() );
 	}
 }

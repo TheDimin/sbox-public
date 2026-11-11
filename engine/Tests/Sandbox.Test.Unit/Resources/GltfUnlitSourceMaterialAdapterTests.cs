@@ -17,8 +17,17 @@ public sealed class GltfUnlitSourceMaterialAdapterTests
 	{
 		using var document = GltfReader.Read( Encoding.UTF8.GetBytes( """{"asset":{"version":"2.0"}}""" ), _ => throw new InvalidOperationException( "Ignored texture was read." ) );
 		var ignored = new GltfTextureInfo { Index = 999 };
-		var material = new GltfMaterial { Unlit = true, AlphaMode = "OPAQUE", BaseColorFactor = new( .2f, .4f, .8f, .1f ),
-			MetallicRoughnessTexture = ignored, NormalTexture = ignored, OcclusionTexture = ignored, EmissiveTexture = ignored, EmissiveFactor = NVector3.One };
+		var material = new GltfMaterial
+		{
+			Unlit = true,
+			AlphaMode = "OPAQUE",
+			BaseColorFactor = new( .2f, .4f, .8f, .1f ),
+			MetallicRoughnessTexture = ignored,
+			NormalTexture = ignored,
+			OcclusionTexture = ignored,
+			EmissiveTexture = ignored,
+			EmissiveFactor = NVector3.One
+		};
 		var prepared = GltfUnlitSourceMaterialAdapter.Prepare( document, material );
 		Assert.IsNull( prepared.BaseColor ); Assert.AreEqual( new NVector4( .2f, .4f, .8f, 1 ), prepared.Plan.LinearFactorForShader );
 	}

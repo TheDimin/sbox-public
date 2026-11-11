@@ -49,7 +49,7 @@ public class GltfCompilerTests
 		var source = Encoding.UTF8.GetBytes( """
 			{"asset":{"version":"2.0"},"buffers":[{"uri":"a.bin","byteLength":3},{"uri":"b.bin","byteLength":4}],"bufferViews":[{"buffer":0,"byteLength":3},{"buffer":1,"byteLength":4}],"accessors":[{"bufferView":0,"componentType":5121,"count":3,"type":"SCALAR"},{"bufferView":1,"componentType":5123,"count":2,"type":"SCALAR"}]}
 			""" );
-		byte[] Resolve( string path ) => path == "a.bin" ? [1, 2, 3] : [4, 0, 5, 0];
+		static byte[] Resolve( string path ) => path == "a.bin" ? [1, 2, 3] : [4, 0, 5, 0];
 		using var document = GltfReader.Read( GltfCompiler.Compile( source, Resolve, null, 256L * 1024 * 1024, false ) );
 		Assert.AreEqual( 2, document.Root.GetProperty( "buffers" ).GetArrayLength() );
 		Assert.AreEqual( 1, document.Root.GetProperty( "bufferViews" )[1].GetProperty( "buffer" ).GetInt32() );

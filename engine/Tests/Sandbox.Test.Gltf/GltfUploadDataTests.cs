@@ -145,7 +145,7 @@ public class GltfUploadDataTests
 	public void SparseByteMatrixKeepsPaddedColumnsAndAllowsMissingLastPadding()
 	{
 		var bytes = new byte[27]; bytes[12] = 0;
-		new byte[] { 1,2,3,0,4,5,6,0,7,8,9 }.CopyTo( bytes, 16 );
+		new byte[] { 1, 2, 3, 0, 4, 5, 6, 0, 7, 8, 9 }.CopyTo( bytes, 16 );
 		var data = Convert.ToBase64String( bytes );
 		var json = $$$$$$$$"""
 			{"asset":{"version":"2.0"},"buffers":[{"uri":"data:application/octet-stream;base64,{{{{{{{{data}}}}}}}}","byteLength":27}],
@@ -157,7 +157,7 @@ public class GltfUploadDataTests
 		using var document = Read( json );
 		var matrix = document.MaterializePrimitiveUpload( 0, 0, maxOwnedBytes: 24 ).Attributes["_MATRIX"];
 		Assert.AreEqual( 12, matrix.ByteStride ); Assert.AreEqual( 4, matrix.Binding.ColumnStride );
-		CollectionAssert.AreEqual( new byte[] { 1,2,3,0,4,5,6,0,7,8,9,0 }, matrix.Storage.Bytes.ToArray() );
+		CollectionAssert.AreEqual( new byte[] { 1, 2, 3, 0, 4, 5, 6, 0, 7, 8, 9, 0 }, matrix.Storage.Bytes.ToArray() );
 	}
 
 	[TestMethod]
@@ -210,7 +210,7 @@ public class GltfUploadDataTests
 		Assert.AreEqual( 1f, BinaryPrimitives.ReadSingleLittleEndian( compressed.Attributes["POSITION"].Storage.Bytes.Span ) );
 		Assert.AreEqual( 3, compressed.Indices.Count ); Assert.AreEqual( 5125, compressed.Indices.ComponentType );
 		Assert.AreEqual( 4, compressed.Indices.ByteStride ); Assert.IsNull( compressed.Indices.Binding );
-		CollectionAssert.AreEqual( new byte[] { 0,0,0,0,1,0,0,0,2,0,0,0 }, compressed.Indices.Storage.Bytes.ToArray() );
+		CollectionAssert.AreEqual( new byte[] { 0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0 }, compressed.Indices.Storage.Bytes.ToArray() );
 		Assert.AreEqual( 48L, compressed.OwnedBytes );
 	}
 
@@ -258,7 +258,7 @@ public class GltfUploadDataTests
 		Assert.AreEqual( 5, output.Layout.SourceMode ); Assert.AreEqual( 4, output.Layout.DecodedMode );
 		Assert.IsFalse( output.Layout.RequiresTopologyExpansion ); Assert.AreEqual( 4, output.Indices.Binding.Count );
 		Assert.AreEqual( 6, output.Indices.Count ); Assert.AreEqual( 5123, output.Indices.ComponentType ); Assert.AreEqual( 2, output.Indices.ByteStride );
-		CollectionAssert.AreEqual( new byte[] { 0,0,1,0,2,0,2,0,1,0,3,0 }, output.Indices.Storage.Bytes.ToArray() );
+		CollectionAssert.AreEqual( new byte[] { 0, 0, 1, 0, 2, 0, 2, 0, 1, 0, 3, 0 }, output.Indices.Storage.Bytes.ToArray() );
 	}
 
 	[TestMethod]
@@ -297,7 +297,7 @@ public class GltfUploadDataTests
 		SeedDraco( document, 0 );
 		if ( !valid ) { Assert.ThrowsException<GltfException>( () => document.MaterializePrimitiveUpload( 0, 0, maxOwnedBytes: 42 ) ); return; }
 		var output = document.MaterializePrimitiveUpload( 0, 0, maxOwnedBytes: 42 );
-		CollectionAssert.AreEqual( new byte[] { 2,0,1,0,2,0 }, output.Indices.Storage.Bytes.ToArray() );
+		CollectionAssert.AreEqual( new byte[] { 2, 0, 1, 0, 2, 0 }, output.Indices.Storage.Bytes.ToArray() );
 	}
 
 	[TestMethod]
@@ -408,10 +408,15 @@ public class GltfUploadDataTests
 		var field = typeof( GltfDocument ).GetField( "dracoCache", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic );
 		Assert.IsNotNull( field );
 		var cache = (Dictionary<(int, int), GltfDracoMesh>)field.GetValue( document );
-		cache.Add( (0, primitive), new GltfDracoMesh { VertexCount = vertexCount, Indices = indices ?? [0, 1, 2], Attributes = new Dictionary<uint, GltfDracoAttribute>
+		cache.Add( (0, primitive), new GltfDracoMesh
 		{
-			[0] = new GltfDracoAttribute { ComponentType = 5126, Components = 3, Bytes = raw }
-		} } );
+			VertexCount = vertexCount,
+			Indices = indices ?? [0, 1, 2],
+			Attributes = new Dictionary<uint, GltfDracoAttribute>
+			{
+				[0] = new GltfDracoAttribute { ComponentType = 5126, Components = 3, Bytes = raw }
+			}
+		} );
 	}
 
 	private static string SparseFixture( byte[] bytes ) => $$$$$$$$"""

@@ -114,7 +114,10 @@ public class GltfDynamicModelVertexTests
 
 	private static GltfDrawData Triangle( IReadOnlyDictionary<int, ReadOnlyMemory<System.Numerics.Vector2>> uv = null ) => new()
 	{
-		Mode = 4, Positions = new System.Numerics.Vector3[] { new( 0, 0, 0 ), new( 1, 0, 0 ), new( 0, 1, 0 ) }, Indices = new uint[] { 0, 1, 2 }, TexCoords = uv
+		Mode = 4,
+		Positions = new System.Numerics.Vector3[] { new( 0, 0, 0 ), new( 1, 0, 0 ), new( 0, 1, 0 ) },
+		Indices = new uint[] { 0, 1, 2 },
+		TexCoords = uv
 	};
 
 	private static (byte[] Json, byte[] Raw) Source()

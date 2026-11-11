@@ -25,7 +25,7 @@ public sealed class GltfVariantDrawStateTests
 	public void EachPrimitiveGetsItsOwnPacketWhileRepeatedNodesReuseThePacket()
 	{
 		using var document = Open(); var acquisitions = new List<Packet>(); var releases = new List<Packet>();
-		using var asset = new GltfVariantDrawAsset<Packet>( document, Slots, (slot, material) =>
+		using var asset = new GltfVariantDrawAsset<Packet>( document, Slots, ( slot, material ) =>
 		{
 			var packet = new Packet( slot.Mesh, material ); acquisitions.Add( packet );
 			return new GltfMaterialLease<Packet>( packet, () => releases.Add( packet ), null );
@@ -45,7 +45,7 @@ public sealed class GltfVariantDrawStateTests
 	public void FailedLaterPrimitiveRollsBackAllNewPacketsAndPreservesPublishedState()
 	{
 		using var document = Open(); var released = new List<Packet>(); var fail = false;
-		using var asset = new GltfVariantDrawAsset<Packet>( document, Slots, (slot, material) =>
+		using var asset = new GltfVariantDrawAsset<Packet>( document, Slots, ( slot, material ) =>
 		{
 			if ( fail && slot.Mesh == 1 && material == 2 ) throw new InvalidOperationException( "injected" );
 			var packet = new Packet( slot.Mesh, material ); return new GltfMaterialLease<Packet>( packet, () => released.Add( packet ), null );
@@ -60,7 +60,7 @@ public sealed class GltfVariantDrawStateTests
 	public void ActiveStatesPreventOwnerDisposalAndEachPacketReleasesExactlyOnce()
 	{
 		using var document = Open(); var released = new List<Packet>();
-		var asset = new GltfVariantDrawAsset<Packet>( document, Slots, (slot, material) =>
+		var asset = new GltfVariantDrawAsset<Packet>( document, Slots, ( slot, material ) =>
 		{
 			var packet = new Packet( slot.Mesh, material ); return new GltfMaterialLease<Packet>( packet, () => released.Add( packet ), null );
 		}, _ => true );
@@ -73,7 +73,7 @@ public sealed class GltfVariantDrawStateTests
 	public void FailedClassificationPreflightReleasesStagedPacketsBeforePublication()
 	{
 		using var document = Open(); var released = new List<Packet>(); var created = 0;
-		using var asset = new GltfVariantDrawAsset<Packet>( document, Slots, (slot, material) =>
+		using var asset = new GltfVariantDrawAsset<Packet>( document, Slots, ( slot, material ) =>
 		{
 			created++; var packet = new Packet( slot.Mesh, material );
 			return new GltfMaterialLease<Packet>( packet, () => released.Add( packet ), null );
@@ -95,7 +95,7 @@ public sealed class GltfVariantDrawStateTests
 			return [137, 80, 78, 71, 13, 10, 26, 10];
 		}, new HashSet<string> { "KHR_materials_variants" } );
 		var snapshot = document.SnapshotMaterialImages( [0, 1, 2], 8 );
-		using var asset = new GltfVariantDrawAsset<Packet>( document, Slots, (slot, material) =>
+		using var asset = new GltfVariantDrawAsset<Packet>( document, Slots, ( slot, material ) =>
 		{
 			if ( material == 1 ) _ = snapshot.ReadImage( 0 );
 			return new GltfMaterialLease<Packet>( new Packet( slot.Mesh, material ), () => { }, null );

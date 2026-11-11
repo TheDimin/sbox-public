@@ -94,17 +94,17 @@ public sealed class GltfGeneratedTangentRouteTests
 	private static GltfDocument Fixture( bool authored = false, bool morphed = false, bool withoutNormal = false )
 	{
 		var data = new byte[124];
-		float[] p = [0,0,0, 1,0,0, 0,1,0, -1,0,0];
+		float[] p = [0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0, 0];
 		for ( var i = 0; i < p.Length; i++ ) BinaryPrimitives.WriteSingleLittleEndian( data.AsSpan( i * 4 ), p[i] );
 		for ( var i = 0; i < 4; i++ ) BinaryPrimitives.WriteSingleLittleEndian( data.AsSpan( 48 + i * 12 + 8 ), 1 );
-		byte[] uv = [0,0,0,0, 255,0,0,0, 0,255,0,0, 255,0,0,0]; uv.CopyTo( data, 96 );
-		ushort[] indices = [0,1,2,0,2,3]; for ( var i = 0; i < indices.Length; i++ ) BinaryPrimitives.WriteUInt16LittleEndian( data.AsSpan( 112 + i * 2 ), indices[i] );
+		byte[] uv = [0, 0, 0, 0, 255, 0, 0, 0, 0, 255, 0, 0, 255, 0, 0, 0]; uv.CopyTo( data, 96 );
+		ushort[] indices = [0, 1, 2, 0, 2, 3]; for ( var i = 0; i < indices.Length; i++ ) BinaryPrimitives.WriteUInt16LittleEndian( data.AsSpan( 112 + i * 2 ), indices[i] );
 		var tangent = authored ? ",\"TANGENT\":4" : "";
 		var normalAttribute = withoutNormal ? "" : ",\"NORMAL\":1";
 		var targets = morphed ? ",\"targets\":[{\"POSITION\":5}]" : "";
 		var json = $$$$$$"""
 			{"asset":{"version":"2.0"},"extensionsUsed":["KHR_texture_transform"],
-			 "buffers":[{"uri":"data:application/octet-stream;base64,{{{{{{Convert.ToBase64String(data)}}}}}}","byteLength":124}],
+			 "buffers":[{"uri":"data:application/octet-stream;base64,{{{{{{Convert.ToBase64String( data )}}}}}}","byteLength":124}],
 			 "bufferViews":[{"buffer":0,"byteOffset":0,"byteLength":48},{"buffer":0,"byteOffset":48,"byteLength":48},{"buffer":0,"byteOffset":96,"byteLength":16,"byteStride":4},{"buffer":0,"byteOffset":112,"byteLength":12}],
 			 "accessors":[{"bufferView":0,"componentType":5126,"count":4,"type":"VEC3","min":[-1,0,0],"max":[1,1,0]},
 			 {"bufferView":1,"componentType":5126,"count":4,"type":"VEC3"},{"bufferView":2,"componentType":5121,"normalized":true,"count":4,"type":"VEC2"},

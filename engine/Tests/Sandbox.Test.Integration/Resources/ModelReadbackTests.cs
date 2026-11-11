@@ -148,7 +148,7 @@ public class ModelReadbackTests
 	static void RewriteFixtureGuid( byte[] bytes, Guid id )
 	{
 		if ( bytes.Length < 16 || BinaryPrimitives.ReadUInt16LittleEndian( bytes.AsSpan( 4 ) ) != 12 ) throw new InvalidDataException( "Invalid fixture header." );
-		int table = checked( 8 + BinaryPrimitives.ReadInt32LittleEndian( bytes.AsSpan( 8 ) ) );
+		int table = checked(8 + BinaryPrimitives.ReadInt32LittleEndian( bytes.AsSpan( 8 ) ));
 		uint count = BinaryPrimitives.ReadUInt32LittleEndian( bytes.AsSpan( 12 ) );
 		if ( count > 4096 || table < 16 || table + 12L * count > bytes.Length ) throw new InvalidDataException( "Invalid fixture block table." );
 		int seen = 0;

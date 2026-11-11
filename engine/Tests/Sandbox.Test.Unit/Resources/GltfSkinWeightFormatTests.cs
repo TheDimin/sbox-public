@@ -23,7 +23,9 @@ public class GltfSkinWeightFormatTests
 	{
 		var prepared = new Dictionary<string, GltfSkinWeightFormat>( StringComparer.Ordinal )
 		{
-			["first"] = GltfSkinWeightFormat.Unorm8, ["second"] = GltfSkinWeightFormat.Float32, ["third"] = GltfSkinWeightFormat.Unorm16
+			["first"] = GltfSkinWeightFormat.Unorm8,
+			["second"] = GltfSkinWeightFormat.Float32,
+			["third"] = GltfSkinWeightFormat.Unorm16
 		};
 		var actual = GltfSkinningMeshFormats.MatchNativeMeshes( ["third", "first", "second"], prepared );
 		CollectionAssert.AreEqual( new[] { GltfSkinWeightFormat.Unorm16, GltfSkinWeightFormat.Unorm8, GltfSkinWeightFormat.Float32 }, actual );

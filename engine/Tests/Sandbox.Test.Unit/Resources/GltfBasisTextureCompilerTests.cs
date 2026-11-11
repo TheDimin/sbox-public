@@ -72,5 +72,5 @@ public sealed class GltfBasisTextureCompilerTests
 
 	private static GltfKtxLevel Level( int size, byte[] color ) => new() { Width = size, Height = size, Pixels = Enumerable.Range( 0, size * size ).SelectMany( _ => color ).ToArray() };
 	private static byte[] Payload( byte[] resource ) => resource[checked((int)BinaryPrimitives.ReadUInt32LittleEndian( resource ))..];
-	private static float Read( byte[] bytes, int pixel, int channel ) => BinaryPrimitives.ReadSingleLittleEndian( bytes.AsSpan( (pixel * 4 + channel) * sizeof(float) ) );
+	private static float Read( byte[] bytes, int pixel, int channel ) => BinaryPrimitives.ReadSingleLittleEndian( bytes.AsSpan( (pixel * 4 + channel) * sizeof( float ) ) );
 }

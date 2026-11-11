@@ -212,8 +212,11 @@ public class GltfUnlitMaterialPlanTests
 			var texture = new JsonObject { ["sampler"] = 0 }; if ( textureHasImage ) texture["source"] = 0;
 			var root = new JsonObject
 			{
-				["asset"] = new JsonObject { ["version"] = "2.0" }, ["extensionsUsed"] = new JsonArray( "KHR_materials_unlit", "KHR_texture_transform" ),
-				["accessors"] = accessors, ["images"] = new JsonArray( new JsonObject { ["uri"] = "must-not-read.png" } ), ["textures"] = new JsonArray( texture ),
+				["asset"] = new JsonObject { ["version"] = "2.0" },
+				["extensionsUsed"] = new JsonArray( "KHR_materials_unlit", "KHR_texture_transform" ),
+				["accessors"] = accessors,
+				["images"] = new JsonArray( new JsonObject { ["uri"] = "must-not-read.png" } ),
+				["textures"] = new JsonArray( texture ),
 				["samplers"] = JsonNode.Parse( """[{"minFilter":9986,"magFilter":9729,"wrapS":33071,"wrapT":33648}]""" ),
 				["materials"] = new JsonArray( JsonNode.Parse( materialJson ) ),
 				["meshes"] = new JsonArray( new JsonObject { ["primitives"] = new JsonArray( new JsonObject { ["attributes"] = attributes, ["mode"] = mode, ["material"] = 0 } ) } )
