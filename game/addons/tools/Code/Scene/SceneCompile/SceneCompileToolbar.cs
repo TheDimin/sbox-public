@@ -61,7 +61,7 @@ sealed class SceneCompileToolbar : Widget
 			return;
 
 		var active = SceneEditorSession.Active;
-		Visible = !Game.IsPlaying && GetAncestor<SceneViewWidget>().IsValid() && active is { IsPrefabSession: false };
+		Visible = !Game.IsPlaying && GetAncestor<SceneViewWidget>().IsValid() && active is { IsPrefabSession: false } and not GltfEditorSession;
 		if ( !Visible )
 		{
 			_menu?.Close();

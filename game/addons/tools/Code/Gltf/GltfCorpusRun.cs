@@ -183,10 +183,12 @@ internal static class GltfCorpusRun
 		var path = entry.GetProperty( "path" ).GetString();
 		return new JsonObject
 		{
-			["id"] = entry.GetProperty( "id" ).GetString(), ["recipeId"] = entry.GetProperty( "id" ).GetString(),
+			["id"] = entry.GetProperty( "id" ).GetString(),
+			["recipeId"] = entry.GetProperty( "id" ).GetString(),
 			["input"] = new JsonObject { ["path"] = path, ["sha256"] = files.GetProperty( path ).GetProperty( "sha256" ).GetString(), ["dependenciesVerified"] = false },
 			["load"] = new JsonObject { ["status"] = "not-run", ["error"] = null },
-			["render"] = new JsonObject { ["status"] = "not-run", ["error"] = null }, ["capture"] = null,
+			["render"] = new JsonObject { ["status"] = "not-run", ["error"] = null },
+			["capture"] = null,
 		};
 	}
 
@@ -285,14 +287,26 @@ internal static class GltfCorpusRun
 
 		var state = new JsonObject
 		{
-			["schemaVersion"] = 1, ["corpusPin"] = Pin,
+			["schemaVersion"] = 1,
+			["corpusPin"] = Pin,
 			["run"] = new JsonObject
 			{
-				["id"] = Guid.NewGuid().ToString( "N" ), ["status"] = "running", ["startedAt"] = DateTimeOffset.UtcNow.ToString( "O" ), ["completedAt"] = null,
-				["producer"] = producer, ["recipesSha256"] = recipesSha, ["recipeProofVersion"] = 1,
-				["editor"] = new JsonObject { ["pid"] = Environment.ProcessId }, ["runner"] = "gltf_corpus_run (C#)", ["parallel"] = options.Parallel,
-				["requested"] = queue.Count, ["selectedCaseIds"] = new JsonArray( queue.Select( q => (JsonNode)q.Row["id"].GetValue<string>() ).OrderBy( x => x.GetValue<string>(), StringComparer.Ordinal ).ToArray() ),
-				["attempted"] = 0, ["recoveredWatchdog"] = new JsonArray( hung.Select( h => (JsonNode)h ).ToArray() ), ["pendingCases"] = new JsonArray(), ["error"] = null,
+				["id"] = Guid.NewGuid().ToString( "N" ),
+				["status"] = "running",
+				["startedAt"] = DateTimeOffset.UtcNow.ToString( "O" ),
+				["completedAt"] = null,
+				["producer"] = producer,
+				["recipesSha256"] = recipesSha,
+				["recipeProofVersion"] = 1,
+				["editor"] = new JsonObject { ["pid"] = Environment.ProcessId },
+				["runner"] = "gltf_corpus_run (C#)",
+				["parallel"] = options.Parallel,
+				["requested"] = queue.Count,
+				["selectedCaseIds"] = new JsonArray( queue.Select( q => (JsonNode)q.Row["id"].GetValue<string>() ).OrderBy( x => x.GetValue<string>(), StringComparer.Ordinal ).ToArray() ),
+				["attempted"] = 0,
+				["recoveredWatchdog"] = new JsonArray( hung.Select( h => (JsonNode)h ).ToArray() ),
+				["pendingCases"] = new JsonArray(),
+				["error"] = null,
 			},
 			["cases"] = rows,
 		};
@@ -456,9 +470,14 @@ internal static class GltfCorpusRun
 		File.Copy( (string)frames[0]["path"], poster, true );
 		result["capture"] = new JsonObject
 		{
-			["path"] = destination, ["sha256"] = GltfCorpusProof.HashFile( destination ), ["kind"] = "apng",
-			["posterPath"] = poster, ["posterSha256"] = GltfCorpusProof.HashFile( poster ),
-			["frames"] = frames.Count, ["duration"] = item.PresentationDurations.Sum(), ["sampled"] = true,
+			["path"] = destination,
+			["sha256"] = GltfCorpusProof.HashFile( destination ),
+			["kind"] = "apng",
+			["posterPath"] = poster,
+			["posterSha256"] = GltfCorpusProof.HashFile( poster ),
+			["frames"] = frames.Count,
+			["duration"] = item.PresentationDurations.Sum(),
+			["sampled"] = true,
 			["description"] = "Actual public component samples at the declared recipe times; user judges visual matching.",
 		};
 		result["animationEncoding"] = new JsonObject { ["frames"] = frames.Count, ["duration"] = duration, ["lossless"] = true };

@@ -145,7 +145,7 @@ internal static class GltfApng
 	{
 		var chunks = Chunks( File.ReadAllBytes( path ) );
 		var actl = chunks.Single( c => c.Kind == "acTL" ).Data;
-		Require( BinaryPrimitives.ReadUInt32BigEndian( actl ) == sources.Count && BinaryPrimitives.ReadUInt32BigEndian( actl.AsSpan( 4 ) ) == (loop ? 0u : 1u ), "Encoded frame inventory differs" );
+		Require( BinaryPrimitives.ReadUInt32BigEndian( actl ) == sources.Count && BinaryPrimitives.ReadUInt32BigEndian( actl.AsSpan( 4 ) ) == (loop ? 0u : 1u), "Encoded frame inventory differs" );
 		var frames = new List<List<byte[]>>(); uint expected = 0; var frame = -1;
 		foreach ( var (kind, data) in chunks )
 		{

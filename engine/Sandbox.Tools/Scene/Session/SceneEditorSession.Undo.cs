@@ -146,7 +146,7 @@ internal sealed class SceneUndoSnapshot : IDisposable
 			public Type Type;
 			public JsonNode Node;
 
-			/// <summary>Set for objects that are not JSON data, such as glTF elements. Restore reuses the same instance.</summary>
+			/// <summary>Set for objects that are not JSON data, such as glTF elements (<see cref="IGltfSelectable"/>). Restore reuses the same instance.</summary>
 			public object Instance;
 		}
 
@@ -161,7 +161,7 @@ internal sealed class SceneUndoSnapshot : IDisposable
 			SelectedComponentRefs = _session.Selection.OfType<Component>().Select( ComponentReference.FromInstance ).ToArray();
 			SelectedObjectRefs = _session.Selection
 				.Where( x => x is not GameObject and not Component and not null )
-				.Select( x => x is GltfElement ? new ObjectReference { Type = x.GetType(), Instance = x } : new ObjectReference { Type = x.GetType(), Node = Json.ToNode( x ) } )
+				.Select( x => x is IGltfSelectable ? new ObjectReference { Type = x.GetType(), Instance = x } : new ObjectReference { Type = x.GetType(), Node = Json.ToNode( x ) } )
 				.ToArray();
 		}
 

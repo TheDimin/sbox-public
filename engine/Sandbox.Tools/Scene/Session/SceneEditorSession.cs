@@ -161,7 +161,7 @@ public partial class SceneEditorSession : Scene.ISceneEditorSession, AssetSystem
 	RealTimeSince timeSinceSavedState;
 	int _reloadHash;
 
-	public void Tick()
+	public virtual void Tick()
 	{
 		//
 		// If this is an editor scene, tick it to flush deleted objects etc

@@ -80,6 +80,9 @@ public class GameObjectInspector : InspectorWidget
 			scroller.Canvas.Layout.Add( transformWidget );
 		}
 
+		// A node of a glTF preview shows its glTF property groups, in place of components.
+		if ( TryBuildGltfNode( scroller ) ) return;
+
 		componentList = new ComponentListWidget( SerializedObject );
 
 		scroller.Canvas.Layout.Add( componentList );
@@ -95,6 +98,46 @@ public class GameObjectInspector : InspectorWidget
 
 
 		scroller.Canvas.Layout.AddStretchCell( 1 );
+	}
+
+	bool TryBuildGltfNode( ScrollArea scroller )
+	{
+		var targets = SerializedObject.Targets.OfType<GameObject>().ToList();
+		if ( targets.Count != 1 || SceneEditorSession.Resolve( targets[0] ) is not GltfEditorSession session || session.GetElement( targets[0] ) is not { } node )
+			return false;
+
+		var layout = scroller.Canvas.Layout;
+		if ( node.MeshIndex is { } meshIndex )
+		{
+			var meshes = node.Document.GetElements( GltfElementKind.Mesh );
+			if ( meshIndex >= 0 && meshIndex < meshes.Count )
+			{
+				var mesh = meshes[meshIndex];
+				var row = layout.AddRow();
+				row.Margin = 8;
+				row.Spacing = 6;
+				row.Add( new Label( "Mesh" ), 1 );
+				row.Add( new Button( mesh.Name, "view_in_ar" ) { Clicked = () => { session.Selection.Clear(); session.Selection.Add( mesh ); } }, 2 );
+			}
+		}
+
+		if ( session.JointOf( targets[0] ) is { } joint )
+		{
+			var column = layout.AddColumn();
+			column.Margin = 8;
+			column.Spacing = 4;
+			var row = column.AddRow();
+			row.Spacing = 6;
+			row.Add( new Label( "Joint" ), 1 );
+			row.Add( new Button( $"{joint.Joint} of {joint.Skin.Name}", "accessibility" ) { Clicked = () => { session.Selection.Clear(); session.Selection.Add( joint.Skin ); } }, 2 );
+			column.Add( new GltfHeatLegend { FixedHeight = 24 } );
+			column.Add( new Label( "Weights in the viewport. Black: no influence. Blue to red: weight 0 to 1. The skinned meshes show in their rest pose." ) { WordWrap = true, Color = Theme.TextControl.WithAlpha( 0.6f ) } );
+		}
+
+		// The transform above is the scene one. It writes to the glTF node, so the glTF transform group would repeat it.
+		layout.Add( new GltfFacetList( session, node, type => type != typeof( Editor.GltfFacetTypes.NodeTransformFacet ) && (type != typeof( Editor.GltfFacetTypes.NodeMorphWeightsFacet ) || node.HasMorphTargets) ) );
+		layout.AddStretchCell( 1 );
+		return true;
 	}
 
 	/// <summary>

@@ -703,6 +703,7 @@ public partial class SceneViewportWidget : Widget
 
 		_drawGizmosInterface ??= x => x.DrawGizmos( Session.Scene );
 		EditorEvent.RunInterface( _drawGizmosInterface );
+		if ( Session is GltfEditorSession gltf ) GltfArmature.Draw( gltf );
 		Session.Scene.EditorDraw();
 
 		DrawSelection();

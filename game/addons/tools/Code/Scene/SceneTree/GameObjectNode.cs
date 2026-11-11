@@ -562,6 +562,24 @@ partial class GameObjectNode : TreeNode<GameObject>
 		bool isObjectMenu = gameObject.IsValid();
 		bool isPrefabRoot = isObjectMenu && treeNode is PrefabNode;
 
+		// glTF nodes are file data: only edits the file can hold are offered.
+		if ( isObjectMenu && SceneEditorSession.Resolve( gameObject ) is GltfEditorSession gltf && gltf.GetElement( gameObject ) is not null )
+		{
+			m.AddOption( "Rename", "label", treeNode.TreeView.BeginRename, "editor.rename" );
+			m.AddOption( gameObject.Enabled ? "Hide in File" : "Show in File", "visibility_off", () =>
+			{
+				// The enabled state is KHR_node_visibility in the file.
+				using var scope = gltf.UndoScope( "Toggle Node Visibility" ).WithGameObjectChanges( [gameObject], GameObjectUndoFlags.Properties ).Push();
+				gameObject.Enabled = !gameObject.Enabled;
+			} );
+			m.AddOption( "Isolate Selection", "filter_center_focus", SceneEditorMenus.IsolateSelection, "editor.isolate-selection" );
+			m.AddSeparator();
+			m.AddOption( "Add Socket", "push_pin", () => gltf.AddSocket( gameObject ) );
+			if ( gltf.GetElement( gameObject ) is { MeshIndex: not null } meshNode )
+				m.AddOption( "Create LOD", "filter_none", () => gltf.CreateGeneratedLod( meshNode ) );
+			return;
+		}
+
 		// For object creation, we need to determine the parent at click time, not menu creation time
 		// (because right-clicking on empty space deselects nodes, and we want root-level creation in that case)
 		Func<IEnumerable<GameObject>> getParentsForCreation = () =>

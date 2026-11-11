@@ -19,6 +19,7 @@ public static class GltfOverrides
 	public const string MetaKey = "gltfOverrides";
 
 	const uint GlbMagic = 0x46546C67;
+	static readonly JsonSerializerOptions IndentedOptions = new() { WriteIndented = true };
 	const uint JsonChunk = 0x4E4F534A;
 
 	/// <summary>Read the overrides of an asset, or null if it has none.</summary>
@@ -121,10 +122,12 @@ public static class GltfOverrides
 		return JsonNode.Parse( json )?.AsObject() ?? throw new InvalidDataException( "glTF root must be an object." );
 	}
 
-	static byte[] WriteJson( byte[] source, JsonObject root )
+	/// <summary>Write <paramref name="root"/> into the same container (.gltf or .glb) as <paramref name="source"/>.</summary>
+	internal static byte[] WriteJson( byte[] source, JsonObject root )
 	{
+		// A .gltf is a text file people read and diff, so it is indented. GLB JSON stays compact.
+		if ( !IsGlb( source ) ) return JsonSerializer.SerializeToUtf8Bytes( root, IndentedOptions );
 		var json = JsonSerializer.SerializeToUtf8Bytes( root );
-		if ( !IsGlb( source ) ) return json;
 
 		// GLB: replace chunk 0 (JSON) and keep every later chunk byte for byte.
 		var oldJsonLength = (int)BinaryPrimitives.ReadUInt32LittleEndian( source.AsSpan( 12 ) );
@@ -172,7 +175,7 @@ public static class GltfOverrides
 	/// Add extension names that overrides introduced, and remove names whose data overrides removed.
 	/// Names with no "extensions" data (such as KHR_mesh_quantization) are never removed.
 	/// </summary>
-	static void SyncExtensionsUsed( JsonObject root, HashSet<string> before )
+	internal static void SyncExtensionsUsed( JsonObject root, HashSet<string> before )
 	{
 		var after = ExtensionNamesPresent( root );
 		var removed = before.Where( x => !after.Contains( x ) ).ToHashSet( StringComparer.Ordinal );
@@ -192,7 +195,7 @@ public static class GltfOverrides
 		root[key] = new JsonArray( names.Select( x => (JsonNode)JsonValue.Create( x ) ).ToArray() );
 	}
 
-	static HashSet<string> ExtensionNamesPresent( JsonNode node, HashSet<string> names = null )
+	internal static HashSet<string> ExtensionNamesPresent( JsonNode node, HashSet<string> names = null )
 	{
 		names ??= new HashSet<string>( StringComparer.Ordinal );
 		switch ( node )

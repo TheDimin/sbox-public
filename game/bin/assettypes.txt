@@ -620,6 +620,28 @@
 		},
 		{
 			_class = "CSimpleAssetTypeInfo"
+			m_Name = "gltf_source_asset"
+			m_FriendlyName = "glTF Model"
+			m_Ext = "gltf"
+			m_IconLg = "toolimages:assettypes/model_lg.png"
+			m_IconSm = "toolimages:assettypes/model_sm.png"
+			m_bHideTypeByDefault = false
+			m_bPrefersIconForThumbnail = true
+			m_Category = "Rendering"
+		},
+		{
+			_class = "CSimpleAssetTypeInfo"
+			m_Name = "glb_source_asset"
+			m_FriendlyName = "GLB Model"
+			m_Ext = "glb"
+			m_IconLg = "toolimages:assettypes/model_lg.png"
+			m_IconSm = "toolimages:assettypes/model_sm.png"
+			m_bHideTypeByDefault = false
+			m_bPrefersIconForThumbnail = true
+			m_Category = "Rendering"
+		},
+		{
+			_class = "CSimpleAssetTypeInfo"
 			m_Name = "obj_asset"
 			m_FriendlyName = "OBJ Source File"
 			m_Ext = "obj"

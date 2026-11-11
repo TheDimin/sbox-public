@@ -39,6 +39,35 @@ partial class ViewportTools
 			b.FixedWidth = Theme.RowHeight * 0.5f;
 		}
 
+		if ( sceneViewWidget.Session is GltfEditorSession )
+		{
+			var group = layout.Add( AddGroup() );
+
+			AddToggleButton(
+				group.Layout,
+				"Show Armature",
+				() => "polyline",
+				() => GltfArmature.ShowArmature,
+				( v ) => GltfArmature.ShowArmature = v
+			);
+
+			var names = AddButton(
+				group.Layout,
+				"Bone Names...",
+				"arrow_drop_down",
+				() =>
+				{
+					var menu = new ContextMenu( this );
+					foreach ( var mode in Enum.GetValues<GltfBoneNames>() )
+					{
+						var option = menu.AddOption( $"Bone Names: {mode}", GltfArmature.BoneNames == mode ? "check" : "label", () => GltfArmature.BoneNames = mode );
+					}
+					menu.OpenAtCursor( false );
+				}
+			);
+			names.FixedWidth = Theme.RowHeight * 0.5f;
+		}
+
 		{
 			var group = layout.Add( AddGroup() );
 

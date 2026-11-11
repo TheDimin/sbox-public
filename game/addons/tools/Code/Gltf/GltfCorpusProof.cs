@@ -230,7 +230,9 @@ internal static class GltfCorpusProof
 		errors.Sort( StringComparer.Ordinal );
 		return new JsonObject
 		{
-			["stockResourceProofVersion"] = 2, ["stockResources"] = resourceNode, ["stockDependencies"] = graphNode,
+			["stockResourceProofVersion"] = 2,
+			["stockResources"] = resourceNode,
+			["stockDependencies"] = graphNode,
 			["stockDependencyErrors"] = new JsonArray( errors.Select( e => (JsonNode)e ).ToArray() ),
 		};
 	}
@@ -255,7 +257,9 @@ internal static class GltfCorpusProof
 		var deform = proof["stockResources"]?["game/core/shaders/gltf_deform_cs.shader_c"]?["sha256"]?.GetValue<string>();
 		var producer = new JsonObject
 		{
-			["binaries"] = binaries, ["driverSha256"] = SourceHash( driverFiles ), ["runnerSha256"] = HashFile( watchdog ),
+			["binaries"] = binaries,
+			["driverSha256"] = SourceHash( driverFiles ),
+			["runnerSha256"] = HashFile( watchdog ),
 			["deformShaderSha256"] = deform,
 		};
 		foreach ( var pair in proof.ToList() ) { proof.Remove( pair.Key ); producer[pair.Key] = pair.Value; }

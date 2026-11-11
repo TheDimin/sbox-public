@@ -34,6 +34,9 @@ public class GltfImportSettings : Widget, IAssetInspector
 		var serialized = settings.GetSerialized();
 		Layout = Layout.Column();
 		Layout.Add( ControlSheet.Create( serialized ) );
+		Layout.Add( new Label( "Compile Compression" ) );
+		try { Layout.Add( new GltfCompressionSheet( asset, GltfEditorSession.LoadDocument( asset ) ) ); }
+		catch ( Exception e ) { Layout.Add( new Label( $"Compression settings are unavailable: {e.Message}" ) ); }
 		Layout.Add( new Button( "Reimport" ) { Clicked = Reimport } );
 		status = Layout.Add( new Label( "External images remain separate files." ) );
 		serialized.OnPropertyChanged += _ =>

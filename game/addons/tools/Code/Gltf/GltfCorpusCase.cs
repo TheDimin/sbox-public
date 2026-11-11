@@ -164,7 +164,7 @@ internal sealed class GltfCorpusCase
 		var animation = Field( recipe, "animation" );
 		var resolution = Field( presentation, "resolution" );
 		width = (int)Number( Field( resolution, "width" ), 512 ); height = (int)Number( Field( resolution, "height" ), 512 );
-		Require( width >= 64 && width <= 512 && height >= 64 && height <= 512, "Capture dimensions must be in [64,512]." );
+		Require( width >= 64 && width <= 1024 && height >= 64 && height <= 1024, "Capture dimensions must be in [64,1024]." );
 
 		var engine = typeof( Model ).Assembly;
 		var gltf = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault( assembly => assembly.GetName().Name == "Sandbox.Gltf" );
@@ -324,6 +324,8 @@ internal sealed class GltfCorpusCase
 		}
 	}
 
+	const float SkyBlurMipFraction = 0.6f;
+
 	void ApplyEnvironment( JsonElement environment, BBox bounds )
 	{
 		var texturePath = Text( Field( environment, "texturePath" ) );
@@ -355,15 +357,23 @@ internal sealed class GltfCorpusCase
 		object skyApplied = null;
 		if ( visibleSky.ValueKind == JsonValueKind.True )
 		{
-			// Blurred background like the Sample Viewer (textureLod at 0.6 of the mip chain, intensity 1).
+			// Blurred background like the Sample Viewer. The viewer reads its GGX-prefiltered chain at 0.6; our
+			// cubemap has box-filtered mips, so a wider fraction (0.9, measured on DamagedHelmet) gives the same
+			// blur. The gain is the probe tint: both correct the same cubemap-to-viewer intensity gap.
 			const string skyShaderPath = "shaders/gltf_reference_sky.shader";
 			environmentSkyMaterial = Material.Create( "gltf_reference_sky_" + Guid.NewGuid().ToString( "N" ), skyShaderPath );
-			Require( environmentSkyMaterial is { IsValid: true } && environmentSkyMaterial.Set( "g_tSkyTexture", texture ), "Reference sky material did not accept the requested cubemap." );
-			Require( environmentSkyMaterial.GetTexture( "g_tSkyTexture" ) == texture, "Reference sky material retained another texture." );
-			environmentSkyMaterial.Set( "g_flGltfSkyYaw", (float)yaw ); environmentSkyMaterial.Set( "g_flGltfSkyBlur", float.Parse( System.Environment.GetEnvironmentVariable( "GLTF_SKY_BLUR" ) ?? "0.6" ) );
+			Require( environmentSkyMaterial is { IsValid: true }, "Reference sky material is invalid." );
 			environmentSky = new SceneSkyBox( scene.SceneWorld, environmentSkyMaterial );
+			// The shader reads render attributes; set them on the sky object and the view so the native sky draw sees them.
+			foreach ( var attributes in new[] { environmentSky.Attributes, scene.RenderAttributes } )
+			{
+				attributes.Set( "GltfSkyTexture", texture );
+				attributes.Set( "GltfSkyYaw", (float)yaw );
+				attributes.Set( "GltfSkyBlur", SkyBlurMipFraction );
+				attributes.Set( "GltfSkyGain", tint.r );
+			}
 			Require( environmentSky.IsValid(), "Native sky object is invalid." );
-			skyApplied = new { visible = true, materialTemplate = skyShaderPath, blurMipFraction = 0.6, gain = 1.0, shader = environmentSkyMaterial.ShaderName, textureResourcePath = texture.ResourcePath, yawDegrees = yaw, scope = "Same native cubemap as the probe; sky visibility does not establish IBL correctness." };
+			skyApplied = new { visible = true, materialTemplate = skyShaderPath, blurMipFraction = SkyBlurMipFraction, gain = tint.r, shader = environmentSkyMaterial.ShaderName, textureResourcePath = texture.ResourcePath, yawDegrees = yaw, scope = "Same native cubemap as the probe; sky visibility does not establish IBL correctness." };
 		}
 		environmentApplied = new { type = "cubemap", texturePath, textureResourcePath = texture.ResourcePath, sourcePath = environmentSourcePath, sourceSha256 = sourceActual, compiledPath, compiledSha256 = compiledActual, texture.Width, texture.Height, texture.Depth, texture.Mips, format = texture.ImageFormat.ToString(), centerInches = Point( center ), sizeInches = size, yawDegrees = yaw, tint = new[] { tint.r, tint.g, tint.b, tint.a }, projection = environmentProbe.Projection.ToString(), sky = skyApplied, limitations = "Loaded resource-to-compiled-file identity, orientation and actual IBL pixels require native validation." };
 	}
@@ -536,6 +546,10 @@ internal sealed class GltfCorpusCase
 		["render"] = new { status = RenderStatus, error = RenderError, observation = drawObserved, visualApproval = "pending" },
 		["capture"] = captureResult,
 		["recipeApplied"] = new { complete = recipeComplete && RenderStatus == "passed", camera = cameraApplied, presentation = presentationApplied, animation = animationApplied, limitations },
-		["producer"] = Producers, ["cleanup_errors"] = CleanupErrors, ["cleanupConfirmed"] = CleanupErrors.Count == 0, ["stopReason"] = StopReason, ["elapsedSeconds"] = Timer.Elapsed.TotalSeconds
+		["producer"] = Producers,
+		["cleanup_errors"] = CleanupErrors,
+		["cleanupConfirmed"] = CleanupErrors.Count == 0,
+		["stopReason"] = StopReason,
+		["elapsedSeconds"] = Timer.Elapsed.TotalSeconds
 	};
 }

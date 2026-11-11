@@ -134,6 +134,7 @@ public partial class SceneTreeWidget : Widget
 
 	WeakReference<Scene> _lastScene = new( null );
 	GltfAuthoringDocument _lastGltfDocument;
+	string _lastGltfShape;
 	bool queryDirty = false;
 
 	[EditorEvent.Frame]
@@ -150,8 +151,11 @@ public partial class SceneTreeWidget : Widget
 		// if query AND scene is unchanged - no need to rebuild the tree
 		// A glTF reload replaces the document, and the tree holds elements of the old one.
 		var gltfDocument = (session as GltfEditorSession)?.Document;
-		var documentChanged = !ReferenceEquals( gltfDocument, _lastGltfDocument );
+		// Adding an element (an imported texture) changes the groups, so the element counts are part of the check.
+		var gltfShape = gltfDocument is null ? null : string.Join( ',', GltfElementKind.All.Select( x => gltfDocument.Count( x ) ) );
+		var documentChanged = !ReferenceEquals( gltfDocument, _lastGltfDocument ) || gltfShape != _lastGltfShape;
 		_lastGltfDocument = gltfDocument;
+		_lastGltfShape = gltfShape;
 
 		if ( !queryDirty && !sceneChanged && !documentChanged )
 			return;

@@ -53,8 +53,15 @@ public abstract class GltfFacet
 	protected internal virtual void Read( JsonObject target )
 	{
 		foreach ( var property in Properties( GetType() ) )
+		{
+			if ( property.PropertyType == typeof( GltfTextureSlot ) )
+			{
+				property.SetValue( this, GltfTextureSlot.Read( target[KeyOf( property )] as JsonObject, property.GetCustomAttribute<GltfTextureAmountAttribute>()?.Key ) );
+				continue;
+			}
 			if ( target[KeyOf( property )] is { } node && GltfValueCodec.TryDecode( node, property.PropertyType, out var value ) )
 				property.SetValue( this, value );
+		}
 	}
 
 	/// <summary>Write one property to the facet object. A null <paramref name="propertyName"/> writes all properties.</summary>
@@ -63,6 +70,15 @@ public abstract class GltfFacet
 		foreach ( var property in Properties( GetType() ) )
 		{
 			if ( propertyName is not null && property.Name != propertyName ) continue;
+			if ( property.PropertyType == typeof( GltfTextureSlot ) )
+			{
+				// A texture reference can hold more than the slot shows (KHR_texture_transform, extras); keep it.
+				var slot = (GltfTextureSlot)property.GetValue( this );
+				var key = KeyOf( property );
+				if ( slot.Texture < 0 ) target.Remove( key );
+				else target[key] = slot.Write( target[key] as JsonObject, property.GetCustomAttribute<GltfTextureAmountAttribute>()?.Key );
+				continue;
+			}
 			var encoded = GltfValueCodec.Encode( property.GetValue( this ), property.GetCustomAttribute<GltfRgbAttribute>() is not null );
 			if ( encoded is null ) target.Remove( KeyOf( property ) );
 			else target[KeyOf( property )] = encoded;
@@ -105,6 +121,73 @@ public abstract class GltfFacet
 
 	static string KeyOf( PropertyInfo property ) =>
 		property.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name ?? char.ToLowerInvariant( property.Name[0] ) + property.Name[1..];
+}
+
+/// <summary>
+/// A material texture reference (glTF textureInfo): the texture index, the UV set, and for some
+/// slots a scale or strength. A texture of -1 means the slot is empty and the key is removed.
+/// </summary>
+public struct GltfTextureSlot
+{
+	public GltfTextureSlot() { }
+
+	/// <summary>Index into the textures of the file, or -1 for none.</summary>
+	public int Texture { get; set; } = -1;
+
+	/// <summary>The UV set (TEXCOORD_n) the texture uses.</summary>
+	public int TexCoord { get; set; }
+
+	/// <summary>normalTexture scale or occlusionTexture strength. Unused by other slots.</summary>
+	public float Amount { get; set; } = 1;
+
+	internal static GltfTextureSlot Read( JsonObject json, string amountKey )
+	{
+		var slot = new GltfTextureSlot();
+		if ( json is null ) return slot;
+		if ( json["index"] is JsonValue index && index.TryGetValue<int>( out var i ) ) slot.Texture = i;
+		if ( json["texCoord"] is JsonValue texCoord && texCoord.TryGetValue<int>( out var t ) ) slot.TexCoord = t;
+		if ( amountKey is not null && json[amountKey] is JsonValue amount && amount.TryGetValue<float>( out var a ) ) slot.Amount = a;
+		return slot;
+	}
+
+	internal JsonObject Write( JsonObject existing, string amountKey )
+	{
+		var json = existing ?? new JsonObject();
+		json["index"] = Texture;
+		if ( TexCoord == 0 ) json.Remove( "texCoord" ); else json["texCoord"] = TexCoord;
+		if ( amountKey is not null )
+		{
+			if ( Amount == 1 ) json.Remove( amountKey ); else json[amountKey] = Amount;
+		}
+		return json;
+	}
+}
+
+/// <summary>The JSON key of the amount of a <see cref="GltfTextureSlot"/>: "scale" for normal textures, "strength" for occlusion.</summary>
+[AttributeUsage( AttributeTargets.Property )]
+public sealed class GltfTextureAmountAttribute( string key ) : Attribute
+{
+	public string Key { get; } = key;
+}
+
+/// <summary>
+/// The shader parameter that renders this facet property. A shader supports a facet when its schema has every
+/// parameter declared on the facet. Facets without one need no dedicated shader support.
+/// </summary>
+[AttributeUsage( AttributeTargets.Property | AttributeTargets.Class, AllowMultiple = true )]
+public sealed class GltfShaderParameterAttribute( string name ) : Attribute
+{
+	public string Name { get; } = name;
+}
+
+/// <summary>
+/// The facet selects a shader: the material uses <paramref name="shader"/> when the facet is present.
+/// Picking another shader removes the facet. The inspector shows the shader choice instead of the facet.
+/// </summary>
+[AttributeUsage( AttributeTargets.Class )]
+public sealed class GltfShaderSelectorAttribute( string shader ) : Attribute
+{
+	public string Shader { get; } = shader;
 }
 
 /// <summary>Write a <see cref="Color"/> facet property as three floats (rgb), such as emissiveFactor.</summary>

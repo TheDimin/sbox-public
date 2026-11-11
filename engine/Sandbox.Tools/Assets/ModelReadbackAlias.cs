@@ -28,7 +28,7 @@ public static partial class ModelReadbackAlias
 		internal bool Registered;
 		internal bool Disposed;
 		internal Model OwnedModel;
-		internal readonly System.Collections.Generic.List<FrozenOwnedFile> DependencyFiles=new();
+		internal readonly System.Collections.Generic.List<FrozenOwnedFile> DependencyFiles = new();
 		public Model Model => !Disposed ? OwnedModel : null;
 		public Guid Guid { get; internal set; }
 		public string SourceSha256 { get; internal set; }
@@ -60,14 +60,14 @@ public static partial class ModelReadbackAlias
 			{
 				try { DeleteOwned( MetaPath, MetaHash, MetaCreated ); } catch ( Exception e ) { failure ??= e; }
 				try { DeleteOwned( CompiledPath, CompiledHash, CompiledCreated ); } catch ( Exception e ) { failure ??= e; }
-				foreach(var file in DependencyFiles)
+				foreach ( var file in DependencyFiles )
 				{
-					try { DeleteOwned(file.Meta,file.MetaHash,file.MetaCreated); } catch(Exception e) { failure ??= e; }
-					try { DeleteOwned(file.Compiled,file.CompiledHash,file.CompiledCreated); } catch(Exception e) { failure ??= e; }
+					try { DeleteOwned( file.Meta, file.MetaHash, file.MetaCreated ); } catch ( Exception e ) { failure ??= e; }
+					try { DeleteOwned( file.Compiled, file.CompiledHash, file.CompiledCreated ); } catch ( Exception e ) { failure ??= e; }
 				}
 			}
 			try { if ( Registered ) g_pResourceSystem.NotifyMetaFileChanged( RelativePath, false ); } catch ( Exception e ) { failure ??= e; }
-			foreach(var file in DependencyFiles) try { if(file.Registered) g_pResourceSystem.NotifyMetaFileChanged(file.Relative,false); } catch(Exception e) { failure ??= e; }
+			foreach ( var file in DependencyFiles ) try { if ( file.Registered ) g_pResourceSystem.NotifyMetaFileChanged( file.Relative, false ); } catch ( Exception e ) { failure ??= e; }
 			try { if ( safePath && Directory.Exists( DirectoryPath ) ) Directory.Delete( DirectoryPath, false ); } catch ( IOException ) { /* Preserve any foreign files. */ }
 			if ( failure != null ) throw new InvalidOperationException( "Private model alias cleanup failed; inspect the owned directory.", failure );
 		}

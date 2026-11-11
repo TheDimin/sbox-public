@@ -19,6 +19,7 @@ partial class ViewportTools
 	PlayControlState CurrentPlayState => sceneViewWidget.Session switch
 	{
 		{ IsPrefabSession: true } => PlayControlState.Hidden,
+		GltfEditorSession => PlayControlState.Hidden,
 		{ IsPlaying: true } => PlayControlState.Playing,
 		_ when Game.IsPlaying => PlayControlState.Hidden,
 		_ => PlayControlState.Ready
