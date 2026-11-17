@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=s&box
+Icon=application-x-sbproj
+Exec="@EDITOR@" -project %f
+MimeType=application/x-sbproj;
+NoDisplay=true

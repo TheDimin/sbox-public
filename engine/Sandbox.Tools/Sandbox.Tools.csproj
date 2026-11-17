@@ -32,6 +32,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Utility/Linux/sandbox-project.xml" LogicalName="Sandbox.Tools.Linux.sandbox-project.xml" />
+    <EmbeddedResource Include="Utility/Linux/sandbox-project.desktop" LogicalName="Sandbox.Tools.Linux.sandbox-project.desktop" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 
