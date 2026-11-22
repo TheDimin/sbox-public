@@ -4888,10 +4888,11 @@ public sealed partial class PolygonMesh : IJsonConvert
 
 	private static Vector2 MaterialTextureSize( Material material )
 	{
-		if ( material?.FirstTexture is not { } texture ) return 512;
+		if ( material is null ) return 512;
+		var texture = material.FirstTexture;
 		var width = material.Attributes.GetInt( "WorldMappingWidth" );
 		var height = material.Attributes.GetInt( "WorldMappingHeight" );
-		return new Vector2( width > 0 ? width / 0.25f : texture.Width, height > 0 ? height / 0.25f : texture.Height );
+		return new Vector2( width > 0 ? width / 0.25f : texture?.Width ?? 512, height > 0 ? height / 0.25f : texture?.Height ?? 512 );
 	}
 
 	private Vector2 CalculateTextureSize( Material material )

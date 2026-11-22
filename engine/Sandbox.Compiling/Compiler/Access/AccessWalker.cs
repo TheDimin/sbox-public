@@ -706,9 +706,8 @@ sealed class AccessWalker : CSharpSyntaxWalker
 		var sig = SymbolSignature.Method( m );
 		if ( _rules.IsBlocked( sig ) )
 		{
-			Report( node, m.MethodKind is MethodKind.Constructor or MethodKind.StaticConstructor
-				? sig
-				: m.ToDisplayString( DiagnosticMethodFormat ) );
+			var display = m.IsGenericMethod ? $"{sig} ({m.ToDisplayString( DiagnosticMethodFormat )})" : sig;
+			Report( node, display );
 			return;
 		}
 

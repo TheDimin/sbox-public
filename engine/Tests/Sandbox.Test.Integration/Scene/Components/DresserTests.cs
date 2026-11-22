@@ -54,10 +54,10 @@ public class DresserTests
 		body.GameObject.Children.SingleOrDefault( x => !x.IsDestroyed && x.Name == "citizen_deforms" );
 
 	/// <summary>
-	/// Legacy deformation APIs do not create a Dresser, retain writes or add deformation objects.
+	/// Human models retain deformation settings without creating Citizen deformation objects.
 	/// </summary>
 	[TestMethod]
-	public void LegacyDeformsHaveNoEffect()
+	public void HumanModelsRetainDeformSettingsWithoutCitizenDeformers()
 	{
 		var scene = new Scene();
 		using var scope = scene.Push();
@@ -66,7 +66,7 @@ public class DresserTests
 
 #pragma warning disable CS0618 // Exercise the compatibility stubs.
 		Assert.IsNull( outfit.ApplyDeforms( body ) );
-		Assert.IsNull( Dresser.Find( body ) );
+		Assert.IsNotNull( Dresser.Find( body ) );
 
 		var dresser = Dresser.GetOrCreate( body );
 		dresser.NeckSize = 1;
@@ -75,11 +75,11 @@ public class DresserTests
 		dresser.HeadShape = 1;
 		dresser.NoseSize = 1;
 		dresser.ChinSize = 1;
-		CollectionAssert.AreEqual( new[] { 0f, 0.5f, 0.5f, 0.5f, 0f, 0f },
+		CollectionAssert.AreEqual( new[] { 1f, 1f, 1f, 1f, 1f, 1f },
 			new[] { dresser.NeckSize, dresser.WaistSize, dresser.ChestSize, dresser.HeadShape, dresser.NoseSize, dresser.ChinSize } );
 
 		dresser.UpdateAppearance( outfit );
-		CollectionAssert.AreEqual( new[] { 0f, 0.5f, 0.5f, 0.5f, 0f, 0f },
+		CollectionAssert.AreEqual( new[] { 1f, 1f, 1f, 1f, 1f, 1f },
 			new[] { dresser.NeckSize, dresser.WaistSize, dresser.ChestSize, dresser.HeadShape, dresser.NoseSize, dresser.ChinSize } );
 #pragma warning restore CS0618
 
