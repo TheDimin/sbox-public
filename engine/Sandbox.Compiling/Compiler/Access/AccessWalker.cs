@@ -29,6 +29,13 @@ sealed class AccessWalker : CSharpSyntaxWalker
 	readonly HashSet<(int, string)> _seen = [];
 	readonly AccessCheckCache _clean;
 	int _reportAttempts;
+	static readonly SymbolDisplayFormat DiagnosticMethodFormat = new(
+		globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted,
+		typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+		genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+		memberOptions: SymbolDisplayMemberOptions.IncludeParameters | SymbolDisplayMemberOptions.IncludeContainingType,
+		parameterOptions: SymbolDisplayParameterOptions.IncludeType,
+		miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes );
 
 	static readonly Dictionary<string, string> InteropAttributes = new()
 	{
@@ -699,7 +706,9 @@ sealed class AccessWalker : CSharpSyntaxWalker
 		var sig = SymbolSignature.Method( m );
 		if ( _rules.IsBlocked( sig ) )
 		{
-			Report( node, sig );
+			Report( node, m.MethodKind is MethodKind.Constructor or MethodKind.StaticConstructor
+				? sig
+				: m.ToDisplayString( DiagnosticMethodFormat ) );
 			return;
 		}
 

@@ -493,7 +493,7 @@ public sealed partial class Project
 
 		mockPackage.Tags = Array.Empty<string>();
 		var publishedIdent = $"{mockPackage.Org.Ident}.{mockPackage.Ident}";
-		mockPackage.UpdatePublishedPackage( Package.TryGetCached( publishedIdent, out var cachedPackage ) ? cachedPackage : null );
+		mockPackage.UpdatePublishedPackage( Package.TryGetCachedRemote( publishedIdent, out var cachedPackage ) ? cachedPackage : null );
 
 		return mockPackage;
 	}

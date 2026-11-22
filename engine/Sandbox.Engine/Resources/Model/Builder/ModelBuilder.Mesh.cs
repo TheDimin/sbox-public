@@ -75,6 +75,12 @@ public sealed partial class ModelBuilder
 		return this;
 	}
 
+	internal ModelBuilder AddMeshForLodMask( Mesh mesh, int lodMask )
+	{
+		AddMesh( mesh, lodMask, ulong.MaxValue );
+		return this;
+	}
+
 	/// <summary>
 	/// Adds multiple meshes to an LOD level.
 	/// </summary>

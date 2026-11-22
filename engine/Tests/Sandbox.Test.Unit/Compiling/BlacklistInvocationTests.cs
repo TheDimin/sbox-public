@@ -1,6 +1,6 @@
-namespace CompilingTests;
+namespace CompilingTests.CodeAccess;
 
-public partial class BlacklistTest
+public partial class HardBlockTest
 {
 	[TestMethod]
 	[DataRow( "System.Runtime.CompilerServices.Unsafe.SizeOf<int>()", 0 )]
@@ -39,7 +39,9 @@ public partial class BlacklistTest
 			}
 			""", out var diagnostics );
 
-		Assert.AreEqual( 3, diagnostics.Count, string.Join( "\n", diagnostics ) );
+		// The unified access checker also rejects the dynamic type itself.
+		Assert.AreEqual( 4, diagnostics.Count, string.Join( "\n", diagnostics ) );
+		Assert.AreEqual( 1, diagnostics.Count( x => x.GetMessage().Contains( "'dynamic'" ) ) );
 		Assert.AreEqual( 2, diagnostics.Count( x => x.GetMessage().Contains( "As<object>" ) ) );
 		Assert.AreEqual( 1, diagnostics.Count( x => x.GetMessage().Contains( "As<dynamic>" ) ) );
 		Assert.AreEqual( 2, diagnostics.Select( x => x.Location.GetMappedLineSpan().StartLinePosition.Line ).Distinct().Count() );

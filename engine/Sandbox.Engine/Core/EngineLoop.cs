@@ -383,17 +383,7 @@ internal static class EngineLoop
 		// The editor renders it's own game scene
 		if ( Application.IsEditor )
 		{
-			CSceneSystem.BeginRenderingViews( true );
-
-			try
-			{
-				Sandbox.UI.ScenePanel.RenderPending();
-			}
-			finally
-			{
-				CSceneSystem.FinishRenderingViews();
-				CSceneSystem.WaitForRenderingToComplete();
-			}
+			Sandbox.UI.ScenePanel.RenderPending();
 
 			using ( _toolsRender.Start() )
 				IToolsDll.Current?.OnRender();

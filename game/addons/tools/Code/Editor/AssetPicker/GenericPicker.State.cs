@@ -86,7 +86,7 @@ public partial class GenericPicker
 		} );
 	}
 
-	public override void SetSearchText( string value )
+	void SetRecentSearchText( string value )
 	{
 		if ( string.IsNullOrEmpty( value ) )
 			return;

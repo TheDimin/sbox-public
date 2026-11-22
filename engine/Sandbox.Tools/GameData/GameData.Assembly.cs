@@ -154,7 +154,7 @@ public static partial class GameData
 		if ( Package.TryGetCached( $"{ident}#local", out var localPackage ) && localPackage is not null )
 			return localPackage;
 
-		if ( !Package.TryParseIdent( ident, out _ ) )
+		if ( !Package.TryParseIdentParts( ident, out _ ) )
 		{
 			return await Package.Fetch( $"{ident}#local", true ); // :|
 		}

@@ -464,6 +464,10 @@ public abstract partial class Asset
 		if ( !attribute.TargetType.IsAssignableTo( t ) || attribute.TargetType.IsAbstract )
 			return false;
 
+		// Publishing can request the original eager dependency checks.
+		if ( AssetPipelineCompatibility.IsLegacyForced && CanRecompile )
+			Compile( false );
+
 		// Compiled first if it changed, as any resource is. One that fails to compile still loads as it last compiled (a
 		// failed compile publishes nothing), so its editor can open it to fix it; building it still fails.
 		if ( !EnsureCurrentForLoad() )
@@ -472,13 +476,6 @@ public abstract partial class Asset
 		obj = GameResource.GetPromise( attribute.TargetType, new ResourceId() { Guid = Guid, Path = Path } );
 		if ( obj != null && !obj.IsPromise )
 			return true; // already exists and loaded
-
-		// Startup's final compile pass and file watchers refresh loaded resources. Only
-		// resources that still need to be read require another compile check here.
-		if ( !forceCompileCheck && CanRecompile )
-		{
-			Compile( false );
-		}
 
 		// get compiled path
 		var compiledFilePath = GetCompiledFile( true );

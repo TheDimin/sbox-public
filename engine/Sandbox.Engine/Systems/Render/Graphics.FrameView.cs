@@ -99,20 +99,17 @@ public static partial class Graphics
 	internal static IFrameView CurrentView => _state.view;
 
 	/// <summary>
-	/// The native renderer's temporal view identity for the current graphics block.
-	/// Use both values as the key. Different native cameras or ViewSetup.ViewHash
+	/// The temporal view identity for the current managed camera graphics block.
+	/// Use both values as the key. Different cameras or ViewSetup.ViewHash
 	/// values have different histories, including editor views that borrow a camera
-	/// component's command lists. Null outside a native managed-camera view.
+	/// component's command lists. Null outside a managed-camera view.
 	/// This does not advance history or imply that a view completed a frame.
 	/// </summary>
 	public static (int CameraId, int ViewId)? NativeViewIdentity
 	{
 		get
 		{
-			if ( _state.view is not NativeFrameView native || !native.View.IsValid )
-				return null;
-			var cameraId = native.View.m_ManagedCameraId;
-			return cameraId == 0 ? null : (cameraId, native.View.m_ViewUniqueId);
+			return _state.view is BorealisGpuView view ? view.ViewIdentity : null;
 		}
 	}
 
@@ -124,40 +121,12 @@ public static partial class Graphics
 	/// The viewport is current context state. Target sizes describe mip zero of the layer resources,
 	/// not a resolved copy or swap chain. Samples is the exact texture sample count (one means no MSAA).
 	/// This is layer metadata, not an inspection of arbitrary native target rebinding.
+	/// Borealis has no native layer, so this is null on its GPU backend.
 	/// </summary>
 	public static (int CameraId, int ViewId, SceneLayerType Layer, Rect Viewport,
 		(int Width, int Height, int Samples) Color, (int Width, int Height, int Samples) Depth)? NativeLayerTargetInfo
 	{
-		get
-		{
-			if ( !IsActive || _state.renderTarget is not null ||
-				_state.view is not NativeFrameView native || !native.View.IsValid ||
-				!native.Layer.IsValid || native.IsChildView || NativeViewIdentity is not { } identity )
-				return null;
-
-			var color = native.GetColorTarget( out var ownsColor );
-			try
-			{
-				var depth = native.GetDepthTarget( out var ownsDepth );
-				try
-				{
-					if ( !color.IsValid || !depth.IsValid ) return null;
-					var colorDesc = g_pRenderDevice.GetTextureDesc( color );
-					var depthDesc = g_pRenderDevice.GetTextureDesc( depth );
-					return (identity.CameraId, identity.ViewId, LayerType, Context.GetViewport().Rect,
-						(colorDesc.m_nWidth, colorDesc.m_nHeight, RenderMultiSampleToNum( g_pRenderDevice.GetTextureMultisampleType( color ) )),
-						(depthDesc.m_nWidth, depthDesc.m_nHeight, RenderMultiSampleToNum( g_pRenderDevice.GetTextureMultisampleType( depth ) )));
-				}
-				finally
-				{
-					if ( ownsDepth && !depth.IsNull ) depth.DestroyStrongHandle();
-				}
-			}
-			finally
-			{
-				if ( ownsColor && !color.IsNull ) color.DestroyStrongHandle();
-			}
-		}
+		get => null;
 	}
 
 	/// <summary>

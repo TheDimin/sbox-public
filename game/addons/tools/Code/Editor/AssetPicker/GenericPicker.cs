@@ -146,6 +146,12 @@ public partial class GenericPicker : AssetPicker
 		if ( string.IsNullOrWhiteSpace( value ) )
 			return;
 
+		if ( HasRecentState )
+		{
+			SetRecentSearchText( value );
+			return;
+		}
+
 		DockManager.RaiseDock( "Asset Browser" );
 		AssetBrowser.Search.Clear();
 		AssetBrowser.Search.Value = value;

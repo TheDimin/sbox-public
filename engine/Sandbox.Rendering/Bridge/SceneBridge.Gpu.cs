@@ -61,6 +61,7 @@ internal sealed partial class SceneBridge
 
 		var backend = (BorealisGpuRenderBackend)RenderBackend.Default;
 		gpuView ??= new BorealisGpuView( backend );
+		gpuView.ViewIdentity = (camera._cameraId, setup.ViewHash);
 		gpuView.Viewport = viewport;
 		gpuView.SrgbWrite = false;
 		gpuView.PostProcessEnabled = setup.EnablePostprocessing ?? camera.EnablePostProcessing;
@@ -114,6 +115,7 @@ internal sealed partial class SceneBridge
 		var rect = camera.Rect;
 		var viewport = new Rect( rect.Left * size.x, rect.Top * size.y, rect.Width * size.x, rect.Height * size.y );
 		gpuView ??= new BorealisGpuView( backend );
+		gpuView.ViewIdentity = (camera._cameraId, setup.ViewHash);
 		gpuView.Viewport = viewport;
 		gpuView.SrgbWrite = false;
 		gpuView.PostProcessEnabled = setup.EnablePostprocessing ?? camera.EnablePostProcessing;
@@ -137,6 +139,7 @@ internal sealed partial class SceneBridge
 
 		var viewport = new Rect( 0, 0, size.x, size.y );
 		gpuView ??= new BorealisGpuView( backend );
+		gpuView.ViewIdentity = (camera._cameraId, setup.ViewHash);
 		gpuView.Viewport = viewport;
 		gpuView.SrgbWrite = false;
 		gpuView.PostProcessEnabled = setup.EnablePostprocessing ?? camera.EnablePostProcessing;

@@ -675,16 +675,9 @@ internal partial class ClutterBatchSceneObject : SceneCustomObject
 
 	private static bool IsShadowPass( out SceneObjectFlags requiredFlags )
 	{
-		var layer = Graphics.SceneLayer;
-		if ( layer.IsValid )
-		{
-			requiredFlags = layer.GetObjectFlagsRequiredMask();
-			if ( (requiredFlags & SceneObjectFlags.CastShadows) == SceneObjectFlags.CastShadows )
-				return true;
-		}
-
-		requiredFlags = SceneObjectFlags.None;
-		return Graphics.LayerType == SceneLayerType.Shadow;
+		var shadow = Graphics.LayerType == SceneLayerType.Shadow;
+		requiredFlags = shadow ? SceneObjectFlags.CastShadows : SceneObjectFlags.None;
+		return shadow;
 	}
 
 	private void DisposeBuffers()
