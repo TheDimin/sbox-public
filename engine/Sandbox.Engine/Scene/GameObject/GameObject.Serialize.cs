@@ -87,7 +87,7 @@ public partial class GameObject
 
 		internal bool ShouldSave( GameObject gameObject )
 		{
-			var shouldIgnoreNotSavedFlag = SingleNetworkObject || SceneForNetwork;
+			var shouldIgnoreNotSavedFlag = SingleNetworkObject || SceneForNetwork || SerializeForUndo;
 
 			// Marked as do not save. This means to disk, really.
 			if ( gameObject.Flags.Contains( GameObjectFlags.NotSaved ) && !shouldIgnoreNotSavedFlag ) return false;
@@ -211,6 +211,7 @@ public partial class GameObject
 
 		// Networking wants all the flags (it applies them verbatim on the other end), otherwise just the saved ones.
 		var serializedFlags = (options.SceneForNetwork || options.SingleNetworkObject) ? Flags : (Flags & PersistedFlags);
+		if ( options.SerializeForUndo ) serializedFlags |= Flags & GameObjectFlags.NotSaved;
 		json[JsonKeys.Flags] = (long)serializedFlags;
 		json[JsonKeys.Name] = Name;
 
