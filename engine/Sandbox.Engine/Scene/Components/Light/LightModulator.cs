@@ -12,6 +12,7 @@ public sealed class LightModulator : Component, Component.ExecuteInEditor
 	/// <summary>
 	/// Limits how the processed texture can change each colour channel of direct light.
 	/// </summary>
+	[Expose]
 	public enum ModulationBlendMode
 	{
 		/// <summary>
@@ -74,6 +75,7 @@ public sealed class LightModulator : Component, Component.ExecuteInEditor
 	/// <summary>
 	/// Blend between original light at zero and full texture modulation at one.
 	/// Multiplies texture alpha and edge feathering rather than dimming the light itself.
+	/// Caustics also accept values above one to amplify modulation, with dark troughs limited to black.
 	/// </summary>
 	[Property, Range( 0, 1 )]
 	public float Strength
@@ -749,8 +751,20 @@ public sealed class LightModulator : Component, Component.ExecuteInEditor
 		}
 
 		data = cachedData;
+		if ( AnimationTime is float time && float.IsFinite( time ) )
+		{
+			data.EffectParameters.x = 0;
+			data.EffectParameters.w = time;
+		}
 		return cachedDataValid;
 	}
+
+	/// <summary>
+	/// Optional procedural-effect clock supplied by an owner, independent of the viewing camera's render time.
+	/// Null uses the camera's render clock. Does not affect texture scrolling.
+	/// Geometry and appearance packing remain cached.
+	/// </summary>
+	internal float? AnimationTime { get; set; }
 
 	bool dataDirty = true;
 	bool cachedDataValid;
@@ -825,9 +839,9 @@ public sealed class LightModulator : Component, Component.ExecuteInEditor
 		var angle = float.IsFinite( TextureRotation ) ? TextureRotation % 360 * (MathF.PI / 180) : 0;
 		data.Rotation = new Vector2( MathF.Cos( angle ), MathF.Sin( angle ) );
 		data.Contrast = FiniteClamp( Contrast, 0, 8, 1 );
-		data.Brightness = FiniteClamp( Brightness, 0, 16, 1 );
+		data.Brightness = FiniteClamp( Brightness, 0, Effect == ModulationEffect.Caustics ? 80 : 16, 1 );
 		data.BlendMode = Enum.IsDefined( BlendMode ) ? (int)BlendMode : 0;
-		data.Strength = FiniteClamp( Strength, 0, 1, 1 );
+		data.Strength = FiniteClamp( Strength, 0, Effect == ModulationEffect.Caustics ? 8 : 1, 1 );
 		data.EdgeFeather = FiniteClamp( EdgeFeather, 0, 0.5f );
 		data.DistanceFeather = FiniteClamp( DistanceFeather, 0, 1000000 );
 		data.Effect = Enum.IsDefined( Effect ) ? (int)Effect : 0;

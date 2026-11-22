@@ -14,8 +14,7 @@ public class PanelDirectDrawingTest
 	[TestInitialize]
 	public void RequireVulkan()
 	{
-		if ( g_pRenderDevice.GetRenderDeviceAPI() != NativeEngine.RenderDeviceAPI_t.RENDER_DEVICE_API_VULKAN )
-			Assert.Inconclusive( "Requires the Vulkan renderer." );
+		TestGraphics.Require();
 	}
 
 	sealed class ColorPanel : Panel
@@ -179,6 +178,28 @@ public class PanelDirectDrawingTest
 			using var bitmap = Render( root );
 			Assert.AreEqual( Color.Red, bitmap.GetPixel( 24, 32 ) );
 			Assert.AreEqual( Color.Blue, bitmap.GetPixel( 40, 32 ) );
+		}
+		finally
+		{
+			system.Clear();
+		}
+	}
+
+	[TestMethod]
+	public void BackdropFilterIsClippedToBorderShape()
+	{
+		var system = new UISystem();
+		var root = new RootPanel( system ) { PanelBounds = Bounds };
+		root.AddChild<Panel>().Style.Set( "position: absolute; width: 64px; height: 64px; background-color: red;" );
+		root.AddChild<Panel>().Style.Set( "position: absolute; width: 64px; height: 64px; backdrop-filter: invert(1); border-shape: circle(50%);" );
+		try
+		{
+			root.Layout();
+			using var bitmap = Render( root );
+			var inside = bitmap.GetPixel( 32, 32 );
+			var corner = bitmap.GetPixel( 62, 62 );
+			Assert.IsTrue( inside.r < 0.05f && inside.g > 0.95f, $"Inside the circle should be inverted, got {inside}" );
+			Assert.IsTrue( corner.r > 0.95f && corner.g < 0.05f, $"Outside the circle should be untouched, got {corner}" );
 		}
 		finally
 		{
@@ -398,10 +419,10 @@ public class PanelDirectDrawingTest
 				{
 					var destination = Graphics.RenderTarget;
 					var viewport = new NativeEngine.RenderViewport( new Rect( 4, 4, size - 8, size - 8 ), 0.2f, 0.8f );
-					Graphics.Context.SetViewport( viewport );
+					Graphics.Backend.SetViewport( viewport );
 					root.RenderManual();
 					Assert.AreSame( destination, Graphics.RenderTarget );
-					var restored = Graphics.Context.GetViewport();
+					var restored = Graphics.Backend.GetViewport();
 					Assert.AreEqual( viewport.Rect, restored.Rect );
 					Assert.AreEqual( viewport.MinZ, restored.MinZ );
 					Assert.AreEqual( viewport.MaxZ, restored.MaxZ );
@@ -618,7 +639,7 @@ public class PanelDirectDrawingTest
 		scope.Attributes.Set( "UIGammaOutput", true );
 		scope.Attributes.SetCombo( "D_NO_ZTEST", 1 );
 		Graphics.RenderTarget = RenderTarget.From( target );
-		scope.Context.Clear( Color.Transparent, true, false, false );
+		Graphics.Clear( Color.Transparent, true, false, false );
 		draw();
 	}
 }

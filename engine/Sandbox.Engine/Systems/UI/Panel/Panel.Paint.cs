@@ -26,14 +26,18 @@ public partial class Panel
 		if ( layered )
 		{
 			stats.LayerPanels++;
-			layer = painter.Target( PanelLayerRTName, PanelLayerBounds );
+			var paint = _paintCache.Layer;
+			// Roots executed outside the normal per-frame pass can skip frames, and manual ones scale opacity at execute time
+			var root = FindRootPanel();
+			var uncached = root is null || root.RenderedManually || root.IsWorldPanel;
+			layer = uncached ? painter.Target( PanelLayerRTName, paint.Bounds, paint.Mips ) : painter.Target( PanelLayerRTName, paint.Bounds, paint.Mips, ref paint.Cache );
 		}
 
 		try
 		{
 			if ( !LayoutTree.IsInlineParticipant )
 			{
-				if ( HasBackdropFilter ) painter.FilterBackdrop( Box.Rect, _paintCache.Backdrop, _paintCache.OuterRadii );
+				if ( HasBackdropFilter ) painter.FilterBackdrop( Box.Rect, _paintCache.Backdrop, _paintCache.OuterRadii, _paintCache.Background.Descriptor.BorderShapeData );
 				if ( layered || this is RootPanel ) DrawShadows( inset: false, painter );
 				DrawBackground( painter );
 				DrawContent( painter );
@@ -91,6 +95,7 @@ public partial class Panel
 
 	/// <summary>
 	/// Called by Render to draw child shadows and non-fixed children in sorted order inside the child clip.
+	/// Children that can't draw anything inside the clip, like rows scrolled out of view, are skipped whole.
 	/// Draws scrollbars afterward; RootPanel handles fixed-position panels separately.
 	/// </summary>
 	void RenderChildren( Painter painter, ref RootPanel.FrameStats stats )
@@ -103,13 +108,22 @@ public partial class Panel
 			RenderChildShadows( painter );
 			foreach ( var child in _renderChildren )
 			{
-				if ( !child.IsFixed )
-					child.Render( painter, ref stats );
+				if ( child.IsFixed ) continue;
+
+				if ( IsClippedAway( child ) )
+				{
+					stats.PanelsCulled++;
+					continue;
+				}
+
+				child.Render( painter, ref stats );
 			}
 		}
 
 		RenderScrollbars( painter, ref stats );
 	}
+
+	bool IsClippedAway( Panel child ) => _paintCache.ClipsChildren && child.PaintsOutside( _paintCache.ContentClipRect );
 
 	/// <summary>
 	/// Called by RenderChildren before child bodies so non-fixed sibling outset shadows are painted underneath them.
@@ -119,7 +133,7 @@ public partial class Panel
 		if ( _shadowChildren is null ) return;
 		foreach ( var child in _shadowChildren )
 		{
-			if ( child.IsFixed ) continue;
+			if ( child.IsFixed || IsClippedAway( child ) ) continue;
 			child.RenderShadow( painter );
 		}
 	}
@@ -259,10 +273,17 @@ public partial class Panel
 
 		if ( !image.HasFill ) return;
 
+		// Nested clip owners each fill the same labels, but the outermost one draws their effects, under every fill
+		bool drawEffects = !HasTextClipFillAbove();
+
 		foreach ( var label in Descendants.Prepend( this ).OfType<Label>() )
 		{
 			if ( !label.IsVisible || label.VisualRoot != VisualRoot ) continue;
 			if ( !label.GetTextMask( out var texture, out var rect ) ) continue;
+
+			// Shadows and outlines aren't part of the mask, they go under the fill like normal text
+			if ( drawEffects ) label.DrawTextEffects( painter, CachedOverrideBlendMode, CachedRenderOpacity );
+
 			var fill = descriptor with
 			{
 				BackgroundClip = BackgroundClip.Text,
@@ -274,6 +295,20 @@ public partial class Panel
 			};
 			painter.Rect( in fill );
 		}
+	}
+
+	/// <summary>
+	/// A visual ancestor fills its background through the text masks too, so it has already drawn our labels' effects.
+	/// </summary>
+	bool HasTextClipFillAbove()
+	{
+		for ( var panel = VisualParent; panel is not null; panel = panel.VisualParent )
+		{
+			if ( panel.HasBackground && panel._paintCache.ClipsBackgroundToText && panel._paintCache.Background.HasFill && panel.LayoutTree?.IsInlineParticipant != true )
+				return true;
+		}
+
+		return false;
 	}
 
 	/// <summary>

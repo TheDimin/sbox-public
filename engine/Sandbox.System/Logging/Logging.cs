@@ -164,7 +164,15 @@ internal static partial class Logging
 	public static bool Enabled { get; set; } = true;
 	internal static bool PrintToConsole { get; set; } = true;
 
+	/// <summary>
+	/// Where what the current thread logs is also written, if anywhere: the log of the content build job it works for
+	/// (ContentCompilerHost).
+	/// </summary>
+	internal static Func<StringBuilder> Capture;
+
 	internal static event Action<LogEvent> OnMessage;
+	// Runs on the emitting thread, before dispatch loses its AsyncLocal game context.
+	internal static event Action<LogEvent> OnEmitted;
 	internal static Action<Exception> OnException;
 
 	/// <summary>
@@ -183,6 +191,8 @@ internal static partial class Logging
 
 	internal static void Write( in LogEvent e )
 	{
+		OnEmitted?.Invoke( e );
+
 		if ( ThreadSafe.IsMainThread && callDepth < 3 )
 		{
 			try
@@ -238,11 +248,12 @@ internal static partial class Logging
 	internal static void RegisterEngineLogger( int id, string v )
 	{
 		v = $"engine/{v}";
-		Loggers.Add( v );
+		lock ( Loggers ) Loggers.Add( v );
 	}
 
+	// Loggers are constructed from any thread
 	internal static void RegisterLogger( string name )
 	{
-		Loggers.Add( name );
+		lock ( Loggers ) Loggers.Add( name );
 	}
 }

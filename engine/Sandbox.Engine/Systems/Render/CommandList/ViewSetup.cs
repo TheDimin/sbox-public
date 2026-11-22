@@ -5,6 +5,7 @@
 /// elements of that render. This means you can use most of the camera's
 /// properties, but override some without disturbing the camera itself.
 /// </summary>
+[Expose]
 public struct ViewSetup
 {
 	/// <summary>
@@ -112,8 +113,9 @@ public struct ViewSetup
 	public bool? EnableUI;
 
 	/// <summary>
-	/// Whether engine debug overlays should be rendered in this view. Null inherits the camera's setting.
-	/// This controls engine overlays, not scene geometry such as editor gizmos.
+	/// Whether debug drawing is rendered in this view: engine overlays, editor gizmos and the scene's
+	/// debug world. False renders the game only. Null keeps the debug worlds and inherits the camera's
+	/// engine overlay setting.
 	/// </summary>
 	public bool? EnableDebugOverlays;
 
@@ -121,11 +123,19 @@ public struct ViewSetup
 	/// If you're rendering a subview this will allow the renderer to find the same view again next frame
 	/// </summary>
 	public int ViewHash;
+
+	/// <summary>
+	/// Render as a reflection, which nobody looks at closely: no planar reflections of its own, a depth-only prepass,
+	/// and no contact shadows, volumetric fog, auto exposure or bloom objects. It's unshadowed unless
+	/// <c>r.reflections.shadows</c> is on.
+	/// </summary>
+	internal bool Reflection;
 }
 
 /// <summary>
 /// Setup for defining gradient fog in a view
 /// </summary>
+[Expose]
 public struct GradientFogSetup
 {
 	/// <summary>
@@ -215,6 +225,7 @@ public struct GradientFogSetup
 /// <summary>
 /// Allows special setup for reflections, such as offsetting the reflection plane
 /// </summary>
+[Expose]
 public struct ReflectionSetup
 {
 	/// <summary>
@@ -244,6 +255,7 @@ public struct ReflectionSetup
 /// <summary>
 /// Allows special setup for refraction, such as offsetting the clip plane
 /// </summary>
+[Expose]
 public struct RefractionSetup
 {
 	/// <summary>
@@ -275,6 +287,7 @@ public struct RefractionSetup
 /// elements of that render. This means you can use most of the Renderer's
 /// properties, but override some without disturbing the Renderer itself.
 /// </summary>
+[Expose]
 public struct RendererSetup
 {
 	/// <summary>

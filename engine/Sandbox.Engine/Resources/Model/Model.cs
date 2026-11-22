@@ -24,6 +24,7 @@ public sealed partial class Model : Resource
 		this.native = native;
 		this.Name = name;
 		this.procedural = procedural;
+		_animationGraph = new( LoadAnimationGraph );
 
 		RegisterWeakResourceId( Name, native.GetGuid() );
 	}
@@ -56,6 +57,7 @@ public sealed partial class Model : Resource
 
 		_physics?.Dispose();
 		_physics = default;
+		_physicsBounds = null;
 
 		_morphs?.Dispose();
 		_morphs = null;
@@ -65,6 +67,11 @@ public sealed partial class Model : Resource
 
 		_animationNames?.Clear();
 		_animationNames = default;
+
+		_boneMaskNames?.Clear();
+		_boneMaskNames = default;
+
+		_animationGraph = new( LoadAnimationGraph );
 
 		_sequenceNames?.Clear();
 		_sequenceNames = default;
@@ -83,9 +90,12 @@ public sealed partial class Model : Resource
 
 		MeshInfo = null;
 
+		// Native gave every scene object of it new mesh instances: their managed draws and flags follow
+		SceneObject.ModelReloaded( this );
+
 		IToolsDll.Current?.RunEvent( "model.reload", this );
 
-		foreach ( var scene in Scene.All )
+		foreach ( var scene in Scene.AllIncludingUnlisted )
 		{
 			using var scope = scene.Push();
 
@@ -158,6 +168,11 @@ public sealed partial class Model : Resource
 		get => field ??= FromNative( native.GetBaseModel() );
 		set;
 	}
+
+	/// <summary>
+	/// Path of the <see cref="Animation.Skeleton"/> this model's animation is authored against, if it names one.
+	/// </summary>
+	public string SkeletonName => native.GetSkeletonName();
 }
 
 internal interface IHasModel

@@ -1,4 +1,5 @@
-﻿using Sandbox.Utility;
+using Sandbox.Engine;
+using Sandbox.Utility;
 using System.Diagnostics;
 
 namespace Sandbox;
@@ -126,7 +127,7 @@ sealed partial class NetworkDebugSystem : GameObjectSystem<NetworkDebugSystem>
 		int msgSize;
 		try
 		{
-			Game.TypeLibrary.ToBytes( message, ref bs );
+			GlobalContext.Current.TypeLibrary.ToBytes( message, ref bs );
 			msgSize = bs.Length;
 		}
 		finally
@@ -134,23 +135,26 @@ sealed partial class NetworkDebugSystem : GameObjectSystem<NetworkDebugSystem>
 			bs.Dispose();
 		}
 
-		Track( name, msgSize, outbound, source );
+		Track( name, msgSize, outbound, source, Diagnostics.DevTools.NetworkLog.Kind.Object );
 	}
 
 	/// <summary>
 	/// Whether calls are being tracked, so callers can skip building their names.
 	/// </summary>
-	internal bool TracksCalls => NetworkRecord || Diagnostics.PerfHub.IsCollecting( "network" );
+	internal bool TracksCalls => NetworkRecord || Diagnostics.DevTools.IsCollecting( "network" );
 
 	/// <summary>
 	/// Track a network message of a known size for diagnostic purposes.
 	/// </summary>
-	internal void Track( string name, int msgSize, bool outbound = false, Connection source = default )
+	internal void Track( string name, int msgSize, bool outbound = false, Connection source = default ) => Track( name, msgSize, outbound, source, Diagnostics.DevTools.NetworkLog.Kind.Rpc );
+
+	void Track( string name, int msgSize, bool outbound, Connection source, Diagnostics.DevTools.NetworkLog.Kind kind )
 	{
 		if ( !TracksCalls )
 			return;
 
 		EnsureInitialized();
+		Diagnostics.DevTools.NetworkLog.Message( kind, name, msgSize, outbound, outbound ? null : source );
 
 		var stats = outbound ? OutboundStats : InboundStats;
 
@@ -181,6 +185,7 @@ sealed partial class NetworkDebugSystem : GameObjectSystem<NetworkDebugSystem>
 			return;
 
 		EnsureInitialized();
+		Diagnostics.DevTools.NetworkLog.Message( Diagnostics.DevTools.NetworkLog.Kind.SyncVar, name, bytes, outbound, outbound ? null : source );
 
 		var stats = outbound ? SyncVarOutboundStats : SyncVarInboundStats;
 
@@ -207,14 +212,14 @@ sealed partial class NetworkDebugSystem : GameObjectSystem<NetworkDebugSystem>
 	/// </summary>
 	internal void Record<T>( MessageType type, T message )
 	{
-		if ( !Diagnostics.PerfHub.IsCollecting( "network" ) )
+		if ( !Diagnostics.DevTools.IsCollecting( "network" ) )
 			return;
 
 		var bs = ByteStream.Create( 256 );
 		int msgSize;
 		try
 		{
-			Game.TypeLibrary.ToBytes( message, ref bs );
+			GlobalContext.Current.TypeLibrary.ToBytes( message, ref bs );
 			msgSize = bs.Length;
 		}
 		finally
@@ -232,7 +237,7 @@ sealed partial class NetworkDebugSystem : GameObjectSystem<NetworkDebugSystem>
 	/// </summary>
 	internal void Record( MessageType type, int size )
 	{
-		if ( !Diagnostics.PerfHub.IsCollecting( "network" ) )
+		if ( !Diagnostics.DevTools.IsCollecting( "network" ) )
 			return;
 
 		if ( !_currentTick.BytesPerType.TryAdd( type, size ) )
@@ -245,6 +250,8 @@ sealed partial class NetworkDebugSystem : GameObjectSystem<NetworkDebugSystem>
 		{
 			DrawPvs();
 		}
+
+		DrawDormancy();
 
 		if ( !_nextSampleTime )
 			return;
@@ -267,12 +274,12 @@ sealed partial class NetworkDebugSystem : GameObjectSystem<NetworkDebugSystem>
 
 	void DrawPvs()
 	{
-		using var _ = Gizmo.Scope();
+		using var _ = Gizmo.PushScope();
 		Gizmo.Draw.IgnoreDepth = true;
 
 		foreach ( var no in Scene.networkedObjects )
 		{
-			using ( Gizmo.ObjectScope( no, no.GameObject.WorldTransform ) )
+			using ( Gizmo.PushObjectScope( no, no.GameObject.WorldTransform ) )
 			{
 				var bounds = no.GameObject.GetLocalBounds();
 				var isVisible = Scene.IsPointVisibleToConnection( Connection.Local, no.GameObject.WorldPosition );

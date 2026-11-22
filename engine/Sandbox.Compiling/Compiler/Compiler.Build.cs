@@ -8,15 +8,6 @@ namespace Sandbox;
 
 partial class Compiler
 {
-	private static readonly DiagnosticDescriptor WhitelistRule = new DiagnosticDescriptor(
-		id: "SB1000",
-		title: "Whitelist Error",
-		messageFormat: "'{0}' is not allowed when whitelist is enabled",
-		helpLinkUri: "https://sbox.game/dev/doc/code/code-basics/api-whitelist/",
-		category: "Usage",
-		defaultSeverity: DiagnosticSeverity.Error,
-		isEnabledByDefault: true );
-
 	CodeArchive _currentArchive;
 
 	/// <summary>
@@ -26,14 +17,23 @@ partial class Compiler
 	private TaskCompletionSource<CompilerOutput> _compileTcs;
 
 	/// <summary>
-	/// Fill this compiler from a code archive
+	/// Fill this compiler from a code archive.
 	/// </summary>
 	public void UpdateFromArchive( CodeArchive a )
 	{
-		_currentArchive = a;
-
-		CopyReferencesFromArchive( a );
+		SetArchive( a );
 		MarkForRecompile();
+	}
+
+	/// <summary>
+	/// Reuse the installed assembly, retaining the archive for dependency rebuilds.
+	/// </summary>
+	public void UseCompiledArchive( CodeArchive a, byte[] installedAssembly, Compiler project )
+	{
+		SetArchive( a );
+
+		// A fast hotload can leave the earlier assembly resident. Its project knows which reference to use.
+		UpdateFromAssembly( project?.MetadataReference ?? Microsoft.CodeAnalysis.MetadataReference.CreateFromImage( installedAssembly ) );
 	}
 
 	/// <summary>
@@ -41,11 +41,12 @@ partial class Compiler
 	/// </summary>
 	internal void UpdateFromAssembly( byte[] bytes )
 	{
-		using ( var a_stream = new System.IO.MemoryStream( bytes ) )
-		{
-			MetadataReference = Microsoft.CodeAnalysis.MetadataReference.CreateFromStream( a_stream );
-		}
+		UpdateFromAssembly( Microsoft.CodeAnalysis.MetadataReference.CreateFromImage( bytes ) );
+	}
 
+	void UpdateFromAssembly( PortableExecutableReference reference )
+	{
+		MetadataReference = reference;
 		var version = Interlocked.Increment( ref compileCounter );
 		Output = new CompilerOutput( this )
 		{
@@ -119,12 +120,22 @@ partial class Compiler
 		}
 	}
 
-	void CopyReferencesFromArchive( CodeArchive a )
+	void SetArchive( CodeArchive a )
 	{
+		_currentArchive = a;
 		_references.Clear();
 
-		foreach ( var reference in a.References )
+		foreach ( var reference in a.References.ToArray() )
 		{
+			// Archives are untrusted - they arrive from a server or a downloaded package. Don't let one
+			// name a reference a project couldn't; FrameworkReferences will Assembly.Load anything.
+			if ( !_config.IsPermittedArchiveReference( reference ) )
+			{
+				log.Warning( $"Ignoring reference '{reference}' from code archive - not permitted" );
+				a.References.Remove( reference );
+				continue;
+			}
+
 			_references.Add( reference );
 		}
 	}
@@ -157,17 +168,17 @@ partial class Compiler
 		//
 		GetSyntaxTree( archive, parseOptions );
 
-		if ( GetGeneratedCode( output.Version, parseOptions ) is SyntaxTree generated )
+		if ( GetGeneratedCode( parseOptions ) is SyntaxTree generated )
 		{
 			archive.SyntaxTrees.Add( generated );
 		}
 
-		archive.SyntaxTrees.Sort( ( a, b ) => string.CompareOrdinal( a.FilePath, b.FilePath ) );
+		archive.SyntaxTrees.Sort( archive.CompareSourceOrder );
 
 		return archive;
 	}
 
-	void BuildInternal( IReadOnlyList<PortableExecutableReference> refs, CompilerOutput output, List<SyntaxTree> razorTrees )
+	async Task BuildInternal( IReadOnlyList<PortableExecutableReference> refs, CompilerOutput output, List<SyntaxTree> razorTrees )
 	{
 		var archive = output.Archive;
 		var releaseMode = archive.Configuration.ReleaseMode == ReleaseMode.Release;
@@ -187,16 +198,33 @@ partial class Compiler
 					.WithNullableContextOptions( conf.Nullables ? NullableContextOptions.Enable : NullableContextOptions.Disable )
 					.WithAllowUnsafe( conf.Unsafe );
 
-		CSharpCompilation compiler;
-
 		List<SyntaxTree> inputSyntaxTrees =
 		[
-			.. archive.SyntaxTrees, // from source files
+			.. archive.SyntaxTrees.Select( tree => StampAssembly( tree, output.Version ) ),
 			.. razorTrees // processed razor files
 		];
 
+		CSharpCompilation compiler = null;
+		var sourceUpgraded = false;
+		// Published archives need compatibility fixes in memory. Local projects apply the IDE
+		// code fix once, keeping automatic analysis and rewrites out of the hotload path.
+		if ( _currentArchive is not null )
+		{
+			var source = CSharpCompilation.Create( AssemblyName, inputSyntaxTrees, refs, options );
+			compiler = source;
+			try
+			{
+				compiler = await CodeUpgrader.CodeUpgrade.UpgradeAsync( source );
+			}
+			catch ( Exception e ) when ( e is not OperationCanceledException )
+			{
+				log.Warning( e, "Automatic code upgrade failed; compiling the original source." );
+			}
+			sourceUpgraded = compiler != source;
+		}
+
 		List<SyntaxTree> modifiedSyntaxTrees;
-		if ( incrementalState.HasState )
+		if ( incrementalState.HasState && !sourceUpgraded )
 		{
 			compiler = incrementalState.Compilation
 							.WithAssemblyName( AssemblyName )
@@ -213,7 +241,7 @@ partial class Compiler
 		}
 		else
 		{
-			compiler = CSharpCompilation.Create( AssemblyName, inputSyntaxTrees, refs, options );
+			compiler ??= CSharpCompilation.Create( AssemblyName, inputSyntaxTrees, refs, options );
 			modifiedSyntaxTrees = compiler.SyntaxTrees.ToList();
 		}
 
@@ -233,12 +261,11 @@ partial class Compiler
 			}
 		}
 
-		// check for blacklisted methods/types used in compilation
-		// we need this because the c# compiler will post optimize and use tons of blacklisted methods
-		// run this after generators because they can contain user inputs too
+		// Runs after generators but before emit, so compiler-emitted Unsafe calls aren't mistaken for
+		// user code. No tree is exempt, including the compiler-extra one.
 		if ( _config.Whitelist )
 		{
-			RunBlacklistWalker( compiler, modifiedSyntaxTrees, output );
+			RunAccessWalker( compiler, output );
 
 			// Errors, fail
 			if ( output.Diagnostics.Any( x => x.Severity == DiagnosticSeverity.Error ) )
@@ -259,27 +286,6 @@ partial class Compiler
 			{
 				output.Successful = true;
 
-				peStream.Seek( 0, System.IO.SeekOrigin.Begin );
-
-				if ( _config.Whitelist && Group.AccessControl is { } access )
-				{
-					var result = access.VerifyAssembly( peStream, out TrustedBinaryStream stream );
-					if ( !result.Success )
-					{
-						log.Error( "Whitelist violation(s), build unsuccessful." );
-
-						output.Successful = false;
-
-						foreach ( var error in result.WhitelistErrors )
-						{
-							foreach ( var location in error.Locations )
-							{
-								output.Diagnostics.Add( Diagnostic.Create( WhitelistRule, location.RoslynLocation ?? Location.None, error.Name ) );
-							}
-						}
-					}
-					stream?.Dispose();
-				}
 			}
 
 			output.AssemblyData = peStream.ToArray();
@@ -293,7 +299,12 @@ partial class Compiler
 			return;
 		}
 
-		incrementalState.Update( archive, inputSyntaxTrees, compiler );
+		// Code fixes can change declarations across files. Don't reuse generated trees derived
+		// from those edits on a later compile of the original source (including after the fix is no longer needed).
+		if ( sourceUpgraded )
+			incrementalState.Reset();
+		else
+			incrementalState.Update( archive, inputSyntaxTrees, compiler );
 
 		using ( var a_stream = new System.IO.MemoryStream( output.AssemblyData ) )
 		{

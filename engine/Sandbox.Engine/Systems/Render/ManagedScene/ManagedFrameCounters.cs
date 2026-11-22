@@ -2,15 +2,15 @@ namespace Sandbox.Rendering;
 
 /// <summary>
 /// What the managed scene renderer did in a frame, added up over every camera it rendered - native's scenesystem counters
-/// (<c>SceneSystemPerFrameStats_t</c>) don't see its draws, so the frame stats (the performance hub's Rendering tab) read these.
+/// (<c>SceneSystemPerFrameStats_t</c>) don't see its draws, so the frame stats (the dev tools's Rendering tab) read these.
 /// </summary>
 internal struct ManagedFrameCounters
 {
 	/// <summary>Camera frames the managed renderer rendered.</summary>
 	public int Renders;
 
-	/// <summary>Objects in the worlds rendered, those the main views drew, and those too small on screen to draw.</summary>
-	public int Objects, ObjectsVisible, ObjectsSizeCulled;
+	/// <summary>Objects in the worlds rendered, those submitted after CPU culling, those too small on screen, and those occlusion culled.</summary>
+	public int Objects, ObjectsVisible, ObjectsSizeCulled, ObjectsOcclusionCulled;
 
 	/// <summary>Instanced draws: forward (translucent included), depth prepass, translucent alone, shadow views, and custom objects drawing themselves.</summary>
 	public int Draws, DepthDraws, TranslucentDraws, ShadowDraws, CustomDraws;
@@ -33,12 +33,39 @@ internal struct ManagedFrameCounters
 	/// <summary>Main thread time, sync to submit.</summary>
 	public readonly double MainThreadMs => SyncMs + CollectMs + PrepareMs + SetupMs + RecordMs + SubmitMs;
 
+	/// <summary>One render's counters, from what Borealis counted (<see cref="global::Borealis.RenderSystem.Stats"/>).</summary>
+	internal static ManagedFrameCounters From( in global::Borealis.RenderStats stats ) => new()
+	{
+		Renders = 1,
+		Objects = stats.Objects,
+		ObjectsVisible = stats.ObjectsVisible,
+		ObjectsSizeCulled = stats.ObjectsSizeCulled,
+		ObjectsOcclusionCulled = stats.ObjectsOcclusionCulled,
+		Draws = stats.Draws,
+		DepthDraws = stats.DepthDraws,
+		TranslucentDraws = stats.TranslucentDraws,
+		ShadowDraws = stats.ShadowDraws,
+		CustomDraws = stats.CustomDraws,
+		Instances = stats.Instances,
+		Triangles = stats.Triangles,
+		Lights = stats.Lights,
+		ShadowViews = stats.ShadowViews,
+		CollectMs = stats.CollectMs,
+		PrepareMs = stats.PrepareMs,
+		SetupMs = stats.SetupMs,
+		RecordMs = stats.RecordMs,
+		RecordWaitMs = stats.RecordWaitMs,
+		SubmitMs = stats.SubmitMs,
+		WorkerRecordMs = stats.WorkerRecordMs,
+	};
+
 	internal void Add( in ManagedFrameCounters other )
 	{
 		Renders += other.Renders;
 		Objects += other.Objects;
 		ObjectsVisible += other.ObjectsVisible;
 		ObjectsSizeCulled += other.ObjectsSizeCulled;
+		ObjectsOcclusionCulled += other.ObjectsOcclusionCulled;
 		Draws += other.Draws;
 		DepthDraws += other.DepthDraws;
 		TranslucentDraws += other.TranslucentDraws;

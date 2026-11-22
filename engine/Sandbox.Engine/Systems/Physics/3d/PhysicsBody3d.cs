@@ -38,6 +38,14 @@ internal sealed partial class PhysicsBody3d : PhysicsBodyInternal, IHandle
 		}
 	}
 
+	internal PhysicsBody3d( PhysicsWorld3d world, in PhysicsBodySettings settings )
+	{
+		World = world;
+		_bodyType3d = settings.BodyType;
+		using var handle = IHandle.MakeNextHandle( this );
+		world.world.AddBody( settings );
+	}
+
 	/// <summary>
 	/// Position of this body in world coordinates.
 	/// </summary>
@@ -70,7 +78,11 @@ internal sealed partial class PhysicsBody3d : PhysicsBodyInternal, IHandle
 	public override Vector3 Velocity
 	{
 		get => native.GetLinearVelocity();
-		set => native.SetLinearVelocity( value );
+		set
+		{
+			native.SetLinearVelocity( value );
+			Dirty();
+		}
 	}
 
 	/// <summary>
@@ -79,7 +91,11 @@ internal sealed partial class PhysicsBody3d : PhysicsBodyInternal, IHandle
 	public override Vector3 AngularVelocity
 	{
 		get => native.GetAngularVelocity();
-		set => native.SetAngularVelocity( value );
+		set
+		{
+			native.SetAngularVelocity( value );
+			Dirty();
+		}
 	}
 
 	/// <summary>

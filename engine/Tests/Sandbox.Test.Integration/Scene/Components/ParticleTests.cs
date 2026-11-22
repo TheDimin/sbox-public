@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using Sandbox.Rendering;
 
 namespace SceneTests.Components;
@@ -6,6 +7,87 @@ namespace SceneTests.Components;
 [TestClass]
 public class ParticleEffectTest
 {
+	[TestMethod]
+	public void VelocityStretch_UploadsRibbonAndConservativeBounds()
+	{
+		var scene = new Scene();
+		using var scope = scene.Push();
+		var renderer = scene.CreateObject().AddComponent<ParticleSpriteRenderer>();
+		renderer.Sprite = Sprite.FromTexture( Texture.White );
+		renderer.VelocityStretch = true;
+		renderer.StretchTime = 0.5f;
+		renderer.StretchLengthLimits = new Vector2( 0, 20 );
+		var particle = renderer.ParticleEffect.Emit( new Vector3( 10, 0, 0 ), 0 );
+		particle.Velocity = new Vector3( 100, 0, 0 );
+		particle.Size = 4;
+		particle.Age = 1;
+		var upload = new SpriteBatchSceneObject.SpriteData[1];
+		IBatchedParticleSpriteRenderer batched = renderer;
+		var result = batched.ProcessParticlesDirectly( upload );
+		Assert.AreEqual( 1, result.SpriteCount );
+		Assert.AreEqual( Vector3.Zero, upload[0].Position );
+		Assert.AreEqual( new Vector2( 2, 10 ), upload[0].Scale );
+		Assert.IsTrue( ((SpriteBatchSceneObject.SpriteFlags)upload[0].RenderFlags).HasFlag( SpriteBatchSceneObject.SpriteFlags.VelocityStretch ) );
+		Assert.IsTrue( result.Bounds.Contains( new Vector3( -10, 0, 0 ) ) );
+		Assert.IsTrue( result.Bounds.Contains( new Vector3( 10, 0, 0 ) ) );
+		renderer.StretchFadeIn = 10;
+		batched.ProcessParticlesDirectly( upload );
+		Assert.AreEqual( 2.5f, upload[0].Scale.y, 0.001f );
+		renderer.StretchFadeIn = 100;
+		batched.ProcessParticlesDirectly( upload );
+		Assert.AreEqual( new Vector2( 0.25f, 0.25f ), upload[0].Scale, "A ribbon shorter than its width narrows to stay square, as Source's sprite trails do." );
+		particle.Velocity = Vector3.Zero;
+		Assert.AreEqual( 0, batched.ProcessParticlesDirectly( upload ).SpriteCount );
+		renderer.VelocityStretch = false;
+		Assert.AreEqual( 1, batched.ProcessParticlesDirectly( upload ).SpriteCount );
+		Assert.AreEqual( new Vector2( 2, 2 ), upload[0].Scale );
+		Assert.AreEqual( new Vector3( 10, 0, 0 ), upload[0].Position );
+	}
+
+	[TestMethod]
+	public void AngularVelocity_IntegratesAndRespectsPause()
+	{
+		var scene = new Scene();
+		using var scope = scene.Push();
+		var effect = scene.CreateObject().AddComponent<ParticleEffect>();
+		effect.Lifetime = 10;
+		effect.ApplyRotation = true;
+		effect.InitialRoll = 10;
+		effect.AngularVelocity = new Vector3( 0, 0, 90 );
+		var particle = effect.Emit( Vector3.Zero, 0 );
+		effect.Step( 0.5f );
+		Assert.AreEqual( 55, particle.Angles.roll, 0.001f );
+		effect.Paused = true;
+		effect.Step( 0.5f );
+		Assert.AreEqual( 55, particle.Angles.roll, 0.001f );
+		effect.Paused = false;
+		effect.Step( 0.5f );
+		Assert.AreEqual( 100, particle.Angles.roll, 0.001f );
+	}
+
+	[TestMethod]
+	public void DirectionalSphere_RotatesPositionAndVelocity()
+	{
+		var scene = new Scene();
+		using var scope = scene.Push();
+		var go = scene.CreateObject();
+		go.WorldRotation = Rotation.FromYaw( 90 );
+		var effect = go.AddComponent<ParticleEffect>();
+		effect.Lifetime = 10;
+		var emitter = go.AddComponent<ParticleSphereEmitter>();
+		emitter.Radius = 10;
+		emitter.Velocity = 100;
+		emitter.DistanceBias = new Vector3( 1, 0, 0 );
+		emitter.LocalDirection = true;
+		for ( var i = 0; i < 20; i++ ) emitter.Emit( effect );
+		foreach ( var particle in effect.Particles )
+		{
+			Assert.AreEqual( 0, particle.Position.x, 0.001f );
+			Assert.AreEqual( 0, particle.Velocity.x, 0.001f );
+			Assert.AreEqual( particle.Position.y * 10, particle.Velocity.y, 0.001f );
+		}
+	}
+
 	/// <summary>
 	/// A box emitter with an initial burst should spawn exactly that many particles on the
 	/// first scene tick, because OnBurst emits GetBurstCount() particles in one go, and a
@@ -659,6 +741,241 @@ public class ParticleEffectTest
 		scene.GameTick();
 
 		Assert.AreEqual( 10, effect.Particles.Count, "ResetEmitters should re-arm the burst so it fires again" );
+	}
+
+	/// <summary>
+	/// Particles that expire mid-step are swept out in PostStep. Survivors keep their emission
+	/// order and every expired particle is destroyed exactly once.
+	/// </summary>
+	[TestMethod]
+	public void DeadParticles_SweptInOrder_DestroyedOnce()
+	{
+		var scene = new Scene();
+		using var sceneScope = scene.Push();
+
+		var go = scene.CreateObject();
+		var effect = go.Components.Create<ParticleEffect>();
+		effect.Lifetime = 10.0f;
+
+		var emitter = go.Components.Create<ParticleBoxEmitter>();
+		emitter.Burst = 10.0f;
+		emitter.Rate = 0.0f;
+		emitter.Loop = false;
+		emitter.ResetEmitter();
+
+		scene.GameTick();
+		Assert.AreEqual( 10, effect.Particles.Count );
+
+		var destroyed = new int[10];
+		effect.OnParticleDestroyed += p => destroyed[p.Get<int>( "i" )]++;
+
+		for ( int i = 0; i < effect.Particles.Count; i++ )
+		{
+			var p = effect.Particles[i];
+			p.Set( "i", i );
+
+			// Past the end of a 10s life, so the next update marks it dead
+			if ( i % 2 == 0 )
+				p.Age = 100.0f;
+		}
+
+		for ( int i = 0; i < 20; i++ ) scene.GameTick();
+
+		CollectionAssert.AreEqual( new[] { 1, 3, 5, 7, 9 }, effect.Particles.Select( p => p.Get<int>( "i" ) ).ToArray(), "Survivors should keep their order" );
+		CollectionAssert.AreEqual( new[] { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 }, destroyed, "Each expired particle should be destroyed exactly once" );
+	}
+
+	/// <summary>
+	/// Lifetime changes apply to live particles and DeathTime is recalculated every step.
+	/// </summary>
+	[TestMethod]
+	public void LifetimeChange_AppliesToLiveParticles()
+	{
+		var scene = new Scene();
+		using var sceneScope = scene.Push();
+
+		var go = scene.CreateObject();
+		var effect = go.Components.Create<ParticleEffect>();
+		effect.Lifetime = 10.0f;
+
+		var emitter = go.Components.Create<ParticleBoxEmitter>();
+		emitter.Burst = 10.0f;
+		emitter.Rate = 0.0f;
+		emitter.Loop = false;
+		emitter.ResetEmitter();
+
+		scene.GameTick();
+		Assert.AreEqual( 10, effect.Particles.Count );
+
+		var changed = false;
+		effect.OnPreStep += _ =>
+		{
+			if ( changed ) return;
+			effect.Lifetime = 2.0f;
+			changed = true;
+		};
+
+		scene.GameTick();
+
+		foreach ( var p in effect.Particles )
+			Assert.AreEqual( p.BornTime + 2.0f, p.DeathTime, 0.0001f, "Live particles should pick up the new lifetime on the step it changed" );
+
+		var custom = effect.Particles[0];
+		custom.DeathTime = custom.BornTime + 5.0f;
+
+		scene.GameTick();
+
+		Assert.AreEqual( custom.BornTime + 2.0f, custom.DeathTime, 0.0001f, "Lifetime should be re-evaluated on every step" );
+	}
+
+	[TestMethod]
+	public void Clear_DestroyCallbacksSeeRemainingParticles()
+	{
+		var scene = new Scene();
+		using var sceneScope = scene.Push();
+		var effect = scene.CreateObject().Components.Create<ParticleEffect>();
+		effect.Emit( Vector3.Zero, 0 );
+		effect.Emit( Vector3.Zero, 0 );
+		var counts = new List<int>();
+		effect.OnParticleDestroyed += p => counts.Add( effect.Particles.Count );
+
+		effect.Clear();
+
+		CollectionAssert.AreEqual( new[] { 2, 1 }, counts );
+		Assert.AreEqual( 0, effect.Particles.Count );
+	}
+
+	[TestMethod]
+	public void Step_UsesChangesMadeByParticleCallback()
+	{
+		var scene = new Scene();
+		using var sceneScope = scene.Push();
+		var effect = scene.CreateObject().Components.Create<ParticleEffect>();
+		effect.Lifetime = 10;
+		effect.ForceDirection = new Vector3( 10, 0, 0 );
+		effect.ForceSpace = ParticleEffect.SimulationSpace.World;
+		var p = effect.Emit( Vector3.Zero, 0 );
+		p.Velocity = Vector3.Zero;
+		effect.OnStep += ( particle, delta ) =>
+		{
+			effect.Force = true;
+			effect.ConstantMovement = new Vector3( 0, 10, 0 );
+		};
+
+		effect.PreStep( 0.1f );
+		effect.UpdateParticle( 0 );
+		Assert.IsTrue( p.Velocity.x > 0, "Force enabled by OnStep should apply immediately" );
+		Assert.IsTrue( p.Position.y > 0, "Movement enabled by OnStep should apply immediately" );
+	}
+
+	[TestMethod]
+	public void Step_AppliesSmallNonzeroDampingAndForce()
+	{
+		var scene = new Scene();
+		using var sceneScope = scene.Push();
+		var effect = scene.CreateObject().Components.Create<ParticleEffect>();
+		effect.Lifetime = 10;
+		effect.Damping = 0.00005f;
+		effect.Force = true;
+		effect.ForceScale = 0.00005f;
+		effect.ForceDirection = new Vector3( 0, 100, 0 );
+		effect.ForceSpace = ParticleEffect.SimulationSpace.World;
+		var p = effect.Emit( Vector3.Zero, 0 );
+		p.Velocity = new Vector3( 10, 0, 0 );
+
+		effect.PreStep( 0.1f );
+		effect.UpdateParticle( 0 );
+		Assert.IsTrue( p.Velocity.x < 10, "Small damping should still reduce velocity" );
+		Assert.IsTrue( p.Velocity.y > 0, "Small force should still affect velocity" );
+	}
+
+	/// <summary>
+	/// Workers fold every particle into the bounds maxima at the same time, so a smaller value must never overwrite a
+	/// larger one another worker wrote in between. Ascending values make nearly every update a new max.
+	/// </summary>
+	[TestMethod]
+	public void InterlockedMax_KeepsLargestValueUnderContention()
+	{
+		const int count = 2_000_000;
+
+		for ( int trial = 0; trial < 50; trial++ )
+		{
+			long max = 0;
+			System.Threading.Tasks.Parallel.For( 0, count, i => ParticleEffect.InterlockedMax( ref max, i ) );
+			Assert.AreEqual( count - 1, max, $"trial {trial}" );
+		}
+	}
+
+	[TestMethod]
+	public void Expiry_CallbackCanTerminateAndReuseAnotherDeadParticle()
+	{
+		var scene = new Scene();
+		using var sceneScope = scene.Push();
+		var effect = scene.CreateObject().Components.Create<ParticleEffect>();
+		var first = effect.Emit( Vector3.Zero, 0 );
+		var second = effect.Emit( Vector3.Zero, 0 );
+		first.IsDead = true;
+		second.IsDead = true;
+		var counts = new List<int>();
+		Particle replacement = null;
+		effect.OnParticleDestroyed += p =>
+		{
+			counts.Add( effect.Particles.Count );
+			if ( p != first ) return;
+			effect.Terminate( first ); // Re-entering the current release must be harmless.
+			effect.Terminate( second );
+			replacement = effect.Emit( Vector3.Zero, 0 );
+		};
+
+		effect.PostStep();
+
+		CollectionAssert.AreEqual( new[] { 2, 2 }, counts );
+		Assert.AreEqual( 1, effect.Particles.Count );
+		Assert.AreSame( replacement, effect.Particles[0] );
+		Assert.IsFalse( scene.ParticlePool.Contains( replacement ), "A live replacement must not be pooled" );
+	}
+
+	/// <summary>
+	/// A warm effect that emits and expires particles every step reuses pooled particles and its own
+	/// buffers, so the step allocates nothing. The step is driven serially on this thread (as
+	/// ParticleGameSystem does, minus the Parallel.ForEach) because a whole scene tick measured across
+	/// every thread picks up unrelated engine allocations and never settles under a loaded test run.
+	/// </summary>
+	[TestMethod]
+	[TestCategory( Allocations.Category )]
+	public void Step_DoesNotAllocateWhenWarm()
+	{
+		var scene = new Scene();
+		using var sceneScope = scene.Push();
+
+		var go = scene.CreateObject();
+		var effect = go.Components.Create<ParticleEffect>();
+		effect.Lifetime = 0.5f;
+		effect.ApplyColor = true;
+		effect.ApplyShape = true;
+		effect.Scale = new ParticleFloat
+		{
+			Type = ParticleFloat.ValueType.Curve,
+			CurveA = Curve.Linear,
+			Evaluation = ParticleFloat.EvaluationType.Life
+		};
+
+		// 13 new particles per 1/30s step living 0.5s: ~200 live, ~13 expiring every step
+		void Step()
+		{
+			for ( int i = 0; i < 13; i++ ) effect.Emit( Vector3.Zero, i / 13.0f );
+
+			effect.PreStep( 1.0f / 30.0f );
+			for ( int i = 0; i < effect.Particles.Count; i++ ) effect.UpdateParticle( i );
+			effect.SpawnDeferredParticleCollisionPrefabs();
+			effect.ApplyDeferredParticleForces();
+			effect.PostStep();
+		}
+
+		for ( int i = 0; i < 30; i++ ) Step();
+		Assert.IsTrue( effect.Particles.Count is > 150 and < 250, $"Effect should be emitting and expiring, has {effect.Particles.Count}" );
+
+		Allocations.AssertSettles( "particle step", Step );
 	}
 
 	/// <summary>

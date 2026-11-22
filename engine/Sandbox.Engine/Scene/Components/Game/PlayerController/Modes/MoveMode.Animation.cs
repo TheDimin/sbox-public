@@ -1,5 +1,7 @@
 ﻿namespace Sandbox.Movement;
 
+#pragma warning disable CS0618
+
 partial class MoveMode
 {
 	/// <summary>
@@ -7,17 +9,14 @@ partial class MoveMode
 	/// </summary>
 	public virtual void UpdateAnimator( SkinnedModelRenderer renderer )
 	{
-		// Animation parameters
+		var oldRotation = renderer.WorldRotation;
+		OnRotateRenderBody( renderer );
+		UpdateRotationSpeed( renderer, oldRotation );
 
 		OnUpdateAnimatorVelocity( renderer );
 		OnUpdateAnimatorState( renderer );
+
 		OnUpdateAnimatorLookDirection( renderer );
-
-		UpdateRotationSpeed( renderer );
-
-		// Renderer transform
-
-		OnRotateRenderBody( renderer );
 	}
 
 	Vector3.SmoothDamped smoothedMove = new Vector3.SmoothDamped( 0, 0, 0.5f );
@@ -66,8 +65,8 @@ partial class MoveMode
 			// convert to model space
 			skid = GetLocalVelocity( rot, skid );
 
-			renderer.Set( "skid_x", (skid.x / 400.0f) );
-			renderer.Set( "skid_y", (skid.y / 400.0f) );
+			SetAnimatorParameter( renderer, "skid_x", skid.x / 400.0f );
+			SetAnimatorParameter( renderer, "skid_y", skid.y / 400.0f );
 		}
 
 		// move the legs
@@ -85,20 +84,20 @@ partial class MoveMode
 
 			smoothed = GetLocalVelocity( rot, smoothed );
 
-			renderer.Set( "move_groundspeed", smoothed.WithZ( 0f ).Length );
-			renderer.Set( "move_x", smoothed.x );
-			renderer.Set( "move_y", smoothed.y );
-			renderer.Set( "move_z", smoothed.z );
+			SetAnimatorParameter( renderer, "move_groundspeed", smoothed.WithZ( 0f ).Length );
+			SetAnimatorParameter( renderer, "move_x", smoothed.x );
+			SetAnimatorParameter( renderer, "move_y", smoothed.y );
+			SetAnimatorParameter( renderer, "move_z", smoothed.z );
 		}
 
 		// the player's wish
 		{
 			var local = GetLocalVelocity( rot, wishVel );
 
-			renderer.Set( "wish_groundspeed", wishVel.WithZ( 0f ).Length );
-			renderer.Set( "wish_x", local.x );
-			renderer.Set( "wish_y", local.y );
-			renderer.Set( "wish_z", local.z );
+			SetAnimatorParameter( renderer, "wish_groundspeed", wishVel.WithZ( 0f ).Length );
+			SetAnimatorParameter( renderer, "wish_x", local.x );
+			SetAnimatorParameter( renderer, "wish_y", local.y );
+			SetAnimatorParameter( renderer, "wish_z", local.z );
 		}
 
 	}
@@ -128,10 +127,13 @@ partial class MoveMode
 	/// </summary>
 	protected virtual void OnUpdateAnimatorState( SkinnedModelRenderer renderer )
 	{
-		renderer.Set( "sit", 0 );
-		renderer.Set( "b_swim", Controller.IsSwimming );
-		renderer.Set( "b_climb", Controller.IsClimbing );
-		renderer.Set( "b_grounded", Controller.IsOnGround || Controller.IsClimbing );
+		if ( renderer.Animation.Graph is not null )
+			renderer.Animation.Parameters.TrySet( "sit", "not_sitting" );
+		else
+			SetAnimatorParameter( renderer, "sit", 0 );
+		SetAnimatorParameter( renderer, "b_swim", Controller.IsSwimming );
+		SetAnimatorParameter( renderer, "b_climb", Controller.IsClimbing );
+		SetAnimatorParameter( renderer, "b_grounded", Controller.IsOnGround || Controller.IsClimbing );
 
 		var duck = Controller.Headroom.Remap( 25, 0, 0, 0.5f, true );
 
@@ -141,7 +143,7 @@ partial class MoveMode
 			duck += 1.0f;
 		}
 
-		renderer.Set( "duck", duck );
+		SetAnimatorParameter( renderer, "duck", duck );
 	}
 
 	/// <summary>
@@ -149,6 +151,12 @@ partial class MoveMode
 	/// </summary>
 	protected virtual void OnUpdateAnimatorLookDirection( SkinnedModelRenderer renderer )
 	{
+		if ( renderer.Animation.Graph is not null )
+		{
+			OnUpdateAnimationGraph( renderer );
+			return;
+		}
+
 		var eyesForward = Controller.EyeTransform.Forward;
 
 		renderer.SetLookDirection( "aim_eyes", eyesForward, Controller.AimStrengthEyes );
@@ -158,6 +166,7 @@ partial class MoveMode
 
 	/// <summary>
 	/// Updates the <see cref="Component.WorldRotation"/> of <paramref name="renderer"/>.
+	/// Called before movement and aim parameters are derived.
 	/// </summary>
 	protected virtual void OnRotateRenderBody( SkinnedModelRenderer renderer )
 	{
@@ -169,16 +178,14 @@ partial class MoveMode
 		var targetAngle = Rotation.FromYaw( eyeAngles.yaw );
 		var velocity = Controller.WishVelocity.WithZ( 0 );
 
-		var rotateDifference = renderer.WorldRotation.Distance( targetAngle );
-		var oldRotation = renderer.WorldRotation;
+		var yawOffset = MathX.DeltaDegrees( eyeAngles.yaw, renderer.WorldRotation.Angles().yaw );
+		var angleLimit = Controller.RotationAngleLimit.Clamp( 0f, 180f );
 
 		// We're over the limit - snap it 
-		if ( rotateDifference > Controller.RotationAngleLimit )
+		if ( MathF.Abs( yawOffset ) > angleLimit )
 		{
-			var delta = 0.999f - Controller.RotationAngleLimit / rotateDifference;
-			var newRotation = Rotation.Lerp( renderer.WorldRotation, targetAngle, delta );
-
-			renderer.WorldRotation = newRotation;
+			// Clamp yaw directly. Quaternion lerp doesn't preserve an angular limit
+			renderer.WorldRotation = Rotation.FromYaw( eyeAngles.yaw + yawOffset.Clamp( -angleLimit, angleLimit ) );
 		}
 
 		// Otherwise only rotate while moving
@@ -189,39 +196,55 @@ partial class MoveMode
 			renderer.WorldRotation = Rotation.Slerp( renderer.WorldRotation, targetAngle,
 				Time.Delta * 2.0f * Controller.RotationSpeed * velocity.Length.Remap( 0, 100 ) );
 		}
-
-		AddRotationSpeed( oldRotation, renderer.WorldRotation );
 	}
 
-	private const float RotationSpeedUpdatePeriod = 0.1f;
+	private const float RotationAnimationDecayTime = 0.12f;
 
 	private float _animRotationSpeed;
-	private TimeSince _timeSinceRotationSpeedUpdate;
+	private SkinnedModelRenderer _rotationSpeedRenderer;
 
-	private void AddRotationSpeed( Rotation oldRotation, Rotation newRotation )
+	private void UpdateRotationSpeed( SkinnedModelRenderer renderer, Rotation oldRotation )
 	{
-		// TODO: this assumes we're always working with exactly one Renderer
+		if ( _rotationSpeedRenderer != renderer || Time.Delta <= 0 )
+			_animRotationSpeed = 0;
+		_rotationSpeedRenderer = renderer;
 
-		var oldYaw = oldRotation.Angles().yaw;
-		var newYaw = newRotation.Angles().yaw;
+		if ( Time.Delta > 0 )
+		{
+			var deltaYaw = MathX.DeltaDegrees( renderer.WorldRotation.Angles().yaw, oldRotation.Angles().yaw );
+			var speed = (deltaYaw / Time.Delta).Clamp( -450f, 450f );
 
-		// TODO: why is this backwards?
+			_animRotationSpeed *= MathF.Exp( -Time.Delta / RotationAnimationDecayTime );
+			if ( MathF.Abs( speed ) > MathF.Abs( _animRotationSpeed ) || speed * _animRotationSpeed < 0 )
+				_animRotationSpeed = speed;
+			if ( MathF.Abs( _animRotationSpeed ) < 0.1f ) _animRotationSpeed = 0;
+		}
 
-		var deltaYaw = MathX.DeltaDegrees( newYaw, oldYaw );
-
-		_animRotationSpeed = (_animRotationSpeed + deltaYaw).Clamp( -90f, 90f );
+		SetAnimatorParameter( renderer, "move_rotationspeed", _animRotationSpeed );
 	}
 
-	private void UpdateRotationSpeed( SkinnedModelRenderer renderer )
+	protected static void SetAnimatorParameter( SkinnedModelRenderer renderer, string name, float value )
 	{
-		if ( _timeSinceRotationSpeedUpdate < RotationSpeedUpdatePeriod ) return;
+		if ( renderer.Animation.Graph is not null )
+			renderer.Animation.Parameters.TrySet( name, value );
+		else
+			renderer.Set( name, value );
+	}
 
-		// TODO: why 5?
+	protected static void SetAnimatorParameter( SkinnedModelRenderer renderer, string name, bool value )
+	{
+		if ( renderer.Animation.Graph is not null )
+			renderer.Animation.Parameters.TrySet( name, value );
+		else
+			renderer.Set( name, value );
+	}
 
-		renderer.Set( "move_rotationspeed", _animRotationSpeed * 5f );
-
-		_timeSinceRotationSpeedUpdate = 0f;
-		_animRotationSpeed = 0f;
+	protected static void SetAnimatorParameter( SkinnedModelRenderer renderer, string name, int value )
+	{
+		if ( renderer.Animation.Graph is not null )
+			renderer.Animation.Parameters.TrySet( name, value );
+		else
+			renderer.Set( name, value );
 	}
 
 }

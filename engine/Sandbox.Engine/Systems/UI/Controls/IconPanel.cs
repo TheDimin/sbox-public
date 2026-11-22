@@ -9,7 +9,7 @@ using static Sandbox.Internal.GlobalGameNamespace;
 namespace Sandbox.UI
 {
 	/// <summary>
-	/// A panel containing an icon, typically a <a href="https://fonts.google.com/icons">material icon</a>.
+	/// A panel containing an icon, typically a <a href="https://fonts.google.com/icons?icon.set=Material+Icons">material icon</a>.
 	/// </summary>
 	[Library( "IconPanel" ), Alias( "icon", "i" )]
 	[StyleSheet.Inline( "iconpanel", Styles )]
@@ -18,7 +18,7 @@ namespace Sandbox.UI
 		const string Styles = """
 			IconPanel
 			{
-				font-family: Material Icons;
+				font-family: Material Symbols Outlined;
 				text-transform: none;
 				letter-spacing: 0px;
 			}

@@ -1,4 +1,3 @@
-using NativeEngine;
 using System.Text.Json;
 
 namespace Sandbox.Diagnostics;
@@ -58,6 +57,17 @@ internal sealed record GpuFrameTimeline( string FrameId, int DroppedEvents, GpuF
 		public double DeviationMs { get; init; }
 		public int CommandBuffers { get; init; }
 		public bool WaitForAcquire { get; init; }
+
+		/// <summary>
+		/// A host submit's <see cref="System.Diagnostics.Stopwatch"/> time, sampled with the device clock at the submit,
+		/// or 0 where it couldn't be.
+		/// </summary>
+		public long HostTicks { get; init; }
+
+		/// <summary>
+		/// A host submit's tag (<c>IRenderDevice::SetSubmitTag</c>): which caller's frame the submission was, or 0.
+		/// </summary>
+		public long SubmitTag { get; init; }
 	}
 
 	/// <summary>
@@ -70,68 +80,27 @@ internal sealed record GpuFrameTimeline( string FrameId, int DroppedEvents, GpuF
 			return null;
 		}
 
-		int count = CSceneSystem.GetGpuTimestampEventCount();
-		if ( count == 0 )
+		// Borealis.Gpu's passes of the last read frame, nested as the profiler's rows are
+		var scopes = GpuProfilerStats.Scopes;
+		var rows = GpuProfilerStats.Rows;
+		if ( scopes.Length == 0 || scopes.Length != rows.Length )
 		{
 			return null;
 		}
 
+		int count = scopes.Length;
 		var events = new Event[Math.Min( count, MaxEvents )];
 		for ( int i = 0; i < events.Length; i++ )
 		{
-			var name = CSceneSystem.GetGpuTimestampEvent( i, out var data );
-			if ( name is null )
-			{
-				return null;
-			}
-
-			var start = data.StartMs;
-			var end = data.EndMs;
-			var queue = data.Queue;
-
-			// Reject corrupt or discontinuous clocks instead of publishing a misleading trace.
-			if ( !double.IsFinite( start ) || !double.IsFinite( end ) || start < 0 || end < start || end > 10_000 || queue is < 0 or > 1 )
-			{
-				return null;
-			}
-
-			if ( name.Length > 128 )
-			{
-				name = name[..128];
-			}
-
-			var parent = data.Parent;
+			var scope = scopes[i];
+			var name = scope.Name.Length > 128 ? scope.Name[..128] : scope.Name;
+			var parent = rows[i].Parent;
 			if ( parent < 0 || parent >= events.Length || parent == i )
 			{
 				parent = -1;
 			}
 
-			var kind = data.Kind;
-			if ( kind is < 0 or > 3 )
-			{
-				return null;
-			}
-
-			var waitMask = data.WaitStageMask;
-			events[i] = new( name, parent, queue == 1 ? "async-compute" : "graphics", start, end )
-			{
-				Kind = kind switch
-				{
-					1 => "submission",
-					3 => "host-submit",
-					_ => "pass"
-				},
-				SubmissionId = Id( data.SubmissionId ),
-				EndSubmissionId = Id( data.EndSubmissionId ),
-				WaitForSubmissionId = Id( data.WaitForSubmissionId ),
-				WaitStage = waitMask == 0 ? null
-					: waitMask == 0x800 ? "compute-shader"
-					: waitMask == 0x10000 ? "all-commands"
-					: $"0x{waitMask:X}",
-				DeviationMs = data.DeviationMs,
-				CommandBuffers = data.CommandBuffers,
-				WaitForAcquire = data.WaitForAcquire
-			};
+			events[i] = new( name, parent, "graphics", scope.Start, scope.End ) { Kind = "pass" };
 		}
 
 		if ( !BuildPaths( events ) )
@@ -196,5 +165,64 @@ internal sealed record GpuFrameTimeline( string FrameId, int DroppedEvents, GpuF
 		return visited == indices.Length; // A cycle has no reachable root.
 	}
 
-	static string Id( ulong value ) => value == 0 ? null : value.ToString( System.Globalization.CultureInfo.InvariantCulture );
+	/// <summary>
+	/// The frame's events with each pass recorded in pieces back to back made one, from its first piece's start to its
+	/// last's end, the pieces' children under it, and the paths rebuilt. The managed renderer records a layer in a piece
+	/// per recording thread, each its own scope, and how many there are changes frame to frame - shown apart, a layer was
+	/// a row of slivers that never held still. Pieces are consecutive siblings of one name on one queue.
+	/// </summary>
+	internal static Event[] MergePieces( Event[] events )
+	{
+		var into = new int[events.Length];
+		var start = new double[events.Length];
+		var end = new double[events.Length];
+		for ( int i = 0; i < events.Length; i++ )
+		{
+			into[i] = i;
+			start[i] = events[i].StartMs;
+			end[i] = events[i].EndMs;
+		}
+
+		// Parents start no later than their children, so each is placed before what's under it
+		var order = Enumerable.Range( 0, events.Length ).Where( i => events[i].Kind == "pass" )
+			.OrderBy( i => events[i].StartMs ).ThenByDescending( i => events[i].EndMs ).ThenBy( i => i );
+
+		var lastChild = new Dictionary<(int Parent, string Queue), int>();
+		foreach ( var i in order )
+		{
+			var e = events[i];
+			var parent = e.Parent >= 0 ? into[e.Parent] : -1;
+			if ( lastChild.TryGetValue( (parent, e.Queue), out var previous ) && events[previous].Name == e.Name )
+			{
+				into[i] = previous;
+				start[previous] = Math.Min( start[previous], e.StartMs );
+				end[previous] = Math.Max( end[previous], e.EndMs );
+				continue;
+			}
+
+			lastChild[(parent, e.Queue)] = i;
+		}
+
+		var index = new int[events.Length];
+		var kept = new List<Event>( events.Length );
+		for ( int i = 0; i < events.Length; i++ )
+		{
+			index[i] = -1;
+			if ( into[i] != i ) continue;
+			index[i] = kept.Count;
+			kept.Add( events[i] );
+		}
+
+		var merged = kept.ToArray();
+		for ( int i = 0; i < events.Length; i++ )
+		{
+			if ( index[i] < 0 ) continue;
+			var e = events[i];
+			var parent = e.Parent >= 0 ? index[into[e.Parent]] : -1;
+			merged[index[i]] = e with { Parent = parent, StartMs = start[i], EndMs = end[i] };
+		}
+
+		return BuildPaths( merged ) ? merged : events;
+	}
+
 }

@@ -45,9 +45,7 @@ void AdjustAlphaToCoverage( inout Material m )
     #if ( S_ALPHA_TEST )
     {
         float eps = 1.0f/255.0f;
-        
-        // Clip first to try to kill the wave if we're in an area of all zero
-        clip(m.Opacity - eps);
+        float flRawOpacity = m.Opacity;
 
         // Shaders with custom material inputs have no known alpha texture, so no mip compensation.
         #ifdef MATERIAL_ALPHA_TEXTURE
@@ -58,7 +56,9 @@ void AdjustAlphaToCoverage( inout Material m )
 
         m.Opacity = AdjustOpacityForAlphaToCoverage( m.Opacity, g_flAlphaTestReference, g_flAntiAliasedEdgeStrength, m.TextureCoords.xy, vAlphaTextureSize );
 
-        clip(m.Opacity - 0.000001); // Second clipping pass after alpha to coverage adjustment
+        // Clip only after the derivatives above: discard is OpKill, which leaves ddx/fwidth undefined
+        // on partly killed quads, so the depth prepass and the EQUAL colour pass would disagree on coverage
+        clip( min( flRawOpacity - eps, m.Opacity - 0.000001 ) );
     }
     #endif
 }
@@ -126,6 +126,11 @@ struct ShadingModelStandard
         // Do our magic alpha to coverage adjustment
         AdjustAlphaToCoverage( m );
 
+        // Depth mode writes only normals and roughness, or nothing but alpha to coverage. Before lighting: its cluster walks
+        // are wave ops, which the compiler keeps even when their result is dead
+        if( DepthNormals::WantsDepthNormals() )
+            return DepthNormals::Output( m.Normal, m.Roughness, m.Opacity );
+
         LightingTerms_t lightingTerms = InitLightingTerms();
         CombinerInput combinerInput = MaterialToCombinerInput( m );
 
@@ -148,13 +153,15 @@ struct ShadingModelStandard
             
             float3 vDiffuse = ( ( lightingTerms.vDiffuse.rgb + lightingTerms.vIndirectDiffuse.rgb ) * combinerInput.vDiffuseColor.rgb ) + combinerInput.vEmissive.rgb;
             float3 vSpecular = lightingTerms.vSpecular.rgb + lightingTerms.vIndirectSpecular.rgb;
+
+            // A surface's own per-light terms, summed by the light loop (sbox/surface_passes.slangh), as emission
+            #ifdef SURFACE_LIGHT_HOOK
+                vDiffuse += SurfaceLightTotal();
+            #endif
             
             color = float4( vDiffuse + vSpecular, m.Opacity );
         }
 
-        //
-        if( DepthNormals::WantsDepthNormals() )
-            return DepthNormals::Output( m.Normal, m.Roughness, color.a );
 
         if ( g_bWireframeMode )
             return g_vWireframeColor;

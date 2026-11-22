@@ -1,3 +1,4 @@
+using Sandbox.Engine;
 using System.Text.Json.Nodes;
 
 namespace Sandbox;
@@ -6,6 +7,9 @@ namespace Sandbox;
 public partial class Scene
 {
 	Dictionary<Type, GameObjectSystem> systems = new();
+	// Rebuilt after reference migration: hotload can add or remove the provider interface.
+	[SkipHotload]
+	readonly List<GameObjectSystem.ITraceProvider> traceProviders = new();
 
 	/// <summary>
 	/// Call dispose on all installed hooks
@@ -29,19 +33,21 @@ public partial class Scene
 		}
 
 		systems.Clear();
+		traceProviders.Clear();
 	}
 
 	/// <summary>
 	/// Find all types of SceneHook, create an instance of each one and install it.
 	/// </summary>
-	void InitSystems()
+	void InitSystems( bool includeGameSystems )
 	{
 		using ( Push() )
 		{
 			ShutdownSystems();
 
-			var found = Game.TypeLibrary.GetTypes<GameObjectSystem>()
+			var found = GlobalContext.Current.TypeLibrary.GetTypes<GameObjectSystem>()
 				.Where( x => !x.IsAbstract )
+				.Where( x => includeGameSystems || x.TargetType.Assembly == typeof( Scene ).Assembly )
 				.ToArray();
 
 			foreach ( var f in found )
@@ -52,6 +58,7 @@ public partial class Scene
 				ApplyGameObjectSystemConfig( e );
 
 				systems[e.GetType()] = e;
+				if ( e is GameObjectSystem.ITraceProvider traceProvider ) traceProviders.Add( traceProvider );
 				AddObjectToDirectory( e );
 			}
 		}
@@ -72,15 +79,23 @@ public partial class Scene
 
 			foreach ( var type in types )
 			{
-				var e = Game.TypeLibrary.GetType( type )?.Create<GameObjectSystem>( [this] );
+				var e = GlobalContext.Current.TypeLibrary.GetType( type )?.Create<GameObjectSystem>( [this] );
 				if ( e is null ) continue;
 
 				ApplyGameObjectSystemConfig( e );
 
 				systems[e.GetType()] = e;
+				if ( e is GameObjectSystem.ITraceProvider traceProvider ) traceProviders.Add( traceProvider );
 				AddObjectToDirectory( e );
 			}
 		}
+	}
+
+	internal void RebuildTraceProviders()
+	{
+		traceProviders.Clear();
+		foreach ( var system in systems.Values )
+			if ( system is GameObjectSystem.ITraceProvider provider ) traceProviders.Add( provider );
 	}
 
 	/// <summary>
@@ -91,7 +106,7 @@ public partial class Scene
 	/// </summary>
 	void ApplyGameObjectSystemConfig( GameObjectSystem system )
 	{
-		var systemType = Game.TypeLibrary.GetType( system.GetType() );
+		var systemType = GlobalContext.Current.TypeLibrary.GetType( system.GetType() );
 		if ( systemType is null ) return;
 
 		using ( Push() )

@@ -1,4 +1,5 @@
-﻿using Sandbox.Network;
+﻿using Sandbox.Engine;
+using Sandbox.Network;
 
 namespace Sandbox;
 
@@ -35,7 +36,12 @@ internal class NetworkTable<T> : INetworkDeltaSnapshot, INetworkProperty, INetwo
 		if ( !CanWriteChanges() )
 			return;
 
+		var hadEntries = Table.Count > 0 || Keys.Count > 0;
+
 		InternalClear();
+
+		if ( hadEntries && Parent is INetworkWakeable networkWakeable )
+			networkWakeable.MarkDirty();
 	}
 
 	void InternalClear()
@@ -65,6 +71,9 @@ internal class NetworkTable<T> : INetworkDeltaSnapshot, INetworkProperty, INetwo
 
 		OnValueChanged( slot, value );
 
+		if ( Parent is INetworkWakeable networkWakeable )
+			networkWakeable.MarkDirty();
+
 		if ( !Keys.Add( slot ) )
 			return;
 
@@ -88,7 +97,7 @@ internal class NetworkTable<T> : INetworkDeltaSnapshot, INetworkProperty, INetwo
 		if ( Serialized.TryGetValue( key, out var bytes ) )
 			return bytes;
 
-		bytes = Game.TypeLibrary.ToBytes( Table[key] );
+		bytes = GlobalContext.Current.TypeLibrary.ToBytes( Table[key] );
 		Serialized[key] = bytes;
 		return bytes;
 	}
@@ -270,7 +279,7 @@ internal class NetworkTable<T> : INetworkDeltaSnapshot, INetworkProperty, INetwo
 			var bytes = new byte[byteCount];
 			data.Read( bytes, 0, byteCount );
 
-			var value = Game.TypeLibrary.FromBytes<T>( bytes );
+			var value = GlobalContext.Current.TypeLibrary.FromBytes<T>( bytes );
 
 			Serialized[key] = bytes;
 			Table[key] = value;

@@ -1,4 +1,5 @@
-﻿using Sandbox.Internal;
+﻿using Sandbox.Engine;
+using Sandbox.Internal;
 using Sandbox.Utility;
 using System.Threading;
 
@@ -396,8 +397,8 @@ public abstract partial class Component : IJsonConvert, IComponentLister, IValid
 	[ActionGraphInclude]
 	public virtual void Reset()
 	{
-		var t = Game.TypeLibrary.GetType( GetType() );
-		var so = Game.TypeLibrary.GetSerializedObject( this );
+		var t = GlobalContext.Current.TypeLibrary.GetType( GetType() );
+		var so = GlobalContext.Current.TypeLibrary.GetSerializedObject( this );
 
 		foreach ( var field in t.Fields.Where( x => x.HasAttribute<PropertyAttribute>() ) )
 		{
@@ -478,7 +479,7 @@ public abstract partial class Component : IJsonConvert, IComponentLister, IValid
 
 	}
 
-	internal void OnParentChangedInternal( GameObject oldParent, GameObject newParent )
+	internal virtual void OnParentChangedInternal( GameObject oldParent, GameObject newParent )
 	{
 		OnParentChanged( oldParent, newParent );
 	}

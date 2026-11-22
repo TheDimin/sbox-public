@@ -89,12 +89,17 @@ internal static class SdlEvents
 			case Sdl.EventType.MouseButtonDown:
 			case Sdl.EventType.MouseButtonUp:
 				if ( window != IntPtr.Zero && window == WindowInput.GetEditorMainWindow() && !WindowInput.GetRelativeMouseMode() ) break;
+				// Motion is dropped while unfocused and SDL won't resend an unchanged position on refocus,
+				// so the click that activates the window would land wherever the cursor last was.
+				var clickPosition = new Vector2( e.Button.X, e.Button.Y );
+				if ( !WindowInput.GetRelativeMouseMode() && InputRouter.MouseCursorPosition != clickPosition )
+					InputRouter.OnMousePositionChange( clickPosition.x, clickPosition.y, 0, 0 );
 				var button = MouseButton( e.Button.Button );
 				if ( button != ButtonCode.BUTTON_CODE_INVALID ) InputRouter.OnMouseButton( button, e.Type == Sdl.EventType.MouseButtonDown );
 				break;
 			case Sdl.EventType.MouseWheel:
 				var wheel = WheelDelta( e.Wheel );
-				if ( wheel != Vector2.Zero ) InputRouter.OnMouseWheel( wheel.x, wheel.y );
+				if ( wheel != Vector2.Zero ) InputRouter.OnMouseWheel( wheel.x, wheel.y, WheelFlip( e.Wheel ) * e.Wheel.IntegerX, WheelFlip( e.Wheel ) * e.Wheel.IntegerY );
 				break;
 			case Sdl.EventType.Quit: InputRouter.CloseApplication(); break;
 			case Sdl.EventType.WindowCloseRequested:
@@ -135,5 +140,10 @@ internal static class SdlEvents
 		((mod & 0x00c0) != 0 ? KeyboardModifiers.Ctrl : KeyboardModifiers.None) |
 		((mod & 0x0300) != 0 ? KeyboardModifiers.Alt : KeyboardModifiers.None);
 
-	internal static Vector2 WheelDelta( Sdl.MouseWheelEvent wheel ) => new Vector2( wheel.X, wheel.Y ) * (wheel.Direction == 1 ? -1 : 1);
+	internal static Vector2 WheelDelta( Sdl.MouseWheelEvent wheel ) => new Vector2( wheel.X, wheel.Y ) * WheelFlip( wheel );
+
+	/// <summary>
+	/// SDL reports natural/flipped scrolling as inverted values, integer notches included - this turns them back.
+	/// </summary>
+	static int WheelFlip( Sdl.MouseWheelEvent wheel ) => wheel.Direction == 1 ? -1 : 1;
 }

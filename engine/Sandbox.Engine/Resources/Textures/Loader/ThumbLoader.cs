@@ -51,7 +51,25 @@ internal static class ThumbLoader
 			//
 			if ( filename.StartsWith( "mount:" ) )
 			{
-				var t = MountUtility.GetPreviewTexture( filename );
+				var loader = MountUtility.FindLoader( filename );
+				if ( loader is null ) return;
+
+				// check to see if there's a pre-generated thumb in the mount
+				var imageFile = $"{loader.RelativePath}.png";
+				if ( loader.Mount.ThumbsFileSystem is { } fs && fs.FileExists( imageFile ) )
+				{
+					using var bitmap = Bitmap.CreateFromBytes( await fs.ReadAllBytesAsync( imageFile ) );
+					if ( ct.IsCancellationRequested ) return;
+
+					using var texture = bitmap.ToTexture();
+					placeholder.CopyFrom( texture );
+					return;
+				}
+
+				// only generate thumbs for models for now
+				if ( loader.Type != ResourceType.Model ) return;
+
+				var t = MountUtility.GetPreviewTexture( loader );
 				if ( !t.IsValid() ) return;
 
 				placeholder.CopyFrom( t );
@@ -61,7 +79,7 @@ internal static class ThumbLoader
 			//
 			// if it looks like a package, try to load the thumb from there
 			//
-			if ( filename.Count( x => x == '/' || x == '\\' ) == 0 && filename.Count( '.' ) == 1 && Package.TryParseIdent( filename, out var ident ) )
+			if ( filename.Count( x => x == '/' || x == '\\' ) == 0 && filename.Count( '.' ) == 1 && Package.TryParseIdentParts( filename, out var ident ) )
 			{
 				var packageInfo = await Package.FetchAsync( $"{ident.org}.{ident.package}", true );
 				if ( packageInfo == null || ct.IsCancellationRequested ) return;

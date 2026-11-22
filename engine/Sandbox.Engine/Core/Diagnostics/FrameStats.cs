@@ -50,6 +50,7 @@ public struct FrameStats
 		ObjectsCulledByVis = stats.m_nNumObjectsRejectedByVis;
 		ObjectsCulledByScreenSize = stats.m_nNumObjectsRejectedByScreenSizeCulling;
 		ObjectsCulledByFade = stats.m_nNumObjectsRejectedByFading;
+		ObjectsCulledByOcclusion = 0;
 		ObjectsFading = stats.m_nNumFadingObjects;
 		ShadowedLightsInView = stats.m_nNumShadowedLightsInView;
 		UnshadowedLightsInView = stats.m_nNumUnshadowedLightsInView;
@@ -62,7 +63,7 @@ public struct FrameStats
 	}
 
 	/// <summary>
-	/// Add what the managed scene renderer drew (<c>r_managed_scene</c>), which native's counters don't see: its objects,
+	/// Add what Borealis drew (<c>-borealisgpu</c>), which native's counters don't see: its objects,
 	/// draws, triangles, views and size culling.
 	/// </summary>
 	internal void AddManaged( in Rendering.ManagedFrameCounters managed )
@@ -74,6 +75,7 @@ public struct FrameStats
 		ObjectsPreCull += managed.Objects;
 		ObjectsTested += managed.Objects;
 		ObjectsCulledByScreenSize += managed.ObjectsSizeCulled;
+		ObjectsCulledByOcclusion += managed.ObjectsOcclusionCulled;
 		DrawCalls += managed.TotalDraws;
 		TrianglesRendered += managed.Triangles;
 		SceneViewsRendered += managed.Renders + managed.ShadowViews;
@@ -84,7 +86,7 @@ public struct FrameStats
 	/// </summary>
 	internal Rendering.ManagedFrameCounters Managed;
 
-	/// <summary>Number of objects that passed all cull checks and were rendered.</summary>
+	/// <summary>Number of objects that passed CPU cull checks and were submitted for rendering.</summary>
 	public double ObjectsRendered { get; set; }
 
 	/// <summary>Number of objects considered before culling.</summary>
@@ -191,6 +193,9 @@ public struct FrameStats
 
 	/// <summary>Number of objects culled by screen size.</summary>
 	public double ObjectsCulledByScreenSize { get; set; }
+
+	/// <summary>Number of instances culled by GPU occlusion culling, read back a few frames late. Native counts once per material, managed once per object.</summary>
+	public double ObjectsCulledByOcclusion { get; set; }
 
 	/// <summary>Number of objects culled by distance fading.</summary>
 	public double ObjectsCulledByFade { get; set; }

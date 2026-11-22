@@ -121,8 +121,10 @@ internal partial class NetworkSystem
 	{
 		Assert.NotNull( sockets, "Socket list is null" ); // should be impossible
 
-		// This network system only exists in the game.
-		using var gameScope = GameSystem?.Push();
+		// This network system only exists in the game. Scene networking pushes without boxing a scope.
+		var sceneSystem = GameSystem as SceneNetworkSystem;
+		using var sceneScope = sceneSystem?.PushScope() ?? default;
+		using var gameScope = sceneSystem is null ? GameSystem?.Push() : null;
 
 		// A failed encoder can close a connection while we drain the queue, so they're flushed from a copy
 		_flushing.Clear();
@@ -218,6 +220,12 @@ internal partial class NetworkSystem
 		using var scriptDisabledScope = DisableUntrustedScripts( msg.Source, msg.Depth );
 
 		var type = msg.Data.Read<InternalMessageType>();
+
+		// Until the host has let a connection in (password, privacy), it only takes handshake messages
+		var unadmitted = IsHost && !msg.Source.IsHost && msg.Source.State < Connection.ChannelState.Welcome;
+		if ( unadmitted && type is not (InternalMessageType.HeartbeatPing or InternalMessageType.HeartbeatPong
+			or InternalMessageType.Packed or InternalMessageType.Request or InternalMessageType.Response) )
+			return;
 
 		// Leaving host: only acknowledgements matter now, relayed ones included
 		if ( _isHandingOff && type is not (InternalMessageType.Packed or InternalMessageType.Multicast) )
@@ -319,6 +327,9 @@ internal partial class NetworkSystem
 				msg.Source.OnResponse( responseTo, obj );
 				return;
 			}
+
+			if ( unadmitted && obj is not (UserInfo or RestartHandshakeMsg) )
+				return;
 
 			if ( typeMessageHandlers.TryGetValue( obj.GetType(), out var h ) )
 			{

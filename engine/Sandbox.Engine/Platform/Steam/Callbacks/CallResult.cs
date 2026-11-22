@@ -46,13 +46,19 @@ namespace Steamworks
 		/// </summary>
 		internal T? GetResult()
 		{
+			if ( utils is null || !utils.IsValid )
+				return null;
+
 			bool failed = false;
 			if ( !utils.IsAPICallCompleted( call, ref failed ) || failed )
 				return null;
 
 			var t = default( T );
 			var size = t.DataSize;
-			var ptr = Marshal.AllocHGlobal( size );
+
+			// DataSize is the native size, which can be smaller than the managed struct
+			// when a layout differs per platform (see LobbyCreated_t), so never read past the buffer.
+			var ptr = Marshal.AllocHGlobal( Math.Max( size, Marshal.SizeOf<T>() ) );
 
 			try
 			{
@@ -79,6 +85,9 @@ namespace Steamworks
 		{
 			get
 			{
+				if ( utils is null || !utils.IsValid )
+					return true;
+
 				bool failed = false;
 				if ( utils.IsAPICallCompleted( call, ref failed ) || failed )
 					return true;

@@ -143,10 +143,20 @@ public enum ImageFormat : int
 	I16F,
 
 	RG3232,
+	R11G11B10F,
 }
 
 internal static class ImageFormatExtensions
 {
+	internal static bool IsValid( this ImageFormat format ) => format >= ImageFormat.RGBA8888 && Enum.IsDefined( format );
+
+	internal static void ThrowIfInvalid( this ImageFormat format, bool allowDefault = false )
+	{
+		if ( allowDefault && format == ImageFormat.Default ) return;
+		if ( !format.IsValid() )
+			throw new ArgumentOutOfRangeException( nameof( format ), $"Invalid image format {(int)format}" );
+	}
+
 	/// <summary>
 	/// Whether the format has the eight stencil bits required by the standard camera pipeline.
 	/// </summary>

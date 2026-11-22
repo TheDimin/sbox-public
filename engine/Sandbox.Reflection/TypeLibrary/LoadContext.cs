@@ -16,6 +16,11 @@ class IsolatedAssemblyContext : AssemblyLoadContext
 	{
 	}
 
+	/// <summary>
+	/// True for types from package code (games, libraries, the menu addon), false for the engine and .NET
+	/// </summary>
+	internal static bool IsPackageType( Type type ) => type is not null && GetLoadContext( type.Assembly ) is IsolatedAssemblyContext;
+
 	protected override Assembly Load( AssemblyName assemblyName )
 	{
 
@@ -32,12 +37,6 @@ class LoadContext : AssemblyLoadContext
 	Assembly root;
 
 	List<IsolatedAssemblyContext> Children = new();
-
-	/// <summary>
-	/// Called when an assembly can't be resolved through normal means (Assemblies, root context).
-	/// Return null to fall through to the default probing.
-	/// </summary>
-	public Func<string, Assembly> OnDemandResolver { get; set; }
 
 	public LoadContext( Assembly root = null ) : base( "TLC", true )
 	{
@@ -82,13 +81,6 @@ class LoadContext : AssemblyLoadContext
 			{
 				return asm;
 			}
-		}
-
-		if ( OnDemandResolver is not null )
-		{
-			var asm = OnDemandResolver( assemblyName.Name );
-			if ( asm is not null )
-				return asm;
 		}
 
 		return base.Load( assemblyName );
@@ -165,6 +157,23 @@ class LoadContext : AssemblyLoadContext
 
 		return lc.Assembly;
 	}
+
+	/// <summary>
+	/// Every child context starts unloading. A collectible context holds itself until it's told to unload, so children left
+	/// alone kept a closed game's assemblies, their statics and what those reach (its last scene) for good.
+	/// </summary>
+	public void UnloadChildren()
+	{
+		foreach ( var child in Children )
+		{
+			child.Assembly = null;
+			child.Unload();
+		}
+
+		Children.Clear();
+	}
+
+	internal int ChildCount => Children.Count;
 
 	public void UnloadChild( Assembly asm )
 	{

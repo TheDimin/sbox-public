@@ -87,6 +87,7 @@ internal partial class NetworkSystem
 	void StartHandshake( Connection channel )
 	{
 		channel.HandshakeId = Guid.NewGuid();
+		var gameWorkshopId = Application.GamePackage is { InstallsFromWorkshop: true } game ? game.WorkshopId : 0;
 
 		var hello = new ServerInfo
 		{
@@ -95,9 +96,12 @@ internal partial class NetworkSystem
 			MaxPlayers = Networking.MaxPlayers,
 			MapName = Networking.MapName,
 			EngineVersion = 234,
-			GamePackage = Application.GamePackage?.GetIdent( false, true ) ?? "",
+			GamePackage = Application.GamePackage?.GetVersionedIdent() ?? Application.GameIdent ?? "",
+			GameWorkshopId = gameWorkshopId,
+			GameWorkshopVersion = gameWorkshopId != 0 ? Workshop.GetInstalledVersion( gameWorkshopId ) : 0,
 			Map = Application.Map,
 			Host = new ChannelInfo { Id = Connection.Local.Id },
+			HostSteamId = Connection.Local.SteamId,
 			Assigned = new ChannelInfo { Id = channel.Id },
 			IsDeveloperHost = IsDeveloperHost,
 			HostMigration = IsHostMigrationEnabled,
@@ -170,6 +174,8 @@ internal partial class NetworkSystem
 		if ( !known )
 			return;
 
+		Sandbox.Diagnostics.DevTools.NetworkLog.Session( "Peer left", source );
+
 		if ( source.State >= Connection.ChannelState.Welcome )
 		{
 			// We only need to call this if we called OnConnected, which would only
@@ -205,6 +211,7 @@ internal partial class NetworkSystem
 		}
 
 		FailureReason = message;
+		Sandbox.Diagnostics.DevTools.NetworkLog.Session( $"Ended: {reasonString}", HostConnection, ends: true );
 		IGameInstanceDll.Current.Disconnect( FailureReason );
 	}
 

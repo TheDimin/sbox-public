@@ -99,6 +99,15 @@ public abstract partial class Resource : IValid, IJsonConvert, BytePack.ISeriali
 	/// </summary>
 	internal void RegisterWeakResourceId( string resourcePath, Guid? guid = null )
 	{
+		SetResourceIdentity( resourcePath, guid );
+		Game.Resources.RegisterWeak( this );
+	}
+
+	/// <summary>
+	/// Assigns the shared path and hash identity without choosing the resource's cache lifetime.
+	/// </summary>
+	internal void SetResourceIdentity( string resourcePath, Guid? guid = null )
+	{
 		ResourcePath = FixPath( resourcePath );
 		ResourceName = System.IO.Path.GetFileNameWithoutExtension( ResourcePath );
 
@@ -106,11 +115,8 @@ public abstract partial class Resource : IValid, IJsonConvert, BytePack.ISeriali
 		ResourceId = ResourcePath.FastHash();
 #pragma warning restore CS0618 // Type or member is obsolete
 		ResourceIdLong = ResourcePath.FastHash64();
-
 		if ( guid is Guid g && g != default )
 			Guid = g;
-
-		Game.Resources.RegisterWeak( this );
 	}
 
 	/// <summary>
@@ -122,7 +128,12 @@ public abstract partial class Resource : IValid, IJsonConvert, BytePack.ISeriali
 		if ( t == typeof( Texture ) ) return Texture.Load( id );
 		if ( t == typeof( Model ) ) return Model.Load( id );
 		if ( t == typeof( SoundFile ) ) return SoundFile.Load( id.Path ); // todo: guid me
+#pragma warning disable CS0618
 		if ( t == typeof( AnimationGraph ) ) return AnimationGraph.Load( id );
+#pragma warning restore CS0618
+		if ( t == typeof( Animation.Graph ) ) return Animation.Graph.Load( id );
+		if ( t == typeof( Animation.Clip ) ) return Animation.Clip.Load( id );
+		if ( t == typeof( Animation.Skeleton ) ) return Animation.Skeleton.Load( id );
 		if ( t == typeof( Shader ) ) return Shader.Load( id );
 		if ( t == typeof( PhysicsGroupDescription ) ) return PhysicsGroupDescription.Load( id );
 
@@ -133,6 +144,22 @@ public abstract partial class Resource : IValid, IJsonConvert, BytePack.ISeriali
 	/// Called by OnResourceReloaded when a resource has been reloaded
 	/// </summary>
 	internal virtual void OnReloaded()
+	{
+	}
+
+	/// <summary>
+	/// How many times this resource has been reloaded. Something made from it compares this with what it was made at.
+	/// </summary>
+	internal int Revision { get; private set; }
+
+	/// <summary>
+	/// How many reloads there have been, of any resource: something made from resources checks their <see cref="Revision"/>
+	/// only when this has moved.
+	/// </summary>
+	internal static int Reloads => System.Threading.Volatile.Read( ref reloads );
+	static int reloads;
+
+	internal virtual void OnMounted( string path )
 	{
 	}
 
@@ -147,18 +174,22 @@ public abstract partial class Resource : IValid, IJsonConvert, BytePack.ISeriali
 			library.MoveResource( resource, resourceName );
 
 			Log.Trace( $" - '{resource}'" );
-			resource?.OnReloaded();
+			if ( resource is null ) return;
+
+			resource.Revision++;
+			System.Threading.Interlocked.Increment( ref reloads );
+			resource.OnReloaded();
 		}
 	}
 
 	/// <summary>
 	/// Called when this resource's file data has been loaded (or reloaded), while
 	/// that data is still in memory. This is our chance to read anything we want
-	/// out of the compiled file - custom blocks written by managed resource
-	/// compilers, for example. The context is only valid during this call, so copy
+	/// out of the file - source bytes for uncompiled assets, or custom blocks written by managed
+	/// resource compilers. The context is only valid during this call, so copy
 	/// out what you need. Main thread.
 	/// </summary>
-	internal virtual void OnLoaded( ResourceLoadContext context )
+	protected internal virtual void OnLoaded( ResourceLoadContext context )
 	{
 	}
 

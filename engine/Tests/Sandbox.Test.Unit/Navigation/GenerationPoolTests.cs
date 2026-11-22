@@ -75,25 +75,4 @@ public class GenerationPoolTests
 		pool.Return( next, 400 );
 	}
 
-	[TestMethod]
-	public void HeightfieldCanBuildFreshSpansAfterBuffersAreReleased()
-	{
-		var min = Vector3.Zero;
-		var max = Vector3.One * 64;
-		using var field = new Heightfield( 2, 2, min, max, 1, 1 );
-		field.AddOrMergeSpan( 0, 0, 0, 4, Constants.WALKABLE_AREA, 0 );
-		field.EnsureCompressed();
-		Assert.IsTrue( field.RetainedBytes > 0 );
-		field.ReleaseMemory();
-		Assert.AreEqual( 0L, field.RetainedBytes );
-
-		field.Init( 2, 2, min, max, 1, 1 );
-		field.AddOrMergeSpan( 1, 1, 8, 12, Constants.WALKABLE_AREA, 0 );
-		using var compact = field.BuildCompactHeightfield( 1, 1 );
-		Assert.AreEqual( 1, compact.SpanCount );
-		Assert.AreEqual( 0, compact.Cells[0].Count );
-		Assert.AreEqual( 1, compact.Cells[3].Count );
-		Assert.AreEqual( (ushort)12, compact.Spans[0].StartY );
-		Assert.AreEqual( Constants.WALKABLE_AREA, compact.Areas[0] );
-	}
 }

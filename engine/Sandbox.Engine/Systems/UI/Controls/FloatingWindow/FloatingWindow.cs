@@ -58,6 +58,20 @@ public partial class FloatingWindow : Panel
 	[Parameter] public bool KeepOnScreen { get; set; }
 
 	/// <summary>
+	/// Whether its titlebar moves it. Off for a window kept where its owner puts it.
+	/// </summary>
+	[Parameter]
+	public bool Draggable
+	{
+		get;
+		set
+		{
+			field = value;
+			SetClass( "fixed", !value );
+		}
+	} = true;
+
+	/// <summary>
 	/// Handles a close request. When unset, closing deletes the window.
 	/// </summary>
 	[Parameter] public Action OnCloseRequested { get; set; }
@@ -144,7 +158,7 @@ public partial class FloatingWindow : Panel
 		if ( !IsMinimized || IsAnimating ) return;
 		animationDockRect = Box.Rect;
 		IsMinimized = false;
-		minimizedWindows.Remove( this );
+		minimizedWindows.RemoveAll( x => ReferenceEquals( x, this ) );
 		Style.Width = restoreWidth;
 		Style.Height = restoreHeight;
 		SetClass( "minimized", false );
@@ -236,7 +250,7 @@ public partial class FloatingWindow : Panel
 		// Share the bottom edge in minimize order, even when windows have different parents.
 		foreach ( var window in minimizedWindows )
 		{
-			if ( !window.IsValid() || !window.IsVisible || window.FindRootPanel() != root ) continue;
+			if ( window.FindRootPanel() != root || window is not { IsValid: true } || !window.IsVisible ) continue;
 			if ( window == this ) index = count;
 			count++;
 		}
@@ -296,7 +310,7 @@ public partial class FloatingWindow : Panel
 	/// </summary>
 	public override void OnDeleted()
 	{
-		minimizedWindows.Remove( this );
+		minimizedWindows.RemoveAll( x => ReferenceEquals( x, this ) );
 		base.OnDeleted();
 	}
 

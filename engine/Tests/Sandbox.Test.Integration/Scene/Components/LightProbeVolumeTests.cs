@@ -203,6 +203,27 @@ public class LightProbeVolumeTests
 		AssertTexture( scalars, native.m_hLightProbeDirectLightScalarsTexture );
 	}
 
+	/// <summary>
+	/// A client can load a probe before the map VPK holding its textures is mounted. The engine
+	/// then hands back an error texture, and the probe must not render black ambient lighting from it.
+	/// </summary>
+	[TestMethod]
+	public void ErrorTextureCreatesNoProbe()
+	{
+		using var scope = scene.Push();
+		using var texture = Texture.CreateVolume( 2, 2, 12 ).Finish();
+		var missing = Texture.FromNative( NativeGlue.Resources.GetTexture( $"maps/{Guid.NewGuid():N}/lightmaps/env_light_probe_volume_1.vtex", Guid.Empty ) );
+		Assert.IsNotNull( missing );
+		Assert.IsTrue( missing.IsError );
+
+		var component = scene.CreateObject().Components.Create<LightProbeVolume>();
+		component.Texture = missing;
+		Assert.IsNull( FindProbe( scene, component ) );
+
+		component.Texture = texture;
+		Assert.IsNotNull( FindProbe( scene, component ) );
+	}
+
 	[TestMethod]
 	[DataRow( false, false )]
 	[DataRow( false, true )]
@@ -215,13 +236,13 @@ public class LightProbeVolumeTests
 		Light light = directional ? go.Components.Create<DirectionalLight>() : go.Components.Create<PointLight>();
 		light.MixedShadows = mixed;
 		light.BakeLightIndex = 254;
-		var native = light.SceneObject.lightNative;
-		Assert.AreNotEqual( 0u, native.GetLightFlags() & 32u );
-		Assert.AreEqual( mixed ? 16u : 0u, native.GetLightFlags() & 16u );
+		// The light's own description: native's twin is written only while something reads it
+		Assert.AreNotEqual( 0u, light.SceneObject.Description.Flags & 32u );
+		Assert.AreEqual( mixed ? 16u : 0u, light.SceneObject.Description.Flags & 16u );
 		light.Enabled = false;
 		light.Enabled = true;
-		Assert.AreNotEqual( 0u, light.SceneObject.lightNative.GetLightFlags() & 32u );
-		Assert.AreEqual( mixed ? 16u : 0u, light.SceneObject.lightNative.GetLightFlags() & 16u );
+		Assert.AreNotEqual( 0u, light.SceneObject.Description.Flags & 32u );
+		Assert.AreEqual( mixed ? 16u : 0u, light.SceneObject.Description.Flags & 16u );
 		var json = go.Serialize();
 		go.Destroy();
 		scene.ProcessDeletes();
@@ -232,13 +253,13 @@ public class LightProbeVolumeTests
 		var loaded = clone.Components.Get<Light>();
 		Assert.AreEqual( 254, loaded.BakeLightIndex );
 		Assert.AreEqual( mixed, loaded.MixedShadows );
-		Assert.AreNotEqual( 0u, loaded.SceneObject.lightNative.GetLightFlags() & 32u );
-		Assert.AreEqual( mixed ? 16u : 0u, loaded.SceneObject.lightNative.GetLightFlags() & 16u );
+		Assert.AreNotEqual( 0u, loaded.SceneObject.Description.Flags & 32u );
+		Assert.AreEqual( mixed ? 16u : 0u, loaded.SceneObject.Description.Flags & 16u );
 		loaded.MixedShadows = !mixed;
-		Assert.AreEqual( mixed ? 0u : 16u, loaded.SceneObject.lightNative.GetLightFlags() & 16u );
+		Assert.AreEqual( mixed ? 0u : 16u, loaded.SceneObject.Description.Flags & 16u );
 		loaded.BakeLightIndex = -1;
-		Assert.AreEqual( 0u, loaded.SceneObject.lightNative.GetLightFlags() & 32u );
-		Assert.AreEqual( 0u, loaded.SceneObject.lightNative.GetLightFlags() & 16u );
+		Assert.AreEqual( 0u, loaded.SceneObject.Description.Flags & 32u );
+		Assert.AreEqual( 0u, loaded.SceneObject.Description.Flags & 16u );
 		Assert.ThrowsException<ArgumentOutOfRangeException>( () => loaded.BakeLightIndex = 255 );
 		Assert.ThrowsException<ArgumentOutOfRangeException>( () => loaded.BakeLightIndex = -2 );
 		Assert.AreEqual( -1, loaded.BakeLightIndex );

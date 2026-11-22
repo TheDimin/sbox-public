@@ -32,6 +32,7 @@ internal abstract partial class PhysicsWorldInternal : IValid
 	/// Create the internal implementation body for this world (2D or 3D).
 	/// </summary>
 	internal abstract PhysicsBodyInternal CreateBodyInternal();
+	internal abstract PhysicsBodyInternal CreateBodyInternal( in PhysicsBodySettings settings );
 
 	/// <summary>
 	/// The world's static reference body, used as a default anchor for joints.
@@ -221,6 +222,15 @@ internal abstract partial class PhysicsWorldInternal : IValid
 	/// Find game objects overlapping a sphere.
 	/// </summary>
 	public virtual IEnumerable<GameObject> FindInPhysics( Sphere sphere ) => Enumerable.Empty<GameObject>();
+
+	/// <summary>
+	/// Add overlapping game objects to caller-owned storage.
+	/// </summary>
+	internal virtual void FindInPhysics( Sphere sphere, HashSet<GameObject> results )
+	{
+		foreach ( var go in FindInPhysics( sphere ) )
+			results.Add( go );
+	}
 
 	/// <summary>
 	/// Find game objects overlapping a box.

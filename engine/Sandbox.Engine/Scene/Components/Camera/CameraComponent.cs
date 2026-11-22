@@ -1,4 +1,4 @@
-﻿
+
 using NativeEngine;
 using Sandbox.Engine;
 using Sandbox.Rendering;
@@ -136,6 +136,13 @@ public sealed partial class CameraComponent : Component, Component.ExecuteInEdit
 	public Vector4 Viewport { get; set; } = new( 0.0f, 0.0f, 1.0f, 1.0f ); // todo this should use a rect
 
 	/// <summary>
+	/// Render this camera without anti-aliasing, whatever the player's graphics settings. Their render resolution and FSR1
+	/// upscaling still apply.
+	/// </summary>
+	[Property]
+	public bool DisableAntiAliasing { get; set; }
+
+	/// <summary>
 	/// If specified, this camera will render to this RenderTexture instead of the screen.
 	/// This can then be used in other stuff like materials.
 	/// </summary>
@@ -217,6 +224,7 @@ public sealed partial class CameraComponent : Component, Component.ExecuteInEdit
 		sceneCamera.WantsDepthNormalsHook = WantsDepthNormals;
 		sceneCamera.WantsMotionVectorsHook = WantsMotionVectors;
 		sceneCamera.HasEarlyPostProcessHook = HasEarlyPostProcess;
+		sceneCamera.HasCommandListsHook = HasCommandLists;
 		sceneCamera.ScheduleEarlyPostProcessHook = ScheduleEarlyPostProcess;
 		sceneCamera.RenderEarlyPostProcessHook = RenderEarlyPostProcess;
 	}
@@ -230,9 +238,10 @@ public sealed partial class CameraComponent : Component, Component.ExecuteInEdit
 	protected override void OnDestroy()
 	{
 		Scene.Cameras.Remove( this );
-		Rendering.ManagedSceneRendering.Forget( this );
 		sceneCamera?.Dispose();
 		sceneCamera = null;
+		_hudCommandList.DisposePainter();
+		_overlayCommandList.DisposePainter();
 	}
 
 	protected override void DrawGizmos()
@@ -240,7 +249,7 @@ public sealed partial class CameraComponent : Component, Component.ExecuteInEdit
 		if ( sceneCamera is null )
 			return;
 
-		using var scope = Gizmo.Scope( $"{GetHashCode()}" );
+		using var scope = Gizmo.PushScope( "camera" );
 
 		Gizmo.Transform = global::Transform.Zero;
 
@@ -394,6 +403,7 @@ public sealed partial class CameraComponent : Component, Component.ExecuteInEdit
 	Func<bool> wantsDepthNormalsHook;
 	Func<SceneCamera, bool> wantsMotionVectorsHook;
 	Func<Stage, PostProcessQueue, bool> hasEarlyPostProcessHook;
+	Func<Stage, bool> hasCommandListsHook;
 	Action<Stage, bool> scheduleEarlyPostProcessHook;
 	Action<Stage, PostProcessQueue> renderEarlyPostProcessHook;
 
@@ -410,11 +420,12 @@ public sealed partial class CameraComponent : Component, Component.ExecuteInEdit
 		camera.World = Scene.SceneWorld;
 		camera.ClearFlags = ClearFlags;
 		camera.Worlds.Clear();
-		camera.Worlds.Add( Scene.DebugSceneWorld );
+		camera.DebugWorlds.Clear();
+		camera.DebugWorlds.Add( Scene.DebugSceneWorld );
 
 		// Also render any active gizmos
 		if ( Gizmo.Active is not null )
-			camera.Worlds.Add( Gizmo.Active.World );
+			camera.DebugWorlds.Add( Gizmo.Active.World );
 
 		// A camera (such as the editor viewport) might not want to take render tags into account
 		// from an existing camera source
@@ -422,6 +433,11 @@ public sealed partial class CameraComponent : Component, Component.ExecuteInEdit
 		{
 			camera.RenderTags.SetFrom( RenderTags );
 			camera.ExcludeTags.SetFrom( RenderExcludeTags );
+			if ( Scene.IsEditor && !IsSceneEditorCamera )
+			{
+				camera.ExcludeTags.Add( "editor_wireframe" );
+				camera.ExcludeTags.Add( "editor_overlay" );
+			}
 		}
 
 		// Merge our global Scene attributes into the camera
@@ -430,6 +446,8 @@ public sealed partial class CameraComponent : Component, Component.ExecuteInEdit
 		camera.DebugMode = DebugMode;
 		camera.WireframeMode = WireframeMode;
 		camera.EnablePostProcessing = EnablePostProcessing;
+		camera.DisableAntiAliasing = DisableAntiAliasing;
+		camera.UpdateScreenSpaceReflections();
 		camera.BackgroundColor = ClearFlags.Contains( ClearFlags.Color ) ? BackgroundColor : Color.Transparent;
 
 		CopyPostProcessing( camera, applyCameraEffects: false );
@@ -482,13 +500,14 @@ public sealed partial class CameraComponent : Component, Component.ExecuteInEdit
 		camera.WantsDepthNormalsHook = wantsDepthNormalsHook ??= WantsDepthNormals;
 		camera.WantsMotionVectorsHook = wantsMotionVectorsHook ??= WantsMotionVectors;
 		camera.HasEarlyPostProcessHook = hasEarlyPostProcessHook ??= HasEarlyPostProcess;
+		camera.HasCommandListsHook = hasCommandListsHook ??= HasCommandLists;
 		camera.ScheduleEarlyPostProcessHook = scheduleEarlyPostProcessHook ??= ScheduleEarlyPostProcess;
 		camera.RenderEarlyPostProcessHook = renderEarlyPostProcessHook ??= RenderEarlyPostProcess;
 
 		// Set with the hooks: a view decides its G-buffer from the camera whose lists it runs (the editor viewport runs the
 		// main camera's). Unknown post effects and custom command lists may sample normals, so only omit them for an empty
 		// stack. Scene attributes can force the G-buffer for custom material consumers outside those stages.
-		camera.Attributes.Set( "NeedsDepthNormals", WantsDepthNormals() );
+		camera.Attributes.Set( "NeedsDepthNormals", WantsDepthNormals() || camera.ScreenSpaceReflections is not null );
 
 		//
 		// Hack because I don't want this to have to be on a camera. This
@@ -638,18 +657,19 @@ public sealed partial class CameraComponent : Component, Component.ExecuteInEdit
 		{
 			InitializeRendering();
 
-			// r_managed_scene: the managed scene renderer takes the whole frame
-			if ( Rendering.ManagedSceneRendering.TryRender( this, swapChain, CustomSize ?? size ) )
-				return;
+			RenderWith( Rendering.SceneRenderer.Current, swapChain, CustomSize ?? size );
+		}
+	}
 
-			if ( RenderTarget is not null && RenderTarget.native.IsValid )
-			{
-				SceneCamera.RenderToTexture( RenderTarget, CustomSize ?? size, default );
-			}
-			else
-			{
-				SceneCamera.AddToRenderList( swapChain, CustomSize ?? size );
-			}
+	void RenderWith( Rendering.ISceneRenderer renderer, SwapChainHandle_t swapChain, Vector2? size )
+	{
+		if ( RenderTarget is not null && RenderTarget.native.IsValid )
+		{
+			renderer.RenderToTexture( SceneCamera, RenderTarget, size, default );
+		}
+		else
+		{
+			SceneCamera.AddToRenderList( renderer, swapChain, size );
 		}
 	}
 
@@ -741,6 +761,9 @@ public sealed partial class CameraComponent : Component, Component.ExecuteInEdit
 		return new Vector2( v.x, v.y );
 	}
 
+	/// <summary>
+	/// Returns a ray created from the specified cursor position on the screen, by conversion into 3D space.
+	/// </summary>
 	public Ray ScreenPixelToRay( Vector2 pixelPosition )
 	{
 		EnsureSceneCameraCreated();
@@ -853,7 +876,8 @@ public sealed partial class CameraComponent : Component, Component.ExecuteInEdit
 	/// <summary>
 	/// Render colour and depth into caller-owned textures without copying the depth buffer.
 	/// The optional depth target must be a renderable 2D depth texture with eight stencil bits and the same dimensions
-	/// as the colour target. Its sample count determines the scene's MSAA sample count.
+	/// as the colour target. Its sample count determines the scene's MSAA sample count, so it must have one sample when
+	/// <see cref="DisableAntiAliasing"/> is set.
 	/// Depth retains the camera's projection and orientation: <see cref="ViewSetup.FlipX"/> and
 	/// <see cref="ViewSetup.FlipY"/> only affect the final colour blit. Keep both textures alive
 	/// until rendering and any subsequent sampling have completed.
@@ -881,6 +905,9 @@ public sealed partial class CameraComponent : Component, Component.ExecuteInEdit
 
 			if ( depthTarget.Size != target.Size )
 				throw new ArgumentException( "Colour and depth targets must have matching dimensions.", nameof( depthTarget ) );
+
+			if ( DisableAntiAliasing && depthTarget.MultisampleType != RenderMultisampleType.RENDER_MULTISAMPLE_NONE )
+				throw new ArgumentException( "A camera without anti-aliasing can't render into a multisampled depth target.", nameof( depthTarget ) );
 		}
 
 		// TODO: we need to get rid of this guard, it's a hack
@@ -891,39 +918,17 @@ public sealed partial class CameraComponent : Component, Component.ExecuteInEdit
 			InitializeRendering();
 		}
 
-		using var setup = new CameraRenderer( $"{GameObject.Name}.RenderToTexture", sceneCamera._cameraId );
+		return sceneCamera.RenderToTexture( target, depthTarget, config, RenderToTextureName(), out viewData );
+	}
 
-		// The lock only covers reading the scene camera into this call's renderer. A top-level render
-		// waits for the whole frame inside the native call, and a child view rendered through this
-		// camera from the render thread needs the lock during that wait.
-		lock ( this )
-		{
-			setup.Configure( sceneCamera, config );
-		}
+	// The view's name for RenderToTexture, made again only when the object's name changes
+	(string Object, string View) _renderToTextureName;
 
-		//
-		// Adds the views to the scene system
-		//
-		var rendered = setup.Native.RenderToTexture( target.native, Graphics.SceneView, depthTarget?.native ?? default );
-
-		if ( rendered )
-		{
-			var depthRange = setup.Native.RenderedDepthRange;
-			viewData = new ViewData
-			{
-				IsValid = true,
-				ProjectionToView = setup.Native.RenderedProjectionToView,
-				Viewport = setup.Native.RenderedViewport,
-				DepthRange = new Vector2( depthRange.x, depthRange.y ),
-				DepthUvScaleBias = new Vector4(
-					setup.Native.FlipX ? -1 : 1, setup.Native.FlipY ? -1 : 1,
-					setup.Native.FlipX ? 1 : 0, setup.Native.FlipY ? 1 : 0 )
-			};
-		}
-
-		setup.Native.ClearSceneWorlds();
-
-		return rendered;
+	string RenderToTextureName()
+	{
+		var name = GameObject.Name;
+		if ( !ReferenceEquals( _renderToTextureName.Object, name ) ) _renderToTextureName = (name, $"{name}.RenderToTexture");
+		return _renderToTextureName.View;
 	}
 
 	/// <summary>

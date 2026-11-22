@@ -25,6 +25,7 @@ public class SceneCustomObject : SceneObject
 				// Start off with infinite bounds so it will actually get rendered
 				// if the user forgets/doesn't need bounds.
 				native.SetBoundsInfinite();
+				KeepFixedBounds( infinite: true );
 			}
 		}
 	}
@@ -53,7 +54,7 @@ public class SceneCustomObject : SceneObject
 		}
 		catch ( System.Exception e )
 		{
-			Log.Error( e );
+			if ( BorealisGpuErrors.ShouldLog( e ) ) Log.Error( e );
 		}
 	}
 
@@ -70,18 +71,14 @@ public class SceneCustomObject : SceneObject
 	{
 		RenderOverride?.Invoke( this );
 	}
-}
 
-internal static class SceneCustomObjectRender
-{
-	internal static void RenderObject( ManagedRenderSetup_t setup, SceneCustomObject obj )
+	internal override bool OwnsRenderObject => true;
+
+	internal override Borealis.RenderObject MakeRenderObject( Rendering.ISceneWorldRender render ) => new Rendering.BridgeCustomObject( this );
+
+	internal override void WriteRender( Borealis.RenderObject obj, Rendering.SceneObjectChange change, Rendering.ISceneWorldRender render )
 	{
-		if ( obj is null )
-			return;
-
-		using ( new Graphics.Scope( in setup ) )
-		{
-			obj.RenderInternal();
-		}
+		base.WriteRender( obj, change, render );
+		if ( obj is Borealis.CustomObject custom ) WriteCustom( custom, change );
 	}
 }

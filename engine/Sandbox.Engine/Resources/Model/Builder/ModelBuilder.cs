@@ -4,6 +4,7 @@ namespace Sandbox;
 /// Provides the ability to generate <see cref="Model"/>s at runtime.
 /// A new instance is available from <see cref="Model.Builder"/>.
 /// </summary>
+[Expose]
 public sealed partial class ModelBuilder
 {
 	private string modelName;
@@ -99,8 +100,9 @@ public sealed partial class ModelBuilder
 
 			var resourceName = Resource.FixPath( modelName ).Replace( ':', '_' );
 			resourceName = string.IsNullOrEmpty( resourceName ) ? "sbox_procedural_model" : System.IO.Path.ChangeExtension( resourceName, ".vmdl" );
-			var model = modelBuilder.CreateRuntimeModel( resourceName, true );
-			return Model.FromNative( model, true, modelName );
+			var model = Model.FromNative( modelBuilder.CreateRuntimeModel( resourceName, true ), true, modelName );
+			if ( model is not null ) model.BuilderMeshes = appliedMeshes;
+			return model;
 		}
 		finally
 		{

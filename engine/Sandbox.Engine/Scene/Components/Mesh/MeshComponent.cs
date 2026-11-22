@@ -8,14 +8,16 @@ namespace Sandbox;
 /// An editable polygon mesh with collision
 /// </summary>
 [Hide, Expose]
-public sealed class MeshComponent : Collider, ExecuteInEditor, ITintable, IMaterialSetter
+public sealed partial class MeshComponent : Collider, ExecuteInEditor, ITintable, IMaterialSetter
 {
 	[Expose]
 	public enum CollisionType
 	{
 		None,
 		Mesh,
-		Hull
+		Hull,
+		Sphere = 4,
+		Capsule
 	}
 
 	[Property, Hide]
@@ -74,6 +76,11 @@ public sealed class MeshComponent : Collider, ExecuteInEditor, ITintable, IMater
 		}
 	}
 
+	/// <summary>
+	/// Scene object tag for Hide In Game meshes in the editor, excluded from envmap and indirect light volume bakes.
+	/// </summary>
+	internal const string HideInGameTag = "hide_in_game";
+
 	[Property, Order( 4 )]
 	public bool HideInGame
 	{
@@ -86,7 +93,10 @@ public sealed class MeshComponent : Collider, ExecuteInEditor, ITintable, IMater
 			field = value;
 
 			if ( Scene.IsEditor )
+			{
+				UpdateSceneObjectTags();
 				return;
+			}
 
 			if ( HideInGame )
 			{
@@ -116,6 +126,34 @@ public sealed class MeshComponent : Collider, ExecuteInEditor, ITintable, IMater
 			}
 		}
 	} = ShadowRenderType.On;
+
+	/// <summary>Draw order for overlapping overlay surfaces.</summary>
+	[Property, Category( "Rendering" )]
+	public int RenderOrder
+	{
+		get;
+		set
+		{
+			if ( field == value ) return;
+			field = value;
+			if ( _sceneObject.IsValid() )
+				_sceneObject.Attributes.Set( "RenderOrder", value );
+		}
+	}
+
+	/// <summary>Hide this surface when rendering in low quality mode.</summary>
+	[Property, Category( "Rendering" )]
+	public bool DisabledInLowQuality
+	{
+		get;
+		set
+		{
+			if ( field == value ) return;
+			field = value;
+			if ( _sceneObject.IsValid() )
+				_sceneObject.Flags.SetFlag( Rendering.SceneObjectFlags.DisabledInLowQuality, value );
+		}
+	}
 
 	[JsonIgnore, Hide]
 	public Model Model { get; private set; }
@@ -165,6 +203,8 @@ public sealed class MeshComponent : Collider, ExecuteInEditor, ITintable, IMater
 
 	void DeleteSceneObject()
 	{
+		DeleteEditorRenderData();
+
 		if ( !_sceneObject.IsValid() ) return;
 
 		_sceneObject.RenderingEnabled = false;
@@ -208,10 +248,7 @@ public sealed class MeshComponent : Collider, ExecuteInEditor, ITintable, IMater
 	{
 		base.OnTagsChanged();
 
-		if ( _sceneObject.IsValid() )
-		{
-			_sceneObject.Tags.SetFrom( Tags );
-		}
+		UpdateSceneObjectTags();
 	}
 
 	internal override void TransformChanged( GameTransform root )
@@ -220,16 +257,40 @@ public sealed class MeshComponent : Collider, ExecuteInEditor, ITintable, IMater
 		{
 			_sceneObject.Transform = WorldTransform;
 		}
+		if ( Scene.IsEditor )
+		{
+			UpdateEditorRenderState();
+			EditorRenderDataChanged?.Invoke();
+		}
 
 		if ( Mesh is not null && Scene.IsEditor )
 		{
 			// Compute face texture parameters on transform change but don't rebuild mesh now.
 			var wasDirty = Mesh.IsDirty;
 			Mesh.Transform = WorldTransform;
-			Mesh.IsDirty = wasDirty;
+			if ( !wasDirty )
+				Mesh.IsDirty = false;
 		}
 
 		base.TransformChanged( root );
+	}
+
+	internal override void ApplyShapeSurfaces()
+	{
+		if ( Shapes.Count == 0 ) return;
+
+		// PolygonMesh emits one shape per physics part, in model order.
+		var index = 0;
+		foreach ( var body in Model.Physics.Parts )
+		{
+			foreach ( var part in body.Parts )
+			{
+				var shape = Shapes[index++];
+				shape.Surface = Surface ?? part.Surface;
+				if ( part is PhysicsGroupDescription.BodyPart.MeshPart mesh && shape._shape is PhysicsShape3d physics )
+					physics.SetSurfaces( mesh.Surfaces, Surface );
+			}
+		}
 	}
 
 	protected override IEnumerable<PhysicsShape> CreatePhysicsShapes( PhysicsBody targetBody, Transform local )
@@ -250,12 +311,33 @@ public sealed class MeshComponent : Collider, ExecuteInEditor, ITintable, IMater
 			{
 				foreach ( var mesh in part.Meshes )
 				{
-					var shape = targetBody.AddShape( mesh, bx, false, true );
+					PhysicsShape shape;
+					using ( targetBody._body.UseShapeSurface( mesh.Surface, mesh.Surfaces ) )
+					{
+						shape = targetBody.AddShape( mesh, bx, false, true );
+					}
 					Assert.NotNull( shape, "Mesh shape was null" );
 
-					shape.Surface = mesh.Surface;
-					shape.Surfaces = mesh.Surfaces;
-
+					yield return shape;
+				}
+			}
+			else if ( Collision == CollisionType.Sphere )
+			{
+				foreach ( var sphere in part.Spheres )
+				{
+					PhysicsShape shape;
+					using ( targetBody._body.UseShapeSurface( sphere.Surface ) )
+						shape = targetBody.AddSphereShape( bx.PointToWorld( sphere.Sphere.Center ), sphere.Sphere.Radius * MathF.Abs( bx.UniformScale ) );
+					yield return shape;
+				}
+			}
+			else if ( Collision == CollisionType.Capsule )
+			{
+				foreach ( var capsule in part.Capsules )
+				{
+					PhysicsShape shape;
+					using ( targetBody._body.UseShapeSurface( capsule.Surface ) )
+						shape = targetBody.AddCapsuleShape( bx.PointToWorld( capsule.Capsule.CenterA ), bx.PointToWorld( capsule.Capsule.CenterB ), capsule.Capsule.Radius * MathF.Abs( bx.UniformScale ) );
 					yield return shape;
 				}
 			}
@@ -263,9 +345,12 @@ public sealed class MeshComponent : Collider, ExecuteInEditor, ITintable, IMater
 			{
 				foreach ( var hull in part.Hulls )
 				{
-					var shape = targetBody.AddShape( hull, bx );
+					PhysicsShape shape;
+					using ( targetBody._body.UseShapeSurface( hull.Surface ) )
+					{
+						shape = targetBody.AddShape( hull, bx );
+					}
 					Assert.NotNull( shape, "Hull shape was null" );
-					shape.Surface = hull.Surface;
 					yield return shape;
 				}
 			}
@@ -335,11 +420,37 @@ public sealed class MeshComponent : Collider, ExecuteInEditor, ITintable, IMater
 	{
 		if ( !_sceneObject.IsValid() ) return;
 
+		if ( Scene.IsEditor )
+		{
+			UpdateEditorRenderData();
+		}
+
 		_sceneObject.Component = this;
-		_sceneObject.Tags.SetFrom( GameObject.Tags );
+		UpdateSceneObjectTags();
 		_sceneObject.ColorTint = Color;
+		if ( RenderOrder != 0 ) _sceneObject.Attributes.Set( "RenderOrder", RenderOrder );
+		if ( DisabledInLowQuality ) _sceneObject.Flags.SetFlag( Rendering.SceneObjectFlags.DisabledInLowQuality, true );
 		_sceneObject.Flags.CastShadows = RenderType == ShadowRenderType.On || RenderType == ShadowRenderType.ShadowsOnly;
 		_sceneObject.Flags.ExcludeGameLayer = RenderType == ShadowRenderType.ShadowsOnly;
 		_sceneObject.Flags.IsStatic = GameObject.IsStatic;
+	}
+
+	/// <summary>
+	/// Hide In Game meshes still render in the editor, tag them so editor bakes (envmaps, indirect light volumes) can leave them out.
+	/// </summary>
+	void UpdateSceneObjectTags()
+	{
+		if ( !_sceneObject.IsValid() ) return;
+
+		_sceneObject.Tags.SetFrom( GameObject.Tags );
+
+		if ( HideInGame )
+			_sceneObject.Tags.Add( HideInGameTag );
+
+		if ( Scene.IsEditor )
+		{
+			_sceneObject.Tags.Add( "editor_mesh" );
+			UpdateEditorRenderState();
+		}
 	}
 }

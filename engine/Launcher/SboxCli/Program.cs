@@ -158,7 +158,8 @@ internal static class Program
 				if ( process is null )
 				{
 					cancellation.ThrowIfCancellationRequested();
-					var executable = Path.Combine( options.EngineDirectory, options.Mode == "--project" ? "sbox-dev.exe" : "sbox.exe" );
+					var extension = OperatingSystem.IsWindows() ? ".exe" : "";
+					var executable = Path.Combine( options.EngineDirectory, (options.Mode == "--project" ? "sbox-dev" : "sbox") + extension );
 					if ( !File.Exists( executable ) )
 						throw new FileNotFoundException( "Engine executable not found. Use --engine to specify the game directory.", executable );
 
@@ -410,7 +411,7 @@ internal static class Program
 	}
 
 	static NamedPipeClientStream CreatePipe( Process process ) => new( ".",
-		McpWire.PipeName( process.Id, process.StartTime.ToUniversalTime().Ticks ), PipeDirection.InOut,
+		McpWire.PipeName( process ), PipeDirection.InOut,
 		PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly );
 
 	static void VerifyServer( NamedPipeClientStream pipe, int pid )

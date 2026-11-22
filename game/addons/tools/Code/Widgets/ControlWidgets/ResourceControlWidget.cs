@@ -198,6 +198,11 @@ public class ResourceControlWidget : ControlWidget
 		picker.Show();
 
 		picker.SetSelection( asset );
+
+		if ( SerializedProperty.TryGetAttribute<AssetHintAttribute>( out var hint ) )
+		{
+			picker.SetSearchText( hint.Pattern );
+		}
 	}
 
 	private void UpdateFromAsset( Asset asset )
@@ -341,7 +346,16 @@ public class ResourceControlWidget : ControlWidget
 
 	async Task DroppedUrl( string identUrl )
 	{
-		var asset = await AssetSystem.InstallAsync( identUrl );
+		Asset asset;
+		try
+		{
+			asset = await AssetSystem.InstallAsync( identUrl );
+		}
+		catch ( AggregateException ex )
+		{
+			Log.Warning( ex, $"Error installing dropped package {identUrl}" );
+			return;
+		}
 
 		if ( !CanAssignAssetType( asset ) )
 			return;

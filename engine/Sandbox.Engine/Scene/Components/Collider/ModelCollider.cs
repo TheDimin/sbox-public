@@ -1,4 +1,4 @@
-﻿namespace Sandbox;
+namespace Sandbox;
 
 /// <summary>
 /// Defines a collider based on a model.
@@ -39,6 +39,8 @@ public class ModelCollider : Collider, IHasModel
 
 	internal override void UpdateShape()
 	{
+		var body = PhysicsBody;
+		using var mass = body.IsValid() ? body._body.BatchMassUpdates() : default;
 		base.UpdateShape();
 
 		// Because we rebuild the physics shapes, allow rigidbody to apply their properties.
@@ -56,31 +58,7 @@ public class ModelCollider : Collider, IHasModel
 
 		Gizmo.Draw.Color = Gizmo.Colors.Green;
 
-		foreach ( var part in Model.Physics.Parts )
-		{
-			using ( Gizmo.Scope( $"part {part.GetHashCode()}", part.Transform ) )
-			{
-				foreach ( var sphere in part.Spheres )
-				{
-					Gizmo.Draw.LineSphere( sphere.Sphere );
-				}
-
-				foreach ( var capsule in part.Capsules )
-				{
-					Gizmo.Draw.LineCapsule( capsule.Capsule );
-				}
-
-				foreach ( var hull in part.Hulls )
-				{
-					Gizmo.Draw.Lines( hull.GetLines() );
-				}
-
-				foreach ( var mesh in part.Meshes )
-				{
-					Gizmo.Draw.LineTriangles( mesh.GetTriangles() );
-				}
-			}
-		}
+		Gizmo.Draw.PhysicsOutline( Model.Physics );
 	}
 
 	protected override IEnumerable<PhysicsShape> CreatePhysicsShapes( PhysicsBody targetBody, Transform local )
@@ -102,18 +80,24 @@ public class ModelCollider : Collider, IHasModel
 
 			foreach ( var sphere in part.Spheres )
 			{
-				var shape = targetBody.AddSphereShape( bx.PointToWorld( sphere.Sphere.Center ), sphere.Sphere.Radius * bx.UniformScale );
+				PhysicsShape shape;
+				using ( targetBody._body.UseShapeSurface( sphere.Surface ) )
+				{
+					shape = targetBody.AddSphereShape( bx.PointToWorld( sphere.Sphere.Center ), sphere.Sphere.Radius * bx.UniformScale );
+				}
 				Assert.NotNull( shape, "Sphere shape was null" );
-				shape.Surface = sphere.Surface;
 				shape.BoneIndex = boneIndex;
 				yield return shape;
 			}
 
 			foreach ( var capsule in part.Capsules )
 			{
-				var shape = targetBody.AddCapsuleShape( bx.PointToWorld( capsule.Capsule.CenterA ), bx.PointToWorld( capsule.Capsule.CenterB ), capsule.Capsule.Radius * bx.UniformScale );
+				PhysicsShape shape;
+				using ( targetBody._body.UseShapeSurface( capsule.Surface ) )
+				{
+					shape = targetBody.AddCapsuleShape( bx.PointToWorld( capsule.Capsule.CenterA ), bx.PointToWorld( capsule.Capsule.CenterB ), capsule.Capsule.Radius * bx.UniformScale );
+				}
 				Assert.NotNull( shape, "Capsule shape was null" );
-				shape.Surface = capsule.Surface;
 				shape.BoneIndex = boneIndex;
 				yield return shape;
 			}
@@ -122,20 +106,25 @@ public class ModelCollider : Collider, IHasModel
 			{
 				foreach ( var hull in part.Hulls )
 				{
-					var shape = targetBody.AddShape( hull, bx );
+					PhysicsShape shape;
+					using ( targetBody._body.UseShapeSurface( hull.Surface ) )
+					{
+						shape = targetBody.AddShape( hull, bx );
+					}
 					Assert.NotNull( shape, "Hull shape was null" );
-					shape.Surface = hull.Surface;
 					shape.BoneIndex = boneIndex;
 					yield return shape;
 				}
 
 				foreach ( var mesh in part.Meshes )
 				{
-					var shape = targetBody.AddShape( mesh, bx, false, true );
+					PhysicsShape shape;
+					using ( targetBody._body.UseShapeSurface( mesh.Surface, mesh.Surfaces ) )
+					{
+						shape = targetBody.AddShape( mesh, bx, false, true );
+					}
 					Assert.NotNull( shape, "Mesh shape was null" );
 
-					shape.Surface = mesh.Surface;
-					shape.Surfaces = mesh.Surfaces;
 					shape.BoneIndex = boneIndex;
 
 					yield return shape;
@@ -147,7 +136,6 @@ public class ModelCollider : Collider, IHasModel
 				{
 					foreach ( var shape in body2d.AddHullPartShapes( hull, bx ) )
 					{
-						shape.Surface = hull.Surface;
 						shape.BoneIndex = boneIndex;
 						yield return shape;
 					}
@@ -157,8 +145,6 @@ public class ModelCollider : Collider, IHasModel
 				{
 					foreach ( var shape in body2d.AddMeshPartShapes( mesh, bx ) )
 					{
-						shape.Surface = mesh.Surface;
-						shape.Surfaces = mesh.Surfaces;
 						shape.BoneIndex = boneIndex;
 						yield return shape;
 					}

@@ -69,6 +69,30 @@ public abstract class ResourceCompileContext
 	public abstract void AddGameFileReference( string path );
 
 	/// <summary>
+	/// Another asset's compiled output this compile reads, by the path of its source (a texture whose pixels are
+	/// copied, a model whose skeleton is used), before reading it. A content build compiles that asset first and
+	/// rebuilds this one when it changes. Declare every one even while <see cref="Describing"/>.
+	/// </summary>
+	public abstract void AddCompiledReference( string path );
+
+	/// <summary>
+	/// A content build is asking what this compile reads before anything is built: declare the compiled outputs it
+	/// reads with <see cref="AddCompiledReference"/>, then return without doing the work. Anything written is discarded.
+	/// </summary>
+	public abstract bool Describing { get; }
+
+	/// <summary>
+	/// The compile fails, whatever the compiler returns: something it had to do (a child, an embedded resource) didn't happen.
+	/// </summary>
+	internal abstract void Fail( string error );
+
+	/// <summary>
+	/// A named string in the compiled resource's edit data, which tools read and the game doesn't load (a material's
+	/// <c>VSInputSignature</c>, which the model compiler lays meshes out by).
+	/// </summary>
+	internal virtual void AddEditData( string name, string value ) { }
+
+	/// <summary>
 	/// Get the streaming data to write to
 	/// </summary>
 	public DataStream StreamingData { get; internal set; }
@@ -87,6 +111,46 @@ public abstract class ResourceCompileContext
 	/// Load the json and scan it for paths or any embedded resources
 	/// </summary>
 	public abstract string ScanJson( string json );
+
+	/// <summary>
+	/// <see cref="ScanJson"/>, awaiting the embedded resources it generates (see <see cref="CompileChild"/>) rather than
+	/// blocking on them (<see cref="Child.CompileAsync"/>). They're compiled when it returns.
+	/// </summary>
+	internal async Task<string> ScanJsonAsync( string json )
+	{
+		deferred = [];
+		List<(Child Child, string Path)> children;
+		try
+		{
+			json = ScanJson( json );
+		}
+		finally
+		{
+			children = deferred;
+			deferred = null;
+		}
+
+		foreach ( var (child, path) in children )
+		{
+			if ( !await child.CompileAsync() ) Fail( $"Couldn't generate {path}" );
+		}
+		return json;
+	}
+
+	/// <summary>
+	/// Compiles a generated child now, or once <see cref="ScanJsonAsync"/> scanning it is done. False if it failed.
+	/// </summary>
+	internal bool CompileChild( Child child, string path )
+	{
+		if ( deferred is not null )
+		{
+			deferred.Add( (child, path) );
+			return true;
+		}
+		return child.Compile();
+	}
+
+	List<(Child Child, string Path)> deferred;
 
 	/// <summary>
 	/// Read the source, either from in memory, or from disk
@@ -178,6 +242,11 @@ public abstract class ResourceCompileContext
 	public abstract class Child
 	{
 		public abstract bool Compile();
+
+		/// <summary>
+		/// <see cref="Compile"/>, awaited where the compile can let its thread go meanwhile.
+		/// </summary>
+		internal virtual Task<bool> CompileAsync() => Task.FromResult( Compile() );
 		public abstract void SetInputData( string data );
 	}
 

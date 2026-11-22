@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Sandbox.Engine;
+using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 
@@ -36,6 +37,7 @@ public struct NetDictionaryChangeEvent<TKey, TValue>
 /// </code>
 /// </para>
 /// </summary>
+[Expose]
 public sealed class NetDictionary<TKey, TValue> : INetworkSerializer, INetworkReliable, INetworkProperty, IDisposable, IDictionary, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
 {
 	/// <summary>
@@ -417,6 +419,9 @@ public sealed class NetDictionary<TKey, TValue> : INetworkSerializer, INetworkRe
 		if ( !CanWriteChanges() )
 			return;
 
+		if ( Parent is INetworkWakeable networkWakeable )
+			networkWakeable.MarkDirty();
+
 		if ( e.Action == NotifyCollectionChangedAction.Add )
 		{
 			var (k, v) = (KeyValuePair<TKey, TValue>)e.NewItems[0];
@@ -443,13 +448,13 @@ public sealed class NetDictionary<TKey, TValue> : INetworkSerializer, INetworkRe
 
 	private static T ReadValue<T>( ref ByteStream data )
 	{
-		var value = Game.TypeLibrary.FromBytes<object>( ref data );
+		var value = GlobalContext.Current.TypeLibrary.FromBytes<object>( ref data );
 		return (T)value;
 	}
 
 	private static void WriteValue( object value, ref ByteStream data )
 	{
-		Game.TypeLibrary.ToBytes( value, ref data );
+		GlobalContext.Current.TypeLibrary.ToBytes( value, ref data );
 	}
 
 	private bool CanWriteChanges() => !Parent?.IsProxy ?? true;

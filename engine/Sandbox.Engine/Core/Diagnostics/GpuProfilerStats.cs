@@ -20,6 +20,10 @@ public static class GpuProfilerStats
 	private static readonly Dictionary<uint, Sample> _samples = new();
 	private static readonly List<uint> _prune = new();
 
+	// Scope names by StableId, decoded from native once instead of allocated per row every frame. The id already
+	// identifies the scope - the smoothed timings and the overlay's rows are keyed by it - so its name doesn't change.
+	private static readonly Dictionary<uint, (string Name, int LastSeenFrame)> _names = new();
+
 	private struct Sample
 	{
 		public float Smoothed;
@@ -44,11 +48,10 @@ public static class GpuProfilerStats
 				return;
 
 			_enabled = value;
-			NativeEngine.CSceneSystem.SetGPUProfilerMode( value ? NativeEngine.SceneSystemGPUProfilerMode.SCENE_GPU_PROFILER_TIMESTAMP_ONLY : NativeEngine.SceneSystemGPUProfilerMode.SCENE_GPU_PROFILER_DISABLE );
-
 			if ( !value )
 			{
 				_samples.Clear();
+				_names.Clear();
 				_paths = null;
 			}
 		}
@@ -78,7 +81,19 @@ public static class GpuProfilerStats
 	internal static ulong FrameId { get; private set; }
 	internal static string Renderer { get; private set; } = "unknown";
 	internal static ReadOnlySpan<Row> Rows => System.Runtime.InteropServices.CollectionsMarshal.AsSpan( _rows );
+
+	/// <summary>
+	/// Borealis.Gpu's scopes of the last read frame, in the order of <see cref="Rows"/>.
+	/// </summary>
+	internal static ReadOnlySpan<GpuScope> Scopes => System.Runtime.InteropServices.CollectionsMarshal.AsSpan( _borealisScopes );
 	internal static Row GetRow( int index ) => _rows[index];
+
+	/// <summary>
+	/// The graphics queue's measured passes this frame, added up: the time it was busy. Leaf passes on one queue
+	/// don't overlap, so this is close to the frame's GPU time where nothing times the whole frame - the editor draws
+	/// into widget swap chains, and only a main window's frame is timed.
+	/// </summary>
+	internal static float BusyMs { get; private set; }
 
 	internal static float GetSmoothedDuration( uint stableId ) => _samples.TryGetValue( stableId, out var s ) ? s.Smoothed : 0f;
 	internal static float GetMaxDuration( uint stableId ) => _samples.TryGetValue( stableId, out var s ) ? s.Max : 0f;
@@ -89,6 +104,7 @@ public static class GpuProfilerStats
 		{
 			FrameId = 0;
 			Renderer = "unknown";
+			BusyMs = 0;
 			_rows.Clear();
 			_paths = null;
 			return;
@@ -100,55 +116,118 @@ public static class GpuProfilerStats
 		}
 
 		_frame++;
+
+		// Borealis.Gpu's lists and passes (the busy-time pass timer's); a process without it draws nothing to time
+		if ( RenderBackend.Default is BorealisGpuRenderBackend borealis )
+		{
+			UpdateFromBorealis( borealis );
+			return;
+		}
+
+		FrameId = 0;
+		Renderer = "none";
+		BusyMs = 0;
 		_rows.Clear();
 		_paths = null;
+	}
 
-		NativeEngine.CSceneSystem.RefreshGpuTimestampSnapshot();
-		FrameId = NativeEngine.CSceneSystem.GetGpuTimestampFrameId();
-		Renderer = NativeEngine.CSceneSystem.GetGpuTimestampRenderer() switch
+	static void AddSample( uint stableId, float duration, float delta )
+	{
+		if ( _samples.TryGetValue( stableId, out var sample ) )
 		{
-			1 => "native",
-			2 => "managed",
-			3 => "managed-async",
-			_ => "unknown"
-		};
-
-		int count = NativeEngine.CSceneSystem.GetGpuTimestampCount();
-		for ( int i = 0; i < count; i++ )
+			sample.Smoothed = MathX.LerpTo( sample.Smoothed, duration, delta );
+			sample.Max = duration > sample.Max ? duration : MathX.LerpTo( sample.Max, duration, delta * 0.25f );
+		}
+		else
 		{
-			var row = new Row
+			sample.Smoothed = duration;
+			sample.Max = duration;
+		}
+
+		sample.LastSeenFrame = _frame;
+		_samples[stableId] = sample;
+	}
+
+	/// <summary>A timed GPU scope of another device's frame: a command list, or a pass or other work inside one.</summary>
+	internal readonly record struct GpuScope( string Name, bool List, double Start, double End )
+	{
+		public double Ms => End - Start;
+	}
+
+	static ulong _borealisFrame;
+	static RealTimeSince _sinceBorealisFrame;
+	static readonly List<GpuScope> _borealisScopes = new();
+	static readonly List<int> _borealisOpen = new();
+	static readonly Dictionary<string, int> _borealisSeen = new();
+
+	/// <summary>
+	/// Rows from Borealis.Gpu's last read frame (<see cref="BuildRows"/>). Kept between reads (one every few frames), so the
+	/// rows and their smoothing only move when a new frame was read.
+	/// </summary>
+	static void UpdateFromBorealis( BorealisGpuRenderBackend borealis )
+	{
+		Renderer = "borealis";
+		var frame = borealis.GpuBusyFrame;
+		if ( frame == _borealisFrame )
+		{
+			// Keep the rows' samples from being pruned while no new frame is read
+			foreach ( var row in _rows )
 			{
-				Name = NativeEngine.CSceneSystem.GetGpuTimestampName( i ),
-				Parent = NativeEngine.CSceneSystem.GetGpuTimestampParent( i ),
-				StableId = NativeEngine.CSceneSystem.GetGpuTimestampStableId( i ),
-				Measured = NativeEngine.CSceneSystem.GetGpuTimestampMeasured( i ),
-				Unparented = NativeEngine.CSceneSystem.GetGpuTimestampUnparented( i ),
-				Duration = NativeEngine.CSceneSystem.GetGpuTimestampDuration( i ),
-			};
-
-			_rows.Add( row );
-
-			if ( !row.Measured )
-				continue;
-
-			var duration = row.Duration;
-
-			if ( _samples.TryGetValue( row.StableId, out var sample ) )
-			{
-				sample.Smoothed = MathX.LerpTo( sample.Smoothed, duration, Time.Delta );
-				sample.Max = duration > sample.Max ? duration : MathX.LerpTo( sample.Max, duration, Time.Delta * 0.25f );
+				if ( !_samples.TryGetValue( row.StableId, out var sample ) ) continue;
+				sample.LastSeenFrame = _frame;
+				_samples[row.StableId] = sample;
 			}
-			else
-			{
-				sample.Smoothed = duration;
-				sample.Max = duration;
-			}
 
-			sample.LastSeenFrame = _frame;
-			_samples[row.StableId] = sample;
+			return;
+		}
+
+		var delta = (float)_sinceBorealisFrame;
+		_sinceBorealisFrame = 0;
+		_borealisFrame = frame;
+		FrameId = frame;
+		_paths = null;
+
+		_borealisScopes.Clear();
+		foreach ( var timing in borealis.GpuBusyTimings )
+			_borealisScopes.Add( new GpuScope( timing.Name, timing.Kind == Borealis.Backend.PassTimer.ScopeKind.List, timing.Start, timing.End ) );
+
+		BuildRows( _borealisScopes, _rows, _borealisOpen, _borealisSeen );
+
+		float busy = 0;
+		for ( int i = 0; i < _rows.Count; i++ )
+		{
+			AddSample( _rows[i].StableId, _rows[i].Duration, delta );
+			if ( _rows[i].Parent < 0 ) busy += _rows[i].Duration;
 		}
 
 		PruneSamples();
+		BusyMs = busy;
+	}
+
+	/// <summary>
+	/// Rows for <paramref name="scopes"/> in the order they began on the GPU: lists at the top, each pass under the list or
+	/// pass it ran inside. A name repeated in a frame (each view's prepass) gets an id per occurrence. Sorts
+	/// <paramref name="scopes"/>; <paramref name="open"/> and <paramref name="seen"/> are scratch. Allocates nothing once they've grown.
+	/// </summary>
+	internal static void BuildRows( List<GpuScope> scopes, List<Row> rows, List<int> open, Dictionary<string, int> seen )
+	{
+		// Outer scopes first where they start together: lists, then the longer scope
+		scopes.Sort( static ( a, b ) => a.Start != b.Start ? a.Start.CompareTo( b.Start ) : a.List != b.List ? (a.List ? -1 : 1) : b.End.CompareTo( a.End ) );
+
+		rows.Clear();
+		open.Clear();
+		seen.Clear();
+		foreach ( var scope in scopes )
+		{
+			while ( open.Count > 0 && scopes[open[^1]].End <= scope.Start ) open.RemoveAt( open.Count - 1 );
+			var parent = open.Count > 0 ? open[^1] : -1;
+
+			seen.TryGetValue( scope.Name, out var count );
+			seen[scope.Name] = count + 1;
+
+			rows.Add( new Row { Name = scope.Name, Parent = parent, StableId = (uint)HashCode.Combine( scope.Name, count, scope.List ), Measured = true, Duration = (float)scope.Ms } );
+			open.Add( rows.Count - 1 );
+		}
 	}
 
 	/// <summary>
@@ -172,6 +251,17 @@ public static class GpuProfilerStats
 
 		foreach ( var key in _prune )
 			_samples.Remove( key );
+
+		_prune.Clear();
+
+		foreach ( var kv in _names )
+		{
+			if ( _frame - kv.Value.LastSeenFrame > window )
+				_prune.Add( kv.Key );
+		}
+
+		foreach ( var key in _prune )
+			_names.Remove( key );
 	}
 
 	private static void UpdateMemoryStats()

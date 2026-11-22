@@ -66,7 +66,7 @@ public partial class Scene : GameObject
 		TimeDelta = timeDelta;
 
 		using var timeScope = Time.PushScope( TimeNow, TimeDelta );
-		using var gizmoScope = gizmoInstance.Push();
+		using var gizmoScope = gizmoInstance.PushScope();
 
 		SharedTick();
 
@@ -206,6 +206,7 @@ public partial class Scene : GameObject
 	/// </summary>
 	void SharedTick()
 	{
+		DispatchLogEvents();
 		Scene.RunEvent<ISceneStage>( x => x.Start() );
 
 		if ( !IsEditor )
@@ -258,6 +259,14 @@ public partial class Scene : GameObject
 			using ( _signalFinishUpdate.Start() )
 			{
 				Signal( GameObjectSystem.Stage.FinishUpdate );
+			}
+		}
+
+		if ( !IsEditor )
+		{
+			using ( PerformanceStats.Timings.Network.Scope() )
+			{
+				SceneNetworkSnapshots();
 			}
 		}
 
@@ -317,7 +326,7 @@ public partial class Scene : GameObject
 		}
 
 		using var timeScope = Time.PushScope( TimeNow, TimeDelta );
-		using var gizmoScope = gizmoInstance?.Push();
+		using var gizmoScope = gizmoInstance?.PushScope();
 
 		using ( PerformanceStats.Timings.Async.Scope() )
 		{

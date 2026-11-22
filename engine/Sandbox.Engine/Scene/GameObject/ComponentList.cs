@@ -1,4 +1,5 @@
-﻿namespace Sandbox;
+﻿using Sandbox.Engine;
+namespace Sandbox;
 
 /// <summary>
 /// Flags to search for Components.
@@ -85,6 +86,10 @@ public enum FindMode
 	EverythingInDescendants = Enabled | Disabled | InDescendants,
 }
 
+/// <summary>
+/// Provides access to a game object's components and methods to create and find them.
+/// </summary>
+[Expose]
 public class ComponentList
 {
 	readonly GameObject go;
@@ -168,7 +173,7 @@ public class ComponentList
 		using var batch = CallbackBatch.Batch();
 
 		// TypeLibrary caches a compiled parameterless factory, much cheaper than Activator.CreateInstance
-		var t = Game.TypeLibrary?.GetType( type )?.Create<Component>() ?? (Component)Activator.CreateInstance( type );
+		var t = GlobalContext.Current.TypeLibrary?.GetType( type )?.Create<Component>() ?? (Component)Activator.CreateInstance( type );
 
 		t.GameObject = go;
 		_list.Add( t );
@@ -216,7 +221,10 @@ public class ComponentList
 	/// </summary>
 	public IEnumerable<T> GetAll<T>( FindMode find = FindMode.InSelf | FindMode.Enabled | FindMode.InDescendants )
 	{
-		if ( go.IsDestroyed ) return Enumerable.Empty<T>();
+		if ( go.IsDestroyed
+			|| (find.Contains( FindMode.Enabled ) && !find.Contains( FindMode.Disabled ) && !go.Enabled)
+			|| (Count == 0 && go.Children.Count == 0 && (find & (FindMode.InParent | FindMode.InAncestors)) == 0) )
+			return Enumerable.Empty<T>();
 
 		var results = new List<T>( 16 );
 
@@ -452,6 +460,41 @@ public class ComponentList
 			if ( !child.IsValid() ) continue;
 
 			child.Components.ExecuteEnabledInSelfAndDescendants( state, action );
+		}
+	}
+
+	internal delegate void RefAction<T, TState>( T target, ref TState state );
+
+	// Ref state variant, for listeners that modify the state (like OnEyeAngles)
+	internal void ExecuteEnabledInSelfAndDescendants<T, TState>( ref TState state, RefAction<T, TState> action )
+	{
+		if ( !go.IsValid() || !go.Enabled ) return;
+
+		if ( _internalList is not null )
+		{
+			// Check components on this GameObject
+			for ( int i = 0; i < _list.Count; i++ )
+			{
+				var component = _list[i];
+				if ( component is null ) continue;
+
+				if ( component is T target && component.Active )
+				{
+					action.Invoke( target, ref state );
+				}
+			}
+		}
+
+		// Recurse to children
+		for ( int i = go.Children.Count - 1; i >= 0; i-- )
+		{
+			if ( i >= go.Children.Count )
+				continue;
+
+			var child = go.Children[i];
+			if ( !child.IsValid() ) continue;
+
+			child.Components.ExecuteEnabledInSelfAndDescendants( ref state, action );
 		}
 	}
 

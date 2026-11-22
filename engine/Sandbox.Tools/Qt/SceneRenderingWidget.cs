@@ -10,8 +10,17 @@ public class SceneRenderingWidget : Frame
 {
 	private static readonly HashSet<SceneRenderingWidget> All = new();
 
-	internal SwapChainHandle_t SwapChain;
 	bool renderingStopped;
+	bool renderFailed;
+
+	// The widget presents on Borealis.Gpu, a swap chain on its native window (docs/reference/borealis-gpu-path.md, the editor)
+	BorealisGpuWindow borealis;
+
+	// Qt changed the widget's native window id since the last frame (FollowNativeWindow)
+	bool winIdChanged;
+
+	/// <summary>The texture the widget's last frame on Borealis.Gpu was drawn into, as it was presented.</summary>
+	internal Texture BorealisGpuTarget => borealis?.Target;
 
 	/// <summary>
 	/// The active scene that we're rendering
@@ -30,6 +39,38 @@ public class SceneRenderingWidget : Frame
 
 	public bool EnableEngineOverlays { get; set; } = false;
 
+	protected override void OnMousePress( MouseEvent e )
+	{
+		QueueGizmoPointerEvent( e, true );
+		base.OnMousePress( e );
+	}
+
+	protected override void OnMouseReleased( MouseEvent e )
+	{
+		QueueGizmoPointerEvent( e, false );
+		base.OnMouseReleased( e );
+	}
+
+	protected override void OnBlur( FocusChangeReason reason )
+	{
+		GizmoInstance.CancelPointerInput();
+		base.OnBlur( reason );
+	}
+
+	void QueueGizmoPointerEvent( MouseEvent e, bool pressed )
+	{
+		if ( !e.LeftMouseButton || GetSceneCamera() is not { } camera ) return;
+		var input = GizmoInstance.Input;
+		input.Camera = camera;
+		input.CursorPosition = e.LocalPosition;
+		input.CursorRay = camera.GetRay( e.LocalPosition, Size );
+		input.Modifiers = e.KeyboardModifiers;
+		input.IsHovered = LocalRect.IsInside( e.LocalPosition );
+		input.LeftMouse = pressed;
+		input.DoubleClick = e.IsDoubleClick;
+		GizmoInstance.QueuePointerEvent( input );
+	}
+
 	// Track if we've locked this widget's size for recording
 	private bool _sizeLockedForRecording;
 	private Vector2 _savedMinSize;
@@ -43,12 +84,13 @@ public class SceneRenderingWidget : Frame
 		SetFlag( Flag.WA_OpaquePaintEvent, true );
 
 		// On Linux/XWayland, Qt's software paint cycle fires on mouse-enter and click
-		// expose events, briefly clearing the native window before the next SwapChain
+		// expose events, briefly clearing the native window before the next swap chain
 		// present and causing a visible flash. Since all rendering goes through the
-		// SwapChain, the Qt paint path serves no purpose and can be suppressed entirely.
+		// swap chain, the Qt paint path serves no purpose and can be suppressed entirely.
 		OnPaintOverride = () => true;
 
-		SwapChain = WidgetUtil.CreateSwapChain( _widget, RenderSettings.Instance.AntiAliasQuality.ToEngine() );
+		borealis = BorealisGpuWindow.FromNativeWindow( (BorealisGpuRenderBackend)RenderBackend.Default, _widget.winId(), Size * DpiScale, vsync: false );
+		if ( borealis is not null ) borealis.Samples = SampleCount( RenderSettings.Instance.AntiAliasQuality.ToEngine() );
 		RenderSettings.Instance.OnVideoSettingsChanged += HandleVideoChanged;
 
 		FocusMode = FocusMode.Click; // If we're focused we're probably accepting input, don't let tab blur us
@@ -63,6 +105,38 @@ public class SceneRenderingWidget : Frame
 	}
 
 	internal override void NativeDestroying() => ReleaseSwapChain();
+
+	/// <summary>
+	/// Qt reset the widget's native window id or gave it one: it was reparented (a widget made without a parent, then put
+	/// in a layout), docked or undocked. The id isn't asked for here: <c>winId()</c> makes the window again while Qt is
+	/// between the two, sending this event again inside this one, and both made a swap chain on the one window. The next
+	/// frame looks (<see cref="FollowNativeWindow"/>).
+	/// </summary>
+	internal override void OnWinIdChanged()
+	{
+		base.OnWinIdChanged();
+		winIdChanged = true;
+	}
+
+	/// <summary>
+	/// After Qt changed the widget's native window id: keep the swap chain when the window is still the one it presents
+	/// to (a reparent keeps it), or move it to the new one. False with nothing to present to.
+	/// </summary>
+	bool FollowNativeWindow()
+	{
+		if ( !winIdChanged || renderingStopped ) return borealis is not null;
+		winIdChanged = false;
+
+		var window = _widget.winId();
+		if ( borealis is not null && borealis.NativeWindow == window ) return true;
+
+		var samples = borealis?.Samples ?? SampleCount( RenderSettings.Instance.AntiAliasQuality.ToEngine() );
+		borealis?.Dispose();
+		borealis = null;
+		borealis = BorealisGpuWindow.MoveToNativeWindow( (BorealisGpuRenderBackend)RenderBackend.Default, window, Size * DpiScale );
+		if ( borealis is not null ) borealis.Samples = samples;
+		return borealis is not null;
+	}
 
 	internal static void ShutdownRendering()
 	{
@@ -80,12 +154,9 @@ public class SceneRenderingWidget : Frame
 
 		RenderSettings.Instance.OnVideoSettingsChanged -= HandleVideoChanged;
 
-		if ( SwapChain == default ) return;
-		// Finish outstanding rendering while the native window is still alive.
-		g_pRenderDevice.Flush();
-		g_pRenderDevice.ForceFlushGPU( SwapChain );
-		g_pRenderDevice.DestroySwapChain( SwapChain );
-		SwapChain = default;
+		// Destroying the swap chain waits for the device: the native window is still alive
+		borealis?.Dispose();
+		borealis = null;
 	}
 
 	internal override void NativeShutdown()
@@ -121,7 +192,7 @@ public class SceneRenderingWidget : Frame
 		if ( !this.IsValid() )
 			return;
 
-		if ( SwapChain == default ) return;
+		if ( borealis is null ) return;
 
 		var sceneCamera = GetSceneCamera();
 		if ( sceneCamera is not null )
@@ -154,11 +225,11 @@ public class SceneRenderingWidget : Frame
 		if ( Camera.IsValid() )
 		{
 			Camera.Scene?.PreCameraRender();
-			Camera.AddToRenderList( SwapChain, Size * DpiScale );
+			Camera.AddToRenderList( default, Size * DpiScale );
 		}
 		else if ( Scene.IsValid() )
 		{
-			Scene.Render( SwapChain, Size * DpiScale );
+			Scene.Render( default, Size * DpiScale );
 		}
 	}
 
@@ -181,7 +252,12 @@ public class SceneRenderingWidget : Frame
 		var camera = GetSceneCamera();
 		if ( camera is null ) return;
 
+		var component = Camera.IsValid() ? Camera : Scene.Camera;
+		component.UpdateSceneCameraTransform( camera );
+
 		UpdateGizmoInputs( ref GizmoInstance.Input, camera, hasMouseFocus );
+		if ( Gizmo.Active == GizmoInstance )
+			GizmoInstance.RefreshInput();
 	}
 
 	void Render()
@@ -189,26 +265,48 @@ public class SceneRenderingWidget : Frame
 		if ( !Scene.IsValid() ) return;
 		if ( !Visible ) return;
 
-		if ( SwapChain == default ) return;
+		if ( FollowNativeWindow() ) RenderOnBorealisGpu();
+	}
 
-		using ( Scene.Push() )
+	/// <summary>
+	/// A frame on Borealis.Gpu, as the game window draws one: the camera (or the scene's) draws into the widget's target
+	/// (<see cref="BorealisGpuWindow.Drawing"/>), then the play widget's overlay, in the block that copies it into the
+	/// acquired image, which is presented straight after. A widget with no pixels draws nothing.
+	/// </summary>
+	void RenderOnBorealisGpu()
+	{
+		using var _ = FrameTiming.Scope();
+		if ( !borealis.Update( Size * DpiScale ) ) return;
+
+		var play = GameMode.IsPlayWidget( this );
+		using ( Scene.PushScope() )
 		{
-			using ( GizmoInstance.Push() )
+			using ( GizmoInstance.PushScope() )
 			{
 				PreFrame();
-				RenderScene();
+				if ( !borealis.BeginFrame( Color.Black ) ) return;
+
+				try
+				{
+					RenderScene();
+				}
+				finally
+				{
+					borealis.EndFrame( play ? Graphics.RenderOverlay : NoOverlay, screenshots: play );
+				}
 			}
 		}
 
-		if ( SwapChain == default ) return;
-
-		if ( GameMode.IsPlayWidget( this ) )
-		{
-			CCameraRenderer.RenderOverlay( SwapChain );
-		}
-
-		g_pRenderDevice.Present( SwapChain );
+		borealis.PresentFrame();
 	}
+
+	static readonly Action NoOverlay = () => { };
+
+	// Where a widget's frame on Borealis.Gpu goes, in the dev tools' timings
+	static readonly Sandbox.Diagnostics.PerformanceStats.Timings FrameTiming = Sandbox.Diagnostics.PerformanceStats.Timings.Get( "Borealis.Gpu widget" );
+
+	/// <summary>Samples per pixel the widget's scenes render with on Borealis.Gpu: the setting, as the device allows it.</summary>
+	static int SampleCount( NativeEngine.RenderMultisampleType multisample ) => Graphics.RenderMultiSampleToNum( NativeEngine.RenderDeviceManager.GetBestMultisampleType( multisample ) );
 
 	private void UpdateGizmoInputs( ref Gizmo.Inputs input, SceneCamera camera, bool hasMouseFocus )
 	{
@@ -219,6 +317,9 @@ public class SceneRenderingWidget : Frame
 
 		if ( !hasMouseFocus )
 		{
+			GizmoInstance.CancelPointerInput();
+			input.LeftMouse = false;
+			input.RightMouse = false;
 			input.CursorRay = new Ray();
 			return;
 		}
@@ -230,11 +331,6 @@ public class SceneRenderingWidget : Frame
 		input.CursorPosition -= ScreenPosition;
 		input.CursorRay = camera.GetRay( input.CursorPosition, Size );
 
-		if ( !input.IsHovered )
-		{
-			input.LeftMouse = false;
-			input.RightMouse = false;
-		}
 	}
 
 	private SceneCamera GetSceneCamera()
@@ -276,13 +372,7 @@ public class SceneRenderingWidget : Frame
 		if ( renderingStopped ) return;
 		var aa = RenderSettings.Instance.AntiAliasQuality.ToEngine();
 
-		if ( SwapChain == default )
-		{
-			SwapChain = WidgetUtil.CreateSwapChain( _widget, aa );
-			return;
-		}
-
-		WidgetUtil.UpdateSwapChainMSAA( SwapChain, aa );
+		if ( borealis is not null ) borealis.Samples = SampleCount( aa );
 	}
 
 	internal static void RenderAll()
@@ -291,7 +381,16 @@ public class SceneRenderingWidget : Frame
 		{
 			if ( !widget.Visible ) continue;
 
-			widget.Render();
+			try
+			{
+				widget.Render();
+			}
+			catch ( Exception e )
+			{
+				if ( widget.renderFailed ) continue;
+				widget.renderFailed = true;
+				Log.Error( e, $"Exception rendering {widget.Scene}" );
+			}
 		}
 	}
 }

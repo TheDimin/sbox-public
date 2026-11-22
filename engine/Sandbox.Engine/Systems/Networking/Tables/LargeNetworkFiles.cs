@@ -327,19 +327,27 @@ internal class LargeNetworkFiles
 
 	async Task OnRequestNetworkFile( RequestFile file, Connection connection, Guid msgGuid )
 	{
-		var normalizedFileName = NormalizeFileName( file.filename );
-		var fs = fileSources.TryGetValue( normalizedFileName, out var source )
-			? source
-			: EngineFileSystem.Mounted;
-
-		if ( !fs.FileExists( normalizedFileName ) )
+		// The advertised table is the download allowlist. A guessed path must not expose
+		// other mounted files, including server-only scripts excluded from replication.
+		if ( connection.System?.IsHost != true || !AssetDownloadCache.IsLegalDownload( file.filename )
+			|| !StringTable.Entries.TryGetValue( NormalizeFileName( file.filename ), out var entry ) )
 		{
-			Log.Warning( $"Client ({connection.Name}) requested missing file: {file.filename}" );
+			Log.Warning( $"Client ({connection.Name}) requested an unadvertised file: {file.filename}" );
 			connection.SendResponse( msgGuid, Array.Empty<byte>() );
 			return;
 		}
 
-		var contents = await fs.ReadAllBytesAsync( normalizedFileName );
+		var fs = fileSources.TryGetValue( NormalizeFileName( entry.Name ), out var source )
+			? source
+			: EngineFileSystem.Mounted;
+		if ( !fs.FileExists( entry.Name ) )
+		{
+			Log.Warning( $"Client ({connection.Name}) requested missing file: {entry.Name}" );
+			connection.SendResponse( msgGuid, Array.Empty<byte>() );
+			return;
+		}
+
+		var contents = await fs.ReadAllBytesAsync( entry.Name );
 
 		connection.SendResponse( msgGuid, contents );
 	}

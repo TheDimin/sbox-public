@@ -93,14 +93,21 @@ public partial class BaseCombatWeapon
 
 	/// <summary>
 	/// Define the presentation for a resolved shot. Base spawns the surface impact and flies the
-	/// tracer for every pellet, then plays <see cref="AttackSound"/>, fires the holder's "b_attack"
-	/// gesture and runs <see cref="BaseWeaponModel.OnAttack"/> on the shown model (muzzle flash,
+	/// tracer for every pellet, then plays <see cref="AttackSound"/>, posts <see cref="WeaponEvents.Attack"/>
+	/// to the holder and runs <see cref="BaseWeaponModel.OnAttack"/> on the shown model (muzzle flash,
 	/// brass) - those are skipped for <see cref="ShotEffect.NoEvents"/> pellets, which share the lead
-	/// pellet's. Call it when you override. Runs on every peer that should see the shot.
+	/// pellet's. Call it when you override. Runs on every peer that should see the shot. A dedicated
+	/// server plays none of it and only posts the event.
 	/// </summary>
 	protected virtual void OnShootEffects( ShotEffect shot )
 	{
-		if ( Application.IsDedicatedServer ) return;
+		if ( Application.IsDedicatedServer )
+		{
+			if ( !shot.NoEvents )
+				PostWeaponEvent( WeaponEvents.Attack );
+
+			return;
+		}
 
 		// Every pellet leaves its mark, even the NoEvents ones.
 		OnShootImpact( shot );
@@ -109,13 +116,16 @@ public partial class BaseCombatWeapon
 		// pellet flies its own, so a shotgun blast is a fan of them.
 		Vector3? hitPoint = shot.Hit || shot.HitPosition != default ? shot.HitPosition : null;
 		if ( hitPoint.HasValue )
+		{
+			WaterBody.CreateBulletSplash( Scene, GetShotOrigin( shot ), hitPoint.Value );
 			WeaponModel?.DoTracerEffect( hitPoint.Value, shot.Origin );
+		}
 
 		if ( shot.NoEvents ) return;
 
 		PlayAttackSound();
-		HolderRenderer?.Set( "b_attack", true );
 		WeaponModel?.OnAttack( hitPoint, shot.Origin );
+		PostWeaponEvent( WeaponEvents.Attack );
 	}
 
 	/// <summary>
@@ -132,14 +142,15 @@ public partial class BaseCombatWeapon
 	/// Worked out on each peer rather than sent with the shot.
 	/// </summary>
 	protected Vector3 GetShotDirection( in ShotEffect shot )
+		=> (shot.HitPosition - GetShotOrigin( shot )).Normal;
+
+	Vector3 GetShotOrigin( in ShotEffect shot )
 	{
 		var owner = Owner;
-		var from = shot.Origin
+		return shot.Origin
 			?? (!IsProxy ? AimRay.Position
 			: owner.IsValid() ? owner.EyeTransform.Position
 			: GetMuzzleTransform().Position);
-
-		return (shot.HitPosition - from).Normal;
 	}
 
 	/// <summary>

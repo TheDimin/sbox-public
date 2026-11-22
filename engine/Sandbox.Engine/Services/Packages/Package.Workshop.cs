@@ -1,6 +1,5 @@
-using Sandbox.Menu;
-using Sandbox.Services;
-using System.Diagnostics;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading;
 
 namespace Sandbox;
@@ -14,9 +13,17 @@ public partial class Package
 
 	/// <summary>
 	/// Are this package's files installed from its Steam Workshop item, rather than downloaded from the backend?
-	/// Only maps - clothing has a workshop item too, but its files are on the backend.
+	/// Only maps, games and addons - clothing has a workshop item too, but its files are on the backend.
 	/// </summary>
-	public bool InstallsFromWorkshop => WorkshopId != 0 && string.Equals( TypeName, "map", StringComparison.OrdinalIgnoreCase );
+	public bool InstallsFromWorkshop => IsRemote && WorkshopId != 0
+		&& (string.Equals( TypeName, "map", StringComparison.OrdinalIgnoreCase )
+			|| string.Equals( TypeName, "game", StringComparison.OrdinalIgnoreCase )
+			|| string.Equals( TypeName, "addon", StringComparison.OrdinalIgnoreCase ));
+
+	/// <summary>
+	/// Whether this map uses the session's Workshop item loader.
+	/// </summary>
+	internal bool IsWorkshopMap => IsRemote && WorkshopId != 0 && string.Equals( TypeName, "map", StringComparison.OrdinalIgnoreCase );
 
 	/// <summary>
 	/// The workshop item this package's files are installed from, or 0 if they aren't, or we can't tell. Search results
@@ -34,157 +41,132 @@ public partial class Package
 	}
 
 	/// <summary>
-	/// Install the latest of this package's workshop item, and mount its files on <paramref name="fs"/> if there is
-	/// one. The item's folder is laid out as the package's files are.
+	/// Take this package's meta from its workshop item installed in <paramref name="folder"/> - the game's own, as it
+	/// was published, rather than the backend's. It keeps its <see cref="WorkshopId"/>, a new item can't know its own.
 	/// </summary>
-	async Task<bool> DownloadFromWorkshop( PackageFileSystem fs, CancellationToken token, PackageLoadOptions options )
+	internal void UseWorkshopMeta( string folder )
 	{
-		var progress = LoadingProgress.Create( $"Downloading '{Title}'" );
+		if ( this is not RemotePackage ) return;
+		if ( WorkshopItemMetaData.Read( folder )?.Meta is not { Length: > 0 } meta ) return;
 
-		// Its place among the load's downloads - unless another download of it's already filling that in
-		var tracked = global::Sandbox.LoadingScreen.TrackDownload( FullIdent, Title );
-		if ( tracked is { IsDownloading: true } ) tracked = null;
+		UseWorkshopMetaJson( meta );
+	}
 
-		// How much Steam sent - nothing if it already had the latest
-		long downloadedSize = 0;
+	/// <summary>
+	/// <see cref="UseWorkshopMeta"/>, given the meta json the item shipped with
+	/// </summary>
+	internal void UseWorkshopMetaJson( string meta )
+	{
+		if ( this is not RemotePackage remote || string.IsNullOrEmpty( meta ) ) return;
 
-		// When we'd asked Steam for it (progress only comes once we have), and when the first bytes came in
-		var sw = Stopwatch.StartNew();
-		double? asked = null;
-		double? started = null;
-
-		void OnProgress( Workshop.State state )
-		{
-			asked ??= sw.Elapsed.TotalSeconds;
-			if ( state.Downloaded > 0 ) started ??= sw.Elapsed.TotalSeconds;
-
-			if ( state.Total == 0 ) return;
-
-			downloadedSize = Math.Max( downloadedSize, state.Total );
-			progress.TotalSize = state.Total;
-			progress.Fraction = state.Fraction;
-			options.Loading?.LoadingProgress( progress );
-
-			if ( tracked is not null )
-			{
-				tracked.IsDownloading = true;
-				tracked.TotalSize = state.Total;
-				tracked.Downloaded = state.Downloaded;
-			}
-		}
-
-		// Steam saying how the download went - what went wrong, or null if it worked
-		var ended = new TaskCompletionSource<string>( TaskCreationOptions.RunContinuationsAsynchronously );
-
-		void OnEnded( WorkshopDownload download )
-		{
-			if ( download.Id == WorkshopId )
-				ended.TrySetResult( download.Error is null ? null : $"{download.Error}: {download.ErrorHelp}" );
-		}
-
-		//
-		// Report how it went, as a backend download reports itself - so the two can be compared. The time's split
-		// up: checking the item's up to date until we asked Steam for it, Steam getting going until it started
-		// sending, then the transfer - the part to compare against a backend download.
-		//
-		void Record( string outcome, string reason, double seconds, string installedIn )
-		{
-			var askedAt = asked ?? seconds;
-			var startedAt = started ?? seconds;
-
-			var metric = new Api.Events.EventRecord( "package.download" );
-			metric.SetValue( "ident", FullIdent );
-			metric.SetValue( "source", "workshop" );
-			metric.SetValue( "workshop_id", WorkshopId );
-			metric.SetValue( "outcome", outcome );
-			if ( reason is not null ) metric.SetValue( "reason", reason );
-			metric.SetValue( "size_sum", downloadedSize );
-			metric.SetValue( "prefetch", fs is null );
-			metric.SetValue( "time", seconds );
-			metric.SetValue( "check_time", askedAt );
-			metric.SetValue( "wait_time", startedAt - askedAt );
-			metric.SetValue( "transfer_time", seconds - startedAt );
-
-			if ( outcome == "ok" )
-			{
-				var fileCount = System.IO.Directory.EnumerateFiles( installedIn, "*", System.IO.SearchOption.AllDirectories ).Count();
-				metric.SetValue( "files", fileCount );
-				Api.Activity.CurrentLoad?.Downloaded( downloadedSize, fileCount, seconds );
-			}
-
-			metric.Submit();
-		}
-
-		string folder;
-		double? installSeconds = null;
-		string error;
-
-		Workshop.DownloadEnded += OnEnded;
+		JsonObject json;
 
 		try
 		{
-			folder = await Workshop.InstallAsync( WorkshopId, OnProgress, token );
-			installSeconds = sw.Elapsed.TotalSeconds;
-
-			// Steam's result can land a moment after the item says it's done
-			if ( asked is not null && !ended.Task.IsCompleted )
-				await Task.WhenAny( ended.Task, Task.Delay( 1000, token ) );
-
-			error = ended.Task.IsCompleted ? ended.Task.Result : null;
+			json = JsonNode.Parse( meta ) as JsonObject;
 		}
-		catch ( OperationCanceledException ) when ( token.IsCancellationRequested )
+		catch ( JsonException e )
 		{
-			// Only a download that got going, not one given up on while checking it's up to date or after it finished
-			if ( asked is not null && installSeconds is null )
-				Record( "cancelled", null, sw.Elapsed.TotalSeconds, null );
+			Log.Warning( $"Workshop item {WorkshopId}'s meta for {FullIdent} isn't valid json ({e.Message})" );
+			return;
+		}
 
-			throw;
+		if ( json is null ) return;
+
+		json["WorkshopId"] = WorkshopId;
+		remote.UseMeta( json.ToJsonString() );
+	}
+
+	/// <summary>
+	/// Mounts a Workshop map after installing any packages its resources depend on.
+	/// </summary>
+	async Task<BaseFileSystem> MountWorkshopMapAsync()
+	{
+		var items = WorkshopItems.Current;
+		var token = items.LifetimeToken;
+		var owner = Networking.IsHost ? ServerPackages.Current : null;
+		using var files = await WorkshopFileSystem.OpenAsync( WorkshopId, Title, token );
+		UseWorkshopMetaJson( files.Metadata?.Meta );
+		var dependencies = new List<string>();
+		bool completed = false;
+
+		try
+		{
+			// Maps can depend on packages with assemblies. Keep those requirements on the package loader.
+			foreach ( var dependency in EnumerateInstallDependencies().Distinct( StringComparer.OrdinalIgnoreCase ) )
+			{
+				token.ThrowIfCancellationRequested();
+				if ( await ServerPackages.DownloadAndMount( dependency, token, reloadResources: !Networking.IsClient ) is null )
+					return null;
+				dependencies.Add( dependency );
+			}
+
+			token.ThrowIfCancellationRequested();
+			var content = await items.LoadAsync( WorkshopId, Workshop.ItemType.Map, token );
+			if ( content is null ) return null;
+			RememberForOffline();
+			completed = true;
+			return content;
 		}
 		finally
 		{
-			Workshop.DownloadEnded -= OnEnded;
-
-			if ( tracked is not null )
+			// A reset already released these requirements; don't remove references from the next game.
+			if ( !completed && token == items.LifetimeToken )
 			{
-				tracked.IsDownloading = false;
-				tracked.IsComplete = true;
+				foreach ( var dependency in dependencies )
+					owner?.RemoveRequirement( dependency );
 			}
 		}
+	}
 
-		// Failing to update can still leave the old version installed to carry on with - it's still a failed download
-		if ( folder is null || error is not null )
-			Record( "failed", error ?? "Steam unavailable", installSeconds.Value, folder );
-		else if ( downloadedSize > 0 )
-			Record( "ok", null, installSeconds.Value, folder );
+	/// <summary>
+	/// Releases one mount requirement, including any package dependencies of a Workshop map.
+	/// </summary>
+	internal void RemoveMountRequirement()
+	{
+		if ( IsWorkshopMap )
+		{
+			WorkshopItems.Current?.RemoveRequirement( WorkshopId );
+			foreach ( var dependency in EnumerateInstallDependencies().Distinct( StringComparer.OrdinalIgnoreCase ) )
+				ServerPackages.Current?.RemoveRequirement( dependency );
+		}
 		else
-			Api.Activity.CurrentLoad?.Downloaded( 0, 0, 0 );
-
-		if ( folder is null )
 		{
-			Log.Warning( $"Couldn't install workshop item {WorkshopId} for {FullIdent}" );
-			return false;
+			ServerPackages.Current?.RemoveRequirement( this );
 		}
+	}
 
-		progress.Title = $"Download '{Title}' Complete";
-		progress.Fraction = 1;
-		options.Loading?.LoadingProgress( progress );
-
-		// Prefetching, it just needed installing
-		if ( fs is null )
-			return true;
-
-		var files = System.IO.Directory.EnumerateFiles( folder, "*", System.IO.SearchOption.AllDirectories )
-			.Select( x => new ManifestSchema.File { Path = System.IO.Path.GetRelativePath( folder, x ).Replace( '\\', '/' ) } )
-			.ToArray();
-
-		foreach ( var file in DownloadableFiles( files, options.SkipAssetDownload ) )
+	/// <summary>
+	/// Uses the shared Workshop mount while retaining the package's metadata and compiled-code setup.
+	/// </summary>
+	async Task<BaseFileSystem> DownloadWorkshopFiles( CancellationToken token, PackageLoadOptions options )
+	{
+		var manifest = string.Equals( TypeName, "game", StringComparison.OrdinalIgnoreCase ) ? Revision.DownloadManifestAsync( token ) : Task.CompletedTask;
+		var files = await WorkshopFileSystem.OpenAsync( WorkshopId, Title, token, options.Loading, options.SkipAssetDownload, FullIdent );
+		try
 		{
-			var absolutePath = System.IO.Path.Combine( folder, file.Path );
-
-			AssetDownloadCache.Mount( fs.Redirect, file.Path, absolutePath );
+			await manifest;
+			UseWorkshopMetaJson( files.Metadata?.Meta );
+			RememberForOffline();
+			return files;
 		}
+		catch
+		{
+			files.Dispose();
+			throw;
+		}
+	}
 
-		RememberForOffline();
+	/// <summary>
+	/// Downloads Workshop content ahead of use without mounting it.
+	/// </summary>
+	async Task<bool> PrefetchWorkshopFiles( CancellationToken token, PackageLoadOptions options )
+	{
+		var manifest = string.Equals( TypeName, "game", StringComparison.OrdinalIgnoreCase ) ? Revision.DownloadManifestAsync( token ) : Task.CompletedTask;
+		var folder = await Workshop.InstallContentAsync( WorkshopId, Title, options.Loading, token, prefetch: true, ident: FullIdent );
+		await manifest;
+		if ( folder is null ) return false;
+		UseWorkshopMeta( folder );
 		return true;
 	}
 }

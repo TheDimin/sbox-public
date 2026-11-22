@@ -80,6 +80,10 @@ internal partial class SurfaceWindow : IDisposable, IPanelWindow
 
 	internal SdlWindow Window { get; set; }
 	SceneCamera _camera;
+
+	// With -borealisgpu: the swap chain and target the window presents on Borealis.Gpu, in place of Source 2's swap chain
+	// and the camera drawing into it (which then only holds the background settings)
+	BorealisGpuWindow _borealis;
 	SceneWorld _world;
 
 	/// <summary>
@@ -263,9 +267,20 @@ internal partial class SurfaceWindow : IDisposable, IPanelWindow
 	/// <summary>
 	/// Size of the window's client area in real pixels - what the swap chain is sized to, and what
 	/// the surface lays its panels out in. Zero until there's an OS window to measure: a popup
-	/// waits for a frame boundary to make one.
+	/// waits for a frame boundary to make one. Setting it sizes the window to exactly that many
+	/// pixels whatever the display scale, for a window whose contents are a frame of a fixed size.
 	/// </summary>
-	internal Vector2 PixelSize => Window?.PixelSize ?? default;
+	internal Vector2 PixelSize
+	{
+		get => Window?.PixelSize ?? default;
+		set
+		{
+			if ( Handle == IntPtr.Zero ) return;
+
+			var window = PixelsToWindow( value );
+			Sdl.SetWindowSize( Handle, (int)MathF.Ceiling( window.x ), (int)MathF.Ceiling( window.y ) );
+		}
+	}
 
 	//
 	// Three spaces meet at a window, and SDL hands us the one number that isn't obvious:
@@ -797,7 +812,8 @@ internal partial class SurfaceWindow : IDisposable, IPanelWindow
 	/// </summary>
 	internal void CreateRenderer( string name, bool vsync )
 	{
-		Window.CreateSwapChain( name, SwapChainMultisample, vsync );
+		if ( RenderBackend.Default is BorealisGpuRenderBackend borealis ) _borealis = new BorealisGpuWindow( borealis, Window.Handle, vsync );
+		else Window.CreateSwapChain( name, SwapChainMultisample, vsync );
 
 		_world = new SceneWorld();
 
@@ -864,6 +880,9 @@ internal partial class SurfaceWindow : IDisposable, IPanelWindow
 
 		var window = Window;
 		Window = null;
+		var borealis = _borealis;
+		_borealis = null;
+		borealis?.ReleaseTarget();
 
 		if ( window is null )
 			return;
@@ -872,6 +891,7 @@ internal partial class SurfaceWindow : IDisposable, IPanelWindow
 		// which needs the window it presented to still there
 		EngineLoop.DisposeAtFrameEnd( new Sandbox.Utility.DisposeAction( () =>
 		{
+			borealis?.Dispose();
 			PanelWindowInput.DetachWindow( window.Handle );
 			window.Dispose();
 		} ) );

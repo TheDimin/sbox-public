@@ -265,17 +265,11 @@ static class AssetThumbnail
 		ThreadSafe.AssertIsMainThread();
 
 		//
-		// If it's a resource, let it generate itself the thumbnail!
+		// The type would rather show its icon than anything we could render, so
+		// leave the thumbnail unset and let the callers fall back to the icon
 		//
-		{
-			var resource = asset.LoadResource();
-			var bitmap = resource?.RenderThumbnail( new() { Width = 256, Height = 256 } );
-			if ( bitmap != null )
-			{
-				return Pixmap.FromBitmap( bitmap );
-			}
-		}
-
+		if ( asset.AssetType.PrefersIconThumbnail )
+			return null;
 
 		if ( asset.thumbnailOverride != null )
 		{
@@ -306,6 +300,16 @@ static class AssetThumbnail
 			catch ( System.Exception e )
 			{
 				Log.Warning( e, $"Exception when rendering thumb via {t.Method} ({e.Message})" );
+			}
+		}
+
+		// Keep editor overrides and custom previews ahead of the resource's default thumbnail.
+		{
+			var resource = asset.LoadResource();
+			using var bitmap = resource?.RenderThumbnail( new() { Width = 256, Height = 256 } );
+			if ( bitmap != null )
+			{
+				return Pixmap.FromBitmap( bitmap );
 			}
 		}
 

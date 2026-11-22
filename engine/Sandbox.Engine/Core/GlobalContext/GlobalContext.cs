@@ -15,6 +15,20 @@ internal partial class GlobalContext
 	public Assembly LocalAssembly { get; set; }
 
 	/// <summary>
+	/// Queues reference migration through the package loader after the script types are registered.
+	/// Returns a migration error if the queued swap was interrupted. An exception means queuing itself failed.
+	/// </summary>
+	internal Func<Assembly, Assembly, Exception> ReplaceScriptAssembly { get; set; }
+
+	/// <summary>
+	/// Rebuilds existing script types before their C# dependencies migrate, without creating a scripting context.
+	/// </summary>
+	internal IDisposable PrepareScriptHotload( IReadOnlyList<Assembly> incoming, HotloadManager manager )
+	{
+		return scripting?.PrepareHotload( incoming, manager );
+	}
+
+	/// <summary>
 	/// The input context for this game instance, which contains the current input state and bindings.
 	/// </summary>
 	public InputContext InputContext { get; set; }
@@ -55,6 +69,17 @@ internal partial class GlobalContext
 	}
 
 	private ScriptSystem scripting;
+
+	/// <summary>
+	/// Network clients use the host's script set, even when local packages contain script source.
+	/// </summary>
+	internal bool ReceivesNetworkScripts => scripting?.ReceivesNetworkFiles == true
+		|| (this == Game && Networking.IsClient);
+
+	/// <summary>
+	/// Resumes ready scripts in this context's scene scope without creating an unused scripting system.
+	/// </summary>
+	internal void TickScripting() => scripting?.Tick();
 
 	internal ScriptSystem Scripting
 	{
@@ -106,6 +131,16 @@ internal partial class GlobalContext
 	internal void AddNodeAssemblyLater( System.Reflection.Assembly assembly, bool logErrors = true )
 	{
 		lock ( pendingNodeAssemblies ) pendingNodeAssemblies.Add( (assembly, logErrors) );
+	}
+
+	/// <summary>
+	/// Take an assembly out of the node library without adding everything still queued first, which is what reading
+	/// <see cref="NodeLibrary"/> would do: a game closed before anything read its action graphs added them all on the way out.
+	/// </summary>
+	internal void RemoveNodeAssembly( System.Reflection.Assembly assembly )
+	{
+		lock ( pendingNodeAssemblies ) pendingNodeAssemblies.RemoveAll( x => x.Assembly == assembly );
+		nodeLibrary?.RemoveAssembly( assembly );
 	}
 
 	void FlushPendingNodeAssemblies()
@@ -211,10 +246,18 @@ internal partial class GlobalContext
 	{
 		DisposeScripting();
 		var oldCts = CancellationTokenSource;
-		CancellationTokenSource = new CancellationTokenSource();
 
-		oldCts?.Cancel();
+		try
+		{
+			oldCts?.Cancel();
+		}
+		catch ( Exception e )
+		{
+			Log.Warning( e, "Exception in cancellation callback during context reset" );
+		}
+
 		oldCts?.Dispose();
+		CancellationTokenSource = new CancellationTokenSource();
 
 		ActiveScene = null;
 

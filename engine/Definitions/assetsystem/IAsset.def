@@ -75,6 +75,7 @@ native class IAsset
 
 	void RequireDependencyInfo_Virtual();
 	bool NeedAnyDependencyUpdate_Virtual();
+	bool IsSourceUnchangedSinceCompile();
 
 	bool IsTrivialChildAsset();
 	bool HasHiddenAssetFlag();
@@ -119,11 +120,6 @@ native class IAsset
 	inline bool IsCompileFailed()
 	{
 		return this->CompileState() == ASSET_FILE_COMPILE_FAILED;
-	}
-
-	inline bool CompileIfNeeded()
-	{
-		return this->RecompileAsset( COMPILE_AS_NEEDED );
 	}
 
 	inline int FindIntEditInfo( string name )

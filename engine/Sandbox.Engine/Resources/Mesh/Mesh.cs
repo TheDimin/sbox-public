@@ -6,6 +6,7 @@ namespace Sandbox
 	/// <summary>
 	/// Possible primitive types of a <see cref="Mesh"/>.
 	/// </summary>
+	[Expose]
 	public enum MeshPrimitiveType
 	{
 		Points,
@@ -21,6 +22,7 @@ namespace Sandbox
 	///
 	/// <para>A set of meshes can be used to create a <see cref="Model"/> via the <see cref="ModelBuilder"/> class.</para>
 	/// </summary>
+	[Expose]
 	public partial class Mesh : IValid
 	{
 		internal IMesh native;
@@ -99,6 +101,20 @@ namespace Sandbox
 		/// <param name="vertexCount">Number of vertices referenced. Defaults to the whole vertex buffer when zero.</param>
 		public Mesh AddSubMesh( Material material, int startIndex, int indexCount, int startVertex = 0, int vertexCount = 0 )
 		{
+			// The range kept inside the buffers, as Source 2 keeps it: its own buffers are only there with its device
+			var vertices = VertexCount;
+			var indices = IndexCount;
+			if ( vertexCount <= 0 )
+			{
+				startVertex = 0;
+				vertexCount = vertices;
+			}
+
+			startVertex = Math.Clamp( startVertex, 0, vertices );
+			vertexCount = Math.Clamp( vertexCount, 0, vertices - startVertex );
+			startIndex = Math.Clamp( startIndex, 0, indices );
+			indexCount = Math.Clamp( indexCount, 0, indices - startIndex );
+
 			MeshGlue.AddMeshDrawCall( native, material != null ? material.native : IntPtr.Zero, renderPrimType, startIndex, indexCount, startVertex, vertexCount );
 			return this;
 		}
@@ -176,6 +192,12 @@ namespace Sandbox
 				Bounds = bounds;
 			}
 		}
+
+		/// <summary>The vertex buffer's bytes and fields, or null without one.</summary>
+		internal Borealis.Source2.Models.MeshVertexBuffer VertexData => vb.IsValid ? new( vb.ElementCount, vb.ElementSize, vb.Fields, vb.Data ) : null;
+
+		/// <summary>The index buffer's indices, or none.</summary>
+		internal int[] IndexData => ib.IsValid ? ib.Data : null;
 
 		private static RenderPrimitiveType MeshPrimTypeToRenderPrimType( MeshPrimitiveType primType )
 		{

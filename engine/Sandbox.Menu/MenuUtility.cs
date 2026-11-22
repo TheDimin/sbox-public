@@ -1,6 +1,7 @@
 using Sandbox.Engine;
 using Sandbox.Engine.Settings;
 using Sandbox.Modals;
+using Sandbox.Platform;
 using Sandbox.Services;
 using System;
 using System.Net;
@@ -13,6 +14,11 @@ public static partial class MenuUtility
 {
 	public static Action Tick { get; set; }
 
+	/// <summary>
+	/// The menu's own TypeLibrary. <see cref="Game.TypeLibrary"/> is always the game's.
+	/// </summary>
+	public static Sandbox.Internal.TypeLibrary TypeLibrary => GlobalContext.Menu.TypeLibrary;
+
 	/// <summary>Whether higher-resolution texture data is currently downloading.</summary>
 	public static bool IsTextureWebStreamingActive => NativeGlue.Resources.IsTextureWebStreamingActive();
 
@@ -21,14 +27,41 @@ public static partial class MenuUtility
 		IModalSystem.Current = system;
 	}
 
+	static event Action<LogEvent> MenuLoggers;
+
 	public static void AddLogger( Action<LogEvent> logger )
 	{
-		Sandbox.Diagnostics.Logging.OnMessage += logger;
+		MenuLoggers += logger;
+
+		Sandbox.Diagnostics.Logging.OnMessage -= DispatchToMenuLoggers;
+		Sandbox.Diagnostics.Logging.OnMessage += DispatchToMenuLoggers;
 	}
 
 	public static void RemoveLogger( Action<LogEvent> logger )
 	{
-		Sandbox.Diagnostics.Logging.OnMessage -= logger;
+		MenuLoggers -= logger;
+	}
+
+	internal static void ClearLoggers()
+	{
+		MenuLoggers = null;
+	}
+
+	/// <summary>
+	/// Messages arrive in whatever context logged them, usually the game's. Menu loggers are menu code - they
+	/// create menu panels - so run them in the menu's context, not against the game's TypeLibrary and UI.
+	/// </summary>
+	static void DispatchToMenuLoggers( LogEvent e )
+	{
+		var loggers = MenuLoggers;
+		if ( loggers is null )
+			return;
+
+		e.Exception = null;
+		e.Arguments = null;
+
+		using var scope = GlobalContext.MenuScope();
+		loggers( e );
 	}
 
 	public static void AddChatListener( Action<ChatMessageEvent> listener )
@@ -39,6 +72,16 @@ public static partial class MenuUtility
 	public static void RemoveChatListener( Action<ChatMessageEvent> listener )
 	{
 		Platform.Chat.OnMessage -= listener;
+	}
+
+	public static void AddVoiceChatListener( Action<VoiceChat.PacketEvent> listener )
+	{
+		Platform.VoiceChat.OnPacket += listener;
+	}
+
+	public static void RemoveVoiceChatListener( Action<VoiceChat.PacketEvent> listener )
+	{
+		Platform.VoiceChat.OnPacket -= listener;
 	}
 
 	/// <summary>
@@ -109,10 +152,31 @@ public static partial class MenuUtility
 #nullable disable
 
 	/// <summary>
-	/// Open a folder 
+	/// The text on the clipboard - null if there isn't any. The menu's alone: games don't get to read what's been copied.
+	/// </summary>
+	public static string GetClipboardText()
+	{
+		if ( !NativeEngine.Sdl.HasClipboardText() ) return null;
+
+		var ptr = NativeEngine.Sdl.GetClipboardText();
+		var text = System.Runtime.InteropServices.Marshal.PtrToStringUTF8( ptr );
+		NativeEngine.Sdl.Free( ptr );
+
+		return text;
+	}
+
+	/// <summary>
+	/// Open a folder
 	/// </summary>
 	public static void OpenFolder( string path )
 	{
+		// UNC paths would connect to the remote share and leak the user's NTLM hash
+		if ( string.IsNullOrWhiteSpace( path ) || !System.IO.Path.IsPathFullyQualified( path ) || path.StartsWith( @"\\" ) || path.StartsWith( "//" ) || !System.IO.Directory.Exists( path ) )
+		{
+			Log.Warning( $"MenuUtility.OpenFolder: not a folder: {path}" );
+			return;
+		}
+
 		System.Diagnostics.Process.Start( new System.Diagnostics.ProcessStartInfo()
 		{
 			FileName = path,
@@ -126,12 +190,29 @@ public static partial class MenuUtility
 	/// </summary>
 	public static void OpenUrl( string path )
 	{
+		if ( !TryGetOpenableUrl( path, out var url ) )
+		{
+			Log.Warning( $"MenuUtility.OpenUrl: not an http(s) or steam url: {path}" );
+			return;
+		}
+
 		System.Diagnostics.Process.Start( new System.Diagnostics.ProcessStartInfo()
 		{
-			FileName = path,
+			FileName = url,
 			UseShellExecute = true,
 			Verb = "open"
 		} );
+	}
+
+	static readonly System.Text.RegularExpressions.Regex SteamUrl = new( @"^steam://(store/\d+|install/\d+|url/CommunityFilePage/\d+)/?$", System.Text.RegularExpressions.RegexOptions.CultureInvariant );
+
+	static bool TryGetOpenableUrl( string path, out string url )
+	{
+		if ( Game.Overlay.TryGetExternalUrl( path, out url ) )
+			return true;
+
+		url = path;
+		return path is not null && SteamUrl.IsMatch( path );
 	}
 
 	static List<Friend> _friendList;
@@ -177,12 +258,12 @@ public static partial class MenuUtility
 		// Should be left with a Steam Id but otherwise try connecting by IP.
 		if ( ulong.TryParse( connectString, out ulong lobbySteamId ) )
 		{
-			ConsoleSystem.Run( $"connect {lobbySteamId}" );
+			RunCommand( $"connect {lobbySteamId}" );
 		}
 		else
 		{
 			var ipAddress = IPEndPoint.Parse( connectString );
-			ConsoleSystem.Run( $"connect {ipAddress}" );
+			RunCommand( $"connect {ipAddress}" );
 		}
 	}
 
@@ -232,6 +313,22 @@ public static partial class MenuUtility
 	}
 
 	/// <summary>
+	/// Get a console variable. Unlike ConsoleSystem.*, this can read protected console variables.
+	/// </summary>
+	public static string GetConsoleVariable( string name, string defaultValue = null )
+	{
+		return ConVarSystem.GetValue( name, defaultValue, true );
+	}
+
+	/// <summary>
+	/// Run a console command. Unlike ConsoleSystem.*, this can run protected commands.
+	/// </summary>
+	public static void RunCommand( string command, params object[] arguments )
+	{
+		ConsoleSystem.RunCommand( command, arguments, true );
+	}
+
+	/// <summary>
 	/// Access to the client's render settings
 	/// </summary>
 	public static RenderSettings RenderSettings => Sandbox.Engine.Settings.RenderSettings.Instance;
@@ -255,6 +352,7 @@ public static partial class MenuUtility
 	/// <summary>
 	/// Listen to the voice
 	/// </summary>
+	[Obsolete( $"Use {nameof( PartyRoom.SetBroadcastVoice )}" )]
 	public static void SetVoiceListen( bool b )
 	{
 		if ( b )
@@ -424,7 +522,7 @@ public static partial class MenuUtility
 
 		if ( !Application.IsEditor )
 		{
-			Sandbox.Mounting.MountConfig.Save();
+			Sandbox.Mounting.Directory.SaveConfig();
 		}
 	}
 
@@ -441,6 +539,11 @@ public static partial class MenuUtility
 		}, null );
 	}
 
+	/// <summary>
+	/// Keep the startup screen up, showing this status, while something is about to appear, so it doesn't pop in
+	/// once the startup screen has faded. Dispose the returned hold once it's there.
+	/// </summary>
+	public static IDisposable HoldStartupScreen( string status ) => StartupScreen.HoldFor( status );
 }
 
 /// <summary>

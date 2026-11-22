@@ -1,6 +1,7 @@
 #ifndef DDGI_HLSL
 #define DDGI_HLSL
 
+#include "common.fxc"
 #include "common/classes/Bindless.hlsl"
 
 struct DDGIVolume
@@ -56,8 +57,14 @@ struct DDGIVolume
     }
 };
 
-StructuredBuffer<DDGIVolume> DDGIVolumes < Attribute( "DDGI_Volumes" ); >;
+// The view's volumes, in its descriptor set (common.fxc)
+StructuredBuffer<DDGIVolume> DDGIVolumes EXTERNAL_DESC_SET( t, g_viewSet, 8 );
 uint DDGIVolumeCount < Attribute( "DDGI_VolumeCount" ); >;
+
+// Whether the scene has any volumes, as a specialization constant: pixel pipelines for scenes without DDGI leave its code
+// out, which takes complex.shader's forward pass from 7 to 8 waves on RDNA3. Compute doesn't get specialized, so it keeps
+// the runtime count.
+int DDGIEnabled < Attribute( "DDGI_Enabled" ); Default( 0 ); SpecializedConstant(); >;
 
 #define DDGISampler g_sBilinearClamp
 #define DDGI_IRRADIANCE_OCT_RESOLUTION 8
@@ -232,7 +239,11 @@ struct DDGI
 
     static bool IsEnabled()
     {
-        return DDGIVolumeCount > 0;
+        #if ( PROGRAM == VFX_PROGRAM_PS )
+            return DDGIEnabled != 0 && DDGIVolumeCount > 0;
+        #else
+            return DDGIVolumeCount > 0;
+        #endif
     }
 
     static float3 Evaluate( DDGIVolume volume, float3 positionWs, float3 normalWs, float3 cameraDirection = float3(0,0,0) )
@@ -276,7 +287,9 @@ struct DDGI
         float3 accumulatedIrradiance = 0.0f.xxx;
         float accumulatedWeight = 0.0f;
 
-        [unroll]
+        // Not unrolled: each probe's fetches wait on its own branches anyway, and unrolled the probes push the
+        // forward shader to 122 VGPRs, 5 waves on RDNA3 instead of 6
+        [loop]
         for ( int i = 0; i < 8; ++i )
         {
             int3 offset = int3( i, i >> 1, i >> 2 ) & int3( 1, 1, 1 );

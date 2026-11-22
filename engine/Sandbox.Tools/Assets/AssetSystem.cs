@@ -196,9 +196,9 @@ public static partial class AssetSystem
 	}
 
 
-	static void UpdateAsset( Asset asset, bool compileImmediately = true )
+	static void UpdateAsset( Asset asset )
 	{
-		asset.UpdateInternals( compileImmediately );
+		asset.UpdateInternals();
 
 		if ( string.IsNullOrWhiteSpace( asset.Path ) )
 			return;
@@ -308,23 +308,22 @@ public static partial class AssetSystem
 		var dependencyTicks = profile ? Stopwatch.GetTimestamp() - phaseStart : 0;
 
 		phaseStart = profile ? Stopwatch.GetTimestamp() : 0;
-		Parallel.ForEach( UpdateQueue, ( Asset asset ) => UpdateAsset( asset, false ) );
+		Parallel.ForEach( UpdateQueue, ( Asset asset ) => UpdateAsset( asset ) );
 		var updateTicks = profile ? Stopwatch.GetTimestamp() - phaseStart : 0;
 
 		phaseStart = profile ? Stopwatch.GetTimestamp() : 0;
 		// Thumbnails have their own queue, so do that all in main
 		foreach ( var asset in UpdateQueue )
 		{
+			AssetUpgrader.Upgrade( asset );
+
 			EditorEvent.RunInterface<IEventListener>( x => x.OnAssetChanged( asset ) );
 
+			// Only drop it: the next draw renders it. A scene's thumbnail loads the whole scene, so rendering it on every
+			// save blocked the editor for as long as the scene takes to load, even with no thumbnail on screen.
 			if ( asset.HasCachedThumbnail )
 			{
-				asset.RebuildThumbnail( true );
-			}
-
-			if ( !asset.IsCompiled && asset.AssetType.IsGameResource )
-			{
-				asset.Compile( false );
+				asset.RebuildThumbnail( false );
 			}
 		}
 
@@ -437,6 +436,9 @@ public static partial class AssetSystem
 	/// </summary>
 	public static void DeleteOrphans()
 	{
+		// What the content build is publishing has no parent links yet
+		if ( EditorContentBuild.IsBuilding ) return;
+
 		// Only delete orphans from the current project's transient folder.
 		// Engine-shipped transients (e.g. addons/menu/Transients/) are shared
 		// across all projects and must not be deleted.
@@ -455,8 +457,9 @@ public static partial class AssetSystem
 			var nativeAsset = o as NativeAsset;
 			var pendingDep = nativeAsset?.native.NeedAnyDependencyUpdate_Virtual() ?? false;
 
-			// Skip assets with pending dependency info - parent links may not be resolved yet.
-			if ( depCount == 0 && parentCount == 0 && !pendingDep )
+			// Skip assets with pending dependency info - parent links may not be resolved yet - and anything a
+			// content build record still lists, whose parent may not be known yet either.
+			if ( depCount == 0 && parentCount == 0 && !pendingDep && !EditorContentBuild.IsOwned( o.AbsolutePath ) )
 			{
 				log.Info( $"Deleting Orphan \"{o}\"" );
 
@@ -467,23 +470,21 @@ public static partial class AssetSystem
 		}
 	}
 
-	internal static void InitializeCompilerForFilename( IResourceCompilerContext context, string filename )
+	internal static void InitializeCompilerForFilename( IResourceCompilerContext context, string filename ) => ContentCompilerHost.OnMainThread( () =>
 	{
+		// On the main thread, where the type library changes (see TryManagedCompile)
 		var ext = System.IO.Path.GetExtension( filename )[1..].ToLowerInvariant();
-		var assetType = AssetType.FromExtension( ext );
-
-		if ( assetType is null )
-			return;
-
-		if ( assetType.IsGameResource == false )
-			return;
+		if ( !IsGameResource( ext ) )
+			return false;
 
 		context.SetCompiler( $"ManagedResourceCompiler" );
 		context.SetExtension( ext );
-	}
+		return true;
+	} );
 
 	/// <summary>
-	/// Create an empty <see cref="GameResource"/>.
+	/// Creates an empty asset. Uncompiled resources start with an empty source file;
+	/// compiled GameResources start with their default JSON data.
 	/// </summary>
 	/// <param name="type">Asset type extension for our new <see cref="GameResource"/> instance.</param>
 	/// <param name="absoluteFilename">Where to save the new <see cref="GameResource"/> instance. For example from <see cref="FileDialog"/>.</param>
@@ -505,7 +506,7 @@ public static partial class AssetSystem
 		if ( found is not null ) return found;
 
 		// create an empty file
-		System.IO.File.WriteAllText( absoluteFilename, "{}" );
+		System.IO.File.WriteAllText( absoluteFilename, gameResourceType.IsUncompiled ? "" : "{}" );
 
 		// convert it to an .asset
 		var asset = RegisterFile( absoluteFilename );
@@ -518,7 +519,7 @@ public static partial class AssetSystem
 		//
 		// Load and save it, to create an empty version of it
 		//
-		if ( asset.TryLoadGameResource( typeof( GameResource ), out var obj, true ) )
+		if ( !gameResourceType.IsUncompiled && asset.TryLoadGameResource( typeof( GameResource ), out var obj, true ) )
 		{
 			asset.SaveToDisk( obj );
 		}
@@ -540,15 +541,6 @@ public static partial class AssetSystem
 		{
 			soundFile.OnReloadedInternal();
 		}
-	}
-
-	internal static void OnDemandRecompile( uint index, string reason )
-	{
-		// matt: disabling this for now because it's causing re-entrants in CResourceSystem::ForceSynchronizationAndBlockUntilManifestLoaded()
-		//       which was making the entire resource system shit the bed
-		//       specifically I was seeing this because Qt events run CHammerEditorSession::RenderView but I imagine it can happen
-		//       in a shit load of places... layla said they'd got this in-game too but I'm not sure if it's the same thing
-		// IToolsDll.Current?.Spin();
 	}
 
 	/// <summary>

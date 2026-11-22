@@ -112,7 +112,7 @@ class ProgramSource
 				if ( token.IsCancellationRequested )
 					return;
 
-				var result = ShaderCompile.CompileSingleCombo( vfx, this, d.Static, d.Dynamic, context, !options.ForceRecompile );
+				var result = ShaderCompile.CompileSingleCombo( vfx, this, d.Static, d.Dynamic, context, !options.ForceRecompile, options.GpuDriven );
 
 				lock ( this )
 				{
@@ -122,6 +122,7 @@ class ProgramSource
 					}
 
 					allCompiles.Add( result );
+					options.ComboCompiled?.Invoke();
 
 					if ( options.ConsoleOutput && fastTimer.ElapsedMilliSeconds > timeBetweenUpdates )
 					{

@@ -23,9 +23,15 @@ internal sealed partial class GameWindow : IDisposable
 	bool renderingInitialized;
 	VideoMode startupVideoMode;
 
+	// With -borealisgpu: the window's swap chain on Borealis.Gpu, in place of Source 2's (docs/reference/borealis-gpu-path.md, stage 5)
+	BorealisGpuWindow borealis;
+
+	/// <summary>The window's swap chain on Borealis.Gpu (<c>-borealisgpu</c>); null on Source 2's device.</summary>
+	internal BorealisGpuWindow Borealis => borealis;
+
 	internal IntPtr Handle => window.Handle;
 
-	internal GameSurface Surface => new( window.Handle, window.SwapChain );
+	internal GameSurface Surface => new( window.Handle, window.SwapChain, borealis?.VSync );
 
 	internal string Title
 	{
@@ -80,7 +86,8 @@ internal sealed partial class GameWindow : IDisposable
 
 	void AttachSwapChain( VideoMode mode )
 	{
-		window.CreateSwapChain( "GameWindow", mode.Multisample, mode.VSync, mainWindow: true );
+		if ( RenderBackend.Default is BorealisGpuRenderBackend device ) borealis = new BorealisGpuWindow( device, window.Handle, mode.VSync ) { Samples = SampleCount( mode.Multisample ) };
+		else window.CreateSwapChain( "GameWindow", mode.Multisample, mode.VSync, mainWindow: true );
 
 		GameWindowNative.Attach( window.Handle, window.SwapChain );
 		attached = true;
@@ -108,6 +115,10 @@ internal sealed partial class GameWindow : IDisposable
 			AttachSwapChain( startupVideoMode );
 		}
 		Screen.UpdateFromEngine();
+
+		// The splash carries on over the menu until it's ready to be seen, then fades out. Standalone games have no menu.
+		if ( splash.IsDrawable && !Application.IsStandalone ) StartupScreen.Show( splash );
+		else splash.Dispose();
 
 		if ( renderingRequested ) InitializeRendering();
 	}
@@ -166,9 +177,19 @@ internal sealed partial class GameWindow : IDisposable
 		window.Flush();
 
 		if ( !ApplyWindowMode( video.Window ) ) return;
-		if ( !window.UpdateSwapChain( video.Multisample, video.VSync ) ) return;
+
+		// A Borealis.Gpu swap chain follows the window's size every frame (Render); only vsync is a mode of its own
+		if ( borealis is not null )
+		{
+			borealis.SetVSync( video.VSync );
+			borealis.Samples = SampleCount( video.Multisample );
+		}
+		else if ( !window.UpdateSwapChain( video.Multisample, video.VSync ) ) return;
 		if ( pendingMode == video ) pendingMode = null;
 	}
+
+	/// <summary>Samples per pixel a game window's scenes render with on Borealis.Gpu: the setting, as the device allows it.</summary>
+	static int SampleCount( RenderMultisampleType multisample ) => Graphics.RenderMultiSampleToNum( Graphics.BestMultisampleType( multisample ) );
 
 	bool ApplyWindowMode( WindowMode requested )
 	{
@@ -207,6 +228,12 @@ internal sealed partial class GameWindow : IDisposable
 		return true;
 	}
 
+	/// <summary>
+	/// Let go of the engine texture the window's frames are drawn into (with <c>-borealisgpu</c>), at shutdown once no frame
+	/// will be drawn, before the engine's leak check: the window itself goes later. A frame drawn after makes it again.
+	/// </summary>
+	public void ReleaseFrameTarget() => borealis?.ReleaseTarget();
+
 	public void Dispose()
 	{
 		ThreadSafe.AssertIsMainThread();
@@ -225,6 +252,10 @@ internal sealed partial class GameWindow : IDisposable
 			GameWindowNative.Detach( window.Handle );
 			attached = false;
 		}
+
+		// Its surface goes before the window
+		borealis?.Dispose();
+		borealis = null;
 		window.Dispose();
 	}
 }

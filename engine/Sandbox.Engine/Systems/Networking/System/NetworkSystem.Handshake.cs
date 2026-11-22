@@ -38,6 +38,7 @@ internal partial class NetworkSystem
 		IsHostMigrationEnabled = msg.HostMigration;
 
 		source.UpdateFrom( msg.Host );
+		source.HostSteamId = msg.HostSteamId;
 		source.State = Connection.ChannelState.LoadingServerInformation;
 
 		Connection.Local = new LocalConnection( msg.Assigned.Id )
@@ -95,6 +96,26 @@ internal partial class NetworkSystem
 					// Failed to load the game package, we can't continue
 					Networking.Disconnect();
 					return;
+				}
+
+				// The game is loaded during the handshake, independently of the session's map and addon requirements.
+				if ( msg.GameWorkshopId != 0 && Application.GamePackage is not LocalPackage )
+				{
+					if ( Application.GamePackage?.WorkshopId != msg.GameWorkshopId )
+					{
+						IGameInstanceDll.Current.Disconnect( "The server is using a different Workshop item for this game." );
+						Networking.Disconnect();
+						return;
+					}
+
+					var ours = Workshop.GetInstalledVersion( msg.GameWorkshopId );
+
+					if ( msg.GameWorkshopVersion != 0 && ours != 0 && msg.GameWorkshopVersion != ours )
+					{
+						IGameInstanceDll.Current.Disconnect( Workshop.GetVersionMismatchMessage( [Application.GamePackage.Title] ) );
+						Networking.Disconnect();
+						return;
+					}
 				}
 			}
 		}
@@ -295,6 +316,8 @@ internal partial class NetworkSystem
 		}
 
 		source.PreInfo = null;
+		// Existing clients need pending updates. The joining client gets their current values in its snapshots.
+		SendTableUpdates();
 		source.State = Connection.ChannelState.Welcome;
 
 		//log.Info( $"Client SteamId is {data.SteamId}" );
@@ -462,6 +485,7 @@ internal partial class NetworkSystem
 	async Task On_Handshake_Snapshot( InitialSnapshotResponse msg, Connection source, Guid msgId )
 	{
 		NetworkDebugSystem.Current?.Record( NetworkDebugSystem.MessageType.Snapshot, msg );
+		Sandbox.Diagnostics.DevTools.NetworkLog.Message( Sandbox.Diagnostics.DevTools.NetworkLog.Kind.Snapshot, "SceneSnapshot", msg, false, source );
 
 		if ( !source.IsHost )
 			return;
@@ -527,6 +551,7 @@ internal partial class NetworkSystem
 		}
 
 		source.State = Connection.ChannelState.Connected;
+		Sandbox.Diagnostics.DevTools.NetworkLog.Session( "Peer joined", source );
 
 		//
 		// Tell game this guy is fully active.
@@ -588,6 +613,7 @@ internal partial class NetworkSystem
 		Api.Activity.LoadFinished();
 
 		Connection.Local.State = Connection.ChannelState.Connected;
+		Sandbox.Diagnostics.DevTools.NetworkLog.Session( "Joined", source, starts: true );
 		source.State = Connection.ChannelState.Connected;
 
 		// Before the party sees we're in and follows

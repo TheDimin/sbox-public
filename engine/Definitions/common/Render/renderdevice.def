@@ -6,6 +6,7 @@ native struct CTextureDesc is NativeEngine.CTextureDesc;
 native enum RenderDeviceAPI_t is NativeEngine.RenderDeviceAPI_t;
 native pointer SwapChainHandle_t;
 native pointer RenderBufferHandle_t is NativeEngine.RenderBufferHandle_t;
+native pointer RenderDescriptorSetHandle_t is NativeEngine.RenderDescriptorSetHandle_t;
 native pointer RenderInputLayout_t is NativeEngine.RenderInputLayout_t;
 native struct BufferDesc_t is NativeEngine.BufferDesc;
 native enum RenderBufferType_t is NativeEngine.RenderBufferType;
@@ -24,6 +25,7 @@ native accessor g_pRenderDevice
 	RenderDeviceInfo_t GetSwapChainInfo( SwapChainHandle_t swapChain );
 	ITexture FindOrCreateFileTexture( string pFileName, RenderSystemAssetFileLoadMode nLoadMode );
 	ITexture FindOrCreateTexture2( string pResourceName, bool bIsAnonymous, TextureCreationConfig_t pDescriptor, void* data, int dataSize );
+	ITexture FindOrCreateTextureWithSheet( string pResourceName, TextureCreationConfig_t pDescriptor, void* data, int dataSize, void* sheetData, int sheetDataSize );
 	void ClearTexture( ITexture hTexture, Color color );
 	void AsyncSetTextureData2( ITexture hTexture, void* pData, int nDataSize, Rect3D rect );
 
@@ -49,6 +51,9 @@ native accessor g_pRenderDevice
 	// Starts a swap chain's frame for GPU timing (GetGPUFrameTimeMS) - call before the frame's first submit
 	void BeginSubmittingDisplayLists( SwapChainHandle_t hSwapChain );
 
+	// Tags the display lists submitted until it's set back to 0, so GPU timings can tell whose frame a submission was
+	void SetSubmitTag( ulong nTag );
+
 	bool ReadTexturePixels( ITexture hTexture, ref Rect_t pSrcRect, int nSrcSlice, int nSrcMip, ref Rect_t pDstRect, void* pData, ImageFormat dstFormat, int nDstStride );
 
 	SwapChainHandle_t CreateSwapChain( CastTo[PlatWindow_t] IntPtr window, RenderDeviceInfo_t mode, string debugName );
@@ -60,6 +65,20 @@ native accessor g_pRenderDevice
 		static thread_local CBufferString str;
 		str.RemoveAll();
 		g_pRenderDevice->AppendStatsSummaryString( &str );
+		return str.String();
+	}
+
+	// Pack the GPU allocator's blocks now and release the ones that empty, over the next frames
+	inline void DefragmentGpuMemory()
+	{
+		g_pRenderDevice->DefragmentGPUMemory( RENDER_DEFRAG_ALGORITHM_BALANCED, true );
+	}
+
+	inline string GetGpuMemoryMap()
+	{
+		static thread_local CBufferString str;
+		str.RemoveAll();
+		g_pRenderDevice->AppendGPUMemoryMap( &str );
 		return str.String();
 	}
 
@@ -75,6 +94,7 @@ native accessor g_pRenderDevice
 	bool Present( SwapChainHandle_t chain );
 	void Flush();
 	void FlushPipelineCache();
+	void RequestGPUMemoryCompaction();
 	void ForceFlushGPU( SwapChainHandle_t hSwapChain );
 	bool CanRenderToSwapChain( SwapChainHandle_t chain );
 	void SetSwapChainIsMainWindow( SwapChainHandle_t chain, bool bIsMainWindow );
@@ -112,6 +132,8 @@ native accessor g_pRenderDevice
 	}
 
 	void DestroyGPUBuffer( RenderBufferHandle_t hGPUBuffer );
+	void DestroyVertexBuffer( VertexBufferHandle_t buffer );
+	void DestroyIndexBuffer( IndexBufferHandle_t buffer );
 	bool ReadBuffer( RenderBufferHandle_t hBuffer, uint nOffsetInBytes, void* pBuf, uint nBytesToRead );
 
 	IntPtr GetDeviceSpecificInfo( DeviceSpecificInfo_t info );

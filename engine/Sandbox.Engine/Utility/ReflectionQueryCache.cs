@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using Sandbox.Engine;
+using System.Collections.Immutable;
 using System.Reflection;
 using System.Text.Json.Serialization;
 
@@ -115,7 +116,7 @@ internal static class ReflectionQueryCache
 			return members;
 		}
 
-		var type = Game.TypeLibrary.GetType( t );
+		var type = GlobalContext.Current.TypeLibrary.GetType( t );
 
 		if ( type is null )
 		{
@@ -170,7 +171,7 @@ internal static class ReflectionQueryCache
 			return members;
 		}
 
-		var type = Game.TypeLibrary.GetType( t );
+		var type = GlobalContext.Current.TypeLibrary.GetType( t );
 
 		if ( type is null )
 		{
@@ -195,13 +196,18 @@ internal static class ReflectionQueryCache
 	/// <summary>
 	/// Returns all properties that have a [Sync] attribute.
 	/// </summary>
-	public static IEnumerable<SyncVarPropertyAndAttribute> SyncProperties( Type t )
+	public static SyncVarPropertyAndAttribute[] SyncProperties( Type t )
 	{
 		if ( _syncVarMemberCache.TryGetValue( t, out var members ) )
 		{
 			return members;
 		}
 
+		return BuildSyncProperties( t );
+	}
+
+	private static SyncVarPropertyAndAttribute[] BuildSyncProperties( Type t )
+	{
 		var properties = new List<PropertyInfo>();
 		var currentType = t;
 

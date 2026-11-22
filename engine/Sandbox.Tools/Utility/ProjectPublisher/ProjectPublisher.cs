@@ -1,4 +1,4 @@
-﻿using Sandbox.DataModel;
+using Sandbox.DataModel;
 using Sandbox.Services;
 using System;
 using System.Text.Json;
@@ -11,6 +11,10 @@ public partial class ProjectPublisher
 
 	public string TargetPackageIdent => Project.Config.FullIdent;
 
+	bool IsWorkshopOnly => PublishesOnlyToWorkshop( Project );
+
+	string ThumbnailPath => IsWorkshopOnly ? "/.publish/thumb.png" : $"/{TargetPackageIdent}/thumb.png";
+
 	Project Project;
 	public PackageManifest Manifest { get; protected set; }
 
@@ -21,6 +25,20 @@ public partial class ProjectPublisher
 	public long MissingFileSize => Manifest.Assets.Sum( x => x.Size - x.SizeUploaded );
 
 	public Action OnProgressChanged { get; set; }
+
+	/// <summary>
+	/// Meta that only goes in the workshop item's <c>metadata.json</c>, never to the backend - the game's menu
+	/// </summary>
+	static readonly HashSet<string> WorkshopOnlyMeta = ["MenuScene"];
+
+	/// <summary>
+	/// <see cref="Meta"/> as the backend gets it, without what's only for the workshop item. Null if there's none.
+	/// </summary>
+	Dictionary<string, object> BackendMeta()
+	{
+		var meta = Meta.Where( x => !WorkshopOnlyMeta.Contains( x.Key ) ).ToDictionary();
+		return meta.Count > 0 ? meta : null;
+	}
 
 	public void SetMeta( string key, object obj )
 	{
@@ -56,13 +74,14 @@ public partial class ProjectPublisher
 
 		if ( IsWorkshopAsset( asset ) )
 		{
+			p.WorkshopType = asset.Publishing.PackageType();
 			p.WorkshopAsset = asset;
 		}
 
 		return p;
 	}
 
-	public static async Task<ProjectPublisher> FromProject( Project project )
+	public static async Task<ProjectPublisher> FromProject( Project project, bool previewOnly = false, CancellationToken cancel = default )
 	{
 		using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
 
@@ -82,7 +101,8 @@ public partial class ProjectPublisher
 		// game
 		{
 			var p = new ProjectPublisher( project );
-			await p.GenerateAssetManifest();
+			await p.GenerateAssetManifest( cancel: cancel, previewOnly: previewOnly );
+			p.WorkshopType = WorkshopTypeFor( project );
 			return p;
 		}
 	}
@@ -174,9 +194,9 @@ public partial class ProjectPublisher
 	/// <summary>
 	/// Build a list of files to upload for this version. Return false if errors that would prevent the upload.
 	/// </summary>
-	async Task GenerateAssetManifest( IProgress progress = null, CancellationToken cancel = default )
+	async Task GenerateAssetManifest( IProgress progress = null, CancellationToken cancel = default, bool previewOnly = false )
 	{
-		await Manifest.BuildFromAssets( Project, progress, cancel );
+		await Manifest.BuildFromAssets( Project, progress, cancel, previewOnly: previewOnly );
 	}
 
 	/// <summary>
@@ -193,14 +213,23 @@ public partial class ProjectPublisher
 	}
 
 	/// <summary>
+	/// Projects with the whitelist disabled are standalone only and can't be published
+	/// </summary>
+	void ThrowIfWhitelistDisabled()
+	{
+		if ( Project.Config.IsStandaloneOnly )
+			throw new InvalidOperationException( $"This project has the whitelist disabled (Disable Whitelist in Project Settings > Game Exporting), so it can't be published to {Global.BackendTitle}." );
+	}
+
+	/// <summary>
 	/// Publish a new revision
 	/// </summary>
 	public async Task Publish( IProgress progress = null, CancellationToken cancel = default )
 	{
 		using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
 
-		if ( Project.Config.IsStandaloneOnly )
-			return;
+		Manifest.RequireUploadManifest();
+		ThrowIfWhitelistDisabled();
 
 		await TryWorkshopUpload();
 
@@ -208,11 +237,14 @@ public partial class ProjectPublisher
 		{
 			await PublishToWorkshop( cancel );
 
+			if ( IsWorkshopOnly )
+				return;
+
 			// Only once the workshop has the files - if Steam turned us down, the backend never hears about it
 			await UploadFiles();
 
 			if ( Manifest.Assets.Any( x => !x.Skip ) )
-				throw new System.Exception( $"Couldn't upload the thumb to {Global.BackendTitle}, the console has more about why." );
+				throw new System.Exception( $"Couldn't upload the files that stay on {Global.BackendTitle}, the console has more about why." );
 		}
 
 		if ( !await PostManifest( Manifest, progress, cancel ) )
@@ -220,16 +252,15 @@ public partial class ProjectPublisher
 	}
 
 	/// <summary>
-	/// Check the intended manifest, ask the backend which files need to be uploaded.
+	/// Prepare the Workshop files and, for projects with a backend package, check which backend files need uploading.
 	/// </summary>
 	public async Task PrePublish( CancellationToken cancellationToken = default )
 	{
 		using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
 
+		Manifest.RequireUploadManifest();
 		FinishAddingFiles();
-
-		if ( Project.Config.IsStandaloneOnly )
-			return;
+		ThrowIfWhitelistDisabled();
 
 		if ( Manifest.Assets.Count == 0 )
 		{
@@ -253,13 +284,16 @@ public partial class ProjectPublisher
 		// After lowercasing, the workshop item's files are laid out by these names
 		MoveFilesToWorkshop();
 
+		if ( IsWorkshopOnly )
+			return;
+
 		var publish = new PublishManifest
 		{
 			Assets = Manifest.Assets.Select( x => new ManifestFile( x.Name, x.Size, x.Hash ) ).ToArray(),
 			Title = "",
 			Description = "",
 			Publish = false,
-			Meta = Meta.Count > 0 ? JsonSerializer.Serialize( Meta ) : null,
+			Meta = BackendMeta() is { } meta ? JsonSerializer.Serialize( meta ) : null,
 			EngineApi = Sandbox.Engine.Protocol.Api
 		};
 
@@ -358,9 +392,9 @@ public partial class ProjectPublisher
 			Title = string.IsNullOrWhiteSpace( manifest.Summary ) ? "Untitled Version" : manifest.Summary,
 			Description = manifest.Description,
 			Publish = true,
-			Meta = Meta.Count > 0 ? Json.Serialize( Meta ) : null,
+			Meta = BackendMeta() is { } meta ? Json.Serialize( meta ) : null,
 			EngineApi = Sandbox.Engine.Protocol.Api,
-			VerifyCompile = true
+			VerifyCompile = Project.Config.Type == "game"
 		};
 
 		publish.Config = new ManifestConfig
@@ -490,6 +524,7 @@ public partial class ProjectPublisher
 
 	public async Task UploadFiles()
 	{
+		Manifest.RequireUploadManifest();
 		// upload
 		var uploads = Manifest.Assets.Where( x => !x.Skip ).ToArray();
 
@@ -569,7 +604,7 @@ public partial class ProjectPublisher
 		using var bitmap = Bitmap.CreateFromBytes( image ) ?? throw new ArgumentException( "Couldn't read the thumbnail image" );
 		using var square = CropToSquare( bitmap );
 
-		var name = $"/{TargetPackageIdent}/thumb.png";
+		var name = ThumbnailPath;
 		Manifest.Assets.RemoveAll( x => string.Equals( x.Name, name, StringComparison.OrdinalIgnoreCase ) );
 		ThumbnailChosen = true;
 

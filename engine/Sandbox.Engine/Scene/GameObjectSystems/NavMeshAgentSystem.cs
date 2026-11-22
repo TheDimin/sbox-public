@@ -1,12 +1,11 @@
-﻿using System.Collections.Concurrent;
-
-namespace Sandbox;
+﻿namespace Sandbox;
 
 /// <summary>
 /// Updates NavMeshAgent ground positions in parallel during PrePhysicsStep.
 /// </summary>
 internal sealed class NavMeshGameSystem : GameObjectSystem
 {
+	private static readonly string[] NpcGroundExcludedTags = ["npc"];
 	private readonly List<NavMeshAgent> _agents = new();
 
 	public NavMeshGameSystem( Scene scene ) : base( scene )
@@ -23,7 +22,7 @@ internal sealed class NavMeshGameSystem : GameObjectSystem
 		Scene.GetAll<NavMeshAgent>( _agents );
 		if ( _agents.Count == 0 ) return;
 
-		System.Threading.Tasks.Parallel.ForEach( Partitioner.Create( _agents, loadBalance: true ), FindPhysicsGroundZ );
+		JobDispatcher.For( _agents.Count, this, static ( system, i ) => system.FindPhysicsGroundZ( system._agents[i] ) );
 	}
 
 	/// <summary>
@@ -32,10 +31,10 @@ internal sealed class NavMeshGameSystem : GameObjectSystem
 	///     |
 	///     |     We start a certain distance above the agents capsules center
 	///     |
-	///     | 
+	///     |
 	///     |
 	///  -------
-	///  |  |  | 
+	///  |  |  |
 	///  |  x  | -- Trace Start (in lower third)
 	///  |  |  |
 	///  -------
@@ -46,7 +45,7 @@ internal sealed class NavMeshGameSystem : GameObjectSystem
 	///     |
 	///     |
 	///     x      We trace down the same distance
-	///          
+	///
 	/// In case of multiple hits we prefer the once closest to the agent's capsule center
 	/// </summary>
 	private void FindPhysicsGroundZ( NavMeshAgent agent )
@@ -65,7 +64,8 @@ internal sealed class NavMeshGameSystem : GameObjectSystem
 		var footRadius = agent.Radius * 0.1f;
 		var traceStartOffset = MathF.Max( 64f, Scene.NavMesh.AgentHeight ) * 8f;
 
-		var navMeshPos = Navigation.NavMesh.FromNav( simulationAgent.State.Position );
+		var state = simulationAgent.State;
+		Vector3 navMeshPos = state.Position;
 
 		var traceStart = navMeshPos + Vector3.Up * Scene.NavMesh.AgentHeight * 0.3f;
 
@@ -76,6 +76,10 @@ internal sealed class NavMeshGameSystem : GameObjectSystem
 				.WithAnyTags( Scene.NavMesh.IncludedBodies )
 				.WithCollisionRules( agent.Tags )
 				.WithoutTags( Scene.NavMesh.ExcludedBodies );
+
+		// Grounded NPCs are keyframed, so IgnoreDynamic alone still lets crowds climb each other.
+		if ( agent.Tags.Has( "npc" ) )
+			baseTrace = baseTrace.WithoutTags( NpcGroundExcludedTags );
 
 		if ( !Scene.NavMesh.IncludeStaticBodies )
 		{
@@ -117,13 +121,12 @@ internal sealed class NavMeshGameSystem : GameObjectSystem
 		}
 
 		agent.groundTraceZ = bestZ;
-		if ( downResult.Hit || upResult.Hit )
+
+		// An agent that is off the navmesh and on no link follows the ground under it. Placing it has
+		// the crowd look for the navmesh again, so only when the ground moved.
+		if ( (downResult.Hit || upResult.Hit) && state.Poly.IsNone && state.Link < 0 && MathF.Abs( bestZ - navMeshPos.z ) > 0.01f )
 		{
-			lock ( simulationAgent.Owner.Gate )
-			{
-				if ( simulationAgent.Path.Count == 0 && simulationAgent.Link is null )
-					simulationAgent.Position.y = bestZ;
-			}
+			agent.SetAgentPosition( navMeshPos.WithZ( bestZ ) );
 		}
 	}
 }

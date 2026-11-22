@@ -40,6 +40,12 @@ public static partial class PerformanceStats
 	public static long BytesAllocated { get; internal set; }
 
 	/// <summary>
+	/// The managed bytes the renderer allocated in the last frame, on every thread it runs on (Borealis's camera frames on
+	/// the main thread, its recording and culling jobs on workers): none in steady state.
+	/// </summary>
+	internal static long RendererBytesAllocated { get; set; }
+
+	/// <summary>
 	/// Number of generation 0 (fastest) garbage collections were done in the last frame.
 	/// </summary>
 	public static int Gen0Collections { get; internal set; }
@@ -96,14 +102,17 @@ public static partial class PerformanceStats
 		PerformanceStats.FrameTime = frameTimer.Elapsed.TotalSeconds;
 		frameTimer.Restart();
 
-		if ( g_pRenderDevice.GetGPUFrameTimeMS( IntPtr.Zero, out float gpuFrametime, out uint gpuFrameNo ) )
+		// On Borealis.Gpu (-borealisgpu) Source 2's device draws nothing: the game window times its frames itself
+		if ( RenderBackend.Default is BorealisGpuRenderBackend { GpuBusyMs: { } busy } borealisGpu )
 		{
-			GpuFrametime = gpuFrametime;
-			GpuFrameNumber = gpuFrameNo;
+			// The GPU's busy time in a recent frame, every window's and block's work added up, as native's
+			GpuFrametime = (float)busy;
+			GpuFrameNumber = (uint)borealisGpu.GpuBusyFrame;
 		}
 
 		var allocatedBytes = AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize;
 		PerformanceStats.BytesAllocated = allocatedBytes - _prevAllocatedBytes;
+		PerformanceStats.RendererBytesAllocated = Borealis.RendererAllocations.TakeFrame();
 		_prevAllocatedBytes = allocatedBytes;
 
 		var pauseTicks = GC.GetTotalPauseDuration().Ticks;
@@ -148,27 +157,34 @@ public static partial class PerformanceStats
 
 		_lastSecond = second;
 
-		var ls = new Block();
-		ls.FrameAvg = _history.Average( x => x.FrameAvg );
-		ls.FrameMin = _history.Min( x => x.FrameAvg );
-		ls.FrameMax = _history.Max( x => x.FrameAvg );
-		ls.ByteAlloc = _history.Sum( x => x.ByteAlloc );
-		ls.Gc0 = _history.Sum( x => x.Gc0 );
-		ls.Gc1 = _history.Sum( x => x.Gc1 );
-		ls.Gc2 = _history.Sum( x => x.Gc2 );
-		ls.GcPause = _history.Sum( x => x.GcPause );
+		var ls = new Block { FrameMin = float.MaxValue, FrameMax = float.MinValue };
+		float frameSum = 0;
+
+		foreach ( var b in _history )
+		{
+			frameSum += b.FrameAvg;
+			ls.FrameMin = Math.Min( ls.FrameMin, b.FrameAvg );
+			ls.FrameMax = Math.Max( ls.FrameMax, b.FrameAvg );
+			ls.ByteAlloc += b.ByteAlloc;
+			ls.Gc0 += b.Gc0;
+			ls.Gc1 += b.Gc1;
+			ls.Gc2 += b.Gc2;
+			ls.GcPause += b.GcPause;
+		}
+
+		ls.FrameAvg = frameSum / _history.Count;
 
 		LastSecond = ls;
 
 		_history.Clear();
 		secondTimer.Restart();
 
+		// The drawing device's summary; Source 2's texture pool is the empty device's, which has none
 		ulong poolUsed = 0, poolLimit = 0, poolNonEvictable = 0;
-		g_pRenderDevice.GetTexturePoolStats( out poolUsed, out poolLimit, out poolNonEvictable );
 		FrameStats._current = new FrameStats(
 			NativeEngine.CSceneSystem.GetPerFrameStats(),
 			NativeEngine.CSceneSystem.GetNumUnbatchableMaterials(),
-			g_pRenderDevice.GetGpuStatsSummary(),
+			RenderBackend.Default is BorealisGpuRenderBackend borealis ? borealis.DescribeResources() : "",
 			NativeEngine.g_pResourceSystem.GetNumPendingStreamingRequests(),
 			poolUsed, poolLimit, poolNonEvictable );
 		FrameStats._current.AddManaged( Rendering.ManagedSceneRendering.LastFrame );

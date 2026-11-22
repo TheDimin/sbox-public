@@ -34,10 +34,21 @@ public class ProjectConfig
 	public string Title { get; set; }
 
 	/// <summary>
-	/// The type of addon. Current valid values are "game"
+	/// The project type can be game, map, menu, tool, library, addon or content.
+	/// Menus load automatically on clients and in editor contexts; tools load only in editor contexts.
 	/// </summary>
 	[Display( GroupName = "Setup", Order = -90, Name = "Addon Type", Description = "Don't change this for christ's sake" )]
 	public string Type { get; set; }
+
+	/// <summary>
+	/// Whether this project type loads in the specified engine environment.
+	/// </summary>
+	internal bool ShouldLoad( bool isEditor, bool isHeadless ) => Type switch
+	{
+		"tool" => isEditor,
+		"menu" => isEditor || !isHeadless,
+		_ => true
+	};
 
 	/// <summary>
 	/// The ident of the org that owns this addon. For example "facepunch", "valve".
@@ -45,6 +56,13 @@ public class ProjectConfig
 	[Display( GroupName = "Setup", Order = -100, Name = "Organization Ident", Description = "The ident of the org that owns this addon. Set to local if you don't have an org or are just testing." )]
 	[Editor( "organization" )]
 	public string Org { get; set; }
+
+	/// <summary>
+	/// Optional organization display name for local packages. Falls back to <see cref="Org"/> when blank.
+	/// Published packages use their organization's title from the backend.
+	/// </summary>
+	[Display( GroupName = "Setup", Order = -100, Name = "Organization Title", Description = "Display name for local packages. Defaults to the organization ident." )]
+	public string OrgTitle { get; set; }
 
 	/// <summary>
 	/// The ident of this addon. For example "sandbox", "cs" or "dm98"
@@ -82,7 +100,8 @@ public class ProjectConfig
 	public bool IncludeSourceFiles { get; set; }
 
 	/// <summary>
-	/// A list of paths in which to look for extra assets to upload with the addon. Note that compiled asset files are automatically included.
+	/// Paths and wildcard patterns for files to always publish. Matching assets and their dependencies are included
+	/// even when PublishUsedAssetsOnly is enabled. Matching loose files are included unchanged.
 	/// </summary>
 	public string Resources { get; set; }
 
@@ -92,6 +111,13 @@ public class ProjectConfig
 	/// Blank lines and lines starting with // are ignored. Does not change local compilation.
 	/// </summary>
 	public string PublishExclude { get; set; }
+
+	/// <summary>
+	/// Publish assets referenced by configured scenes and project settings, assets in the Resources folder at the
+	/// root of each asset directory, explicit Resources patterns, and their dependencies. Code is not scanned.
+	/// Enabled for new games; existing projects continue publishing all assets until they opt in.
+	/// </summary>
+	public bool PublishUsedAssetsOnly { get; set; }
 
 	/// <summary>
 	/// A list of packages that this package depends on. These should be installed alongside this package.
@@ -156,7 +182,9 @@ public class ProjectConfig
 		Ident ??= Directory.Name.ToLower();
 		PackageReferences ??= new List<string>();
 
-		if ( Type == "map" ) Type = "content";
+		// Older map projects were content collections without a launchable asset.
+		if ( Type == "map" && string.IsNullOrWhiteSpace( GetMetaOrDefault<string>( "PrimaryAsset", null ) ) )
+			Type = "content";
 	}
 
 	internal bool Upgrade()

@@ -12,6 +12,7 @@ namespace Sandbox;
 /// <summary>
 /// A convenience JSON helper that handles <see cref="Resource"/> types for you.
 /// </summary>
+[Expose]
 public static partial class Json
 {
 	internal static JsonSerializerOptions options
@@ -34,7 +35,7 @@ public static partial class Json
 	/// </summary>
 	internal static void Initialize()
 	{
-		var typeLibrary = Game.TypeLibrary;
+		var typeLibrary = GlobalContext.Current.TypeLibrary;
 
 		GlobalContext.Current.JsonSerializerOptions = new JsonSerializerOptions( JsonSerializerOptions.Default );
 		options.WriteIndented = true;

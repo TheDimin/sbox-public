@@ -138,6 +138,20 @@ public partial class GenericPicker : AssetPicker
 		}
 	}
 
+	/// <summary>
+	/// Starts an editable search across local assets, including the engine's built-in assets.
+	/// </summary>
+	public override void SetSearchText( string value )
+	{
+		if ( string.IsNullOrWhiteSpace( value ) )
+			return;
+
+		DockManager.RaiseDock( "Asset Browser" );
+		AssetBrowser.Search.Clear();
+		AssetBrowser.Search.Value = value;
+		AssetBrowser.NavigateTo( new EverythingLocation() );
+	}
+
 	public override void SetSelection( Package package )
 	{
 		if ( HasRecentState )
@@ -270,7 +284,16 @@ public partial class GenericPicker : AssetPicker
 
 		if ( AssetSystem.CanCloudInstall( package ) )
 		{
-			var a = await AssetSystem.InstallAsync( package.FullIdent );
+			Asset a;
+			try
+			{
+				a = await AssetSystem.InstallAsync( package.FullIdent );
+			}
+			catch ( AggregateException ex )
+			{
+				Log.Error( ex, $"Failed to install package: {package.FullIdent}" );
+				return;
+			}
 
 			if ( !IsValid ) return;
 

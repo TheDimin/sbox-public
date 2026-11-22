@@ -1,5 +1,4 @@
 using NativeEngine;
-using System.Runtime.InteropServices;
 
 namespace Sandbox;
 
@@ -9,12 +8,13 @@ namespace Sandbox;
 [Expose]
 public sealed partial class SceneModel : SceneObject
 {
-	internal CSceneAnimatableObject animNative;
+	internal SceneModelAnimation animNative;
 
-	DelegateFunctionPointer animGraphChangedCallback;
-
-	[UnmanagedFunctionPointer( CallingConvention.StdCall )]
-	internal delegate void AnimGraphChangedCallback( IntPtr p );
+	/// <summary>
+	/// Made by managed code: its native twin is a plain scene object and it animates on its own instance. A scene model
+	/// native code made (a tool's preview) wraps the <see cref="CSceneAnimatableObject"/> native animates.
+	/// </summary>
+	readonly bool plainTwin;
 
 	internal SceneModel() { }
 	internal SceneModel( HandleCreationData _ ) { }
@@ -28,68 +28,50 @@ public sealed partial class SceneModel : SceneObject
 
 		if ( !model.HasRenderMeshes() ) model = Model.Error;
 
+		plainTwin = true;
+
 		using ( var h = IHandle.MakeNextHandle( this ) )
 		{
 			var flags = Rendering.SceneObjectFlags.CastShadows | Rendering.SceneObjectFlags.IsLoaded;
 			var typeFlags = ESceneObjectTypeFlags.NONE;
 
-			MeshSystem.CreateSceneObject( model.native, transform, "AnimatableSceneObjectDesc", flags, typeFlags, sceneWorld, 0x1 );
+			// A plain mesh object, as SceneObject's: it animates on its own instance, and native only keeps its draw state,
+			// bounds and render meshes for traces
+			MeshSystem.CreateSceneObject( model.native, transform, null, flags, typeFlags, sceneWorld, 0x1 );
+			StartResolvingDraws( model );
+			FlagsAtCreation( model, flags );
 
-			if ( !animNative.IsValid )
+			if ( native.IsNull )
 			{
 				Log.Warning( "SceneModel: Didn't get a valid native pointer" );
 				throw new System.ArgumentException( "Error creating AnimSceneObject - possible invalid model?" );
 			}
 
+			CreateAnimationInstance( model, transform );
+
 			Tags.RemoveAll();
 			Transform = transform;
 
-			if ( animGraphChangedCallback == DelegateFunctionPointer.Null )
-			{
-				animGraphChangedCallback = DelegateFunctionPointer.Get<AnimGraphChangedCallback>( OnAnimGraphChanged );
-			}
-
-			// TODO
-			animNative.InitAnimGraph( animGraphChangedCallback );
+			RegisterLegacyAnimationCallback();
+			animNative.InitAnimation();
+			PoseChanged();
 		}
-	}
-
-	private void OnAnimGraphChanged( IntPtr p )
-	{
-		_animationGraph = AnimationGraph.FromNative( animNative.GetAnimGraph() );
 	}
 
 	internal override void OnNativeInit( CSceneObject ptr )
 	{
 		base.OnNativeInit( ptr );
 
-		animNative = (NativeEngine.CSceneAnimatableObject)ptr;
+		// Native code made it (a tool's preview): its twin is the CSceneAnimatableObject native animates
+		if ( !plainTwin )
+			animNative = new SceneModelAnimation( (NativeEngine.CSceneAnimatableObject)ptr, default, this );
 	}
 
 	internal override void OnNativeDestroy()
 	{
+		DestroyAnimationInstance();
 		animNative = default;
 		base.OnNativeDestroy();
-	}
-
-	/// <summary>
-	/// Override the anim graph this scene model uses
-	/// </summary>
-	[System.Obsolete( "Can use AnimationGraph directly" )]
-	public void SetAnimGraph( string name )
-	{
-		animNative.SetAnimGraph( name );
-	}
-
-	private AnimationGraph _animationGraph;
-
-	public AnimationGraph AnimationGraph
-	{
-		get => _animationGraph;
-		set
-		{
-			animNative.SetAnimGraph( value?.native ?? default );
-		}
 	}
 
 	public float PlaybackRate
@@ -101,6 +83,13 @@ public sealed partial class SceneModel : SceneObject
 	internal override void OnModelChanged()
 	{
 		base.OnModelChanged();
+		AnimationInstanceModelChanged();
+	}
+
+	internal override void OnTransformChanged( in Transform tx )
+	{
+		base.OnTransformChanged( tx );
+		if ( animNative.HasInstance ) animNative.Instance.SetTransform( tx );
 	}
 
 	/// <summary>
@@ -114,7 +103,7 @@ public sealed partial class SceneModel : SceneObject
 		OOBChecks.ThrowIfBoneOutOfBounds( boneIndex, Model?.BoneCount ?? 0, nameof( boneIndex ) );
 
 		animNative.SetWorldSpaceRenderBoneTransform( boneIndex, transform );
-		NotifyChanged( Rendering.SceneObjectChange.Bones );
+		BonesChanged();
 	}
 
 	/// <summary>
@@ -141,6 +130,32 @@ public sealed partial class SceneModel : SceneObject
 
 		fixed ( Transform* p = dest )
 			animNative.GetWorldSpaceRenderBoneTransforms( dest.Length, (IntPtr)p );
+	}
+
+	/// <summary>
+	/// <see cref="GetBoneWorldTransforms"/> as the matrices native keeps and skins with, without a round trip through
+	/// <see cref="Transform"/>.
+	/// </summary>
+	internal unsafe void GetBoneWorldMatrices( Span<Matrix3x4> dest )
+	{
+		if ( animNative.IsNull || dest.IsEmpty )
+			return;
+
+		fixed ( Matrix3x4* p = dest )
+			animNative.GetWorldSpaceRenderBoneMatrices( dest.Length, (IntPtr)p );
+	}
+
+	/// <summary>
+	/// The flex controllers' weights as native morphs the model with them - from its animation, then the overrides set
+	/// through <see cref="Morphs"/> - by the model's flex controller index (<see cref="Model.GetMorphName"/>), into
+	/// <paramref name="dest"/>. Returns how many the model has.
+	/// </summary>
+	internal unsafe int GetFlexControllerWeights( Span<float> dest )
+	{
+		if ( animNative.IsNull ) return 0;
+
+		fixed ( float* p = dest )
+			return animNative.GetFlexControllerWeights( (IntPtr)p, dest.Length );
 	}
 
 	/// <summary>
@@ -234,8 +249,16 @@ public sealed partial class SceneModel : SceneObject
 	/// </summary>
 	public void SetBodyGroup( string name, int value )
 	{
-		animNative.SetBodyGroup( name, value );
-		NotifyChanged( Rendering.SceneObjectChange.Material );
+		// CSceneObject::SetBodyGroup: the part's meshes out of the mask, the chosen one's in (the first for a choice past the
+		// last). A part the model doesn't have changes nothing
+		if ( Model is not { } model || model.native.IsNull ) return;
+		var part = model.native.GetBodyPartForName( name );
+		if ( part < 0 || part >= model.Parts.Count ) return;
+
+		var parts = model.Parts.All[part];
+		if ( value >= parts.Choices.Count ) value = 0;
+		var chosen = value >= 0 && value < parts.Choices.Count ? parts.Choices[value].Mask : 0;
+		MeshGroupMask = (MeshGroupMask & ~parts.Mask) | chosen;
 	}
 
 	/// <summary>
@@ -305,23 +328,6 @@ public sealed partial class SceneModel : SceneObject
 			_morphs ??= new SceneObjectMorphCollection( this );
 
 			return _morphs;
-		}
-	}
-
-	SceneObjectDirectPlayback _directPlayback;
-
-	/// <summary>
-	/// Access this sceneobject's direct playback. Direct playback is used to control the direct playback node in an animgraph
-	/// to play sequences directly in code
-	/// </summary>
-	public AnimGraphDirectPlayback DirectPlayback
-	{
-		get
-		{
-			// Create on first access
-			_directPlayback ??= new SceneObjectDirectPlayback( this );
-
-			return _directPlayback;
 		}
 	}
 }

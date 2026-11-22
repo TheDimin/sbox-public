@@ -15,7 +15,7 @@ internal sealed class TerrainClipmapSceneObject : SceneCustomObject
 	// A queued normal bake, run on the render thread before we draw so every pass this frame samples fresh data
 	public CommandList PendingBake;
 
-	private Frustum _cullFrustum;
+	private Frustum _cullFrustumLocal;
 	private Vector2 _clipCameraLocal;
 
 	// What the visible meshlets were culled for, so a view's later passes - its prepass, then its opaque pass - reuse them
@@ -143,7 +143,7 @@ internal sealed class TerrainClipmapSceneObject : SceneCustomObject
 		{
 			if ( _culledFor == key ) return;
 
-			_cullFrustum = frustum;
+			_cullFrustumLocal = ToLocal( frustum, Transform );
 			_clipCameraLocal = clipCamera;
 
 			foreach ( ref var tier in _tiers.AsSpan() )
@@ -188,8 +188,6 @@ internal sealed class TerrainClipmapSceneObject : SceneCustomObject
 
 	private void Cull( ref Tier tier )
 	{
-		var terrainTransform = Transform;
-
 		int vis = 0;
 		foreach ( ref readonly var group in tier.CullGroups.AsSpan() )
 		{
@@ -197,14 +195,14 @@ internal sealed class TerrainClipmapSceneObject : SceneCustomObject
 			float increment = vertexStep * 2.0f;
 			var center = _clipCameraLocal.SnapToGrid( increment );
 
-			if ( !_cullFrustum.IsInside( GetCullGroupAABB( in group, center, vertexStep, increment, terrainTransform ), partially: true ) )
+			if ( !_cullFrustumLocal.IsInside( GetCullGroupBounds( in group, center, vertexStep, increment ), partially: true ) )
 				continue;
 
 			int end = group.Start + group.Count;
 			for ( int i = group.Start; i < end; i++ )
 			{
 				ref readonly var meshlet = ref tier.Meshlets[i];
-				if ( _cullFrustum.IsInside( GetMeshletAABB( in meshlet, center, vertexStep, increment, terrainTransform ), partially: true ) )
+				if ( _cullFrustumLocal.IsInside( GetMeshletBounds( in meshlet, center, vertexStep, increment ), partially: true ) )
 					tier.Visible[vis++] = meshlet;
 			}
 		}
@@ -215,41 +213,50 @@ internal sealed class TerrainClipmapSceneObject : SceneCustomObject
 		tier.VisibleCount = vis;
 	}
 
-	private BBox GetMeshletAABB( in Meshlet m, Vector2 center, float vertexStep, float increment, in Transform terrainTransform )
+	private BBox GetMeshletBounds( in Meshlet m, Vector2 center, float vertexStep, float increment )
 	{
 		float ox = center.x + m.BlockOffset.x * vertexStep;
 		float oy = center.y + m.BlockOffset.y * vertexStep;
 		float ext = BlockSize * vertexStep;
 
 		// Grow by one snap increment so sub-cell rounding / vertex displacement never culls an on-screen block
-		var localBox = new BBox(
+		return new BBox(
 			new Vector3( ox - increment, oy - increment, -increment ),
 			new Vector3( ox + ext + increment, oy + ext + increment, HeightScale + increment ) );
-
-		return TransformBounds( localBox, terrainTransform );
 	}
 
-	private BBox GetCullGroupAABB( in CullGroup group, Vector2 center, float vertexStep, float increment, in Transform terrainTransform )
+	private BBox GetCullGroupBounds( in CullGroup group, Vector2 center, float vertexStep, float increment )
 	{
 		float minX = center.x + group.MinimumBlockOffset.x * vertexStep;
 		float minY = center.y + group.MinimumBlockOffset.y * vertexStep;
 		float maxX = center.x + (group.MaximumBlockOffset.x + BlockSize) * vertexStep;
 		float maxY = center.y + (group.MaximumBlockOffset.y + BlockSize) * vertexStep;
 
-		var localBox = new BBox(
+		return new BBox(
 			new Vector3( minX - increment, minY - increment, -increment ),
 			new Vector3( maxX + increment, maxY + increment, HeightScale + increment ) );
-
-		return TransformBounds( localBox, terrainTransform );
 	}
 
-	private static BBox TransformBounds( in BBox localBox, in Transform terrainTransform )
+	/// <summary>
+	/// Bring a world frustum into terrain space. Normals are left unnormalized since the box test only checks signs.
+	/// </summary>
+	internal static Frustum ToLocal( in Frustum frustum, in Transform transform )
 	{
-		if ( terrainTransform.Rotation == Rotation.Identity && terrainTransform.Scale == Vector3.One )
-			return new BBox( localBox.Mins + terrainTransform.Position, localBox.Maxs + terrainTransform.Position );
+		var inverse = transform.Rotation.Inverse;
+		var scale = transform.Scale;
+		var position = transform.Position;
 
-		return localBox.Transform( terrainTransform );
+		return new Frustum(
+			ToLocal( frustum.RightPlane, inverse, scale, position ), ToLocal( frustum.LeftPlane, inverse, scale, position ),
+			ToLocal( frustum.TopPlane, inverse, scale, position ), ToLocal( frustum.BottomPlane, inverse, scale, position ),
+			ToLocal( frustum.NearPlane, inverse, scale, position ), ToLocal( frustum.FarPlane, inverse, scale, position ) );
 	}
+
+	private static Plane ToLocal( in Plane plane, Rotation inverse, Vector3 scale, Vector3 position ) => new()
+	{
+		Normal = (inverse * plane.Normal) * scale,
+		Distance = plane.Distance - plane.Normal.Dot( position ),
+	};
 
 	private void DisposeBuffers()
 	{

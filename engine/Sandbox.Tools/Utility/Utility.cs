@@ -181,14 +181,16 @@ public static partial class EditorUtility
 			return;
 
 		// don't allow moving a folder inside a subfolder of itself!
-		if ( newDirectory.StartsWith( directory, StringComparison.OrdinalIgnoreCase ) )
+		if ( IsSameOrDescendantDirectory( directory, newDirectory ) )
 			return;
 
 		if ( !System.IO.Directory.Exists( newDirectory ) )
 			System.IO.Directory.CreateDirectory( newDirectory );
 
 
-		var assets = AssetSystem.All.Where( x => x.AbsolutePath.StartsWith( directory.Replace( '\\', '/' ), StringComparison.OrdinalIgnoreCase ) && x.AbsolutePath.Substring( directory.Length ).Contains( '/' ) );
+		var assets = AssetSystem.All
+			.Where( x => IsDirectChildPath( directory, x.AbsolutePath ) )
+			.ToArray();
 		foreach ( var asset in assets )
 		{
 			if ( !System.IO.Path.Exists( asset.AbsolutePath ) ) continue;
@@ -198,17 +200,55 @@ public static partial class EditorUtility
 		var files = System.IO.Directory.GetFiles( directory, "*", System.IO.SearchOption.TopDirectoryOnly );
 		foreach ( var file in files )
 		{
-			var newFile = file.Replace( directory, newDirectory );
+			var newFile = System.IO.Path.Combine( newDirectory, System.IO.Path.GetFileName( file ) );
 			System.IO.File.Move( file, newFile );
 		}
 
 		var folders = System.IO.Directory.GetDirectories( directory, "*", System.IO.SearchOption.TopDirectoryOnly );
 		foreach ( var folder in folders )
 		{
-			RenameDirectory( folder, folder.Replace( directory, newDirectory ), true );
+			var newFolder = System.IO.Path.Combine( newDirectory, System.IO.Path.GetFileName( folder ) );
+			RenameDirectory( folder, newFolder, true );
 		}
 
 		if ( !recursive ) System.IO.Directory.Delete( directory, true );
+	}
+
+	internal static bool IsSameOrDescendantDirectory( string directory, string candidate )
+	{
+		var directoryPath = NormalizeDirectoryPath( directory );
+		var candidatePath = NormalizeDirectoryPath( candidate );
+		var directoryPrefix = directoryPath.EndsWith( '/' ) ? directoryPath : $"{directoryPath}/";
+
+		return string.Equals( candidatePath, directoryPath, StringComparison.OrdinalIgnoreCase )
+			|| candidatePath.StartsWith( directoryPrefix, StringComparison.OrdinalIgnoreCase );
+	}
+
+	internal static bool IsDirectChildPath( string directory, string candidate )
+	{
+		if ( string.IsNullOrWhiteSpace( candidate ) )
+			return false;
+
+		candidate = candidate.Replace( '\\', '/' );
+		if ( !System.IO.Path.IsPathFullyQualified( candidate ) )
+			return false;
+
+		var directoryPath = NormalizeDirectoryPath( directory );
+		var candidatePath = NormalizePath( candidate );
+		var directoryPrefix = directoryPath.EndsWith( '/' ) ? directoryPath : $"{directoryPath}/";
+
+		return candidatePath.StartsWith( directoryPrefix, StringComparison.OrdinalIgnoreCase )
+			&& candidatePath.IndexOf( '/', directoryPrefix.Length ) == -1;
+	}
+
+	private static string NormalizeDirectoryPath( string path )
+	{
+		return System.IO.Path.TrimEndingDirectorySeparator( NormalizePath( path ) );
+	}
+
+	private static string NormalizePath( string path )
+	{
+		return System.IO.Path.GetFullPath( path.Replace( '\\', '/' ) ).NormalizeFilename( false );
 	}
 
 	/// <summary>
@@ -271,6 +311,9 @@ public static partial class EditorUtility
 	/// Create a copy of an asset (and related files) on a new path.
 	/// </summary>
 	public static bool CopyAsset( Asset asset, string path, bool overwrite = false )
+		=> CopyAsset( asset, path, overwrite, rebuildFromSource: false );
+
+	public static bool CopyAsset( Asset asset, string path, bool overwrite, bool rebuildFromSource )
 	{
 		path = path?.Trim();
 
@@ -297,14 +340,25 @@ public static partial class EditorUtility
 		// TODO: Remove this once we have FileSystem.DeferChanges()
 		FileWatch.SuppressWatchers = RealTime.Now + 999;
 
-		// copy all our components: oldpath -> path
-		foreach ( var ext in Asset.RelatedFileExts )
+		try
 		{
-			var file = new FileInfo( oldPath + ext );
-			if ( file.Exists ) file.CopyTo( path + ext, overwrite );
-		}
+			var rebuild = rebuildFromSource && asset.HasSourceFile;
+			foreach ( var ext in Asset.RelatedFileExts )
+			{
+				if ( rebuild && ext == "_c" )
+				{
+					if ( overwrite ) File.Delete( path + ext );
+					continue;
+				}
 
-		FileWatch.SuppressWatchers = RealTime.Now;
+				var file = new FileInfo( oldPath + ext );
+				if ( file.Exists ) file.CopyTo( path + ext, overwrite );
+			}
+		}
+		finally
+		{
+			FileWatch.SuppressWatchers = RealTime.Now;
+		}
 
 		return true;
 	}
@@ -361,6 +415,15 @@ public static partial class EditorUtility
 	public static SceneWorld CreateSceneWorld()
 	{
 		return new SceneWorld() { IsTransient = false };
+	}
+
+	/// <summary>
+	/// Creates an isolated scene for editor previews, with runtime animation and physics
+	/// but without game-defined systems or the project's system scene.
+	/// </summary>
+	public static Scene CreatePreviewScene()
+	{
+		return new Scene( isEditor: false, includeGameSystems: false ) { WantsSystemScene = false };
 	}
 
 	static SoundHandle lastSound;
@@ -741,6 +804,21 @@ public static partial class EditorUtility
 		kv.DeleteThis();
 
 		return json;
+	}
+
+	/// <summary>
+	/// Write json back out as kv3, so an asset we read with <see cref="KeyValues3ToJson"/> stays
+	/// in the format the rest of the tools expect.
+	/// </summary>
+	public static bool JsonToKeyValues3File( string filePath, string json )
+	{
+		var kv = EngineGlue.JsonToKeyValues3( json );
+		if ( kv.IsNull ) return false;
+
+		var saved = kv.SaveToFile( filePath );
+		kv.DeleteThis();
+
+		return saved;
 	}
 
 	/// <summary>

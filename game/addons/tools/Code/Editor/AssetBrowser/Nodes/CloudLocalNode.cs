@@ -15,6 +15,10 @@ partial class CloudLocalNode : AssetFilterNode, ResourceLibrary.IEventListener
 	void ResourceLibrary.IEventListener.OnSave( GameResource resource ) => InvalidateCount();
 	void ResourceLibrary.IEventListener.OnExternalChanges( GameResource resource ) => InvalidateCount();
 
+	/// <summary>
+	/// Counting scans every project resource, so it only happens when the node is painted. Hidden or
+	/// closed browsers never pay for it, and a burst of saves (scene + terrain + prefabs) costs one recount.
+	/// </summary>
 	bool _countStale = true;
 
 	void InvalidateCount()
@@ -30,6 +34,7 @@ partial class CloudLocalNode : AssetFilterNode, ResourceLibrary.IEventListener
 			_countStale = false;
 			Count = CloudAsset.GetAssetReferences( true ).Count;
 		}
+
 		base.OnPaint( item );
 	}
 }

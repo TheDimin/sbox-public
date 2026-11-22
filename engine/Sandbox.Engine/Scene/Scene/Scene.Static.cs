@@ -9,7 +9,31 @@ partial class Scene
 	/// <summary>
 	/// All active non-editor scenes.
 	/// </summary>
-	public static IEnumerable<Scene> All => _all.Where( x => !x.IsEditor && x.Active );
+	public static IEnumerable<Scene> All => AllIncludingUnlisted.Where( x => !x.IsUnlisted );
+
+	internal static IEnumerable<Scene> AllIncludingUnlisted => _all.Where( x => !x.IsEditor && x.Active );
+
+	/// <summary>
+	/// Every scene not yet destroyed, editor and inactive ones included.
+	/// </summary>
+	internal static IEnumerable<Scene> AllLive => _all;
+
+	/// <summary>
+	/// Kept out of <see cref="All"/>, like the menu's own scene.
+	/// </summary>
+	internal bool IsUnlisted { get; init; }
+
+	/// <summary>
+	/// Destroy every scene still alive, whatever still references it. Called during shutdown.
+	/// </summary>
+	internal static void DestroyAll()
+	{
+		foreach ( var scene in _all.GetLiveItems() )
+		{
+			try { scene.DestroyInternal(); } // Destroy() throws on a PrefabCacheScene
+			catch ( Exception e ) { Log.Warning( e, $"Exception destroying scene {scene.Name} at shutdown" ); }
+		}
+	}
 
 	/// <summary>
 	/// <see cref="RenderEnvmaps"/> on each scene in <see cref="All"/>, without allocating.

@@ -32,6 +32,14 @@ public class SceneSkyBox : SceneObject
 		public Vector3 LightDirection;
 	}
 
+	// The settings, once managed code owns them: a sky it made, or one native code made (a tool's: Hammer's sky helper, a tool
+	// scene's sky) that it has changed since. Only a sky native code made is a native sky object; the native twin of one
+	// managed code made is a plain object, and its settings live here only
+	bool managed;
+	Material material;
+	Vector3 skyTint;
+	FogParamInfo fogParams;
+
 	internal SceneSkyBox() { }
 	internal SceneSkyBox( HandleCreationData _ ) { }
 	public SceneSkyBox( SceneWorld world, Material skyMaterial )
@@ -39,17 +47,27 @@ public class SceneSkyBox : SceneObject
 		Assert.NotNull( skyMaterial );
 		Assert.IsValid( world );
 
+		managed = true;
+		material = skyMaterial;
+		skyTint = Vector3.One;
+
+		// Native's defaults (CSceneSkyBoxObject)
+		fogParams = new FogParamInfo { FogType = FogType.Distance, FogMinStart = -25, FogMinEnd = -35, FogMaxStart = 25, FogMaxEnd = 35 };
+
 		using ( var h = IHandle.MakeNextHandle( this ) )
 		{
-			CSceneSystem.CreateSkyBox( skyMaterial.native, world );
+			CManagedSceneObject.Create( world );
 		}
+
+		ChangeFlags( Rendering.SceneObjectFlags.None, ~InternalFlags );
 	}
 
 	internal override void OnNativeInit( CSceneObject ptr )
 	{
 		base.OnNativeInit( ptr );
 
-		skyboxNative = (CSceneSkyBoxObject)ptr;
+		// A sky managed code made has a plain twin (managed is set before it's made)
+		skyboxNative = managed ? default : (CSceneSkyBoxObject)ptr;
 
 		lock ( World.Skies )
 		{
@@ -69,29 +87,59 @@ public class SceneSkyBox : SceneObject
 	}
 
 	/// <summary>
+	/// Managed code owns the settings from here: take what the native twin has (native's defaults, or what native code set
+	/// after making it) once.
+	/// </summary>
+	void TakeOver()
+	{
+		if ( managed || skyboxNative.IsNull ) return;
+		managed = true;
+		material = Sandbox.Material.FromNative( skyboxNative.GetMaterial() );
+		skyTint = skyboxNative.GetSkyTint();
+		fogParams = NativeFogParams;
+	}
+
+	FogParamInfo NativeFogParams => new()
+	{
+		FogType = (FogType)skyboxNative.GetFogType(),
+		FogMinStart = skyboxNative.GetFogMinStart(),
+		FogMinEnd = skyboxNative.GetFogMinEnd(),
+		FogMaxStart = skyboxNative.GetFogMaxStart(),
+		FogMaxEnd = skyboxNative.GetFogMaxEnd()
+	};
+
+	/// <summary>
 	/// The skybox material. Typically it should use the "Sky" shader.
 	/// </summary>
 	public Material SkyMaterial
 	{
 		set
 		{
-			skyboxNative.SetMaterial( value?.native ?? default );
+			TakeOver();
+			material = value;
+			if ( WritesNative && !skyboxNative.IsNull ) skyboxNative.SetMaterial( value?.native ?? default );
 			NotifyChanged( Rendering.SceneObjectChange.Settings );
 		}
 	}
 
 	/// <summary>
-	/// The actual native sky material, including skies created by native tools without a managed constructor.
+	/// The sky material, including that of a sky native code made without a managed constructor.
 	/// </summary>
-	internal Material Material => this.IsValid() ? Sandbox.Material.FromNative( skyboxNative.GetMaterial() ) : null;
+	internal Material Material => !this.IsValid() ? null : managed ? material : Sandbox.Material.FromNative( skyboxNative.GetMaterial() );
 
 	/// <summary>
 	/// Skybox color tint.
 	/// </summary>
 	public Color SkyTint
 	{
-		get => skyboxNative.GetSkyTint();
-		set { skyboxNative.SetSkyTint( value ); NotifyChanged( Rendering.SceneObjectChange.Settings ); }
+		get => managed || skyboxNative.IsNull ? skyTint : skyboxNative.GetSkyTint();
+		set
+		{
+			TakeOver();
+			skyTint = value;
+			if ( WritesNative && !skyboxNative.IsNull ) skyboxNative.SetSkyTint( skyTint );
+			NotifyChanged( Rendering.SceneObjectChange.Settings );
+		}
 	}
 
 	/// <summary>
@@ -99,19 +147,17 @@ public class SceneSkyBox : SceneObject
 	/// </summary>
 	public FogParamInfo FogParams
 	{
-		get => new()
-		{
-			FogType = (FogType)skyboxNative.GetFogType(),
-			FogMinStart = skyboxNative.GetFogMinStart(),
-			FogMinEnd = skyboxNative.GetFogMinEnd(),
-			FogMaxStart = skyboxNative.GetFogMaxStart(),
-			FogMaxEnd = skyboxNative.GetFogMaxEnd()
-		};
-
+		get => managed || skyboxNative.IsNull ? fogParams : NativeFogParams;
 		set
 		{
-			skyboxNative.SetFogType( (int)value.FogType );
-			skyboxNative.SetAngularFogParams( value.FogMinStart, value.FogMinEnd, value.FogMaxStart, value.FogMaxEnd );
+			TakeOver();
+			fogParams = value;
+			if ( WritesNative && !skyboxNative.IsNull )
+			{
+				skyboxNative.SetFogType( (int)value.FogType );
+				skyboxNative.SetAngularFogParams( value.FogMinStart, value.FogMinEnd, value.FogMaxStart, value.FogMaxEnd );
+			}
+
 			NotifyChanged( Rendering.SceneObjectChange.Settings );
 		}
 	}

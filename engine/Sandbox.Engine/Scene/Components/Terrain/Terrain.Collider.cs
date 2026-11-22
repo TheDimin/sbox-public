@@ -18,6 +18,7 @@ public partial class Terrain
 	}
 
 	private PhysicsShape _shape;
+	private int _shapeResolution;
 
 	internal override Transform GetTargetTransform()
 	{
@@ -48,37 +49,44 @@ public partial class Terrain
 
 		// Extract base texture IDs from the compact format
 		var surfaceMap = ArrayPool<byte>.Shared.Rent( Storage.ControlMap.Length );
-		for ( int i = 0; i < Storage.ControlMap.Length; i++ )
+		try
 		{
-			var material = new CompactTerrainMaterial( Storage.ControlMap[i] );
+			// The pool can return extra capacity; only initialized entries belong to the heightfield.
+			var materials = surfaceMap.AsSpan( 0, Storage.ControlMap.Length );
+			for ( int i = 0; i < materials.Length; i++ )
+			{
+				var material = new CompactTerrainMaterial( Storage.ControlMap[i] );
 
-			// If marked as a hole, use 255
-			if ( material.IsHole )
-			{
-				surfaceMap[i] = 255;
+				// If marked as a hole, use 255
+				if ( material.IsHole )
+				{
+					materials[i] = 255;
+				}
+				else
+				{
+					// Use the base texture ID
+					materials[i] = material.BaseTextureId;
+				}
 			}
-			else
+
+			Span<int> surfaceIndices = stackalloc int[4];
+			surfaceIndices.Fill( Surface?.Index ?? -1 );
+			int index = 0;
+			foreach ( var material in Storage.Materials )
 			{
-				// Use the base texture ID
-				surfaceMap[i] = material.BaseTextureId;
+				if ( index == surfaceIndices.Length ) break;
+				surfaceIndices[index++] = (material.Surface ?? Surface)?.Index ?? -1;
 			}
+
+			_shape = targetBody.AddHeightFieldShape( Storage.HeightMap, materials, Storage.Resolution, Storage.Resolution, sizeScale, heightScale, 4, surfaceIndices );
+			_shapeResolution = Storage.Resolution;
+		}
+		finally
+		{
+			ArrayPool<byte>.Shared.Return( surfaceMap );
 		}
 
-		var shape = targetBody.AddHeightFieldShape( Storage.HeightMap, surfaceMap, Storage.Resolution, Storage.Resolution, sizeScale, heightScale, 4 );
-		shape.Collider = this;
-		shape.Surface = Surface;
-
-		shape.Surfaces = Storage.Materials
-			.Select( x => x.Surface ?? Surface )
-			.Concat( Enumerable.Repeat( Surface, 4 ) )
-			.Take( 4 )
-			.ToArray();
-
-		_shape = shape;
-
-		ArrayPool<byte>.Shared.Return( surfaceMap );
-
-		yield return shape;
+		yield return _shape;
 	}
 
 	private unsafe void UpdateColliderHeights( int x, int y, int w, int h )
@@ -89,6 +97,9 @@ public partial class Terrain
 		if ( _shape?._shape is not PhysicsShape3d shape3d )
 			return;
 
+		if ( !CanUpdateCollider() )
+			return;
+
 		fixed ( ushort* heights = &Storage.HeightMap[0] )
 		{
 			var sizeScale = Storage.TerrainSize / Storage.Resolution;
@@ -96,6 +107,11 @@ public partial class Terrain
 
 			shape3d.native.UpdateHeightShape( (IntPtr)heights, IntPtr.Zero, x, y, w, h, sizeScale, heightScale );
 		}
+	}
+
+	internal bool CanUpdateCollider()
+	{
+		return Storage?.HeightMap is { } heights && Storage.Resolution == _shapeResolution && heights.Length >= (long)_shapeResolution * _shapeResolution;
 	}
 
 	private unsafe void UpdateColliderMaterials( int x, int y, int w, int h )

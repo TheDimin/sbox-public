@@ -45,7 +45,7 @@ public partial class RenderSettings
 			var defaultValue = RenderMultisampleType.RENDER_MULTISAMPLE_NONE;
 			var value = VideoSettings.Get( "aaquality", defaultValue );
 
-			if ( !Enum.IsDefined( typeof( RenderMultisampleType ), value ) )
+			if ( !Enum.IsDefined( value ) )
 				value = defaultValue;
 
 			return value.FromEngine();
@@ -67,7 +67,7 @@ public partial class RenderSettings
 		{
 			var defaultMode = UpscalerMode == UpscalerMode.Off ? AntiAliasMode.Cmaa2 : AntiAliasMode.None;
 			var value = VideoSettings.Get<int>( "aa.mode", (int)defaultMode );
-			return Enum.IsDefined( typeof( AntiAliasMode ), value ) ? (AntiAliasMode)value : defaultMode;
+			return Enum.IsDefined( (AntiAliasMode)value ) ? (AntiAliasMode)value : defaultMode;
 		}
 
 		set
@@ -81,7 +81,7 @@ public partial class RenderSettings
 
 	/// <summary>Returns the requested MSAA amount when supported, or the best available amount.</summary>
 	public static MultisampleAmount GetSupportedAntiAliasQuality( MultisampleAmount amount ) =>
-		NativeEngine.RenderDeviceManager.GetBestMultisampleType( amount.ToEngine() ).FromEngine();
+		Graphics.BestMultisampleType( amount.ToEngine() ).FromEngine();
 
 	internal struct VideoModeSnapshot
 	{
@@ -125,9 +125,13 @@ public partial class RenderSettings
 		VideoSettings.Save();
 	}
 
-	private void ApplyVideoMode()
+	/// <param name="honourCommandLine">Keep this session's command-line window switches (-sw, -w/-h, etc.) on top of the saved settings.</param>
+	private void ApplyVideoMode( bool honourCommandLine = false )
 	{
 		if ( GameWindow.Current is not { } window ) return;
+
+		// Resolve before the desktop size is written back, so this matches the mode the window was created with
+		GameWindow.VideoMode? commandLineMode = honourCommandLine ? GameWindow.VideoMode.FromCommandLine( this ) : null;
 
 		if ( Borderless && !Fullscreen )
 		{
@@ -136,7 +140,7 @@ public partial class RenderSettings
 			ResolutionHeight = (int)size.y;
 		}
 
-		window.QueueVideoMode( GameWindow.VideoMode.FromSettings( this ) );
+		window.QueueVideoMode( commandLineMode ?? GameWindow.VideoMode.FromSettings( this ) );
 	}
 
 	/// <summary>

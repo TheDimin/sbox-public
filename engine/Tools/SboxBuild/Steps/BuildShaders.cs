@@ -38,7 +38,10 @@ internal class BuildShaders( bool forced = false, bool seed = false )
 				return ExitCode.Failure;
 			}
 
-			return RunShaderCompiler( shaderCompilerPath, gameDir );
+			var result = RunShaderCompiler( shaderCompilerPath, gameDir );
+			if ( result == ExitCode.Success ) CompileSlang( shaderCompilerPath, gameDir );
+			if ( result == ExitCode.Success && !CheckShaderIncludes.Check( rootDir ) ) result = ExitCode.Failure;
+			return result;
 		}
 		catch ( Exception ex )
 		{
@@ -46,6 +49,24 @@ internal class BuildShaders( bool forced = false, bool seed = false )
 			return ExitCode.Failure;
 		}
 	} );
+
+	/// <summary>
+	/// Borealis's Slang shaders compiled offline (<c>name.slang_c</c> beside each <c>.slang</c>): every surface and pass module,
+	/// so a fresh build or install runs no Slang in game (docs/reference/borealis-slang-materials.md). Only those whose inputs
+	/// changed compile. A failure only warns: Borealis.Gpu compiles what's missing in game.
+	/// </summary>
+	void CompileSlang( string shaderCompilerPath, string gameDir )
+	{
+		BuildDisplay.Status( "Compile Slang shaders" );
+		var success = Utility.RunProcess( shaderCompilerPath, "-slang", gameDir, onDataReceived: ( sender, e ) =>
+		{
+			if ( e.Data == null ) return;
+			if ( !BuildDisplay.IsActive ) Log.Info( e.Data );
+			if ( e.Data.StartsWith( "Slang offline:", StringComparison.Ordinal ) ) GitHubActions.Note( e.Data );
+		} );
+
+		if ( !success ) Log.Warning( "Some Slang shaders didn't compile offline; Borealis.Gpu compiles those in game." );
+	}
 
 	private ExitCode RunShaderCompiler( string shaderCompilerPath, string workingDirectory )
 	{

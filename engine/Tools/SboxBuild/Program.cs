@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.CommandLine;
+using System.CommandLine.Invocation;
 using Facepunch.Steps;
 using static Facepunch.Constants;
 
@@ -24,13 +25,16 @@ internal class Program
 		AddBuildContentCommand( rootCommand );
 		AddTestCommand( rootCommand );
 		AddBuildShadersCommand( rootCommand );
+		AddCheckShaderIncludesCommand( rootCommand );
 		AddShaderStatsCommand( rootCommand );
+		AddBorealisRenderTestsCommand( rootCommand );
 		AddGenerateSolutionsCommand( rootCommand );
 		AddSyncPublicRepoCommand( rootCommand );
 		AddWriteVersionCommand( rootCommand );
 		AddNvPatchCommand( rootCommand );
 		AddSignBinariesCommand( rootCommand );
 		AddBuildAddonsCommand( rootCommand );
+		AddBuildMountCommand( rootCommand );
 		AddUploadSymbolsCommand( rootCommand );
 		AddUploadDocsCommand( rootCommand );
 		AddSentryReleaseCommand( rootCommand );
@@ -44,9 +48,6 @@ internal class Program
 		AddPublishBuildCommand( rootCommand );
 		AddSummaryCommand( rootCommand );
 		AddShaderSpecializationExperimentCommand( rootCommand );
-		var complexSpecialization = new Command( "test-complex-specialization", "Compare full complex.shader macro/specialized compiles and rendered bent-normal output (requires built engine/tests)" );
-		complexSpecialization.SetHandler( () => Environment.ExitCode = (int)new TestComplexSpecialization().Run() );
-		rootCommand.Add( complexSpecialization );
 		AddNotifySlackCommand( rootCommand );
 		AddReportBuildCommand( rootCommand );
 
@@ -138,7 +139,11 @@ internal class Program
 	private static void AddBuildContentCommand( RootCommand rootCommand )
 	{
 		var cmd = new Command( "build-content", "Build game content" );
-		cmd.SetHandler( () => { Environment.ExitCode = (int)new BuildContent().Run(); } );
+		var rootOption = new Option<string>( "--root", description: "Only build the content root at this path under game/, with whatever it reads from the others", getDefaultValue: () => null );
+		var forceOption = new Option<bool>( "--force", description: "Compile everything again, current or not", getDefaultValue: () => false );
+		cmd.AddOption( rootOption );
+		cmd.AddOption( forceOption );
+		cmd.SetHandler( ( string root, bool force ) => Environment.ExitCode = (int)new BuildContent( root, force ).Run(), rootOption, forceOption );
 		rootCommand.Add( cmd );
 	}
 
@@ -178,9 +183,43 @@ internal class Program
 		rootCommand.Add( cmd );
 	}
 
+	private static void AddCheckShaderIncludesCommand( RootCommand rootCommand )
+	{
+		var cmd = new Command( "check-shader-includes", "Check that every shipped Slang shader's includes are in a player's install, and that none reaches Valve's headers" );
+		cmd.SetHandler( () => Environment.ExitCode = (int)CheckShaderIncludes.Run() );
+		rootCommand.Add( cmd );
+	}
+
+	private static void AddBorealisRenderTestsCommand( RootCommand rootCommand )
+	{
+		var cmd = new Command( "borealis-render-tests", "Render Borealis's lab presets with BorealisLab on Lavapipe and check them against Borealis's approved images in engine/Tests/GoldenTruth/Borealis" );
+		var presetOption = new Option<string[]>( "--preset",
+			description: "Only these presets, repeatable. Default: BorealisLab's core suite",
+			getDefaultValue: () => [] )
+		{ AllowMultipleArgumentsPerToken = true };
+		var updateOption = new Option<bool>( "--update",
+			description: "Write the captures as the approved images",
+			getDefaultValue: () => false );
+		var pullRequestOption = new Option<bool>( "--pull-request",
+			description: "On a pull request, run only with the render-tests label, or when it changes rendering (which adds the label); skip with skip-render-tests",
+			getDefaultValue: () => false );
+		var slackOption = new Option<bool>( "--notify-slack",
+			description: "Tell Slack when they fail",
+			getDefaultValue: () => false );
+		cmd.AddOption( presetOption );
+		cmd.AddOption( updateOption );
+		cmd.AddOption( pullRequestOption );
+		cmd.AddOption( slackOption );
+		cmd.SetHandler( ( string[] presets, bool update, bool pullRequest, bool notifySlack ) =>
+		{
+			Environment.ExitCode = (int)new BorealisRenderTests( presets, update, pullRequest, notifySlack ).Run();
+		}, presetOption, updateOption, pullRequestOption, slackOption );
+		rootCommand.Add( cmd );
+	}
+
 	private static void AddShaderStatsCommand( RootCommand rootCommand )
 	{
-		var cmd = new Command( "shader-stats", "Compile every shader combo with AMD's Radeon GPU Analyzer and write register use and occupancy to docs/shaders/shader-stats.md" );
+		var cmd = new Command( "shader-stats", "Compile every shader combo with AMD's Radeon GPU Analyzer and write register use and occupancy to docs/reference/shader-stats.md" );
 		var asicOption = new Option<string[]>( "--asic",
 			description: "Target to analyze, repeatable. The first one gets the detailed tables",
 			getDefaultValue: () => ShaderStats.DefaultAsics )
@@ -217,14 +256,26 @@ internal class Program
 
 	private static void AddSyncPublicRepoCommand( RootCommand rootCommand )
 	{
-		var cmd = new Command( "sync-public-repo", "Sync master branch to the public repository" );
+		var cmd = new Command( "sync-public-repo", "Sync master branch to the public repository, or a Steam branch's commit to its public branch" );
 		var dryRunOption = new Option<bool>( "--dry-run",
 			getDefaultValue: () => false );
+		var branchOption = new Option<string>( "--branch", getDefaultValue: () => SyncPublicRepo.MasterBranch,
+			description: "Public branch to update. Another than master syncs --source to it, without tags" );
+		var sourceOption = new Option<string>( "--source",
+			description: "Commit or ref to sync to --branch (default HEAD); only a dry run may name one that isn't checked out" );
+		var artifactsCommitOption = new Option<string>( "--artifacts-commit",
+			description: "Commit the build outputs were built from, when not the source (a PR's merge commit); its native inputs must match" );
+		var keepFilteredOption = new Option<bool>( "--keep-filtered", getDefaultValue: () => false,
+			description: "On a dry run, keep the filtered repository for inspection" );
 		cmd.AddOption( dryRunOption );
-		cmd.SetHandler( ( bool dryRun ) =>
+		cmd.AddOption( branchOption );
+		cmd.AddOption( sourceOption );
+		cmd.AddOption( artifactsCommitOption );
+		cmd.AddOption( keepFilteredOption );
+		cmd.SetHandler( ( bool dryRun, string branch, string source, string artifactsCommit, bool keepFiltered ) =>
 		{
-			Environment.ExitCode = (int)new SyncPublicRepo( dryRun ).Run();
-		}, dryRunOption );
+			Environment.ExitCode = (int)new SyncPublicRepo( dryRun, branch, source, artifactsCommit, keepFiltered ).Run();
+		}, dryRunOption, branchOption, sourceOption, artifactsCommitOption, keepFilteredOption );
 		rootCommand.Add( cmd );
 	}
 
@@ -253,6 +304,25 @@ internal class Program
 	{
 		var cmd = new Command( "build-addons", "Build addons and menu" );
 		cmd.SetHandler( () => { Environment.ExitCode = (int)new BuildAddons().Run(); } );
+		rootCommand.Add( cmd );
+	}
+
+	private static void AddBuildMountCommand( RootCommand rootCommand )
+	{
+		var cmd = new Command( "build-mount", "Compile mount addons into game/mounts/ " );
+		var projectOption = new Option<string[]>( "--project",
+			description: "Mount .sbproj(s) to build.",
+			getDefaultValue: () => [] )
+		{ AllowMultipleArgumentsPerToken = true };
+		var outOption = new Option<string>( "--out",
+			description: "Directory to put each mount's folder in. Defaults to game/mounts/",
+			getDefaultValue: () => null );
+		cmd.AddOption( projectOption );
+		cmd.AddOption( outOption );
+		cmd.SetHandler( ( string[] projects, string output ) =>
+		{
+			Environment.ExitCode = (int)new BuildMount( projects, output ).Run();
+		}, projectOption, outOption );
 		rootCommand.Add( cmd );
 	}
 

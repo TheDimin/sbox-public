@@ -36,7 +36,7 @@ internal class UploadBuildArtifacts
 		"core/**",
 		"config/**",
 		"editor/**",
-		"mount/**",
+		"mounts/**",
 		"samples/**",
 		"templates/**"
 	};
@@ -156,10 +156,11 @@ internal class UploadBuildArtifacts
 		"core/shaders/tools_wireframe.shader",
 		"core/shaders/ui.shader",
 		"core/shaders/unlit.shader",
-		"core/shaders/visualize_quad_overdraw.shader",
 
 		// addons raw assets
 		"addons/**/*.tga",
+		"addons/content/**/*.png",
+		"addons/content/**/*.meta",
 		"addons/citizen/Assets/models/**/*_color.png",
 		"addons/citizen/Assets/models/**/*_normal.png",
 		"addons/citizen/Assets/models/**/*_bentnormal.png",
@@ -193,7 +194,6 @@ internal class UploadBuildArtifacts
 		"bin/win64/materialsystem2.dll",
 		"bin/win64/meshsystem.dll",
 		"bin/win64/modeldoc_utils.dll",
-		"bin/win64/openxr_loader.dll",
 		"bin/win64/rendersystemempty.dll",
 		"bin/win64/resourcecompiler.dll",
 		"bin/win64/schemasystem.dll",
@@ -223,7 +223,7 @@ internal class UploadBuildArtifacts
 	private static readonly string[] CompilerEmptyFolders =
 	{
 		"game/addons/citizen/Assets/",
-		"game/mount/"
+		"game/addons/content/Assets/",
 	};
 
 	internal ExitCode Run()
@@ -301,7 +301,7 @@ internal class UploadBuildArtifacts
 	/// include/exclude globs (see <see cref="IncludeGlobs"/> / <see cref="ExcludeGlobs"/>)
 	/// to the <c>game/</c> folder.
 	/// </summary>
-	private static List<(string EntryPath, string AbsolutePath)> CollectRunnableFiles( string repoRoot )
+	internal static List<(string EntryPath, string AbsolutePath)> CollectRunnableFiles( string repoRoot )
 	{
 		var gameRoot = Path.Combine( repoRoot, "game" );
 		if ( !Directory.Exists( gameRoot ) )

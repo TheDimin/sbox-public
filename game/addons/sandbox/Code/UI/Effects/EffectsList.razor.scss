@@ -1,0 +1,24 @@
+@import "/UI/Theme.scss";
+@import "/UI/Theme/GroupedSidebar.scss";
+
+@mixin component-theme
+{
+    EffectsList
+    {
+        @include ui-grouped-sidebar;
+
+        .item { gap: 6px; }
+
+        .empty-state
+        {
+            flex-shrink: 0;
+            padding: 16px 12px;
+            justify-content: center;
+            text-align: center;
+            color: $ui-text-muted;
+            font-size: 13px;
+        }
+    }
+}
+
+@import "/UI/Theme/Apply.scss";

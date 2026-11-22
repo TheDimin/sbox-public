@@ -11,7 +11,12 @@ public partial class Texture
 	/// </summary>
 	public void Clear( Color color )
 	{
-		g_pRenderDevice.ClearTexture( native, color );
+		DirtyVersion++; // Layer caches hash this
+
+		// Other devices clear their copies too, or make them from this colour when they next use it
+		RenderBackend.ClearEverywhere( this, color );
+		InitialPixels = null;
+		InitialColor = color;
 	}
 
 	/// <summary>
@@ -80,16 +85,24 @@ public partial class Texture
 	{
 		if ( native.IsNull ) throw new ObjectDisposedException( "Texture" );
 
+		if ( x < 0 || y < 0 || z < 0 || width < 0 || height < 0 || depth < 0 )
+			throw new ArgumentException( "Update region can't be negative" );
+
+		if ( (long)x + width > Width || (long)y + height > Height || (long)z + depth > Math.Max( Depth, 1 ) )
+			throw new ArgumentException( "Update region is outside the texture" );
+
+		DirtyVersion++; // Layer caches hash this
+
 		var memRequired = ImageLoader.GetMemRequired( width, height, depth, ImageFormat, false );
 		if ( data.Length < memRequired )
 		{
 			throw new Exception( $"{data.Length} bytes is not enough data to update texture! {memRequired} required." );
 		}
 
-		fixed ( byte* dataPtr = data )
-		{
-			g_pRenderDevice.AsyncSetTextureData2( native, (IntPtr)dataPtr, data.Length, new Rect3D( x, y, z, width, height, depth ) );
-		}
+		// The devices take the same bytes into their copies, or drop them
+		RenderBackend.UpdateEverywhere( this, data, x, y, z, width, height, depth );
+		InitialPixels = null;
+		InitialColor = null;
 	}
 
 	/// <summary>

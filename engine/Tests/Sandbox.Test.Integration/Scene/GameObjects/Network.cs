@@ -15,11 +15,13 @@ using static GlobalGameNamespace;
 public class NetworkTest
 {
 	private TypeLibrary _oldTypeLibrary;
+	private Scene _oldActiveScene;
 
 	[TestInitialize]
 	public void TestInitialize()
 	{
 		_oldTypeLibrary = Game.TypeLibrary;
+		_oldActiveScene = Game.ActiveScene;
 
 		Game.TypeLibrary = SharedTypeLibrary.EngineAndTests;
 
@@ -30,6 +32,71 @@ public class NetworkTest
 	public void TestCleanup()
 	{
 		Game.TypeLibrary = _oldTypeLibrary;
+
+		// Applying a snapshot replaces the active scene, so the test's push scope won't restore it
+		if ( Game.ActiveScene != _oldActiveScene )
+		{
+			Game.ActiveScene?.Destroy();
+			Game.ActiveScene = _oldActiveScene;
+		}
+	}
+
+	[TestMethod]
+	public void PropertyRefreshPreservesExistingSlotsAndRegistersMissingSlots()
+	{
+		using var scope = new Scene().Push();
+		using var peers = new ClientAndHost( TypeLibrary );
+		peers.BecomeHost();
+
+		var go = new GameObject();
+		var prop = go.Components.Create<Prop>();
+		prop.Health = 100;
+		go.NetworkSpawn();
+
+		var property = ReflectionQueryCache.SyncProperties( typeof( Prop ) ).Single( x => x.Property.Name == nameof( Prop.Health ) );
+		var slot = NetworkObject.GetPropertySlot( property.NameHash, prop.Id );
+		var table = go._net.dataTable;
+		table.Unregister( slot );
+		var existing = new NetworkTable.Entry { TargetType = typeof( float ), GetValue = () => 42f };
+		table.Register( slot, existing );
+		existing.IsDirty = false;
+
+		go._net.RegisterProperties( prop, prop.Id );
+		Assert.AreEqual( 42f, table.GetValue( slot ) );
+		Assert.IsFalse( existing.IsDirty, "Refreshing must preserve existing entry state" );
+
+		table.Unregister( slot );
+		go._net.RegisterProperties( prop, prop.Id );
+		Assert.AreEqual( 100f, table.GetValue( slot ) );
+		prop.Health = 75;
+		Assert.AreEqual( 75f, table.GetValue( slot ), "A newly registered accessor must read the live instance" );
+
+		var other = go.Components.Create<Prop>();
+		other.Health = 25;
+		go._net.RegisterProperties( other, other.Id );
+		var otherSlot = NetworkObject.GetPropertySlot( property.NameHash, other.Id );
+		Assert.AreEqual( 25f, table.GetValue( otherSlot ) );
+		Assert.AreEqual( 75f, table.GetValue( slot ), "Instances of the same type must retain separate accessors" );
+	}
+
+	[TestMethod, TestCategory( Allocations.Category )]
+	public void RegisteredPropertyRefreshDoesNotAllocate()
+	{
+		using var scope = new Scene().Push();
+		using var peers = new ClientAndHost( TypeLibrary );
+		peers.BecomeHost();
+
+		var go = new GameObject();
+		var prop = go.Components.Create<Prop>();
+		var rigidbody = go.Components.Create<Rigidbody>();
+		go.NetworkSpawn();
+
+		Allocations.AssertSettles( "Refreshing registered GameObject, Prop and Rigidbody properties", () =>
+		{
+			go._net.RegisterProperties( go, go.Id );
+			go._net.RegisterProperties( prop, prop.Id );
+			go._net.RegisterProperties( rigidbody, rigidbody.Id );
+		} );
 	}
 
 	[TestMethod]
@@ -917,6 +984,142 @@ public class NetworkTest
 		Assert.AreEqual( expectedFaces, clientMesh.Mesh.FaceHandles.Count(), "Mesh geometry did not survive the snapshot" );
 	}
 
+	private static PolygonMesh CreateQuadMesh()
+	{
+		var mesh = new PolygonMesh();
+		var a = mesh.AddVertex( new Vector3( 0, 0, 0 ) );
+		var b = mesh.AddVertex( new Vector3( 64, 0, 0 ) );
+		var c = mesh.AddVertex( new Vector3( 64, 64, 0 ) );
+		var d = mesh.AddVertex( new Vector3( 0, 64, 0 ) );
+		mesh.AddFace( a, b, c, d );
+		return mesh;
+	}
+
+	private static void AssertReceivedMesh( Scene receiverScene, Guid id )
+	{
+		var go = receiverScene.Directory.FindByGuid( id );
+		Assert.IsTrue( go.IsValid(), "Mesh object missing on receiver" );
+
+		var meshComponent = go.GetComponent<MeshComponent>();
+		Assert.IsNotNull( meshComponent, "MeshComponent missing on receiver" );
+		Assert.IsNotNull( meshComponent.Mesh, "Mesh data missing on receiver" );
+		Assert.AreEqual( 1, meshComponent.Mesh.FaceHandles.Count(), "Mesh geometry did not survive" );
+	}
+
+	/// <summary>
+	/// A single networked object spawned while a client is connected goes through ObjectCreateMsg.
+	/// Its blob-backed properties are read when the callback batch flushes, so the blob data has to
+	/// still be loaded at that point.
+	/// </summary>
+	[TestMethod]
+	public void NetworkedMeshSurvivesSpawnToConnectedClient()
+	{
+		using var clientAndHost = new ClientAndHost( TypeLibrary );
+
+		var senderScene = new Scene();
+		var receiverScene = new Scene();
+
+		Guid id;
+
+		using ( senderScene.Push() )
+		{
+			clientAndHost.BecomeHost();
+
+			var go = new GameObject( "Floor" );
+			go.Components.Create<MeshComponent>().Mesh = CreateQuadMesh();
+			go.NetworkSpawn();
+
+			id = go.Id;
+		}
+
+		using ( receiverScene.Push() )
+		{
+			clientAndHost.BecomeClient();
+			clientAndHost.ProcessMessages();
+
+			AssertReceivedMesh( receiverScene, id );
+		}
+	}
+
+	/// <summary>
+	/// Spawning an object with networked children sends an ObjectCreateBatchMsg instead.
+	/// </summary>
+	[TestMethod]
+	public void NetworkedMeshSurvivesBatchedSpawnToConnectedClient()
+	{
+		using var clientAndHost = new ClientAndHost( TypeLibrary );
+
+		var senderScene = new Scene();
+		var receiverScene = new Scene();
+
+		Guid floorId;
+		Guid barrelId;
+
+		using ( senderScene.Push() )
+		{
+			clientAndHost.BecomeHost();
+
+			var root = new GameObject( "Root" );
+
+			var floor = new GameObject( root, true, "Floor" );
+			floor.Components.Create<MeshComponent>().Mesh = CreateQuadMesh();
+
+			var barrel = new GameObject( root, true, "Barrel" );
+			barrel.NetworkMode = NetworkMode.Object;
+
+			root.NetworkSpawn();
+
+			floorId = floor.Id;
+			barrelId = barrel.Id;
+		}
+
+		using ( receiverScene.Push() )
+		{
+			clientAndHost.BecomeClient();
+			clientAndHost.ProcessMessages();
+
+			Assert.IsTrue( receiverScene.Directory.FindByGuid( barrelId ).IsValid(), "Networked child missing on receiver" );
+			AssertReceivedMesh( receiverScene, floorId );
+		}
+	}
+
+	/// <summary>
+	/// Refreshing a single descendant sends an ObjectRefreshDescendantMsg, which deserializes the same way.
+	/// </summary>
+	[TestMethod]
+	public void NetworkedMeshSurvivesDescendantRefresh()
+	{
+		using var clientAndHost = new ClientAndHost( TypeLibrary );
+
+		var senderScene = new Scene();
+		var receiverScene = new Scene();
+
+		Guid floorId;
+
+		using ( senderScene.Push() )
+		{
+			clientAndHost.BecomeHost();
+
+			var root = new GameObject( "Root" );
+			root.NetworkSpawn();
+
+			var floor = new GameObject( root, true, "Floor" );
+			floor.Components.Create<MeshComponent>().Mesh = CreateQuadMesh();
+			root.Network.Refresh( floor );
+
+			floorId = floor.Id;
+		}
+
+		using ( receiverScene.Push() )
+		{
+			clientAndHost.BecomeClient();
+			clientAndHost.ProcessMessages();
+
+			AssertReceivedMesh( receiverScene, floorId );
+		}
+	}
+
+	[TestMethod]
 	[DataRow( false, false, false, DisplayName = "Cullable + hidden -> excluded" )]
 	[DataRow( false, true, true, DisplayName = "Cullable + visible -> included" )]
 	[DataRow( true, false, true, DisplayName = "AlwaysTransmit -> included when hidden" )]
@@ -1058,6 +1261,87 @@ public class NetworkTest
 		go._net.EnsureCreateMessageSent( clientAndHost.Client );
 
 		Assert.AreEqual( 0, CreateMsgCount( clientAndHost.Client ) );
+	}
+
+	[TestMethod]
+	[DataRow( true )]
+	[DataRow( false )]
+	public void BroadcastRecipientCheckMatchesDelivery( bool host )
+	{
+		using var scope = new Scene().Push();
+		using var peers = new ClientAndHost( TypeLibrary );
+		peers.Become( host ? peers.Host : peers.Client );
+		var remote = host ? peers.Client : peers.Host;
+
+		foreach ( var state in Enum.GetValues<Connection.ChannelState>() )
+		{
+			remote.State = state;
+			foreach ( var filter in new Connection.Filter?[]
+			{
+				null,
+				new( Connection.Filter.FilterType.Include, new[] { remote } ),
+				new( Connection.Filter.FilterType.Exclude, new[] { remote } ),
+				new( Connection.Filter.FilterType.Include, new[] { Connection.Local } )
+			} )
+			{
+				Assert.AreEqual(
+					Networking.System.GetFilteredConnections( filter: filter ).Any(),
+					Networking.System.HasBroadcastRecipients( filter: filter ),
+					$"Recipient check differs for {state}, host={host}" );
+			}
+		}
+	}
+
+	[TestMethod]
+	public void UnsentSpawnsAndRefreshesAreCapturedForLateJoiners()
+	{
+		using var scope = new Scene().Push();
+		using var peers = new ClientAndHost( TypeLibrary );
+		peers.BecomeHost();
+		peers.Client.State = Connection.ChannelState.Snapshot - 1;
+		peers.Client.Messages.Clear();
+
+		var go = new GameObject();
+		var component = go.Components.Create<SerializationProbe>();
+		component.Value = 10;
+		go.NetworkSpawn();
+		Assert.IsTrue( go.IsNetworkRoot );
+		Assert.AreEqual( 0, component.Reads, "No recipient needs a serialized spawn" );
+
+		component.Value = 20;
+		go.Network.Refresh( component );
+		var child = new GameObject( go );
+		child.Name = "added while alone";
+		go.Network.Refresh( child );
+		go.Network.Refresh();
+		Assert.AreEqual( 0, component.Reads, "No recipient needs a serialized refresh" );
+		Assert.AreEqual( 0, peers.Client.Messages.Count );
+
+		peers.Client.State = Connection.ChannelState.Connected;
+		var snapshot = new List<object>();
+		Game.ActiveScene.SerializeNetworkObjects( peers.Client, snapshot );
+		var create = snapshot.OfType<ObjectCreateMsg>().Single( x => x.Guid == go.Id );
+		Assert.IsTrue( component.Reads > 0 );
+		var json = JsonNode.Parse( create.JsonData );
+		Assert.AreEqual( 20, json["Components"][0][nameof( SerializationProbe.Value )].GetValue<int>() );
+		Assert.AreEqual( "added while alone", json["Children"][0]["Name"].GetValue<string>() );
+
+		peers.Client.Messages.Clear();
+		go.Network.Refresh( component );
+		Assert.IsTrue( peers.Client.Messages.Any( x => x.Payload is ObjectRefreshComponentMsg ) );
+	}
+
+	private class SerializationProbe : Component
+	{
+		public int Reads;
+		private int _value;
+
+		[Property]
+		public int Value
+		{
+			get { Reads++; return _value; }
+			set { _value = value; }
+		}
 	}
 
 	// Spawns a cullable (not AlwaysTransmit) networked object with controllable visibility.

@@ -3,6 +3,11 @@ include "sbox/glue_resources.h"
 
 native static class Glue.Resources as NativeGlue.Resources
 {
+	inline bool IsAnonymousResource( CastTo[ResourceHandle_t] void* handle )
+	{
+		return ResourceIsAnonymous( handle );
+	}
+
 	IMaterial GetMaterial( string name, Guid guid );
 	ITexture GetTexture( string name, Guid guid );
 	bool IsTextureWebStreamingActive();
@@ -22,7 +27,18 @@ native static class Glue.Resources as NativeGlue.Resources
 		return name.String();
 	}
 
+	// A model made in code (FindOrCreateProceduralModel: a tool's meshes), with no file to read
+	inline bool IsModelProcedural( IModel model )
+	{
+		return model.GetBinding() != nullptr && ResourceIsProcedural( model.GetBinding() );
+	}
+
 	CPhysicsData GetPhysics( string name, Guid guid );
 	HAnimationGraph GetAnimationGraph( string name, Guid guid );
+	HAnimGraph2 GetAnimGraph2( string name, Guid guid );
+	HAnimGraph2 CreateCompiledAnimGraph2( string name, void* data, int size );
+	HAnimGraph2 CreateBuiltAnimGraph2( string name, AnimationGraphBuilder builder, int rootNodeIndex );
+	HAnimSkeleton GetAnimSkeleton( string name, Guid guid );
+	HAnimClip GetAnimClip( string name, Guid guid );
 	CVfx GetShader( string name, Guid guid );
 }

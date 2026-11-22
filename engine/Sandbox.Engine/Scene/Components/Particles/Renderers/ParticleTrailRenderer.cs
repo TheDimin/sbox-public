@@ -51,6 +51,8 @@ public sealed class ParticleTrailRenderer : ParticleController, Component.Execut
 
 	List<SceneTrailObject> adopted = new();
 
+	// A copy of its own, since it sets the texture on it; every trail it makes draws with it. Freed once the component is
+	// disabled and its trails are gone, rather than left to the GC
 	internal Material _defaultMaterial;
 
 	protected override void OnParticleCreated( Particle p )
@@ -92,14 +94,16 @@ public sealed class ParticleTrailRenderer : ParticleController, Component.Execut
 			}
 		}
 
-		Sandbox.Utility.Parallel.ForEach( adopted, p =>
-		{
-			p.AdvanceTime( Time.Delta );
-			p.Build();
-
-		} );
+		JobDispatcher.For( adopted.Count, this, static ( renderer, i ) => renderer.AdvanceTrail( i ) );
 
 		adopted.RemoveAll( TryDelete );
+	}
+
+	void AdvanceTrail( int i )
+	{
+		var p = adopted[i];
+		p.AdvanceTime( Time.Delta );
+		p.Build();
 	}
 
 	static bool TryDelete( SceneTrailObject obj )
@@ -128,6 +132,9 @@ public sealed class ParticleTrailRenderer : ParticleController, Component.Execut
 		}
 
 		adopted.Clear();
+
+		_defaultMaterial?.ReleaseCopy();
+		_defaultMaterial = null;
 	}
 }
 

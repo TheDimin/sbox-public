@@ -102,14 +102,17 @@ internal sealed partial class TextBlock : IDisposable
 
 	Dictionary<int, Vector2> SizeCache = new Dictionary<int, Vector2>();
 	Vector2? MinContentSize;
+	(float Width, Vector2 Size)? MinContentAtWidth;
 
 	internal Vector2 MeasureMinContent( float? width = null )
 	{
 		if ( width is null && MinContentSize is { } cached ) return cached;
+		if ( width is { } w && MinContentAtWidth is { } atWidth && atWidth.Width.Equals( w ) ) return atWidth.Size;
 
 		var size = Block.MeasureMinContent( width, WhiteSpace == UI.WhiteSpace.BreakSpaces, EndsWithNewline );
 		var result = new Vector2( size.Width.CeilToInt(), size.Height.CeilToInt() );
 		if ( width is null ) MinContentSize = result;
+		else MinContentAtWidth = (width.Value, result);
 		return result;
 	}
 
@@ -180,9 +183,11 @@ internal sealed partial class TextBlock : IDisposable
 	}
 
 	readonly List<GPUBoxInstance> Instances = new();
+	(int LayoutVersion, Vector2 Origin, GpuFontText.Options Options) instancesBuiltFor;
 
 	/// <summary>
-	/// Emit the text through Painter, drawn straight from the glyph outlines every frame.
+	/// Emit the text through Painter, drawn straight from the glyph outlines every frame. The instances are only
+	/// rebuilt when the layout, position or options change, since walking every glyph costs far more than drawing them.
 	/// </summary>
 	internal void Draw( Painter painter, BlendMode blendMode, Styles currentStyle, Rect textrect, float opacity )
 	{
@@ -192,9 +197,34 @@ internal sealed partial class TextBlock : IDisposable
 		var options = GetOptions();
 		options.Opacity = opacity;
 
-		Instances.Clear();
-		GpuFontText.Build( Block, GetBlockOrigin( currentStyle, textrect ), options, Instances );
+		(int LayoutVersion, Vector2 Origin, GpuFontText.Options Options) builtFor = (Block.LayoutVersion, GetBlockOrigin( currentStyle, textrect ), options);
+		if ( !builtFor.Equals( instancesBuiltFor ) )
+		{
+			Instances.Clear();
+			GpuFontText.Build( Block, builtFor.Origin, options, Instances );
+			instancesBuiltFor = builtFor;
+		}
+
 		painter.Glyphs( Instances, blendMode, HasGradient ? GradientInfo : default );
+	}
+
+	/// <summary>
+	/// Emit only the text's shadows and outlines, for background-clip: text, which fills the glyphs with the background instead.
+	/// </summary>
+	internal void DrawEffects( Painter painter, BlendMode blendMode, Styles currentStyle, Rect textrect, float opacity )
+	{
+		if ( !ui_rendertext || Block is null || BlockSize == 0 || Text.Length == 0 ) return;
+		if ( opacity <= 0 || Style?.TextEffects?.Any() != true ) return;
+
+		var options = GetOptions();
+		options.Opacity = opacity;
+		options.HasGradient = false;
+		options.EffectsOnly = true;
+
+		Instances.Clear();
+		instancesBuiltFor = default;
+		GpuFontText.Build( Block, GetBlockOrigin( currentStyle, textrect ), options, Instances );
+		painter.Glyphs( Instances, blendMode, default );
 	}
 
 	GpuFontText.Options GetOptions()
@@ -258,6 +288,20 @@ internal sealed partial class TextBlock : IDisposable
 		textrect.Position -= TextureMargin.Position;
 
 		return textrect.Floor();
+	}
+
+	/// <summary>
+	/// Everything <see cref="Draw"/> can cover for a text rect: the block with its effects and glyph overhang.
+	/// Null when the block isn't in the layout <see cref="Relayout"/> measured, so its size isn't known.
+	/// </summary>
+	internal Rect? GetInkRect( Styles currentStyle, Rect textrect )
+	{
+		if ( Block is null || needsLayout || Block.LayoutVersion != measuredLayoutVersion ) return null;
+
+		textrect = GetAlignedRect( currentStyle, textrect );
+		textrect.Size = textureSize;
+		textrect.Position -= TextureMargin.Position;
+		return textrect;
 	}
 
 	/// <summary>
@@ -359,7 +403,7 @@ internal sealed partial class TextBlock : IDisposable
 		hash = HashCode.Combine( hash, style.TextStrokeWidth, style.TextStrokeColor, style.TextDecorationColor, style.TextDecorationThickness, style.TextDecorationSkipInk, style.TextDecorationStyle );
 		hash = HashCode.Combine( hash, style.TextUnderlineOffset, style.TextOverlineOffset, style.TextLineThroughOffset, style.TextGradient, style.TextOverflow, style.WordBreak, style.LineHeight );
 		hash = HashCode.Combine( hash, style.WordSpacing );
-		hash = HashCode.Combine( hash, Smooth, FontVariantNumeric, NoWrap, IsHtml );
+		hash = HashCode.Combine( hash, Smooth, FontVariantNumeric, style.FontVariationSettings, style.FontOpticalSizing, NoWrap, IsHtml );
 
 		if ( FontHash == hash && Block != null )
 			return false;
@@ -378,6 +422,8 @@ internal sealed partial class TextBlock : IDisposable
 		Style.FontWeight = FontWeight ?? 400;
 		Style.FontItalic = FontStyle != FontStyle.None;
 		Style.FontVariantNumeric = FontVariantNumeric ?? UI.FontVariantNumeric.Normal;
+		Style.FontVariationSettings = style.FontVariationSettings ?? default;
+		Style.FontOpticalSizing = style.FontOpticalSizing ?? UI.FontOpticalSizing.Auto;
 		Style.TextColor = fontColor.ToSkF();
 		Style.Underline = UnderlineStyle.None;
 		Style.StrokeInkSkip = style.TextDecorationSkipInk == TextSkipInk.All;
@@ -506,6 +552,7 @@ internal sealed partial class TextBlock : IDisposable
 
 		SizeCache.Clear();
 		MinContentSize = null;
+		MinContentAtWidth = null;
 		Invalidate();
 
 		return true;
@@ -617,7 +664,13 @@ internal sealed partial class TextBlock : IDisposable
 
 		var marginEdge = TextureMargin.EdgeSize;
 		textureSize = new Vector2( width + marginEdge.x.CeilToInt(), height + marginEdge.y.CeilToInt() );
+		measuredLayoutVersion = Block.LayoutVersion;
 	}
+
+	/// <summary>
+	/// The block layout <see cref="Relayout"/> last measured
+	/// </summary>
+	int measuredLayoutVersion = -1;
 
 	/// <summary>
 	/// Render the laid out text into a texture, for background-clip: text
@@ -629,9 +682,11 @@ internal sealed partial class TextBlock : IDisposable
 		int width = (int)textureSize.x, height = (int)textureSize.y;
 		if ( width < 2 || height < 2 ) return null;
 
-		// Only the alpha is used, so colour and gradient don't matter here
+		// Only the alpha is used, so colour and gradient don't matter here. Shadows and outlines
+		// aren't part of the mask, the label draws them itself under the clipped fill.
 		var options = GetOptions();
 		options.HasGradient = false;
+		options.SkipEffects = true;
 
 		var origin = new Vector2( TextureMargin.Left - Block.MeasuredPadding.Left, TextureMargin.Top );
 		return GpuFontText.Render( Block, origin, width, height, false, int.MaxValue, options, Texture );

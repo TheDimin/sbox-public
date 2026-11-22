@@ -6,6 +6,8 @@ namespace Sandbox;
 
 public partial class Scene : GameObject
 {
+	internal Queue<Particle> ParticlePool { get; } = new();
+
 	public bool IsEditor { get; private set; }
 
 	/// <summary>
@@ -132,7 +134,7 @@ public partial class Scene : GameObject
 	/// </summary>
 	internal int ReloadHash => HashCode.Combine( PhysicsMode );
 
-	public PhysicsWorld PhysicsWorld => _physicsWorld ??= CreatePhysicsWorld();
+	public PhysicsWorld PhysicsWorld => _physicsWorld ??= _destroyed ? null : CreatePhysicsWorld();
 
 	/// <summary>
 	/// Creates the physics world for this scene, matching <see cref="PhysicsMode"/>.
@@ -165,18 +167,21 @@ public partial class Scene : GameObject
 		}
 	}
 
-	protected Scene( bool isEditor ) : base( true, "Scene" )
+	protected Scene( bool isEditor ) : this( isEditor, true ) { }
+
+	internal Scene( bool isEditor, bool includeGameSystems ) : base( true, "Scene" )
 	{
 		_all.Add( this );
 
 		Directory = new GameObjectDirectory( this );
+		NavMesh.scene = this;
 
 		RenderAttributes = new();
 		IsEditor = isEditor;
 
 		if ( this is not PrefabCacheScene )
 		{
-			InitSystems();
+			InitSystems( includeGameSystems );
 		}
 	}
 
@@ -237,6 +242,8 @@ public partial class Scene : GameObject
 
 		NavMesh?.Dispose();
 		NavMesh = default;
+
+		RenderAttributes.Clear();
 
 		DisposeListeners();
 	}
@@ -391,15 +398,14 @@ public partial class Scene : GameObject
 			return;
 		}
 
-		// We pre-render envmaps, we dont need to render them parallelly in a frame anymore, this can cause transform buffers and descriptor sets to balloon in complex scenes and cause crashes.
-		foreach ( var envmap in Query<EnvmapProbe>() )
-		{
-			if ( !envmap.Dirty ) continue;
+		// The renderer is still making a loaded scene's models: they'd be missing from the capture, and every face would wait on them
+		if ( Rendering.SceneRenderer.Current.HoldsCaptures ) return;
 
-			envmap.RenderCubemap();
-			break;
-		}
+		Rendering.SceneRenderer.Current.RenderEnvmaps( this );
 	}
+
+	/// <summary>The scene's dirty envmap probes, for the renderer to choose which to capture this frame.</summary>
+	internal SceneObjectQuery<EnvmapProbe> EnvmapProbes() => Query<EnvmapProbe>();
 
 	/// <summary>
 	/// Cache all enabled and disabled cameras in the scene.

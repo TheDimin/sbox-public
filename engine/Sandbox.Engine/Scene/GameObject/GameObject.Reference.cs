@@ -10,7 +10,7 @@ namespace Sandbox;
 /// if we're referencing a prefab.
 /// </summary>
 [ActionGraphExposeWhenCached]
-internal readonly struct GameObjectReference
+internal readonly struct GameObjectReference : IEquatable<GameObjectReference>
 {
 	private const string ExpectedReferenceType = "gameobject";
 
@@ -67,6 +67,23 @@ internal readonly struct GameObjectReference
 		PrefabPath = prefabPath;
 	}
 
+	public bool Equals( GameObjectReference other )
+	{
+		return GameObjectId == other.GameObjectId
+			&& string.Equals( PrefabPath, other.PrefabPath, StringComparison.Ordinal )
+			&& string.Equals( ReferenceType, other.ReferenceType, StringComparison.Ordinal );
+	}
+
+	public override bool Equals( object? obj ) => obj is GameObjectReference other && Equals( other );
+
+	/// <summary>
+	/// Leaves out <see cref="ReferenceType"/>: it's the same for every reference, so it adds nothing to the hash.
+	/// </summary>
+	public override int GetHashCode() => HashCode.Combine( GameObjectId, PrefabPath );
+
+	public static bool operator ==( GameObjectReference left, GameObjectReference right ) => left.Equals( right );
+	public static bool operator !=( GameObjectReference left, GameObjectReference right ) => !left.Equals( right );
+
 	/// <summary>
 	/// Attempt to resolve this reference in the current <see cref="Game.ActiveScene"/>. Returns <see langword="null"/> if
 	/// the reference couldn't be resolved, and logs a warning.
@@ -86,7 +103,14 @@ internal readonly struct GameObjectReference
 
 		if ( !string.IsNullOrWhiteSpace( PrefabPath ) )
 		{
-			var prefabFile = (PrefabFile)GameResource.GetPromise( typeof( PrefabFile ), PrefabPath );
+			// A prefab that can't be found is no reference, such as one from a game that isn't mounted
+			if ( GameResource.GetPromise( typeof( PrefabFile ), PrefabPath ) is not PrefabFile prefabFile )
+			{
+				if ( warn ) Log.Warning( $"Unknown prefab {PrefabPath}" );
+
+				return null;
+			}
+
 			return SceneUtility.GetPrefabScene( prefabFile );
 		}
 

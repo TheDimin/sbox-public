@@ -94,6 +94,7 @@ file sealed class SkinnedModelRendererCapturer : ComponentCapturer<SkinnedModelR
 		}
 		else if ( component.UseAnimGraph )
 		{
+#pragma warning disable CS0618
 			if ( component.Parameters.Graph is not { } graph ) return;
 
 			var parametersTrack = recorder.Property( nameof( SkinnedModelRenderer.Parameters ) );
@@ -107,6 +108,7 @@ file sealed class SkinnedModelRendererCapturer : ComponentCapturer<SkinnedModelR
 					parametersTrack.Property( paramName ).Capture();
 				}
 			}
+#pragma warning restore CS0618
 		}
 		else
 		{
@@ -253,6 +255,7 @@ file sealed class ParticleEffectCapturer : ComponentCapturer<ParticleEffect>
 		recorder.Property( nameof( ParticleEffect.Timing ) ).Capture();
 
 		recorder.Property( nameof( ParticleEffect.InitialVelocity ) ).Capture();
+		recorder.Property( nameof( ParticleEffect.AngularVelocity ) ).Capture();
 		recorder.Property( nameof( ParticleEffect.StartVelocity ) ).Capture();
 		recorder.Property( nameof( ParticleEffect.Damping ) ).Capture();
 		recorder.Property( nameof( ParticleEffect.ConstantMovement ) ).Capture();
@@ -400,6 +403,10 @@ file sealed class ParticleSpriteRendererCapturer : ComponentCapturer<ParticleSpr
 		recorder.Property( nameof( ParticleSpriteRenderer.CameraFadeFar ) ).Capture();
 		recorder.Property( nameof( ParticleSpriteRenderer.FogStrength ) ).Capture();
 		recorder.Property( nameof( ParticleSpriteRenderer.FaceVelocity ) ).Capture();
+		recorder.Property( nameof( ParticleSpriteRenderer.VelocityStretch ) ).Capture();
+		recorder.Property( nameof( ParticleSpriteRenderer.StretchTime ) ).Capture();
+		recorder.Property( nameof( ParticleSpriteRenderer.StretchLengthLimits ) ).Capture();
+		recorder.Property( nameof( ParticleSpriteRenderer.StretchFadeIn ) ).Capture();
 		recorder.Property( nameof( ParticleSpriteRenderer.RotationOffset ) ).Capture();
 		recorder.Property( nameof( ParticleSpriteRenderer.MotionBlur ) ).Capture();
 		recorder.Property( nameof( ParticleSpriteRenderer.LeadingTrail ) ).Capture();
@@ -466,6 +473,15 @@ file sealed class LightCapturer : ComponentCapturer<Light>
 	protected override void OnCapture( IMovieTrackRecorder recorder, Light component )
 	{
 		recorder.Property( nameof( Light.LightColor ) ).Capture();
+		recorder.Property( nameof( Light.Intensity ) ).Capture();
+		recorder.Property( nameof( Light.Temperature ) ).Capture();
+		recorder.Property( nameof( Light.AnimationEnabled ) ).Capture();
+		recorder.Property( nameof( Light.AnimationPattern ) ).Capture();
+		recorder.Property( nameof( Light.AnimationSpeed ) ).Capture();
+		recorder.Property( nameof( Light.AnimationTimeOffset ) ).Capture();
+		recorder.Property( nameof( Light.AnimationDuration ) ).Capture();
+		recorder.Property( nameof( Light.AnimationCurve ) ).Capture();
+		recorder.Property( nameof( Light.AnimationGradient ) ).Capture();
 		recorder.Property( nameof( Light.FogMode ) ).Capture();
 		recorder.Property( nameof( Light.FogStrength ) ).Capture();
 		recorder.Property( nameof( Light.Shadows ) ).Capture();

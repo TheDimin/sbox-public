@@ -198,14 +198,13 @@ public partial class BaseCombatWeapon
 	// the hooks on its BaseWeaponModel. Override these to add weapon-level reactions on top.
 
 	/// <summary>
-	/// Reload started. Plays the reload animation on the weapon model, and fires the "b_reload" gesture on
-	/// the holder's body. Fires once, on every peer, off the synced IsReloading.
+	/// Reload started. Plays the reload animation on the weapon model, and posts
+	/// <see cref="WeaponEvents.Reload"/> to the holder. Fires once, on every peer, off the synced IsReloading.
 	/// </summary>
 	protected virtual void OnReloadStarted()
 	{
 		WeaponModel?.OnReloadStart();
-
-		HolderRenderer?.Set( "b_reload", true );
+		PostWeaponEvent( WeaponEvents.Reload );
 	}
 
 	/// <summary>Reload ended (finished or cancelled). Drives the active weapon model.</summary>
@@ -215,7 +214,11 @@ public partial class BaseCombatWeapon
 	/// The reload was cancelled part-way (fired, holstered). Fires on every peer, alongside
 	/// <see cref="OnReloadFinished"/> - use it to stop timed reload sounds and the like.
 	/// </summary>
-	protected virtual void OnReloadCancelled() => WeaponModel?.OnReloadCancel();
+	protected virtual void OnReloadCancelled()
+	{
+		WeaponModel?.OnReloadCancel();
+		PostWeaponEvent( WeaponEvents.ReloadCancel );
+	}
 
 	/// <summary>A round was loaded (incremental). Drives the active weapon model's per-shell insert.</summary>
 	protected virtual void OnReloadInserted() => WeaponModel?.OnIncrementalReload();

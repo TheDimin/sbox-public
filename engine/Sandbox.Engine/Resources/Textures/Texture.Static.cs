@@ -23,22 +23,73 @@ public partial class Texture
 	/// </summary>
 	public static Texture Transparent { get; internal set; } = Create( 1, 1 ).WithData( new byte[4] { 128, 128, 128, 0 } ).Finish();
 
-	internal static Texture Create( string name, bool anonymous, TextureBuilder builder, IntPtr data, int dataSize )
+	internal static unsafe Texture Create( string name, bool anonymous, TextureBuilder builder, IntPtr data, int dataSize )
 	{
 		var config = builder._config.GetWithFixes();
+		config.m_nImageFormat.ThrowIfInvalid();
 
 		var texture = g_pRenderDevice.FindOrCreateTexture2( string.IsNullOrEmpty( name ) ? "unnamed" : name, anonymous, config, data, dataSize );
 		//bool isRenderTarget = builder.common.m_nFlags.HasFlag( RuntimeTextureSpecificationFlags.TSPEC_RENDER_TARGET );
-
-		if ( data == IntPtr.Zero || dataSize <= 0 )
-		{
-			g_pRenderDevice.ClearTexture( texture, builder._initialColor ?? Color.Transparent );
-		}
 
 		var result = FromNative( texture );
 		if ( !string.IsNullOrWhiteSpace( name ) )
 			result?.RegisterWeakResourceId( name );
 
+		if ( result is not null )
+		{
+			result.CreatedMultisample = config.m_nMultisampleType;
+			result.MadeAtRunTime = true;
+		}
+
+		// An anonymous texture is always a new one, described by what it was made with; a named one may be one Source 2
+		// found by its name (NamedDescription)
+		if ( result is not null && !result.gotdesc && DescriptionOf( config, dataSize ) is var made && (anonymous || NamedDescription( name, result, made )) )
+		{
+			result._desc = made;
+			result.gotdesc = true;
+			result.describedAtCreation = true;
+		}
+
+		// The drawing device makes its copy from these (Source 2's empty device holds no pixels), and a headless process reads
+		// them back; what's drawn makes a copy cleared (InitialColor)
+		if ( result is not null )
+		{
+			result.InitialPixels = data != IntPtr.Zero && dataSize > 0 ? new ReadOnlySpan<byte>( (void*)data, dataSize ).ToArray() : null;
+			result.InitialColor = builder._initialColor ?? Color.Transparent;
+		}
+
 		return result;
 	}
+
+	/// <summary>Named textures made at run time, by native texture: the name and description each was made with.</summary>
+	static readonly Dictionary<long, (string Name, NativeEngine.CTextureDesc Desc)> namedTextures = new();
+
+	/// <summary>
+	/// Whether a texture made with a name, new to managed code, is described by what it was made with
+	/// (<paramref name="made"/>). Source 2 finds a named texture that's still there rather than making it, so one made here
+	/// before at the same texture and name with another description (found, or made again where the old one was) is
+	/// described by Source 2, as is a name that's a compiled file's.
+	/// </summary>
+	static bool NamedDescription( string name, Texture texture, in NativeEngine.CTextureDesc made )
+	{
+		if ( string.IsNullOrEmpty( name ) || name.EndsWith( ".vtex", StringComparison.OrdinalIgnoreCase ) || name.EndsWith( ".vtex_c", StringComparison.OrdinalIgnoreCase ) ) return false;
+
+		// As Source 2 names it (FindOrCreateTexture)
+		var key = name.Replace( ':', '_' ).TrimStart( '/' ).ToLowerInvariant();
+		var at = texture.native.GetBindingPtr().ToInt64();
+		lock ( namedTextures )
+		{
+			if ( namedTextures.TryGetValue( at, out var known ) && known.Name == key )
+			{
+				if ( !SameDescription( known.Desc, made ) ) return false;
+			}
+
+			namedTextures[at] = (key, made);
+			return true;
+		}
+	}
+
+	static bool SameDescription( in NativeEngine.CTextureDesc a, in NativeEngine.CTextureDesc b ) => a.m_nWidth == b.m_nWidth && a.m_nHeight == b.m_nHeight && a.m_nDepth == b.m_nDepth
+		&& a.m_nNumMipLevels == b.m_nNumMipLevels && a.m_nImageFormat == b.m_nImageFormat && a.m_nFlags == b.m_nFlags && a.m_nDecodeFlags == b.m_nDecodeFlags
+		&& a.m_nDisplayRectWidth == b.m_nDisplayRectWidth && a.m_nDisplayRectHeight == b.m_nDisplayRectHeight;
 }

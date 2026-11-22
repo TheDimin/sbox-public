@@ -1,5 +1,4 @@
 ﻿using Facepunch.ActionGraphs;
-using NativeEngine;
 using Sandbox.Clutter;
 using Sentry;
 using System.Text.Json.Nodes;
@@ -94,6 +93,14 @@ public partial class MapInstance : Component, Component.ExecuteInEditor
 		Transform.OnTransformChanged -= OnTransformChanged;
 
 		UnloadMap();
+		CancelLoading();
+	}
+
+	internal override void OnDestroyInternal()
+	{
+		SceneMap.OnMapUpdated -= OnMapUpdated;
+
+		base.OnDestroyInternal();
 	}
 
 	private void OnTransformChanged()
@@ -131,10 +138,7 @@ public partial class MapInstance : Component, Component.ExecuteInEditor
 	/// </summary>
 	public void UnloadMap()
 	{
-		if ( loadedMapPkg is not null )
-		{
-			ServerPackages.Current?.RemoveRequirement( loadedMapPkg );
-		}
+		loadedMapPkg?.RemoveMountRequirement();
 
 		loadedMapName = null;
 		loadedMapPkg = null;
@@ -173,9 +177,9 @@ public partial class MapInstance : Component, Component.ExecuteInEditor
 		if ( hadMap )
 		{
 			OnMapUnloaded?.InvokeWithWarning();
-			g_pWorldRendererMgr.ServiceWorldRequests();
-			SceneMap.OnMapUpdated -= OnMapUpdated;
 		}
+
+		SceneMap.OnMapUpdated -= OnMapUpdated;
 
 		IsLoaded = false;
 	}
@@ -261,7 +265,7 @@ public partial class MapInstance : Component, Component.ExecuteInEditor
 			{
 				// can just load these directly
 			}
-			else if ( Package.TryParseIdent( mapName, out var parts ) )
+			else if ( Package.TryParseIdentParts( mapName, out var parts ) )
 			{
 				// If this looks like a package ident, then download it
 
@@ -282,10 +286,17 @@ public partial class MapInstance : Component, Component.ExecuteInEditor
 
 				context?.Title = $"Loading Map - {package.Title}";
 
-				var fs = await package.MountAsync();
+				// Fetch selected the source. Retain that same package to release its requirement on teardown.
+				var fs = await package.MountResolvedAsync();
 
-				if ( !IsValid || fs is null )
+				if ( fs is null )
 					return false;
+
+				if ( !IsValid || token.IsCancellationRequested )
+				{
+					package.RemoveMountRequirement();
+					return false;
+				}
 
 				loadedMapPkg = package;
 				mapFileName = package.PrimaryAsset;
@@ -395,7 +406,9 @@ public partial class MapInstance : Component, Component.ExecuteInEditor
 				GameObject.Flags &= ~GameObjectFlags.Loading;
 			}
 
-			SceneMap.OnMapUpdated += OnMapUpdated;
+			// static event, so never subscribe twice and never pin a destroyed component (and its scene)
+			SceneMap.OnMapUpdated -= OnMapUpdated;
+			if ( IsValid ) SceneMap.OnMapUpdated += OnMapUpdated;
 		}
 
 		tokenSources.Remove( tokenSource );
@@ -558,9 +571,9 @@ public partial class MapInstance : Component, Component.ExecuteInEditor
 	}
 
 	/// <summary>
-	/// Get the PVS of the loaded map
+	/// The loaded map, whose visibility culls what's sent to each connection; null when none is loaded.
 	/// </summary>
-	internal IPVS GetNetworkPvs() => loadedMap?.PVS ?? default;
+	internal SceneMap GetNetworkMap() => loadedMap;
 }
 
 file class MapComponentMapLoader : SceneMapLoader
@@ -880,13 +893,17 @@ file class MapComponentMapLoader : SceneMapLoader
 					break;
 				}
 
+			// Never network probe volumes. Their textures live in the map VPK, so a snapshot copy can
+			// arrive before the VPK is mounted and render black. Every client builds them from the VPK.
 			case "env_light_probe_volume":
 				{
+					go.NetworkMode = NetworkMode.Never;
 					LightProbeVolume.InitializeFromLegacy( go, kv );
 					break;
 				}
 			case "env_combined_light_probe_volume":
 				{
+					go.NetworkMode = NetworkMode.Never;
 					EnvmapProbe.InitializeFromLegacy( go, kv ); // create an envmap component
 					LightProbeVolume.InitializeFromLegacy( go, kv );
 					break;

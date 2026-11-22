@@ -6,6 +6,12 @@ namespace Sandbox;
 
 public partial class Texture
 {
+	/// <summary>The material and parameter a texture with no path of its own came from (<see cref="Material.GetTexture"/>).</summary>
+	internal readonly record struct MaterialOrigin( string Material, string Parameter );
+
+	/// <summary>Where textures read from materials came from, for the Borealis.Gpu device, which reads them by path.</summary>
+	internal static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Texture, object> MaterialOrigins = new();
+
 	internal static Texture FromNative( ITexture native )
 	{
 		if ( !native.IsStrongHandleValid() )
@@ -31,6 +37,37 @@ public partial class Texture
 
 		var texture = new Texture( native );
 		NativeResourceCache.Add( instanceId, texture );
+		return texture;
+	}
+
+	/// <summary>
+	/// A texture native loaded (takes the strong handle), by its resource name where it has one, so a renderer that reads
+	/// textures by path (Borealis.Gpu) can read it: a map native loads for a tool's preview has its probes' textures so.
+	/// </summary>
+	internal static Texture FromNativeResource( ITexture native )
+	{
+		if ( native.IsNull ) return null;
+
+		var name = RenderTools.GetTextureResourceName( native );
+		if ( string.IsNullOrEmpty( name ) ) return FromNative( native );
+
+		native.DestroyStrongHandle();
+		return Load( name, false );
+	}
+
+	/// <summary>
+	/// A texture something native holds (a material's), knowing the compiled file it was loaded from by that file's path,
+	/// as <see cref="Load(string, bool)"/> would: a device that reads textures by path (Borealis.Gpu) can read it.
+	/// </summary>
+	internal static Texture FromNativeFile( ITexture native )
+	{
+		var texture = FromNative( native );
+		if ( texture is null || !string.IsNullOrEmpty( texture.ResourcePath ) ) return texture;
+
+		var name = RenderTools.GetTextureResourceName( texture.native );
+		if ( string.IsNullOrEmpty( name ) ) return texture;
+		if ( name.EndsWith( ".vtex_c", StringComparison.OrdinalIgnoreCase ) ) name = name[..^2];
+		if ( name.EndsWith( ".vtex", StringComparison.OrdinalIgnoreCase ) ) texture.RegisterWeakResourceId( name, texture.native.GetGuid() );
 		return texture;
 	}
 
@@ -154,11 +191,30 @@ public partial class Texture
 
 	internal static Texture TryToLoad( BaseFileSystem filesystem, string filepath, bool warnOnMissing = true )
 	{
-		if ( Application.IsUnitTest )
+		if ( Application.IsUnitTest && !Graphics.IsAvailable )
 			return null;
 
 		// if no filesystem provided
 		filesystem ??= GlobalContext.Current.FileMount;
+
+		// Project menu artwork is available before the game's assets are mounted. Keep the
+		// qualified path as the texture's identity, but read the image from that project's folder.
+		if ( filepath.StartsWith( "project:" ) )
+		{
+			var separator = filepath.IndexOf( '/' );
+			if ( separator < 0 ) return null;
+
+			var project = Project.FindByIdent( filepath[8..separator] );
+			var image = filepath[(separator + 1)..];
+			if ( project?.FileSystem is null || image.Contains( ':' ) || image.Split( '/' ).Contains( ".." ) ) return null;
+
+			if ( TextureLoader.SvgLoader.IsAppropriate( image ) )
+				return TextureLoader.SvgLoader.Load( project.FileSystem, image, warnOnMissing );
+
+			return TextureLoader.Image.IsAppropriate( image )
+				? TextureLoader.Image.Load( project.FileSystem, image, warnOnMissing )
+				: null;
+		}
 
 		//
 		// Svg Loader
@@ -193,6 +249,15 @@ public partial class Texture
 		}
 
 		//
+		// Thumb loader - before the image loader, which goes by extension and would take a
+		// thumb: of a .png for a file path
+		//
+		if ( TextureLoader.ThumbLoader.IsAppropriate( filepath ) )
+		{
+			return TextureLoader.ThumbLoader.Load( filepath );
+		}
+
+		//
 		// Image loader
 		//
 		if ( TextureLoader.Image.IsAppropriate( filepath ) )
@@ -206,14 +271,6 @@ public partial class Texture
 		if ( TextureLoader.Avatar.IsAppropriate( filepath ) )
 		{
 			return TextureLoader.Avatar.Load( filepath );
-		}
-
-		//
-		// Thumb loader
-		//
-		if ( TextureLoader.ThumbLoader.IsAppropriate( filepath ) )
-		{
-			return TextureLoader.ThumbLoader.Load( filepath );
 		}
 
 		//Precache.Add( filename );

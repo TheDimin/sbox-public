@@ -22,10 +22,12 @@ public sealed partial class SceneWorld : IHandle
 	internal HashSet<SceneLight> InternalSceneLights { get; } = new();
 
 	/// <summary>
-	/// Told about every change to this world's scene objects - the managed scene renderer's mirror of it, when
-	/// <c>r_managed_scene</c> is on. Null otherwise.
+	/// What this world draws as on Borealis, once a camera has drawn it: its objects make and write their own render objects
+	/// (<see cref="SceneObject.OwnsRenderObject"/>) and its lighting there. Null before, and in a process without Borealis.
 	/// </summary>
-	internal Rendering.ISceneObjectListener ChangeListener { get; set; }
+	internal Rendering.ISceneWorldRender Render { get; set; }
+
+	internal event Action<SceneWorld> Destroyed;
 
 	/// <summary>
 	/// This world's fog volumes, in the order native's world lists them (<c>CSceneWorld::m_VolumetricFogVolumes</c>: added at
@@ -56,8 +58,10 @@ public sealed partial class SceneWorld : IHandle
 		FogVolumesVersion++;
 	}
 	internal HashSet<SceneMap> InternalSceneMaps { get; set; } = new();
+
+	/// <summary>Changes whenever a map is added or removed, so a view of the world knows to look at <see cref="InternalSceneMaps"/> again.</summary>
+	internal int MapsVersion { get; private set; }
 	internal HashSet<SceneSkybox3D> InternalSkyboxWorlds { get; set; } = new();
-	internal IPVS ActivePVS { get; private set; }
 
 	/// <summary>
 	/// List of scene objects belonging to this scene world.
@@ -133,18 +137,19 @@ public sealed partial class SceneWorld : IHandle
 		if ( !IsTransient ) return;
 		if ( !native.IsValid ) return;
 
+		// Delete rather than detach, a map outliving its scene world would later tear down objects that are already gone
 		foreach ( var map in InternalSceneMaps.ToArray() )
 		{
-			RemoveSceneMap( map );
+			map.Delete();
 		}
 
 		InternalSceneMaps.Clear();
 
-		Rendering.ManagedSceneRendering.Forget( this );
+		Rendering.SceneRenderer.Forget( this );
 		CSceneSystem.DestroyWorld( this );
 		native = IntPtr.Zero;
-		ActivePVS = default;
 		All.Remove( this );
+		NotifyDestroyed();
 	}
 
 	internal void OnNativeInit( ISceneWorld ptr )
@@ -155,10 +160,17 @@ public sealed partial class SceneWorld : IHandle
 
 	internal void OnNativeDestroy()
 	{
-		Rendering.ManagedSceneRendering.Forget( this );
+		Rendering.SceneRenderer.Forget( this );
 		native = IntPtr.Zero;
-		ActivePVS = default;
 		All.Remove( this );
+		NotifyDestroyed();
+	}
+
+	void NotifyDestroyed()
+	{
+		var destroyed = Destroyed;
+		Destroyed = null;
+		destroyed?.Invoke( this );
 	}
 
 	/// <summary>
@@ -182,29 +194,6 @@ public sealed partial class SceneWorld : IHandle
 	}
 
 	/// <summary>
-	/// This finishes any loads and actually spawns the world sceneobjects
-	/// </summary>
-	internal void UpdateObjectsForRendering( Vector3 eyePos = default, float farPlane = 5000.0f )
-	{
-		if ( InternalSceneMaps is null )
-			return;
-
-		if ( !InternalSceneMaps.Any() )
-			return;
-
-		foreach ( var worldGroup in InternalSceneMaps.Select( x => x.WorldGroup ).Distinct() )
-		{
-			g_pWorldRendererMgr.UpdateObjectsForRendering( worldGroup, eyePos, 1.0f, farPlane );
-		}
-
-		// If we have a 3D skybox, update its objects too
-		foreach ( var world in InternalSkyboxWorlds )
-		{
-			world?.SkyboxWorld.UpdateObjectsForRendering( world.Origin, farPlane );
-		}
-	}
-
-	/// <summary>
 	/// Add a scenemap to this world
 	/// </summary>
 	internal void AddSceneMap( SceneMap sceneMap )
@@ -216,17 +205,8 @@ public sealed partial class SceneWorld : IHandle
 				Log.Warning( "Couldn't add sceneMap" );
 			}
 
-			// If the PVS data is valid - then apply it to this world
-			// We need to be careful that the pvs doesn't get deleted
-			// because this will be a hanging pointer. 
-			// I think it would be better to wrap it in a c# object and
-			// only delete when it gets garbage collected
-			if ( sceneMap.PVS.IsValid )
-			{
-				//Log.Info( $"{this} - SET PVS from {sceneMap}" );
-				native.SetPVS( sceneMap.PVS );
-				ActivePVS = sceneMap.PVS;
-			}
+			// No PVS is set (owner, 2026-11-18): maps don't build one
+			MapsVersion++;
 		}
 	}
 
@@ -240,14 +220,7 @@ public sealed partial class SceneWorld : IHandle
 				Log.Warning( "Couldn't remove sceneMap" );
 			}
 
-			if ( ActivePVS == sceneMap.PVS )
-			{
-				if ( !native.IsNull )
-				{
-					native.SetPVS( default );
-				}
-				ActivePVS = default;
-			}
+			MapsVersion++;
 		}
 	}
 }

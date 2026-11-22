@@ -1,0 +1,48 @@
+{
+  "HasHumanSkin": true,
+  "HumanSkinModel": "models/citizen_human/citizen_human_male.vmdl",
+  "HumanSkinBodyGroups": 32704,
+  "HumanSkinMaterialGroup": "body_07",
+  "HumanSkinTags": "male",
+  "AllowedSlots": "All",
+  "HumanSkinMaterial": null,
+  "HumanEyesMaterial": null,
+  "Title": "Human Skin 11",
+  "Subtitle": "11",
+  "Type": "PlayerModel",
+  "Category": "Skin",
+  "ConditionalModels": {},
+  "Tags": null,
+  "Model": null,
+  "HumanAltModel": null,
+  "HumanAltFemaleModel": null,
+  "SkinMaterial": null,
+  "EyesMaterial": null,
+  "MaterialGroup": "",
+  "HeelHeight": 0,
+  "SlotsUnder": "None",
+  "SlotsOver": "None",
+  "HideBody": 0,
+  "DeformationMode": "Normal",
+  "AllowTintSelect": false,
+  "TintSelection": {
+    "blend": "Linear",
+    "color": [
+      {
+        "t": 0.5,
+        "c": "1,1,1,1"
+      }
+    ],
+    "alpha": []
+  },
+  "TintDefault": 0.5,
+  "SteamItemDefinitionId": null,
+  "Icon": {
+    "Path": "models/citizen_clothes/body/human11.clothing.vtex",
+    "Mode": "HumanSkin",
+    "UsePositionOffset": false,
+    "PositionOffset": "0,0,0"
+  },
+  "__references": [],
+  "__version": 0
+}

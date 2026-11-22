@@ -1,12 +1,14 @@
-﻿using System.ComponentModel;
+﻿using Sandbox.Engine;
+using System.ComponentModel;
 
 namespace Sandbox;
 
 /// <summary>
-/// Should be applied to a class that inherits from <see cref="GameResource"/>.
-/// Makes the class able to be stored as an asset on disk.
+/// Defines a disk asset for a <see cref="Resource"/> class. Compiled JSON assets inherit
+/// from <see cref="GameResource"/>; uncompiled assets receive their source through Resource.OnLoaded.
 /// </summary>
 [AttributeUsage( AttributeTargets.Class )]
+[Expose]
 public class AssetTypeAttribute : System.Attribute, ITypeAttribute, IUninheritable
 {
 	/// <summary>
@@ -36,6 +38,16 @@ public class AssetTypeAttribute : System.Attribute, ITypeAttribute, IUninheritab
 	public AssetTypeFlags Flags { get; set; }
 
 	/// <summary>
+	/// Whether the source file is loaded and published directly, without a compiled counterpart.
+	/// </summary>
+	public bool IsUncompiled => (Flags & AssetTypeFlags.Uncompiled) != 0;
+
+	/// <summary>
+	/// Extension of the file loaded at runtime, including its leading period.
+	/// </summary>
+	internal string RuntimeExtension => IsUncompiled ? $".{Extension}" : $".{Extension}_c";
+
+	/// <summary>
 	/// Color of the bottom line and background gradient for this resource's thumbnail.
 	/// </summary>
 	public string IconColor { get; set; } = "#67ac5c";
@@ -45,7 +57,7 @@ public class AssetTypeAttribute : System.Attribute, ITypeAttribute, IUninheritab
 	/// </summary>
 	public static TypeDescription FindTypeByExtension( string extension )
 	{
-		foreach ( var t in Game.TypeLibrary.GetTypesWithAttribute<AssetTypeAttribute>() )
+		foreach ( var t in GlobalContext.Current.TypeLibrary.GetTypesWithAttribute<AssetTypeAttribute>() )
 		{
 			if ( string.Equals( t.Attribute.Extension, extension, StringComparison.OrdinalIgnoreCase ) )
 				return t.Type;
@@ -77,6 +89,12 @@ public enum AssetTypeFlags
 	/// Include thumbnails when publishing as part of another package
 	/// </summary>
 	IncludeThumbnails = 1 << 1,
+
+	/// <summary>
+	/// Load and publish the original file without invoking a resource compiler or producing an _c file.
+	/// The resource reads its source data through Resource.OnLoaded.
+	/// </summary>
+	Uncompiled = 1 << 2,
 }
 
 [Obsolete( "Use AssetType instead" )]
@@ -85,7 +103,7 @@ public class GameResourceAttribute : AssetTypeAttribute
 	/// <summary>
 	/// Icon to be used for this asset
 	/// Can be an absolute path of a PNG
-	/// Or a <a href="https://fonts.google.com/icons">material icon</a> for this game resource's thumbnail.
+	/// Or a <a href="https://fonts.google.com/icons?icon.set=Material+Icons">material icon</a> for this game resource's thumbnail.
 	/// </summary>
 	public string Icon { get; set; } = "question_mark";
 

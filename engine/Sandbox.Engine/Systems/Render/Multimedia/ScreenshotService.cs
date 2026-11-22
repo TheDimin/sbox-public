@@ -11,7 +11,7 @@ namespace Sandbox;
 /// </summary>
 internal static class ScreenshotService
 {
-	[ConVar( "screenshot_prefix", Help = "Prefix for auto-generated screenshot filenames" )]
+	[ConVar( "screenshot_prefix", ConVarFlags.Protected, Help = "Prefix for auto-generated screenshot filenames" )]
 	public static string ScreenshotPrefix { get; set; } = "sbox";
 
 	private record ScreenshotRequest( string FilePath );
@@ -30,56 +30,80 @@ internal static class ScreenshotService
 		return filePath;
 	}
 
-	internal static void ProcessFrame( IRenderContext context, ITexture nativeTexture )
+	/// <summary>
+	/// Take the screenshots asked for from a Borealis.Gpu window's finished frame, <paramref name="frame"/> (RGBA8, as the window
+	/// presents it), read back once its last block has been submitted.
+	/// </summary>
+	internal static void ProcessFrame( BorealisGpuRenderBackend backend, Texture frame )
 	{
-		if ( nativeTexture.IsNull || !nativeTexture.IsStrongHandleValid() )
+		if ( _pendingRequests.IsEmpty ) return;
+
+		byte[] pixels;
+		try
+		{
+			pixels = System.Runtime.InteropServices.MemoryMarshal.AsBytes( backend.ReadPixels( frame ).AsSpan() ).ToArray();
+		}
+		catch ( Exception ex )
+		{
+			_pendingRequests.Clear();
+			Log.Error( $"Error capturing screenshot: {ex.Message}" );
 			return;
+		}
 
 		while ( _pendingRequests.TryDequeue( out var request ) )
 		{
-			CaptureRenderTexture( context, nativeTexture, request.FilePath );
+			Save( pixels, ImageFormat.RGBA8888, frame.Width, frame.Height, request.FilePath );
+			Log.Info( $"Screenshot saved to: {request.FilePath}" );
+		}
+	}
+
+	static void Save( ReadOnlySpan<byte> data, ImageFormat format, int width, int height, string filePath )
+	{
+		try
+		{
+			using var bitmap = new Bitmap( width, height );
+
+			if ( !CopyReadbackToBitmap( data, format, width, height, bitmap ) )
+			{
+				Log.Warning( $"Can't save screenshot, unsupported render target format {format}" );
+				return;
+			}
+
+			var rgbData = bitmap.ToFormat( ImageFormat.RGB888 );
+			Services.Screenshots.AddScreenshotToLibrary( rgbData, width, height );
+
+			var dir = Path.GetDirectoryName( filePath );
+			if ( dir != null )
+			{
+				Directory.CreateDirectory( dir );
+			}
+			var encodedBytes = bitmap.ToPng();
+			File.WriteAllBytes( filePath, encodedBytes );
+		}
+		catch ( Exception ex )
+		{
+			Log.Error( $"Error creating bitmap from texture: {ex.Message}" );
 		}
 	}
 
 	/// <summary>
-	/// Captures the current render target and saves it to the specified file.
+	/// Copies texture readback data into an RGBA8888 bitmap, converting from the source format if needed.
+	/// The swapchain isn't always RGBA8888, e.g. Linux surfaces are usually BGRA8888.
 	/// </summary>
-	private static void CaptureRenderTexture( IRenderContext context, ITexture nativeTexture, string filePath )
+	internal static unsafe bool CopyReadbackToBitmap( ReadOnlySpan<byte> data, ImageFormat format, int width, int height, Bitmap bitmap )
 	{
-		try
+		var buffer = bitmap.GetBuffer();
+
+		if ( format is ImageFormat.RGBA8888 or ImageFormat.RGBA8888_LINEAR )
 		{
-			Bitmap bitmap = null;
-
-			context.ReadTextureAsync( nativeTexture, ( pData, format, mipLevel, width, height, _ ) =>
-			{
-				try
-				{
-					bitmap = new Bitmap( width, height );
-
-					pData.CopyTo( bitmap.GetBuffer() );
-
-					var rgbData = bitmap.ToFormat( ImageFormat.RGB888 );
-					Services.Screenshots.AddScreenshotToLibrary( rgbData, width, height );
-
-					var dir = Path.GetDirectoryName( filePath );
-					if ( dir != null )
-					{
-						Directory.CreateDirectory( dir );
-					}
-					var encodedBytes = bitmap.ToPng();
-					File.WriteAllBytes( filePath, encodedBytes );
-				}
-				catch ( Exception ex )
-				{
-					Log.Error( $"Error creating bitmap from texture: {ex.Message}" );
-				}
-			} );
-
-			Log.Info( $"Screenshot saved to: {filePath}" );
+			data.CopyTo( buffer );
+			return true;
 		}
-		catch ( Exception ex )
+
+		fixed ( byte* src = data )
+		fixed ( byte* dst = buffer )
 		{
-			Log.Error( $"Error capturing screenshot: {ex.Message}" );
+			return ImageLoader.ConvertImageFormat( (IntPtr)src, format, (IntPtr)dst, ImageFormat.RGBA8888, width, height, 0, width * 4 );
 		}
 	}
 

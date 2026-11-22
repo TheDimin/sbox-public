@@ -18,7 +18,7 @@ public sealed partial class SceneWorld
 	/// </summary>
 	internal SceneSkybox3D GetRenderingSkybox()
 	{
-		return ActiveSkybox is { IsValid: true, Scale: > 0 } skybox && ConVarSystem.GetInt( "r_3d_skybox", 1, true ) != 0
+		return ActiveSkybox is { IsValid: true, Scale: > 0 } skybox && ConVarSystem.GetNativeInt( "r_3d_skybox", 1 ) != 0
 			? skybox : null;
 	}
 
@@ -45,10 +45,10 @@ public sealed partial class SceneWorld
 				{
 					var included = !filterInclusion;
 					var excluded = false;
-					var tagCount = sky.native.GetTagCount();
-					for ( int tagIndex = 0; tagIndex < tagCount; tagIndex++ )
+					var tags = sky.TagTokens;
+					for ( int tagIndex = 0; tagIndex < tags.Count; tagIndex++ )
 					{
-						var tag = sky.native.GetTagAt( tagIndex );
+						var tag = tags[tagIndex];
 						if ( filterExclusion && exclude.Contains( tag ) )
 						{
 							excluded = true;

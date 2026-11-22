@@ -41,8 +41,6 @@ public class EditorMainWindow : DockWindow, IUndoSystemProvider
 			return false;
 		}
 
-		ProjectCookie?.Set( $"gizmo.settings", EditorScene.GizmoSettings );
-
 		return true;
 	}
 
@@ -162,8 +160,8 @@ public class EditorMainWindow : DockWindow, IUndoSystemProvider
 
 			EditMenu.AddSeparator();
 			EditMenu.AddOption( "Cut", "cut", EditorScene.Cut, "editor.cut" );
-			EditMenu.AddOption( "Copy", "copy", EditorScene.Copy, "editor.copy" );
-			EditMenu.AddOption( "Paste", "paste", EditorScene.Paste, "editor.paste" );
+			EditMenu.AddOption( "Copy", "content_copy", EditorScene.Copy, "editor.copy" );
+			EditMenu.AddOption( "Paste", "content_paste", EditorScene.Paste, "editor.paste" );
 			EditMenu.AddOption( "Paste Special", "content_paste_go", EditorScene.PasteSpecial, "editor.paste-special" );
 			EditMenu.AddOption( "Paste As Child", null, EditorScene.PasteAsChild, "editor.paste-as-child" );
 			EditMenu.AboutToShow += OnEditMenuAboutToShow;
@@ -339,6 +337,9 @@ public class EditorMainWindow : DockWindow, IUndoSystemProvider
 		// Register our menu bar and dock options, doesn't open anything
 		MenuBar.RegisterNamed( "Editor", MenuBar );
 		DockAttribute.RegisterWindow( "Editor", this );
+
+		// Dev tools open in a dock here, not a window of their own
+		DevToolsDock.Install( this );
 
 		// Reopen last session's scenes so their docks exist before the layout is restored
 		SceneEditorSession.RestoreOpenSessions();

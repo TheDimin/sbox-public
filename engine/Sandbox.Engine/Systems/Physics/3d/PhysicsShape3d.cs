@@ -289,6 +289,14 @@ internal sealed partial class PhysicsShape3d : PhysicsShapeInternal, IHandle
 
 	Surface _surface;
 
+	internal void InitializeCreationSettings( PhysicsBody3d body )
+	{
+		_surface = body.ResolvedCreationSurface;
+		Collider = body.CreationCollider;
+		if ( Collider is not null )
+			((TagAccessor)Tags).Initialize( Collider.GameObject.Tags );
+	}
+
 	public override Surface Surface
 	{
 		get
@@ -302,6 +310,9 @@ internal sealed partial class PhysicsShape3d : PhysicsShapeInternal, IHandle
 		}
 		set
 		{
+			if ( ReferenceEquals( _surface, value ) )
+				return;
+
 			_surface = value;
 			UpdateSurface();
 		}
@@ -320,14 +331,14 @@ internal sealed partial class PhysicsShape3d : PhysicsShapeInternal, IHandle
 		set => SetSurfaces( value );
 	}
 
-	private unsafe void SetSurfaces( Surface[] surfaces )
+	internal void SetSurfaces( Surface[] surfaces, Surface surfaceOverride = null )
 	{
 		if ( surfaces is null )
 			return;
 
 		for ( var i = 0; i < surfaces.Length; i++ )
 		{
-			var surface = surfaces[i];
+			var surface = surfaceOverride ?? surfaces[i];
 			native.SetSurfaceIndex( surface is null ? -1 : surface.Index, i );
 		}
 	}

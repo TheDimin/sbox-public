@@ -1,4 +1,3 @@
-
 namespace Sandbox;
 
 /// <summary>
@@ -9,6 +8,8 @@ internal sealed class LocalPackage : Package
 	Package publishedPackage;
 
 	public override IRevision Revision => publishedPackage?.Revision;
+
+	internal void UpdatePublishedPackage( Package package ) => publishedPackage = package;
 
 	public Project Project { get; set; }
 
@@ -41,9 +42,13 @@ internal sealed class LocalPackage : Package
 	public Compiler Compiler => Project.Compiler;
 	public Compiler EditorCompiler => Project.EditorCompiler;
 
+	/// <summary>
+	/// Create the local package and read its presentation from the project.
+	/// </summary>
 	public LocalPackage( Project project )
 	{
 		this.Project = project;
+		ReadPresentation();
 	}
 
 	/// <summary>
@@ -56,7 +61,7 @@ internal sealed class LocalPackage : Package
 
 	internal override IEnumerable<string> EnumerateInstallDependencies()
 	{
-		if ( (Project.Config.Type == "game" || Project.Config.Type == "addon") && !Project.IsBuiltIn )
+		if ( Project.Config.Type is "game" or "addon" )
 		{
 			foreach ( var library in Project.Libraries.Where( x => x.HasCodePath() || x.HasEditorPath() ) )
 			{
@@ -70,16 +75,41 @@ internal sealed class LocalPackage : Package
 		}
 	}
 
-	internal void UpdateFromPackage( Package cachedPackage )
+	/// <summary>
+	/// Read available files from the project's presentation folder, without borrowing cloud metadata.
+	/// </summary>
+	void ReadPresentation()
 	{
-		publishedPackage = cachedPackage;
-		Summary = cachedPackage.Summary;
-		Description = cachedPackage.Description;
-		Thumb = cachedPackage.Thumb;
-		ThumbWide = cachedPackage.ThumbWide;
-		ThumbTall = cachedPackage.ThumbTall;
-		VideoThumb = cachedPackage.VideoThumb;
-		Screenshots = cachedPackage.Screenshots;
-		Org = cachedPackage.Org;
+		var files = Project.FileSystem;
+		Summary = null;
+		Description = null;
+
+		if ( files?.FileExists( "presentation/description.md" ) == true )
+		{
+			var text = files.ReadAllText( "presentation/description.md" ).Trim();
+			Description = System.Net.WebUtility.HtmlEncode( text ).ReplaceLineEndings( "<br>" );
+			Summary = text.Split( '\n', 2 )[0].TrimEnd( '\r' );
+		}
+
+		Thumb = PresentationImage( "presentation/thumb-square.png" );
+		ThumbWide = PresentationImage( "presentation/thumb-wide.png" ) ?? Thumb;
+		ThumbTall = PresentationImage( "presentation/thumb-tall.png" ) ?? Thumb;
+		VideoThumb = null;
+		Screenshots = (files?.FindFile( "presentation/screenshots" ) ?? [])
+			.Where( x => System.IO.Path.GetExtension( x ).ToLowerInvariant() is ".png" or ".jpg" or ".gif" or ".webp" or ".svg" )
+			.Order( StringComparer.OrdinalIgnoreCase )
+			.Select( x => PresentationImage( $"presentation/screenshots/{x}" ) )
+			.Select( x => new Screenshot { Url = x, Thumb = x } )
+			.ToArray();
+	}
+
+	/// <summary>
+	/// Qualify artwork by project so two addons can use the same image filenames.
+	/// </summary>
+	string PresentationImage( string path )
+	{
+		if ( Project.FileSystem?.FileExists( path ) != true ) return null;
+
+		return $"project:{Project.Config.FullIdent}/{path}";
 	}
 }

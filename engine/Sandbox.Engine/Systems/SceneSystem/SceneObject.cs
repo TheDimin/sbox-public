@@ -29,10 +29,23 @@ public partial class SceneObject : IHandle
 		get
 		{
 			if ( native.IsNull ) return null;
-			// FIXME: What really sucks with this is it allocates CSceneObject::m_pExtraData even if we're only reading
 			if ( _attributes is not null ) return _attributes;
 
-			_attributes = new RenderAttributes( native.GetAttributesPtrForModify() );
+			if ( !WritesNative )
+			{
+				// Nothing reads native's: the set is managed only (Borealis reads it), and native's is never made
+				_attributes = RenderAttributes.CreateManaged();
+			}
+			else
+			{
+				// FIXME: What really sucks with this is it allocates CSceneObject::m_pExtraData even if we're only reading
+				_attributes = new RenderAttributes( native.GetAttributesPtrForModify() );
+
+				// Borealis reads them from a managed copy: a custom or dynamic object merges them into the set it draws with, and a
+				// model's draws read them as its object attributes
+				_attributes.KeepManagedCopy();
+			}
+
 			NotifyChanged( Rendering.SceneObjectChange.Attributes );
 			return _attributes;
 		}
@@ -40,7 +53,7 @@ public partial class SceneObject : IHandle
 
 	/// <summary>
 	/// <see cref="Attributes"/> if anything has asked for them, without making them - for a renderer that chains them
-	/// in (Sandbox.SceneRenderer).
+	/// in (Borealis).
 	/// </summary>
 	internal RenderAttributes CreatedAttributes => _attributes;
 
@@ -74,8 +87,11 @@ public partial class SceneObject : IHandle
 			var flags = Rendering.SceneObjectFlags.CastShadows | Rendering.SceneObjectFlags.IsLoaded;
 			var typeFlags = ESceneObjectTypeFlags.NONE;
 			MeshSystem.CreateSceneObject( model.native, transform, null, flags, typeFlags, sceneWorld, 0x1 );
+			StartResolvingDraws( model );
+			FlagsAtCreation( model, flags );
 			Tags.RemoveAll();
 			Transform = transform;
+			KeepRigidBounds();
 		}
 	}
 
@@ -94,6 +110,21 @@ public partial class SceneObject : IHandle
 	{
 		if ( native.IsValid )
 		{
+			// Children go with it, and it leaves its parent, as native's CSceneSystem::DeleteSceneObject does
+			if ( _children is not null )
+			{
+				foreach ( var child in _children.ToArray() )
+				{
+					child._parent = null;
+					child.Delete();
+				}
+
+				_children = null;
+			}
+
+			_parent?.RemoveChild( this );
+
+			World?.Render?.Deleted( this );
 			CSceneSystem.DeleteSceneObjectAtFrameEnd( this );
 			native = IntPtr.Zero; // avoid double delete etc
 		}
@@ -111,14 +142,15 @@ public partial class SceneObject : IHandle
 			World.InternalSceneObjects.Add( this );
 		}
 
-		NotifyChanged( Rendering.SceneObjectChange.Added );
+		// Made in its renderer once its constructor is done
+		World.Render?.Made( this );
 
 		//Log.Info( $"Created SceneObject: {GetType().Name}" );
 	}
 
 	internal virtual void OnNativeDestroy()
 	{
-		NotifyChanged( Rendering.SceneObjectChange.Removed );
+		World.Render?.Destroyed( this );
 
 		lock ( World.InternalSceneObjects )
 		{
@@ -129,7 +161,9 @@ public partial class SceneObject : IHandle
 
 		if ( _attributes != null )
 		{
-			_attributes.Set( default );
+			// What a renderer copied stops matching anything (Borealis shares sets of equal values between objects)
+			_attributes.ManagedValues?.Clear();
+			if ( !_attributes.IsManaged ) _attributes.Set( default );
 			_attributes = null;
 		}
 
@@ -146,9 +180,21 @@ public partial class SceneObject : IHandle
 	internal int TransformVersion = 1;
 
 	/// <summary>
-	/// Tell the world's <see cref="SceneWorld.ChangeListener"/>, if it has one, that something changed.
+	/// What it draws as in its world's render world on Borealis, its own: made when its world is first drawn, null before
+	/// that, and for an object drawn another way (a sun, a sky, a probe volume) or not at all.
 	/// </summary>
-	internal void NotifyChanged( Rendering.SceneObjectChange change ) => World?.ChangeListener?.OnChanged( this, change );
+	internal Borealis.RenderObject RenderObject { get; set; }
+
+	/// <summary>
+	/// Write a change into its own render object (<see cref="OwnsRenderObject"/>) or its world's lighting, when its world is
+	/// drawn; one that can't be written now (made on another thread or during a render, or before its render object is made)
+	/// is written when its world's renderer next prepares a frame.
+	/// </summary>
+	internal void NotifyChanged( Rendering.SceneObjectChange change )
+	{
+		if ( World?.Render is not { } render || WroteRender( change, render ) ) return;
+		render.Later( this, change );
+	}
 
 	/// <summary>
 	/// Transform of this scene object, relative to its <see cref="Parent"/>, or <see cref="SceneWorld"/> if parent is not set.
@@ -157,49 +203,47 @@ public partial class SceneObject : IHandle
 	{
 		// Until it's set from here, native's: an object native made - a map's world geometry - is placed by native, and
 		// read as default(Transform), zero scale and all
-		get => _transformSet || native.IsNull ? _transform : native.GetCTransform();
+		get => _transformSet || native.IsNull ? _transform : native.GetCTransformUnaligned();
 		set
 		{
 			if ( _transformSet && _transform == value )
 				return;
 
+			var previous = _children is null ? default : Transform;
 			_transformSet = true;
 			_transform = value;
 			TransformVersion++;
 			native.SetTransform( value );
+			UpdateRigidBounds();
 			NotifyChanged( Rendering.SceneObjectChange.Transform );
 			OnTransformChanged( value );
-			MoveChildren();
+			MoveChildren( previous, value );
 		}
 	}
 
 	/// <summary>
-	/// Children added with <see cref="AddChild"/>, which native moves with this one.
+	/// Children added with <see cref="AddChild"/>, which move with this one. Kept here only: native's twins aren't linked.
 	/// </summary>
 	List<SceneObject> _children;
+	SceneObject _parent;
 
 	/// <summary>
-	/// Native moved the children with this one (<c>SceneObject_MirrorTransformToChildSceneObjectsRelative</c>, for
-	/// <c>CHILD_SCENEOBJECT_INHERIT_TRANSFORM</c>), and theirs with them: read each one's transform back, and say it changed, as
-	/// its own setter would - or what's cached here, and the managed renderer's copy (<c>r_managed_scene</c>), stay where they were.
+	/// Move the children with this one, as native's <c>SceneObject_MirrorTransformToChildSceneObjectsRelative</c> moves them
+	/// (<c>CHILD_SCENEOBJECT_INHERIT_TRANSFORM</c>): each one's transform taken out of this one's old one (<c>InverseTR</c>, an
+	/// inverse for a uniform scale) and put into the new one. Each child's setter moves its own children.
 	/// </summary>
-	void MoveChildren()
+	void MoveChildren( in Transform previous, in Transform now )
 	{
-		if ( _children is null ) return;
+		if ( _children is null || _children.Count == 0 ) return;
 
-		foreach ( var child in _children )
+		// A zero scale has no inverse: native's leaves the scale out then, as this does by not moving them
+		if ( !System.Numerics.Matrix4x4.Invert( Matrix.FromTransform( previous ), out var inverse ) ) return;
+		var move = inverse * (System.Numerics.Matrix4x4)Matrix.FromTransform( now );
+
+		foreach ( var child in _children.ToArray() )
 		{
 			if ( !child.IsValid() ) continue;
-
-			var moved = child.native.GetCTransform();
-			if ( child._transformSet && child._transform == moved ) continue;
-
-			child._transformSet = true;
-			child._transform = moved;
-			child.TransformVersion++;
-			child.NotifyChanged( Rendering.SceneObjectChange.Transform );
-			child.OnTransformChanged( moved );
-			child.MoveChildren();
+			child.Transform = ((Matrix)((System.Numerics.Matrix4x4)Matrix.FromTransform( child.Transform ) * move)).ExtractTransform();
 		}
 	}
 
@@ -237,7 +281,7 @@ public partial class SceneObject : IHandle
 	// We could do better here, sometimes sceneobjects are set to infinite bounds by design
 	private BBox GetSafeBounds()
 	{
-		var bounds = native.GetBounds();
+		var bounds = WorldBounds;
 		var volume = bounds.Volume;
 
 		if ( !float.IsNaN( volume ) && !float.IsInfinity( volume ) )
@@ -252,7 +296,7 @@ public partial class SceneObject : IHandle
 	public BBox Bounds
 	{
 		get => GetSafeBounds();
-		set { native.SetBounds( value ); NotifyChanged( Rendering.SceneObjectChange.Bounds ); }
+		set { native.SetBounds( value ); SetKeptBounds( value ); NotifyChanged( Rendering.SceneObjectChange.Bounds ); }
 	}
 
 	/// <summary>
@@ -265,13 +309,28 @@ public partial class SceneObject : IHandle
 		set => Bounds = value.Transform( Transform );
 	}
 
+	// Kept here once read from native (what native code made the object with) or set: native still gets visibility, which
+	// render-mesh traces skip hidden objects by, and the tint only while something reads it (WritesNative)
+	bool? _renderingEnabled;
+	Color? _tint;
+
+	/// <summary>
+	/// Read visibility and tint from native again next time: native code changes the objects it made behind managed
+	/// code's back (a tool hiding a helper, tinting a selection, switching its worklight off).
+	/// </summary>
+	internal void ForgetNativeState()
+	{
+		_renderingEnabled = null;
+		_tint = null;
+	}
+
 	/// <summary>
 	/// Whether this scene object should render or not.
 	/// </summary>
 	public bool RenderingEnabled
 	{
-		get => native.IsRenderingEnabled();
-		set { native.SetRenderingEnabled( value ); NotifyChanged( Rendering.SceneObjectChange.Visibility ); }
+		get => _renderingEnabled ??= native.IsRenderingEnabled();
+		set { native.SetRenderingEnabled( value ); _renderingEnabled = value; NotifyChanged( Rendering.SceneObjectChange.Visibility ); }
 	}
 
 	/// <summary>
@@ -279,8 +338,25 @@ public partial class SceneObject : IHandle
 	/// </summary>
 	public Color ColorTint
 	{
-		get => native.GetTintRGBA();
-		set { native.SetTintRGBA( value ); NotifyChanged( Rendering.SceneObjectChange.Tint ); }
+		get => _tint ??= native.GetTintRGBA();
+		set
+		{
+			if ( native.IsNull ) Sandbox.Interop.ThrowNullSelf( "CSceneObject", "SetTintRGBA" );
+			_tint = NativeTint( value );
+			if ( WritesNative ) native.SetTintRGBA( value );
+			NotifyChanged( Rendering.SceneObjectChange.Tint );
+		}
+	}
+
+	/// <summary>
+	/// A tint as native's <c>CSceneObject::SetTintRGBA</c> keeps it and <c>GetTintRGBA</c> gives it back: colour channels as
+	/// bytes (the value times 255, cut to a byte as native's conversion cuts it, read back times 1/255 as native's build
+	/// computes the division), alpha clamped to 0 to 1.
+	/// </summary>
+	internal static Color NativeTint( Color tint )
+	{
+		static float Channel( float value ) => unchecked((byte)(int)(value * 255.0f)) * (1.0f / 255.0f);
+		return new Color( Channel( tint.r ), Channel( tint.g ), Channel( tint.b ), Math.Clamp( tint.a, 0.0f, 1.0f ) );
 	}
 
 	/// <summary>
@@ -298,7 +374,7 @@ public partial class SceneObject : IHandle
 	/// <summary>
 	/// Movement parent of this scene object, if any.
 	/// </summary>
-	public SceneObject Parent => native.GetParent();
+	public SceneObject Parent => _parent;
 
 	/// <summary>
 	/// Add a named child scene object to this one. The child scene object will have its parent set.
@@ -308,10 +384,10 @@ public partial class SceneObject : IHandle
 	/// </remarks>
 	public void AddChild( string name, SceneObject child )
 	{
-		if ( !child.IsValid() )
+		if ( !child.IsValid() || child._parent is not null )
 			return;
 
-		native.AddChildObject( name, child, 0x02 );
+		child._parent = this;
 		(_children ??= new()).Add( child );
 	}
 
@@ -320,12 +396,19 @@ public partial class SceneObject : IHandle
 	/// </summary>
 	public void RemoveChild( SceneObject child )
 	{
-		if ( !child.IsValid() )
+		if ( !child.IsValid() || child._parent != this )
 			return;
 
-		native.RemoveChild( child );
-		_children?.Remove( child );
+		child._parent = null;
+		_children.Remove( child );
 	}
+
+	/// <summary>
+	/// What a native buffer object (<c>CreateSceneObjectFromBuffers</c>: draws of its own, no model) is drawn as by
+	/// renderers that draw models: a model of its draws, made by whoever draws it (<c>Editor.ToolSceneViews</c>). Null for
+	/// any other object.
+	/// </summary>
+	internal Model BufferObjectModel { get; set; }
 
 	/// <summary>
 	/// The model this scene object will render.
@@ -347,6 +430,12 @@ public partial class SceneObject : IHandle
 			if ( !model.HasRenderMeshes() ) model = Model.Error;
 
 			MeshSystem.ChangeModel( this, model.native );
+
+			// New mesh instances draw the model's materials; the override list and mesh groups stay
+			if ( ResolvesDraws ) StartResolvingDraws( model );
+			FlagsAtModelChange( model );
+			if ( !ResolvesDraws && _boundsKind == BoundsKind.Rigid ) _boundsKind = BoundsKind.Native;
+			ModelChangedBounds();
 			NotifyChanged( Rendering.SceneObjectChange.Model );
 
 			OnModelChanged();
@@ -359,22 +448,70 @@ public partial class SceneObject : IHandle
 	}
 
 	/// <summary>
+	/// Every object drawing <paramref name="model"/>, after it was reloaded: native's resource system gave each new mesh
+	/// instances of it (<c>CModelTypeManager::FinalizeResource</c> calls <c>CMeshSystem::ChangeModel</c>), so their draws,
+	/// flags and bounds are worked out again as after <see cref="Model"/> is set.
+	/// </summary>
+	internal static void ModelReloaded( Model model )
+	{
+		List<SceneObject> drawing = null;
+		foreach ( var world in SceneWorld.All.ToArray() )
+		{
+			lock ( world.InternalSceneObjects )
+			{
+				foreach ( var sceneObject in world.InternalSceneObjects )
+				{
+					if ( !sceneObject.native.IsNull && sceneObject.Model == model ) (drawing ??= new()).Add( sceneObject );
+				}
+			}
+		}
+
+		foreach ( var sceneObject in drawing ?? [] )
+			sceneObject.ModelReloaded();
+	}
+
+	void ModelReloaded()
+	{
+		if ( Model is not { } model ) return;
+
+		// Native's new mesh instances draw the model's materials (no material group or mesh-instance override); the override
+		// list, per index overrides and mesh groups stay
+		if ( ResolvesDraws ) StartResolvingDraws( model );
+		_materialOverride = null;
+		FlagsAtModelChange( model );
+		ModelChangedBounds();
+		NotifyChanged( Rendering.SceneObjectChange.Model );
+	}
+
+	/// <summary>
 	/// State of all bodygroups of this object's model. You might be looking for <see cref="SceneModel.SetBodyGroup"/>.
 	/// </summary>
 	public ulong MeshGroupMask
 	{
-		get => native.GetCurrentMeshGroupMask();
-		set { native.ResetMeshGroups( value ); NotifyChanged( Rendering.SceneObjectChange.Material ); }
+		get => _meshGroupMask ??= native.IsNull ? 0 : native.GetCurrentMeshGroupMask();
+		set
+		{
+			if ( native.IsNull ) Sandbox.Interop.ThrowNullSelf( "CSceneObject", "ResetMeshGroups" );
+			native.ResetMeshGroups( value );
+			_meshGroupMask = value;
+			NotifyChanged( Rendering.SceneObjectChange.Material );
+		}
 	}
 
+	int? _lod;
+
 	/// <summary>
-	/// Override current LOD level, -1 to disable.
+	/// Override current LOD level, -1 to disable. Kept here as native keeps it (<c>CSceneObject::SetLOD</c>: anything outside
+	/// 0 to 7 disables it), or read once from native for an object native code made; native gets it while something reads it.
 	/// </summary>
 	internal int LodOverride
 	{
+		get => _lod ??= native.IsNull ? -1 : native.GetCurrentLODLevel();
 		set
 		{
-			native.SetLOD( value );
+			if ( native.IsNull ) Sandbox.Interop.ThrowNullSelf( "CSceneObject", "SetLOD" );
+			_lod = value is < 0 or > 7 ? -1 : value;
+			if ( WritesNative ) native.SetLOD( value );
 			NotifyChanged( Rendering.SceneObjectChange.Settings );
 		}
 	}
@@ -395,10 +532,14 @@ public partial class SceneObject : IHandle
 		if ( material != null && material.native.IsValid )
 		{
 			native.SetMaterialOverrideForMeshInstances( material.native );
+			OverrideMeshInstances( material );
+			FlagsAtMaterialChange();
 			return;
 		}
 
 		native.SetMaterialOverrideForMeshInstances( default );
+		OverrideMeshInstances( null );
+		FlagsAtMaterialChange();
 	}
 
 	/// <summary>
@@ -406,8 +547,33 @@ public partial class SceneObject : IHandle
 	/// </summary>
 	public void ClearMaterialOverride()
 	{
-		native.ClearMaterialOverrideList();
+		ClearMaterialOverrideList();
 		_materialOverride = default;
+	}
+
+	/// <summary>
+	/// Clear the override list (<c>CSceneObject::ClearMaterialOverrideList</c>), leaving mesh-instance and per index overrides.
+	/// </summary>
+	internal void ClearMaterialOverrideList()
+	{
+		native.ClearMaterialOverrideList();
+
+		// Native works the material flags out again only if there was something to clear, and not the translucency flags
+		var had = _overrideList is { Count: > 0 };
+		_overrideList?.Clear();
+		if ( had ) FlagsAtMaterialChange( translucency: false );
+		NotifyChanged( Rendering.SceneObjectChange.Material );
+	}
+
+	/// <summary>
+	/// Override the model's material at <paramref name="index"/> in <see cref="Model.Materials"/>, or stop overriding it for
+	/// null (<c>CSceneObject::SetMaterialOverrideByIndex</c>).
+	/// </summary>
+	internal void SetMaterialOverrideByIndex( int index, Material material )
+	{
+		native.SetMaterialOverrideByIndex( index, material?.native ?? default );
+		SetIndexOverride( index, material is { native.IsValid: true } ? material : null );
+		FlagsAtMaterialChange();
 		NotifyChanged( Rendering.SceneObjectChange.Material );
 	}
 
@@ -421,7 +587,10 @@ public partial class SceneObject : IHandle
 	/// <param name="attributeValue">Value of the attribute to test for.</param>
 	public void SetMaterialOverride( Material material, string attributeName, int attributeValue = 1 )
 	{
-		native.SetMaterialOverride( material?.native ?? IntPtr.Zero, attributeName, attributeValue );
+		StringToken attribute = attributeName;
+		native.SetMaterialOverride( material?.native ?? IntPtr.Zero, attribute, attributeValue );
+		SetOverrideEntry( material is { native.IsValid: true } ? material : null, attribute.Value, attributeValue );
+		FlagsAtMaterialChange();
 		NotifyChanged( Rendering.SceneObjectChange.Material );
 	}
 
@@ -431,6 +600,7 @@ public partial class SceneObject : IHandle
 	public void SetMaterialGroup( string name )
 	{
 		native.SetMaterialGroup( name );
+		if ( ApplyMaterialGroup( name ) ) FlagsAtMaterialChange();
 		NotifyChanged( Rendering.SceneObjectChange.Material );
 	}
 
@@ -485,6 +655,8 @@ public partial class SceneObject : IHandle
 	internal void UpdateFlagsBasedOnMaterial()
 	{
 		native.UpdateFlagsBasedOnMaterial();
+		FlagsAtMaterialChange();
+		NotifyChanged( Rendering.SceneObjectChange.Flags );
 	}
 
 	/// <summary>
@@ -501,15 +673,15 @@ public partial class SceneObject : IHandle
 			Object = obj;
 		}
 
+		// Kept on the object (CurrentFlags), as native's HasFlags: any of them
 		internal bool HasFlag( Rendering.SceneObjectFlags f )
 		{
-			return Object.native.HasFlags( f );
+			return (Object.CurrentFlags & f) != 0;
 		}
 
 		internal void SetFlag( Rendering.SceneObjectFlags f, bool val )
 		{
-			Object.native.ChangeFlags( val ? f : Rendering.SceneObjectFlags.None, f );
-			Object.NotifyChanged( Rendering.SceneObjectChange.Flags );
+			Object.ChangeFlags( val ? f : Rendering.SceneObjectFlags.None, f );
 		}
 
 

@@ -1,5 +1,3 @@
-using NativeEngine;
-
 namespace Sandbox;
 
 public abstract class MapLoader
@@ -20,16 +18,33 @@ public abstract class MapLoader
 		public Vector3 WorldOrigin { get; init; }
 		public ITagSet Tags { get; init; }
 
-		private readonly Dictionary<uint, string> values = new();
+		private readonly Dictionary<uint, string> values;
 
-		internal ObjectEntry( CEntityKeyValues keyValues, Vector3 origin )
+		/// <summary>
+		/// An entity read from the map's entity lump by Borealis.Source2, its values as the strings native's key values give
+		/// (<see cref="Borealis.Source2.World.MapEntity.Format"/>).
+		/// </summary>
+		internal ObjectEntry( Borealis.Source2.World.MapEntity entity, Vector3 origin ) : this( ValuesOf( entity ), origin )
 		{
-			var keyCount = keyValues.GetKeyCount();
-			for ( int i = 0; i < keyCount; i++ )
-			{
-				var key = keyValues.GetKey( i );
-				values.Add( key, keyValues.GetValueString( key, null ) );
-			}
+		}
+
+		static Dictionary<uint, string> ValuesOf( Borealis.Source2.World.MapEntity entity )
+		{
+			var values = new Dictionary<uint, string>( entity.Count );
+			foreach ( var (key, value) in entity.Values )
+				values[key] = Borealis.Source2.World.MapEntity.Format( value );
+
+			return values;
+		}
+
+		/// <summary>An entity from its values alone, placed at the world's origin.</summary>
+		internal ObjectEntry( Dictionary<uint, string> keyValues ) : this( keyValues, Vector3.Zero )
+		{
+		}
+
+		ObjectEntry( Dictionary<uint, string> values, Vector3 origin )
+		{
+			this.values = values;
 
 			TypeName = GetValueString( "classname", null );
 			TargetName = GetValueString( "targetname", null );
@@ -97,23 +112,23 @@ public abstract class MapLoader
 	/// </summary>
 	protected abstract void CreateObject( ObjectEntry kv );
 
-	internal void CreateEntities( IWorldReference worldRef, string entityLumpName )
+	/// <summary>
+	/// Create the objects for a map's entities read from its entity lump by Borealis.Source2.
+	/// </summary>
+	internal void CreateEntities( IReadOnlyList<Borealis.Source2.World.MapEntity> entities )
 	{
-		var entityCount = worldRef.GetEntityCount( entityLumpName );
-		if ( entityCount == 0 )
+		if ( entities.Count == 0 )
 			return;
 
-		var entries = new List<ObjectEntry>( entityCount );
+		var entries = new List<ObjectEntry>( entities.Count );
+		foreach ( var entity in entities )
+			entries.Add( new ObjectEntry( entity, WorldOrigin ) );
 
-		for ( int i = 0; i < entityCount; ++i )
-		{
-			var kv = worldRef.GetEntityKeyValues( entityLumpName, i );
-			if ( !kv.IsValid )
-				continue;
+		CreateEntities( entries );
+	}
 
-			entries.Add( new ObjectEntry( kv, WorldOrigin ) );
-		}
-
+	void CreateEntities( List<ObjectEntry> entries )
+	{
 		entries.Sort( ( a, b ) =>
 		{
 			if ( string.IsNullOrEmpty( a.ParentName ) && string.IsNullOrEmpty( b.ParentName ) ) return 0;

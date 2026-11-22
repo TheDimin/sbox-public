@@ -25,9 +25,15 @@ namespace Sandbox.UI
 			if ( IsCssWideKeyword( value, out var cssWide ) && MarkCssWide( property, cssWide ) )
 				return true;
 
-			// A normal value supersedes any keyword recorded earlier for this property (or its longhands).
-			ClearCssWide( property );
+			if ( !SetProperty( property, value ) ) return false;
 
+			// Only a valid declaration supersedes an earlier CSS-wide keyword.
+			ClearCssWide( property );
+			return true;
+		}
+
+		bool SetProperty( string property, string value )
+		{
 			// 'currentColor' (even nested inside a shorthand) parses to a sentinel that resolves to the
 			// element's computed colour after the cascade; flag it so that resolution pass runs.
 			if ( value != null && value.Length >= 12 && value.Contains( "currentcolor", System.StringComparison.OrdinalIgnoreCase ) )
@@ -252,6 +258,19 @@ namespace Sandbox.UI
 
 				case "font-style":
 					return SetFontStyle( value );
+
+				case "font-variation-settings":
+					if ( !UI.FontVariationSettings.TryParse( value, out var settings ) ) return false;
+					FontVariationSettings = settings;
+					return true;
+
+				case "font-optical-sizing":
+					switch ( value?.Trim().ToLowerInvariant() )
+					{
+						case "auto": FontOpticalSizing = UI.FontOpticalSizing.Auto; return true;
+						case "none": FontOpticalSizing = UI.FontOpticalSizing.None; return true;
+						default: return false;
+					}
 
 				case "font-variant-numeric":
 					return SetFontVariantNumeric( value );
@@ -1898,20 +1917,67 @@ namespace Sandbox.UI
 
 		bool SetTransformOrigin( string value )
 		{
-			var p = new Parse( value );
-
-			if ( !p.TryReadLength( out var x ) )
+			if ( !TryParseOrigin( value, out var x, out var y ) )
 				return false;
 
 			TransformOriginX = x;
+			TransformOriginY = y;
+			return true;
+		}
 
-			if ( !p.TryReadLength( out var y ) )
+		enum OriginAxis
+		{
+			None,
+			Horizontal,
+			Vertical
+		}
+
+		static OriginAxis GetOriginAxis( Parse p )
+		{
+			p = p.SkipWhitespaceAndNewlines();
+			if ( p.IsEnd ) return OriginAxis.None;
+
+			return p.ReadWord( null, true ).ToLowerInvariant() switch
 			{
-				TransformOriginY = x;
+				"left" or "right" => OriginAxis.Horizontal,
+				"top" or "bottom" => OriginAxis.Vertical,
+				_ => OriginAxis.None
+			};
+		}
+
+		/// <summary>
+		/// Parses a transform-origin or perspective-origin position. Like CSS, keywords pick their own
+		/// axis, so "bottom left" and "left bottom" are the same point. A single length still sets both axes.
+		/// </summary>
+		static bool TryParseOrigin( string value, out Length x, out Length y )
+		{
+			var center = new Length { Unit = LengthUnit.Center };
+			var p = new Parse( value );
+
+			x = default;
+			y = default;
+
+			var axisA = GetOriginAxis( p );
+			if ( !p.TryReadLength( out var a ) )
+				return false;
+
+			var axisB = GetOriginAxis( p );
+			if ( !p.TryReadLength( out var b ) )
+			{
+				x = axisA == OriginAxis.Vertical ? center : a;
+				y = axisA == OriginAxis.Horizontal ? center : a;
 				return true;
 			}
 
-			TransformOriginY = y;
+			// "left right" or "top bottom" isn't a position
+			if ( axisA != OriginAxis.None && axisA == axisB )
+				return false;
+
+			if ( axisA == OriginAxis.Vertical || axisB == OriginAxis.Horizontal )
+				(a, b) = (b, a);
+
+			x = a;
+			y = b;
 			return true;
 		}
 
@@ -1935,21 +2001,10 @@ namespace Sandbox.UI
 
 		bool SetPerspectiveOrigin( string value )
 		{
-			var p = new Parse( value );
-
-			if ( !p.TryReadLength( out var x ) )
+			if ( !TryParseOrigin( value, out var x, out var y ) )
 				return false;
 
 			PerspectiveOriginX = x;
-
-			if ( !p.TryReadLength( out var y ) )
-			{
-				PerspectiveOriginY = x;
-				return true;
-			}
-
-			// Do we want to move away from standard and let us specify a Z too?
-
 			PerspectiveOriginY = y;
 			return true;
 		}
@@ -3098,6 +3153,9 @@ namespace Sandbox.UI
 			{
 				Set( "font-size", sizePart );
 			}
+
+			FontVariationSettings = default( UI.FontVariationSettings );
+			FontOpticalSizing = UI.FontOpticalSizing.Auto;
 
 			// Everything after the size is the font-family.
 			Set( "font-family", string.Join( " ", tokens, sizeIndex + 1, tokens.Length - sizeIndex - 1 ) );

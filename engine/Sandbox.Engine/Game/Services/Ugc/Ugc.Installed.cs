@@ -71,6 +71,12 @@ internal static partial class Ugc
 	const double StartGrace = 15.0;
 
 	/// <summary>
+	/// How old an answer Steam can give when checking an installed item is the latest. A load asks twice in a few
+	/// seconds, prefetching then installing, and each fresh query took a third of a second.
+	/// </summary>
+	const int OutdatedCheckAge = 30;
+
+	/// <summary>
 	/// Get what Steam knows about this item, without downloading anything. Null if there's no Steam.
 	/// </summary>
 	internal static ItemInfo GetItem( ulong id )
@@ -102,7 +108,7 @@ internal static partial class Ugc
 		removed.Remove( id );
 
 		// In use - what's mounted is what we've got, Steam rewriting files we're using breaks things
-		if ( item.IsInstalled && IsMounted( id ) )
+		if ( item.IsInstalled && WorkshopFileSystem.IsInUse( id ) )
 			return item.InstallFolder;
 
 		var downloaded = false;
@@ -175,20 +181,12 @@ internal static partial class Ugc
 	}
 
 	/// <summary>
-	/// Is this item's content mounted by a package right now? Steam mustn't rewrite it while it is.
-	/// </summary>
-	static bool IsMounted( ulong id )
-	{
-		return PackageManager.ActivePackages.Any( x => x.Package is { InstallsFromWorkshop: true } p && p.WorkshopId == id );
-	}
-
-	/// <summary>
 	/// Download the latest version of this item - unless it's mounted, Steam rewriting files we're using
 	/// breaks things. It's picked up again once it isn't, see <see cref="OnPackagesUnmounted"/>.
 	/// </summary>
 	static void StartUpdate( ulong id )
 	{
-		if ( !IsMounted( id ) )
+		if ( !WorkshopFileSystem.IsInUse( id ) )
 			RequestDownload( id );
 	}
 
@@ -342,7 +340,7 @@ internal static partial class Ugc
 	{
 		if ( !item.IsInstalled ) return false;
 
-		var latest = await Workshop.FetchAsync( [item.PublishedFileId], token, 0 );
+		var latest = await Workshop.FetchAsync( [item.PublishedFileId], token, OutdatedCheckAge );
 		return latest.Length > 0 && IsOutdated( item, latest[0] );
 	}
 
