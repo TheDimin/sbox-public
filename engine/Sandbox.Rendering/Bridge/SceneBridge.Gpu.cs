@@ -344,7 +344,7 @@ internal sealed partial class SceneBridge
 			RunStage( camera, Stage.AfterViewmodel );
 
 			// Upscaled before post processing, as native's: the stages after draw at the display size, unjittered
-			if ( upscaling ) Upscale( upscaler, frame, state.View, displayViewport, camera );
+			if ( upscaling ) Upscale( upscaler, frame, state.View, displayViewport, camera, stages.Run );
 			gpuView.DisplayViewport = null;
 
 			RunStage( camera, Stage.BeforePostProcess );
@@ -363,7 +363,7 @@ internal sealed partial class SceneBridge
 	/// The frame upscaled into the display size's <paramref name="displayViewport"/>, in its block: the constants after it are
 	/// the frame's at the display size with the projection unjittered.
 	/// </summary>
-	void Upscale( BorealisGpuUpscaler upscaler, BorealisGpuFrame frame, RenderView view, Rect displayViewport, SceneCamera camera )
+	void Upscale( BorealisGpuUpscaler upscaler, BorealisGpuFrame frame, RenderView view, Rect displayViewport, SceneCamera camera, Action<SceneCamera, Stage> runStage )
 	{
 		var constants = System.Runtime.InteropServices.MemoryMarshal.Read<Borealis.Gpu.ViewConstants>( frame.Constants );
 		var display = upscaler.DisplaySize;
@@ -372,7 +372,7 @@ internal sealed partial class SceneBridge
 		// Native's frustum: a horizontal field of view; the upscalers take the vertical one
 		var aspect = view.Viewport.Height > 0 ? view.Viewport.Width / view.Viewport.Height : 1.0f;
 		var verticalFov = 2.0f * MathF.Atan( MathF.Tan( view.FieldOfView.DegreeToRadian() * 0.5f ) / aspect );
-		upscaler.Upscale( frame, gpuView, displayViewport, constants, view.ZNear, verticalFov, () => RunStage( camera, Stage.MotionVectors ) );
+		upscaler.Upscale( frame, gpuView, displayViewport, constants, view.ZNear, verticalFov, camera, runStage );
 	}
 
 	/// <summary>

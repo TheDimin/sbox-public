@@ -114,19 +114,27 @@ public static partial class Graphics
 	}
 
 	/// <summary>
-	/// Native layer target metadata for the current render callback. Null outside an active native
-	/// camera view, in child views, or while Graphics.RenderTarget overrides the layer targets.
+	/// Scene layer target metadata for the current render callback. Null outside a camera scene
+	/// stage with both attachments, in child views, or while Graphics.RenderTarget overrides the targets.
 	/// Read at the start of an unmodified main-camera AfterOpaque callback, before target changes.
 	/// Match CameraId and ViewId to the intended view; this property does not identify the main camera.
 	/// The viewport is current context state. Target sizes describe mip zero of the layer resources,
 	/// not a resolved copy or swap chain. Samples is the exact texture sample count (one means no MSAA).
-	/// This is layer metadata, not an inspection of arbitrary native target rebinding.
-	/// Borealis has no native layer, so this is null on its GPU backend.
+	/// In Borealis, these are the attachments of the scene stage before any resolve.
 	/// </summary>
 	public static (int CameraId, int ViewId, SceneLayerType Layer, Rect Viewport,
 		(int Width, int Height, int Samples) Color, (int Width, int Height, int Samples) Depth)? NativeLayerTargetInfo
 	{
-		get => null;
+		get
+		{
+			if ( !IsActive || _state.renderTarget is not null || _state.view is not BorealisGpuView view
+				|| view.ViewIdentity is not { } identity || view.StageTargetSamples is not { } samples
+				|| view.Target?.ColorTarget is not { } color || view.Target.DepthTarget is not { } depth )
+				return null;
+
+			return (identity.CameraId, identity.ViewId, LayerType, Viewport,
+				(color.Width, color.Height, samples.Color), (depth.Width, depth.Height, samples.Depth));
+		}
 	}
 
 	/// <summary>

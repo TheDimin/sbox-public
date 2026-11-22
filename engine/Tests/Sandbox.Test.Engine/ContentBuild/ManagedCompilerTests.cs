@@ -223,7 +223,8 @@ public class ManagedCompilerTests
 			for ( var x = 0; x < 8; x++ )
 				pattern.SetPixel( x, y, new Color32( (byte)(x * 36), (byte)(y * 36), 128, (byte)((x + y) * 18) ) );
 		Directory.CreateDirectory( Path.GetDirectoryName( fx.Path( "textures/pattern.png" ) ) );
-		File.WriteAllBytes( fx.Path( "textures/pattern.png" ), pattern.ToPng() );
+		var sourcePng = pattern.ToPng();
+		File.WriteAllBytes( fx.Path( "textures/pattern.png" ), sourcePng );
 		var text = Sandbox.Json.Serialize( new TextRendering.Scope( "A", Color.White, 14 ) );
 		fx.Write( "graphs/g.fxg", $$"""
 			{
@@ -276,8 +277,9 @@ public class ManagedCompilerTests
 
 		// Lossless PNG, one level, the image's own pixels
 		Assert.AreEqual( (8, 8, 1), (image.Width, image.Height, image.Mips), report.Log.ToString() );
+		using var sourceImage = Bitmap.CreateFromBytes( sourcePng );
 		using var decoded = Bitmap.CreateFromBytes( image.Data );
-		CollectionAssert.AreEqual( pattern.GetPixels32(), decoded.GetPixels32() );
+		CollectionAssert.AreEqual( sourceImage.GetPixels32(), decoded.GetPixels32() );
 
 		// Too small to compress: RGBA, smallest level first, every level down to 1x1, each the mean of the 2x2 above it as
 		// the GPU blits an sRGB texture: colour in linear light, alpha as it is

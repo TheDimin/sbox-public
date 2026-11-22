@@ -351,9 +351,10 @@ internal sealed class BorealisGpuUpscaler : IDisposable
 	/// <paramref name="upscaledConstants"/> are the frame's constants at the display size, unjittered. The camera's near plane
 	/// and vertical field of view (radians) are for the temporal upscalers.
 	/// </summary>
-	public void Upscale( BorealisGpuFrame frame, BorealisGpuView view, Rect displayViewport, in GpuViewConstants upscaledConstants, float zNear, float verticalFov, Action drawMotionVectors = null )
+	public void Upscale( BorealisGpuFrame frame, BorealisGpuView view, Rect displayViewport, in GpuViewConstants upscaledConstants, float zNear, float verticalFov, SceneCamera camera, Action<SceneCamera, Rendering.Stage> runStage )
 	{
 		var renderViewport = view.Viewport;
+		var sceneViewport = Graphics.Backend.GetViewport();
 		var color = frame.SceneColor;
 		var sceneDepth = frame.SceneDepth;
 		if ( color is null || output is null ) return;
@@ -379,8 +380,10 @@ internal sealed class BorealisGpuUpscaler : IDisposable
 			Graphics.Blit( motionMaterial );
 			if ( wantsMotionVectors )
 			{
+				Graphics.RenderTarget = temporalDepthTarget;
+				Graphics.Backend.SetViewport( sceneViewport );
 				Graphics.Attributes.Set( "MotionVectors", motionVectors );
-				drawMotionVectors?.Invoke();
+				runStage( camera, Rendering.Stage.MotionVectors );
 			}
 
 			// The overlays drawn again depth only, translucent ones too, as native's mask has them; without any, the frame's depth

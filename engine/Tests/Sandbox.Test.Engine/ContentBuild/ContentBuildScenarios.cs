@@ -358,7 +358,8 @@ public abstract class ContentBuildScenarios
 	public void FailedAssetPublishesNoOutputs() => Scenario( fx =>
 	{
 		fx.CopyShipped( Sources.ImageA, "materials/a_color.tga" );
-		fx.Write( "materials/a.vmat", Sources.Material( "TextureColor", "materials/a_color.tga", "g_tNormal", "materials/missing.vtex_c" ) );
+		fx.Write( "materials/bad_normal.tga", "Not a TGA image." );
+		fx.Write( "materials/a.vmat", Sources.Material( "TextureColor", "materials/a_color.tga", "TextureNormal", "materials/bad_normal.tga" ) );
 
 		var run = Build( fx );
 
@@ -862,16 +863,16 @@ public class ManagedContentBuild : ContentBuildScenarios
 	} );
 
 	/// <summary>
-	/// A DXT5 texture two materials generate from the same normal map, built from nothing: one set of bytes whichever
+	/// A BC7 texture two materials generate from the same normal map, built from nothing: one set of bytes whichever
 	/// parent makes it, in a build (several jobs at once or one worker for all) or compiled by itself as the editor
-	/// does, then nothing to do. DXT5 is compressed on the CPU, so it doesn't depend on a GPU or on build order.
+	/// does, then nothing to do.
 	/// </summary>
 	[TestMethod]
-	public void SharedGeneratedDxt5TextureIsTheSameWhoeverMakesIt() => Scenario( fx =>
+	public void SharedGeneratedNormalTextureIsTheSameWhoeverMakesIt() => Scenario( fx =>
 	{
 		fx.CopyShipped( "core/materials/default/default_normal.tga", "materials/n.tga" );
 		fx.CopyShipped( Sources.ImageA, "materials/c.tga" );
-		// The generic shader's normal map is DXT5 (the complex shader's is BC7), as core's dev materials have it
+		// Generic resolves to standard in Borealis. Standard generates BC7 normal maps.
 		fx.Write( "materials/a.vmat", Sources.Material( "shaders/generic.shader", ["TextureNormal", "materials/n.tga"] ) );
 		fx.Write( "materials/b.vmat", Sources.Material( "shaders/generic.shader", ["TextureNormal", "materials/n.tga", "TextureColor", "materials/c.tga"] ) );
 
@@ -880,7 +881,7 @@ public class ManagedContentBuild : ContentBuildScenarios
 		var child = fx.Child( "materials/n.tga" );
 		Assert.IsNotNull( child, run.ToString() );
 		var built = fx.Read( child );
-		Assert.AreEqual( (2, 4, 4), TextureFormat( built ), "a 4x4 DXT5 (BC3) texture" );
+		Assert.AreEqual( (20, 4, 4), TextureFormat( built ), "a 4x4 BC7 texture" );
 		AssertWroteExactly( Build( fx ) );
 
 		foreach ( var parent in new[] { "materials/b.vmat", "materials/a.vmat" } )

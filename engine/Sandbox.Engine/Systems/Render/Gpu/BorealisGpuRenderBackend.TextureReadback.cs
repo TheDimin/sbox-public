@@ -26,7 +26,8 @@ internal sealed partial class BorealisGpuRenderBackend
 		if ( list is not null ) return false;
 		if ( source.w != destination.w || source.h != destination.h || source.w <= 0 || source.h <= 0 ) return false;
 
-		var handle = TextureOf( texture );
+		var captured = texture.DrawnByView ? RenderedInto?.Invoke( this, texture ) as Borealis.Backend.BackendTexture : null;
+		var handle = captured?.Handle ?? TextureOf( texture );
 		var info = gpu.InfoOf( handle );
 		var volume = info.Dimension == TextureDimension.Texture3D;
 		var slices = volume ? Math.Max( info.Depth >> mip, 1 ) : ArrayLayersOf( info );
@@ -61,7 +62,9 @@ internal sealed partial class BorealisGpuRenderBackend
 			SubmitUploads();
 			var copy = gpu.BeginCommandList( QueueType.Graphics, "Readback" );
 			context.Begin( copy );
+			if ( captured is not null ) context.Track( handle, captured.Layout );
 			context.CopyToBuffer( handle, readback, mip, volume ? 0 : slice );
+			if ( captured is not null ) context.PrepareNative( handle, captured.Layout, false );
 			context.Finish();
 			gpu.Wait( gpu.Submit( copy ) );
 

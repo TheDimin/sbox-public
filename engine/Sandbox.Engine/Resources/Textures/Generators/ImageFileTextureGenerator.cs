@@ -191,10 +191,13 @@ public class ImageFileGenerator : TextureGenerator
 		{
 			// Create the bitmap and crop it if needed
 			var bitmap = Bitmap.CreateFromBytes( bytes );
+			if ( bitmap is null ) return null;
+
 			var newRect = new Rect( cropping.Left, cropping.Top, bitmap.Width - cropping.Right - cropping.Left, bitmap.Height - cropping.Bottom - cropping.Top );
-			if ( newRect.Width > 0 && newRect.Height > 0 )
+			if ( !cropping.IsNearlyZero() && newRect.Width > 0 && newRect.Height > 0 )
 			{
-				bitmap = bitmap.Crop( newRect.SnapToGrid() );
+				using var original = bitmap;
+				bitmap = original.Crop( newRect.SnapToGrid() );
 			}
 
 			// Cache operations only hold this lock on workers, never across an await.

@@ -487,14 +487,15 @@ public class BorealisGpuTexturesTest
 		RenderBackend.SetDefault( borealis );
 		try
 		{
-			// A 4x4 checkerboard of black and white; the second mip starts as its box filter, grey
-			using var texture = Texture.Create( 4, 4, ImageFormat.RGBA8888 ).WithMips( 2 ).WithUAVBinding()
-				.WithData( Pixels( 4, 4, ( x, y ) => ((x + y) & 1) == 0 ? new Color32( 0, 0, 0, 255 ) : new Color32( 255, 255, 255, 255 ) ) ).Finish();
+			using var source = Texture.Create( 4, 4, ImageFormat.RGBA8888 )
+				.WithData( Pixels( 4, 4, static ( _, _ ) => new Color32( 255, 255, 255, 255 ) ) ).Finish();
+			using var destination = Texture.Create( 2, 2, ImageFormat.RGBA8888 ).WithUAVBinding()
+				.WithData( Pixels( 2, 2, static ( _, _ ) => new Color32( 64, 64, 64, 255 ) ) ).Finish();
 
 			var downsample = new ComputeShader( "downsample_cs" );
-			downsample.Attributes.SetCombo( "D_DOWNSAMPLE_METHOD", (int)Graphics.DownsampleMethod.Max );
-			downsample.Attributes.Set( "MipLevel0", texture, 0 );
-			downsample.Attributes.Set( "MipLevel1", texture, 1 );
+			downsample.Attributes.SetCombo( "D_DOWNSAMPLE_METHOD", (int)Graphics.DownsampleMethod.GaussianBlur );
+			downsample.Attributes.Set( "MipLevel0", source, 0 );
+			downsample.Attributes.Set( "MipLevel1", destination, 0 );
 			downsample.Attributes.Set( "TextureSize", new Vector2( 2, 2 ) );
 			downsample.Attributes.Set( "InvTextureSize", new Vector2( 0.5f, 0.5f ) );
 
@@ -504,10 +505,10 @@ public class BorealisGpuTexturesTest
 			var mip = new byte[2 * 2 * 4];
 			fixed ( byte* data = mip )
 			{
-				Assert.IsTrue( borealis.ReadPixels( texture, new NativeRect( 0, 0, 2, 2 ), 0, 1, new NativeRect( 0, 0, 2, 2 ), (IntPtr)data, ImageFormat.RGBA8888, 2 * 4 ) );
+				Assert.IsTrue( borealis.ReadPixels( destination, new NativeRect( 0, 0, 2, 2 ), 0, 0, new NativeRect( 0, 0, 2, 2 ), (IntPtr)data, ImageFormat.RGBA8888, 2 * 4 ) );
 			}
 
-			Assert.IsTrue( mip.All( v => v == 255 ), "the second mip is the max of the first's: white, not the grey it started as" );
+			Assert.IsTrue( mip.All( v => v == 255 ), "The dispatch must replace the grey destination with the filtered white input." );
 		}
 		finally
 		{

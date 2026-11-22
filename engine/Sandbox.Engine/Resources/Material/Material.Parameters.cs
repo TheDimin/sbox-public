@@ -10,9 +10,28 @@ public partial class Material
 	string _shaderName;
 
 	/// <summary>
-	/// Get thje first texture assigned to this material, if any.
+	/// Get the first texture assigned to this material, if any.
 	/// </summary>
-	public Texture FirstTexture => Texture.FromNativeFile( native.GetFirstTextureAttribute() );
+	public Texture FirstTexture
+	{
+		get
+		{
+			var texture = Texture.FromNativeFile( native.GetFirstTextureAttribute() );
+			if ( texture is not null || RenderBackend.Default is not BorealisGpuRenderBackend backend )
+				return texture;
+
+			if ( firstTextureVersion != ShaderVersion )
+			{
+				firstTexturePath = backend.FirstMaterialTexturePath( FilePath );
+				firstTextureVersion = ShaderVersion;
+			}
+
+			return firstTexturePath is null ? null : Texture.Load( firstTexturePath, warnOnMissing: false );
+		}
+	}
+
+	string firstTexturePath;
+	int firstTextureVersion = -1;
 
 	/// <summary>Whether this material defines a native parameter with the given name.</summary>
 	public bool HasParameter( string name ) => native.HasParam( name );

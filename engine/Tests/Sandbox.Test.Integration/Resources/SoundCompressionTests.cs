@@ -78,34 +78,38 @@ public class SoundCompressionTests
 	[TestMethod]
 	public void PreservesCompressedPayloadsAndAppliesRequestedProcessing()
 	{
-		var extensions = new[] { "mp3", "ogg", "opus" };
+		// The native compiler dispatches Ogg Vorbis and Ogg Opus through the .ogg importer.
+		var inputs = new[]
+		{
+			(Format: SoundFormat.MP3, Fixture: "mp3", Extension: "mp3"),
+			(Format: SoundFormat.Vorbis, Fixture: "ogg", Extension: "ogg"),
+			(Format: SoundFormat.Opus, Fixture: "opus", Extension: "ogg")
+		};
 
 		// Write every source first so they all compile in one run
 		using var files = new Fixtures();
 		var paths = new List<string>();
-		foreach ( var extension in extensions )
+		foreach ( var input in inputs )
 		{
-			var original = File.ReadAllBytes( Path.Combine( AppContext.BaseDirectory, "Resources", "Audio", $"tone.{extension}" ) );
-			paths.Add( files.Write( $"tone_{extension}.{extension}", original ) );
+			var original = File.ReadAllBytes( Path.Combine( AppContext.BaseDirectory, "Resources", "Audio", $"tone.{input.Fixture}" ) );
+			paths.Add( files.Write( $"tone_{input.Fixture}.{input.Extension}", original ) );
 
 			// Gain/mono/trim edits decode the original source before encoding the result.
-			var processed = files.Write( $"processed_{extension}.{extension}", original );
+			var processed = files.Write( $"processed_{input.Fixture}.{input.Extension}", original );
 			File.WriteAllText( processed + ".meta", JsonSerializer.Serialize( new { guid = Guid.NewGuid(), gain = -6 } ) );
 			paths.Add( processed );
 		}
 
 		var compiled = files.Compile( paths.ToArray() );
 
-		for ( var i = 0; i < extensions.Length; i++ )
+		for ( var i = 0; i < inputs.Length; i++ )
 		{
-			var extension = extensions[i];
 			var original = File.ReadAllBytes( paths[i * 2] );
 			var plain = compiled[i * 2];
-			var expected = extension switch { "mp3" => SoundFormat.MP3, "ogg" => SoundFormat.Vorbis, _ => SoundFormat.Opus };
-			Assert.AreEqual( expected, plain.Format );
-			if ( extension == "ogg" ) CollectionAssert.AreEqual( original, plain.Payload );
-			if ( extension == "opus" ) CollectionAssert.AreEqual( OpusPackets( original ), plain.Payload );
-			if ( extension == "mp3" )
+			Assert.AreEqual( inputs[i].Format, plain.Format );
+			if ( plain.Format == SoundFormat.Vorbis ) CollectionAssert.AreEqual( original, plain.Payload );
+			if ( plain.Format == SoundFormat.Opus ) CollectionAssert.AreEqual( OpusPackets( original ), plain.Payload );
+			if ( plain.Format == SoundFormat.MP3 )
 			{
 				var start = original.AsSpan( 0, 3 ).SequenceEqual( "ID3"u8 )
 					? 10 + (original[6] << 21 | original[7] << 14 | original[8] << 7 | original[9]) : 0;

@@ -1584,6 +1584,24 @@ internal sealed partial class BorealisGpuRenderBackend : RenderBackend, IDisposa
 	// The shader each compiled material file names, by the file's path
 	readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> fileShaders = new( StringComparer.OrdinalIgnoreCase );
 
+	/// <summary>Read the texture from a compiled material whose shader has only Slang metadata.</summary>
+	internal string FirstMaterialTexturePath( string path )
+	{
+		if ( string.IsNullOrEmpty( path ) ) return null;
+		try
+		{
+			if ( files.TryRead( path ) is not { } data ) return null;
+			var textures = Borealis.Source2.Materials.MaterialFile.Read( data ).Textures;
+			return textures.TryGetValue( "g_tColor", out var color ) && !string.IsNullOrEmpty( color )
+				? color
+				: textures.Values.FirstOrDefault( x => !string.IsNullOrEmpty( x ) );
+		}
+		catch ( Exception e ) when ( e is System.IO.InvalidDataException or System.IO.IOException )
+		{
+			return null;
+		}
+	}
+
 	/// <summary>
 	/// The shader a material's compiled file names (<c>m_shaderName</c>), read once per file, again with
 	/// <paramref name="reread"/> (it was reloaded); null when there's no file of it to read.

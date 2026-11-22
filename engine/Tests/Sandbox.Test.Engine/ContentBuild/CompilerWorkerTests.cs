@@ -37,11 +37,11 @@ public class CompilerWorkerTests
 		{
 			static SpecialDependency Shader( string name ) => new( "CompileMaterial", 0, name, 0 );
 			var missing = compiler.Fingerprints( [Shader( "shaders/cbt_fixture.shader" )] )[0];
-			var generic = compiler.Fingerprints( [Shader( "shaders/generic.shader" )] )[0];
-			Assert.AreNotEqual( missing, generic, "a missing shader has no version of its own" );
+			var line = compiler.Fingerprints( [Shader( "shaders/line.shader" )] )[0];
+			Assert.AreNotEqual( missing, line, "a missing shader has no version of its own" );
 
-			fx.CopyShipped( "core/shaders/generic.shader_c", "shaders/cbt_fixture.shader_c" );
-			Assert.AreEqual( generic, compiler.Fingerprints( [Shader( "shaders/cbt_fixture.shader" )] )[0], "the shader compiled since it was first asked about" );
+			fx.CopyShipped( "core/shaders/line.shader_c", "shaders/cbt_fixture.shader_c" );
+			Assert.AreEqual( line, compiler.Fingerprints( [Shader( "shaders/cbt_fixture.shader" )] )[0], "the shader compiled since it was first asked about" );
 		}
 		finally { compiler.Finished(); }
 	}

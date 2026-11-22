@@ -26,6 +26,9 @@ internal sealed class BorealisGpuView : Graphics.IFrameView, IDisposable
 	/// <summary>The camera and view key for temporal history, when this is a managed camera view.</summary>
 	public (int CameraId, int ViewId)? ViewIdentity;
 
+	/// <summary>The exact attachment sample counts during a stage of the scene frame.</summary>
+	public (int Color, int Depth)? StageTargetSamples;
+
 	/// <summary>
 	/// The camera's viewport at the display size while its scene draws at an upscaler's render size, else null (the same as
 	/// <see cref="Viewport"/>): what a block on the view gives Painter as its screen (<c>PainterScreenViewport</c>), as native's

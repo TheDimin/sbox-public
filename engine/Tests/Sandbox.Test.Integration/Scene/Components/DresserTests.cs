@@ -30,8 +30,13 @@ public class DresserTests
 		{
 			var clone = root.Clone( new CloneConfig { StartEnabled = false } );
 			var clonedDresser = clone.GetComponent<Dresser>( true );
-			Assert.IsNotNull( LegacyDeforms( clonedDresser.BodyTarget ) );
+			var deforms = LegacyDeforms( clonedDresser.BodyTarget );
+			Assert.IsNotNull( deforms );
+			var neck = deforms.GetComponentsInChildren<ModelDeformer>( true ).Single( x => x.GameObject.Name == "deform_neck" );
 			Assert.AreEqual( 0.8f, clonedDresser.NeckSize );
+			Assert.AreEqual( -0.06f, neck.Weight, 0.0001f );
+			clonedDresser.NeckSize = 0.2f;
+			Assert.AreEqual( 0.36f, neck.Weight, 0.0001f );
 			Assert.IsFalse( warnings.Any( x => x.Contains( "Object created during cloning" ) ), string.Join( "\n", warnings ) );
 		}
 		finally

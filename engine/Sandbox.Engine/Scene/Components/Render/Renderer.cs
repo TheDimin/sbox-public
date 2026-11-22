@@ -109,7 +109,7 @@ public abstract class Renderer : Component, SceneObjectCallbacks
 		if ( attributes is null || !_sceneObject.IsValid() )
 			return;
 
-		_attributes ??= new RenderAttributes();
+		_attributes ??= attributes.IsManaged ? RenderAttributes.CreateManaged() : new RenderAttributes();
 		attributes.MergeTo( _attributes );
 	}
 

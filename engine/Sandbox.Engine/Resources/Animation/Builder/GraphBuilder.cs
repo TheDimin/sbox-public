@@ -372,6 +372,7 @@ public sealed partial class GraphBuilder
 		}
 	}
 
+	[System.Diagnostics.CodeAnalysis.SuppressMessage( "Reliability", "CA2000", Justification = "Load returns shared mounted resources. The builder borrows their native handles and does not own the resources." )]
 	private NativeEngine.AnimationGraphBuilder BuildNative( Node root, bool bindResources = false )
 	{
 		RequirePose( root );

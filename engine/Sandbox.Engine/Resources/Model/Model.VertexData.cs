@@ -83,6 +83,7 @@ public partial class Model
 		streams = default;
 
 		if ( BuilderMeshes is { } built ) return TryReadBuilderDrawCall( built, mesh, drawCall, out vertices, out indices, out streams );
+		if ( FileGeometry() is { } file ) return ModelFileGeometry.TryReadDrawCall( file, mesh, drawCall, out vertices, out indices, out streams );
 
 		int vertexCount = MeshGlue.GetDrawCallVertexCount( native, mesh, drawCall );
 		int indexCount = MeshGlue.GetDrawCallIndexCount( native, mesh, drawCall );
@@ -139,20 +140,7 @@ public partial class Model
 			read[i] = index;
 		}
 
-		// The vertices it uses, in order, and its indices rebased to them
-		var used = (uint[])read.Clone();
-		Array.Sort( used );
-		var usedCount = 0;
-		for ( int i = 0; i < used.Length; i++ )
-		{
-			if ( usedCount == 0 || used[usedCount - 1] != used[i] ) used[usedCount++] = used[i];
-		}
-
-		if ( usedCount > capacity || (long)baseVertex + used[usedCount - 1] >= vb.Count ) return false;
-		for ( int i = 0; i < read.Length; i++ ) read[i] = (uint)Array.BinarySearch( used, 0, usedCount, read[i] );
-
-		vertices = new Vertex[usedCount];
-		ModelFileGeometry.Read( vb, vertices, baseVertex, used.AsSpan( 0, usedCount ) );
+		if ( !ModelFileGeometry.TryReadDrawVertices( vb, baseVertex, read, out vertices ) ) return false;
 		indices = read;
 		streams = ModelFileGeometry.Streams( vb );
 		return true;

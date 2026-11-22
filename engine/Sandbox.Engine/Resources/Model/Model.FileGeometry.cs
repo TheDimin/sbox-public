@@ -87,6 +87,58 @@ internal static class ModelFileGeometry
 		return indices;
 	}
 
+	public static bool TryReadDrawCall( ModelFile file, int meshIndex, int drawIndex, out Vertex[] vertices, out uint[] indices, out VertexStreams streams )
+	{
+		vertices = null;
+		indices = null;
+		streams = default;
+		if ( (uint)meshIndex >= (uint)file.Meshes.Count ) return false;
+		var mesh = file.Meshes[meshIndex];
+		if ( (uint)drawIndex >= (uint)mesh.DrawCalls.Count ) return false;
+		var draw = mesh.DrawCalls[drawIndex];
+		if ( draw.Primitive != PrimitiveKind.Triangles || draw.IndexCount < 3 || draw.IndexCount % 3 != 0 ) return false;
+
+		var (vertexSlot, vertexOffset) = draw.VertexBuffers.Count > 0 ? draw.VertexBuffers[0] : (0, 0);
+		var (indexSlot, indexOffset) = draw.IndexBuffer;
+		if ( (uint)vertexSlot >= (uint)mesh.VertexBuffers.Count || (uint)indexSlot >= (uint)mesh.IndexBuffers.Count ) return false;
+		var vb = mesh.VertexBuffers[vertexSlot];
+		var ib = mesh.IndexBuffers[indexSlot];
+		if ( vb.Stride <= 0 || ib.Size <= 0 || vertexOffset < 0 || indexOffset < 0
+			|| vertexOffset % vb.Stride != 0 || indexOffset % ib.Size != 0 ) return false;
+
+		var first = (long)vertexOffset / vb.Stride + draw.BaseVertex;
+		var start = (long)indexOffset / ib.Size + draw.StartIndex;
+		if ( first < 0 || first >= vb.Count || start < 0 || start + draw.IndexCount > ib.Count ) return false;
+		var read = new uint[draw.IndexCount];
+		for ( int i = 0; i < read.Length; i++ ) read[i] = ib[(int)start + i];
+		if ( !TryReadDrawVertices( vb, (int)first, read, out vertices ) ) return false;
+
+		indices = read;
+		streams = Streams( vb );
+		return true;
+	}
+
+	/// <summary>Read the vertices referenced by a draw in buffer order, and rebase its indices to those vertices.</summary>
+	internal static bool TryReadDrawVertices( MeshVertexBuffer buffer, int first, uint[] indices, out Vertex[] vertices )
+	{
+		vertices = null;
+		if ( indices.Length == 0 ) return false;
+		var used = (uint[])indices.Clone();
+		Array.Sort( used );
+		if ( (long)first + used[^1] >= buffer.Count ) return false;
+
+		var count = 0;
+		foreach ( var index in used )
+		{
+			if ( count == 0 || used[count - 1] != index ) used[count++] = index;
+		}
+		for ( var i = 0; i < indices.Length; i++ ) indices[i] = (uint)Array.BinarySearch( used, 0, count, indices[i] );
+
+		vertices = new Vertex[count];
+		Read( buffer, vertices, first, used.AsSpan( 0, count ) );
+		return true;
+	}
+
 	/// <summary>
 	/// Decode one vertex buffer's fields into <paramref name="vertices"/>, as native's <c>ReadVertexStream</c> does: vertex
 	/// <c>v</c> from the buffer's <paramref name="first"/> + <paramref name="which"/>[v] (or + v without a list). Fields the

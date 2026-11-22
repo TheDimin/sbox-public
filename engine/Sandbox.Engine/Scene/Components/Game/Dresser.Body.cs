@@ -80,11 +80,17 @@ public sealed partial class Dresser
 	/// </summary>
 	private void ClearAppearanceAttributes()
 	{
-		var attributes = BodyTarget.Attributes.Get();
+		var attributes = BodyTarget.Attributes;
+		var native = attributes.Get();
 		if ( _hasSkinAttributes )
 		{
-			attributes.DeleteFloatValue( "skin_age" );
-			attributes.DeleteFloatValue( "skin_tint" );
+			attributes.ManagedValues?.SetObject( "skin_age", null );
+			attributes.ManagedValues?.SetObject( "skin_tint", null );
+			if ( native.IsValid )
+			{
+				native.DeleteFloatValue( "skin_age" );
+				native.DeleteFloatValue( "skin_tint" );
+			}
 			_hasSkinAttributes = false;
 
 #pragma warning disable CS0618
@@ -101,8 +107,13 @@ public sealed partial class Dresser
 
 		if ( _hasEyeAttributes )
 		{
-			attributes.DeleteVector4DValue( "eye_color" );
-			attributes.DeleteVector2DValue( "eye_align" );
+			attributes.ManagedValues?.SetObject( "eye_color", null );
+			attributes.ManagedValues?.SetObject( "eye_align", null );
+			if ( native.IsValid )
+			{
+				native.DeleteVector4DValue( "eye_color" );
+				native.DeleteVector2DValue( "eye_align" );
+			}
 			_hasEyeAttributes = false;
 		}
 	}
