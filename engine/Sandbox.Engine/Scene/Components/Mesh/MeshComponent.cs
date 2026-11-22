@@ -10,6 +10,30 @@ namespace Sandbox;
 [Hide, Expose]
 public sealed class MeshComponent : Collider, ExecuteInEditor, ITintable, IMaterialSetter
 {
+	/// <summary>A derived rendering mesh and its native LOD switch distance.</summary>
+	[Expose]
+	public sealed class LodLevel
+	{
+		[Property, Hide] public PolygonMesh Mesh { get; set; }
+		[Property] public float SwitchDistance { get; set; }
+		/// <summary>Optional model-space bounds for vertex-deformed geometry.</summary>
+		[Property, Hide] public BBox? RenderBounds { get; set; }
+	}
+
+	/// <summary>Derived meshes, ordered from LOD1 to LOD7.</summary>
+	[Property] public List<LodLevel> Lods { get; set; } = new();
+
+	/// <summary>Fingerprint of the editable source used to build the derived LODs.</summary>
+	[Property, Hide] public string LodSourceFingerprint { get; set; }
+
+	/// <summary>Fingerprint of the current editable mesh. Use when publishing derived LODs.</summary>
+	public string GetLodSourceFingerprint()
+	{
+		if ( Mesh is null ) return null;
+		var bytes = System.Text.Encoding.UTF8.GetBytes( Json.Serialize( Mesh ) );
+		return Convert.ToHexString( System.Security.Cryptography.SHA256.HashData( bytes ) );
+	}
+
 	[Expose]
 	public enum CollisionType
 	{
@@ -127,6 +151,40 @@ public sealed class MeshComponent : Collider, ExecuteInEditor, ITintable, IMater
 	SceneObject _sceneObject;
 	PolygonMesh _builtMesh;
 	CollisionType _builtCollision;
+	List<(PolygonMesh Mesh, float Distance, BBox? Bounds)> _builtLods = new();
+	string _builtLodFingerprint;
+	bool _builtLodsActive;
+
+	bool LodSettingsChanged()
+	{
+		if ( _builtLodFingerprint != LodSourceFingerprint || _builtLods.Count != (Lods?.Count ?? 0) ) return true;
+		for ( var i = 0; i < _builtLods.Count; i++ )
+		{
+			var lod = Lods[i];
+			if ( _builtLods[i].Mesh != lod?.Mesh || !_builtLods[i].Distance.Equals( lod?.SwitchDistance ?? float.NaN ) || !Nullable.Equals( _builtLods[i].Bounds, lod?.RenderBounds ) || (_builtLodsActive && (lod?.Mesh?.IsDirty == true || lod?.Mesh?.IsVertexDataDirty == true)) ) return true;
+		}
+		return false;
+	}
+
+	void RememberLodSettings()
+	{
+		_builtLodFingerprint = LodSourceFingerprint;
+		_builtLods = Lods?.Select( x => (x?.Mesh, x?.SwitchDistance ?? float.NaN, x?.RenderBounds) ).ToList() ?? new();
+	}
+
+	bool CanBuildLods()
+	{
+		if ( Mesh is null || Lods is null || Lods.Count is < 1 or > 7 || string.IsNullOrEmpty( LodSourceFingerprint ) ) return false;
+		if ( !string.Equals( LodSourceFingerprint, GetLodSourceFingerprint(), StringComparison.Ordinal ) ) return false;
+		var previous = 0f;
+		foreach ( var lod in Lods )
+		{
+			if ( lod?.Mesh is null || lod.Mesh == Mesh || !float.IsFinite( lod.SwitchDistance ) || lod.SwitchDistance <= previous ) return false;
+			if ( lod.RenderBounds is { } bounds && (!float.IsFinite( bounds.Mins.x ) || !float.IsFinite( bounds.Mins.y ) || !float.IsFinite( bounds.Mins.z ) || !float.IsFinite( bounds.Maxs.x ) || !float.IsFinite( bounds.Maxs.y ) || !float.IsFinite( bounds.Maxs.z ) || bounds.Mins.x > bounds.Maxs.x || bounds.Mins.y > bounds.Maxs.y || bounds.Mins.z > bounds.Maxs.z) ) return false;
+			previous = lod.SwitchDistance;
+		}
+		return true;
+	}
 
 	public void SetMaterial( Material material, int triangle )
 	{
@@ -190,13 +248,13 @@ public sealed class MeshComponent : Collider, ExecuteInEditor, ITintable, IMater
 	{
 		if ( !Active || !PhysicsBody.IsValid() ) return;
 
-		if ( Scene.IsEditor && (_builtMesh != Mesh || Mesh?.IsDirty == true) )
+		if ( Scene.IsEditor && (_builtMesh != Mesh || Mesh?.IsDirty == true || LodSettingsChanged() || (Mesh?.IsVertexDataDirty == true && Lods?.Count > 0)) )
 		{
 			RebuildRenderMesh();
 		}
 		else if ( _builtMesh is not null && _builtCollision != Collision )
 		{
-			SetModel( _builtMesh.CreateModel( Collision ) );
+			SetModel( CreateCurrentModel( _builtMesh ) );
 		}
 		else if ( Scene.IsEditor && Mesh?.IsVertexDataDirty == true )
 		{
@@ -283,18 +341,34 @@ public sealed class MeshComponent : Collider, ExecuteInEditor, ITintable, IMater
 		}
 
 		var model = Model;
-		if ( _builtMesh != Mesh || Mesh?.IsDirty == true || model is null )
-			model = Mesh?.Rebuild( Collision );
+		if ( _builtMesh != Mesh || Mesh?.IsDirty == true || model is null || LodSettingsChanged() || (Mesh?.IsVertexDataDirty == true && Lods?.Count > 0) )
+		{
+			if ( Mesh is not null )
+			{
+				if ( Mesh.IsDirty ) Mesh.RebuildGeometry();
+				else if ( Mesh.IsVertexDataDirty ) Mesh.UpdateVertexData();
+			}
+			model = CreateCurrentModel( Mesh );
+		}
 		else
 		{
 			if ( Mesh?.IsVertexDataDirty == true )
 				Mesh.UpdateVertexData();
 			if ( _builtCollision != Collision )
-				model = Mesh?.CreateModel( Collision );
+				model = CreateCurrentModel( Mesh );
 		}
 
 		_builtMesh = Mesh;
+		RememberLodSettings();
 		SetModel( model );
+	}
+
+	Model CreateCurrentModel( PolygonMesh source )
+	{
+		if ( source is null ) { _builtLodsActive = false; return null; }
+		_builtLodsActive = source == Mesh && CanBuildLods();
+		if ( !_builtLodsActive ) return source.CreateModel( Collision );
+		return source.CreateModel( Collision, Lods.Select( x => x.Mesh ).ToArray(), Lods.Select( x => x.SwitchDistance ).ToArray(), Lods.Select( x => x.RenderBounds ).ToArray() );
 	}
 
 	void SetModel( Model model )

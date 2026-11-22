@@ -4466,6 +4466,12 @@ public sealed partial class PolygonMesh : IJsonConvert
 	/// </summary>
 	public Model Rebuild( MeshComponent.CollisionType collision = MeshComponent.CollisionType.None )
 	{
+		RebuildGeometry();
+		return CreateModel( collision );
+	}
+
+	internal void RebuildGeometry()
+	{
 		var faceCount = Topology.FaceCount;
 		var halfEdgeCount = Topology.HalfEdgeCount;
 
@@ -4554,17 +4560,64 @@ public sealed partial class PolygonMesh : IJsonConvert
 		IsDirty = false;
 
 		_faceNormalCache.Clear();
-		return CreateModel( collision );
 	}
 
-	internal Model CreateModel( MeshComponent.CollisionType collision )
+	internal Model CreateModel( MeshComponent.CollisionType collision, IReadOnlyList<PolygonMesh> lodMeshes = null, IReadOnlyList<float> lodDistances = null, IReadOnlyList<BBox?> lodRenderBounds = null )
 	{
 		var builder = Model.Builder;
+		var hasLods = lodMeshes is { Count: > 0 };
+		var privateMeshes = new List<PolygonMesh>();
+		var hasRenderBounds = lodRenderBounds?.Any( x => x.HasValue ) == true;
+		var viewBounds = hasRenderBounds ? CalculateBounds() : default;
 		foreach ( var submesh in _submeshes )
 		{
 			builder.AddSurface( submesh.Material?.Surface );
-			builder.AddMesh( submesh.Mesh );
+			if ( hasLods ) builder.AddMesh( submesh.Mesh, 0 );
+			else builder.AddMesh( submesh.Mesh );
 		}
+
+		if ( hasLods )
+		{
+			for ( var i = 0; i < lodMeshes.Count; i++ )
+			{
+				var lodMesh = lodMeshes[i];
+				// Clear dirtiness on the owned source mesh before making a private
+				// rendering copy; otherwise the component rebuilds every frame.
+				if ( lodMesh.IsDirty ) lodMesh.RebuildGeometry();
+				if ( lodMesh.IsVertexDataDirty ) lodMesh.UpdateVertexData();
+				if ( lodRenderBounds?[i] is not null )
+				{
+					// Native models share Mesh objects. Keep a separate mesh when its
+					// vertex shader can move geometry outside the polygon bounds.
+					lodMesh = Json.Deserialize<PolygonMesh>( Json.Serialize( lodMesh ) );
+					privateMeshes.Add( lodMesh );
+					lodMesh.RebuildGeometry();
+				}
+				if ( lodMesh.IsDirty ) lodMesh.RebuildGeometry();
+				else if ( lodMesh.IsVertexDataDirty ) lodMesh.UpdateVertexData();
+				if ( lodRenderBounds?[i] is { } renderBounds )
+				{
+					var expanded = renderBounds.AddBBox( lodMesh.CalculateBounds() );
+					foreach ( var part in lodMesh._submeshes )
+						if ( part.Mesh is not null ) part.Mesh.Bounds = expanded;
+				}
+				if ( hasRenderBounds )
+				{
+					viewBounds = viewBounds.AddBBox( lodMesh.CalculateBounds() );
+					if ( lodRenderBounds?[i] is { } bounds ) viewBounds = viewBounds.AddBBox( bounds );
+				}
+				builder.WithLodDistance( i + 1, lodDistances[i] );
+				foreach ( var submesh in lodMesh._submeshes )
+				{
+					builder.AddSurface( submesh.Material?.Surface );
+					var mask = i == lodMeshes.Count - 1 ? (0xff << (i + 1)) & 0xff : 1 << (i + 1);
+					builder.AddMeshForLodMask( submesh.Mesh, mask );
+				}
+			}
+			for ( var level = lodMeshes.Count + 1; level < 8; level++ )
+				builder.WithLodDistance( level, float.MaxValue );
+		}
+		if ( hasRenderBounds ) builder.WithViewBounds( viewBounds );
 
 		if ( _meshVertices.Count >= 3 && _meshIndices.Count >= 3 )
 		{
@@ -4580,7 +4633,9 @@ public sealed partial class PolygonMesh : IJsonConvert
 			builder.AddTraceMesh( _meshVertices, _meshIndices );
 		}
 
-		return builder.Create();
+		var model = builder.Create();
+		GC.KeepAlive( privateMeshes );
+		return model;
 	}
 
 	private int AddMaterial( Material material )
