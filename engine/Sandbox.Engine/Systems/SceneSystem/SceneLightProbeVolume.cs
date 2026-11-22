@@ -84,12 +84,13 @@ internal class SceneLightProbe : SceneObject
 	/// <summary>Of two volumes holding an object, the higher priority lights it.</summary>
 	internal int RenderPriority => made?.Priority ?? (lightProbeVolume.IsValid ? lightProbeVolume.m_nRenderPriority : 0);
 
-	/// <summary>The light groups it lights, by token: none for one managed code made, native's (Hammer's) otherwise.</summary>
+	/// <summary>The light groups it lights, by token. Volumes made in managed code use the default group.</summary>
 	internal uint[] LightGroups
 	{
 		get
 		{
-			if ( made is not null || !lightProbeVolume.IsValid ) return [];
+			if ( made is not null ) return [0];
+			if ( !lightProbeVolume.IsValid ) return [];
 			var groups = new uint[lightProbeVolume.GetLightGroupCount()];
 			for ( int i = 0; i < groups.Length; i++ ) groups[i] = lightProbeVolume.GetLightGroup( i );
 			return groups;

@@ -30,7 +30,7 @@ public class BorealisGpuCustomProbeTest
 			_ = new SceneLightProbe( world, probes, null, null, new BBox( new Vector3( -400 ), new Vector3( 400 ) ), Transform.Zero, 0, 0 );
 
 			// The model on the left, the custom object on the right
-			_ = new SceneModel( world, model, new Transform( new Vector3( 0, offset, 0 ) ) );
+			var reference = new SceneModel( world, model, new Transform( new Vector3( 0, offset, 0 ) ) );
 			var lit = true;
 			var at = new Transform( new Vector3( 0, -offset, 0 ) );
 			var custom = new SceneCustomObject( world ) { Transform = at, Bounds = model.Bounds.Transform( at ) };
@@ -47,7 +47,9 @@ public class BorealisGpuCustomProbeTest
 			lit = false;
 			var (modelAfter, customUnlit) = Halves( camera, bitmap );
 
-			Assert.IsTrue( modelLit.x > 1 && modelLit.x > (modelLit.y + modelLit.z) * 4, $"the model is lit red by its probes ({modelLit})" );
+			var mirrored = reference.RenderObject as Borealis.MeshObject;
+			Assert.IsTrue( modelLit.x > 1 && modelLit.x > (modelLit.y + modelLit.z) * 4,
+				$"Expected the probe to light the model red. Read {modelLit}. The mesh requests probes {mirrored?.NeedsLightProbe}, with {mirrored?.World?.DrawnLightProbeVolumes.Count} volumes in the view." );
 			Assert.IsTrue( customLit.x > modelLit.x * 0.75f && customLit.x < modelLit.x * 1.25f, $"the custom object asking is lit as the model is ({customLit} against {modelLit})" );
 			Assert.IsTrue( customLit.x > (customLit.y + customLit.z) * 4, $"red, as the model ({customLit})" );
 			Assert.IsTrue( customUnlit.x < customLit.x * 0.5f, $"without asking it isn't ({customUnlit} against {customLit})" );
