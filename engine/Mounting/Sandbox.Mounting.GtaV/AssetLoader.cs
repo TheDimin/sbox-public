@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 using Sandbox;
 using Sandbox.Mounting;
 
@@ -8,11 +9,101 @@ namespace GtaV;
 
 internal sealed class AssetLoader( Entry entry ) : ResourceLoader<GtaMount>
 {
+	BinaryReader prepared;
+	internal Model PreparedModel { get; private set; }
+	internal BinaryReader ReadPacket() => Host.Read( entry );
+
+	internal bool TextureReady { get; private set; }
+
+	internal void UploadTexture( BinaryReader packet )
+	{
+		if ( TextureReady ) return;
+		prepared = packet;
+		try { Texture.Load( Path ); }
+		finally { prepared = null; }
+	}
+
+	// Read material headers on the engine thread. Skip geometry and embedded textures.
+	internal Queue<AssetLoader> ExternalTextures( BinaryReader packet )
+	{
+		var result = new Queue<AssetLoader>();
+		var seen = new HashSet<AssetLoader>();
+		var stream = packet.BaseStream;
+		var dictionaries = new string[packet.ReadInt32()];
+		for ( int i = 0; i < dictionaries.Length; i++ ) dictionaries[i] = packet.Text();
+		int vertices;
+		while ( (vertices = packet.ReadInt32()) > 0 )
+		{
+			packet.ReadInt32();
+			for ( int slot = 0; slot < 2; slot++ )
+			{
+				var name = packet.Text();
+				int size = packet.ReadInt32();
+				stream.Position += size;
+				if ( size != 0 ) continue;
+				foreach ( var dictionary in dictionaries )
+				{
+					if ( !Host.TexturePaths.TryGetValue( $"{dictionary}/{name}", out var path ) ) continue;
+					if ( Host.GetByPath( path ) is AssetLoader asset && !asset.TextureReady && seen.Add( asset ) ) result.Enqueue( asset );
+					break;
+				}
+			}
+			stream.Position += (long)vertices * 12 * sizeof( float );
+			int indices = packet.ReadInt32();
+			stream.Position += (long)indices * sizeof( ushort );
+		}
+		stream.Position = 0;
+		return result;
+	}
+
+	WeakReference<Model> physics;
+	bool emptyBounds;
+	internal bool TryGetPhysics( out Model model )
+	{
+		model = null;
+		return emptyBounds || (physics is not null && physics.TryGetTarget( out model ) && model.IsValid);
+	}
+
+	internal BinaryReader ReadPhysics() => Host.ReadObjectCollision( entry );
+
+	internal Model LoadPhysics( BinaryReader packet )
+	{
+		if ( TryGetPhysics( out var existing ) ) return existing;
+		int count = checked(packet.ReadInt32() * 3);
+		if ( count == 0 )
+		{
+			emptyBounds = true;
+			return null;
+		}
+
+		var vertices = new Vector3[count];
+		var indices = new int[count];
+		for ( int i = 0; i < count; i++ )
+		{
+			vertices[i] = packet.Vector() * PacketReader.UnitsPerMetre;
+			indices[i] = i;
+		}
+		var model = Model.Builder.WithName( entry.Name ).AddCollisionMesh( vertices.AsSpan(), indices.AsSpan() ).Create();
+		physics = new( model );
+		return model;
+	}
+
+	internal Model LoadPrepared( BinaryReader packet )
+	{
+		prepared = packet;
+		try { return Model.Load( Path ); }
+		finally { prepared = null; }
+	}
+
 	protected override object Load()
 	{
-		using var data = Host.Read( entry );
+		using var data = prepared ?? ReadPacket();
 		if ( entry.Kind == Kind.Texture )
-			return TextureLoader.FromDds( data.ReadBytes( checked((int)data.BaseStream.Length) ) );
+		{
+			var texture = TextureLoader.FromDds( data.ReadBytes( checked((int)data.BaseStream.Length) ) );
+			TextureReady = texture.IsValid();
+			return texture;
+		}
 
 		var builder = Model.Builder.WithName( Path );
 		if ( entry.Kind != Kind.Collision )
@@ -69,7 +160,7 @@ internal sealed class AssetLoader( Entry entry ) : ResourceLoader<GtaMount>
 			}
 			builder.AddCollisionMesh( positions.AsSpan(), indices.AsSpan() );
 		}
-		return builder.Create();
+		return PreparedModel = builder.Create();
 	}
 
 	void BindTexture( BinaryReader data, Material material, string parameter, string[] dictionaries )

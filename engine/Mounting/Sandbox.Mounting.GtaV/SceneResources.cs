@@ -71,12 +71,13 @@ internal sealed class ArchetypeLoader( Entry entry ) : ResourceLoader<GtaMount>
 				root.AddComponent<ModelRenderer>().Model = model;
 				if ( model.Physics?.Parts.Count > 0 )
 				{
-					var collider = root.AddComponent<ModelCollider>();
+					var collider = root.AddComponent<ModelCollider>( false );
 					collider.Model = model;
 					collider.Static = true;
 				}
 			}
 			Placements.Build( Host, data, root );
+			foreach ( var extension in Host.GetExtensions( entry ) ) extension.Apply( root, false );
 		}
 		return prefab = builder.Create();
 	}

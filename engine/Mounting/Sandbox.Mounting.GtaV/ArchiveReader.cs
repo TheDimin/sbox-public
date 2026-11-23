@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Security.Cryptography;
@@ -24,6 +25,23 @@ internal sealed class ArchiveReader : SafeHandleZeroOrMinusOneIsInvalid
 		if ( !result.IsInvalid ) return result;
 		result.Dispose();
 		throw Error();
+	}
+
+	readonly Dictionary<uint, Dictionary<uint, List<ArchetypeExtension>>> extensions = new();
+
+	internal IReadOnlyList<ArchetypeExtension> GetExtensions( uint file, uint archetype )
+	{
+		if ( file == uint.MaxValue ) return [];
+		lock ( this )
+		{
+			if ( !extensions.TryGetValue( file, out var types ) )
+			{
+				using var data = Read( -5, file, 0 );
+				types = ArchetypeExtension.ReadDictionary( data );
+				extensions.Add( file, types );
+			}
+			return types.TryGetValue( archetype, out var items ) ? items : [];
+		}
 	}
 
 	internal BinaryReader Read( int kind, uint file, uint member )

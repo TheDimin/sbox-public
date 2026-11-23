@@ -13,7 +13,7 @@ internal enum Kind { Scene, Prefab, Model, DictionaryModel, Texture, Collision, 
 
 internal readonly record struct Entry( Kind Kind, uint File, uint Member, string Name );
 
-public sealed class GtaMount : BaseGameMount
+public sealed class GtaMount : BaseGameMount, IGtaWorldSource
 {
 	public override string Ident => "gtav";
 	public override string Title => "Grand Theft Auto V Enhanced";
@@ -69,6 +69,7 @@ public sealed class GtaMount : BaseGameMount
 						break;
 				}
 			}
+			context.Add( ResourceType.Scene, "gtaV", new WorldLoader() );
 			IsMounted = true;
 			return Task.CompletedTask;
 		}
@@ -79,10 +80,20 @@ public sealed class GtaMount : BaseGameMount
 		}
 	}
 
+	Task<WorldCatalog> worldCatalog;
+	internal Task<WorldCatalog> GetWorldCatalog( ArchiveReader reader ) => worldCatalog ??= Task.Run( () => WorldCatalog.Read( reader ) );
+
+	IGtaWorldSession IGtaWorldSource.StartStreaming( GameObject root ) => new WorldSession( this, archive, root );
+
+	internal IReadOnlyList<ArchetypeExtension> GetExtensions( Entry entry ) => archive.GetExtensions( entry.File, entry.Member );
+
+	internal BinaryReader ReadObjectCollision( Entry entry ) => archive.Read( -6, entry.File, entry.Member );
+
 	internal BinaryReader Read( Entry entry ) => archive.Read( (int)entry.Kind, entry.File, entry.Member );
 
 	protected override void Shutdown()
 	{
+		worldCatalog = null;
 		archive?.Dispose();
 		archive = null;
 		Prefabs.Clear();

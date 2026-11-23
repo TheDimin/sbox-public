@@ -1,5 +1,8 @@
 #include "dictionary.h"
+#include <ragekit/hash.h>
 #include <ragekit/gameindex.h>
+#include <ragekit/world.h>
+#include <unordered_map>
 #include <ragekit/bounds.h>
 #include <ragekit/drawable.h>
 #include <ragekit/image.h>
@@ -36,6 +39,8 @@ struct Packet {
         bytes.insert(bytes.end(), s.begin(), s.end());
     }
 };
+
+#include "extensions.inl"
 
 enum Kind : int32_t { Scene, Prefab, ModelFile, DictionaryModel, TextureFile, Collision, FragmentFile };
 void entry(Packet& out, Kind kind, uint32_t file, uint32_t member, const std::string& name) {
@@ -148,20 +153,74 @@ void placements(Packet& out, const std::vector<Entity>& entities) {
         out.put(e.scale_z);
     }
 }
+void world_catalog(const GameIndex& index, Packet& out) {
+    auto world = WorldIndex::open(index);
+    std::unordered_map<uint64_t, uint32_t> files;
+    auto key = [](const IndexedFile& f) { return uint64_t(f.archive) << 32 | f.entry; };
+    for (uint32_t i = 0; i < index.files().size(); ++i) files.emplace(key(index.files()[i]), i);
+    out.count(world.maps().size());
+    for (const auto& m : world.maps()) {
+        out.put(files.at(key(m.file))); out.put(m.name); out.put(m.parent);
+        out.put(m.flags); out.put(m.content_flags); out.put(m.group); out.put(m.readable);
+        out.put(m.streaming_min); out.put(m.streaming_max); out.put(m.entities_min); out.put(m.entities_max);
+    }
+    out.count(world.bounds().size());
+    for (const auto& b : world.bounds()) {
+        out.put(files.at(key(b.file))); out.string(index.file_name(b.file)); out.put(b.interior); out.put(b.box_min); out.put(b.box_max);
+    }
+}
+
+std::string drawable_path(const GameIndex& index, const IndexedArchetype& a) {
+    auto drawable = index.resolve_drawable(a);
+    std::string path;
+    if (drawable.file) {
+        path = index.file_name(*drawable.file);
+        path.resize(path.size() - 4);
+        if (drawable.type == ResolvedDrawable::Yft) path = "fragments/" + path;
+        if (drawable.type == ResolvedDrawable::Ydd)
+        path += "/" + index.name(drawable.drawable_name);
+    }
+    return path;
+}
+
+void world_entities(const GameIndex& index, uint32_t file, Packet& out) {
+    auto map = read_ymap(index.extract(index.files().at(file)));
+    out.count(map.entities.size());
+    for (const auto& e : map.entities) {
+        out.put(e.archetype_name); out.put(e.position); out.put(entity_orientation(e));
+        out.put(e.scale_xy); out.put(e.scale_z); out.put(e.parent_index); out.put(e.lod_level);
+        auto a = index.archetype(e.archetype_name);
+        out.put(e.lod_dist > 0 || !a ? e.lod_dist : a->lod_dist);
+        out.put(e.child_lod_dist); out.put(e.num_children); out.put(e.flags);
+        out.put(a ? a->ytyp_file : UINT32_MAX);
+        out.string(a && a->kind != IndexedArchetype::Mlo ? drawable_path(index, *a) : "");
+    }
+    out.count(map.physics_dictionaries.size());
+    for (auto hash : map.physics_dictionaries) out.put(hash);
+}
+void object_collision(const GameIndex& index, uint32_t file, uint32_t member, Packet& out) {
+    const auto& f = index.files().at(file);
+    auto data = index.extract(f);
+    const auto& ext = index.extension(f);
+    if (ext == ".ydr") collision(out, read_ydr(data).bound.get());
+    else if (ext == ".ydd") {
+        auto dict = read_ydd(data);
+        auto d = dict.find(member);
+        collision(out, d ? d->bound.get() : nullptr);
+    } else if (ext == ".yft") {
+        auto fragment = read_yft(data);
+        const auto& lod = fragment.physics[0];
+        auto bound = lod ? lod->bound.get() : nullptr;
+        if (!bound && lod && lod->archetype) bound = lod->archetype->bound.get();
+        collision(out, bound ? bound : fragment.drawable ? fragment.drawable->bound.get() : nullptr);
+    } else throw Error("Unsupported object collision resource");
+}
+
 void read(const GameIndex& index, Kind kind, uint32_t file, uint32_t member, Packet& out) {
     if (kind == Prefab) {
         auto a = index.archetype(member);
         if (!a) throw std::runtime_error("Missing archetype");
-        auto drawable = index.resolve_drawable(*a);
-        std::string path;
-        if (drawable.file) {
-            path = index.file_name(*drawable.file);
-            path.resize(path.size() - 4);
-            if (drawable.type == ResolvedDrawable::Yft) path = "fragments/" + path;
-            if (drawable.type == ResolvedDrawable::Ydd)
-                path += "/" + index.name(drawable.drawable_name);
-        }
-        out.string(path);
+        out.string(drawable_path(index, *a));
         if (a->kind == IndexedArchetype::Mlo) {
             auto defs = read_ytyp(index.extract(index.files().at(file)));
             for (const auto& archetype : defs.archetypes) {
@@ -234,6 +293,10 @@ API void* gta_read(rk::GameIndex* index, int kind, uint32_t file, uint32_t membe
     try {
         auto packet = std::make_unique<Packet>();
         if (kind == -1) catalog(*index, *packet);
+        else if (kind == -3) world_catalog(*index, *packet);
+        else if (kind == -5) archetype_extensions(*index, file, *packet);
+        else if (kind == -4) world_entities(*index, file, *packet);
+        else if (kind == -6) object_collision(*index, file, member, *packet);
         else read(*index, static_cast<Kind>(kind), file, member, *packet);
         if (packet->bytes.size() > INT32_MAX) throw std::length_error("Resource too large");
         *data = packet->bytes.data();
