@@ -9,7 +9,7 @@ using Sandbox.Mounting;
 
 namespace GtaV;
 
-internal enum Kind { Scene, Prefab, Model, DictionaryModel, Texture, Collision }
+internal enum Kind { Scene, Prefab, Model, DictionaryModel, Texture, Collision, Fragment }
 
 internal readonly record struct Entry( Kind Kind, uint File, uint Member, string Name );
 

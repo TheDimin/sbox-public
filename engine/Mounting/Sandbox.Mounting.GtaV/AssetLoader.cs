@@ -17,17 +17,31 @@ internal sealed class AssetLoader( Entry entry ) : ResourceLoader<GtaMount>
 		var builder = Model.Builder.WithName( Path );
 		if ( entry.Kind != Kind.Collision )
 		{
+			var dictionaries = new string[data.ReadInt32()];
+			for ( int i = 0; i < dictionaries.Length; i++ )
+				dictionaries[i] = data.Text();
+
 			int meshIndex = 0;
 			int count;
 			while ( (count = data.ReadInt32()) > 0 )
 			{
+				int bucket = data.ReadInt32();
 				var textureName = data.Text();
 				var embedded = data.ReadBytes( data.ReadInt32() );
-				var material = Material.Create( $"gtav/materials/{entry.Name}_{meshIndex++}.vmat", "shaders/complex.shader" );
+				var material = Material.Load( "materials/default/white.vmat" ).CreateCopy( $"gtav/materials/{entry.Name}_{meshIndex++}.vmat" );
+				if ( bucket == 3 ) material.SetFeature( "F_ALPHA_TEST", 1 );
+				if ( bucket is 1 or 2 ) material.SetFeature( "F_TRANSLUCENT", 1 );
 				if ( embedded.Length > 0 )
-					material.Set( "TextureColor", TextureLoader.FromDds( embedded ) );
-				else if ( Host.TexturePaths.TryGetValue( textureName, out var texturePath ) )
-					material.Set( "TextureColor", Texture.Load( texturePath ) );
+					material.Set( "g_tColor", TextureLoader.FromDds( embedded ) );
+				else
+				{
+					foreach ( var dictionary in dictionaries )
+					{
+						if ( !Host.TexturePaths.TryGetValue( $"{dictionary}/{textureName}", out var texturePath ) ) continue;
+						material.Set( "g_tColor", Texture.Load( texturePath ) );
+						break;
+					}
+				}
 
 				var vertices = new Vertex[count];
 				for ( int i = 0; i < count; i++ )

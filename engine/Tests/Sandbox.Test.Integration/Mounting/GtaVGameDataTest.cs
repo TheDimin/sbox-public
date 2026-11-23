@@ -29,8 +29,12 @@ public class GtaVGameDataTest
 			Assert.IsTrue( collision?.Physics?.Parts.Count > 0 );
 			var texture = Texture.Load( "mount://gtav/textures/v_29_founsmllrmdirt+hidr/ah_found_dirtbigah_found_dirt2_a.vtex" );
 			Assert.IsTrue( texture is not null && !texture.IsError && texture.Width > 1 );
-			var dictionary = mount.GetAll( ResourceType.Model ).First( r => r.RelativePath.StartsWith( "models/" ) && r.RelativePath.Count( c => c == '/' ) == 2 );
+			var dictionary = mount.GetAll( ResourceType.Model ).First( r => r.RelativePath.StartsWith( "models/" ) && !r.RelativePath.StartsWith( "models/fragments/" ) && r.RelativePath.Count( c => c == '/' ) == 2 );
 			Assert.IsTrue( await dictionary.GetOrCreate() is Model member && !member.IsError );
+
+			var fragment = Model.Load( "mount://gtav/models/fragments/prop_dumpster_02b.vmdl" );
+			Assert.IsTrue( fragment is { IsError: false, MeshCount: > 0 } );
+			Assert.IsTrue( fragment.Physics?.Parts.Count > 0 );
 
 			var scene = SceneFile.Load( "mount://gtav/maps/lr_sc1_rd_strm_4.scene" );
 			Assert.IsTrue( scene?.GameObjects?.Length > 0 );

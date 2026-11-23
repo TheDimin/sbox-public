@@ -11,6 +11,10 @@ internal sealed class MapLoader( Entry entry ) : SceneLoader<GtaMount>
 	{
 		using var data = Host.Read( entry );
 		Placements.Build( Host, data, null );
+		var daylight = new GameObject( true, "Daylight" );
+		daylight.AddComponent<SkyBox2D>();
+		daylight.WorldRotation = Rotation.From( new Angles( 50, 35, 0 ) );
+		daylight.AddComponent<DirectionalLight>();
 		int collisionCount = data.ReadInt32();
 		for ( int i = 0; i < collisionCount; i++ )
 		{
