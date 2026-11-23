@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Sandbox;
 using Sandbox.Mounting;
+using Sandbox.ModelEditor.Nodes;
 
 namespace GtaV;
 
@@ -58,6 +59,13 @@ internal sealed class AssetLoader( Entry entry ) : ResourceLoader<GtaMount>
 			}
 		}
 		int triangleCount = data.ReadInt32();
+		for ( int hull = 0; hull < -triangleCount; hull++ )
+		{
+			var points = new Vector3[data.ReadInt32()];
+			for ( int i = 0; i < points.Length; i++ )
+				points[i] = data.Vector() * PacketReader.UnitsPerMetre;
+			builder.AddCollisionHull( points.AsSpan() );
+		}
 		if ( triangleCount > 0 )
 		{
 			var positions = new Vector3[checked(triangleCount * 3)];
@@ -67,7 +75,38 @@ internal sealed class AssetLoader( Entry entry ) : ResourceLoader<GtaMount>
 				positions[i] = data.Vector() * PacketReader.UnitsPerMetre;
 				indices[i] = i;
 			}
-			builder.AddCollisionMesh( positions.AsSpan(), indices.AsSpan() );
+			if ( entry.Kind == Kind.FragmentGroup )
+				builder.AddCollisionHull( positions.AsSpan() );
+			else
+				builder.AddCollisionMesh( positions.AsSpan(), indices.AsSpan() );
+		}
+		if ( entry.Kind == Kind.Fragment )
+		{
+			var pieces = new ModelBreakPiece[data.ReadInt32()];
+			float weakest = float.PositiveInfinity;
+			for ( int i = 0; i < pieces.Length; i++ )
+			{
+				uint id = data.ReadUInt32();
+				pieces[i] = new ModelBreakPiece
+				{
+					PieceName = data.Text(),
+					Model = $"mount://{Host.Ident}/models/{entry.Name}/gibs/{id}.vmdl",
+					CollisionTags = "",
+					RandomSpawnChance = 1f,
+					IsEssential = true
+				};
+				weakest = Math.Min( weakest, data.ReadSingle() );
+			}
+			if ( pieces.Length > 0 )
+			{
+				builder.WithData( pieces );
+				builder.WithData( new ModelPropData { Health = Math.Max( 1f, weakest ) } );
+			}
+		}
+		if ( entry.Kind is Kind.Fragment or Kind.FragmentGroup )
+		{
+			float mass = data.ReadSingle();
+			if ( float.IsFinite( mass ) && mass > 0 ) builder.WithMass( mass );
 		}
 		return builder.Create();
 	}

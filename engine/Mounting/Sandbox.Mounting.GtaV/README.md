@@ -8,15 +8,18 @@ Install GTA V Enhanced and configure the [ragekit archive keys](https://github.c
 | --- | --- |
 | `maps/<map>.scene` | YMAP placements and referenced static collision dictionaries |
 | `archetypes/<archetype>.prefab` | One prefab per YTYP archetype. Interior prefabs include base interior placements. |
+| `models/fragments/<fragment>.vmdl` | Intact YFT with model break pieces |
+| `models/fragments/<fragment>/gibs/<group>.vmdl` | Detachable YFT group with its own geometry and collision |
 | `models/<drawable>.vmdl` | YDR geometry and embedded collision |
 | `models/<dictionary>/<drawable>.vmdl` | Individual YDD member |
-| `models/fragments/<fragment>.vmdl` | YFT intact geometry and static collision |
 | `textures/<dictionary>/<texture>.vtex` | Individual YTD member with its mip chain |
 | `collision/<bound>.vmdl` | YBN physics mesh. Scenes attach it to a static ModelCollider. |
 
 The reader resolves duplicate archive entries using the game's DLC load order. It reads resources from the installed archives. The engine creates each requested asset in memory. The reader can cache archive index metadata in the user's ragekit directory.
 
-The mount builds static geometry at the first available detail level. It uses the source diffuse and normal textures and builds trace geometry for viewport selection. Specialized GTA shaders, skeletal animation, fragment destruction, interior entity-set activation, and world streaming are outside this implementation.
+The mount builds geometry at the first available detail level. YTYP flags select fixed props, movable props, and doors. YMAP flags can fix a placement or suppress its embedded collision. Map YBN collision is independent. Movable collision uses convex hulls of the authored collision leaves. It uses the source diffuse and normal textures and builds trace geometry for viewport selection. Specialized GTA shaders, skeletal animation, interior entity-set activation, and world streaming are outside this implementation.
+
+YFT group strength below zero disables detachment. A fragment with detachable groups uses the lowest finite detachable strength as whole-prop health, with a minimum of 1 HP. This is a mount tuning rule. s&box spawns the model’s break list when the prop dies. The intact prop and all gib models load from the game archives at runtime.
 
 ## Rebuild in an open editor
 

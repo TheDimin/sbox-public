@@ -38,10 +38,57 @@ public class GtaVGameDataTest
 
 			var scene = SceneFile.Load( "mount://gtav/maps/lr_sc1_rd_strm_4.scene" );
 			Assert.IsTrue( scene?.GameObjects?.Length > 0 );
+			VerifyPlacedPhysics( scene );
 		}
 		finally
 		{
 			await MountDirectory.SetMountState( "gtav", false );
+		}
+	}
+
+	private static void VerifyPlacedPhysics( SceneFile file )
+	{
+		var scene = new Scene();
+		try
+		{
+			using var scope = scene.Push();
+			Assert.IsTrue( scene.Load( file ) );
+			var bin = scene.Children.First( x => x.Name == "prop_bin_01a" );
+			var body = bin.Components.Get<Rigidbody>();
+			Assert.IsNotNull( body );
+			body.ApplyImpulse( Vector3.Up * 100 );
+			Assert.IsTrue( body.Velocity.z > 0 );
+			Assert.IsFalse( bin.Components.Get<ModelCollider>().Static );
+			var bush = scene.Children.First( x => x.Name == "prop_skunk_bush_01" );
+			Assert.IsTrue( bush.Components.Get<ModelCollider>().Static );
+			Assert.IsNull( bush.Components.Get<Rigidbody>() );
+			var plant = scene.Children.First( x => x.Name == "prop_plant_group_05" );
+			Assert.IsNotNull( plant.Components.Get<ModelRenderer>() );
+			Assert.IsNull( plant.Components.Get<ModelCollider>() );
+
+			var gate = GameObject.Clone( PrefabFile.Load( "mount://gtav/archetypes/sm_27_gatec_002.prefab" ) );
+			var door = gate.Components.Get<Sandbox.Mapping.Door>();
+			Assert.IsNotNull( door );
+			door.Open();
+			Assert.AreEqual( Sandbox.Mapping.Door.DoorState.Opening, door.State );
+
+			var truck = scene.Children.First( x => x.Name == "prop_pallettruck_02" ).Components.Get<Prop>();
+			var pieces = truck.Model.GetData<Sandbox.ModelEditor.Nodes.ModelBreakPiece[]>();
+			Assert.AreEqual( 1, pieces.Length );
+			Assert.AreEqual( "Pallet_01", pieces[0].PieceName );
+			Assert.AreEqual( 100f, truck.Health );
+			truck.OnDamage( new DamageInfo( 99, null, null ) );
+			Assert.AreEqual( 1f, truck.Health );
+			System.Collections.Generic.List<Gib> gibs = null;
+			truck.OnGibsCreated += created => gibs = created;
+			truck.OnDamage( new DamageInfo( 1, null, null ) );
+			Assert.AreEqual( 1, gibs?.Count );
+			Assert.AreEqual( pieces[0].Model, gibs[0].Model.Name );
+			Assert.IsNotNull( gibs[0].Components.Get<Rigidbody>() );
+		}
+		finally
+		{
+			scene.Destroy();
 		}
 	}
 }
