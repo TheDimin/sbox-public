@@ -16,7 +16,7 @@ Install GTA V Enhanced and configure the [ragekit archive keys](https://github.c
 
 The reader resolves duplicate archive entries using the game's DLC load order. It reads resources from the installed archives. The engine creates each requested asset in memory. The reader can cache archive index metadata in the user's ragekit directory.
 
-The mount builds static geometry at the first available detail level. It uses the drawable shader's diffuse texture for the material. Specialized GTA shaders, skeletal animation, fragment destruction, interior entity-set activation, and world streaming are outside this implementation.
+The mount builds static geometry at the first available detail level. It uses the source diffuse and normal textures and builds trace geometry for viewport selection. Specialized GTA shaders, skeletal animation, fragment destruction, interior entity-set activation, and world streaming are outside this implementation.
 
 ## Rebuild in an open editor
 

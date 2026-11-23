@@ -26,33 +26,32 @@ internal sealed class AssetLoader( Entry entry ) : ResourceLoader<GtaMount>
 			while ( (count = data.ReadInt32()) > 0 )
 			{
 				int bucket = data.ReadInt32();
-				var textureName = data.Text();
-				var embedded = data.ReadBytes( data.ReadInt32() );
 				var material = Material.Load( "materials/default/white.vmat" ).CreateCopy( $"gtav/materials/{entry.Name}_{meshIndex++}.vmat" );
 				if ( bucket == 3 ) material.SetFeature( "F_ALPHA_TEST", 1 );
 				if ( bucket is 1 or 2 ) material.SetFeature( "F_TRANSLUCENT", 1 );
-				if ( embedded.Length > 0 )
-					material.Set( "g_tColor", TextureLoader.FromDds( embedded ) );
-				else
-				{
-					foreach ( var dictionary in dictionaries )
-					{
-						if ( !Host.TexturePaths.TryGetValue( $"{dictionary}/{textureName}", out var texturePath ) ) continue;
-						material.Set( "g_tColor", Texture.Load( texturePath ) );
-						break;
-					}
-				}
+				BindTexture( data, material, "g_tColor", dictionaries );
+				BindTexture( data, material, "g_tNormal", dictionaries );
 
 				var vertices = new Vertex[count];
 				for ( int i = 0; i < count; i++ )
 				{
 					vertices[i] = new Vertex( data.Vector() * PacketReader.UnitsPerMetre );
-					vertices[i].Normal = data.Vector();
+					vertices[i].Normal = data.Vector().Normal;
 					vertices[i].TexCoord0 = new Vector4( data.ReadSingle(), data.ReadSingle(), 0, 0 );
+					var tangent = data.Vector();
+					float sign = data.ReadSingle();
+					if ( tangent.LengthSquared < 0.000001f )
+					{
+						var normal = vertices[i].Normal;
+						tangent = Vector3.Cross( MathF.Abs( normal.z ) < 0.9f ? Vector3.Up : Vector3.Forward, normal );
+					}
+					vertices[i].Tangent = new Vector4( tangent.Normal, sign < 0 ? -1 : 1 );
 				}
 				var indices = new int[data.ReadInt32()];
 				for ( int i = 0; i < indices.Length; i++ ) indices[i] = data.ReadUInt16();
-				var mesh = new Mesh( material ) { Bounds = BBox.FromPoints( vertices.Select( v => v.Position ) ) };
+				var meshPositions = vertices.Select( v => v.Position ).ToArray();
+				builder.AddTraceMesh( meshPositions.AsSpan(), indices.AsSpan() );
+				var mesh = new Mesh( material ) { Bounds = BBox.FromPoints( meshPositions ) };
 				mesh.CreateVertexBuffer( count, vertices );
 				mesh.CreateIndexBuffer( indices.Length, indices );
 				builder.AddMesh( mesh );
@@ -71,5 +70,23 @@ internal sealed class AssetLoader( Entry entry ) : ResourceLoader<GtaMount>
 			builder.AddCollisionMesh( positions.AsSpan(), indices.AsSpan() );
 		}
 		return builder.Create();
+	}
+
+	void BindTexture( BinaryReader data, Material material, string parameter, string[] dictionaries )
+	{
+		var name = data.Text();
+		var embedded = data.ReadBytes( data.ReadInt32() );
+		if ( embedded.Length > 0 )
+		{
+			material.Set( parameter, TextureLoader.FromDds( embedded ) );
+			return;
+		}
+
+		foreach ( var dictionary in dictionaries )
+		{
+			if ( !Host.TexturePaths.TryGetValue( $"{dictionary}/{name}", out var path ) ) continue;
+			material.Set( parameter, Texture.Load( path ) );
+			return;
+		}
 	}
 }

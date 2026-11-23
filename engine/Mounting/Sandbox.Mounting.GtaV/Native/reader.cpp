@@ -95,23 +95,28 @@ void meshes(Packet& out, const Drawable& d, const Mat4& transform, const ShaderG
             for (const auto& g : m.geometries) {
                 if (!g.vertex_count || g.indices.empty()) continue;
                 out.count(g.vertex_count);
-                std::string diffuse;
+                std::string diffuse, normal;
                 int32_t bucket = 0;
                 if (group && g.shader_index < group->shaders.size()) {
                     const auto& shader = group->shaders[g.shader_index];
                     diffuse = shader.texture_of("DiffuseSampler");
                     if (diffuse.empty()) diffuse = shader.texture_of("TextureSampler_layer0");
+                    normal = shader.texture_of("BumpSampler");
+                    if (normal.empty()) normal = shader.texture_of("BumpSampler_layer0");
                     bucket = shader.render_bucket & 7;
                 }
                 out.put(bucket);
-                out.string(diffuse);
-                const auto* embedded = group && group->textures
-                    ? group->textures->find(diffuse) : nullptr;
-                auto dds = embedded ? write_dds(*embedded) : Bytes{};
-                out.count(dds.size());
-                out.bytes.insert(out.bytes.end(), dds.begin(), dds.end());
+                for (const auto* name : {&diffuse, &normal}) {
+                    out.string(*name);
+                    const auto* embedded = group && group->textures ? group->textures->find(*name) : nullptr;
+                    auto dds = embedded ? write_dds(*embedded) : Bytes{};
+                    out.count(dds.size());
+                    out.bytes.insert(out.bytes.end(), dds.begin(), dds.end());
+                }
                 for (uint32_t i = 0; i < g.vertex_count; ++i) {
                     out.put(transformed(transform, g.position(i), 1)); out.put(transformed(transform, g.normal(i), 0)); out.put(g.uv(i));
+                    auto tangent = g.get(i, VertexSemantic::Tangent);
+                    out.put(transformed(transform, tangent.xyz(), 0)); out.put(tangent.w);
                 }
                 out.count(g.indices.size());
                 for (uint16_t i : g.indices) out.put(i);
