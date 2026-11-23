@@ -1,4 +1,4 @@
-using Editor.Widgets.Packages;
+﻿using Editor.Widgets.Packages;
 using System.IO;
 using System.Security;
 
@@ -257,12 +257,12 @@ public partial class AssetList
 
 		if ( count > 0 )
 		{
-			if ( e.SelectedList.All( x => x.CanOpenInEditor ) )
+			if ( e.SelectedList.All( x => x.Asset is { CanOpenInEditor: true } ) )
 			{
 				e.Menu.AddOption( count == 1 ? "Open in Editor" : $"Open {count} in Editor(s)", "edit",
-					() => e.SelectedList.ForEach( x => x.OpenInEditor() ) );
+					() => e.SelectedList.ForEach( x => x.Asset.OpenInEditor() ) );
 			}
-			else if ( e.SelectedList.All( x => !x.IsMountEntry && x.Asset?.IsProcedural != true ) )
+			else if ( !asset?.IsProcedural ?? true )
 			{
 				if ( e.SelectedList.All( x => EditorUtility.IsCodeFile( x.FileInfo.FullName ) ) )
 				{
@@ -273,7 +273,13 @@ public partial class AssetList
 				else
 				{
 					e.Menu.AddOption( count == 1 ? "Open" : $"Open {count} files", "open_in_new",
-					() => e.SelectedList.ForEach( x => EditorUtility.OpenFolder( x.FileInfo.FullName ) ) );
+					() => e.SelectedList.ForEach( x =>
+					{
+						if ( Sandbox.Mounting.MountUtility.IsMountPath( x.FileInfo.ToString() ) && x.FileInfo.Extension is ".scene" or ".prefab" )
+							SceneEditorSession.CreateFromPath( x.FileInfo.ToString() )?.MakeActive();
+						else
+							EditorUtility.OpenFolder( x.FileInfo.FullName );
+					} ) );
 				}
 			}
 		}
@@ -299,9 +305,9 @@ public partial class AssetList
 		}
 
 		var absolutePath = asset?.AbsolutePath ?? entry.AbsolutePath.Replace( '\\', '/' ).ToLower();
-		var relativePath = asset?.RelativePath ?? (entry.IsMountEntry ? entry.AbsolutePath : System.IO.Path.GetRelativePath( Project.Current.GetAssetsPath(), absolutePath ).Replace( '\\', '/' ).ToLower());
+		var relativePath = asset?.RelativePath ?? System.IO.Path.GetRelativePath( Project.Current.GetAssetsPath(), absolutePath ).Replace( '\\', '/' ).ToLower();
 
-		if ( !entry.IsMountEntry && asset?.IsProcedural != true )
+		if ( asset is null || !asset.IsProcedural )
 		{
 			e.Menu.AddOption( $"Show in Explorer", "drive_file_move", () => EditorUtility.OpenFileFolder( absolutePath ) );
 		}
@@ -317,7 +323,7 @@ public partial class AssetList
 		{
 			e.Menu.AddOption( $"Copy Relative Path", "content_paste_go", action: () => EditorUtility.Clipboard.Copy( relativePath ) ).Enabled = !string.IsNullOrEmpty( relativePath );
 
-			if ( !entry.IsMountEntry && asset?.IsProcedural != true )
+			if ( asset is null || !asset.IsProcedural )
 			{
 				e.Menu.AddOption( $"Copy Absolute Path", "content_paste", action: () => EditorUtility.Clipboard.Copy( absolutePath ) );
 			}
