@@ -48,9 +48,13 @@ public class GtaVGameDataTest
 
 	private static void VerifyPlacedPhysics( SceneFile file )
 	{
+		var previousConnection = Connection.Local;
+		var previousSystem = Networking.System;
 		var scene = new Scene();
 		try
 		{
+			Connection.Local = new SceneTests.TestConnection( Guid.NewGuid(), isHost: true );
+			Networking.System = null;
 			using var scope = scene.Push();
 			Assert.IsTrue( scene.Load( file ) );
 			var props = scene.GetAllComponents<Prop>().ToArray();
@@ -97,6 +101,8 @@ public class GtaVGameDataTest
 		finally
 		{
 			scene.Destroy();
+			Connection.Local = previousConnection;
+			Networking.System = previousSystem;
 		}
 	}
 }
