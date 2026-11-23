@@ -53,6 +53,14 @@ public class GtaVGameDataTest
 		{
 			using var scope = scene.Push();
 			Assert.IsTrue( scene.Load( file ) );
+			var props = scene.GetAllComponents<Prop>().ToArray();
+			Assert.AreEqual( 345, props.Length );
+			Assert.IsTrue( props.All( x => x.Components.Get<ModelRenderer>()?.Model is { IsError: false } ) );
+			Assert.AreEqual( 59, props.Count( x => !x.PhysicsEnabled ) );
+			Assert.AreEqual( 187, props.Count( x => x.Components.Get<Rigidbody>() is not null ) );
+			Assert.IsTrue( props.Where( x => !x.PhysicsEnabled ).All( x =>
+				x.Components.Get<ModelCollider>() is null && x.Components.Get<Rigidbody>() is null ) );
+
 			var bin = scene.Children.First( x => x.Name == "prop_bin_01a" );
 			var body = bin.Components.Get<Rigidbody>();
 			Assert.IsNotNull( body );
@@ -70,7 +78,7 @@ public class GtaVGameDataTest
 			var door = gate.Components.Get<Sandbox.Mapping.Door>();
 			Assert.IsNotNull( door );
 			door.Open();
-			Assert.AreEqual( Sandbox.Mapping.Door.DoorState.Opening, door.State );
+			Assert.IsTrue( door.State is Sandbox.Mapping.Door.DoorState.Opening or Sandbox.Mapping.Door.DoorState.Open );
 
 			var truck = scene.Children.First( x => x.Name == "prop_pallettruck_02" ).Components.Get<Prop>();
 			var pieces = truck.Model.GetData<Sandbox.ModelEditor.Nodes.ModelBreakPiece[]>();

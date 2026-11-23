@@ -75,19 +75,17 @@ internal sealed class AssetLoader( Entry entry ) : ResourceLoader<GtaMount>
 				positions[i] = data.Vector() * PacketReader.UnitsPerMetre;
 				indices[i] = i;
 			}
-			if ( entry.Kind == Kind.FragmentGroup )
-				builder.AddCollisionHull( positions.AsSpan() );
-			else
-				builder.AddCollisionMesh( positions.AsSpan(), indices.AsSpan() );
+			builder.AddCollisionMesh( positions.AsSpan(), indices.AsSpan() );
 		}
 		if ( entry.Kind == Kind.Fragment )
 		{
-			var pieces = new ModelBreakPiece[data.ReadInt32()];
+			var count = data.ReadInt32();
+			var pieces = new System.Collections.Generic.List<ModelBreakPiece>( count );
 			float weakest = float.PositiveInfinity;
-			for ( int i = 0; i < pieces.Length; i++ )
+			for ( int i = 0; i < count; i++ )
 			{
 				uint id = data.ReadUInt32();
-				pieces[i] = new ModelBreakPiece
+				var piece = new ModelBreakPiece
 				{
 					PieceName = data.Text(),
 					Model = $"mount://{Host.Ident}/models/{entry.Name}/gibs/{id}.vmdl",
@@ -95,11 +93,14 @@ internal sealed class AssetLoader( Entry entry ) : ResourceLoader<GtaMount>
 					RandomSpawnChance = 1f,
 					IsEssential = true
 				};
-				weakest = Math.Min( weakest, data.ReadSingle() );
+				var strength = data.ReadSingle();
+				if ( Host.GetByPath( piece.Model ) is null ) continue;
+				pieces.Add( piece );
+				weakest = Math.Min( weakest, strength );
 			}
-			if ( pieces.Length > 0 )
+			if ( pieces.Count > 0 )
 			{
-				builder.WithData( pieces );
+				builder.WithData( pieces.ToArray() );
 				builder.WithData( new ModelPropData { Health = Math.Max( 1f, weakest ) } );
 			}
 		}

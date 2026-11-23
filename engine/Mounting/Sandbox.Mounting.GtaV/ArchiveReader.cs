@@ -47,7 +47,7 @@ internal sealed class ArchiveReader : SafeHandleZeroOrMinusOneIsInvalid
 	internal BinaryReader OpenCatalog()
 	{
 		var key = Marshal.PtrToStringUTF8( gta_index_key( this ) );
-		var folder = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.LocalApplicationData ), "sbox", "gtav", "catalog-physics-v2" );
+		var folder = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.LocalApplicationData ), "sbox", "gtav", "catalog-physics-v3" );
 		var path = Path.Combine( folder, key + ".bin" );
 		try
 		{

@@ -18,6 +18,7 @@ public class Prop : Component, Component.ExecuteInEditor, Component.IDamageable
 	string _materialGroup = default;
 	Color _tint = Color.White;
 	bool _static = false;
+	bool _physicsEnabled = true;
 
 	[Property]
 	public Model Model
@@ -108,21 +109,26 @@ public class Prop : Component, Component.ExecuteInEditor, Component.IDamageable
 	public bool IsStatic
 	{
 		get => _static;
-		set
-		{
-			if ( _static == value ) return;
+		set => SetPhysicsOption( ref _static, value );
+	}
 
-			_static = value;
+	/// <summary>
+	/// Create collision and physics bodies from the model. Disable when a map supplies separate collision.
+	/// </summary>
+	[Property]
+	public bool PhysicsEnabled
+	{
+		get => _physicsEnabled;
+		set => SetPhysicsOption( ref _physicsEnabled, value );
+	}
 
-			if ( !Active || IsProxy || ProceduralComponents is null )
-				return;
-
-			if ( GameObject.IsDeserializing )
-				return;
-
-			ClearProcedurals();
-			UpdateComponents();
-		}
+	void SetPhysicsOption( ref bool option, bool value )
+	{
+		if ( option == value ) return;
+		option = value;
+		if ( !Active || IsProxy || ProceduralComponents is null || GameObject.IsDeserializing ) return;
+		ClearProcedurals();
+		UpdateComponents();
 	}
 
 	/// <summary>
@@ -229,7 +235,7 @@ public class Prop : Component, Component.ExecuteInEditor, Component.IDamageable
 		bool skinned = Model.BoneCount > 0;
 
 		CreateModelComponent( skinned );
-		CreatePhysicsComponent();
+		if ( PhysicsEnabled ) CreatePhysicsComponent();
 	}
 
 	void CreateModelComponent( bool skinned )

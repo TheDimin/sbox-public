@@ -1,5 +1,6 @@
 #include "dictionary.h"
 #include <algorithm>
+#include <unordered_set>
 #include <ragekit/gameindex.h>
 #include <ragekit/bounds.h>
 #include <ragekit/drawable.h>
@@ -61,10 +62,14 @@ bool detachable(const Fragment& f, size_t group) {
 }
 
 void catalog(const GameIndex& index, Packet& out) {
+    std::unordered_set<uint32_t> propFragments;
     for (const auto& a : index.archetypes()) {
         auto active = index.archetype(a.name);
-        if (active && active->ytyp_file == a.ytyp_file)
-            entry(out, Prefab, a.ytyp_file, a.name, index.name(a.name));
+        if (!active || active->ytyp_file != a.ytyp_file) continue;
+        entry(out, Prefab, a.ytyp_file, a.name, index.name(a.name));
+        auto drawable = index.resolve_drawable(a);
+        if (drawable.type == ResolvedDrawable::Yft && drawable.file)
+            propFragments.insert(drawable.file->name_hash);
     }
     for (uint32_t i = 0; i < index.files().size(); ++i) {
         const auto& f = index.files()[i];
@@ -84,7 +89,7 @@ void catalog(const GameIndex& index, Packet& out) {
                     entry(out, textures ? TextureFile : DictionaryModel, i, item.hash, name + "/" + memberName);
                 }
             } else {
-                if (ext == ".yft" && index.archetype(f.name_hash)) {
+                if (ext == ".yft" && propFragments.contains(f.name_hash)) {
                     entry(out, FragmentFile, i, 0, "fragments/" + name);
                     auto fragment = read_yft(index.extract(f));
                     if (fragment.physics[0]) {
@@ -285,7 +290,8 @@ void read(const GameIndex& index, Kind kind, uint32_t file, uint32_t member, Pac
         auto skeleton = main && main->skeleton ? &*main->skeleton : nullptr;
         auto bounds = lod.bound ? lod.bound.get() : lod.archetype ? lod.archetype->bound.get() : nullptr;
         std::vector<uint16_t> emitted;
-        std::vector<BoundTriangle> triangles;
+        Bound selected;
+        selected.type = BoundType::Composite;
         for (size_t i = 0; i < lod.children.size(); ++i) {
             auto& c = lod.children[i];
             if (c.group_index != member) continue;
@@ -297,16 +303,10 @@ void read(const GameIndex& index, Kind kind, uint32_t file, uint32_t member, Pac
                 emitted.push_back(c.bone_tag);
             }
             if (!bounds || i >= bounds->children.size()) continue;
-            const auto& shape = bounds->children[i];
-            if (!shape.bound) continue;
-            for (auto triangle : bound_triangles(*shape.bound)) {
-                for (auto& v : triangle.v) v = transformed(shape.transform.matrix(), v, 1);
-                triangles.push_back(triangle);
-            }
+            selected.children.push_back(bounds->children[i]);
         }
         out.count(0);
-        out.count(triangles.size());
-        for (auto& tri : triangles) for (auto& v : tri.v) out.put(v);
+        hulls(out, selected.children.empty() ? nullptr : &selected);
         out.put(lod.groups.at(member).mass());
         break;
     }
@@ -327,7 +327,7 @@ void read(const GameIndex& index, Kind kind, uint32_t file, uint32_t member, Pac
         if (!bound && fragment.drawable) bound = fragment.drawable->bound.get();
         if (movable) hulls(out, bound); else collision(out, bound);
         std::vector<uint32_t> groups;
-        if (lod && index.archetype(index.files().at(file).name_hash))
+        if (lod)
             for (uint32_t i = 0; i < lod->groups.size(); ++i)
                 if (detachable(fragment, i)) groups.push_back(i);
         out.count(groups.size());

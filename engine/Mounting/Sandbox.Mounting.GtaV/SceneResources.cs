@@ -61,17 +61,15 @@ internal static class Placements
 			{
 				var placed = GameObject.Clone( prefab, new Transform( position, rotation, scale ), parent );
 				var prop = placed.Components.Get<Prop>();
-				if ( prop is not null && (flags & PlacementFlags.SuppressEmbeddedCollision) != 0 )
+				if ( prop is not null )
 				{
-					var model = prop.Model;
-					prop.Destroy();
-					placed.AddComponent<ModelRenderer>().Model = model;
+					if ( (flags & PlacementFlags.Fixed) != 0 ) prop.IsStatic = true;
+					if ( (flags & PlacementFlags.SuppressEmbeddedCollision) != 0 ) prop.PhysicsEnabled = false;
 				}
-				else if ( prop is not null && (flags & PlacementFlags.Fixed) != 0 )
+				else if ( (flags & PlacementFlags.SuppressEmbeddedCollision) != 0 )
 				{
-					prop.IsStatic = true;
+					placed.Components.Get<ModelCollider>()?.Destroy();
 				}
-				if ( (flags & PlacementFlags.SuppressEmbeddedCollision) != 0 ) placed.Components.Get<ModelCollider>()?.Destroy();
 			}
 			else
 			{
