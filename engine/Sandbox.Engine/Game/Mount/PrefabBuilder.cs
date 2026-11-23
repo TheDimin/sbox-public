@@ -104,11 +104,23 @@ public sealed class PrefabBuilder
 public readonly struct PrefabBuildScope : IDisposable
 {
 	readonly IDisposable _push;
+	readonly IDisposable _callbacks;
 
 	internal PrefabBuildScope( Scene scene )
 	{
 		_push = scene.Push();
+		_callbacks = CallbackBatch.Isolated();
 	}
 
-	public void Dispose() => _push?.Dispose();
+	public void Dispose()
+	{
+		try
+		{
+			_callbacks?.Dispose();
+		}
+		finally
+		{
+			_push?.Dispose();
+		}
+	}
 }

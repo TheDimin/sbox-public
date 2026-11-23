@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <NativeBuild>$(MSBuildProjectDirectory)/obj/native</NativeBuild>
+    <GameDir>$(MSBuildProjectDirectory)/../../../game</GameDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Sandbox.Engine/Sandbox.Engine.csproj" />
+    <ProjectReference Include="../Sandbox.Mounting/Sandbox.Mounting.csproj" />
+  </ItemGroup>
+  <Target Name="BuildGtaReader" AfterTargets="Build" Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <Exec Command="cmake -S &quot;$(MSBuildProjectDirectory)/Native&quot; -B &quot;$(NativeBuild)&quot; -A x64 $(GtaReaderCMakeOptions)" />
+    <Exec Command="cmake --build &quot;$(NativeBuild)&quot; --config Release --target gta_mount_reader --parallel" />
+    <Copy SkipUnchangedFiles="true" SourceFiles="$(NativeBuild)/Release/gta_mount_reader.dll" DestinationFolder="$(GameDir)/bin/win64" />
+    <Copy SkipUnchangedFiles="true" SourceFiles="$(NativeBuild)/ragekit.txt;$(NativeBuild)/miniz.txt;$(NativeBuild)/clipper2.txt" DestinationFolder="$(GameDir)/mount/gtav/licenses" />
+    <Copy SkipUnchangedFiles="true" SourceFiles="$(TargetPath)" DestinationFiles="$(GameDir)/mount/gtav/gtav.dll" />
+  </Target>
+</Project>

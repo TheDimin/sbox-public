@@ -51,6 +51,7 @@
     <Project Path="Mounting/Sandbox.Mounting.GoldSrc/Sandbox.Mounting.GoldSrc.csproj" />
     <Project Path="Mounting/Sandbox.Mounting.NS2/Sandbox.Mounting.NS2.csproj" />
     <Project Path="Mounting/Sandbox.Mounting.Quake/Sandbox.Mounting.Quake.csproj" />
+    <Project Path="Mounting/Sandbox.Mounting.GtaV/Sandbox.Mounting.GtaV.csproj" />
     <Project Path="Mounting/Sandbox.Mounting.SE3/Sandbox.Mounting.SE3.csproj" />
     <Project Path="Mounting/Sandbox.Mounting.Source1/Sandbox.Mounting.Source1.csproj" />
     <Project Path="Mounting/Sandbox.Mounting/Sandbox.Mounting.csproj" />
