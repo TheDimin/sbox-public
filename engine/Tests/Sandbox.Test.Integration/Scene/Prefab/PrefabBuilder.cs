@@ -7,6 +7,24 @@ namespace SceneTests.Prefab;
 public class PrefabBuilderTest
 {
 	[TestMethod]
+	public void NestedPrefabRunsCallbacksInItsOwnScene()
+	{
+		using var outer = CallbackBatch.Isolated();
+		var builder = new PrefabBuilder().WithName( "test/nested_callback.prefab" );
+		Scene expected;
+		Scene observed = null;
+		using ( builder.Scope() )
+		{
+			var root = new GameObject();
+			expected = root.Scene;
+			CallbackBatch.Add( CommonCallback.Awake, () => observed = Game.ActiveScene, root, "Check prefab scene" );
+		}
+
+		PrefabBuilder.Destroy( builder.Create() );
+		Assert.AreSame( expected, observed );
+	}
+
+	[TestMethod]
 	public void BasicPrefabIsRegisteredAndRetrievable()
 	{
 		var builder = new PrefabBuilder()

@@ -117,10 +117,7 @@ public abstract class BaseGameMount
 
 		await Mount( new MountContext( this ) );
 
-		foreach ( var entry in _entries.Values )
-		{
-			RootFolder.AddResource( entry );
-		}
+		RootFolder.AddResources( _entries.Values );
 	}
 
 	/// <summary>

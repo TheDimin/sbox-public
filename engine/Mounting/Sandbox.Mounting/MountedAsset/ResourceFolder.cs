@@ -73,57 +73,43 @@ public class ResourceFolder
 	}
 
 	/// <summary>
-	/// Get or create a child directory by name
+	/// Build the directory tree for a new mount. Discard the index once the
+	/// tree is complete so callers can continue to edit the public folder lists.
 	/// </summary>
-	private ResourceFolder GetOrCreateChild( string name )
+	internal void AddResources( IEnumerable<ResourceLoader> resources )
 	{
-		var existing = Folders.FirstOrDefault( f => f.Name.Equals( name, StringComparison.OrdinalIgnoreCase ) );
-		if ( existing != null )
-			return existing;
-
-		var childPath = IsRoot ? name : $"{Path}/{name}";
-		var child = new ResourceFolder( name, childPath, this );
-		Folders.Add( child );
-		return child;
-	}
-
-	/// <summary>
-	/// Add a resource loader to this directory tree, creating intermediate directories as needed
-	/// </summary>
-	internal void AddResource( ResourceLoader resource )
-	{
-		// Extract the path after "mount://mountname/"
-		var path = resource.Path;
-		var mountPrefix = "mount://";
-
-		if ( !path.StartsWith( mountPrefix ) )
-			return;
-
-		// Remove mount prefix and mount name
-		var afterMount = path.Substring( mountPrefix.Length );
-		var firstSlash = afterMount.IndexOf( '/' );
-		if ( firstSlash == -1 )
-			return;
-
-		var relativePath = afterMount.Substring( firstSlash + 1 );
-
-		// Split into directory parts and filename
-		var parts = relativePath.Split( '/', StringSplitOptions.RemoveEmptyEntries );
-		if ( parts.Length == 0 )
-			return;
-
-		// Navigate/create directory structure
-		var currentDir = this;
-		for ( int i = 0; i < parts.Length - 1; i++ )
+		var children = new Dictionary<ResourceFolder, Dictionary<string, ResourceFolder>>();
+		foreach ( var resource in resources )
 		{
-			currentDir = currentDir.GetOrCreateChild( parts[i] );
+			var parts = resource.RelativePath.Split( '/', StringSplitOptions.RemoveEmptyEntries );
+			if ( parts.Length == 0 ) continue;
+
+			var directory = this;
+			for ( int i = 0; i < parts.Length - 1; i++ )
+			{
+				if ( !children.TryGetValue( directory, out var index ) )
+				{
+					index = new Dictionary<string, ResourceFolder>( StringComparer.OrdinalIgnoreCase );
+					foreach ( var existing in directory.Folders )
+						index.TryAdd( existing.Name, existing );
+					children.Add( directory, index );
+				}
+
+				var name = parts[i];
+				if ( !index.TryGetValue( name, out var child ) )
+				{
+					var path = directory.IsRoot ? name : $"{directory.Path}/{name}";
+					child = new ResourceFolder( name, path, directory );
+					directory.Folders.Add( child );
+					index.Add( name, child );
+				}
+				directory = child;
+			}
+
+			directory.Files.Add( resource );
+			resource.Folder = directory;
 		}
-
-		// Add the file to the final directory
-		currentDir.Files.Add( resource );
-		resource.Folder = currentDir;
 	}
-
 	/// <summary>
 	/// Get all files recursively from this directory and all subdirectories
 	/// </summary>
@@ -146,10 +132,7 @@ public class ResourceFolder
 	{
 		var root = CreateRoot();
 
-		foreach ( var resource in resources )
-		{
-			root.AddResource( resource );
-		}
+		root.AddResources( resources );
 
 		return root;
 	}

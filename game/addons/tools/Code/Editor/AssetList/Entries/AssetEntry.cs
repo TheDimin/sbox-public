@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 
 namespace Editor;
 
@@ -16,7 +16,18 @@ public class AssetEntry : IAssetListEntry
 
 	public string GetStatusText() => Asset?.AbsolutePath ?? FileInfo.FullName;
 
-	public string AbsolutePath => Asset?.AbsolutePath ?? FileInfo.FullName;
+	internal bool IsMountEntry => Sandbox.Mounting.MountUtility.IsMountPath( FileInfo.ToString() );
+	internal bool CanOpenInEditor => Asset?.CanOpenInEditor == true || (Asset is null && IsMountEntry && FileInfo.Extension is ".scene" or ".prefab");
+
+	internal void OpenInEditor()
+	{
+		if ( Asset is not null )
+			Asset.OpenInEditor();
+		else if ( CanOpenInEditor )
+			SceneEditorSession.CreateFromPath( FileInfo.ToString() )?.MakeActive();
+	}
+
+	public string AbsolutePath => Asset?.AbsolutePath ?? (IsMountEntry ? FileInfo.ToString() : FileInfo.FullName);
 	public AssetType AssetType => Asset?.AssetType ?? null;
 
 	public AssetEntry( Asset asset ) : this( new FileInfo( asset.AbsolutePath ), asset )
@@ -194,7 +205,9 @@ public class AssetEntry : IAssetListEntry
 		}
 		else
 		{
-			if ( EditorUtility.IsCodeFile( FileInfo.FullName ) )
+			if ( IsMountEntry )
+				OpenInEditor();
+			else if ( EditorUtility.IsCodeFile( FileInfo.FullName ) )
 				CodeEditor.OpenFile( FileInfo.FullName );
 			else if ( list.Browser is AssetBrowser browser )
 				browser.OnFileSelected?.Invoke( FileInfo.FullName );
