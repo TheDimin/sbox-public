@@ -7,7 +7,7 @@ namespace GtaV;
 
 internal abstract record ArchetypeExtension
 {
-	public abstract void Apply( GameObject owner, bool startEnabled );
+	public abstract void Apply( GameObject owner );
 
 	// A converter consumes one length-delimited native record.
 	static readonly Dictionary<uint, Func<BinaryReader, ArchetypeExtension>> Readers = new()
@@ -39,21 +39,22 @@ internal abstract record ArchetypeExtension
 
 internal sealed record LadderExtension( Vector3 Bottom, Vector3 Top, Vector3 Normal ) : ArchetypeExtension
 {
-	public override void Apply( GameObject owner, bool startEnabled )
+	public override void Apply( GameObject owner ) => Create( owner, Transform.Zero );
+
+	internal GameObject Create( GameObject owner, Transform placement )
 	{
 		var axis = Top - Bottom;
 		var up = axis.Normal;
 		var facing = Normal - up * Normal.Dot( up );
-		if ( !Bottom.IsFinite || !Top.IsFinite || !Normal.IsFinite || axis.LengthSquared < 1e-6f || facing.LengthSquared < 1e-6f ) return;
+		if ( !Bottom.IsFinite || !Top.IsFinite || !Normal.IsFinite || axis.LengthSquared < 1e-6f || facing.LengthSquared < 1e-6f ) return null;
 		var child = new GameObject( owner, false, "Ladder" );
-		child.LocalPosition = (Bottom + Top) * (0.5f * PacketReader.UnitsPerMetre);
-		child.LocalRotation = Rotation.LookAt( facing.Normal, up );
+		child.LocalTransform = placement.ToWorld( new Transform( (Bottom + Top) * (0.5f * PacketReader.UnitsPerMetre), Rotation.LookAt( facing.Normal, up ) ) );
 		child.Tags.Add( "ladder" );
-		var trigger = child.AddComponent<BoxCollider>( startEnabled );
+		var trigger = child.AddComponent<BoxCollider>();
 		trigger.IsTrigger = true;
 		trigger.Static = true;
 		// GTA supplies the climb line. Width and depth are mount defaults in metres.
 		trigger.Scale = new Vector3( 0.4f, 0.65f, axis.Length ) * PacketReader.UnitsPerMetre;
-		child.Enabled = true;
+		return child;
 	}
 }

@@ -77,7 +77,7 @@ internal sealed class ArchetypeLoader( Entry entry ) : ResourceLoader<GtaMount>
 				}
 			}
 			Placements.Build( Host, data, root );
-			foreach ( var extension in Host.GetExtensions( entry ) ) extension.Apply( root, false );
+			foreach ( var extension in Host.GetExtensions( entry ) ) extension.Apply( root );
 		}
 		return prefab = builder.Create();
 	}

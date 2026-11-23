@@ -30,7 +30,7 @@ public class GtaVGameDataTest
 			var ladders = template.GetComponentsInChildren<BoxCollider>( true )
 				.Where( x => x.Tags.Has( "ladder" ) ).OrderBy( x => x.Scale.z ).ToArray();
 			Assert.AreEqual( 2, ladders.Length );
-			Assert.IsTrue( ladders.All( x => !x.Enabled ) );
+			Assert.IsTrue( ladders.All( x => x.Enabled && !x.GameObject.Enabled ) );
 			Assert.IsTrue( ladders.All( x => x.IsTrigger && x.Static && x.Scale.x < x.Scale.y ) );
 			Assert.AreEqual( 4.75f / 0.0254f, ladders[0].Scale.z, 0.01f );
 			Assert.AreEqual( 5.75f / 0.0254f, ladders[1].Scale.z, 0.01f );
@@ -60,6 +60,53 @@ public class GtaVGameDataTest
 		}
 		finally
 		{
+			await MountDirectory.SetMountState( "gtav", false );
+		}
+	}
+
+	[TestMethod]
+	public async Task LadderObjectTracksPlayerDistance()
+	{
+		if ( Environment.GetEnvironmentVariable( "SBOX_TEST_GTA_V" ) != "1" )
+			Assert.Inconclusive( "Set SBOX_TEST_GTA_V=1 to test the installed archives." );
+
+		var mount = await MountDirectory.Mount( "gtav" );
+		var scene = new Scene();
+		try
+		{
+			using var scope = scene.Push();
+			var template = SceneUtility.GetPrefabScene( PrefabFile.Load( "mount://gtav/archetypes/sc1_04_bld_02.prefab" ) );
+			var ladder = template.GetComponentsInChildren<BoxCollider>( true ).MaxBy( x => x.Scale.z );
+			Assert.IsFalse( ladder.GameObject.Enabled );
+			const float units = 1f / 0.0254f;
+			var building = new Vector3( 175.20032f, -1303.1029f, 35.49249f ) * units;
+			var center = building + ladder.WorldPosition;
+			var approach = ladder.WorldRotation.Forward;
+			var nearTop = center + ladder.WorldRotation.Up * ladder.Scale.z * 0.45f;
+			var camera = center + Vector3.Forward * 500 * units;
+
+			var root = scene.CreateObject();
+			using var session = ((IGtaWorldSource)mount).StartStreaming( root );
+			var timer = System.Diagnostics.Stopwatch.StartNew();
+			GameObject instance = null;
+			while ( instance is null && timer.Elapsed.TotalSeconds < 30 )
+			{
+				session.Update( camera, nearTop + approach * (4.9f * units) );
+				instance = root.Children.FirstOrDefault( x => x.Tags.Has( "ladder" ) && x.WorldPosition.Distance( center ) < 1 );
+				System.Threading.Thread.Sleep( 1 );
+			}
+			Assert.IsNotNull( instance, "Expected the retail ladder near its upper end." );
+			Assert.IsTrue( instance.Enabled );
+			session.Update( camera, nearTop + approach * (5.1f * units) );
+			Assert.IsFalse( instance.Enabled );
+			session.Update( camera, nearTop );
+			Assert.IsTrue( instance.Enabled );
+			session.Update( nearTop, null );
+			Assert.IsFalse( instance.IsValid() && instance.Active );
+		}
+		finally
+		{
+			scene.Destroy();
 			await MountDirectory.SetMountState( "gtav", false );
 		}
 	}

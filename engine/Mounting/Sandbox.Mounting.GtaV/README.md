@@ -32,11 +32,11 @@ The command builds the managed mount and its native reader together. Each build 
 
 Open `mount://gtav/gtav.scene` for the assembled world. The scene camera starts above the Strawberry road crossing. The camera controls rendering within 350 metres. A physics focus controls collision within 80 metres. Set GtaWorld.PhysicsFocus to the controlled vehicle when needed. The default is the local player controller in play mode and the camera otherwise. Individual mounted maps still open for inspection.
 
-Mounted archetype prefabs store disabled colliders. The physics streamer creates active colliders for nearby static bounds, props, and ladder triggers. World model and texture packets come from the retail archives. Physics and rendering share map records until both release them. The engine mount can keep loaded visual resources cached until unmount.
+Mounted archetype prefabs store disabled colliders. The physics streamer creates active colliders for nearby static bounds and props. Ladder GameObjects start disabled. The ladder streamer enables each trigger only when the physics focus is less than 5 metres from the closest point on its climb line. In play mode a ladder requires a local player or an explicit physics focus. The editor uses its camera if no focus is set. World model and texture packets come from the retail archives. Physics and rendering share map records until both release them. The engine mount can keep loaded visual resources cached until unmount.
 
 ### Crossing check
 
-Use Enhanced world index key `c1426cd87425d39a` with the multiplayer map replacements enabled. The route uses GTA metres. In s&box, divide each coordinate by 0.0254.
+Use Enhanced world index key `c1426cd87425d39a` with the multiplayer map replacements enabled. The patched maps are in `update/update.rpf/dlc_patch/mplowrider/x64/levels/gta5/_citye/scentral_01/scentral_metadata.rpf`. The patched road collision is in the sibling archive `sc1_rd.rpf`. The route uses GTA metres. In s&box, divide each coordinate by 0.0254.
 
 | Event | Verified GTA source or Enhanced data | s&box proof of concept |
 | --- | --- | --- |

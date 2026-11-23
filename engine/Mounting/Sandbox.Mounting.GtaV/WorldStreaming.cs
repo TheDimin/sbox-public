@@ -152,17 +152,19 @@ internal sealed class WorldSession : IGtaWorldSession
 	internal static readonly Logger StreamingLog = new( "GTA world" );
 	readonly Task<WorldCatalog> catalog;
 	readonly ISubStreamSystem render, physics;
+	readonly LadderStreamSystem ladders;
 
 	internal WorldSession( GtaMount host, ArchiveReader archive, GameObject root )
 	{
 		catalog = host.GetWorldCatalog( archive );
 		var maps = new PlacementCache( archive );
 		render = new RenderStreamSystem( host, maps, root );
-		physics = new PhysicsStreamSystem( host, maps, archive, root );
+		ladders = new LadderStreamSystem( maps, root );
+		physics = new PhysicsStreamSystem( host, maps, archive, root, ladders );
 	}
 
 	bool failed;
-	public void Update( Vector3 camera, Vector3 focus )
+	public void Update( Vector3 camera, Vector3? focus )
 	{
 		if ( failed || !catalog.IsCompleted ) return;
 		if ( catalog.IsFaulted )
@@ -171,7 +173,9 @@ internal sealed class WorldSession : IGtaWorldSession
 			StreamingLog.Warning( catalog.Exception );
 			return;
 		}
-		physics.Update( catalog.Result, focus / PacketReader.UnitsPerMetre );
+		physics.Update( catalog.Result, (focus ?? camera) / PacketReader.UnitsPerMetre );
+		if ( focus.HasValue ) ladders.Update( catalog.Result, focus.Value / PacketReader.UnitsPerMetre );
+		else ladders.ClearFocus();
 		render.Update( catalog.Result, camera / PacketReader.UnitsPerMetre );
 	}
 
@@ -179,12 +183,13 @@ internal sealed class WorldSession : IGtaWorldSession
 	{
 		render.Dispose();
 		physics.Dispose();
+		ladders.Dispose();
 	}
 }
 
-internal sealed class PhysicsStreamSystem( GtaMount host, PlacementCache maps, ArchiveReader archive, GameObject root ) : ISubStreamSystem
+internal sealed class PhysicsStreamSystem( GtaMount host, PlacementCache maps, ArchiveReader archive, GameObject root, LadderStreamSystem ladders ) : ISubStreamSystem
 {
-	readonly PlacementStream props = new PhysicsPlacementStream( host, maps, root );
+	readonly PlacementStream props = new PhysicsPlacementStream( host, maps, root, ladders );
 	readonly Dictionary<WorldArea, GameObject> active = new();
 	HashSet<WorldArea> wanted = new();
 	Vector3? last;
@@ -472,7 +477,7 @@ internal sealed class RenderStreamSystem( GtaMount host, PlacementCache cache, G
 	}
 }
 
-internal sealed class PhysicsPlacementStream( GtaMount host, PlacementCache cache, GameObject root ) : PlacementStream( host, cache, root, 80 )
+internal sealed class PhysicsPlacementStream( GtaMount host, PlacementCache cache, GameObject root, LadderStreamSystem ladders ) : PlacementStream( host, cache, root, 80 )
 {
 	protected override bool TryGetModel( AssetLoader asset, out Model model ) => asset.TryGetPhysics( out model );
 	protected override BinaryReader Prepare( AssetLoader asset ) => asset.ReadPhysics();
@@ -480,7 +485,7 @@ internal sealed class PhysicsPlacementStream( GtaMount host, PlacementCache cach
 	protected override GameObject ActivateModel( Model model, WorldEntity entity, GameObject owner )
 	{
 		bool solid = model?.Physics?.Parts.Count > 0;
-		if ( !solid && entity.Extensions.Count == 0 ) return null;
+		if ( !solid ) return null;
 		var obj = new GameObject( owner, false, "Object collision" );
 		obj.WorldTransform = entity.Transform;
 		if ( solid )
@@ -489,7 +494,7 @@ internal sealed class PhysicsPlacementStream( GtaMount host, PlacementCache cach
 			collider.Static = true;
 			collider.Model = model;
 		}
-		foreach ( var extension in entity.Extensions ) extension.Apply( obj, true );
+
 		obj.Enabled = true;
 		return obj;
 	}
@@ -519,7 +524,7 @@ internal sealed class PhysicsPlacementStream( GtaMount host, PlacementCache cach
 			box.Scale = source.Scale;
 			box.IsTrigger = true;
 			box.Static = true;
-			child.Enabled = true;
+			ladders.TrackInterior( child, box.Scale.z );
 		}
 		return group;
 	}

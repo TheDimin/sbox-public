@@ -8,7 +8,7 @@ public interface IGtaWorldSource
 
 public interface IGtaWorldSession : System.IDisposable
 {
-	void Update( Vector3 camera, Vector3 physics );
+	void Update( Vector3 camera, Vector3? physics );
 }
 
 public sealed class GtaWorld : Component, Component.ExecuteInEditor
@@ -63,7 +63,7 @@ public sealed class GtaWorldStreamingSystem : GameObjectSystem<GtaWorldStreaming
 		if ( !focus.IsValid() && !Scene.IsEditor )
 			focus = Scene.GetAllComponents<PlayerController>().FirstOrDefault( x => !x.IsProxy )?.GameObject;
 		session ??= source.StartStreaming( world.GameObject );
-		session.Update( camera.WorldPosition, focus.IsValid() ? focus.WorldPosition : camera.WorldPosition );
+		session.Update( camera.WorldPosition, focus.IsValid() ? focus.WorldPosition : Scene.IsEditor ? camera.WorldPosition : null );
 	}
 
 	public override void Dispose()
