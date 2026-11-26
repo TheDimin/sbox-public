@@ -134,7 +134,8 @@ internal static class ThumbLoader
 			}
 
 			var cache = new ThumbnailCache( filename );
-			using var cached = cache.Load();
+			using var cached = await cache.LoadAsync();
+			if ( ct.IsCancellationRequested ) return;
 			if ( cached is not null )
 			{
 				placeholder.CopyFrom( cached );
