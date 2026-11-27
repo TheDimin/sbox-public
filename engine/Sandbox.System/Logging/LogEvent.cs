@@ -33,7 +33,23 @@ namespace Sandbox
 		[Title( "Stack Trace" )]
 		[ReadOnly]
 		[Category( "Stack Trace" )]
-		public string Stack { get; set; }
+		public string Stack
+		{
+			readonly get => _stack ?? _deferredStack?.ToString();
+			set
+			{
+				_stack = value;
+				_deferredStack = null;
+			}
+		}
+
+		string _stack;
+		Sandbox.Diagnostics.LoggedStack _deferredStack;
+
+		/// <summary>
+		/// A stack that's only formatted when <see cref="Stack"/> is read.
+		/// </summary>
+		internal Sandbox.Diagnostics.LoggedStack DeferredStack { init => _deferredStack = value; }
 
 		[Category( "Meta Data" )]
 		[ReadOnly]
@@ -45,6 +61,14 @@ namespace Sandbox
 
 		[ReadOnly]
 		public int Repeats { get; set; }
+
+		/// <summary>
+		/// For an error, the package assembly it came from ("package.org.ident") - the first on its exception's stack, or
+		/// where it was logged. Null if it didn't come through one, or isn't an error.
+		/// </summary>
+		[Category( "Meta Data" )]
+		[ReadOnly]
+		public string SourceAssembly { get; set; }
 
 		[ReadOnly]
 		public bool IsDiagnostic { get; set; }

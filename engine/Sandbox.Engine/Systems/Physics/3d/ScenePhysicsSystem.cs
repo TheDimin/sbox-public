@@ -14,8 +14,10 @@ sealed class ScenePhysicsSystem : GameObjectSystem<ScenePhysicsSystem>
 
 	PhysicsWorld3d GetWorld()
 	{
-		if ( _world is not null )
+		if ( _world.IsValid() )
 			return _world;
+
+		DisconnectWorld();
 
 		if ( Scene is null || !Scene.HasPhysicsWorld )
 			return null;
@@ -50,6 +52,16 @@ sealed class ScenePhysicsSystem : GameObjectSystem<ScenePhysicsSystem>
 	{
 		base.Dispose();
 
+		DisconnectWorld();
+
+		foreach ( var c in KeyframeColliders.EnumerateLocked() )
+			c.KeyframeQueued = false;
+
+		KeyframeColliders.Clear();
+	}
+
+	void DisconnectWorld()
+	{
 		if ( _world is null )
 			return;
 
@@ -93,20 +105,28 @@ sealed class ScenePhysicsSystem : GameObjectSystem<ScenePhysicsSystem>
 		//
 		IScenePhysicsEvents.Post( x => x.PrePhysicsStep() );
 
+		if ( !world.IsValid() )
+			return;
+
 		//
-		// Tell all the keyframe colliders to "move" their keyframes to their new position
+		// Tell the keyframe colliders that moved to "move" their keyframes to their new position
 		// - we do this right before the physics step
 		// - this means that changes in FixedUpdate are immediate
+		// - they leave the set once their body is on target, transform changes and body moves add them back
 		//
 		// Box3D doesn't like us threading things
 		// System.Threading.Tasks.Parallel.ForEach( KeyframeColliders.EnumerateLocked( true ), c => c.UpdateKeyframeTransform() );
 		foreach ( var c in KeyframeColliders.EnumerateLocked( true ) )
 		{
-			c.UpdateKeyframeTransform();
+			if ( c.UpdateKeyframeTransform() )
+				RemoveKeyframe( c );
 		}
 
 		// The actual physics step
 		world.Step( Time.NowDouble, Time.Delta, steps );
+
+		if ( !world.IsValid() )
+			return;
 
 		//
 		// Update the positions of the rigidbodies based on the new physics positions
@@ -129,44 +149,32 @@ sealed class ScenePhysicsSystem : GameObjectSystem<ScenePhysicsSystem>
 		IScenePhysicsEvents.Post( x => x.PostPhysicsStep() );
 	}
 
-	void OnIntersectionStart( PhysicsIntersection o )
+	void OnIntersectionStart( Collision c )
 	{
-		if ( CollisionEvents.Count == 0 ) return;
-
-		var c = new Collision( new CollisionSource( o.Self ), new CollisionSource( o.Other ), o.Contact );
 		foreach ( var e in CollisionEvents )
 		{
 			e.OnCollisionStart( c );
 		}
 	}
 
-	void OnIntersectionHit( PhysicsIntersection o )
+	void OnIntersectionHit( Collision c )
 	{
-		if ( CollisionEvents.Count == 0 ) return;
-
-		var c = new Collision( new CollisionSource( o.Self ), new CollisionSource( o.Other ), o.Contact );
 		foreach ( var e in CollisionEvents )
 		{
 			e.OnCollisionHit( c );
 		}
 	}
 
-	void OnIntersectionUpdate( PhysicsIntersection o )
+	void OnIntersectionUpdate( Collision c )
 	{
-		if ( CollisionEvents.Count == 0 ) return;
-
-		var c = new Collision( new CollisionSource( o.Self ), new CollisionSource( o.Other ), o.Contact );
 		foreach ( var e in CollisionEvents )
 		{
 			e.OnCollisionUpdate( c );
 		}
 	}
 
-	void OnIntersectionEnd( PhysicsIntersectionEnd o )
+	void OnIntersectionEnd( CollisionStop c )
 	{
-		if ( CollisionEvents.Count == 0 ) return;
-
-		var c = new CollisionStop( new CollisionSource( o.Self ), new CollisionSource( o.Other ) );
 		foreach ( var e in CollisionEvents )
 		{
 			e.OnCollisionStop( c );
@@ -202,8 +210,17 @@ sealed class ScenePhysicsSystem : GameObjectSystem<ScenePhysicsSystem>
 		}
 	}
 
-	internal void AddKeyframe( Collider collider ) => KeyframeColliders.Add( collider );
-	internal void RemoveKeyframe( Collider collider ) => KeyframeColliders.Remove( collider );
+	internal void AddKeyframe( Collider collider )
+	{
+		KeyframeColliders.Add( collider );
+		collider.KeyframeQueued = true;
+	}
+
+	internal void RemoveKeyframe( Collider collider )
+	{
+		KeyframeColliders.Remove( collider );
+		collider.KeyframeQueued = false;
+	}
 
 	internal void AddRigidBody( Rigidbody rigidBody )
 	{

@@ -27,7 +27,13 @@ public class AssetType
 	public static AssetType Animation { get; protected set; }
 
 	/// <summary>
-	/// Animation Graph (.vanmgrph) asset type.
+	/// Legacy Animation Graph (.vanmgrph) asset type.
+	/// </summary>
+	[Obsolete( "AnimGraph1 is obsolete. Use AnimationGraph instead." )]
+	public static AssetType LegacyAnimationGraph { get; protected set; }
+
+	/// <summary>
+	/// Animation Graph (.ag) asset type.
 	/// </summary>
 	public static AssetType AnimationGraph { get; protected set; }
 
@@ -151,6 +157,11 @@ public class AssetType
 	/// </summary>
 	public AssetTypeFlags Flags => _assetTypeAttribute?.Flags ?? default;
 
+	/// <summary>
+	/// Whether this asset is loaded and published as its original source file.
+	/// </summary>
+	public bool IsUncompiled => _assetTypeAttribute?.IsUncompiled ?? false;
+
 	public override string ToString() => FriendlyName;
 
 	internal string IconPathSmall { get; set; }
@@ -240,10 +251,28 @@ public class AssetType
 		}
 
 		if ( FriendlyName == "Animation" ) Animation = this;
-		if ( FriendlyName == "Animation Graph" )
+		if ( FileExtension == "vanmgrph" )
+		{
+#pragma warning disable CS0618
+			LegacyAnimationGraph = this;
+			ResourceType = typeof( AnimationGraph );
+#pragma warning restore CS0618
+		}
+
+		if ( FileExtension == "ag" )
 		{
 			AnimationGraph = this;
-			ResourceType = typeof( AnimationGraph );
+			ResourceType = typeof( Sandbox.Animation.Graph );
+		}
+
+		if ( FileExtension == "anim" )
+		{
+			ResourceType = typeof( Sandbox.Animation.Clip );
+		}
+
+		if ( FileExtension == "skel" )
+		{
+			ResourceType = typeof( Sandbox.Animation.Skeleton );
 		}
 
 		if ( FriendlyName == "Sound File" )
@@ -271,7 +300,7 @@ public class AssetType
 
 	private void Init( TypeDescription type, AssetTypeAttribute attribute )
 	{
-		IsGameResource = true;
+		IsGameResource = type.TargetType.IsAssignableTo( typeof( GameResource ) );
 
 		_typeDescription = type;
 		_assetTypeAttribute = attribute;
@@ -367,7 +396,7 @@ public class AssetType
 			created = true;
 
 			// create it in the engine
-			IAssetSystem.UpdateGameResourceType( attribute.Name, attribute.Extension );
+			IAssetSystem.UpdateGameResourceType( attribute.Name, attribute.Extension, attribute.IsUncompiled );
 
 			old = AssetTypeCache.Values.FirstOrDefault( x => x.FileExtension == attribute.Extension );
 
@@ -392,6 +421,8 @@ public class AssetType
 		foreach ( var file in GetCustomTypeFiles( index.Files,
 			extension => FromExtension( extension )?.IsGameResource == true ) )
 		{
+			if ( FromExtension( System.IO.Path.GetExtension( file ) )?._assetTypeAttribute is null )
+				continue;
 			if ( !index.TryGetFileSystem( file, out var owner, out var ownerPath ) )
 				continue;
 			AssetSystem.RegisterFile( owner.GetFullPath( ownerPath ) );
@@ -439,7 +470,10 @@ public class AssetType
 		if ( t == typeof( Material ) ) return AssetType.Material;
 		if ( t == typeof( Model ) ) return AssetType.Model;
 		if ( t == typeof( SoundFile ) ) return AssetType.SoundFile;
-		if ( t == typeof( AnimationGraph ) ) return AssetType.AnimationGraph;
+#pragma warning disable CS0618
+		if ( t == typeof( AnimationGraph ) ) return AssetType.LegacyAnimationGraph;
+#pragma warning restore CS0618
+		if ( t == typeof( Sandbox.Animation.Graph ) ) return AssetType.AnimationGraph;
 		if ( t == typeof( Shader ) ) return AssetType.Shader;
 
 		foreach ( var a in t.GetCustomAttributes<AssetTypeAttribute>() )

@@ -13,7 +13,6 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo( "Sandbox.Test.NetSim" )]
 [assembly: InternalsVisibleTo( "Benchmark" )]
 
-[assembly: InternalsVisibleTo( "Sandbox.Access" )]
 [assembly: InternalsVisibleTo( "Sandbox.Engine" )]
 [assembly: InternalsVisibleTo( "Sandbox.Tools" )]
 [assembly: InternalsVisibleTo( "Sandbox.Bind" )]
@@ -22,8 +21,9 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo( "Sandbox.GameInstance" )]
 [assembly: InternalsVisibleTo( "Facepunch.Interopgen" )]
 [assembly: InternalsVisibleTo( "Sandbox.AppSystem" )]
-[assembly: InternalsVisibleTo( "Sandbox.SceneRenderer" )]
-[assembly: InternalsVisibleTo( "scenelab" )]
+[assembly: InternalsVisibleTo( "Borealis" )]
+[assembly: InternalsVisibleTo( "Sandbox.Rendering" )]
+[assembly: InternalsVisibleTo( "borealislab" )]
 [assembly: InternalsVisibleTo( "Sbox-Server" )]
 
 [assembly: TasksPersistOnContextReset]

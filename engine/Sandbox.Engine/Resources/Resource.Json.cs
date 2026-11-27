@@ -1,4 +1,5 @@
-﻿using Sandbox.Resources;
+﻿using Sandbox.Engine;
+using Sandbox.Resources;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -39,6 +40,11 @@ public partial class Resource
 	/// </summary>
 	internal static Resource Load( Type targetType, ResourceId id )
 	{
+		if ( Game.Resources.TryLoadUncompiledResource( targetType, id, FileSystem.Mounted, out var uncompiled ) )
+		{
+			return uncompiled;
+		}
+
 		if ( targetType.IsAssignableTo( typeof( GameResource ) ) )
 		{
 			if ( !string.IsNullOrEmpty( id.Path ) )
@@ -124,7 +130,7 @@ public partial class Resource
 				//
 				if ( !string.IsNullOrEmpty( serializedResource.TypeName ) )
 				{
-					var type = Game.TypeLibrary.GetType( serializedResource.TypeName );
+					var type = GlobalContext.Current.TypeLibrary.GetType( serializedResource.TypeName );
 					if ( type is not null )
 					{
 						targetType = type.TargetType;

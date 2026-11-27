@@ -1,4 +1,4 @@
-﻿// Supporting Obsolete paths
+// Supporting Obsolete paths
 #pragma warning disable CS0612
 #pragma warning disable CS0618
 
@@ -74,7 +74,7 @@ namespace Sandbox.UI
 
 		public ScenePanel()
 		{
-			_renderScene = new() { WantsSystemScene = false };
+			_renderScene = new() { WantsSystemScene = false, IsUnlisted = true };
 			_ownsScene = true;
 
 			Camera.FieldOfView = 60;
@@ -99,20 +99,24 @@ namespace Sandbox.UI
 		{
 			base.Tick();
 
-			if ( !RenderScene.IsValid() )
+			var scene = RenderScene;
+			if ( !scene.IsValid() )
 				return;
 
-			using ( RenderScene.PushScope() )
+			using ( scene.PushScope() )
 			{
 				if ( TickScene )
 				{
-					RenderScene.GameTick( RealTime.Delta );
+					scene.GameTick( RealTime.Delta );
 				}
 				else
 				{
-					RenderScene.UpdateTime( RealTime.Delta );
+					scene.UpdateTime( RealTime.Delta );
 				}
 			}
+
+			// Tick callbacks can delete the panel or replace its scene.
+			if ( !scene.IsValid || scene != RenderScene ) return;
 
 			if ( Box.RectInner.Size.x <= 0 ) return;
 			if ( Box.RectInner.Size.y <= 0 ) return;
@@ -184,8 +188,20 @@ namespace Sandbox.UI
 			else if ( RenderScene.IsValid() && RenderScene.Camera.IsValid() )
 			{
 				using var timeScope = Time.Scope( RenderScene.TimeNow, RenderScene.TimeDelta );
-				RenderScene.PreCameraRender(); // TODO WTF?... terrible hack to get around Graphics.IsActive guard in RenderToTexture
-				RenderScene.Camera.RenderToTexture( RenderTexture );
+				// A UI preview goes without screen-space reflections. Only while it renders here: a camera may show this scene elsewhere too.
+				var sceneCamera = RenderScene.Camera.SceneCamera;
+				var wantedReflections = sceneCamera.WantsScreenSpaceReflections;
+				sceneCamera.WantsScreenSpaceReflections = false;
+
+				try
+				{
+					RenderScene.PreCameraRender(); // TODO WTF?... terrible hack to get around Graphics.IsActive guard in RenderToTexture
+					RenderScene.Camera.RenderToTexture( RenderTexture );
+				}
+				finally
+				{
+					sceneCamera.WantsScreenSpaceReflections = wantedReflections;
+				}
 			}
 		}
 
@@ -199,6 +215,23 @@ namespace Sandbox.UI
 
 		public override void Delete( bool immediate = false )
 		{
+			ReleaseRenderResources();
+
+			base.Delete( immediate );
+		}
+
+		public override void OnDeleted()
+		{
+			base.OnDeleted();
+
+			// Deleting a parent only calls OnDeleted on its children, never Delete,
+			// so a ScenePanel inside a deleted tree has to release its scene here too.
+			ReleaseRenderResources();
+			Camera.Dispose();
+		}
+
+		void ReleaseRenderResources()
+		{
 			RenderTexture?.Dispose();
 			RenderTexture = null;
 
@@ -209,8 +242,6 @@ namespace Sandbox.UI
 			}
 
 			_renderScene = null;
-
-			base.Delete( immediate );
 		}
 
 		public override void OnDraw( Painter painter )
@@ -219,6 +250,13 @@ namespace Sandbox.UI
 			if ( Box.RectInner.Size.y <= 0 ) return;
 
 			DrawTexture( painter, RenderTexture, Length.Contain );
+		}
+
+		internal override bool TryGetDrawKey( out DrawKey key )
+		{
+			// The scene renders into the same texture every frame, so its contents needn't record again
+			key = new DrawKey( RenderTexture, RenderTexture.IsValid() ? RenderTexture.Index : 0, Box.RectInner, default );
+			return IsDrawnBy( typeof( ScenePanel ) );
 		}
 
 		public override void SetProperty( string name, string value )

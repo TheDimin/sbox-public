@@ -249,6 +249,71 @@ public class PropDamageTest
 	/// A prop's configured values survive a serialize/deserialize round trip.
 	/// </summary>
 	[TestMethod]
+	public void ClonedPropReusesItsComponents()
+	{
+		var scene = new Scene();
+		using var sceneScope = scene.Push();
+
+		var go = scene.CreateObject();
+		var prop = go.Components.Create<Prop>();
+		prop.Model = ArrowModel;
+		go.Components.Get<ModelCollider>().IsTrigger = true;
+
+		var clone = go.Clone();
+
+		Assert.AreEqual( 1, clone.Components.GetAll<ModelRenderer>( FindMode.EverythingInSelf ).Count() );
+		Assert.AreEqual( 1, clone.Components.GetAll<ModelCollider>( FindMode.EverythingInSelf ).Count() );
+		Assert.AreEqual( 1, clone.Components.GetAll<Rigidbody>( FindMode.EverythingInSelf ).Count() );
+		Assert.IsTrue( clone.Components.Get<ModelCollider>().IsTrigger, "the cloned collider should be kept, not rebuilt from the model" );
+		Assert.IsTrue( clone.Components.Get<Rigidbody>().PhysicsBody.IsValid() );
+	}
+
+	[TestMethod]
+	public void ModelChangeSwapsRendererKind()
+	{
+		var scene = new Scene();
+		using var sceneScope = scene.Push();
+
+		var go = scene.CreateObject();
+		var prop = go.Components.Create<Prop>();
+		prop.Model = ArrowModel;
+		Assert.IsNotInstanceOfType( go.Components.Get<ModelRenderer>(), typeof( SkinnedModelRenderer ) );
+
+		prop.Model = HumanModel;
+		var renderers = go.Components.GetAll<ModelRenderer>( FindMode.EverythingInSelf ).ToArray();
+		Assert.AreEqual( 1, renderers.Length );
+		Assert.IsInstanceOfType( renderers[0], typeof( SkinnedModelRenderer ) );
+		Assert.IsNull( go.Components.Get<Rigidbody>( true ), "the single body rigidbody should be gone for a ragdoll" );
+
+		prop.Model = ArrowModel;
+		renderers = go.Components.GetAll<ModelRenderer>( FindMode.EverythingInSelf ).ToArray();
+		Assert.AreEqual( 1, renderers.Length );
+		Assert.IsNotInstanceOfType( renderers[0], typeof( SkinnedModelRenderer ) );
+		Assert.IsNull( go.Components.Get<ModelPhysics>( true ) );
+	}
+
+	[TestMethod]
+	public void StaticToggleDropsAndRestoresRigidbody()
+	{
+		var scene = new Scene();
+		using var sceneScope = scene.Push();
+
+		var go = scene.CreateObject();
+		var prop = go.Components.Create<Prop>();
+		prop.Model = ArrowModel;
+		var collider = go.Components.Get<ModelCollider>();
+
+		prop.IsStatic = true;
+		Assert.IsNull( go.Components.Get<Rigidbody>( true ) );
+		Assert.AreSame( collider, go.Components.Get<ModelCollider>(), "the collider should be reused" );
+		Assert.IsTrue( collider.Static );
+
+		prop.IsStatic = false;
+		Assert.IsNotNull( go.Components.Get<Rigidbody>() );
+		Assert.IsFalse( collider.Static );
+	}
+
+	[TestMethod]
 	public void SerializedPropKeepsConfiguredValues()
 	{
 		var scene = new Scene();
@@ -1221,6 +1286,7 @@ public class WorldComponentTest
 		Assert.IsTrue( minZ > 0f, $"the sag should stay sane: {minZ}" );
 	}
 
+#pragma warning disable CS0618 // Exercises the obsolete WaterVolume, which existing scenes still use.
 	/// <summary>
 	/// A dynamic body inside a WaterVolume receives buoyancy and ends up far above
 	/// an identical free-falling body, while bodies carrying an ignore tag fall
@@ -1274,6 +1340,7 @@ public class WorldComponentTest
 		Assert.IsTrue( corked.WorldPosition.z < floater.WorldPosition.z - 500f,
 			$"ignored tags fall like there's no water: {corked.WorldPosition} vs {floater.WorldPosition}" );
 	}
+#pragma warning restore CS0618
 
 	/// <summary>
 	/// A manual hitbox only registers on traces with UseHitboxes - a plain physics
@@ -1391,6 +1458,7 @@ public class WorldComponentTest
 		Assert.IsFalse( after.Hit, "no hitboxes remain to be hit" );
 	}
 
+#pragma warning disable CS0618 // Exercises the obsolete WaterVolume, which existing scenes still use.
 	/// <summary>
 	/// VerletRope, WaterVolume and ManualHitbox keep their configured values through
 	/// a serialization round trip; the rope's attachment reference resolves back to
@@ -1452,4 +1520,5 @@ public class WorldComponentTest
 		Assert.AreEqual( new Vector3( 1, 2, 3 ), hb2.CenterA );
 		Assert.AreEqual( new Vector3( 4, 5, 6 ), hb2.CenterB );
 	}
+#pragma warning restore CS0618
 }

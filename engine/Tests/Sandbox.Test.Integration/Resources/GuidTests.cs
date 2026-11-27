@@ -38,7 +38,7 @@ public class GuidTests
 		_testPath = System.IO.Path.Combine( _assetsPath, testName );
 		System.IO.Directory.CreateDirectory( _testPath );
 
-		NativeEngine.FullFileSystem.AddProjectPath( "unittest", _assetsPath );
+		NativeEngine.FullFileSystem.AddProjectPath( "unittest", Project.NativeSearchPath( _assetsPath ) );
 
 		// Rebuild the guid mappings once so they include the fixtures. A rebuild rescans
 		// everything mounted (~0.5s), and later tests only add files in their own new folder
@@ -274,14 +274,16 @@ public class GuidTests
 					}
 				}
 				""" );
-			var start = new ProcessStartInfo( Path.Combine( engine, NetCore.NativeDllPath, OperatingSystem.IsWindows() ? "resourcecompiler.exe" : "resourcecompiler" ) )
+			// The content worker compiles one asset as the editor does: unlit is a Slang module alone, which the native
+			// resource compiler can't compile a material of
+			var start = new ProcessStartInfo( Path.Combine( engine, "bin", "managed", OperatingSystem.IsWindows() ? "contentworker.exe" : "contentworker" ) )
 			{
 				UseShellExecute = false,
 				CreateNoWindow = true,
 				RedirectStandardOutput = true,
 				RedirectStandardError = true
 			};
-			foreach ( var arg in new[] { "-f", "-noassert", "-skiprendersystem", "-searchpaths", $"core|{_assetsPath}", source } )
+			foreach ( var arg in new[] { "-searchpaths", $"core|{_assetsPath}", "-compile", source } )
 				start.ArgumentList.Add( arg );
 			using var process = Process.Start( start );
 			var output = process.StandardOutput.ReadToEndAsync();

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reflection;
 
@@ -19,7 +19,7 @@ namespace Sandbox.Upgraders
 		{
 			if ( oldInstance is Assembly oldAsm )
 			{
-				newInstance = Swaps.TryGetValue( oldAsm, out var swapAsm ) ? swapAsm : oldAsm;
+				newInstance = TryGetTypeReplacement( oldAsm, out var swapAsm ) ? swapAsm : oldAsm;
 				return true;
 			}
 
@@ -131,7 +131,8 @@ namespace Sandbox.Upgraders
 			if ( declaringType == oldMember.DeclaringType && oldMember is not MethodBase { IsConstructedGenericMethod: true } )
 				return true;
 
-			if ( oldMember is MethodInfo oldMethod && DelegateUpgrader.IsCompilerGenerated( oldMethod ) )
+			// Other generators also use angle brackets for helpers. Only C# lambda names need lambda matching.
+			if ( oldMember is MethodInfo oldMethod && DelegateUpgrader.GetLambdaMethodInfo( oldMethod, out _, out _, out _ ) )
 			{
 				newInstance = GetUpgrader<DelegateUpgrader>().GetMatchingLambdaMethod( oldMethod );
 				return true;

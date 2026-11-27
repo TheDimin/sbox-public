@@ -48,7 +48,7 @@ public abstract class Renderer : Component, SceneObjectCallbacks
 			{
 				return _sceneObject.Attributes;
 			}
-			_attributes ??= new RenderAttributes();
+			_attributes ??= RenderAttributes.CreateManaged();
 			return _attributes;
 		}
 	}
@@ -109,7 +109,7 @@ public abstract class Renderer : Component, SceneObjectCallbacks
 		if ( attributes is null || !_sceneObject.IsValid() )
 			return;
 
-		_attributes ??= new RenderAttributes();
+		_attributes ??= attributes.IsManaged ? RenderAttributes.CreateManaged() : new RenderAttributes();
 		attributes.MergeTo( _attributes );
 	}
 
@@ -133,7 +133,9 @@ public abstract class Renderer : Component, SceneObjectCallbacks
 		_sceneObject.CallbackTarget = this;
 
 		UpdateSceneObjectFlags();
-		RestoreRenderAttributes( obj.Attributes );
+		// Accessing Attributes creates a per-object set and removes the mesh from resident batching.
+		if ( _attributes is not null )
+			RestoreRenderAttributes( obj.Attributes );
 	}
 
 	/// <summary>

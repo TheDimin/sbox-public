@@ -13,11 +13,34 @@ public static partial class Program
 	[STAThread]
 	public static int Main( string[] args )
 	{
+		// Slang: every surface, raw module and pass module under the shaders folders compiled offline into name.slang_c beside
+		// it (Borealis.Backend.OfflineShaders), only those whose inputs changed. Needs no engine
+		// With --dump-spirv folder, every surface's stages written as SPIR-V for SboxBuild shader-stats as well (the surfaces
+		// among the files named after it, when there are any)
+		if ( args.Any( x => x.Equals( "-slang", StringComparison.OrdinalIgnoreCase ) ) )
+		{
+			var dump = Array.IndexOf( args, "--dump-spirv" );
+			if ( dump >= 0 && dump + 1 < args.Length )
+			{
+				var only = args.Skip( dump + 2 ).Where( x => !x.StartsWith( '-' ) ).ToArray();
+				return Borealis.Backend.OfflineShaders.DumpSurfaces( System.IO.Directory.GetCurrentDirectory(), System.IO.Path.GetFullPath( args[dump + 1] ), only, Console.WriteLine ) == 0 ? 0 : 1;
+			}
+
+			return Borealis.Backend.OfflineShaders.CompileAll( System.IO.Directory.GetCurrentDirectory(), Console.WriteLine ) == 0 ? 0 : 1;
+		}
+
+		// The record definitions (core/shaders/sbox/records.slangh): the C# structs and HLSL offsets they make, where stale
+		if ( args.Any( x => x.Equals( "-records", StringComparison.OrdinalIgnoreCase ) ) )
+			return Borealis.Backend.OfflineShaders.UpdateRecords( System.IO.Directory.GetCurrentDirectory(), Console.WriteLine );
+
 		var options = new ShaderCompileOptions();
 		// Exact matches - substring matching meant any other flag containing these letters (e.g. -slang) turned them on
 		options.ForceRecompile = args.Any( x => x == "-f" );
 		options.SingleThreaded = args.Any( x => x == "-s" );
 		options.ConsoleOutput = !args.Any( x => x == "-q" );
+
+		// Borealis's GPU-driven variant, into name.gpudriven.shader_c beside each shader
+		options.GpuDriven = args.Any( x => x == "-gpudriven" );
 
 		// Most combos to compile at once, default is one per core
 		var threadsIndex = Array.IndexOf( args, "-j" );
@@ -42,6 +65,10 @@ public static partial class Program
 			return Recompile( args, options );
 		}
 
+		// Optional path to mount and process the shaders from instead of the ones under game/. Its shaders include each other through that path.
+		var assetsIndex = Array.IndexOf( args, "-assets" );
+		string assetsPath = assetsIndex >= 0 && assetsIndex + 1 < args.Length ? System.IO.Path.GetFullPath( args[assetsIndex + 1] ) : null;
+
 		List<ProcessList> failedList = new();
 
 		HashSet<string> files = new();
@@ -49,7 +76,7 @@ public static partial class Program
 		for ( int i = 0; i < args.Length; i++ )
 		{
 			var arg = args[i];
-			if ( arg == "--dump-spirv" || arg == "-j" ) { i++; continue; }
+			if ( arg == "--dump-spirv" || arg == "-j" || arg == "-assets" ) { i++; continue; }
 			if ( arg.StartsWith( "-" ) ) continue;
 
 			files.Add( arg );
@@ -66,6 +93,18 @@ public static partial class Program
 			List<ProcessList> compileList = new();
 
 			var wd = System.IO.Directory.GetCurrentDirectory();
+
+			if ( assetsPath is not null )
+			{
+				if ( !System.IO.Directory.Exists( assetsPath ) )
+				{
+					Console.Error.WriteLine( $"Assets folder not found: {assetsPath}" );
+					return 1;
+				}
+
+				EngineFileSystem.AddAssetPath( "assets", assetsPath );
+				wd = assetsPath;
+			}
 
 			foreach ( var s in System.IO.Directory.EnumerateFiles( wd, "*.shader", new System.IO.EnumerationOptions { RecurseSubdirectories = true } ) )
 			{
@@ -171,14 +210,18 @@ public static partial class Program
 	/// </summary>
 	static int Recompile( string[] args, ShaderCompileOptions options )
 	{
+		// --out <path>: write the one file's result there instead of over it (a package shader's GPU-driven variant)
+		var outIndex = Array.IndexOf( args, "--out" );
+		var output = outIndex >= 0 && outIndex + 1 < args.Length ? System.IO.Path.GetFullPath( args[outIndex + 1] ) : null;
+
 		var files = args
-			.Where( a => !a.StartsWith( "-" ) )
+			.Where( ( a, i ) => !a.StartsWith( "-" ) && (outIndex < 0 || i != outIndex + 1) )
 			.Distinct( StringComparer.OrdinalIgnoreCase )
 			.ToList();
 
-		if ( files.Count == 0 )
+		if ( files.Count == 0 || (output is not null && files.Count != 1) )
 		{
-			Console.Error.WriteLine( "Usage: ShaderCompiler --recompile <file.shader_c> [more.shader_c ...]" );
+			Console.Error.WriteLine( "Usage: ShaderCompiler --recompile <file.shader_c> [more.shader_c ...], or one file with --out <path>" );
 			return 1;
 		}
 
@@ -208,12 +251,13 @@ public static partial class Program
 						continue;
 					}
 
-					System.IO.File.WriteAllBytes( absolute, result.CompiledShader );
+					if ( output is not null ) System.IO.Directory.CreateDirectory( System.IO.Path.GetDirectoryName( output ) );
+					System.IO.File.WriteAllBytes( output ?? absolute, result.CompiledShader );
 
 					if ( options.ConsoleOutput )
 					{
 						Console.ForegroundColor = ConsoleColor.Cyan;
-						Console.WriteLine( $"Recompiled {absolute} ({result.CompiledShader.Length:n0} bytes)" );
+						Console.WriteLine( $"Recompiled {absolute}{(output is null ? "" : $" into {output}")} ({result.CompiledShader.Length:n0} bytes)" );
 						Console.ForegroundColor = ConsoleColor.White;
 					}
 				}

@@ -70,6 +70,9 @@ public partial class Scene : GameObject
 
 		SharedTick();
 
+		if ( !IsValid )
+			return;
+
 		using ( PerformanceStats.Timings.NavMesh.Scope() )
 		{
 			Nav_Update();
@@ -132,26 +135,42 @@ public partial class Scene : GameObject
 		_cameraModifierScratch.Clear();
 	}
 
-	List<IRenderThread> renderThreadEventTargets = new();
+	List<IRenderThread> renderThreadEventTargets = new(), nextRenderThreadEventTargets = new();
 
 	/// <summary>
 	/// Screen panels in draw order, captured in PreRender(). Sorted here so the render
 	/// thread neither walks the object index nor sorts every frame.
 	/// </summary>
 	internal List<ScreenPanel> renderScreenPanels = new();
+	List<ScreenPanel> nextScreenPanels = new();
+	bool snapshotsTaken;
 
 	internal void PreRender()
 	{
 		// Snapshot IRenderThread components on the main thread so the render thread
-		// can iterate without racing against concurrent Add/Remove in objectIndex.
-		renderThreadEventTargets.Clear();
-		GetAll( renderThreadEventTargets );
+		// can iterate without racing against concurrent Add/Remove in objectIndex. Into the next frame's lists: the render
+		// thread may be drawing the last frame from the others, which the extract swaps for these (TakeRenderSnapshots)
+		nextRenderThreadEventTargets.Clear();
+		GetAll( nextRenderThreadEventTargets );
 
-		renderScreenPanels.Clear();
-		GetAll( renderScreenPanels );
-		SortScreenPanels( renderScreenPanels );
+		nextScreenPanels.Clear();
+		GetAll( nextScreenPanels );
+		SortScreenPanels( nextScreenPanels );
+		snapshotsTaken = true;
 
 		foreach ( var c in preRenderComponents.EnumerateLocked() ) c.OnPreRenderInternal();
+	}
+
+	/// <summary>
+	/// At the frame's render preparation (<see cref="PreCameraRender"/>, on the main thread with nothing drawing): what
+	/// <see cref="PreRender"/> captured becomes what the frame's drawing reads.
+	/// </summary>
+	void TakeRenderSnapshots()
+	{
+		if ( !snapshotsTaken ) return;
+		snapshotsTaken = false;
+		(renderThreadEventTargets, nextRenderThreadEventTargets) = (nextRenderThreadEventTargets, renderThreadEventTargets);
+		(renderScreenPanels, nextScreenPanels) = (nextScreenPanels, renderScreenPanels);
 	}
 
 	/// <summary>
@@ -206,6 +225,7 @@ public partial class Scene : GameObject
 	/// </summary>
 	void SharedTick()
 	{
+		DispatchLogEvents();
 		Scene.RunEvent<ISceneStage>( x => x.Start() );
 
 		if ( !IsEditor )
@@ -220,6 +240,9 @@ public partial class Scene : GameObject
 		{
 			FixedUpdate();
 		}
+
+		if ( !IsValid )
+			return;
 
 		{
 			ProcessDeletes();
@@ -313,7 +336,7 @@ public partial class Scene : GameObject
 
 	public void GameTick( double timeDelta = 0.1 )
 	{
-		if ( IsSuspended ) return;
+		if ( !IsValid || IsSuspended ) return;
 
 		UpdateTime( timeDelta );
 
@@ -332,7 +355,8 @@ public partial class Scene : GameObject
 			SyncContext.FrameStage.Update.Trigger();
 		}
 
-		if ( IsLoading )
+		// A frame continuation can close a ScenePanel and destroy the scene we're ticking.
+		if ( !IsValid || IsLoading )
 			return;
 
 		if ( Game.IsPaused )
@@ -357,11 +381,15 @@ public partial class Scene : GameObject
 
 	internal void InternalFixedUpdate()
 	{
+		if ( !IsValid )
+			return;
+
 		FixedUpdateInputContext.Flip();
 		using var _ = FixedUpdateInputContext.Push();
 
-		using ( _fixedUpdateTimer.Start() )
+		try
 		{
+			using var timing = _fixedUpdateTimer.Start();
 			Signal( GameObjectSystem.Stage.StartFixedUpdate );
 
 			// All components that have not had OnStart() called yet
@@ -381,6 +409,9 @@ public partial class Scene : GameObject
 			}
 
 			Signal( GameObjectSystem.Stage.PhysicsStep );
+
+			if ( !IsValid )
+				return;
 
 			if ( !IsEditor )
 			{
@@ -402,7 +433,9 @@ public partial class Scene : GameObject
 
 			Signal( GameObjectSystem.Stage.FinishFixedUpdate );
 		}
-
-		Connection.ClearFixedUpdateContextInput();
+		finally
+		{
+			Connection.ClearFixedUpdateContextInput();
+		}
 	}
 }

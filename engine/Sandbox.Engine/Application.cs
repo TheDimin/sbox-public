@@ -35,7 +35,8 @@ public static class Application
 	public static bool IsConsoleApp => IsHeadless;
 
 	/// <summary>
-	/// True if this is a dedicated server
+	/// True if this process is a dedicated server.
+	/// To check if the current game is hosted on a dedicated server, use <seealso cref="Networking.IsDedicatedServer"/> instead.
 	/// </summary>
 	public static bool IsDedicatedServer { get; private set; }
 
@@ -65,7 +66,20 @@ public static class Application
 	/// Number of engine frames since startup. Increments once at the start of every frame.
 	/// Starts at 1, so a default frame stamp of 0 always reads as a frame that has passed.
 	/// </summary>
-	public static ulong FrameCount { get; internal set; } = 1;
+	public static ulong FrameCount
+	{
+		// The render thread draws the frame handed over while the main thread counts on into the next
+		get => renderThreadFrame != 0 ? renderThreadFrame : frameCount;
+		internal set => frameCount = value;
+	}
+
+	static ulong frameCount = 1;
+
+	/// <summary>The frame the render thread is drawing, which <see cref="FrameCount"/> is on that thread; 0 elsewhere.</summary>
+	[ThreadStatic] static ulong renderThreadFrame;
+
+	/// <summary>Set the frame this thread (the render thread) draws, which <see cref="FrameCount"/> says on it; 0 for none.</summary>
+	internal static void DrawingFrame( ulong frame ) => renderThreadFrame = frame;
 
 	/// <summary>
 	/// The engine's version string
@@ -116,6 +130,9 @@ public static class Application
 		IsHeadless = headless;
 		IsEditor = toolsMode;
 		IsJoinLocal = CommandLine.HasSwitch( "-joinlocal" );
+
+		// The game window's render thread takes a core of its own: the job workers leave it one
+		if ( !dedicated && !testMode && !headless && !toolsMode && Graphics.BorealisGpuRequested && BorealisGpuFrameThread.Draws ) JobDispatcher.Workers.ReserveForRenderThread();
 		IsBenchmark = Environment.GetEnvironmentVariable( "SBOX_MODE" ) == "BENCHMARK";
 		LocalInstanceId = CommandLine.GetSwitchInt( "+instanceid", 1 );
 	}
@@ -149,19 +166,14 @@ public static class Application
 	internal static Package GamePackage { get; set; }
 
 	/// <summary>
-	/// The currently loaded map package
-	/// </summary>
-	internal static Package MapPackage { get; set; }
-
-	/// <summary>
 	/// The currently loaded game package's ident - if applicable.
 	/// </summary>
 	internal static string GameIdent { get; set; }
 
 	/// <summary>
-	/// The currently loaded map, can be an ident or a path.
+	/// The map the running game launched on, or null if it launched without one.
 	/// </summary>
-	internal static string Map { get; set; }
+	internal static MapReference Map { get; set; }
 
 #if DEBUG
 	public static bool IsDebug => true;
@@ -202,7 +214,7 @@ public static class Application
 		GameIdent = default;
 		GamePackage = default;
 		ExceptionCount = default;
-		MapPackage = default;
+		Map = default;
 
 		// Cheats, and anything they allowed, shouldn't carry over into the next game
 		ConVarSystem.ResetCheats();
@@ -227,19 +239,14 @@ public static class Application
 	}
 
 	/// <summary>
-	/// Gets the active scene. This could be in the menu system, or in the game. This is provided
-	/// for internal engine, and should never be accessible to the user code.
+	/// Gets the active scene - the game's, as the menu has none of its own. This is provided for internal engine, and
+	/// should never be accessible to the user code.
 	/// </summary>
 	internal static Scene GetActiveScene()
 	{
 		if ( IGameInstance.Current?.Scene is Scene gameScene && gameScene.IsValid() )
 		{
 			return gameScene;
-		}
-
-		if ( IMenuDll.Current?.Scene is Scene menuScene && menuScene.IsValid() )
-		{
-			return menuScene;
 		}
 
 		return null;
@@ -258,12 +265,12 @@ public static class Application
 
 		if ( GamePackage is { } game )
 		{
-			Log.Info( $"Game: {game.GetIdent( false, true )} ({game.Revision?.Created})" );
+			Log.Info( $"Game: {game.GetVersionedIdent()} ({game.Revision?.Created})" );
 		}
 
-		if ( MapPackage is { } map )
+		if ( Map is { } map )
 		{
-			Log.Info( $"Map: {map.GetIdent( false, true )} ({map.Revision?.Created})" );
+			Log.Info( $"Map: {map.Title ?? map.Text} ({map.Text})" );
 		}
 	}
 }

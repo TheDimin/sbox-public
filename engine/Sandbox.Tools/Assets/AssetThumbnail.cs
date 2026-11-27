@@ -1,4 +1,4 @@
-﻿using Native;
+using Native;
 using System;
 
 namespace Editor;
@@ -59,9 +59,30 @@ static class AssetThumbnail
 	}
 
 	/// <summary>
-	/// Get an asset thumb. Will generate it if not immediately available, but will wait for it to be generated before returning.
+	/// Return the editor thumbnail as a bitmap, rendering it only after the caches miss.
 	/// </summary>
-	internal static async Task<Pixmap> GetAssetThumbAsync( Asset asset )
+	internal static async Task<Bitmap> GetThumbnailBitmapAsync( Asset asset, string filename )
+	{
+		var thumb = FindCachedThumbnail( asset );
+		if ( thumb is null )
+		{
+			// An authored preview override has priority over the generic model icon.
+			if ( asset.AssetType?.FileExtension == "vmdl" && asset.thumbnailOverride is null
+				&& new ThumbnailCache( filename ).LoadBitmap() is { } cached )
+				return cached;
+
+			QueueThumbBuild( asset );
+			while ( RenderQueue.Contains( asset ) || RenderingList.Contains( asset ) )
+			{
+				await Task.Delay( 100 );
+			}
+
+			thumb = GetAssetThumb( asset, generateIfNotInCache: false );
+		}
+		return thumb is null ? null : Bitmap.CreateFromBytes( thumb.GetPng() );
+	}
+
+	static Pixmap FindCachedThumbnail( Asset asset )
 	{
 		ArgumentNullException.ThrowIfNull( asset, nameof( asset ) );
 
@@ -73,45 +94,14 @@ static class AssetThumbnail
 		}
 
 		var fullPath = GetThumbnailFile( asset, false );
-		if ( System.IO.File.Exists( fullPath ) )
-		{
-			var pix = Pixmap.FromFile( fullPath );
-			asset.CachedThumbnail = pix;
-			return pix;
-		}
+		if ( !System.IO.File.Exists( fullPath ) ) return null;
 
-		// start an async render
-		QueueThumbBuild( asset );
-
-		// wait for it to come out of the list
-		while ( RenderQueue.Contains( asset ) || RenderingList.Contains( asset ) )
-		{
-			await Task.Delay( 100 );
-		}
-
-		// A completed image may have left the resident set while this caller was waiting.
-		// Reload its PNG on use, with the same type-icon fallback if generation failed.
-		return GetAssetThumb( asset, generateIfNotInCache: false );
+		return asset.CachedThumbnail = Pixmap.FromFile( fullPath );
 	}
 
 	internal static Pixmap GetAssetThumb( Asset asset, bool generateIfNotInCache = true )
 	{
-		ArgumentNullException.ThrowIfNull( asset, nameof( asset ) );
-
-		var cached = asset.CachedThumbnail;
-		if ( cached is not null && cached != asset.AssetType?.Icon256 )
-		{
-			TouchCachedThumbnail( asset, cached );
-			return cached;
-		}
-
-		var fullPath = GetThumbnailFile( asset, false );
-		if ( System.IO.File.Exists( fullPath ) )
-		{
-			var pix = Pixmap.FromFile( fullPath );
-			asset.CachedThumbnail = pix;
-			return pix;
-		}
+		if ( FindCachedThumbnail( asset ) is { } cached ) return cached;
 
 		if ( asset.AssetType != null )
 		{
@@ -265,17 +255,11 @@ static class AssetThumbnail
 		ThreadSafe.AssertIsMainThread();
 
 		//
-		// If it's a resource, let it generate itself the thumbnail!
+		// The type would rather show its icon than anything we could render, so
+		// leave the thumbnail unset and let the callers fall back to the icon
 		//
-		{
-			var resource = asset.LoadResource();
-			var bitmap = resource?.RenderThumbnail( new() { Width = 256, Height = 256 } );
-			if ( bitmap != null )
-			{
-				return Pixmap.FromBitmap( bitmap );
-			}
-		}
-
+		if ( asset.AssetType.PrefersIconThumbnail )
+			return null;
 
 		if ( asset.thumbnailOverride != null )
 		{
@@ -306,6 +290,16 @@ static class AssetThumbnail
 			catch ( System.Exception e )
 			{
 				Log.Warning( e, $"Exception when rendering thumb via {t.Method} ({e.Message})" );
+			}
+		}
+
+		// Keep editor overrides and custom previews ahead of the resource's default thumbnail.
+		{
+			var resource = asset.LoadResource();
+			using var bitmap = resource?.RenderThumbnail( new() { Width = 256, Height = 256 } );
+			if ( bitmap != null )
+			{
+				return Pixmap.FromBitmap( bitmap );
 			}
 		}
 

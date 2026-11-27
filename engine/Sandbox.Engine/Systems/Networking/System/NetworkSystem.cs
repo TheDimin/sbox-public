@@ -67,7 +67,30 @@ internal partial class NetworkSystem
 		AddHandler<ServerNameMsg>( OnReceiveServerName );
 		AddHandler<MapNameMsg>( OnReceiveMapName );
 		AddHandler<LogMsg>( OnLogMsg );
+		AddHandler<DirectRouteMsg>( OnDirectRoute );
+		AddHandler<DirectRouteAckMsg>( OnDirectRouteAck );
 	}
+
+	void OnDirectRoute( DirectRouteMsg msg, Connection source, Guid msgId )
+	{
+		var ack = new DirectRouteAckMsg { Token = msg.Token };
+
+		// A peer's outgoing barrier might be waiting for our marker too. Sending the ack through its normal
+		// queue would deadlock both barriers, so pass this control message through the host instead.
+		if ( !IsHost && !source.IsHost && Connection.Host is not null and not MockConnection )
+		{
+			var stream = ByteStream.Create( 256 );
+			stream.Write( InternalMessageType.Packed );
+			Serialize( ack, ref stream );
+			SendMulticast( [source.Id], stream.ToSpan(), NetFlags.Reliable );
+			stream.Dispose();
+			return;
+		}
+
+		source.SendMessage( ack );
+	}
+
+	void OnDirectRouteAck( DirectRouteAckMsg msg, Connection source, Guid msgId ) => source.OnDirectRouteAck( msg.Token );
 
 	/// <summary>
 	/// We have received a log message from another client.
@@ -100,9 +123,8 @@ internal partial class NetworkSystem
 		if ( !Networking.IsHost )
 			return;
 
-		var command = ConVarSystem.Find( msg.Command );
-		if ( command is null ) return;
-		if ( !command.IsUserInfo ) return;
+		if ( !Sandbox.Network.ConnectionInfo.IsValidUserData( msg.Command, msg.Value ) )
+			return;
 
 		source.SetUserData( msg.Command, msg.Value );
 	}
@@ -286,6 +308,8 @@ internal partial class NetworkSystem
 
 		TickHostMigration();
 
+		TickHostTimeout();
+
 		if ( timeSinceTick >= 1f )
 		{
 			timeSinceTick = 0f;
@@ -401,17 +425,18 @@ internal partial class NetworkSystem
 			return;
 
 		// Conna: if we're a dedicated server, we don't "join" the game.
-		if ( Application.IsDedicatedServer )
-			return;
+		// And when we're taking over a scene we already have a player in it.
+		if ( !Application.IsDedicatedServer && !_isBecomingHost )
+		{
+			//
+			// Trigger local join events, so that the new scene can do stuff like spawn a player prefab etc.
+			//
+			GameSystem?.OnJoined( Connection.Local );
+		}
 
-		// We already have a player in the scene we're taking over
-		if ( _isBecomingHost )
-			return;
-
-		//
-		// Trigger local join events, so that the new scene can do stuff like spawn a player prefab etc.
-		//
-		GameSystem?.OnJoined( Connection.Local );
+		// Clients are already waiting for a new host's snapshot
+		if ( !_isBecomingHost )
+			(GameSystem as SceneNetworkSystem)?.WarmSnapshot();
 	}
 }
 

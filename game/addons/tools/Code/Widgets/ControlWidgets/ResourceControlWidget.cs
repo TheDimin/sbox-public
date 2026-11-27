@@ -159,7 +159,7 @@ public class ResourceControlWidget : ControlWidget
 		var resource = SerializedProperty.GetValue<Resource>( null );
 		var asset = (resource != null) ? AssetSystem.FindByPath( resource.ResourcePath ) : null;
 
-		m.AddOption( "Open in Editor", "edit", () => asset?.OpenInEditor() ).Enabled = asset != null && !asset.IsProcedural;
+		m.AddOption( "Open in Editor", "edit", () => asset?.OpenInEditor() ).Enabled = asset?.CanOpenInEditor == true;
 		m.AddOption( "Find in Asset Browser", "search", () => LocalAssetBrowser.OpenTo( asset, true ) ).Enabled = asset is not null;
 		m.AddSeparator();
 		m.AddOption( "Copy", "file_copy", action: Copy ).Enabled = asset != null;
@@ -198,6 +198,11 @@ public class ResourceControlWidget : ControlWidget
 		picker.Show();
 
 		picker.SetSelection( asset );
+
+		if ( SerializedProperty.TryGetAttribute<AssetHintAttribute>( out var hint ) )
+		{
+			picker.SetSearchText( hint.Pattern );
+		}
 	}
 
 	private void UpdateFromAsset( Asset asset )
@@ -341,7 +346,16 @@ public class ResourceControlWidget : ControlWidget
 
 	async Task DroppedUrl( string identUrl )
 	{
-		var asset = await AssetSystem.InstallAsync( identUrl );
+		Asset asset;
+		try
+		{
+			asset = await AssetSystem.InstallAsync( identUrl );
+		}
+		catch ( AggregateException ex )
+		{
+			Log.Warning( ex, $"Error installing dropped package {identUrl}" );
+			return;
+		}
 
 		if ( !CanAssignAssetType( asset ) )
 			return;

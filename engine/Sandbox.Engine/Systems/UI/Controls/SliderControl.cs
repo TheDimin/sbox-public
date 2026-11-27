@@ -9,6 +9,8 @@ namespace Sandbox.UI;
 /// </summary>
 [StyleSheet.Inline( "slidercontrol", Styles )]
 [CustomEditor( typeof( float ), WithAllAttributes = [typeof( RangeAttribute )] )]
+[CustomEditor( typeof( double ), WithAllAttributes = [typeof( RangeAttribute )] )]
+[CustomEditor( typeof( int ), WithAllAttributes = [typeof( RangeAttribute )] )]
 public class SliderControl : BaseControl
 {
 	const string Styles = """
@@ -145,6 +147,56 @@ public class SliderControl : BaseControl
 		        position: absolute;
 		    }
 		}
+
+		// Bound to a property it's laid out like the editor's float control: one box with an f chip
+		// to scrub from, the track, and the value on the right
+		.slidercontrol.property
+		{
+		    gap: 0px;
+		    min-height: 32px;
+		    padding: 0px 4px;
+		    border-radius: 8px;
+		    background-color: #000a;
+
+		    > .prefix-chip
+		    {
+		        order: -1;
+		        flex-shrink: 0;
+		        width: 24px;
+		        height: 24px;
+		        border-radius: 5px;
+		        font-weight: 600;
+		        text-align: center;
+		        justify-content: center;
+		        align-items: center;
+		        color: #B0E24D;
+		        background-color: #B0E24D1a;
+		        cursor: ew-resize;
+		    }
+
+		    &:hover > .prefix-chip
+		    {
+		        background-color: #B0E24D33;
+		    }
+
+		    > .inner
+		    {
+		        min-height: 0px;
+		    }
+
+		    > .entry
+		    {
+		        order: 1;
+		        width: 60px;
+
+		        > numberentry
+		        {
+		            height: 28px;
+		            padding: 0px 6px;
+		            border: 0px solid transparent;
+		        }
+		    }
+		}
 		""";
 
 	public override bool SupportsMultiEdit => true;
@@ -248,17 +300,24 @@ public class SliderControl : BaseControl
 	}
 
 	float _value;
+	bool _applyOnRelease;
+	bool _hasPropertyGradient;
+	SerializedProperty _pendingProperty;
 
+	/// <summary>
+	/// The value displayed by the slider, including an edit awaiting release.
+	/// </summary>
 	[Parameter]
 	public float Value
 	{
-		get => Property?.As.Float ?? _value;
+		get => _pendingProperty is not null ? _value : Property?.As.Float ?? _value;
 
 		set
 		{
 			if ( Property is not null )
 			{
-				Property.As.Float = value;
+				_pendingProperty = null;
+				WriteProperty( Property, value );
 				UpdateVisuals();
 				return;
 			}
@@ -269,6 +328,42 @@ public class SliderControl : BaseControl
 			_value = value;
 			UpdateVisuals();
 		}
+	}
+
+	static void WriteProperty( SerializedProperty property, float value )
+	{
+		if ( property.PropertyType == typeof( int ) )
+			property.As.Int = (int)MathF.Round( value );
+		else if ( property.PropertyType == typeof( double ) )
+			property.As.Double = value;
+		else
+			property.As.Float = value;
+	}
+
+	void SetFromInput( float value )
+	{
+		if ( Property is not null ) value = value.Clamp( Min, Max );
+
+		if ( _applyOnRelease && Property is not null )
+		{
+			_pendingProperty = Property;
+			_value = value;
+			UpdateVisuals();
+		}
+		else
+		{
+			Value = value;
+		}
+
+		OnValueChanged?.Invoke( Value );
+	}
+
+	void CommitPending()
+	{
+		if ( _pendingProperty is not { } property ) return;
+
+		_pendingProperty = null;
+		WriteProperty( property, _value );
 	}
 
 	Panel entryPanel;
@@ -282,6 +377,11 @@ public class SliderControl : BaseControl
 	Panel TrackPanel { get; set; }
 	Panel ThumbPanel { get; set; }
 	TextEntry TextEntryPanel { get; set; }
+
+	Label _prefixChip;
+	bool _scrubbing;
+	float _scrubValue;
+	float _scrubLastX;
 
 	public SliderControl()
 	{
@@ -318,9 +418,22 @@ public class SliderControl : BaseControl
 
 	public override void Rebuild()
 	{
-		if ( Property is null ) return;
+		CommitPending();
+		_applyOnRelease = Property?.HasAttribute<ApplyOnReleaseAttribute>() == true;
+		UpdateTrackGradient();
+		if ( Property is null )
+		{
+			UpdateVisuals();
+			return;
+		}
 
 		ShowTextEntry = true;
+		TextEntryPanel.WholeNumbers = Property.PropertyType == typeof( int );
+
+		// The chip shows the number type and acts as the scrub handle.
+		AddClass( "property" );
+		_prefixChip ??= Add.Label( "", "prefix-chip" );
+		_prefixChip.Text = TextEntryPanel.WholeNumbers ? "i" : "f";
 
 		if ( Property.TryGetAttribute<RangeAttribute>( out var rangeAttribute ) )
 		{
@@ -332,6 +445,31 @@ public class SliderControl : BaseControl
 		{
 			Step = stepAttribute.Step;
 		}
+
+		UpdateVisuals();
+	}
+
+	void UpdateTrackGradient()
+	{
+		var stops = Property?.GetAttributes<SliderGradientAttribute>().FirstOrDefault()?.CreateGradient().Colors;
+		if ( stops is { Count: > 0 } )
+		{
+			var colors = stops.Select( stop => FormattableString.Invariant( $"{stop.Value.Hex} {stop.Time * 100f}%" ) );
+			TrackPanel.Style.Set( $"background-image: linear-gradient(to right, {string.Join( ", ", colors )});" );
+			_hasPropertyGradient = true;
+		}
+		else if ( _hasPropertyGradient )
+		{
+			TrackPanel.Style.Set( "background-image: none;" );
+			_hasPropertyGradient = false;
+		}
+	}
+
+	/// <inheritdoc/>
+	public override void OnDeleted()
+	{
+		CommitPending();
+		base.OnDeleted();
 	}
 
 	float renderedValue = float.NaN;
@@ -339,6 +477,9 @@ public class SliderControl : BaseControl
 	public override void Tick()
 	{
 		base.Tick();
+
+		if ( !HasActive && !TextEntryPanel.HasFocus )
+			CommitPending();
 
 		// the bound property can change underneath us
 		if ( Value != renderedValue )
@@ -381,7 +522,8 @@ public class SliderControl : BaseControl
 
 		var position = MathX.LerpInverse( value, Min, Max, true ) * 100.0f;
 
-		var (fillStart, fillWidth) = _fill switch
+		var fill = _hasPropertyGradient ? SliderFill.None : _fill;
+		var (fillStart, fillWidth) = fill switch
 		{
 			SliderFill.Right => (position, 100.0f - position),
 			SliderFill.Center => (MathF.Min( 50.0f, position ), MathF.Abs( position - 50.0f )),
@@ -433,8 +575,11 @@ public class SliderControl : BaseControl
 
 	void OnTextEntryEdited( string text )
 	{
-		Value = text.ToFloat( Value );
-		OnValueChanged?.Invoke( Value );
+		var value = text.ToFloat( Value );
+		if ( Property is not null && Step > 0f )
+			value = value.Clamp( Min, Max ).SnapToGrid( Step );
+
+		SetFromInput( value );
 	}
 
 	/// <summary>
@@ -454,25 +599,61 @@ public class SliderControl : BaseControl
 	{
 		base.OnMouseMove( e );
 
+		if ( _scrubbing )
+		{
+			Scrub( e );
+			return;
+		}
+
 		if ( !HasActive || e.MouseButton == MouseButtons.Middle ) return;
 
-		Value = ScreenPosToValue( ScreenMousePosition );
-		OnValueChanged?.Invoke( Value );
+		SetFromInput( ScreenPosToValue( ScreenMousePosition ) );
 		e.StopPropagation();
 	}
 
 	/// <summary>
-	/// On mouse press jump to that position
+	/// On mouse press jump to that position, or start scrubbing if it's on the prefix chip
 	/// </summary>
 	protected override void OnMouseDown( MousePanelEvent e )
 	{
 		base.OnMouseDown( e );
 
-		Value = ScreenPosToValue( ScreenMousePosition );
-		OnValueChanged?.Invoke( Value );
+		TextEntryPanel?.Blur();
 		e.StopPropagation();
 
-		TextEntryPanel?.Blur();
+		if ( e.Button == "mouseleft" && _prefixChip.IsValid() && _prefixChip.Box.Rect.IsInside( ScreenMousePosition ) )
+		{
+			_scrubbing = true;
+			_scrubValue = Value;
+			_scrubLastX = ScreenMousePosition.x;
+			return;
+		}
+
+		SetFromInput( ScreenPosToValue( ScreenMousePosition ) );
+	}
+
+	protected override void OnMouseUp( MousePanelEvent e )
+	{
+		base.OnMouseUp( e );
+		_scrubbing = false;
+		if ( !TextEntryPanel.HasFocus ) CommitPending();
+	}
+
+	/// <summary>
+	/// Dragging the chip moves the value relative to where it was - the whole range over a
+	/// thousand pixels, ten times finer with the right button held too, like NumberEntry.
+	/// </summary>
+	void Scrub( MousePanelEvent e )
+	{
+		var x = ScreenMousePosition.x;
+		var step = (Max - Min) / 1000.0f;
+		if ( e.MouseButton == MouseButtons.Right ) step *= 0.1f;
+
+		_scrubValue = (_scrubValue + (x - _scrubLastX) / ScaleToScreen * step).Clamp( Min, Max );
+		_scrubLastX = x;
+
+		SetFromInput( Step > 0 ? _scrubValue.SnapToGrid( Step ) : _scrubValue );
+		e.StopPropagation();
 	}
 
 	protected override void OnMiddleClick( MousePanelEvent e )

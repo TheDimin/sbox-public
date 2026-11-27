@@ -1,0 +1,63 @@
+@using Sandbox.Mounting;
+@using Sandbox.UI;
+@namespace Sandbox
+@inherits Panel
+
+@if ( !Weapons && !CarParts && items.Count > 0 )
+{
+	<div style="flex-direction: column; gap: 8px; align-items: stretch; width: 300px;">
+		@if ( Paints.Count > 1 )
+		{
+			<label>#spawnmenu.inspect.paint</label>
+			<UIDropdown Items=@Paints Value=@Paint ValueChanged=@((object value) => { Paint = (string)value; }) Tokenize=@false />
+		}
+		<SpawnMenuIcon Ident=@items[0].Ident Title=@items[0].Title SpawnMetadata=@Paint />
+	</div>
+}
+else
+{
+<VirtualGrid Items=@items ItemSize=@(new Vector2( 123, 123 ))>
+	<Item Context="item">
+		@if ( item is Entry entry )
+		{
+			<SpawnMenuIcon Ident=@entry.Ident Title=@entry.Title />
+		}
+	</Item>
+</VirtualGrid>
+}
+
+@code
+{
+	public bool Weapons { get; set; }
+	public bool CarParts { get; set; }
+
+	record Entry( string Ident, string Title );
+	List<Entry> items = [];
+	List<UIDropdown.Item> Paints = [];
+	string Paint { get; set; }
+
+	protected override int BuildHash() => HashCode.Combine( Weapons, CarParts, Paint, items.Count );
+
+	protected override void OnParametersSet()
+	{
+		items.Clear();
+		if ( Weapons )
+		{
+			var folder = Sandbox.Mounting.Directory.Get( "gtav" )?.RootFolder?.Folders.FirstOrDefault( x => x.Name == "weapons" );
+			if ( folder is null ) return;
+			foreach ( var weapon in folder.Files.Where( x => x.Type == ResourceType.PrefabFile && x.Tags.Contains( MountedPrefabs.WeaponTag ) ).OrderBy( x => x.Name ) )
+				items.Add( new( $"mountprefab:{weapon.Path}", MountedPrefabs.Title( weapon.Path ) ) );
+		}
+		else if ( CarParts )
+		{
+			if ( ResourceLibrary.Get<ScriptedEntity>( "vehicles/adder/adder_wheel.sent" ) is { IsMountAvailable: true } wheel )
+				items.Add( new( $"entity:{wheel.ResourcePath}", wheel.Title ) );
+		}
+		else if ( ResourceLibrary.Get<ScriptedEntity>( AdderPaint.EntityPath ) is { IsMountAvailable: true } car )
+		{
+			items.Add( new( $"entity:{car.ResourcePath}", car.Title ) );
+			Paints = AdderPaint.GetOptions( Model.Load( AdderPaint.BodyPath ) );
+			Paint = Paints.FirstOrDefault()?.Value as string;
+		}
+	}
+}

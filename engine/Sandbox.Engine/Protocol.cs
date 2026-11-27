@@ -8,15 +8,16 @@ public static class Protocol
 	/// <summary>
 	/// We cannot play packages with an Api version higher than this.
 	/// </summary>
-	public static int Api => 32;
+	public static int Api => 33;
 
 	/// <summary>
 	/// We cannot talk to servers or clients with a network protocol different to this.
 	/// </summary>
-	public static int Network => 1113;
+	public static int Network => 1125;
 }
 
 // Api Versions
+// 33. 29 October 2026 - AG2 adds the Sandbox.Animation namespace; AssetType.AnimationGraph now selects .ag, use LegacyAnimationGraph for .vanmgrph
 // 32. 22 October 2026 - ModelPhysics bodies and joints use NetList
 // 31. 17 October 2026 - Network stuff
 // 30. 05 October 2026 - Compiled sounds support Opus and Vorbis compression
@@ -33,6 +34,15 @@ public static class Protocol
 
 
 // Network Versions
+// 1125. 24 November 2026 - User commands pack named actions, controller axes, aim angles, mouse movement and wheel deltas
+// 1121. 23 November 2026 - ServerInfo says whether the host is a dedicated server
+// 1120. 22 November 2026 - Object create and refresh messages carry their JSON as UTF-8 bytes
+// 1119. 18 November 2026 - CodeArchive join snapshots advertise checksums
+// 1118. 16 November 2026 - WorkshopItems table for maps and addons; game Workshop ID in ServerInfo
+// 1117. 11 November 2026 - Scripts string table and ServerPackages resource readiness payload
+// 1116. 4 November 2026 - LoadSceneSnapshotMsg carries the maps to mount
+// 1115. 29th October 2026 - Voice travels as VoiceChatBroadcastMsg instead of the Msg_Voice RPC
+// 1114. 29 October 2026 - ParticleFloat uses an explicit BytePack format
 // 1113. 26th October 2026 - ServerInfo says which version of the game's workshop item the host has
 // 1112. 25th October 2026 - ServerInfo carries the host's SteamId
 // 1109. 14th October 2026 - Network rebuild: delta snapshot clusters, 32 bit snapshot ids, multicast relays, raw typed RPCs, targeted messages removed

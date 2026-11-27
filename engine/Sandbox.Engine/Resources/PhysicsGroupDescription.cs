@@ -49,7 +49,7 @@ public sealed class PhysicsGroupDescription : Resource
 		Dispose();
 		Refresh();
 
-		foreach ( var scene in Scene.All )
+		foreach ( var scene in Scene.AllIncludingUnlisted )
 		{
 			using var scope = scene.Push();
 
@@ -483,6 +483,7 @@ public sealed class PhysicsGroupDescription : Resource
 		{
 			internal RnHullDesc_t native;
 			internal RnHull_t hull;
+			Line[] _gizmoLines;
 
 			public BBox Bounds { get; init; }
 
@@ -507,6 +508,21 @@ public sealed class PhysicsGroupDescription : Resource
 				}
 			}
 
+			// Resource outlines are immutable until this part is disposed during a reload.
+			internal ReadOnlySpan<Line> GetGizmoLines()
+			{
+				if ( _gizmoLines is null )
+				{
+					_gizmoLines = new Line[hull.GetEdgeCount()];
+					for ( var i = 0; i < _gizmoLines.Length; ++i )
+					{
+						hull.GetEdgeVertex( i, out var a, out var b );
+						_gizmoLines[i] = new Line( a, b );
+					}
+				}
+				return _gizmoLines;
+			}
+
 			public IEnumerable<Vector3> GetPoints()
 			{
 				for ( int i = 0; i < hull.GetVertexCount(); i++ )
@@ -519,6 +535,7 @@ public sealed class PhysicsGroupDescription : Resource
 			{
 				native = default;
 				hull = default;
+				_gizmoLines = null;
 			}
 		}
 
@@ -527,6 +544,7 @@ public sealed class PhysicsGroupDescription : Resource
 		{
 			internal RnMeshDesc_t native;
 			internal RnMesh_t mesh;
+			Triangle[] _gizmoTriangles;
 
 			public BBox Bounds { get; init; }
 
@@ -612,10 +630,25 @@ public sealed class PhysicsGroupDescription : Resource
 				}
 			}
 
+			internal ReadOnlySpan<Triangle> GetGizmoTriangles()
+			{
+				if ( _gizmoTriangles is null )
+				{
+					_gizmoTriangles = new Triangle[mesh.GetTriangleCount()];
+					for ( var i = 0; i < _gizmoTriangles.Length; ++i )
+					{
+						mesh.GetTriangle( i, out var a, out var b, out var c );
+						_gizmoTriangles[i] = new Triangle( a, b, c );
+					}
+				}
+				return _gizmoTriangles;
+			}
+
 			internal override void Dispose()
 			{
 				native = default;
 				mesh = default;
+				_gizmoTriangles = null;
 			}
 		}
 	}

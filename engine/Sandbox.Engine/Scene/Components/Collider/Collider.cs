@@ -1,4 +1,5 @@
-﻿namespace Sandbox;
+﻿using Sandbox.Engine;
+namespace Sandbox;
 
 [Expose]
 public abstract partial class Collider : Component, Component.ExecuteInEditor, Component.IHasBounds
@@ -30,8 +31,9 @@ public abstract partial class Collider : Component, Component.ExecuteInEditor, C
 			_keyframeBody.BodyType = isKeyframed ? PhysicsBodyType.Keyframed : PhysicsBodyType.Static;
 			_keyframeBody.UseController = isKeyframed;
 
-			if ( isKeyframed ) ScenePhysicsSystem.Current?.AddKeyframe( this );
-			else ScenePhysicsSystem.Current?.RemoveKeyframe( this );
+			var system = Scene.GetSystem<ScenePhysicsSystem>();
+			if ( isKeyframed ) system?.AddKeyframe( this );
+			else system?.RemoveKeyframe( this );
 		}
 	}
 
@@ -138,10 +140,7 @@ public abstract partial class Collider : Component, Component.ExecuteInEditor, C
 
 			_surface = value;
 
-			foreach ( var shape in Shapes )
-			{
-				shape.Surface = _surface;
-			}
+			ApplyShapeSurfaces();
 		}
 	}
 
@@ -205,6 +204,7 @@ public abstract partial class Collider : Component, Component.ExecuteInEditor, C
 		UpdatePhysicsBody();
 
 		Transform.OnTransformChangedInternal += TransformChanged;
+		Transform.OnProxyChangedInternal += QueueKeyframeUpdate;
 		ChangeBody();
 
 		base.OnEnabledInternal();
@@ -213,17 +213,43 @@ public abstract partial class Collider : Component, Component.ExecuteInEditor, C
 	internal override void OnDisabledInternal()
 	{
 		Transform.OnTransformChangedInternal -= TransformChanged;
+		Transform.OnProxyChangedInternal -= QueueKeyframeUpdate;
 
 		DisconnectBody();
 
-		// Component disabled tells triggers to check for exits.
-		base.OnDisabledInternal();
+		try
+		{
+			base.OnDisabledInternal();
+		}
+		finally
+		{
+			// Our shapes are gone without sending trigger exits, end those pairs even if a disable callback threw
+			NotifyTouchWatchers();
+		}
 
 		// Dispose collision events last to hold onto touching for as long as possible.
 		if ( !GameObject.IsDestroyed )
 		{
 			_collisionEvents?.Dispose();
 			_collisionEvents = null;
+		}
+	}
+
+	// Collision event systems with a trigger pair against us, our shapes go away without sending exits
+	HashSet<CollisionEventSystem> _touchWatchers;
+
+	internal void AddTouchWatcher( CollisionEventSystem watcher ) => (_touchWatchers ??= new()).Add( watcher );
+	internal void RemoveTouchWatcher( CollisionEventSystem watcher ) => _touchWatchers?.Remove( watcher );
+
+	void NotifyTouchWatchers()
+	{
+		if ( _touchWatchers is null || _touchWatchers.Count == 0 )
+			return;
+
+		using ( GameTransform.DisableInterpolation() )
+		{
+			foreach ( var watcher in _touchWatchers.ToArray() )
+				watcher.RemoveDeactivated();
 		}
 	}
 
@@ -313,6 +339,21 @@ public abstract partial class Collider : Component, Component.ExecuteInEditor, C
 		}
 	}
 
+	/// <summary>
+	/// Append touching colliders to a reusable list without allocating an enumerator.
+	/// </summary>
+	public void GetTouching( List<Collider> result )
+	{
+		if ( _collisionEvents is not null )
+		{
+			_collisionEvents.GetTouching( result );
+		}
+		else
+		{
+			Rigidbody?.GetTouching( result );
+		}
+	}
+
 	protected virtual void RebuildImmediately()
 	{
 		if ( !Active ) return;
@@ -347,7 +388,7 @@ public abstract partial class Collider : Component, Component.ExecuteInEditor, C
 				}
 				else
 				{
-					var system = ScenePhysicsSystem.Current;
+					var system = Scene.GetSystem<ScenePhysicsSystem>();
 					if ( Static ) system?.RemoveKeyframe( this );
 					else system?.AddKeyframe( this );
 				}
@@ -417,12 +458,19 @@ public abstract partial class Collider : Component, Component.ExecuteInEditor, C
 		}
 	}
 
+	internal virtual void ApplyShapeSurfaces()
+	{
+		foreach ( var shape in Shapes )
+			shape.Surface = Surface;
+	}
+
 	/// <summary>
 	/// Apply any things that we an apply after they're created
 	/// </summary>
 	protected void ConfigureShapes()
 	{
 		ApplyColliderFlags();
+		if ( Surface.IsValid() ) ApplyShapeSurfaces();
 
 		BBox? bounds = null;
 		var invScale = 1.0f / Transform.World.SafeScale;
@@ -431,12 +479,6 @@ public abstract partial class Collider : Component, Component.ExecuteInEditor, C
 		{
 			shape.Collider = this;
 			shape.IsTrigger = IsTrigger;
-
-			// Only override with a valid surface, otherwise it will override the surface set by model collision!
-			if ( Surface.IsValid() )
-			{
-				shape.Surface = Surface;
-			}
 
 			if ( Friction.HasValue )
 			{
@@ -524,6 +566,8 @@ public abstract partial class Collider : Component, Component.ExecuteInEditor, C
 		}
 		else
 		{
+			QueueKeyframeUpdate();
+
 			if ( !Transform.InsideChangeCallback && targetTransform == _bodyWorld.WithScale( 1.0f ) )
 			{
 				TeleportKeyframeBody( targetTransform );
@@ -535,7 +579,7 @@ public abstract partial class Collider : Component, Component.ExecuteInEditor, C
 
 	internal void OnResize<T>( in WrappedPropertySet<T> p )
 	{
-		var property = Game.TypeLibrary.GetMemberByIdent( p.MemberIdent ) as PropertyDescription;
+		var property = GlobalContext.Current.TypeLibrary.GetMemberByIdent( p.MemberIdent ) as PropertyDescription;
 		var oldValue = property.GetValue( p.Object );
 		var isTheSame = Equals( p.Value, oldValue );
 
@@ -550,8 +594,16 @@ public abstract partial class Collider : Component, Component.ExecuteInEditor, C
 	protected void CalculateLocalBounds()
 	{
 		var invScale = 1.0f / Transform.World.SafeScale;
-		LocalBounds = BBox.FromBoxes( Shapes.Where( x => x.IsValid() )
-			.Select( x => x.LocalBounds.Scale( invScale ) ) );
+		BBox bounds = default;
+		var first = true;
+		foreach ( var shape in Shapes )
+		{
+			if ( !shape.IsValid() ) continue;
+			var box = shape.LocalBounds.Scale( invScale );
+			bounds = first ? box : bounds.AddBBox( box );
+			first = false;
+		}
+		LocalBounds = bounds;
 	}
 
 	[AttributeUsage( AttributeTargets.Property )]

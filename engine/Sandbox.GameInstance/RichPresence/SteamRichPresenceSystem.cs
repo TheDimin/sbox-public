@@ -16,14 +16,21 @@ internal sealed class SteamRichPresenceSystem : IRichPresenceSystem
 		if ( _values.TryGetValue( key, out var oldValue ) && oldValue == value )
 			return;
 
-		Steam.SteamFriends().SetRichPresence( key, value );
+		var friends = Steam.SteamFriends();
+		if ( friends.IsValid )
+			friends.SetRichPresence( key, value );
 
 		_values[key] = value;
 	}
 
 	void Clear()
 	{
-		Steam.SteamFriends().ClearRichPresence();
+		var friends = Steam.SteamFriends();
+		if ( friends.IsValid )
+		{
+			friends.ClearRichPresence();
+		}
+
 		_values.Clear();
 	}
 
@@ -97,15 +104,39 @@ internal sealed class SteamRichPresenceSystem : IRichPresenceSystem
 			SetValue( "steam_player_group_size", null );
 		}
 
-		if ( IGameInstance.Current.Package is Package gamePackage )
+		if ( Application.IsEditor )
 		{
-			SetValue( "steam_display", "#StatusGame" );
+			// In editor
+			SetValue( "steam_display", "#StatusEditor" );
+		}
+		else if ( IGameInstance.Current.Package is Package gamePackage )
+		{
+			if ( Application.Map?.Title is { } mapTitle )
+			{
+				// Playing Sandbox - Construct
+				SetValue( "steam_display", "#StatusGameMap" );
+				SetValue( "maptitle", mapTitle );
+			}
+			else if ( Application.Map?.ShortName is { } mapName )
+			{
+				// Playing Sandbox - gm_construct
+				SetValue( "steam_display", "#StatusGameMap" );
+				SetValue( "maptitle", mapName );
+			}
+			else
+			{
+				// Playing Sandbox
+				SetValue( "steam_display", "#StatusGame" );
+				SetValue( "maptitle", "" );
+			}
+
 			SetValue( "gametitle", gamePackage.Title );
 			SetValue( "map", "" );
 			SetValue( "gamename", Application.GameIdent );
 		}
 		else
 		{
+			// Playing Secret Game
 			SetValue( "steam_display", "#StatusGame" );
 			SetValue( "gametitle", "Secret Game" );
 			SetValue( "map", "" );

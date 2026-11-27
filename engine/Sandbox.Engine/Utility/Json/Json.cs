@@ -12,6 +12,7 @@ namespace Sandbox;
 /// <summary>
 /// A convenience JSON helper that handles <see cref="Resource"/> types for you.
 /// </summary>
+[Expose]
 public static partial class Json
 {
 	internal static JsonSerializerOptions options
@@ -34,7 +35,7 @@ public static partial class Json
 	/// </summary>
 	internal static void Initialize()
 	{
-		var typeLibrary = Game.TypeLibrary;
+		var typeLibrary = GlobalContext.Current.TypeLibrary;
 
 		GlobalContext.Current.JsonSerializerOptions = new JsonSerializerOptions( JsonSerializerOptions.Default );
 		options.WriteIndented = true;
@@ -271,6 +272,10 @@ public static partial class Json
 	{
 		if ( node is null ) return default;
 
+		// A parsed value still has its text, read that instead of writing the node out and parsing it again
+		if ( node is JsonValue value && value.TryGetValue( out JsonElement element ) )
+			return element.Deserialize( type, options );
+
 		return node.Deserialize( type, options );
 	}
 
@@ -280,6 +285,10 @@ public static partial class Json
 	public static T FromNode<T>( JsonNode node )
 	{
 		if ( node is null ) return default;
+
+		if ( node is JsonValue value && value.TryGetValue( out JsonElement element ) )
+			return element.Deserialize<T>( options );
+
 		return node.Deserialize<T>( options );
 	}
 

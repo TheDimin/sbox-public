@@ -11,6 +11,9 @@ public partial class RenderAttributes
 
 	private Dictionary<StringToken, ITexture> usedTextures; // lazy allocated
 
+	// Shared attributes like SceneObject.Attributes get textures set from views rendering in parallel
+	private readonly System.Threading.Lock usedTexturesLock = new();
+
 	private void SetUsedTexture( StringToken k, Texture texture )
 	{
 		usedTextures ??= [];
@@ -40,21 +43,46 @@ public partial class RenderAttributes
 		usedTextures[k] = native.CopyStrongHandle();
 	}
 
+	// MergeToPtr copies the raw texture handles, so the target needs its own strong handles
+	private void MergeUsedTexturesTo( RenderAttributes target )
+	{
+		if ( target == this || usedTextures is null )
+			return;
+
+		foreach ( var (k, texture) in usedTextures )
+		{
+			target.usedTextures ??= [];
+
+			if ( target.usedTextures.TryGetValue( k, out var old ) )
+			{
+				if ( old.GetBindingPtr() == texture.GetBindingPtr() )
+					continue;
+
+				old.DestroyStrongHandle();
+			}
+
+			target.usedTextures[k] = texture.CopyStrongHandle();
+		}
+	}
+
 	/// <summary>
 	/// Clear used textures, destroying any strong handles we've created.
 	/// These handles are mainly used for storage RenderAttributes like SceneObject.Attributes
 	/// </summary>
 	private void ClearUsedTextures()
 	{
-		if ( usedTextures is null )
-			return;
-
-		// Clean up any strong handles
-		foreach ( var tex in usedTextures.Values )
+		lock ( usedTexturesLock )
 		{
-			if ( !tex.IsValid ) continue;
-			tex.DestroyStrongHandle();
+			if ( usedTextures is null )
+				return;
+
+			// Clean up any strong handles
+			foreach ( var tex in usedTextures.Values )
+			{
+				if ( !tex.IsValid ) continue;
+				tex.DestroyStrongHandle();
+			}
+			usedTextures.Clear();
 		}
-		usedTextures.Clear();
 	}
 }

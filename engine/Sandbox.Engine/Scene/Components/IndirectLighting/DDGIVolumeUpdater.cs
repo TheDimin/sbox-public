@@ -1,3 +1,4 @@
+using NativeEngine;
 using Sandbox.Rendering;
 using System.Threading;
 
@@ -8,6 +9,7 @@ namespace Sandbox;
 /// </summary>
 class DDGIProbeUpdaterCubemapper : IDisposable
 {
+	private const int CaptureSize = 64;
 	private readonly IndirectLightVolume _volume;
 	private readonly SceneCamera _camera;
 	private List<Vector3Int> _pendingProbes;
@@ -31,8 +33,10 @@ class DDGIProbeUpdaterCubemapper : IDisposable
 
 	Vector3Int _renderedIndex = 0;
 
-	static ComputeShader DepthCopyShader = new ComputeShader( "common/DDGI/ddgi_depth_copy_cs" );
-	static ComputeShader IntegrateShader = new ComputeShader( "common/DDGI/ddgi_integrate_cs" );
+	// Made by the constructor, on the main thread. As static initializers they were first reached from the camera's stage hook,
+	// on a thread recording a face, where Material.Create throws: the type failed to initialize, and the bake integrated nothing.
+	static ComputeShader DepthCopyShader;
+	static ComputeShader IntegrateShader;
 
 	/// <summary>
 	/// Creates the capture camera and temporary textures for one volume bake.
@@ -41,6 +45,9 @@ class DDGIProbeUpdaterCubemapper : IDisposable
 	{
 		_volume = volume;
 		_pendingProbes = new List<Vector3Int>();
+
+		DepthCopyShader ??= new ComputeShader( "common/DDGI/ddgi_depth_copy_cs" );
+		IntegrateShader ??= new ComputeShader( "common/DDGI/ddgi_integrate_cs" );
 
 		// Initialize camera for probe captures
 		_camera = new SceneCamera
@@ -66,13 +73,25 @@ class DDGIProbeUpdaterCubemapper : IDisposable
 			if ( stage != Stage.AfterTransparent )
 				return;
 
-			// We don't render depth to cubemap, so we copy it manually using a compute shader
-			var depth = Texture.FromNative( Graphics.SceneLayer.GetDepthTarget() );
-
-			int face = Graphics.SceneView.GetRenderTargetArrayIndex();
-			CopyDepthToColor( depth, _captureDepth, face );
-
-			depth.Dispose();
+			// We don't render depth to cubemap, so we copy it manually using a compute shader. A face on Borealis.Gpu has its
+			// depth as an engine texture; a native view's is a native one
+			int face = Graphics.CubeFace;
+			if ( Graphics.DepthTexture is { } depthTexture )
+			{
+				CopyDepthToColor( depthTexture, _captureDepth, face );
+			}
+			else
+			{
+				var depth = Graphics.GetDepthTarget( out var owned );
+				try
+				{
+					CopyDepthToColor( depth, _captureDepth, face );
+				}
+				finally
+				{
+					if ( owned && !depth.IsNull ) depth.DestroyStrongHandle();
+				}
+			}
 
 			// Recording order is arbitrary; GPU submission follows the face order.
 			if ( face == 5 )
@@ -91,18 +110,30 @@ class DDGIProbeUpdaterCubemapper : IDisposable
 	/// <summary>
 	/// Copies depth texture values to a color texture array slice using a compute shader.
 	/// </summary>
-	void CopyDepthToColor( Texture srcDepth, Texture dstColor, int dstArraySlice )
+	void CopyDepthToColor( ITexture srcDepth, Texture dstColor, int dstArraySlice )
 	{
-		var width = srcDepth.Width;
-		var height = srcDepth.Height;
-
 		var attrs = RenderAttributes.Pool.Get();
 		attrs.Set( "SourceDepth", srcDepth );
+		CopyDepthToColor( attrs, dstColor, dstArraySlice );
+	}
+
+	/// <summary>
+	/// <see cref="CopyDepthToColor(ITexture, Texture, int)"/> from an engine texture's depth (a face drawn on Borealis.Gpu).
+	/// </summary>
+	void CopyDepthToColor( Texture srcDepth, Texture dstColor, int dstArraySlice )
+	{
+		var attrs = RenderAttributes.Pool.Get();
+		attrs.Set( "SourceDepth", srcDepth );
+		CopyDepthToColor( attrs, dstColor, dstArraySlice );
+	}
+
+	void CopyDepthToColor( RenderAttributes attrs, Texture dstColor, int dstArraySlice )
+	{
 		attrs.Set( "DestTextureArray", dstColor );
-		attrs.Set( "TextureSize", new Vector2Int( width, height ) );
+		attrs.Set( "TextureSize", new Vector2Int( CaptureSize, CaptureSize ) );
 		attrs.Set( "DestArraySlice", dstArraySlice );
 
-		DepthCopyShader.DispatchWithAttributes( attrs, width, height, 1 );
+		DepthCopyShader.DispatchWithAttributes( attrs, CaptureSize, CaptureSize, 1 );
 		RenderAttributes.Pool.Return( attrs );
 	}
 
@@ -133,45 +164,39 @@ class DDGIProbeUpdaterCubemapper : IDisposable
 	/// Captures direct lighting, then one bounce from the completed first pass.
 	/// Returns false when either cancellation source interrupts the bake.
 	/// </summary>
-	public async Task<bool> RunAsync( CancellationToken token )
+	public async Task<bool> RunAsync( CancellationToken token, Editor.IProgressSection section = null )
 	{
-		FastTimer pauseTimer = FastTimer.StartNew();
+		using var popup = section is null ? Application.Editor.ProgressSection() : null;
+		var progress = section ?? popup;
 
-		using var progress = Application.Editor.ProgressSection();
-
+		var totalCaptures = _pendingProbes.Count * 2;
 		progress.Title = "Baking Indirect Light Volume";
-		progress.TotalCount = _pendingProbes.Count * 2;
+		progress.TotalCount = totalCaptures;
 		var progressToken = progress.GetCancel();
+
+		await Task.Yield();
+
+		int completedCaptures = 0;
+		var pauseTimer = FastTimer.StartNew();
 
 		for ( _pass = 0; _pass < 2; _pass++ )
 		{
-			if ( _pass == 1 )
-			{
-				// The volume preview keeps the completed first pass as a frozen bounce source.
-				var irradiance = CreateVolumeTexture(
-					new Vector3Int( GeneratedIrradianceTexture.Width, GeneratedIrradianceTexture.Height, GeneratedIrradianceTexture.Depth ),
-					ImageFormat.RGBA16161616F, "Irradiance" );
-				_firstPassIrradiance = GeneratedIrradianceTexture;
-				GeneratedIrradianceTexture = irradiance;
-			}
-
-			UpdateCaptureVolumes();
+			BeginPass();
 			foreach ( var probeIndex in _pendingProbes )
 			{
 				if ( token.IsCancellationRequested || progressToken.IsCancellationRequested )
 					return false;
 
-				progress.Subtitle = $"Rendering probe {progress.Current + 1:n0} / {progress.TotalCount:n0}";
-				if ( !await RenderProbe( probeIndex, token, progressToken ) )
-					return false;
-				if ( token.IsCancellationRequested || progressToken.IsCancellationRequested )
-					return false;
+				RenderProbe( probeIndex );
+				completedCaptures++;
 
-				progress.Current++;
-
-				if ( pauseTimer.ElapsedMilliSeconds > 20 )
+				// Update the editor between slices of capture work.
+				if ( pauseTimer.ElapsedMilliSeconds >= 20 || completedCaptures == totalCaptures )
 				{
+					progress.Subtitle = $"Rendering probe {completedCaptures:n0} / {totalCaptures:n0}";
+					progress.Current = completedCaptures;
 					await Task.Delay( 1 );
+					pauseTimer.Start();
 				}
 			}
 		}
@@ -182,6 +207,47 @@ class DDGIProbeUpdaterCubemapper : IDisposable
 		progress.Subtitle = $"Complete!";
 
 		return true;
+	}
+
+	/// <summary>
+	/// Start a pass: the second keeps the completed first as a frozen bounce source, and each captures with the volumes as they
+	/// are when it starts.
+	/// </summary>
+	void BeginPass()
+	{
+		if ( _pass == 1 )
+		{
+			// The volume preview keeps the completed first pass as a frozen bounce source.
+			var irradiance = CreateVolumeTexture(
+				new Vector3Int( GeneratedIrradianceTexture.Width, GeneratedIrradianceTexture.Height, GeneratedIrradianceTexture.Depth ),
+				ImageFormat.RGBA16161616F, "Irradiance" );
+			_firstPassIrradiance = GeneratedIrradianceTexture;
+			GeneratedIrradianceTexture = irradiance;
+		}
+
+		UpdateCaptureVolumes();
+	}
+
+	/// <summary>
+	/// The renderer probes capture through, rather than the frame's (<see cref="SceneRenderer.Current"/>): for tools that
+	/// compare them.
+	/// </summary>
+	internal ISceneRenderer Renderer { get; set; }
+
+	/// <summary>
+	/// Bake both passes now, without the editor's progress or yielding between probes: for tools and tests.
+	/// </summary>
+	internal void BakeNow()
+	{
+		for ( _pass = 0; _pass < 2; _pass++ )
+		{
+			BeginPass();
+			foreach ( var probeIndex in _pendingProbes )
+			{
+				PrepareProbe( probeIndex );
+				CaptureProbe();
+			}
+		}
 	}
 
 	/// <summary>
@@ -216,7 +282,16 @@ class DDGIProbeUpdaterCubemapper : IDisposable
 			_captureVolumes.SetData( data );
 	}
 
-	private async Task<bool> RenderProbe( Vector3Int probeIndex, CancellationToken token, CancellationToken progressToken )
+	private void RenderProbe( Vector3Int probeIndex )
+	{
+		PrepareProbe( probeIndex );
+		CaptureProbe();
+	}
+
+	/// <summary>
+	/// Move the capture camera to a probe, with the scene's attributes and the volumes the pass captures with.
+	/// </summary>
+	void PrepareProbe( Vector3Int probeIndex )
 	{
 		_renderedIndex = probeIndex;
 
@@ -227,19 +302,18 @@ class DDGIProbeUpdaterCubemapper : IDisposable
 		_volume.Scene.RenderAttributes.MergeTo( _camera.Attributes );
 		_camera.Attributes.Set( "DDGI_Volumes", _captureVolumes );
 		_camera.Attributes.Set( "DDGI_VolumeCount", _captureVolumeCount );
+	}
 
-		await Task.Yield();
-
-		if ( token.IsCancellationRequested || progressToken.IsCancellationRequested )
-			return false;
-
+	/// <summary>
+	/// Capture the probe's cube; the camera's stage hook copies each face's depth and integrates the probe after the sixth.
+	/// </summary>
+	void CaptureProbe()
+	{
 		foreach ( var texture in _captureTextures )
 			texture.MarkUsed( ushort.MaxValue );
 
-		_camera.RenderToCubeTexture( _captureTexture );
-
-		await Task.Yield();
-		return true;
+		if ( Renderer is null ) _camera.RenderToCubeTexture( _captureTexture );
+		else Renderer.RenderToCube( _camera, _captureTexture, default );
 	}
 
 	private void InitializeProbeQueue()
@@ -251,7 +325,11 @@ class DDGIProbeUpdaterCubemapper : IDisposable
 			{
 				for ( int x = 0; x < counts.x; x++ )
 				{
-					_pendingProbes.Add( new Vector3Int( x, y, z ) );
+					var index = new Vector3Int( x, y, z );
+					if ( _volume.GetProbe( index )?.Active == false )
+						continue;
+
+					_pendingProbes.Add( index );
 				}
 			}
 		}
@@ -259,16 +337,15 @@ class DDGIProbeUpdaterCubemapper : IDisposable
 
 	private void InitializeCaptureTexture()
 	{
-		const int cubemapSize = 64;
-		int numMips = (int)MathF.Log2( cubemapSize ) + 1;
+		int numMips = (int)MathF.Log2( CaptureSize ) + 1;
 
-		_captureTexture = Texture.CreateCube( cubemapSize, cubemapSize )
+		_captureTexture = Texture.CreateCube( CaptureSize, CaptureSize )
 								.WithUAVBinding()
 								.WithMips( numMips )
 								.WithFormat( ImageFormat.RGBA16161616F )
 								.Finish();
 
-		_captureDepth = Texture.CreateCube( cubemapSize, cubemapSize )
+		_captureDepth = Texture.CreateCube( CaptureSize, CaptureSize )
 								.WithUAVBinding()
 								.WithFormat( ImageFormat.R32F )
 								.Finish();

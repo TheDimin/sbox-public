@@ -5,6 +5,9 @@ using Sandbox.Internal;
 
 namespace Sandbox.Tests;
 
+/// <summary>
+/// Verifies script execution, host API restrictions, and context lifetimes.
+/// </summary>
 [TestClass]
 [DoNotParallelize]
 public class ScriptSystemTests
@@ -37,8 +40,281 @@ public class ScriptSystemTests
 		GlobalContext.Current = context = new GlobalContext { TypeLibrary = SharedLibrary.Value };
 	}
 
+	/// <summary>
+	/// Menu code cannot create a scripting runtime, even through direct context access.
+	/// </summary>
+	[TestMethod]
+	public void MenuCannotLoadScripts()
+	{
+		var previousMenu = GlobalContext.Menu;
+		try
+		{
+			GlobalContext.Menu = context;
+			var error = Assert.ThrowsException<InvalidOperationException>( () => context.Scripting.Load( "return 1;" ) );
+			StringAssert.Contains( error.Message, "Scripting is unavailable in the menu" );
+		}
+		finally
+		{
+			GlobalContext.Menu = previousMenu;
+		}
+	}
+
+	/// <summary>
+	/// Releases the async test host and restores the previous game context.
+	/// </summary>
 	[TestCleanup]
-	public void Cleanup() => GlobalContext.Current = previous;
+	public void Cleanup()
+	{
+		AsyncHost.Current = null;
+		GlobalContext.Current = previous;
+	}
+
+	/// <summary>
+	/// Network and console flags can be used as ordinary script values.
+	/// </summary>
+	[TestMethod]
+	public void NetworkAndConsoleFlagsAreAvailable()
+	{
+		Assert.AreEqual( NetFlags.Reliable, context.Scripting.Run<NetFlags>( "return NetFlags.Reliable;" ) );
+		Assert.AreEqual( ConVarFlags.Saved, context.Scripting.Run<ConVarFlags>( "return ConVarFlags.Saved;" ) );
+	}
+
+	/// <summary>
+	/// Networking attributes cannot publish without wrappers through the catalog's case-insensitive names.
+	/// Check both an ordinary file and a file that also contains a generated declaration.
+	/// </summary>
+	[TestMethod]
+	[DataRow( "sync" )]
+	[DataRow( "SYNC" )]
+	[DataRow( "syncAttribute" )]
+	[DataRow( "Sandbox.sync" )]
+	[DataRow( "sandbox.SyncAttribute" )]
+	public void NetworkingAttributesRejectNonCSharpNames( string attribute )
+	{
+		foreach ( var companion in new[] { "", "[Sync] public int Generated { get; set; }" } )
+		{
+			var source = $$"""
+				class NetworkAttributeProbe : Component
+				{
+					{{companion}}
+					[{{attribute}}] public int Value { get; set; }
+				}
+				""";
+			var result = context.Scripting.LoadFile( "network.csx", source );
+			Assert.IsFalse( result.Published, attribute );
+			Assert.IsFalse( result.Success, attribute );
+			Assert.IsFalse( result.RequiresReload, attribute );
+			var error = result.Diagnostics.Single();
+			Assert.AreEqual( "SCR_TYPE", error.Code, error.ToString() );
+			Assert.AreEqual( "network.csx", error.FilePath );
+			StringAssert.Contains( error.Message, attribute );
+		}
+	}
+
+	/// <summary>
+	/// The generator's supported attribute types remain available through short and qualified C# names.
+	/// </summary>
+	[TestMethod]
+	[DataRow( "SyncAttribute", typeof( SyncAttribute ) )]
+	[DataRow( "Sandbox.SyncAttribute", typeof( SyncAttribute ) )]
+	[DataRow( "global::Sandbox.SyncAttribute", typeof( SyncAttribute ) )]
+	[DataRow( "Rpc.BroadcastAttribute", typeof( Rpc.BroadcastAttribute ) )]
+	[DataRow( "Sandbox.Rpc.HostAttribute", typeof( Rpc.HostAttribute ) )]
+	[DataRow( "global::Sandbox.Rpc.OwnerAttribute", typeof( Rpc.OwnerAttribute ) )]
+	public void NetworkingAttributeTypesRemainAvailable( string name, Type expected )
+	{
+		var script = context.Scripting.CreateScript( $"return new {name}();" );
+		var attribute = script.RunAndReturn<object>();
+		Assert.IsNull( script.LastError, script.LastError?.ToString() );
+		Assert.IsNotNull( attribute );
+		Assert.AreEqual( expected, attribute.GetType() );
+	}
+
+	/// <summary>
+	/// The safe shared pool supports buffer operations through its returned runtime implementation.
+	/// </summary>
+	[TestMethod]
+	public void SafeArrayPoolSupportsRentAndReturn()
+	{
+		var script = context.Scripting.CreateScript( """
+			var pool = Sandbox.Internal.PublicArrayPool<int>.Shared;
+			var buffer = pool.Rent(4);
+			buffer[0] = 42;
+			var value = buffer[0];
+			pool.Return(buffer, true);
+			return value;
+			""" );
+		Assert.AreEqual( 42, script.RunAndReturn<int>(), script.LastError?.ToString() );
+		Assert.IsNull( script.LastError );
+		Assert.AreSame( PublicArrayPool<int>.Shared, context.Scripting.Run<object>( "return Sandbox.Internal.PublicArrayPool<int>.Shared;" ) );
+
+		var bclPool = context.Scripting.CreateScript( "return System.Buffers.ArrayPool<int>.Shared;" );
+		Assert.IsFalse( bclPool.Run() );
+		Assert.IsNotNull( bclPool.LastError );
+	}
+
+	/// <summary>
+	/// Familiar builder names construct the same safe wrapper used by compiled addon C#.
+	/// </summary>
+	[TestMethod]
+	[DataRow( "var sb = new System.Text.StringBuilder();" )]
+	[DataRow( "var sb = new StringBuilder();" )]
+	[DataRow( "StringBuilder sb = new StringBuilder();" )]
+	[DataRow( "System.Text.StringBuilder sb = new();" )]
+	public void StringBuilderNamesUseSafeWrapper( string declaration )
+	{
+		var script = context.Scripting.CreateScript( declaration + " return sb.Append(\"value=\").Append(42).AppendLine(\"!\").AppendLine();" );
+		var result = script.RunAndReturn<object>();
+
+		Assert.IsNull( script.LastError, script.LastError?.Message );
+		Assert.IsInstanceOfType<SafeStringBuilder>( result );
+		Assert.AreEqual( "value=42!" + Environment.NewLine + Environment.NewLine, result.ToString() );
+	}
+
+	/// <summary>
+	/// Every wrapper constructor and both string conversion overloads remain usable from scripts.
+	/// </summary>
+	[TestMethod]
+	[DataRow( "", "" )]
+	[DataRow( "16", "" )]
+	[DataRow( "16, 64", "" )]
+	[DataRow( "\"seed\"", "seed" )]
+	[DataRow( "\"seed\", 16", "seed" )]
+	[DataRow( "\"!seed!\", 1, 4, 16", "seed" )]
+	public void StringBuilderConstructorsAndFormatting( string arguments, string initial )
+	{
+		var script = context.Scripting.CreateScript( $$"""
+			var sb = new System.Text.StringBuilder({{arguments}});
+			sb.Append("!");
+			return sb.ToString() + sb.ToString(0, {{initial.Length}});
+			""" );
+
+		Assert.AreEqual( initial + "!" + initial, script.RunAndReturn<string>(), script.LastError?.Message );
+		Assert.IsNull( script.LastError );
+	}
+
+	/// <summary>
+	/// Builder support does not expose its implementation or reflection.
+	/// </summary>
+	[TestMethod]
+	[DataRow( "return new StringBuilder().GetType();" )]
+	[DataRow( "return new StringBuilder()._inner;" )]
+	[DataRow( "return raw.Append(\"unsafe\");" )]
+	public void StringBuilderImplementationRemainsHidden( string source )
+	{
+		var script = context.Scripting.CreateScript( source );
+		if ( source.Contains( "raw" ) )
+		{
+			script.SetArgument( "raw", new System.Text.StringBuilder() );
+		}
+
+		Assert.IsFalse( script.Run(), source );
+		Assert.IsNotNull( script.LastError );
+	}
+
+	/// <summary>
+	/// Only the registered wrapper is available, through the ordinary catalog member filters.
+	/// </summary>
+	[TestMethod]
+	public void StringBuilderCatalogPreservesRestrictions()
+	{
+		var resolver = new TypeLibraryScriptResolver( SharedLibrary.Value );
+		Assert.AreSame( typeof( SafeStringBuilder ), resolver.ResolveType( "System.Text.StringBuilder" ) );
+		Assert.AreSame( typeof( SafeStringBuilder ), resolver.ResolveType( "StringBuilder" ) );
+		Assert.IsNull( SharedLibrary.Value.GetType( typeof( System.Text.StringBuilder ) ) );
+		Assert.IsNull( resolver.ResolveType( "System.Text.Encoding" ) );
+
+		var members = new System.Collections.Generic.List<MemberInfo>();
+		resolver.GetMembers( typeof( SafeStringBuilder ), members );
+		Assert.AreEqual( 6, members.OfType<ConstructorInfo>().Count() );
+		Assert.AreEqual( 2, members.OfType<MethodInfo>().Count( method => method.Name == "ToString" ) );
+		Assert.IsFalse( members.OfType<MethodBase>().Any( method => method.GetParameters().Any( parameter => parameter.ParameterType.IsByRefLike ) ) );
+		Assert.IsFalse( members.Any( member => member.Name is "GetType" or "_inner" or "_syncLock" ) );
+	}
+
+	/// <summary>
+	/// Builder aliases follow catalog registration and do not hide a user's own StringBuilder type.
+	/// </summary>
+	[TestMethod]
+	public void StringBuilderAliasesFollowCatalogAndNamePrecedence()
+	{
+		var library = new TypeLibrary();
+		try
+		{
+			var resolver = new TypeLibraryScriptResolver( library );
+			Assert.IsNull( resolver.ResolveType( "StringBuilder" ) );
+			Assert.IsNull( resolver.ResolveType( "System.Text.StringBuilder" ) );
+
+			library.AddAssembly( typeof( SafeStringBuilder ).Assembly, false );
+			Assert.AreSame( typeof( SafeStringBuilder ), resolver.ResolveType( "StringBuilder" ) );
+			Assert.AreSame( typeof( SafeStringBuilder ), resolver.ResolveType( "System.Text.StringBuilder" ) );
+
+			var assembly = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(
+				new AssemblyName( "ScriptBuilderPrecedence" ), System.Reflection.Emit.AssemblyBuilderAccess.RunAndCollect );
+			var userType = assembly.DefineDynamicModule( "Types" ).DefineType( "User.StringBuilder", TypeAttributes.Public ).CreateType();
+			resolver.IncomingAssemblies = [assembly];
+			Assert.AreSame( userType, resolver.ResolveType( "StringBuilder" ) );
+			Assert.AreSame( typeof( SafeStringBuilder ), resolver.ResolveType( "System.Text.StringBuilder" ) );
+
+			resolver.IncomingAssemblies = [];
+			library.RemoveAssembly( typeof( SafeStringBuilder ).Assembly );
+			Assert.IsNull( resolver.ResolveType( "StringBuilder" ) );
+			Assert.IsNull( resolver.ResolveType( "System.Text.StringBuilder" ) );
+		}
+		finally
+		{
+			library.Dispose();
+		}
+	}
+
+	/// <summary>
+	/// Compatibility names must not shadow existing aliases, including aliases changed after lookup.
+	/// </summary>
+	[TestMethod]
+	public void StringBuilderCompatibilityNamesRespectLiveAliases()
+	{
+		var library = new TypeLibrary();
+		try
+		{
+			library.AddAssembly( typeof( SafeStringBuilder ).Assembly, false );
+			var assembly = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(
+				new AssemblyName( "ScriptBuilderAliases" ), System.Reflection.Emit.AssemblyBuilderAccess.RunAndCollect );
+			var builder = assembly.DefineDynamicModule( "Types" ).DefineType( "User.CustomBuilder", TypeAttributes.Public );
+			builder.SetCustomAttribute( new System.Reflection.Emit.CustomAttributeBuilder(
+				typeof( AliasAttribute ).GetConstructor( [typeof( string[] )] ), [new[] { "StringBuilder", "System.Text.StringBuilder" }] ) );
+			var userType = builder.CreateType();
+			var resolver = new TypeLibraryScriptResolver( library );
+			Assert.AreSame( typeof( SafeStringBuilder ), resolver.ResolveType( "StringBuilder" ) );
+
+			library.AddAssembly( assembly, true );
+			Assert.AreSame( userType, resolver.ResolveType( "StringBuilder" ) );
+			Assert.AreSame( userType, resolver.ResolveType( "System.Text.StringBuilder" ) );
+
+			library.GetType( userType ).Aliases[0] = "RenamedBuilder";
+			Assert.AreSame( typeof( SafeStringBuilder ), resolver.ResolveType( "StringBuilder" ) );
+			Assert.AreSame( userType, resolver.ResolveType( "RenamedBuilder" ) );
+			Assert.AreSame( userType, resolver.ResolveType( "System.Text.StringBuilder" ) );
+		}
+		finally
+		{
+			library.Dispose();
+		}
+	}
+
+	/// <summary>
+	/// The shared catalog also retains ActionGraph's existing ref-struct parameter restrictions.
+	/// </summary>
+	[TestMethod]
+	public void StringBuilderActionGraphMembersExcludeRefStructs()
+	{
+		var loader = new Sandbox.ActionGraphs.TypeLoader( () => SharedLibrary.Value );
+		foreach ( var name in new[] { "Append", "AppendLine", "Insert", "CopyTo" } )
+		{
+			var methods = loader.GetMethods( typeof( SafeStringBuilder ), name );
+			Assert.IsTrue( methods.Count > 0, name );
+			Assert.IsFalse( methods.Any( method => method.GetParameters().Any( parameter => parameter.ParameterType.IsByRefLike ) ), name );
+		}
+	}
 
 	[Expose]
 	public sealed class Host
@@ -55,7 +331,7 @@ public class ScriptSystemTests
 		public string NestedError { get; private set; }
 		public void Cascade()
 		{
-			var next = Game.Scripting.CreateScript( "Host.Cascade();" );
+			var next = GlobalContext.Current.Scripting.CreateScript( "Host.Cascade();" );
 			next.SetArgument( "Host", this );
 			if ( !next.Run() ) NestedError = next.LastError.Message;
 		}
@@ -69,7 +345,7 @@ public class ScriptSystemTests
 	[TestMethod]
 	public void InputsExpireOnSuccessAndFailure()
 	{
-		var script = Game.Scripting.CreateScript( "return Number * 2;" );
+		var script = GlobalContext.Current.Scripting.CreateScript( "return Number * 2;" );
 		script.SetArgument( "Number", 3 );
 		Assert.AreEqual( 6, script.RunAndReturn<int>() );
 		Assert.IsNull( script.LastError );
@@ -78,7 +354,7 @@ public class ScriptSystemTests
 		script.SetArgument( "Number", 4L );
 		Assert.AreEqual( 8L, script.RunAndReturn<long>() );
 
-		var failure = Game.Scripting.CreateScript( "Host.Value++; Host.Fail();" );
+		var failure = GlobalContext.Current.Scripting.CreateScript( "Host.Value++; Host.Fail();" );
 		var host = new Host();
 		failure.SetArgument( "Host", host );
 		Assert.IsFalse( failure.Run() );
@@ -91,7 +367,7 @@ public class ScriptSystemTests
 	[TestMethod]
 	public void MissingReceiversReportBindingErrorsAndScriptWritesExpire()
 	{
-		var script = Game.Scripting.CreateScript( "if (Skip) return 7; return Player.Read(1);" );
+		var script = GlobalContext.Current.Scripting.CreateScript( "if (Skip) return 7; return Player.Read(1);" );
 		script.SetArgument( "Skip", true );
 		// rc.1 needs receiver types before compiling even an untaken branch.
 		Assert.IsFalse( script.Run() );
@@ -106,7 +382,7 @@ public class ScriptSystemTests
 		script.SetArgument<Host>( "Player", null );
 		Assert.IsFalse( script.Run() );
 
-		var writes = Game.Scripting.CreateScript( "if (Write) X = 42; return X;" );
+		var writes = GlobalContext.Current.Scripting.CreateScript( "if (Write) X = 42; return X;" );
 		writes.SetArgument( "Write", true );
 		writes.SetArgument( "X", 0 );
 		Assert.AreEqual( 42, writes.RunAndReturn<int>(), writes.LastError?.Message );
@@ -117,7 +393,7 @@ public class ScriptSystemTests
 	[TestMethod]
 	public void ErrorsHaveSourceRangesAndReturnConversionFailures()
 	{
-		var script = Game.Scripting.CreateScript( "return Missing;" );
+		var script = GlobalContext.Current.Scripting.CreateScript( "return Missing;" );
 		Assert.IsFalse( script.Run() );
 		Assert.AreEqual( 7, script.LastError.Start );
 		Assert.AreEqual( 7, script.LastError.Length );
@@ -125,27 +401,27 @@ public class ScriptSystemTests
 		script.SetArgument( "Missing", new Host() );
 		Assert.AreEqual( 0, script.RunAndReturn<int>() );
 		Assert.AreEqual( "SCR_RETURN_TYPE", script.LastError.Code );
-		Assert.AreEqual( 0, Game.Scripting.CreateScript( "var local = 1;" ).RunAndReturn<int>() );
-		Assert.ThrowsException<Script.ScriptException>( () => Game.Scripting.Run<int>( "return (;" ) );
-		Assert.ThrowsException<Script.ScriptException>( () => Game.Scripting.Run<int>( "var local = 1;" ) );
-		Assert.ThrowsException<InvalidCastException>( () => Game.Scripting.Run<int>( "return 1.0;" ) );
+		Assert.AreEqual( 0, GlobalContext.Current.Scripting.CreateScript( "var local = 1;" ).RunAndReturn<int>() );
+		Assert.ThrowsException<Script.ScriptException>( () => GlobalContext.Current.Scripting.Run<int>( "return (;" ) );
+		Assert.ThrowsException<Script.ScriptException>( () => GlobalContext.Current.Scripting.Run<int>( "var local = 1;" ) );
+		Assert.ThrowsException<InvalidCastException>( () => GlobalContext.Current.Scripting.Run<int>( "return 1.0;" ) );
 	}
 
 	[TestMethod]
 	public void LocalsLoopsOperatorsAndHostMetadataWork()
 	{
-		var script = Game.Scripting.CreateScript( "long total = 0; for (var i = 0; i < 10; i++) { if (i < 5) total += i; else total += 2; } return total;" );
+		var script = GlobalContext.Current.Scripting.CreateScript( "long total = 0; for (var i = 0; i < 10; i++) { if (i < 5) total += i; else total += 2; } return total;" );
 		Assert.AreEqual( 20L, script.RunAndReturn<long>() );
 		Assert.AreEqual( 20L, script.RunAndReturn<long>() );
-		Assert.IsTrue( Game.Scripting.CreateScript( "return true || Missing.Read();" ).RunAndReturn<bool>() );
-		Assert.IsFalse( Game.Scripting.CreateScript( "return false && Missing.Read();" ).RunAndReturn<bool>() );
-		var vector = Game.Scripting.CreateScript( "return new Vector3(4, 5, 6) * 100;" );
+		Assert.IsTrue( GlobalContext.Current.Scripting.CreateScript( "return true || Missing.Read();" ).RunAndReturn<bool>() );
+		Assert.IsFalse( GlobalContext.Current.Scripting.CreateScript( "return false && Missing.Read();" ).RunAndReturn<bool>() );
+		var vector = GlobalContext.Current.Scripting.CreateScript( "return new Vector3(4, 5, 6) * 100;" );
 		var result = vector.RunAndReturn<Vector3>();
 		Assert.IsNull( vector.LastError, vector.LastError?.ToString() );
 		Assert.AreEqual( new Vector3( 400, 500, 600 ), result );
-		Assert.AreEqual( 10.0, Game.Scripting.Run<double>( "return Math.Cos(0) * 10;" ) );
-		Assert.IsTrue( Game.Scripting.CreateScript( "return Time.Now + RealTime.Now;" ).Run() );
-		var member = Game.Scripting.CreateScript( "return Player.Read(1);" );
+		Assert.AreEqual( 10.0, GlobalContext.Current.Scripting.Run<double>( "return Math.Cos(0) * 10;" ) );
+		Assert.IsTrue( GlobalContext.Current.Scripting.CreateScript( "return Time.Now + RealTime.Now;" ).Run() );
+		var member = GlobalContext.Current.Scripting.CreateScript( "return Player.Read(1);" );
 		member.SetArgument( "Player", new Host { Value = 2 } );
 		Assert.AreEqual( 3, member.RunAndReturn<int>(), member.LastError?.Message );
 	}
@@ -156,7 +432,7 @@ public class ScriptSystemTests
 	[DataRow( "return new Vector3(4, 5, 6) * 100.0f;" )]
 	public void VectorMultiplicationSelectsTheScalarOverload( string source )
 	{
-		var script = Game.Scripting.CreateScript( source );
+		var script = GlobalContext.Current.Scripting.CreateScript( source );
 		Assert.IsTrue( script.Compile(), script.LastError?.Message );
 		var result = script.RunAndReturn<Vector3>();
 		Assert.IsNull( script.LastError, script.LastError?.Message );
@@ -168,22 +444,22 @@ public class ScriptSystemTests
 	{
 		foreach ( var source in new[] { "Host.Hidden();", "Host.ReadOnly = 10;", "return Host.WriteOnly;", "Host.Field = 8;" } )
 		{
-			var script = Game.Scripting.CreateScript( source );
+			var script = GlobalContext.Current.Scripting.CreateScript( source );
 			script.SetArgument( "Host", new Host() );
 			Assert.IsFalse( script.Run(), source );
 		}
-		var denied = Game.Scripting.CreateScript( "return Target.Value;" );
+		var denied = GlobalContext.Current.Scripting.CreateScript( "return Target.Value;" );
 		denied.SetArgument( "Target", new UnexposedHost() );
 		Assert.IsFalse( denied.Run() );
-		Assert.IsFalse( Game.Scripting.CreateScript( "return System.IO.File.ReadAllText(\"secret\");" ).Run() );
-		Assert.IsFalse( Game.Scripting.CreateScript( "return new UnexposedHost();" ).Run() );
+		Assert.IsFalse( GlobalContext.Current.Scripting.CreateScript( "return System.IO.File.ReadAllText(\"secret\");" ).Run() );
+		Assert.IsFalse( GlobalContext.Current.Scripting.CreateScript( "return new UnexposedHost();" ).Run() );
 	}
 
 	[TestMethod]
 	public void ConstructedGenericInputsUseApprovedMembers()
 	{
 		var items = new System.Collections.Generic.List<int> { 2, 3 };
-		var script = Game.Scripting.CreateScript( "Items.Add(4); return Items[0] + Items.Count;" );
+		var script = GlobalContext.Current.Scripting.CreateScript( "Items.Add(4); return Items[0] + Items.Count;" );
 		script.SetArgument( "Items", items );
 		Assert.AreEqual( 5, script.RunAndReturn<int>(), script.LastError?.Message );
 		Assert.AreEqual( 3, items.Count );
@@ -193,8 +469,8 @@ public class ScriptSystemTests
 	public void InstancesAreIndependentAndHotloadInvalidatesPermissions()
 	{
 		UseOwnLibrary();
-		var first = Game.Scripting.CreateScript( "return Host.Read(1);" );
-		var second = Game.Scripting.CreateScript( "return Host.Read(1);" );
+		var first = GlobalContext.Current.Scripting.CreateScript( "return Host.Read(1);" );
+		var second = GlobalContext.Current.Scripting.CreateScript( "return Host.Read(1);" );
 		first.SetArgument( "Host", new Host { Value = 10 } );
 		second.SetArgument( "Host", new Host { Value = 20 } );
 		Assert.AreEqual( 11, first.RunAndReturn<int>(), first.LastError?.Message );
@@ -212,7 +488,7 @@ public class ScriptSystemTests
 	[TestMethod]
 	public void OptionalArgumentsUseTheirDeclaredDefaults()
 	{
-		var script = Game.Scripting.CreateScript( "return Player.Read();" );
+		var script = GlobalContext.Current.Scripting.CreateScript( "return Player.Read();" );
 		script.SetArgument( "Player", new Host() );
 		Assert.AreEqual( 1, script.RunAndReturn<int>() );
 		Assert.IsNull( script.LastError );
@@ -221,7 +497,7 @@ public class ScriptSystemTests
 	[TestMethod]
 	public void ContextsAreIsolatedAndOldScriptsDispose()
 	{
-		var script = Game.Scripting.CreateScript( "return 42;" );
+		var script = GlobalContext.Current.Scripting.CreateScript( "return 42;" );
 		var other = new GlobalContext { TypeLibrary = context.TypeLibrary };
 		GlobalContext.Current = other;
 		Assert.IsFalse( script.Run() );
@@ -231,7 +507,7 @@ public class ScriptSystemTests
 		context.TypeLibrary = new TypeLibrary();
 		Assert.IsFalse( script.Run() );
 		StringAssert.Contains( script.LastError.Message, "ended" );
-		var fresh = Game.Scripting.CreateScript( "return 1;" );
+		var fresh = GlobalContext.Current.Scripting.CreateScript( "return 1;" );
 		context.Shutdown();
 		Assert.IsFalse( fresh.Run() );
 	}
@@ -239,13 +515,13 @@ public class ScriptSystemTests
 	[TestMethod]
 	public void BudgetsAndReentryAreBounded()
 	{
-		var budget = Assert.ThrowsException<Script.ScriptException>( () => Game.Scripting.Run<int>( "while (true) { } return 0;" ) );
+		var budget = Assert.ThrowsException<Script.ScriptException>( () => GlobalContext.Current.Scripting.Run<int>( "while (true) { } return 0;" ) );
 		Assert.AreEqual( "SCR_BUDGET", budget.Code );
 		var host = new Host();
-		host.Recursive = Game.Scripting.CreateScript( "return Host.Reenter();" );
+		host.Recursive = GlobalContext.Current.Scripting.CreateScript( "return Host.Reenter();" );
 		host.Recursive.SetArgument( "Host", host );
 		Assert.IsFalse( host.Recursive.RunAndReturn<bool>() );
-		var cascade = Game.Scripting.CreateScript( "Host.Cascade();" );
+		var cascade = GlobalContext.Current.Scripting.CreateScript( "Host.Cascade();" );
 		cascade.SetArgument( "Host", host );
 		Assert.IsTrue( cascade.Run() );
 		StringAssert.Contains( host.NestedError, "depth limit" );
@@ -254,7 +530,7 @@ public class ScriptSystemTests
 	[TestMethod]
 	public void DirectRunsPreserveContextAndReleaseDepthAfterFailure()
 	{
-		var system = Game.Scripting;
+		var system = GlobalContext.Current.Scripting;
 		for ( int i = 0; i < 40; i++ )
 			Assert.ThrowsException<Script.ScriptException>( () => system.Run<int>( "return Missing;" ) );
 		Assert.AreEqual( 100000, system.Run<int>( "var total = 0; for (var i = 0; i < 100000; i++) total++; return total;" ) );
@@ -283,6 +559,218 @@ public class ScriptSystemTests
 		}
 	}
 
+	/// <summary>
+	/// Supplies a controlled asynchronous operation and records where its script resumes.
+	/// </summary>
+	[Expose]
+	public sealed class AsyncHost
+	{
+		/// <summary>
+		/// Durable host input for named script functions, independent of temporary invocation arguments.
+		/// </summary>
+		public static AsyncHost Current { get; set; }
+
+		internal readonly TaskCompletionSource<int> Completion = new();
+		internal GlobalContext ResumedContext;
+		internal int ResumedThread;
+
+		/// <summary>
+		/// Suspends until the test completes the host operation.
+		/// </summary>
+		public Task<int> Wait() => Completion.Task;
+
+		/// <summary>
+		/// Records the script's continuation context before returning its result.
+		/// </summary>
+		public int Finish( int value )
+		{
+			ResumedContext = GlobalContext.Current;
+			ResumedThread = Environment.CurrentManagedThreadId;
+			return value + 1;
+		}
+	}
+
+	private Task<int> StartAsyncScript( AsyncHost host )
+	{
+		AsyncHost.Current = host;
+		var task = context.Scripting.Run<Task<int>>( "async Task<int> Read() { var host = AsyncHost.Current; var value = await host.Wait(); return host.Finish(value); } return Read();" );
+		Assert.IsNotNull( task );
+		return task;
+	}
+
+	/// <summary>
+	/// A worker completing a host task only queues work; the owning context resumes it on its tick.
+	/// </summary>
+	[TestMethod]
+	public void AsyncScriptsResumeOnTheirOwningContextTick()
+	{
+		var host = new AsyncHost();
+		var task = StartAsyncScript( host );
+		var worker = new System.Threading.Thread( () => host.Completion.SetResult( 41 ) );
+		worker.Start();
+		worker.Join();
+		Assert.IsFalse( task.IsCompleted );
+
+		var other = new GlobalContext { TypeLibrary = context.TypeLibrary };
+		using ( new GlobalContext.GlobalContextScope( other ) )
+		{
+			other.TickScripting();
+			Assert.IsFalse( task.IsCompleted );
+		}
+
+		context.TickScripting();
+		Assert.IsTrue( task.IsCompletedSuccessfully );
+		Assert.AreEqual( 42, task.Result );
+		Assert.AreSame( context, host.ResumedContext );
+		Assert.AreEqual( Environment.CurrentManagedThreadId, host.ResumedThread );
+	}
+
+	/// <summary>
+	/// Failed and cancelled host operations complete the script task without running the rest of its body.
+	/// </summary>
+	[TestMethod]
+	[DataRow( false )]
+	[DataRow( true )]
+	public void AsyncScriptsPropagateHostFailure( bool cancelled )
+	{
+		var host = new AsyncHost();
+		var task = StartAsyncScript( host );
+		if ( cancelled )
+		{
+			host.Completion.SetCanceled();
+		}
+		else
+		{
+			host.Completion.SetException( new InvalidOperationException( "Host failed" ) );
+		}
+
+		context.TickScripting();
+		Assert.IsTrue( task.IsCompleted );
+		Assert.AreEqual( cancelled, task.IsCanceled );
+		Assert.AreEqual( !cancelled, task.IsFaulted );
+		if ( !cancelled ) StringAssert.Contains( task.Exception.ToString(), "Host failed" );
+		Assert.IsNull( host.ResumedContext );
+	}
+
+	/// <summary>
+	/// Hotload and context teardown prevent suspended scripts from executing stale code.
+	/// </summary>
+	[TestMethod]
+	[DataRow( false )]
+	[DataRow( true )]
+	public void AsyncScriptsStopWhenTheirOwnerChanges( bool shutdown )
+	{
+		var host = new AsyncHost();
+		var task = StartAsyncScript( host );
+		if ( shutdown )
+		{
+			context.Shutdown();
+		}
+		else
+		{
+			context.Scripting.InvalidateBindings();
+		}
+
+		host.Completion.SetResult( 41 );
+		context.TickScripting();
+		Assert.IsTrue( task.IsCompleted );
+		Assert.IsFalse( task.IsCompletedSuccessfully );
+		_ = task.Exception;
+		Assert.IsNull( host.ResumedContext );
+	}
+
+	/// <summary>
+	/// Task-returning functions without a result also resume, and each frame processes only a bounded batch.
+	/// </summary>
+	[TestMethod]
+	public void AsyncScriptsWithoutResultsAreBatchedAcrossTicks()
+	{
+		var hosts = Enumerable.Range( 0, 101 ).Select( _ => new AsyncHost() ).ToArray();
+		var tasks = hosts.Select( host =>
+		{
+			AsyncHost.Current = host;
+			return context.Scripting.Run<Task>( "async System.Threading.Tasks.Task Read() { await AsyncHost.Current.Wait(); } return Read();" );
+		} ).ToArray();
+
+		// A shared task can dispatch its extra awaiters through the ThreadPool. Each completion here
+		// has one awaiter, so all script continuations are queued before the first tick.
+		foreach ( var host in hosts )
+		{
+			host.Completion.SetResult( 1 );
+		}
+
+		context.TickScripting();
+		Assert.AreEqual( 100, tasks.Count( task => task.IsCompletedSuccessfully ) );
+		context.TickScripting();
+		Assert.IsTrue( tasks.All( task => task.IsCompletedSuccessfully ) );
+	}
+
+	/// <summary>
+	/// Task declaration names do not expose scheduling methods or constructors outside the approved catalog.
+	/// </summary>
+	[TestMethod]
+	public void AsyncTaskNamesPreserveMemberRestrictions()
+	{
+		var resolver = new TypeLibraryScriptResolver( context.TypeLibrary );
+		Assert.AreEqual( typeof( Task ), resolver.ResolveType( "Task" ) );
+		Assert.AreEqual( typeof( Task ), resolver.ResolveType( "System.Threading.Tasks.Task" ) );
+		Assert.AreEqual( typeof( Task<> ), resolver.ResolveType( "Task`1" ) );
+		Assert.AreEqual( typeof( Task<> ), resolver.ResolveType( "System.Threading.Tasks.Task`1" ) );
+
+		foreach ( var type in new[] { typeof( Task ), typeof( Task<> ), typeof( Task<int> ) } )
+		{
+			var members = new System.Collections.Generic.List<MemberInfo>();
+			resolver.GetMembers( type, members );
+			Assert.IsFalse( members.Any( member => member is ConstructorInfo || member.Name is "Run" or "Start" or "Wait" ), type.ToString() );
+			Assert.IsTrue( members.Any( member => member.Name == nameof( Task.IsCompleted ) ), type.ToString() );
+		}
+	}
+
+	/// <summary>
+	/// Registering tasks for observation does not let scripts construct unscheduled native work.
+	/// </summary>
+	[TestMethod]
+	[DataRow( "return new Task(() => {});" )]
+	[DataRow( "return new Task<int>(() => 42);" )]
+	public void TaskConstructionRequiresApproval( string source )
+	{
+		var script = context.Scripting.CreateScript( source );
+
+		Assert.IsFalse( script.Compile(), source );
+		Assert.IsNotNull( script.LastError );
+	}
+
+	/// <summary>
+	/// Explicitly approved constructors and ordinary generic collection constructors remain usable.
+	/// </summary>
+	[TestMethod]
+	[DataRow( "return new Exception(\"expected\").Message == \"expected\";" )]
+	[DataRow( "return new AggregateException(new Exception(\"expected\")).GetBaseException().Message == \"expected\";" )]
+	[DataRow( "return new System.Threading.CancellationToken(true).IsCancellationRequested;" )]
+	[DataRow( "var source = new System.Threading.CancellationTokenSource(); source.Cancel(); var cancelled = source.Token.IsCancellationRequested; source.Dispose(); return cancelled;" )]
+	[DataRow( "var values = new List<int>(); values.Add(42); return values[0] == 42;" )]
+	public void ApprovedConstructorsRemainUsable( string source )
+	{
+		var script = context.Scripting.CreateScript( source );
+
+		Assert.IsTrue( script.RunAndReturn<bool>(), script.LastError?.ToString() );
+		Assert.IsNull( script.LastError );
+	}
+
+	/// <summary>
+	/// Base constructor lookup honors the same catalog approval as direct construction.
+	/// </summary>
+	[TestMethod]
+	[DataRow( typeof( Array ), false )]
+	[DataRow( typeof( Exception ), true )]
+	public void BaseConstructorsRequireCatalogApproval( Type type, bool expected )
+	{
+		var members = new System.Collections.Generic.List<MemberInfo>();
+		new TypeLibraryScriptResolver( context.TypeLibrary ).GetBaseMembers( type, members );
+
+		Assert.AreEqual( expected, members.OfType<ConstructorInfo>().Any() );
+	}
+
 	static void AssertNoBreen( Type type )
 	{
 		Assert.AreNotEqual( "Breen", type.Assembly.GetName().Name, type.ToString() );
@@ -300,7 +788,7 @@ public class ScriptSystemTests
 	[TestMethod]
 	public void ForeignThreadsCannotConsumeArguments()
 	{
-		var script = Game.Scripting.CreateScript( "return Number;" );
+		var script = GlobalContext.Current.Scripting.CreateScript( "return Number;" );
 		script.SetArgument( "Number", 42 );
 		Exception failure = null;
 		var thread = new System.Threading.Thread( () =>
@@ -317,7 +805,7 @@ public class ScriptSystemTests
 	[TestMethod, TestCategory( Allocations.Category )]
 	public void WarmedCallsIncludingArgumentExpiryAllocateNothing()
 	{
-		var script = Game.Scripting.CreateScript( "return Math.Sin(Number) * 10.0;" );
+		var script = GlobalContext.Current.Scripting.CreateScript( "return Math.Sin(Number) * 10.0;" );
 		Allocations.AssertSettles( "10,000 calls", () =>
 		{
 			for ( int i = 0; i < 10_000; i++ )

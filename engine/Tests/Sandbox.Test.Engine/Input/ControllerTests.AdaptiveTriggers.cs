@@ -1,10 +1,7 @@
 using NativeEngine;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Sandbox.Engine;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -138,37 +135,6 @@ public unsafe partial class ControllerTests
 			Writes.Add( (handle, effect) );
 		}
 		internal override bool Shutdown() { ShutDown = true; return true; }
-	}
-
-	[TestMethod]
-	public void AdaptiveResistanceIsAvailableToGameAssemblies()
-	{
-		// Compile outside the test friend assembly, then apply the same access rules as a game.
-		var source = """
-			using Sandbox;
-			public static class TriggerExample
-			{
-				public static bool Enabled => Preferences.AdaptiveTriggers;
-				public static bool Apply()
-				{
-					using ( Input.PlayerScope( Input.PlayerIndex.Controller1 ) )
-						return Input.TrySetAdaptiveTriggerResistance( 0.25f, 0.5f, 1000 );
-				}
-				public static void Stop() => Input.StopAllHaptics();
-			}
-			""";
-		var references = ((string)AppContext.GetData( "TRUSTED_PLATFORM_ASSEMBLIES" )).Split( Path.PathSeparator )
-			.Select( path => MetadataReference.CreateFromFile( path ) );
-		var compilation = CSharpCompilation.Create( "package.tests.adaptivetriggers", [CSharpSyntaxTree.ParseText( source )], references,
-			new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary ) );
-		using var output = new MemoryStream();
-		var emitted = compilation.Emit( output );
-		Assert.IsTrue( emitted.Success, string.Join( Environment.NewLine, emitted.Diagnostics ) );
-		output.Position = 0;
-		using var access = new AccessControl();
-		var verified = access.VerifyAssembly( output, out var trusted );
-		using ( trusted )
-			Assert.IsTrue( verified.Success, string.Join( Environment.NewLine, verified.Errors ) );
 	}
 
 	[TestMethod]

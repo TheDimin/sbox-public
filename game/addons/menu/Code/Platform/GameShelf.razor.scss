@@ -1,0 +1,82 @@
+@import "/Platform/_platform.scss";
+
+// Laid out by the ShelfPanel it's on. The gap's GameShelf.HeaderGap.
+GameShelf
+{
+	@include platform-16x9;
+	flex-direction: column;
+	flex-shrink: 0;
+	gap: 18px;
+
+	.header
+	{
+		@include platform-shelf-header;
+	}
+
+	// Each card's in a cell with room round it to grow into, taken back off so they line up - the gap's what's left of
+	// GameShelf.CardGap once the insets are counted
+	.cards
+	{
+		gap: 4px;
+		margin: -6px;
+		flex-wrap: wrap;
+	}
+
+	.cell
+	{
+		position: relative;
+		flex-shrink: 0;
+
+		// Taken off the row - the card shrinks and fades where it is, then the cell closes up (to nothing, the gap after it
+		// too) so the ones after it slide over. GameShelf.LeaveTime covers both.
+		&.leaving
+		{
+			margin-right: -4px;
+			pointer-events: none;
+			transition: width 0.28s ease-in-out 0.14s, margin-right 0.28s ease-in-out 0.14s;
+
+			GameCard
+			{
+				opacity: 0;
+				transform: scale( 0.85 );
+				transition: opacity 0.16s ease-in, transform 0.16s ease-in;
+			}
+		}
+	}
+
+	// Inset in its cell as a card is - and only faded in once it's been a moment, so a quick fetch goes straight to the
+	// cards rather than flashing it
+	.skeleton
+	{
+		position: absolute;
+		left: 6px;
+		top: 6px;
+		right: 6px;
+		bottom: 6px;
+		@include platform-card-skeleton( shelf-breathe );
+		transition: opacity 0.3s ease-out 0.35s;
+
+		&:intro
+		{
+			opacity: 0;
+		}
+	}
+
+	.empty
+	{
+		@include platform-shelf-empty;
+	}
+}
+
+@keyframes shelf-breathe
+{
+	from
+	{
+		opacity: 0.6;
+	}
+
+	to
+	{
+		opacity: 1;
+	}
+}

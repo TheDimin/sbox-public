@@ -72,6 +72,11 @@ public partial class RootPanel : Panel
 	readonly UISystem system;
 
 	/// <summary>
+	/// Scratch stack for <see cref="Panel.TickInternal()"/>, empty outside of a tick.
+	/// </summary>
+	internal readonly List<Panel> TickStack = [];
+
+	/// <summary>
 	/// A root in the game's UI. This is the one addon code wants.
 	/// </summary>
 	public RootPanel() : this( GlobalContext.Current.UISystem )
@@ -107,7 +112,8 @@ public partial class RootPanel : Panel
 		base.OnDeleted();
 		fixedOverlays.Clear();
 		PanelCommandList.Enabled = false;
-		PanelCommandList.Reset();
+		PanelCommandList.DisposePainter(); // tasks can keep a deleted root alive
+		_recording.Clear();
 
 		UISystem.RemoveRoot( this );
 	}
@@ -116,14 +122,15 @@ public partial class RootPanel : Panel
 	{
 		base.AddToLists();
 
-		Sandbox.Internal.IPanel.InspectablePanels.Add( this );
+		// Root panels are made on more than one thread (tests run in parallel), so the shared set is changed under a lock
+		lock ( Sandbox.Internal.IPanel.InspectablePanels ) Sandbox.Internal.IPanel.InspectablePanels.Add( this );
 	}
 
 	internal override void RemoveFromLists()
 	{
 		base.RemoveFromLists();
 
-		Sandbox.Internal.IPanel.InspectablePanels.Remove( this );
+		lock ( Sandbox.Internal.IPanel.InspectablePanels ) Sandbox.Internal.IPanel.InspectablePanels.Remove( this );
 	}
 
 	/// <summary>
@@ -359,8 +366,25 @@ public partial class RootPanel : Panel
 		}
 		else
 		{
-			_buildStyleRule ??= BuildStyleRule;
-			Parallel.ForEach( styleRuleUpdates, _buildStyleRule );
+			// Copied to a list so threads can split it by index
+			_styleRuleList.AddRange( styleRuleUpdates );
+
+			try
+			{
+				JobDispatcher.For( _styleRuleList.Count, this, static ( root, i ) => root.BuildStyleRule( root._styleRuleList[i] ) );
+			}
+			finally
+			{
+				_styleRuleList.Clear();
+			}
+		}
+
+		// A ::before or ::after element appearing or going is made in the panel's tick, which nothing else wakes
+		foreach ( var panel in styleRuleUpdates )
+		{
+			if ( panel.Style is not { PseudoElementsChanged: true } style ) continue;
+			style.PseudoElementsChanged = false;
+			panel.WakeTick();
 		}
 
 		styleRuleUpdates.Clear();
@@ -373,7 +397,7 @@ public partial class RootPanel : Panel
 
 	readonly object _styleRuleLock = new();
 	int _styleRuleChanges;
-	Action<Panel> _buildStyleRule;
+	readonly List<Panel> _styleRuleList = new();
 
 	/// <summary>
 	/// Re-evaluate one panel's rules. Safe to run from a worker thread.

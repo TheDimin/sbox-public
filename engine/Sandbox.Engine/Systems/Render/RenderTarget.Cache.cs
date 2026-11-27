@@ -20,6 +20,12 @@ public sealed partial class RenderTarget
 	/// <param name="targetName">The optional name of the render target</param>
 	/// <returns>A RenderTarget that is ready to render to.</returns>
 	public static RenderTarget GetTemporary( int width, int height, ImageFormat colorFormat = ImageFormat.Default, ImageFormat depthFormat = ImageFormat.Default, MultisampleAmount msaa = MultisampleAmount.MultisampleNone, int numMips = 1, string targetName = "" )
+		=> GetTemporary( width, height, colorFormat, depthFormat, msaa, numMips, targetName, 0 );
+
+	/// <summary>
+	/// As above, with <paramref name="targetId"/> also telling targets apart, so callers needn't build a unique name every frame.
+	/// </summary>
+	internal static RenderTarget GetTemporary( int width, int height, ImageFormat colorFormat, ImageFormat depthFormat, MultisampleAmount msaa, int numMips, string targetName, int targetId, bool engineOwned = false )
 	{
 		const int maxSize = 1024 * 16;
 
@@ -35,14 +41,15 @@ public sealed partial class RenderTarget
 		if ( colorFormat == ImageFormat.Default )
 			colorFormat = Graphics.IdealColorFormat;
 
+		// Source 2's empty device keeps its default, 24-bit depth
 		if ( depthFormat == ImageFormat.Default )
-			depthFormat = g_pRenderDevice.IsUsing32BitDepthBuffer() ? ImageFormat.D32FS8 : ImageFormat.D24S8;
+			depthFormat = ImageFormat.D24S8;
 
 		// Resolve this once, so the key matches the sample count the texture is created with
 		if ( msaa == MultisampleAmount.MultisampleScreen )
 			msaa = Graphics.IsActive ? Graphics.IdealMsaaLevel : CSceneSystem.GetMainSwapChainMultisampleType().FromEngine();
 
-		int hash = HashCode.Combine( width, height, colorFormat, depthFormat, numMips, msaa, targetName );
+		int hash = HashCode.Combine( HashCode.Combine( width, height, colorFormat, depthFormat, numMips, msaa, targetName, targetId ), engineOwned );
 
 		RenderTarget rt = null;
 
@@ -51,7 +58,7 @@ public sealed partial class RenderTarget
 			// Not FirstOrDefault - the predicate would capture hash and allocate a closure every call.
 			foreach ( var candidate in All )
 			{
-				if ( candidate.Loaned || candidate.CreationHash != hash ) continue;
+				if ( candidate.Loaned || candidate.CreationHash != hash || candidate.EngineOwned != engineOwned ) continue;
 
 				rt = candidate;
 				break;
@@ -70,6 +77,7 @@ public sealed partial class RenderTarget
 				rt = new RenderTarget()
 				{
 					Loaned = true,
+					EngineOwned = engineOwned,
 					CreationHash = hash,
 					ColorTarget = rtColor,
 					DepthTarget = rtDepth,
@@ -85,6 +93,19 @@ public sealed partial class RenderTarget
 		}
 
 		return rt;
+	}
+
+	/// <summary>
+	/// A temporary target from the engine's own pool, for anything holding the menu UI or the whole screen.
+	/// </summary>
+	internal static RenderTarget GetEngineTemporary( int width, int height, ImageFormat colorFormat, ImageFormat depthFormat, MultisampleAmount msaa = MultisampleAmount.MultisampleNone, int numMips = 1, string targetName = "" )
+		=> GetTemporary( width, height, colorFormat, depthFormat, msaa, numMips, targetName, 0, engineOwned: true );
+
+	/// <inheritdoc cref="GetEngineTemporary(int, int, ImageFormat, ImageFormat, MultisampleAmount, int, string)"/>
+	internal static RenderTarget GetEngineTemporary( int sizeFactor, ImageFormat colorFormat, ImageFormat depthFormat, MultisampleAmount msaa = MultisampleAmount.MultisampleNone, int numMips = 1, string targetName = "" )
+	{
+		var (width, height) = ScaleDownSize( ScreenSize( sizeFactor ), sizeFactor );
+		return GetEngineTemporary( width, height, colorFormat, depthFormat, msaa, numMips, targetName );
 	}
 
 	internal static int CalculateMaxMipCount( int width, int height )
@@ -104,6 +125,13 @@ public sealed partial class RenderTarget
 	/// <returns>A RenderTarget that is ready to render to.</returns>
 	public static RenderTarget GetTemporary( int sizeFactor, ImageFormat colorFormat = ImageFormat.Default, ImageFormat depthFormat = ImageFormat.Default, MultisampleAmount msaa = MultisampleAmount.MultisampleNone, int numMips = 1, string targetName = "" )
 	{
+		var (width, height) = ScaleDownSize( ScreenSize( sizeFactor ), sizeFactor );
+
+		return GetTemporary( width, height, colorFormat, depthFormat, msaa, numMips, targetName );
+	}
+
+	static Vector2 ScreenSize( int sizeFactor )
+	{
 		if ( sizeFactor <= 0 )
 			throw new ArgumentException( "cannot be lower than 1", nameof( sizeFactor ) );
 
@@ -115,9 +143,7 @@ public sealed partial class RenderTarget
 			ss = 8;
 		}
 
-		var (width, height) = ScaleDownSize( ss, sizeFactor );
-
-		return GetTemporary( width, height, colorFormat, depthFormat, msaa, numMips, targetName );
+		return ss;
 	}
 
 	/// <summary>

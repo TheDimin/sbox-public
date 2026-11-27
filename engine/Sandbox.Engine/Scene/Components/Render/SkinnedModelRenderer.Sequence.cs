@@ -11,7 +11,7 @@ partial class SkinnedModelRenderer
 		get
 		{
 			if ( UseAnimGraph ) return false;
-			if ( !SceneModel.IsValid() && GltfInstance is null ) return false;
+			if ( SceneModel.IsValid() == false ) return false;
 			if ( Model.IsValid() == false ) return false;
 			if ( Model.AnimationCount <= 0 ) return false;
 
@@ -33,8 +33,6 @@ partial class SkinnedModelRenderer
 			{
 				if ( !_renderer.IsValid() )
 					return null;
-				if ( _renderer.Model?.GltfResource is not null )
-					return _renderer.gltfSequence;
 
 				if ( !_renderer.SceneModel.IsValid() )
 					return null;
@@ -65,10 +63,10 @@ partial class SkinnedModelRenderer
 			get => _name;
 			set
 			{
-				if ( CurrentSequence is not null )
-					CurrentSequence.Name = value;
-
 				_name = value;
+
+				if ( CurrentSequence is not null )
+					CurrentSequence.Name = _name;
 			}
 		}
 
@@ -91,10 +89,10 @@ partial class SkinnedModelRenderer
 			get => _blending;
 			set
 			{
-				if ( CurrentSequence is not null )
-					CurrentSequence.Blending = value;
-
 				_blending = value;
+
+				if ( CurrentSequence is not null )
+					CurrentSequence.Blending = _blending;
 			}
 		}
 

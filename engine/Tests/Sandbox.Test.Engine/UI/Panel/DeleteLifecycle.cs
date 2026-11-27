@@ -100,6 +100,32 @@ public partial class PanelDeleteTest
 	}
 
 	/// <summary>
+	/// Clearing the UI system deletes panels that are still queued. A panel detached from its
+	/// parent before being deleted is in no root's tree, so clearing the roots doesn't reach it,
+	/// and nothing runs the pump afterwards - without this it would keep everything it owns.
+	/// </summary>
+	[TestMethod]
+	public void ClearDeletesQueuedPanels()
+	{
+		var root = new RootPanel();
+		root.PanelBounds = new Rect( 0, 0, 1000, 1000 );
+
+		var p = new RecordingPanel { Parent = root };
+		root.Layout();
+
+		// What a PanelComponent does when its GameObject is destroyed
+		p.Parent = null;
+		p.Delete();
+
+		Assert.AreEqual( 0, p.DeletedCount );
+
+		GlobalContext.Current.UISystem.Clear();
+
+		Assert.IsFalse( p.IsValid );
+		Assert.AreEqual( 1, p.DeletedCount );
+	}
+
+	/// <summary>
 	/// A panel whose :outro rule starts a transition is kept alive by the deferred deletion
 	/// pump until the transition has finished, and only then deleted.
 	/// </summary>
@@ -134,5 +160,40 @@ public partial class PanelDeleteTest
 		GlobalContext.Current.UISystem.RunDeferredDeletion();
 		Assert.IsFalse( p.IsValid );
 		Assert.AreEqual( 0, root.Children.Count() );
+	}
+
+	/// <summary>
+	/// A panel whose outro is running when its parent stops being drawn is deleted by the next pump: hidden panels don't lay
+	/// out their children, so the outro would never end and the panel (and its background image) would stay.
+	/// </summary>
+	[TestMethod]
+	public void OutroUnderHiddenParentDoesNotWait()
+	{
+		PanelRealTime.TimeNow = 0;
+		PanelRealTime.TimeDelta = 0;
+
+		var root = new RootPanel();
+		root.PanelBounds = new Rect( 0, 0, 1000, 1000 );
+		root.StyleSheet.Parse( ".holder { width: 100px; height: 100px; } .holder.hidden { opacity: 0; } .box { transition: opacity 1s linear; opacity: 1; width: 50px; height: 50px; } .box:outro { opacity: 0; }" );
+
+		var holder = root.Add.Panel( "holder" );
+		var p = holder.Add.Panel( "box" );
+		root.Layout();
+
+		p.Delete();
+		root.Layout(); // the :outro styles apply and start the opacity transition
+		Assert.IsTrue( p.HasActiveTransitions );
+
+		// The holder goes, and with it the box's layouts: its outro doesn't advance however long it's left
+		holder.AddClass( "hidden" );
+		root.Layout();
+		PanelRealTime.TimeNow = 5;
+		root.Layout();
+		Assert.IsFalse( holder.IsVisible );
+		Assert.IsTrue( p.HasActiveTransitions );
+
+		GlobalContext.Current.UISystem.RunDeferredDeletion();
+		Assert.IsFalse( p.IsValid );
+		Assert.AreEqual( 0, holder.Children.Count() );
 	}
 }

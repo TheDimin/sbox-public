@@ -638,9 +638,20 @@ internal class DeltaSnapshotSystem
 				return;
 			}
 
-			var keep = _clusterObjects.Count - 1;
-			while ( keep > 1 && Measure( ref writer, _clusterObjects[keep].Start, keep ) > ClusterLimit )
-				keep--;
+			// The most objects that still fit. Each measure compresses the prefix, so search rather than step back one at a time,
+			// which is quadratic when a misjudged ratio lets many objects in before the first measure. The last fitting measure
+			// is the one kept, so Close reuses its encoding.
+			// Usually all but the last object fit, so try that first.
+			int keep = 1, over = _clusterObjects.Count - 1;
+			if ( over > 1 && Measure( ref writer, _clusterObjects[over].Start, over ) <= ClusterLimit ) keep = over;
+			else over--;
+
+			while ( keep < over )
+			{
+				var mid = (keep + over + 1) / 2;
+				if ( Measure( ref writer, _clusterObjects[mid].Start, mid ) <= ClusterLimit ) keep = mid;
+				else over = mid - 1;
+			}
 
 			Carry( target, ref writer, (ushort)(firstClusterId + clusters), keep );
 			clusters++;
@@ -1238,7 +1249,7 @@ internal class DeltaSnapshotSystem
 			ref var shared = ref Share( message );
 
 			// Peers we only reach through the host go up together, see FlushShared
-			if ( connection is MockConnection )
+			if ( connection.RelayFor( ClusterFlags ) )
 				(shared.RelayTargets ??= _targetLists.TryPop( out var list ) ? list : new()).Add( connection );
 			else
 				connection.Send( shared.Encoded ??= TakeFitPacket( end ) ?? Connection.EncodePacket( message ), ClusterFlags );
@@ -1390,6 +1401,11 @@ internal class DeltaSnapshotSystem
 		using var bs = WriteSnapshot( state, state.Entries );
 		return bs.ToArray();
 	}
+
+	/// <summary>
+	/// The object's id in <see cref="GetFullSnapshotData"/>.
+	/// </summary>
+	internal static Guid ReadObjectId( byte[] snapshotData ) => MemoryMarshal.Read<Guid>( snapshotData );
 
 	/// <summary>
 	/// The object's snapshot version in <see cref="GetFullSnapshotData"/>, after its id.

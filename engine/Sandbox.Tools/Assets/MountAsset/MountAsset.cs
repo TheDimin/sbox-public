@@ -1,4 +1,4 @@
-﻿using Sandbox.Mounting;
+using Sandbox.Mounting;
 using System;
 
 namespace Editor;
@@ -16,7 +16,7 @@ internal class MountAsset : Asset
 		this.source = source;
 	}
 
-	internal override void UpdateInternals( bool compileImmediately = true )
+	internal override void UpdateInternals()
 	{
 		AssetType = AssetType.ResolveFromPath( file.Path );
 
@@ -45,6 +45,12 @@ internal class MountAsset : Asset
 
 	public override void OpenInEditor( string nativeEditor = null )
 	{
+		if ( file.Type == ResourceType.Model )
+		{
+			MountedModelDocument.Open( this );
+			return;
+		}
+
 		var opened = file.Type switch
 		{
 			ResourceType.Scene or ResourceType.PrefabFile => TryOpenSceneSession(),
@@ -55,7 +61,7 @@ internal class MountAsset : Asset
 			Log.Warning( $"Don't know how to open mounted asset '{Path}' ({file.Type})" );
 	}
 
-	public override bool CanOpenInEditor => file.Type is ResourceType.Scene or ResourceType.PrefabFile;
+	public override bool CanOpenInEditor => file.Type is ResourceType.Model or ResourceType.Scene or ResourceType.PrefabFile;
 
 	private bool TryOpenSceneSession()
 	{

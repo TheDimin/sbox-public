@@ -161,7 +161,7 @@ internal sealed class ConnectionInfo
 
 	internal void Update( UserInfo userInfo )
 	{
-		Name = userInfo.Name;
+		Name = userInfo.Name?.Length > MaxNameLength ? userInfo.Name[..MaxNameLength] : userInfo.Name;
 		SteamId = userInfo.SteamId;
 		PartyId = userInfo.PartyId;
 
@@ -169,6 +169,9 @@ internal sealed class ConnectionInfo
 
 		foreach ( var p in userInfo.UserData )
 		{
+			if ( !IsValidUserData( p.Key, p.Value ) )
+				continue;
+
 			UserData.Add( p.Key, p.Value );
 		}
 
@@ -281,17 +284,28 @@ internal sealed class ConnectionInfo
 	{
 		UserData.Clear();
 
-		// tony todo: Can this be one loop?
 		foreach ( var (k, v) in userData )
 		{
-			UserData.Add( k, v );
-		}
+			if ( !IsValidUserData( k, v ) )
+				continue;
 
-		foreach ( var (k, v) in userData )
-		{
+			UserData.Add( k, v );
 			UpdateStringTable( k, v, true );
 		}
 	}
+
+	// The host replicates user data to every peer, so only take small values for UserInfo convars
+	internal static bool IsValidUserData( string key, string value )
+	{
+		if ( key is null || value?.Length > MaxUserDataLength )
+			return false;
+
+		var command = ConVarSystem.Find( key );
+		return command is not null && command.IsUserInfo;
+	}
+
+	internal const int MaxUserDataLength = 16 * 1024;
+	internal const int MaxNameLength = 256;
 
 	internal void SetUserData( string key, string value )
 	{
@@ -309,12 +323,46 @@ internal sealed class ConnectionInfo
 	/// local connection.
 	/// </summary>
 	static ConnectionInfo _localMock;
+	static int _localMockConVars;
 
 	internal static ConnectionInfo GetLocalMock()
 	{
-		_localMock ??= new( null );
-		_localMock.Update( UserInfo.Local );
+		if ( _localMock is null )
+		{
+			_localMock = new( null );
+			_localMockConVars = ConVarSystem.Version - 1;
+		}
 
+		_localMock.UpdateLocal( ref _localMockConVars );
 		return _localMock;
+	}
+
+	/// <summary>
+	/// The local mock's view of <see cref="UserInfo.Local"/>, without building one: it's read whenever something asks the
+	/// local connection for its name or id (UI does every frame), so the user data is read from the ConVars again only
+	/// when they've changed since <paramref name="conVarsVersion"/>.
+	/// </summary>
+	void UpdateLocal( ref int conVarsVersion )
+	{
+		var name = Utility.Steam.PersonaName;
+		Name = name?.Length > MaxNameLength ? name[..MaxNameLength] : name;
+		SteamId = Utility.Steam.SteamId;
+		PartyId = PartyRoom.Current?.Id ?? new( 0 );
+
+		var version = ConVarSystem.Version;
+		if ( version == conVarsVersion )
+			return;
+
+		conVarsVersion = version;
+		UserData.Clear();
+		foreach ( var convar in ConVarSystem.Members.Values )
+		{
+			if ( !convar.IsUserInfo )
+				continue;
+
+			var value = convar.Value;
+			if ( IsValidUserData( convar.Name, value ) )
+				UserData[convar.Name] = value;
+		}
 	}
 }

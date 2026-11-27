@@ -14,6 +14,10 @@ namespace Steamworks
 
 			AppId = appid;
 
+			// Without Steam (-nosteam, or Steam not running) the interfaces would call native with null pointers.
+			if ( !NativeEngine.Steam.SteamUser().IsValid )
+				return;
+
 			initialized = true;
 
 			AddInterface<SteamFriends>();

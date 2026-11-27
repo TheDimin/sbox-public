@@ -14,37 +14,10 @@ internal static class ScreenCaptureUtility
 	/// </summary>
 	internal static void CaptureFrame()
 	{
-		var colorTarget = Graphics.GetColorTarget( out var owned );
-
-		if ( colorTarget.IsNull )
-			return;
-
-		try
-		{
-			if ( owned && !colorTarget.IsStrongHandleValid() )
-				return;
-
-			if ( ScreenRecorder.IsRecording() )
-			{
-				var width = (int)Graphics.Viewport.Width;
-				var height = (int)Graphics.Viewport.Height;
-
-				// Preserve the frame before the recording border is drawn.
-				using var tempRT = RenderTarget.GetTemporary( width, height, Graphics.IdealColorFormat, ImageFormat.None );
-				RenderTools.CopyTexture( Graphics.Context, colorTarget, tempRT.ColorTarget.native, default, 0, 0, 0, 0, 0, 0 );
-
-				ScreenshotService.ProcessFrame( Graphics.Context, tempRT.ColorTarget.native );
-				ScreenRecorder.RecordVideoFrame( Graphics.Context, tempRT.ColorTarget.native );
-			}
-			else
-			{
-				ScreenshotService.ProcessFrame( Graphics.Context, colorTarget );
-			}
-		}
-		finally
-		{
-			if ( owned ) colorTarget.DestroyStrongHandle();
-		}
+		// A Borealis.Gpu window's frame: recorded from the bound target before the border is drawn; screenshots come from
+		// the finished frame (BorealisGpuWindow.EndFrame)
+		if ( Graphics.Backend is BorealisGpuRenderBackend gpu && ScreenRecorder.IsRecording() && BorealisGpuWindow.Drawing?.Target is { } frame )
+			ScreenRecorder.RecordVideoFrame( gpu, frame );
 	}
 
 	internal static void DrawRecordingBorder()
@@ -69,11 +42,7 @@ internal static class ScreenCaptureUtility
 	/// </summary>
 	public static string GenerateScreenshotFilename( string extension, string filePath = "screenshots" )
 	{
-		var fileName = ConsoleSystem.GetValue( "screenshot_prefix", "sbox_" );
-		if ( string.IsNullOrEmpty( fileName ) )
-		{
-			fileName = "sbox_";
-		}
+		var fileName = SafePath.ToFileName( ScreenshotService.ScreenshotPrefix, "sbox_" );
 
 		// Format extension with dot if needed
 		string extensionSeparator = "";
@@ -90,6 +59,9 @@ internal static class ScreenCaptureUtility
 		if ( !string.IsNullOrEmpty( filePath ) )
 		{
 			screenshotFilename = Path.Combine( filePath, $"{fileName}.{timestamp}{extensionSeparator}{extension}" );
+
+			if ( !SafePath.IsWithin( filePath, screenshotFilename ) )
+				throw new ArgumentException( $"Screenshot path escapes '{filePath}'", nameof( extension ) );
 		}
 		else
 		{

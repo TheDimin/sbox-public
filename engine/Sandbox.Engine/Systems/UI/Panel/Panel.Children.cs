@@ -13,7 +13,16 @@ public partial class Panel
 	/// <inheritdoc cref="Children"/>
 	internal List<Panel> _children;
 
-	internal bool _renderChildrenDirty;
+	internal bool _renderChildrenDirty
+	{
+		get;
+		set
+		{
+			field = value;
+			// The children draw in another order, or a different set of them
+			if ( value ) MarkPaintChanged();
+		}
+	}
 	internal List<Panel> _renderChildren;
 	List<Panel> _shadowChildren;
 	internal HashSet<Panel> _childrenHash;
@@ -88,6 +97,7 @@ public partial class Panel
 			}
 
 			ParentHasChanged = true;
+			WakeTick();
 			// Dirty
 
 			UpdateSceneIndex();
@@ -302,7 +312,11 @@ public partial class Panel
 		if ( SiblingIndex != index && Parent is { } parent )
 		{
 			parent._renderChildrenDirty = true;
-			if ( FindRootPanel() is { } root ) root.FixedOverlaysDirty = true;
+			if ( FindRootPanel() is { } root )
+			{
+				root.FixedOverlaysDirty = true;
+				StyleSelectorsChanged( true, true, root );
+			}
 		}
 		SiblingIndex = index;
 

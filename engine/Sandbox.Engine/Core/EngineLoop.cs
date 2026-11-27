@@ -8,6 +8,7 @@ using Sandbox.UI;
 using Sandbox.Utility;
 using Sandbox.VR;
 using System.Threading.Channels;
+using Sandbox.Platform;
 
 namespace Sandbox;
 
@@ -43,10 +44,12 @@ internal static class EngineLoop
 
 		double time = RealTime.NowDouble;
 		FastTimer frameTimer = FastTimer.StartNew();
+		var cpuAtStart = ThreadCpuTime.NowMs();
 
 		using ( _runFrame.Start() )
 		{
 			Application.FrameCount++;
+			Sandbox.Diagnostics.FrameAllocations.MainFrameStart( Application.FrameCount );
 			RealTime.Update( time );
 			Time.Update( RealTime.Now, RealTime.Delta );
 
@@ -78,6 +81,9 @@ internal static class EngineLoop
 			try
 			{
 				GameWindow.Current?.ApplyPendingMode();
+
+				// The next frame's device frame starts on the frame thread from here, while this one ends
+				GameWindow.Current?.HandOverFrame();
 			}
 			catch ( System.Exception e )
 			{
@@ -91,6 +97,7 @@ internal static class EngineLoop
 					FrameEnd();
 				}
 				IToolsDll.Current?.RunFrame();
+				Bootstrap.TryFinishStartup();
 			}
 			catch ( System.Exception e )
 			{
@@ -98,13 +105,23 @@ internal static class EngineLoop
 			}
 		}
 
-		var frameRateLimit = FrameRateLimit;
+		Sandbox.Utility.ProfilerZones.FrameMark();
+		// The main thread's CPU time this frame, besides the wall time the timings add up to
+		MainThreadCpuTiming.AddMilliseconds( ThreadCpuTime.NowMs() - cpuAtStart );
+
+				var frameRateLimit = FrameRateLimit;
 		var idleMs = framePacer.Wait( frameRateLimit.FramesPerSecond );
+
+		// The deadline latency mode: when the render thread draws, the next frame's input waits until just in time for the GPU.
+		// Not idle time: it takes the place of the wait for the render thread later in the frame, which isn't either
+		if ( GameWindow.Current?.HandedOverFrame == Application.FrameCount ) BorealisGpuFrameLatency.SleepBeforeInput( Application.FrameCount );
 		PerformanceStats.Timings.Idle.AddMilliseconds( idleMs );
 		DevTools.SampleFrame( frameTimer.ElapsedMilliSeconds, idleMs, frameRateLimit );
 
 		previousTime = time;
 	}
+
+	static readonly PerformanceStats.Timings MainThreadCpuTiming = PerformanceStats.Timings.Get( "Borealis main thread CPU" );
 
 	internal static FrameRateLimit FrameRateLimit
 	{
@@ -136,11 +153,7 @@ internal static class EngineLoop
 	{
 		ThreadSafe.AssertIsMainThread();
 
-		//
-		// Let the Steam API and Steam Game Server API think
-		//
-		NativeEngine.Steam.SteamGameServer_RunCallbacks();
-		NativeEngine.Steam.SteamAPI_RunCallbacks();
+		RunSteamCallbacks();
 
 		//
 		// Update performance stats (should be called every frame)
@@ -149,6 +162,7 @@ internal static class EngineLoop
 		if ( !Application.IsHeadless )
 		{
 			DebugOverlay.Draw();
+			BorealisGpuFrameLatency.InputSampled( Application.FrameCount );
 			UpdateInput();
 		}
 
@@ -214,7 +228,7 @@ internal static class EngineLoop
 		{
 			using ( IGameInstanceDll.Current?.PushScope() ?? default )
 			{
-				VoiceManager.Tick();
+				VoiceChat.Tick();
 				Sandbox.TextRendering.Tick();
 			}
 		}
@@ -264,6 +278,15 @@ internal static class EngineLoop
 		PartyRoom.Current?.Tick();
 	}
 
+	/// <summary>
+	/// Let the Steam API and Steam Game Server API think
+	/// </summary>
+	internal static void RunSteamCallbacks()
+	{
+		NativeEngine.Steam.SteamGameServer_RunCallbacks();
+		NativeEngine.Steam.SteamAPI_RunCallbacks();
+	}
+
 	public static void RunAsyncTasks()
 	{
 		using ( PerformanceStats.Timings.Async.Scope() )
@@ -309,13 +332,45 @@ internal static class EngineLoop
 		Project.Tick();
 
 		//
-		// Free anything that needs to be disposed of at end of frame
-		// 
-		DrainFrameEndDisposables();
-
-		// Free render targets
-		if ( !Application.IsHeadless )
+		// Free anything that needs to be disposed of at end of frame, and render targets: once the render thread has drawn
+		// the frame handed to it, when it draws one
+		//
+		if ( BorealisGpuRenderBackend.DrawingOnRenderThread ) DeferFrameEndDisposals();
+		else
 		{
+			DrainFrameEndDisposables();
+			RenderTarget.EndOfFrame();
+		}
+	}
+
+	// What was queued to be disposed of before a frame was handed to the render thread, disposed once it's drawn
+	static readonly List<IDisposable> handedOverDisposals = new();
+	static bool handedOverTargets;
+
+	static void DeferFrameEndDisposals()
+	{
+		while ( FrameEndDisposables.Reader.TryRead( out var disposable ) ) handedOverDisposals.Add( disposable );
+		handedOverTargets = true;
+	}
+
+	/// <summary>
+	/// The render thread has drawn the frame handed to it (the main thread joined it): what that frame's end left to dispose of
+	/// goes now, and its render targets return to the pool.
+	/// </summary>
+	internal static void RenderThreadFrameDone()
+	{
+		// Cameras and worlds that went while it drew
+		Rendering.SceneRenderer.ForgetAfterDrawing();
+
+		if ( handedOverDisposals.Count > 0 )
+		{
+			foreach ( var disposable in handedOverDisposals ) disposable.Dispose();
+			handedOverDisposals.Clear();
+		}
+
+		if ( handedOverTargets )
+		{
+			handedOverTargets = false;
 			RenderTarget.EndOfFrame();
 		}
 	}
@@ -344,9 +399,23 @@ internal static class EngineLoop
 
 		using ( _simulateUiMenu.Start() )
 		{
-			IMenuDll.Current?.SimulateUI();
+			// The editor only shows the menu's UI as an overlay on a game view, so it's left alone while nothing draws it
+			MenuUISimulated = !Application.IsEditor || LoopFrames - MenuUIOverlayWanted <= 2;
+			if ( MenuUISimulated ) IMenuDll.Current?.SimulateUI();
 		}
+
+		StandaloneLoadingScreen.Tick();
 	}
+
+	/// <summary>
+	/// The last frame something wanted to draw the menu's UI overlay.
+	/// </summary>
+	internal static long MenuUIOverlayWanted;
+
+	/// <summary>
+	/// Whether the menu's UI was simulated this frame, so its command lists are current.
+	/// </summary>
+	internal static bool MenuUISimulated = true;
 
 	static Superluminal _clientOutput = new Superluminal( "OnClientOutput", "#3a6ea5" );
 	static Superluminal _toolsRender = new Superluminal( "Tools Render", "#6e6e3a" );
@@ -358,6 +427,13 @@ internal static class EngineLoop
 
 		using var _outputScope = _clientOutput.Start();
 
+		// The render thread has finished the last frame (the game window's, or the editor's game view's) before anything here
+		// touches the render side or the device
+		BorealisGpuRenderBackend.JoinRenderThread();
+
+		// The frame's scene renderer, picked once, so a frame never mixes renderers
+		Rendering.SceneRenderer.BeginFrame();
+
 		// Choose g_flTime before rendering, independently of temporary menu and preview scene scopes.
 		var renderTime = Game.IsPlaying && GlobalContext.Game.ActiveScene is { IsValid: true } gameScene
 			? (float)gameScene.TimeNow
@@ -365,11 +441,11 @@ internal static class EngineLoop
 
 		CSceneSystem.SetNextRenderTime( renderTime );
 
+		// The sync point: the game's changes since the last frame are written into the worlds every view of this one draws
+		Rendering.RenderSync.Run();
+
 		// Flush envmaps in their own view scope before we do any view rendering
 		Scene.RenderAllEnvmaps();
-
-		// r_managed_scene_compare renders to a bitmap, which has to happen before any views are rendering
-		Rendering.ManagedSceneRendering.BeforeRenderingViews();
 
 		// UI windows own their own swap chains, they're not part of anyone's view
 		Sandbox.UI.PanelWindows.FrameAll();
@@ -377,20 +453,13 @@ internal static class EngineLoop
 		// The editor renders it's own game scene
 		if ( Application.IsEditor )
 		{
-			CSceneSystem.BeginRenderingViews( true );
-
-			try
-			{
-				Sandbox.UI.ScenePanel.RenderPending();
-			}
-			finally
-			{
-				CSceneSystem.FinishRenderingViews();
-				CSceneSystem.WaitForRenderingToComplete();
-			}
+			Sandbox.UI.ScenePanel.RenderPending();
 
 			using ( _toolsRender.Start() )
 				IToolsDll.Current?.OnRender();
+
+			// The frame's end for deleted scene objects (the game window's Render runs them in the game)
+			SceneWorld.RunEndOfFrameDeletes();
 			return;
 		}
 

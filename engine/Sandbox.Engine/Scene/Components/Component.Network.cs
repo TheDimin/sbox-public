@@ -9,7 +9,7 @@ public abstract partial class Component
 	[ActionGraphInclude, Icon( "wifi" )]
 	public GameObject.NetworkAccessor Network => GameObject.Network;
 
-	private readonly Dictionary<string, IInterpolatedSyncVar> InterpolatedVars = new();
+	private Dictionary<string, IInterpolatedSyncVar> InterpolatedVars;
 
 	/// <summary>
 	/// True if this is a networked object and is owned by another client. This means that we're
@@ -33,7 +33,7 @@ public abstract partial class Component
 			// we don't want to do all the logic below for the same value.
 			// Obviously, if we're reading changes from the network, then we
 			// should just allow all the logic to go through.
-			if ( !NetworkTable.IsReadingChanges )
+			if ( !NetworkTable.IsReadingChanges && !NetworkTable.HasReflectionEquality<T>() )
 			{
 				var currentValue = p.Getter();
 
@@ -93,6 +93,8 @@ public abstract partial class Component
 	[EditorBrowsable( EditorBrowsableState.Never )]
 	protected T __sync_GetValue<T>( WrappedPropertyGet<T> p )
 	{
+		if ( !IsValid ) return p.Value;
+
 		var attribute = p.GetAttribute<SyncAttribute>();
 		var interpolate = attribute is not null && (attribute.Flags & SyncFlags.Interpolate) != 0;
 		if ( !interpolate ) return p.Value;
@@ -106,7 +108,7 @@ public abstract partial class Component
 		if ( !net.dataTable.IsRegistered( slot ) || net.dataTable.HasControl( slot ) )
 			return p.Value;
 
-		if ( InterpolatedVars.TryGetValue( p.PropertyName, out var i ) )
+		if ( InterpolatedVars is not null && InterpolatedVars.TryGetValue( p.PropertyName, out var i ) )
 			return (T)i.Query( Time.NowDouble );
 
 		return p.Value;
@@ -162,7 +164,7 @@ public abstract partial class Component
 	/// </summary>
 	private InterpolatedSyncVar<T> GetOrCreateInterpolatedVar<T>( T value, string propertyName )
 	{
-		if ( InterpolatedVars.TryGetValue( propertyName, out var i ) )
+		if ( InterpolatedVars is not null && InterpolatedVars.TryGetValue( propertyName, out var i ) )
 			return (InterpolatedSyncVar<T>)i;
 
 		var interpolator = IInterpolatedSyncVar.Create( value );
@@ -171,6 +173,7 @@ public abstract partial class Component
 			return null;
 
 		var interpolated = new InterpolatedSyncVar<T>( interpolator );
+		InterpolatedVars ??= new();
 		InterpolatedVars[propertyName] = interpolated;
 
 		return interpolated;

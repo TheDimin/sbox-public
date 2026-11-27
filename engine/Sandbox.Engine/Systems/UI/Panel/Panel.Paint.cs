@@ -17,6 +17,50 @@ public partial class Panel
 			return;
 		}
 
+		// An unchanged subtree replays what it recorded last frame
+		if ( PanelRecording.Current is not { } recording || !WantsSubtreeRecording )
+		{
+			RenderRecorded( painter, ref stats );
+			return;
+		}
+
+		// A large subtree that stopped changing draws from a list of its own, which is inserted while it stays unchanged
+		if ( recording.WantsRetained( this, painter ) )
+		{
+			if ( !recording.TryInsertRetained( this, painter, ref stats ) ) RenderRetained( recording, painter, ref stats );
+			return;
+		}
+
+		if ( recording.TryReplay( this, painter, ref stats ) ) return;
+
+		var capture = recording.BeginSubtree( this, painter, in stats );
+		RenderRecorded( painter, ref stats );
+		recording.EndSubtree( this, painter, in capture, in stats );
+	}
+
+	/// <summary>
+	/// Called by Render to record this subtree into its retained list, begun where <paramref name="painter"/> draws, and
+	/// insert the list there.
+	/// </summary>
+	void RenderRetained( PanelRecording recording, Painter painter, ref RootPanel.FrameStats stats )
+	{
+		var kept = recording.BeginRetained( this, painter );
+		using ( var child = kept.Context.BeginInherited( painter.RecordingContext ) )
+		{
+			var capture = recording.BeginSubtree( this, child, in stats );
+			RenderRecorded( child, ref stats );
+			recording.EndSubtree( this, child, in capture, in stats );
+			recording.EndRetained( this, in capture );
+		}
+
+		painter.Batcher.InsertRetained( kept.List );
+	}
+
+	/// <summary>
+	/// Called by Render to record this visible panel and its children.
+	/// </summary>
+	void RenderRecorded( Painter painter, ref RootPanel.FrameStats stats )
+	{
 		stats.Panels++;
 		using var scope = EnterDestination( painter );
 		painter = scope.Painter;
@@ -26,7 +70,11 @@ public partial class Panel
 		if ( layered )
 		{
 			stats.LayerPanels++;
-			layer = painter.Target( PanelLayerRTName, PanelLayerBounds );
+			var paint = _paintCache.Layer;
+			// Roots executed outside the normal per-frame pass can skip frames, and manual ones scale opacity at execute time
+			var root = FindRootPanel();
+			var uncached = root is null || root.RenderedManually || root.IsWorldPanel;
+			layer = uncached ? painter.Target( PanelLayerRTName, paint.Bounds, paint.Mips ) : painter.Target( PanelLayerRTName, paint.Bounds, paint.Mips, ref paint.Cache );
 		}
 
 		try
@@ -74,10 +122,18 @@ public partial class Panel
 					Log.Error( e );
 				}
 			}
+
+			// Inline paragraphs draw text gathered from other panels, which nothing describes yet
+			if ( PanelRecording.Current is { } recording )
+			{
+				if ( LayoutTree.HasInlineContent ) recording.DrewUncomparable();
+				else recording.Drew( this );
+			}
 		}
 
 		if ( this is IPanelDraw custom )
 		{
+			PanelRecording.Current?.DrewUncomparable();
 			try
 			{
 				custom.Draw( painter.NativeCommands( objectSpace: true ) );
@@ -91,6 +147,7 @@ public partial class Panel
 
 	/// <summary>
 	/// Called by Render to draw child shadows and non-fixed children in sorted order inside the child clip.
+	/// Children that can't draw anything inside the clip, like rows scrolled out of view, are skipped whole.
 	/// Draws scrollbars afterward; RootPanel handles fixed-position panels separately.
 	/// </summary>
 	void RenderChildren( Painter painter, ref RootPanel.FrameStats stats )
@@ -103,13 +160,22 @@ public partial class Panel
 			RenderChildShadows( painter );
 			foreach ( var child in _renderChildren )
 			{
-				if ( !child.IsFixed )
-					child.Render( painter, ref stats );
+				if ( child.IsFixed ) continue;
+
+				if ( IsClippedAway( child ) )
+				{
+					stats.PanelsCulled++;
+					continue;
+				}
+
+				child.Render( painter, ref stats );
 			}
 		}
 
 		RenderScrollbars( painter, ref stats );
 	}
+
+	bool IsClippedAway( Panel child ) => _paintCache.ClipsChildren && child.PaintsOutside( _paintCache.ContentClipRect );
 
 	/// <summary>
 	/// Called by RenderChildren before child bodies so non-fixed sibling outset shadows are painted underneath them.
@@ -119,7 +185,7 @@ public partial class Panel
 		if ( _shadowChildren is null ) return;
 		foreach ( var child in _shadowChildren )
 		{
-			if ( child.IsFixed ) continue;
+			if ( child.IsFixed || IsClippedAway( child ) ) continue;
 			child.RenderShadow( painter );
 		}
 	}
@@ -262,11 +328,18 @@ public partial class Panel
 		// Nested clip owners each fill the same labels, but the outermost one draws their effects, under every fill
 		bool drawEffects = !HasTextClipFillAbove();
 
-		foreach ( var label in Descendants.Prepend( this ).OfType<Label>() )
-		{
-			if ( !label.IsVisible || label.VisualRoot != VisualRoot ) continue;
-			if ( !label.GetTextMask( out var texture, out var rect ) ) continue;
+		FillTextClipLabels( this, painter, in descriptor, drawEffects );
+	}
 
+	/// <summary>
+	/// Fill the background through the text mask of <paramref name="panel"/> and every label below it, in tree order.
+	/// Walks the child lists directly: this runs each frame the panel paints, and the descendant iterators allocated one
+	/// enumerator per panel in the subtree.
+	/// </summary>
+	void FillTextClipLabels( Panel panel, Painter painter, in Painter.BoxDescriptor descriptor, bool drawEffects )
+	{
+		if ( panel is Label label && label.IsVisible && label.VisualRoot == VisualRoot && label.GetTextMask( out var texture, out var rect ) )
+		{
 			// Shadows and outlines aren't part of the mask, they go under the fill like normal text
 			if ( drawEffects ) label.DrawTextEffects( painter, CachedOverrideBlendMode, CachedRenderOpacity );
 
@@ -280,6 +353,13 @@ public partial class Panel
 				BorderImage = default
 			};
 			painter.Rect( in fill );
+		}
+
+		var children = panel._children;
+		if ( children is null ) return;
+		for ( int i = 0; i < children.Count; i++ )
+		{
+			if ( children[i] is { } child ) FillTextClipLabels( child, painter, in descriptor, drawEffects );
 		}
 	}
 

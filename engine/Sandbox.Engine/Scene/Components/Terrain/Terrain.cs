@@ -22,7 +22,9 @@ public sealed partial class Terrain : Collider, Component.ExecuteInEditor
 
 	protected override void OnEnabled()
 	{
-		Create();
+		// Enabling the collider has just built the physics shape from this storage - building
+		// the heightfield again is the slowest part of loading a scene with a big terrain
+		Create( rebuildCollider: false );
 		Transform.OnTransformChanged += OnTerrainChanged;
 		Storage?.MaterialSettings?.OnChanged += OnTerrainChanged;
 	}
@@ -107,7 +109,7 @@ public sealed partial class Terrain : Collider, Component.ExecuteInEditor
 		if ( _normalBakeDirty && _normalBakeCs is not null )
 		{
 			_normalBakeDirty = false;
-			_so.PendingBake = RecordNormalBake();
+			_so.QueueBake( RecordNormalBake() );
 		}
 
 		_so.Attributes.Set( "VertexDisplacement", UseVertexDisplacement );
@@ -139,7 +141,9 @@ public sealed partial class Terrain : Collider, Component.ExecuteInEditor
 	/// <summary>
 	/// Call on enable or storage change
 	/// </summary>
-	public void Create()
+	public void Create() => Create( rebuildCollider: true );
+
+	void Create( bool rebuildCollider )
 	{
 		if ( !Active )
 			return;
@@ -161,7 +165,8 @@ public sealed partial class Terrain : Collider, Component.ExecuteInEditor
 		}
 
 		// Rebuild the collider
-		Rebuild();
+		if ( rebuildCollider )
+			Rebuild();
 	}
 
 	protected override void DrawGizmos()

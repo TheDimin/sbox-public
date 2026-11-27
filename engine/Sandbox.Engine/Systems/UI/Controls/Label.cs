@@ -39,7 +39,7 @@ namespace Sandbox.UI
 				if ( _textBlock is null )
 					return;
 
-				if ( _textBlock.ShouldDrawSelection == Selectable && value )
+				if ( _textBlock.ShouldDrawSelection == (Selectable && value) )
 					return;
 
 				_textBlock.ShouldDrawSelection = Selectable && value;
@@ -171,12 +171,16 @@ namespace Sandbox.UI
 			{
 				value ??= "";
 
-				if ( Tokenize && value != null && value.Length > 1 && value[0] == '#' )
+				if ( Tokenize && value.Length > 1 && value[0] == '#' )
 				{
 					if ( _textToken == value ) return;
 					_textToken = value;
 
-					value = Language.GetPhrase( _textToken[1..] );
+					value = LanguageContainer.GetUiPhrase( _textToken[1..] );
+				}
+				else
+				{
+					_textToken = null;
 				}
 
 				if ( _text == value )
@@ -322,16 +326,10 @@ namespace Sandbox.UI
 		{
 			base.PreLayout( cascade );
 
-			string styleContent = null;
-
-			if ( ComputedStyle.Content != null )
+			var styleContent = ComputedStyle.Content;
+			if ( styleContent is { Length: > 1 } && styleContent[0] == '#' )
 			{
-				styleContent = ComputedStyle.Content;
-
-				if ( styleContent.Length > 1 && styleContent[0] == '#' )
-				{
-					styleContent = Language.GetPhrase( styleContent[1..] );
-				}
+				styleContent = LanguageContainer.GetUiPhrase( styleContent[1..] );
 			}
 
 			var text = styleContent ?? Text ?? string.Empty;
@@ -502,6 +500,41 @@ namespace Sandbox.UI
 			_textBlock?.Draw( painter, CachedOverrideBlendMode, ComputedStyle, TextLayoutRect, CachedRenderOpacity );
 		}
 
+		internal override bool TryGetDrawKey( out DrawKey key )
+		{
+			key = default;
+			if ( !IsDrawnBy( typeof( Label ) ) ) return false;
+
+			// Drawing nothing of its own is still a drawing: say which way, so a switch between them shows
+			if ( LayoutTree?.IsInlineParticipant == true || clipsBackgroundToText || _textBlock is null )
+			{
+				key = new DrawKey( null, (clipsBackgroundToText ? 1 : 0) | (_textBlock is null ? 2 : 0), default, default );
+				return true;
+			}
+
+			return _textBlock.TryGetDrawKey( TextLayoutRect, out key );
+		}
+
+		internal override bool DrawKeyHolds( in DrawKey drawn )
+		{
+			// A label drawing its text block, as TryGetDrawKey has it: compared in place
+			if ( drawn.Source is not null && _textBlock is { } block && !clipsBackgroundToText && IsDrawnBy( typeof( Label ) ) && LayoutTree?.IsInlineParticipant != true )
+				return block.DrawKeyHolds( TextLayoutRect, in drawn );
+
+			return base.DrawKeyHolds( in drawn );
+		}
+
+		internal override bool TryGetContentBounds( out Rect bounds )
+		{
+			bounds = Box.Rect;
+			if ( !IsDrawnBy( typeof( Label ) ) ) return false;
+			if ( LayoutTree?.IsInlineParticipant == true || string.IsNullOrEmpty( _textBlock?.Text ) ) return true;
+
+			if ( _textBlock.GetInkRect( ComputedStyle, TextLayoutRect ) is not { } ink ) return false;
+			bounds.Add( ink );
+			return true;
+		}
+
 		public int GetLetterAt( Vector2 pos )
 		{
 			if ( _textBlock == null ) return -1;
@@ -538,8 +571,15 @@ namespace Sandbox.UI
 		/// </summary>
 		public override void LanguageChanged()
 		{
-			if ( _textToken == null ) return;
-			if ( !Tokenize ) return;
+			base.LanguageChanged();
+
+			if ( ComputedStyle?.Content?.StartsWith( '#' ) == true )
+			{
+				LayoutTree?.MarkDirty();
+				SetNeedsPreLayout();
+			}
+
+			if ( _textToken == null || !Tokenize ) return;
 
 			var token = _textToken;
 			_textToken = null; // skip cache

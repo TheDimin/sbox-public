@@ -283,6 +283,28 @@ namespace Sandbox
 			return this;
 		}
 
+		/// <summary>Adds CPU trace positions from a stored float3 field. The render buffers remain unchanged.</summary>
+		internal void AddStoredTraceMesh( ReadOnlySpan<byte> vertices, int stride, int position, ReadOnlySpan<ushort> indices, in Matrix geometryToModel )
+		{
+			const int positionBytes = 3 * sizeof(float);
+			if ( stride < positionBytes || position < 0 || position > stride - positionBytes || vertices.Length % stride != 0 )
+				throw new ArgumentException( "The trace position field is outside its vertex stream." );
+			int count = vertices.Length / stride;
+			if ( count < 3 || indices.Length < 3 ) return;
+			foreach ( ushort index in indices )
+				if ( index >= count ) throw new ArgumentOutOfRangeException( nameof(indices), "A trace index is outside its vertex stream." );
+
+			int start = traceVertices.Count;
+			traceVertices.EnsureCapacity( checked(start + count) );
+			traceIndices.EnsureCapacity( checked(traceIndices.Count + indices.Length) );
+			for ( int i = 0; i < count; i++ )
+			{
+				var value = MemoryMarshal.Read<Vector3>( vertices[(i * stride + position)..] );
+				traceVertices.Add( geometryToModel.Transform( value ) );
+			}
+			foreach ( ushort index in indices ) traceIndices.Add( start + index );
+		}
+
 		private readonly List<int> _surfaces = [];
 
 		private unsafe void ApplyTraceMesh( NativeEngine.ModelBuilder modelBuilder )
@@ -302,10 +324,10 @@ namespace Sandbox
 		/// <summary>
 		/// Adds a surface that can be referenced by collision mesh material indices.
 		/// </summary>
-		/// <param name="surface">The surface to add. Null uses the default surface.</param>
+		/// <param name="surface">The surface to add. Null uses the default surface, or a generic fallback if no surfaces are loaded.</param>
 		public ModelBuilder AddSurface( Surface surface )
 		{
-			surface ??= Surface.FindByName( "default" );
+			surface ??= Surface.FindByName( "default" ) ?? Surface.FindByIndex( 0 );
 			_surfaces.Add( surface.Index );
 			return this;
 		}

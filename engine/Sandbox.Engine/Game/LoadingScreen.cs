@@ -18,10 +18,16 @@ public static class LoadingScreen
 			//Log.Info( $"Loading: {value}\n{new StackTrace( true ).ToString()}" );
 
 			_loading = value;
+			_shown = 0;
 			TextureWebStreaming.UpdateDownloadState();
+			Audio.AudioEngine.SetLoading( value );
 
 			// Each load's downloads are its own
 			_downloads.Clear();
+
+			// And so's its progress - kept while the last one's screen fades out full, gone as the next one's shown
+			if ( value )
+				LoadProgress.Forget();
 
 			if ( !value )
 			{
@@ -29,7 +35,55 @@ public static class LoadingScreen
 				StepFraction = null;
 				Package = null;
 			}
+
+			_changes++;
+			if ( !value )
+			{
+				_hidden = 0;
+				Navigation.NavMesh.LoadEnded();
+			}
+			if ( !value && CollectsAfterLoad )
+				_ = CollectWhatTheLoadLeft( _changes );
 		}
+	}
+
+	/// <summary>
+	/// Counts the screen being shown and hidden, so a collection queued as it went away is dropped if it came back.
+	/// </summary>
+	static int _changes;
+
+	/// <summary>How many times the screen has been shown or hidden, so what waits to hide it knows whether something else has.</summary>
+	internal static int Changes => _changes;
+
+	/// <summary>Seconds since a loading screen last went: what a load left to finish (envmap bounces) gets more time a frame just after.</summary>
+	internal static float SinceHidden => _hidden;
+
+	static RealTimeSince _hidden = 1e6f;
+
+	/// <summary>
+	/// How long after the screen goes the heap is collected: the menu's loading overlay lets go of the game's art a second
+	/// after it's put away, once it has faded out.
+	/// </summary>
+	const float CollectSeconds = 2;
+
+	/// <summary>
+	/// Not on a dedicated server, in a terminal, a test or a benchmark (it settles the heap itself between runs).
+	/// </summary>
+	static bool CollectsAfterLoad => !Application.IsDedicatedServer && !Application.IsHeadless && !Application.IsUnitTest && !Application.IsBenchmark;
+
+	/// <summary>
+	/// Once a load's screen has gone, start collecting what the load left, in the background. A game that allocates
+	/// little can go its whole session without another full collection, and textures nothing holds any more (the loading
+	/// art, a 20 MB screenshot) keep their video memory until their engine objects are collected.
+	/// </summary>
+	static async Task CollectWhatTheLoadLeft( int change )
+	{
+		await Task.Delay( TimeSpan.FromSeconds( CollectSeconds ) );
+		if ( change != _changes || _loading ) return;
+
+		// It returns at once: the collection runs on the background GC thread, and the finalizers it queues free the
+		// textures' video memory between frames
+		GC.Collect( GC.MaxGeneration, GCCollectionMode.Forced, blocking: false );
 	}
 
 	/// <summary>
@@ -37,7 +91,37 @@ public static class LoadingScreen
 	/// art and what's new in it. Null before then, and when what's loading isn't a game.
 	/// Cleared when the loading screen is hidden.
 	/// </summary>
-	public static Package Package { get; internal set; }
+	public static Package Package
+	{
+		get => _package;
+		internal set
+		{
+			// The game's art comes in when it's known
+			if ( _package is null && value is not null ) _shown = 0;
+			_package = value;
+		}
+	}
+
+	static Package _package;
+	static RealTimeSince _shown;
+
+	/// <summary>
+	/// How long the loading screen and the game's art take to come in, matching the menu's loading overlay.
+	/// </summary>
+	const float IntroSeconds = 0.6f;
+
+	/// <summary>
+	/// Waits until the loading screen and the game's art have come in. Loading blocks the main thread in chunks, which
+	/// would stutter them.
+	/// </summary>
+	internal static async Task WaitForIntro( System.Threading.CancellationToken token = default )
+	{
+		var remaining = IntroSeconds - _shown;
+		if ( !IsVisible || remaining <= 0 ) return;
+
+		try { await Task.Delay( TimeSpan.FromSeconds( remaining ), token ); }
+		catch ( OperationCanceledException ) { }
+	}
 
 	/// <summary>
 	/// A title to show
@@ -67,6 +151,29 @@ public static class LoadingScreen
 	}
 
 	static double _stepFraction = double.NaN;
+
+	/// <summary>
+	/// How far the whole game load is, 0 to 1, across all its stages - for a bar that keeps moving once the
+	/// downloads are done. 1 once it's made it into the game, so the screen can finish its bar on the way out; null
+	/// when no game is loading and the last one didn't make it, or a new screen's up before its load has begun.
+	/// </summary>
+	public static double? LoadFraction => Api.Activity.CurrentLoad is { Ended: false } ? LoadProgress.Fraction : LoadProgress.Completed ? 1 : null;
+
+	/// <summary>
+	/// The downloads are all done: anything still waiting in <see cref="Downloads"/> was sized up in advance but turned
+	/// out not to need fetching, and would otherwise hold the bar where it was.
+	/// </summary>
+	internal static void CompleteDownloads()
+	{
+		ThreadSafe.AssertIsMainThread();
+
+		foreach ( var download in _downloads )
+		{
+			if ( download.IsComplete ) continue;
+			download.IsComplete = true;
+			download.Mbps = 0;
+		}
+	}
 
 	/// <summary>
 	/// Every package downloaded for the load under way, in the order they became known - for one bar
@@ -111,7 +218,7 @@ public static class LoadingScreen
 	/// down. Ones that aren't packages, or are local, are skipped. With <paramref name="withReferences"/>,
 	/// everything they reference too, and everything that references - what installing them pulls in
 	/// (a game's libraries and the cloud assets it uses), less anything already installed. Package info
-	/// and manifests only; nothing's downloaded.
+	/// and manifests only; nothing's downloaded. Waits at most <see cref="ReserveWait"/>.
 	/// </summary>
 	internal static async Task ReserveDownloads( IEnumerable<string> idents, System.Threading.CancellationToken token = default, bool withReferences = false )
 	{
@@ -126,13 +233,13 @@ public static class LoadingScreen
 		{
 			try
 			{
-				var package = await Package.Fetch( ident, false );
+				var package = await FetchForSizing( ident );
 				if ( package is null ) return;
 
 				// What it pulls in, sized alongside it rather than after
 				var references = withReferences
 					? package.EnumerateInstallDependencies()
-						.Where( x => IsPackage( x ) && PackageManager.Find( x, false ) is null && Unseen( x ) )
+						.Where( x => IsPackage( x ) && PackageManager.Find( x ) is null && Unseen( x ) )
 						.Select( Reserve )
 						.ToList()
 					: new List<Task>();
@@ -158,9 +265,28 @@ public static class LoadingScreen
 			}
 		}
 
-		await Task.WhenAll( idents.Where( x => IsPackage( x ) && Unseen( x ) ).Select( Reserve ) );
+		var sizing = Task.WhenAll( idents.Where( x => IsPackage( x ) && Unseen( x ) ).Select( Reserve ) );
+		try
+		{
+			await sizing.WaitAsync( ReserveWait, token );
+		}
+		catch ( TimeoutException )
+		{
+			Log.Info( $"Sizing up the downloads took over {ReserveWait.TotalSeconds:0} s; going on without it" );
+		}
+
 		token.ThrowIfCancellationRequested();
 	}
+
+	/// <summary>
+	/// The longest <see cref="ReserveDownloads"/> holds what waits on it (a join installing the server's packages): the sizes
+	/// only fill the loading bar, and a package lookup the backend never answers would hold the join for the request's whole
+	/// timeout. Lookups that answer later still size the bar, for downloads that haven't started.
+	/// </summary>
+	internal static TimeSpan ReserveWait = TimeSpan.FromSeconds( 5 );
+
+	/// <summary>The package lookup <see cref="ReserveDownloads"/> sizes with; the tests stand in for the backend.</summary>
+	internal static Func<string, Task<Package>> FetchForSizing = static ident => Package.Fetch( ident, false );
 
 	/// <summary>
 	/// A URL or filepath to show as the background image.

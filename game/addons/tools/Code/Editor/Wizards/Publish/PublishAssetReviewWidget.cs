@@ -308,17 +308,41 @@ internal sealed class PublishAssetReviewWidget : Widget
 	void AddScenes( FileEntry[] files )
 	{
 		var scenes = files.Where( x => x.Path.EndsWith( ".scene", StringComparison.OrdinalIgnoreCase ) )
-			.OrderBy( x => x.Path, StringComparer.OrdinalIgnoreCase ).Select( x => x with { Note = SceneNote( x ) } ).ToArray();
+			.OrderBy( x => x.Path, StringComparer.OrdinalIgnoreCase )
+			.Select( x => x with { Note = SceneNote( x ), Compilation = SceneCompilation( x.Path ) } ).ToArray();
 		var section = content.Layout.Add( new PublishSection( content, "Included scenes", Theme.Text, "image", count: scenes.Length, iconImage: AssetType.FromExtension( "scene" )?.Icon16 ) );
 		section.Header.Add( new PublishButton( "Add scene", "add", primary: true ) ).Clicked = OpenScenePicker;
 		if ( scenes.Length == 0 ) section.Layout.Add( new Label.Body( "No scenes in this preview. Add a scene or check Game Setup." ) );
 		else
 		{
 			section.Layout.Add( new SceneColumns( section ) );
-			var list = section.Layout.Add( new SceneList( section ) { FixedHeight = Math.Min( scenes.Length, 6 ) * 38 + 4 } );
+			var list = section.Layout.Add( new SceneList( section ) { FixedHeight = Math.Min( scenes.Length, 6 ) * 38 + 4, Exclude = path => Include( $"!{path}" ), IsExcluded = path => IsAdded( $"!{path}" ) } );
 			list.SetItems( scenes );
+			actionLists.Add( list );
 		}
 	}
+
+	static CompileState SceneCompilation( string path )
+	{
+		try
+		{
+			var asset = AssetSystem.FindByPath( path );
+			return asset?.HasSourceFile != true ? CompileState.Unavailable
+				: SceneCompileSession.HasCurrentBake( asset ) ? CompileState.Compiled : CompileState.Uncompiled;
+		}
+		catch ( Exception e ) when ( e is IOException or UnauthorizedAccessException )
+		{
+			Log.Warning( e, $"Could not check compile status for scene '{path}'" );
+			return CompileState.Unavailable;
+		}
+	}
+
+	static string CompileMessage( CompileState state ) => state switch
+	{
+		CompileState.Compiled => "Geometry compiled",
+		CompileState.Uncompiled => "No current geometry bake",
+		_ => "Compile status unavailable"
+	};
 
 	string SceneNote( FileEntry file )
 	{
@@ -499,7 +523,9 @@ internal sealed class PublishAssetReviewWidget : Widget
 		return asset?.Path ?? path;
 	}
 
-	sealed record FileEntry( string Path, long Size = 0, PublishImpact Impact = null, string Note = null, DependencySummary Dependencies = null, string[] Files = null )
+	enum CompileState { Unavailable, Uncompiled, Compiled }
+
+	sealed record FileEntry( string Path, long Size = 0, PublishImpact Impact = null, string Note = null, DependencySummary Dependencies = null, string[] Files = null, CompileState Compilation = CompileState.Unavailable )
 	{
 		public IEnumerable<string> Paths => Files ?? [Path];
 		public long? SortSize => Impact is null ? Size : SizeForSort( Impact );
@@ -599,6 +625,10 @@ internal sealed class PublishAssetReviewWidget : Widget
 
 	sealed class SceneList : ListView
 	{
+		public Action<string> Exclude { get; init; }
+		public Func<string, bool> IsExcluded { get; init; }
+		static Rect RemoveRect( VirtualWidget item ) => new( item.Rect.Right - 80, item.Rect.Center.y - 12, 68, 24 );
+
 		public SceneList( Widget parent ) : base( parent )
 		{
 			ItemSize = new Vector2( 0, 38 );
@@ -619,7 +649,15 @@ internal sealed class PublishAssetReviewWidget : Widget
 			rect.Right = item.Rect.Left + item.Rect.Width * 0.55f - 16;
 			Paint.SetDefaultFont( 10, 500 );
 			Paint.SetPen( Theme.Text );
-			Paint.DrawText( rect, Paint.GetElidedText( file.Path, Math.Max( 0, rect.Width ) ), TextFlag.LeftCenter );
+			var title = rect;
+			title.Top += 4;
+			title.Height = 17;
+			Paint.DrawText( title, Paint.GetElidedText( file.Path, Math.Max( 0, title.Width ) ), TextFlag.LeftCenter );
+			title.Top += 17;
+			title.Height = 13;
+			Paint.SetDefaultFont( 8 );
+			Paint.SetPen( file.Compilation == CompileState.Compiled ? Theme.Green : Theme.TextLight );
+			Paint.DrawText( title, Paint.GetElidedText( CompileMessage( file.Compilation ), Math.Max( 0, title.Width ) ), TextFlag.LeftCenter );
 
 			var reason = file.Note?.Split( '\n' )[0] ?? "Included content";
 			var configured = reason is "Startup scene" or "System scene" or "Map startup scene" or "Dedicated server startup scene";
@@ -627,19 +665,38 @@ internal sealed class PublishAssetReviewWidget : Widget
 			Paint.SetDefaultFont( 9 );
 			var reasonRect = item.Rect;
 			reasonRect.Left = item.Rect.Left + item.Rect.Width * 0.55f;
-			reasonRect.Right -= 40;
+			reasonRect.Right -= 90;
 			Paint.SetPen( Theme.TextLight );
 			Paint.DrawText( reasonRect, Paint.GetElidedText( reason, Math.Max( 0, reasonRect.Width ) ), TextFlag.LeftCenter | TextFlag.SingleLine );
+			if ( file.CanExclude )
+			{
+				var button = RemoveRect( item );
+				PublishButton.DrawBackground( button, item.Hovered && button.IsInside( FromScreen( Application.CursorPosition ) ) );
+				Paint.SetPen( Theme.TextLight );
+				Paint.DrawText( button, IsExcluded( file.Path ) ? "Undo" : "Remove", TextFlag.Center );
+				return;
+			}
 			icon = item.Rect.Shrink( 12, 0 );
 			icon.Left = icon.Right - 20;
 			Paint.SetPen( Theme.TextLight );
-			Paint.DrawIcon( icon, configured ? "lock" : "info_outline", 16 );
+			Paint.DrawIcon( icon, configured ? "lock" : "info", 16 );
+		}
+
+		protected override bool OnItemPressed( VirtualWidget item, MouseEvent e )
+		{
+			if ( e.LeftMouseButton && item.Object is FileEntry { CanExclude: true } file && RemoveRect( item ).IsInside( e.LocalPosition ) )
+			{
+				e.Accepted = true;
+				Exclude( file.Path );
+				return false;
+			}
+			return base.OnItemPressed( item, e );
 		}
 
 		protected override string GetTooltip( object item )
 		{
 			var file = (FileEntry)item;
-			return WebUtility.HtmlEncode( $"{file.Path}\n{file.Note}\n{file.Size.FormatBytes()}\n{DependencyText( file.Dependencies )}\nConfigured scenes are managed in Game Setup. Other inclusion rules are available under Edit rules." );
+			return WebUtility.HtmlEncode( $"{file.Path}\n{CompileMessage( file.Compilation )}\n{file.Note}\n{file.Size.FormatBytes()}\n{DependencyText( file.Dependencies )}\nConfigured scenes are managed in Game Setup. Scenes included only by rules can be removed here. Required dependencies cannot be removed." );
 		}
 	}
 

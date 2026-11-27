@@ -131,6 +131,71 @@ public class MeshComponentBuildTests
 		}
 	}
 
+	/// <summary>
+	/// Standalone exports used to ship no surfaces, which threw in AddSurface and left every mesh without a model.
+	/// </summary>
+	[TestMethod]
+	public void BuildsWithoutAnySurfacesLoaded()
+	{
+		var surfaces = Surface.All.ToArray();
+		Surface.All.Clear();
+
+		var scene = Scene.CreateEditorScene();
+		try
+		{
+			using var scope = scene.Push();
+			var component = scene.CreateObject().AddComponent<MeshComponent>();
+			component.Mesh = CreateBox();
+			component.Collision = MeshComponent.CollisionType.Mesh;
+
+			AssertCollision( component, MeshComponent.CollisionType.Mesh );
+		}
+		finally
+		{
+			scene.Destroy();
+
+			foreach ( var (index, surface) in surfaces )
+				Surface.All[index] = surface;
+		}
+	}
+
+	/// <summary>
+	/// A mesh is on the update list in the editor only. In play an OnComponentUpdate action set on one after it's enabled
+	/// still puts it on, and takes it off again when cleared.
+	/// </summary>
+	[TestMethod]
+	[DataRow( true )]
+	[DataRow( false )]
+	public void MeshUpdatesInPlayOnlyForItsAction( bool editor )
+	{
+		var scene = editor ? Scene.CreateEditorScene() : new Scene();
+		try
+		{
+			using var scope = scene.Push();
+			var mesh = scene.CreateObject().AddComponent<MeshComponent>();
+			mesh.Mesh = CreateBox();
+
+			Assert.IsInstanceOfType<Sandbox.Internal.IUpdateSubscriber>( mesh );
+			Assert.AreEqual( editor, scene.updateComponents.Contains( mesh ) );
+			if ( editor ) return;
+
+			var calls = 0;
+			mesh.OnComponentUpdate = () => calls++;
+			Assert.IsTrue( scene.updateComponents.Contains( mesh ) );
+			scene.GameTick();
+			Assert.AreEqual( 1, calls );
+
+			mesh.OnComponentUpdate = null;
+			Assert.IsFalse( scene.updateComponents.Contains( mesh ) );
+			scene.GameTick();
+			Assert.AreEqual( 1, calls );
+		}
+		finally
+		{
+			scene.Destroy();
+		}
+	}
+
 	[TestMethod]
 	[DataRow( true, true )]
 	[DataRow( true, false )]

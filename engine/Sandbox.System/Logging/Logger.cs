@@ -123,7 +123,7 @@ public class Logger
 		Error( $"{message}" );
 	}
 
-	internal void WriteToTargets( NLog.LogLevel nlogLevel, Exception ex, FormattableString message, string name = null )
+	internal void WriteToTargets( NLog.LogLevel nlogLevel, Exception ex, FormattableString message, string name = null, bool captureStack = true )
 	{
 		name ??= Name;
 
@@ -155,29 +155,33 @@ public class Logger
 		}
 
 		var logEvent = LogEventInfo.Create( nlogLevel, name, defaultMessage );
+		StackTrace stackTrace = null;
 
 		if ( ex != null )
 		{
 			logEvent.Exception = ex;
 		}
-		else
+		else if ( captureStack )
 		{
-			var stackTrace = new StackTrace( 0, true );
+			// Source lines are the slow part: errors get them now, everything else when the stack is first read
+			stackTrace = new StackTrace( 0, level == LogLevel.Error );
 			logEvent.SetStackTrace( stackTrace, 0 );
 		}
 
 		_log.Log( logEvent );
 
 		string stacktrace = null;
+		LoggedStack deferredStack = null;
 
 		if ( logEvent.Exception != null )
 		{
 			stacktrace = GameLog.WriteExceptionDetails( logEvent.Exception );
 		}
 
-		if ( stacktrace == null && logEvent.StackTrace != null )
+		if ( stacktrace == null && stackTrace != null )
 		{
-			stacktrace = logEvent.StackTrace.ToString();
+			if ( level == LogLevel.Error ) stacktrace = stackTrace.ToString();
+			else deferredStack = new LoggedStack( stackTrace );
 		}
 
 		var e = new LogEvent
@@ -188,11 +192,40 @@ public class Logger
 			Exception = ex,
 			HtmlMessage = htmlMessage,
 			Stack = stacktrace,
+			DeferredStack = deferredStack,
 			Time = DateTime.Now,
-			Arguments = arguments.ToArray()
+			Arguments = arguments.ToArray(),
+			SourceAssembly = level == LogLevel.Error ? FindPackageAssembly( ex, stackTrace ) : null
 		};
 
 		Logging.Write( e );
+	}
+
+	/// <summary>
+	/// The first package assembly ("package.org.ident") on an error's stack - its exception's, or its inner ones' (an
+	/// invocation's), or where it was logged. Null if it never went through one.
+	/// </summary>
+	internal static string FindPackageAssembly( Exception ex, StackTrace logged )
+	{
+		for ( var e = ex; e is not null; e = e.InnerException )
+		{
+			if ( FindPackageAssembly( new StackTrace( e, false ) ) is { } found )
+				return found;
+		}
+
+		return logged is null ? null : FindPackageAssembly( logged );
+	}
+
+	static string FindPackageAssembly( StackTrace stack )
+	{
+		foreach ( var frame in stack.GetFrames() )
+		{
+			var name = frame.GetMethod()?.DeclaringType?.Assembly.GetName().Name;
+			if ( name?.StartsWith( "package.", StringComparison.OrdinalIgnoreCase ) == true )
+				return name;
+		}
+
+		return null;
 	}
 
 	/// <summary>

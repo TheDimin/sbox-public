@@ -1,0 +1,103 @@
+@import "/Platform/_platform.scss";
+
+// Centred just above the dock, sliding up into view when there's something to show - a slim card as the platform's
+// panels are, one line: their face, who it is, and what they've started playing in green
+FriendNews
+{
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 60px;
+	justify-content: center;
+	pointer-events: none;
+	opacity: 0;
+	transform: translateY( 10px );
+	transition: opacity 0.25s ease-out, transform 0.3s ease-out;
+
+	&.up
+	{
+		opacity: 1;
+		transform: translateY( 0px );
+
+		.news
+		{
+			pointer-events: all;
+		}
+	}
+
+	.news
+	{
+		@include platform-surface;
+
+		flex-direction: row;
+		height: 40px;
+		align-items: center;
+		gap: 5px;
+		padding: 0 6px 0 7px;
+		border: 1px solid rgba( 255, 255, 255, 0.06 );
+		box-shadow: 0 8px 24px rgba( 0, 0, 0, 0.45 );
+		cursor: pointer;
+	}
+
+	.face
+	{
+		flex-shrink: 0;
+		width: 26px;
+		height: 26px;
+		margin-right: 3px;
+		border-radius: 50%;
+		background-size: cover;
+		background-position: center;
+	}
+
+	.name
+	{
+		font-size: 13px;
+		font-weight: 600;
+		color: $platform-text;
+		white-space: nowrap;
+	}
+
+	.verb
+	{
+		font-size: 13px;
+		color: $platform-muted;
+		white-space: nowrap;
+	}
+
+	.game
+	{
+		font-size: 13px;
+		font-weight: 600;
+		color: $platform-good;
+		white-space: nowrap;
+	}
+
+	// The same green as joining elsewhere
+	.join
+	{
+		flex-shrink: 0;
+		height: 28px;
+		margin-left: 7px;
+		align-items: center;
+		padding: 0 12px;
+		border-radius: $platform-radius;
+		background-color: $platform-good;
+		background-image: linear-gradient( 160deg, #8ef0b2, $platform-good 55%, #239a55 );
+		cursor: pointer;
+		@include platform-sounds;
+		transition: box-shadow 0.15s ease-out;
+
+		label
+		{
+			font-size: 12px;
+			font-weight: 700;
+			color: #06210f;
+		}
+
+		&:hover
+		{
+			box-shadow: 0 4px 14px rgba( $platform-good, 0.5 );
+		}
+	}
+}

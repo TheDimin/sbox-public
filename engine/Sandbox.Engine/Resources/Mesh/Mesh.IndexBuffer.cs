@@ -3,14 +3,39 @@ using System.Runtime.InteropServices;
 
 namespace Sandbox
 {
+	/// <summary>
+	/// A mesh's index buffer. Its indices live here so it can be saved without a render device.
+	/// </summary>
 	internal struct IndexBufferHandle : IValid
 	{
-		public readonly bool IsValid => _native != IntPtr.Zero;
+		public readonly bool IsValid => _data != null || _data16 != null;
 		public readonly bool IsLocked => _locked;
 		public readonly int ElementCount => _elementCount;
 
+		/// <summary>The buffer's indices for callers that need 32-bit CPU data.</summary>
+		internal readonly int[] Data
+		{
+			get
+			{
+				if ( _data16 is null ) return _data;
+				var indices = MemoryMarshal.Cast<byte, ushort>( _data16.AsSpan() );
+				var result = GC.AllocateUninitializedArray<int>( indices.Length );
+				for ( int i = 0; i < result.Length; i++ ) result[i] = indices[i];
+				return result;
+			}
+		}
+
+		internal readonly int ElementSize => _data16 is null ? sizeof(int) : sizeof(ushort);
+		internal readonly ReadOnlySpan<byte> Bytes => _data16 is null
+			? MemoryMarshal.AsBytes( _data.AsSpan() ) : _data16;
+		internal readonly byte[] StoredBytes => _data16;
+
+		/// <summary>Whether Source 2's device holds a copy (only with its device).</summary>
+		internal readonly bool HasNative => _native != IntPtr.Zero;
+
 		private IndexBufferHandle_t _native;
-		private IntPtr _lockData;
+		private int[] _data;
+		private byte[] _data16;
 		private int _elementCount;
 		private int _lockDataSize;
 		private int _lockDataOffset;
@@ -19,6 +44,13 @@ namespace Sandbox
 		private static readonly int ElementMax = int.MaxValue / 4;
 
 		public static implicit operator IndexBufferHandle_t( IndexBufferHandle handle ) => handle._native;
+
+		internal IndexBufferHandle( ReadOnlySpan<ushort> data )
+		{
+			if ( data.IsEmpty ) throw new ArgumentException( "Index buffer size can't be zero.", nameof(data) );
+			_data16 = MemoryMarshal.AsBytes( data ).ToArray();
+			_elementCount = data.Length;
+		}
 
 		/// <summary>
 		/// Create a index buffer with a number of indices
@@ -46,19 +78,14 @@ namespace Sandbox
 			if ( dataCount > indexCount )
 				dataCount = indexCount;
 
-			fixed ( int* data_ptr = data )
-			{
-				var handle = MeshGlue.CreateIndexBuffer( indexCount, true, (IntPtr)data_ptr, dataCount );
-				if ( handle == IntPtr.Zero )
-					throw new Exception( $"Failed to create index buffer" );
+			_data = new int[indexCount];
+			data[..dataCount].CopyTo( _data );
 
-				_native = handle;
-				_lockData = IntPtr.Zero;
-				_elementCount = indexCount;
-				_lockDataSize = 0;
-				_lockDataOffset = 0;
-				_locked = false;
-			}
+
+			_elementCount = indexCount;
+			_lockDataSize = 0;
+			_lockDataOffset = 0;
+			_locked = false;
 		}
 
 		/// <summary>
@@ -72,7 +99,7 @@ namespace Sandbox
 		/// <summary>
 		/// Set data of this buffer
 		/// </summary>
-		public readonly unsafe void SetData( Span<int> data, int elementOffset = 0 )
+		public unsafe void SetData( Span<int> data, int elementOffset = 0 )
 		{
 			if ( !IsValid )
 				throw new InvalidOperationException( "Index buffer has not been created" );
@@ -101,6 +128,11 @@ namespace Sandbox
 			if ( dataSize > int.MaxValue || dataOffset > int.MaxValue )
 				throw new OverflowException( "Calculated values exceed the range of int." );
 
+			EnsureWritable32();
+			data.CopyTo( _data.AsSpan( elementOffset ) );
+
+			if ( !HasNative ) return;
+
 			fixed ( int* data_ptr = data )
 			{
 				MeshGlue.SetIndexBufferData( _native, (IntPtr)data_ptr, (int)dataSize, (int)dataOffset );
@@ -108,7 +140,7 @@ namespace Sandbox
 		}
 
 		/// <summary>
-		/// Resize the index buffer.
+		/// Resize the index buffer. Its contents start again from zero, as a new buffer's do.
 		/// </summary>
 		public void SetSize( int elementCount )
 		{
@@ -127,12 +159,13 @@ namespace Sandbox
 			if ( elementCount == _elementCount )
 				return;
 
-			var handle = MeshGlue.SetIndexBufferSize( _native, elementCount );
-			_native = handle;
+			_data = new int[elementCount];
+			_data16 = null;
+			if ( HasNative ) _native = MeshGlue.SetIndexBufferSize( _native, elementCount );
 			_elementCount = elementCount;
 		}
 
-		public unsafe Span<int> Lock( int elementCount, int elementOffset )
+		public Span<int> Lock( int elementCount, int elementOffset )
 		{
 			if ( !IsValid )
 				throw new InvalidOperationException( "Index buffer has not been created" );
@@ -157,24 +190,25 @@ namespace Sandbox
 			if ( dataSize > int.MaxValue || dataOffset > int.MaxValue )
 				throw new OverflowException( "Calculated values exceed the range of int." );
 
+			EnsureWritable32();
 			_lockDataSize = (int)dataSize;
 			_lockDataOffset = (int)dataOffset;
-			_lockData = MeshGlue.LockIndexBuffer( _native, _lockDataSize, _lockDataOffset );
-
-			if ( _lockData == IntPtr.Zero )
-			{
-				_lockDataSize = 0;
-				_lockDataOffset = 0;
-
-				return null;
-			}
-
 			_locked = true;
 
-			return new Span<int>( _lockData.ToPointer(), elementCount );
+			// A locked region starts from zero, as Source 2's did
+			var region = _data.AsSpan( elementOffset, elementCount );
+			region.Clear();
+			return region;
 		}
 
-		public void Unlock()
+		private void EnsureWritable32()
+		{
+			if ( _data16 is null ) return;
+			_data = Data;
+			_data16 = null;
+		}
+
+		public unsafe void Unlock()
 		{
 			if ( !IsValid )
 				return;
@@ -182,9 +216,15 @@ namespace Sandbox
 			if ( !_locked )
 				return;
 
-			MeshGlue.UnlockIndexBuffer( _native, _lockData, _lockDataSize, _lockDataOffset );
+			// Source 2's copy gets what was written
+			if ( HasNative )
+			{
+				fixed ( int* pData = &_data[_lockDataOffset / sizeof( int )] )
+				{
+					MeshGlue.SetIndexBufferData( _native, (IntPtr)pData, _lockDataSize, _lockDataOffset );
+				}
+			}
 
-			_lockData = IntPtr.Zero;
 			_lockDataSize = 0;
 			_lockDataOffset = 0;
 			_locked = false;
@@ -255,6 +295,19 @@ namespace Sandbox
 		/// </summary>
 		public int IndexCount => HasIndexBuffer ? ib.ElementCount : 0;
 
+		internal ReadOnlySpan<byte> IndexBufferBytes => ib.Bytes;
+		internal int IndexElementSize => ib.ElementSize;
+		internal Borealis.Source2.Models.MeshIndexBuffer StoredIndexBuffer => ib.StoredBytes is { } bytes
+			? new( ib.ElementCount, sizeof( ushort ), bytes ) : null;
+
+		internal void CreateRawIndexBuffer( ReadOnlySpan<ushort> data )
+		{
+			if ( ib.IsValid ) throw new InvalidOperationException( "Index buffer has already been created." );
+			ib = new IndexBufferHandle( data );
+			MeshGlue.SetMeshIndexBuffer( native, ib, IntPtr.Zero, 0 );
+			SetIndexRange( 0, ib.ElementCount );
+		}
+
 		/// <summary>
 		/// Create an empty index buffer, it can be resized later
 		/// </summary>
@@ -284,6 +337,7 @@ namespace Sandbox
 
 			ib = new( indexCount, data );
 
+			// Without Source 2's device the handle is null: the mesh's draws still bind it, the bytes are ours
 			fixed ( int* data_ptr = data )
 			{
 				MeshGlue.SetMeshIndexBuffer( native, ib, (IntPtr)data_ptr, data.Length );

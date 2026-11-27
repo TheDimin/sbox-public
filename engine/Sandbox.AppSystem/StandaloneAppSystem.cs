@@ -18,11 +18,9 @@ public class StandaloneAppSystem : AppSystem
 		Application.IsStandalone = true;
 		Application.AppId = Standalone.Manifest.AppId;
 
-		if ( Standalone.Manifest.IsVRProject && !Utility.CommandLine.HasSwitch( "-vr" ) && !Utility.CommandLine.HasSwitch( "-novr" ) )
-		{
-			Utility.CommandLine.CommandLineString = Utility.CommandLine.Full + " -vr";
-			Utility.CommandLine.Parse();
-		}
+		// An exported game draws on Borealis.Gpu, as the game does; a headless one draws nothing
+		if ( !Utility.CommandLine.HasSwitch( "-headless" ) )
+			DrawOnBorealisGpu();
 
 		CreateGame();
 
@@ -44,6 +42,7 @@ public class StandaloneAppSystem : AppSystem
 
 	private void LoadStandaloneGame()
 	{
+		Standalone.IsLoadingGame = true;
 		_standaloneLoadTask = IGameInstanceDll.Current.LoadGamePackageAsync( Standalone.Manifest.Ident, GameLoadingFlags.Host, default );
 	}
 
@@ -56,6 +55,7 @@ public class StandaloneAppSystem : AppSystem
 		{
 			if ( _standaloneLoadTask.IsCompleted )
 			{
+				Standalone.IsLoadingGame = false;
 				var loaded = _standaloneLoadTask.GetAwaiter().GetResult();
 				_standaloneLoadTask = null;
 
@@ -68,7 +68,7 @@ public class StandaloneAppSystem : AppSystem
 					if ( Utility.CommandLine.HasSwitch( "-test-standalone" ) )
 					{
 						Environment.ExitCode = 1;
-						Game.Close();
+						Game.CloseGame();
 					}
 				}
 			}
@@ -76,7 +76,7 @@ public class StandaloneAppSystem : AppSystem
 		// Quit next loop after load, if we are testing
 		else if ( Utility.CommandLine.HasSwitch( "-test-standalone" ) )
 		{
-			Game.Close();
+			Game.CloseGame();
 		}
 
 		return !wantsToQuit;

@@ -1,0 +1,13 @@
+{
+  "Prefab": {
+    "Path": "vehicles/adder/adder.prefab",
+    "Id": "f1ba689b-cc16-5fde-a697-3d5411b0e98e"
+  },
+  "Title": "Adder",
+  "Description": "Two-door GTA V sports car.",
+  "Category": "Vehicle",
+  "RequiredMount": "gtav",
+  "PreviewIcon": "textures/lgm_default/adder",
+  "PreviewModel": "models/fragments/adder",
+  "__version": 0
+}

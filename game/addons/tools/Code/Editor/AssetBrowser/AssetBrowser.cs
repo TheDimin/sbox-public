@@ -108,8 +108,6 @@ public partial class AssetBrowser : Widget, IBrowser, AssetSystem.IEventListener
 			}
 			catch ( IOException e )
 			{
-				externalWatchRetryAt = RealTime.NowDouble + 5;
-				Interlocked.Exchange( ref externalWatchRestartPending, 1 );
 				Log.Warning( $"Couldn't update the file watcher for {CurrentLocation?.Path} ({e.Message})" );
 			}
 
@@ -134,10 +132,6 @@ public partial class AssetBrowser : Widget, IBrowser, AssetSystem.IEventListener
 	}
 
 	private FileSystemWatcher watcher;
-	private int externalChangesPending;
-	private int externalWatchRestartPending;
-	private double externalWatchRetryAt;
-	private double externalWatchHealthAt;
 
 	public AssetBrowser( Widget parent ) : this( parent, null )
 	{
@@ -227,7 +221,6 @@ public partial class AssetBrowser : Widget, IBrowser, AssetSystem.IEventListener
 		watcher.Created += OnExternalChanges;
 		watcher.Deleted += OnExternalChanges;
 		watcher.Renamed += OnExternalChanges;
-		watcher.Error += OnExternalWatchError;
 
 		SetInitialLocation();
 		RefreshCookies();
@@ -258,49 +251,7 @@ public partial class AssetBrowser : Widget, IBrowser, AssetSystem.IEventListener
 
 	private void OnExternalChanges( object sender, FileSystemEventArgs e )
 	{
-		System.Threading.Interlocked.Exchange( ref externalChangesPending, 1 );
-	}
-
-	private void OnExternalWatchError( object sender, ErrorEventArgs e )
-	{
-		Log.Warning( $"Asset browser watching interrupted ({e.GetException().Message}); refreshing and rebuilding coverage" );
-		Interlocked.Exchange( ref externalWatchRestartPending, 1 );
-		Interlocked.Exchange( ref externalChangesPending, 1 );
-	}
-
-	[EditorEvent.Frame]
-	private void RefreshExternalChanges()
-	{
-		// Some platform watchers stop quietly when their root disappears.
-		if ( RealTime.NowDouble >= externalWatchHealthAt )
-		{
-			externalWatchHealthAt = RealTime.NowDouble + 5;
-			if ( CurrentLocation is DiskLocation && (!watcher.EnableRaisingEvents || !Directory.Exists( CurrentLocation.Path )) )
-			{
-				Interlocked.Exchange( ref externalWatchRestartPending, 1 );
-				Interlocked.Exchange( ref externalChangesPending, 1 );
-			}
-		}
-		if ( RealTime.NowDouble >= externalWatchRetryAt && Interlocked.Exchange( ref externalWatchRestartPending, 0 ) != 0 )
-		{
-			try
-			{
-				watcher.EnableRaisingEvents = false;
-				if ( CurrentLocation is DiskLocation )
-				{
-					watcher.Path = CurrentLocation.Path;
-					watcher.EnableRaisingEvents = true;
-				}
-			}
-			catch ( Exception e )
-			{
-				externalWatchRetryAt = RealTime.NowDouble + 5;
-				Interlocked.Exchange( ref externalWatchRestartPending, 1 );
-				Log.Warning( $"Couldn't resume asset browser watching; retrying in five seconds ({e.Message})" );
-			}
-		}
-		if ( System.Threading.Interlocked.Exchange( ref externalChangesPending, 0 ) != 0 )
-			UpdateAssetList();
+		MainThread.Queue( UpdateAssetList );
 	}
 
 	private void GoBack()
@@ -410,8 +361,6 @@ public partial class AssetBrowser : Widget, IBrowser, AssetSystem.IEventListener
 			}
 			catch ( Exception e )
 			{
-				externalWatchRetryAt = RealTime.NowDouble + 5;
-				Interlocked.Exchange( ref externalWatchRestartPending, 1 );
 				Log.Warning( $"Couldn't watch {CurrentLocation.Path} for changes ({e.Message})" );
 			}
 		}
@@ -530,16 +479,6 @@ public partial class AssetBrowser : Widget, IBrowser, AssetSystem.IEventListener
 						file.Name.EndsWith( ".meta", StringComparison.OrdinalIgnoreCase ) )
 					{
 						continue;
-					}
-
-					// Compiled glTF: model.glb -> model.glb_c, model.gltf -> model.gltf.glb_c.
-					// Hide it only while its source exists; without the source, the game still loads it.
-					if ( file.Name.EndsWith( ".glb_c", StringComparison.OrdinalIgnoreCase ) )
-					{
-						var compiled = file.FullName;
-						var source = compiled.EndsWith( ".gltf.glb_c", StringComparison.OrdinalIgnoreCase ) ? compiled[..^6] : compiled[..^2];
-						if ( File.Exists( source ) )
-							continue;
 					}
 				}
 
@@ -795,12 +734,8 @@ public partial class AssetBrowser : Widget, IBrowser, AssetSystem.IEventListener
 		await RestoreSelection( asset, skipEvents );
 	}
 
-	/// <summary>
-	/// Select an asset in the current results without changing the folder or search.
-	/// </summary>
 	internal async Task RestoreSelection( Asset asset, bool skipEvents = false )
 	{
-
 		// wait for the list to (successfully) populate before selecting the item
 		var success = await RefreshTask;
 		if ( !success || !IsValid )

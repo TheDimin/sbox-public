@@ -49,17 +49,20 @@ public record MountLocation : LocalAssetBrowser.Location
 				.Distinct().Select( x => new MountLocation( Source, basePath + x ) );
 	}
 
-	public override IEnumerable<FileInfo> GetFiles()
+	public override IEnumerable<FileInfo> GetFiles() => GetFiles( false, default );
+
+	internal IEnumerable<FileInfo> GetFiles( bool recursive, System.Threading.CancellationToken token )
 	{
 		var basePath = Path ?? $"mount://{Source.Ident}";
 		basePath += '/';
 
-		foreach ( var f in Source.Resources )
+		var source = Source;
+		if ( source is null || token.IsCancellationRequested ) yield break;
+		foreach ( var f in source.Resources )
 		{
-			if ( !f.Path.StartsWith( basePath ) ) continue;
-
-			var relative = f.Path.Substring( basePath.Length );
-			if ( relative.Contains( '/' ) ) continue;
+			if ( token.IsCancellationRequested ) yield break;
+			if ( !f.Path.StartsWith( basePath, StringComparison.OrdinalIgnoreCase ) ) continue;
+			if ( !recursive && f.Path.IndexOf( '/', basePath.Length ) >= 0 ) continue;
 
 			var file = new FileInfo( f.Path );
 			yield return file;

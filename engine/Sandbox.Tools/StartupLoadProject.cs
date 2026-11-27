@@ -108,6 +108,20 @@ static class StartupLoadProject
 		CurrentStep = 0;
 		TotalSteps = 16;
 
+		// Content is built once, below; loading a resource before then must not compile it
+		IAssetSystem.SuspendOnDemandCompiles( true );
+		try
+		{
+			return await OpenProjectAndBuildContent( path, ct );
+		}
+		finally
+		{
+			IAssetSystem.SuspendOnDemandCompiles( false );
+		}
+	}
+
+	static async Task<bool> OpenProjectAndBuildContent( string path, CancellationToken ct )
+	{
 		// should never be one existing once we remove all this shit
 		Project project = Project.AddFromFile( path, false );
 		var parentPackage = project.Config.GetMetaOrDefault<string>( "ParentPackage", null );
@@ -125,6 +139,10 @@ static class StartupLoadProject
 		Project.Current = project;
 		Project.Current.LastOpened = DateTime.Now;
 		project.Active = true;
+
+		// defer this until after we've loaded the project, so if we're opening a mount addon we don't do it twice
+		Sandbox.Mounting.Directory.LoadSources();
+		await EditorUtility.Projects.WaitForCompiles();
 
 		Step( "Initializing asset system" );
 		using ( var _ = Bootstrap.StartupTiming?.ScopeTimer( $"Load Project: Init AssetSystem" ) )
@@ -218,7 +236,15 @@ static class StartupLoadProject
 
 			Log.Info( $"AssetSystem.InstallAsync" );
 			// Install into asset system so we can use prefabs, gameresources, etc.
-			await AssetSystem.InstallAsync( parentPackage, false );
+			try
+			{
+				await AssetSystem.InstallAsync( parentPackage, false );
+			}
+			catch ( AggregateException ex )
+			{
+				// The game is already loaded. Missing editor assets should not prevent opening the project.
+				Log.Error( ex, $"Failed to install editor assets for {parentPackage}. Some assets may be unavailable." );
+			}
 
 			Log.Info( $"MountAsync" );
 			// Mount our current project, and load the source!
@@ -265,7 +291,7 @@ static class StartupLoadProject
 		// Import custom asset type files from content directories (including mounted ones)
 		//
 		Step( "Importing custom assets" );
-		using ( var _ = Bootstrap.StartupTiming?.ScopeTimer( $"Load Project: Register CustomAssetTypes" ) )
+		using ( var _ = Bootstrap.StartupTiming?.ScopeTimer( $"Load Project: Import CustomAssetTypes" ) )
 		{
 			AssetType.ImportCustomTypeFiles();
 		}
@@ -277,6 +303,9 @@ static class StartupLoadProject
 			await RefreshCloudAssets( ct );
 		}
 
+		// Ticking the asset system resolves any pendeing types and dependencies
+		AssetSystem.Tick();
+
 		// Go through and compile all assets
 		using ( var _ = Bootstrap.StartupTiming?.ScopeTimer( $"Load Project: CompileAllAssets" ) )
 		{
@@ -284,10 +313,21 @@ static class StartupLoadProject
 			await CompileAllShaders();
 
 			Step( "Compiling assets" );
-			await CompileAllAssets();
-			GltfAssetImport.ImportAll();
+			await EditorContentBuild.Startup( project );
+			await WarmMissingThumbnails();
 
 			FileWatch.Tick();
+		}
+
+		// Transient children the build published have parent links by now, so only files nothing owns are pruned
+		using ( var _ = Bootstrap.StartupTiming?.ScopeTimer( $"Load Project: PruneOrphans" ) )
+		{
+			AssetSystem.Tick();
+			AssetSystem.DeleteOrphans();
+		}
+
+		using ( var _ = Bootstrap.StartupTiming?.ScopeTimer( $"Load Project: LoadWorkingSets" ) )
+		{
 
 			// do we even need this anymore?
 			IAssetSystem.LoadWorkingSetsAndTags();
@@ -363,7 +403,14 @@ static class StartupLoadProject
 		var projectDir = Path.GetFullPath( Project.Current.RootDirectory.FullName );
 
 		var sw = Stopwatch.StartNew();
-		var gr = AssetSystem.All.Where( x => x.AssetType == AssetType.Shader && x.HasSourceFile && Path.GetFullPath( x.AbsoluteSourcePath ).StartsWith( projectDir, StringComparison.OrdinalIgnoreCase ) ).ToArray();
+
+		// Ask for the source path now rather than using AbsoluteSourcePath, which is cached from the asset's last update
+		// and is still empty if its .shader turned up after that - HasSourceFile is live, so the two can disagree
+		var gr = AssetSystem.All
+			.Where( x => x.AssetType == AssetType.Shader && x.HasSourceFile )
+			.Select( x => (Asset: x, SourcePath: x.GetSourceFile( true )) )
+			.Where( x => !string.IsNullOrEmpty( x.SourcePath ) && Path.GetFullPath( x.SourcePath ).StartsWith( projectDir, StringComparison.OrdinalIgnoreCase ) )
+			.ToArray();
 		if ( gr.Length == 0 ) return;
 
 		var options = new ShaderCompileOptions();
@@ -376,12 +423,11 @@ static class StartupLoadProject
 		int reused = 0, compiled = 0, failed = 0;
 		for ( int i = 0; i < gr.Length; i++ )
 		{
-			progress.Begin( gr[i].RelativePath, reportStart: true );
-			EditorSplashScreen.SetMessage( $"Checking shader {i + 1}/{gr.Length} {gr[i].RelativePath}" );
+			var (asset, sourcePath) = gr[i];
+			EditorSplashScreen.SetMessage( $"Checking shader {i + 1}/{gr.Length} {asset.RelativePath}" );
 			StepProgress( (float)i / gr.Length );
 
-			var result = await ShaderCompile.Compile( gr[i].AbsolutePath, gr[i].RelativePath, options, default );
-			progress.Complete( !result.Success ? "failed" : result.Skipped ? "reused" : "compiled" );
+			var result = await ShaderCompile.Compile( sourcePath, asset.RelativePath, options, default );
 			if ( !result.Success ) failed++;
 			else if ( result.Skipped ) reused++;
 			else compiled++;
@@ -389,7 +435,7 @@ static class StartupLoadProject
 			{
 				// Resident shaders may still have combo offsets from before the compiled file was rewritten.
 				// Reload them before any further asset loading can use those offsets against the new file.
-				ConsoleSystem.Run( $"mat_reloadshaders \"{gr[i].RelativePath}\"" );
+				ConsoleSystem.Run( $"mat_reloadshaders \"{asset.RelativePath}\"" );
 			}
 		}
 		Bootstrap.StartupTiming?.SetValue( "Shaders.Reused", reused );
@@ -398,68 +444,13 @@ static class StartupLoadProject
 		Log.Info( $"Shader checks took {sw.Elapsed.TotalSeconds:0.000}s: {reused} reused, {compiled} compiled, {failed} failed" );
 	}
 
-	static async Task CompileAllAssets()
+	static async Task WarmMissingThumbnails()
 	{
-		var sw = Stopwatch.StartNew();
 		var useFastEditorPath = AssetPipelineCompatibility.UseFastEditorPath;
 		var warmAllThumbnails = useFastEditorPath && WarmAllThumbnails;
 
 		Bootstrap.StartupTiming?.SetValue( "AssetPipeline.Mode", useFastEditorPath ? "fast-editor" : "legacy" );
 		Bootstrap.StartupTiming?.SetValue( "AssetPipeline.WarmAllThumbnails", warmAllThumbnails );
-
-		var candidateScan = Stopwatch.StartNew();
-		var gr = AssetSystem.All.Where( x => !x.IsTrivialChild && x.CanRecompile && !x.IsCompiledAndUpToDate ).ToArray();
-		Bootstrap.StartupTiming?.SetDuration( "AssetPipeline.CandidateScanMilliseconds", (int)candidateScan.ElapsedMilliseconds );
-		if ( candidateScan.Elapsed.TotalSeconds >= 2 )
-			Log.Info( $"Asset catalog check took {candidateScan.Elapsed.TotalSeconds:0.000}s; {gr.Length:N0} compile candidates" );
-		Bootstrap.StartupTiming?.SetValue( "AssetPipeline.CompileCandidates", gr.Length );
-
-		using var progress = new StartupImportProgress( "Asset imports", gr.Length, message => Log.Info( message ) );
-		using var splashProgress = EditorSplashScreen.TrackMessage( () => progress.Message );
-
-		if ( useFastEditorPath )
-		{
-			var orderedAssets = gr
-				.OrderByDescending( asset => asset.Path.StartsWith( "thirdparty/synty/", StringComparison.OrdinalIgnoreCase ) )
-				.ThenBy( asset => asset.AssetType == AssetType.Model )
-				.ToArray();
-
-			for ( int i = 0; i < orderedAssets.Length; i++ )
-			{
-				progress.Begin( orderedAssets[i].Path );
-				if ( i % 128 == 0 )
-				{
-					EditorSplashScreen.SetMessage( $"Compiling asset {i + 1:N0}/{orderedAssets.Length:N0}" );
-					StepProgress( (float)i / orderedAssets.Length );
-					IToolsDll.Current?.Spin();
-				}
-
-				progress.Complete( orderedAssets[i].Compile( false ) ? "compile returned true" : "compile returned false" );
-			}
-		}
-		else
-		{
-			// Compatibility path: preserve the original catalog order and pump the editor for
-			// every compile. Publishing and the default editor configuration use this path.
-			for ( int i = 0; i < gr.Length; i++ )
-			{
-				progress.Begin( gr[i].Path );
-				EditorSplashScreen.SetMessage( $"Compiling asset {i + 1}/{gr.Length} {gr[i].Path}" );
-				StepProgress( (float)i / gr.Length );
-				IToolsDll.Current?.Spin();
-				progress.Complete( gr[i].Compile( false ) ? "compile returned true" : "compile returned false" );
-			}
-		}
-
-		progress.Dispose();
-		splashProgress.Dispose();
-
-		if ( sw.Elapsed.TotalSeconds > 2 )
-			Log.Info( useFastEditorPath
-				? $"Compiled {gr.Length:N0} assets in {sw.Elapsed.TotalSeconds:0.000}s"
-				: $"Compiling assets took {sw.Elapsed.TotalSeconds:0.000}s" );
-
-		Bootstrap.StartupTiming?.SetDuration( "AssetPipeline.CompileMilliseconds", (int)sw.ElapsedMilliseconds );
 
 		if ( !warmAllThumbnails )
 			return;
@@ -492,7 +483,6 @@ static class StartupLoadProject
 		Bootstrap.StartupTiming?.SetValue( "AssetPipeline.ThumbnailsGenerated", missingThumbnailCount );
 		Bootstrap.StartupTiming?.SetDuration( "AssetPipeline.ThumbnailMilliseconds", (int)thumbnailStart.ElapsedMilliseconds );
 	}
-
 	/// <summary>
 	/// Download all required cloud resources for each asset in the asset system, and remove any we don't need anymore 
 	/// </summary>
@@ -513,7 +503,7 @@ static class StartupLoadProject
 		foreach ( var ident in packagesToDownload )
 		{
 			// normalise into org.ident, without version, so we can easily check below
-			if ( Package.TryParseIdent( ident, out var p ) )
+			if ( Package.TryParseIdentParts( ident, out var p ) )
 				required.Add( Package.FormatIdent( p.org, p.package ) );
 		}
 
@@ -533,6 +523,9 @@ static class StartupLoadProject
 
 	private static void ExportSettings( Project project )
 	{
+		if ( project.Config.Type != "game" )
+			return;
+
 		if ( !FileSystem.ProjectSettings.FileExists( "/Input.config" ) )
 		{
 			if ( !project.Config.TryGetMeta<InputSettings>( "InputSettings", out var meta ) )

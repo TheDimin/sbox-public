@@ -131,7 +131,12 @@ internal static class LinuxViewportInput
 		if ( !viewport.IsFocused ) return;
 		if ( detail is >= 4 and <= 7 )
 		{
-			if ( down ) InputRouter.OnMouseWheel( detail == 6 ? -1 : detail == 7 ? 1 : 0, detail == 4 ? 1 : detail == 5 ? -1 : 0 );
+			if ( down )
+			{
+				var horizontal = detail == 6 ? -1 : detail == 7 ? 1 : 0;
+				var vertical = detail == 4 ? 1 : detail == 5 ? -1 : 0;
+				InputRouter.OnMouseWheel( horizontal, vertical, horizontal, vertical );
+			}
 			return;
 		}
 		var button = detail switch

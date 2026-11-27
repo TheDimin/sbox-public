@@ -36,8 +36,6 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 		{
 			if ( value == this ) return;
 			if ( _boneMergeTarget == value ) return;
-			if ( value is not null && (Model?.GltfResource is not null || value.Model?.GltfResource is not null) )
-				throw new NotSupportedException( "Bone merging is not implemented for managed glTF renderers." );
 
 			_boneMergeTarget?.RemoveBoneMergeChild( this );
 
@@ -69,30 +67,6 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 		}
 	}
 
-	AnimationGraph _animationGraph;
-
-	/// <summary>
-	/// Override animgraph, otherwise uses animgraph of the model.
-	/// </summary>
-	[Property, Group( "Animation" ), ShowIf( nameof( UseAnimGraph ), true )]
-	public AnimationGraph AnimationGraph
-	{
-		get => _animationGraph;
-		set
-		{
-			if ( _animationGraph == value ) return;
-			if ( value is not null && Model?.GltfResource is not null )
-				throw new NotSupportedException( "Native animation graphs are not implemented for managed glTF renderers." );
-
-			_animationGraph = value;
-
-			if ( SceneModel.IsValid() )
-			{
-				SceneModel.AnimationGraph = value;
-			}
-		}
-	}
-
 	/// <summary>
 	/// Allows playback of sequences directly, rather than using an animation graph.
 	/// Requires <see cref="UseAnimGraph"/> disabled if the scene model has one.
@@ -118,15 +92,14 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 		get => _playbackRate;
 		set
 		{
-			if ( !float.IsFinite( value ) ) throw new ArgumentOutOfRangeException( nameof( value ), "Animation playback rate must be finite." );
 			if ( _playbackRate == value ) return;
+
+			_playbackRate = value;
 
 			if ( SceneModel.IsValid() )
 			{
-				SceneModel.PlaybackRate = value;
+				SceneModel.PlaybackRate = _playbackRate;
 			}
-
-			_playbackRate = value;
 		}
 	}
 
@@ -192,7 +165,21 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 
 	internal bool IsRootRenderer => _skinnedParent == null;
 
-	internal IEnumerable<SkinnedModelRenderer> SkinnedChildren => _skinnedChildren;
+	internal HashSet<SkinnedModelRenderer> SkinnedChildren => _skinnedChildren;
+
+	/// <summary>
+	/// The skinned renderer this one is animated after: the first one among its ancestors.
+	/// </summary>
+	internal SkinnedModelRenderer SkinnedParent => _skinnedParent;
+
+	/// <summary>
+	/// The bone merge children, which <see cref="MergeDescendants"/> merges onto this one.
+	/// </summary>
+	internal HashSet<SkinnedModelRenderer> BoneMergeChildren => _mergeChildren;
+
+	// The animation pass's grouping (SceneAnimationSystem), written on the main thread before the pass each frame
+	internal int AnimationUnitFrame, AnimatedFrame;
+	internal SkinnedModelRenderer AnimationUnitHead, NextAttachedRoot, FirstAttachedRoot, NextUnitMerge, FirstUnitMerge;
 
 	private void UpdateSkinnedRendererParent()
 	{
@@ -235,31 +222,13 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 		Scene.GetSystem<SceneAnimationSystem>().AddRenderer( this );
 
 		var model = Model ?? Model.Load( "models/dev/box.vmdl" );
-		if ( model.GltfResource is not null )
-		{
-			try
-			{
-				base.OnEnabled();
-				Transform.OnTransformChanged += OnTransformChanged;
-			}
-			catch
-			{
-				ResetGltfAnimation();
-				Scene.GetSystem<SceneAnimationSystem>().RemoveRenderer( this );
-				_skinnedParent?._skinnedChildren.Remove( this );
-				_skinnedParent = null;
-				throw;
-			}
-			return;
-		}
 
 		var so = new SceneModel( Scene.SceneWorld, model, WorldTransform );
 		_sceneObject = so;
+		so.AnimationControllerCreated += OnAnimationControllerCreated;
 
-		if ( AnimationGraph is not null )
-		{
-			so.AnimationGraph = AnimationGraph;
-		}
+		ApplyLegacyAnimationGraph( so );
+		ApplyAnimationGraph( so );
 
 		if ( so.UseAnimGraph != UseAnimGraph )
 		{
@@ -267,6 +236,7 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 		}
 
 		so.PlaybackRate = PlaybackRate;
+		so.LowDetailAnimation = LowDetailAnimation;
 
 		OnSceneObjectCreated( _sceneObject );
 
@@ -285,30 +255,13 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 
 	internal override void OnSceneObjectCreated( SceneObject o )
 	{
-		if ( Model?.GltfResource is not null )
-		{
-			var previous = CaptureGltfAnimationState();
-			try
-			{
-				InitializeGltfAnimation();
-				base.OnSceneObjectCreated( o );
-				Morphs.Apply();
-				Sequence.Apply();
-				RebindGltfController( previous );
-			}
-			catch { RestoreGltfAnimationState( previous ); throw; }
-			return;
-		}
-
-		var previousController = gltfController;
 		base.OnSceneObjectCreated( o );
 
-		ApplyStoredAnimParameters();
+		ApplyStoredLegacyParameters();
+		_animation?.ApplyStoredParameters();
 
 		Morphs.Apply();
 		Sequence.Apply();
-		ResetGltfAnimation();
-		GltfControllerBindingLost( previousController, "The target no longer has a glTF model." );
 
 		//
 		// Merge our bones immediately if we have a parent. This avoids frame 0 flicker.
@@ -324,21 +277,13 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 
 	protected override void UpdateObject()
 	{
-		if ( !IsGltfChangeStaged )
-		{
-			BuildBoneHierarchy();
+		BuildBoneHierarchy();
 
-			// If the model is changing, let go of any voice morphs now, while the
-			// scene object still has the old model our morph indices belong to
-			ReleaseVoiceMorphs();
-		}
+		// If the model is changing, let go of any voice morphs now, while the
+		// scene object still has the old model our morph indices belong to
+		ReleaseVoiceMorphs();
 
 		base.UpdateObject();
-		if ( Model?.GltfResource is not null )
-		{
-			UpdateGltfBoneObjects();
-			return;
-		}
 
 		if ( !SceneModel.IsValid() )
 			return;
@@ -373,13 +318,13 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 			// Updated bones, transform is no longer dirty.
 			_transformDirty = false;
 
-			UpdateGameObjectsFromBones();
+			if ( UpdateGameObjectsFromBones() && ThreadSafe.IsMainThread )
+				Transform.TransformChanged( true );
 		}
 	}
 
 	internal override void OnDisabledInternal()
 	{
-		ResetGltfAnimation();
 		try
 		{
 			ClearBoneProxies();
@@ -413,6 +358,11 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 		MergeDescendants();
 	}
 
+	/// <summary>
+	/// Whether the last animation update skipped this renderer's own update (<see cref="SkipsOwnAnimationUpdate"/>).
+	/// </summary>
+	internal bool OwnUpdateSkipped { get; private set; }
+
 	internal void DispatchEvents()
 	{
 		ThreadSafe.AssertIsMainThread();
@@ -433,7 +383,7 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 		if ( PlayAnimationsInEditorScene ) return true;
 
 		// Do we have any modified animgraph parameters?
-		if ( StoredParameterCount > 0 )
+		if ( (_animation?.StoredParameterCount ?? 0) > 0 || StoredLegacyParameterCount > 0 )
 			return true;
 
 		// If we're not using animgraph, do we have a sequence selected?
@@ -444,15 +394,126 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 		return SceneModel.IsValid() && SceneModel.HasBoneOverrides();
 	}
 
+	private void UpdateAnimationAfterParameterChange()
+	{
+		if ( Scene.IsEditor && !CanUpdateInEditor() )
+			SceneModel.UpdateToBindPose( ReadBonesFromGameObjects );
+		else
+			SceneModel.Update( Time.Delta, ReadBonesFromGameObjects );
+	}
+
+	/// <summary>
+	/// Always run this renderer's own animation update, even when <see cref="SkipsOwnAnimationUpdate"/> holds. For tests.
+	/// </summary>
+	internal bool AlwaysUpdateOwnAnimation { get; set; }
+
+	Model _mergeCoverageModel, _mergeCoverageTarget;
+	bool _mergeCovered;
+
+	/// <summary>
+	/// Whether this bone-merged renderer's own animation update is skipped, because its merge sets everything that update
+	/// would. The merge takes every bone and every morph the merge target also has from the target and overwrites what the
+	/// update did with them, so the update only matters through what the target lacks or through what it does besides
+	/// posing. It's skipped when:
+	/// <list type="bullet">
+	/// <item>every merge target up the chain is active and has a scene model, so the merge runs this frame;</item>
+	/// <item>every bone and morph of the model is also the target's: bones of its own (jiggle, cloth, extra
+	/// attachment bones) get their pose from the update, so they keep it;</item>
+	/// <item>the model has no animations and the scene model no animgraph: nothing plays, so no events or root motion;</item>
+	/// <item>there are no physics bones and no procedural bone objects.</item>
+	/// </list>
+	/// </summary>
+	internal bool SkipsOwnAnimationUpdate
+	{
+		get
+		{
+			if ( AlwaysUpdateOwnAnimation || Physics is not null || _graphDefinition is not null || _legacyAnimationGraph is not null )
+				return false;
+
+			var target = _boneMergeTarget;
+			if ( !target.IsValid() || !target.SceneModel.IsValid() || !Model.IsValid() || !target.Model.IsValid() )
+				return false;
+
+			for ( var t = target; t.IsValid(); t = t._boneMergeTarget )
+			{
+				if ( !t.Active ) return false;
+			}
+
+			if ( _mergeCoverageModel != Model || _mergeCoverageTarget != target.Model )
+			{
+				_mergeCovered = MergeCoversModel( Model, target.Model );
+				_mergeCoverageModel = Model;
+				_mergeCoverageTarget = target.Model;
+			}
+
+			if ( !_mergeCovered || HasProceduralBones() )
+				return false;
+
+			// No animgraph on the scene model, from the model or set on it
+			var sceneModel = SceneModel;
+			var legacyGraph = sceneModel.animNative.GetAnimGraph();
+			return (legacyGraph.IsNull || !legacyGraph.IsStrongHandleValid()) && sceneModel.animGraph2Native.IsNull;
+		}
+	}
+
+	bool HasProceduralBones()
+	{
+		foreach ( var entry in boneToGameObject )
+		{
+			if ( entry.Value.Flags.Contains( GameObjectFlags.ProceduralBone ) )
+				return true;
+		}
+
+		return false;
+	}
+
+	/// <summary>
+	/// Whether merging onto <paramref name="target"/> poses every bone of <paramref name="model"/> and sets every morph, and
+	/// the model has nothing to play by itself (<see cref="SkipsOwnAnimationUpdate"/>).
+	/// </summary>
+	static bool MergeCoversModel( Model model, Model target )
+	{
+		if ( model.BoneCount == 0 || model.AnimationCount > 0 )
+			return false;
+
+		foreach ( var bone in model.Bones.AllBones )
+		{
+			if ( !target.Bones.HasBone( bone.Name ) )
+				return false;
+		}
+
+		if ( model.Morphs.Count > 0 )
+		{
+			var targetMorphs = new HashSet<string>( target.Morphs.Names ?? [], StringComparer.Ordinal );
+			foreach ( var name in model.Morphs.Names ?? [] )
+			{
+				if ( !targetMorphs.Contains( name ) )
+					return false;
+			}
+		}
+
+		return true;
+	}
+
 	internal bool AnimationUpdate( bool previewBindPose = false )
 	{
-		if ( GltfInstance is not null )
-		{
-			QueueGltfAnimation( Time.Delta, previewBindPose );
-			return false;
-		}
 		if ( !SceneModel.IsValid() )
 			return false;
+
+		if ( SkipsOwnAnimationUpdate )
+		{
+			// The merge that follows (MergeDescendants) sets the transform and the whole pose
+			lock ( this )
+			{
+				UpdateDeformations();
+			}
+
+			_transformDirty = false;
+			OwnUpdateSkipped = true;
+			return false;
+		}
+
+		OwnUpdateSkipped = false;
 
 		SceneModel.Transform = WorldTransform;
 
@@ -493,23 +554,12 @@ public sealed partial class SkinnedModelRenderer : ModelRenderer, Component.Exec
 
 	void OnTransformChanged()
 	{
-		if ( GltfInstance is not null )
-		{
-			_boneSnapshotFrame = -1;
-			UpdateGltfBoneObjects();
-			return;
-		}
 		// Check transform because we could get a false positive.
 		_transformDirty = SceneModel.IsValid() && SceneModel.Transform != WorldTransform;
 	}
 
 	internal void FinishUpdate()
 	{
-		if ( Model?.GltfResource is not null )
-		{
-			FinishGltfAnimation();
-			return;
-		}
 		// Debug draw physics world if it exists.
 		Physics?.DebugDraw();
 

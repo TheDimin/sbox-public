@@ -19,29 +19,26 @@ public partial class ModelRenderer : MaterialAccessor.ITarget
 		set
 		{
 			if ( field == value ) return;
-			if ( Model?.GltfResource is not null && value is not null && (!value.IsValid || value.IsError) )
-				throw new Sandbox.Gltf.GltfException( "Material override is invalid." );
-			var previous = field;
 			field = value;
-			try { UpdateObject(); }
-			catch { field = previous; throw; }
+
+			UpdateObject();
 		}
 	}
 
 	Dictionary<string, Material> taggedMaterialOverrides;
 
 	/// <summary>
+	/// Bumped when a tagged or per-index material override changes, so code mirroring this renderer's materials onto
+	/// another scene object (<see cref="CopyMaterialsTo"/>) knows to copy them again.
+	/// </summary>
+	internal int MaterialOverrideVersion { get; private set; }
+
+	/// <summary>
 	/// Completely stop overriding materials
 	/// </summary>
 	public void ClearMaterialOverrides()
 	{
-		if ( gltfInstance is not null )
-		{
-			// The setter commits the complete effective vector before state is cleared.
-			MaterialOverride = null;
-			taggedMaterialOverrides = null;
-			return;
-		}
+		MaterialOverrideVersion++;
 		taggedMaterialOverrides = null;
 		MaterialOverride = null;
 		_sceneObject?.ClearMaterialOverride();
@@ -53,19 +50,16 @@ public partial class ModelRenderer : MaterialAccessor.ITarget
 	/// </summary>
 	public void SetMaterialOverride( Material material, string target )
 	{
-		// The managed glTF renderer cannot realize tagged overrides yet. Reject
-		// before mutating saved component state, including while disabled.
-		if ( Model?.GltfResource is not null && material is not null )
-			throw new NotSupportedException( "Tagged material overrides for managed glTF models are not implemented yet." );
 		if ( material is null && taggedMaterialOverrides is null )
 			return;
 
+		MaterialOverrideVersion++;
 		taggedMaterialOverrides ??= new Dictionary<string, Material>();
 
 		if ( material is null )
 		{
 			taggedMaterialOverrides.Remove( target );
-			if ( gltfInstance is null ) _sceneObject?.SetMaterialOverride( null, target );
+			_sceneObject?.SetMaterialOverride( null, target );
 		}
 		else
 		{
@@ -80,7 +74,6 @@ public partial class ModelRenderer : MaterialAccessor.ITarget
 	/// </summary>
 	void ApplyMaterialOverrides()
 	{
-		if ( ApplyGltfMaterialOverrides() ) return;
 		if ( !_sceneObject.IsValid() ) return;
 
 		if ( taggedMaterialOverrides is not null )
@@ -97,6 +90,32 @@ public partial class ModelRenderer : MaterialAccessor.ITarget
 	MaterialAccessor _materialAccessor;
 
 	/// <summary>
+	/// Apply the renderer's materials to an additional scene object, including clothing overrides.
+	/// </summary>
+	internal void CopyMaterialsTo( SceneObject target )
+	{
+		target.ClearMaterialOverride();
+		target.SetMaterialOverride( HasMaterialGroups ? null : MaterialOverride );
+		if ( HasMaterialGroups ) target.SetMaterialGroup( MaterialGroup );
+
+		if ( taggedMaterialOverrides is not null )
+		{
+			foreach ( var (tag, material) in taggedMaterialOverrides )
+				target.SetMaterialOverride( material, tag );
+		}
+
+		if ( _materialAccessor is not null )
+		{
+			for ( int i = 0; i < _materialAccessor.Count; i++ )
+			{
+				if ( _materialAccessor.GetOverride( i ) is { } material )
+					target.SetMaterialOverrideByIndex( i, material );
+			}
+		}
+		target.NotifyChanged( Rendering.SceneObjectChange.Material );
+	}
+
+	/// <summary>
 	/// Access to the materials 
 	/// </summary>
 	[Property, Group( "Materials", StartFolded = true )]
@@ -105,7 +124,6 @@ public partial class ModelRenderer : MaterialAccessor.ITarget
 	int MaterialAccessor.ITarget.GetMaterialCount()
 	{
 		if ( !Model.IsValid() ) return 0;
-		if ( Model.GltfResource is { } gltf ) return gltf.MaterialSlotSourceIndices.Count;
 		return Model.Materials.Length;
 	}
 
@@ -120,30 +138,18 @@ public partial class ModelRenderer : MaterialAccessor.ITarget
 
 	void MaterialAccessor.ITarget.SetOverride( int index, Material material )
 	{
-		if ( Model?.GltfResource is { } gltf )
-		{
-			if ( (uint)index >= gltf.MaterialSlotSourceIndices.Count ) throw new ArgumentOutOfRangeException( nameof( index ) );
-			if ( material is not null && (!material.IsValid || material.IsError) ) throw new Sandbox.Gltf.GltfException( "Material override is invalid." );
-			if ( gltfInstance is not null ) ApplyGltfMaterialOverrides();
-			return;
-		}
+		MaterialOverrideVersion++;
 		if ( !_sceneObject.IsValid() ) return;
 
-		_sceneObject.native.SetMaterialOverrideByIndex( index, material?.native ?? default );
-		_sceneObject.NotifyChanged( Rendering.SceneObjectChange.Material );
+		_sceneObject.SetMaterialOverrideByIndex( index, material );
 	}
 
 	void MaterialAccessor.ITarget.ClearOverrides()
 	{
-		if ( gltfInstance is not null )
-		{
-			ApplyGltfMaterialOverrides();
-			return;
-		}
+		MaterialOverrideVersion++;
 		if ( !_sceneObject.IsValid() ) return;
 
-		_sceneObject.native.ClearMaterialOverrideList();
-		_sceneObject.NotifyChanged( Rendering.SceneObjectChange.Material );
+		_sceneObject.ClearMaterialOverrideList();
 	}
 
 }

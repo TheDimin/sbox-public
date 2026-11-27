@@ -58,7 +58,7 @@ public class PackageEditorToolbaseReloadTests
 		var chainProject = transitiveConsumer
 			? new Project( new DirectoryInfo( root ) ) { Config = new Sandbox.DataModel.ProjectConfig { Org = "local", Ident = "chain", Title = "Chain test", Type = "game" } }
 			: null;
-		var loader = new Sandbox.PackageLoader( "toolbase-regression", GetType().Assembly, disableAccessControl: true ) { ToolsMode = true };
+		var loader = new Sandbox.PackageLoader( "toolbase-regression", GetType().Assembly ) { ToolsMode = true };
 		var library = new TypeLibrary();
 		var enroller = loader.CreateEnroller( "toolbase-regression" );
 		enroller.OnAssemblyAdded = a => library.AddAssembly( a.Assembly, true );

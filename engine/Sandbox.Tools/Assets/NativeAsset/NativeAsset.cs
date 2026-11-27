@@ -13,7 +13,7 @@ internal class NativeAsset : Asset
 		AssetId = native.GetAssetIndexInt();
 	}
 
-	internal override void UpdateInternals( bool compileImmediately = true )
+	internal override void UpdateInternals()
 	{
 		if ( AssetType.AssetTypeCache.TryGetValue( native.GetAssetTypeId(), out var type ) )
 			AssetType = type;
@@ -56,17 +56,14 @@ internal class NativeAsset : Asset
 		// Reload all tags.
 		LoadUserTags();
 		UpdateAutoTags();
-
-		if ( compileImmediately && !IsCompiled && AssetType.IsGameResource )
-		{
-			Compile( false );
-		}
 	}
 
 	/// <summary>
 	/// Can this asset be recompiled?
 	/// </summary>
 	public override bool CanRecompile => native.CanRecompile();
+
+	internal override bool EnsureCurrentForLoad() => IAssetSystem.EnsureAssetCurrentForLoad( native );
 
 	internal override void OnRemoved()
 	{

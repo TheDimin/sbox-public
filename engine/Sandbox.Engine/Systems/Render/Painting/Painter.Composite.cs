@@ -12,41 +12,33 @@ public readonly ref partial struct Painter
 		var commands = NativeCommands( objectSpace: true );
 		var attributes = commands.Attributes;
 		attributes.Set( "Texture", source.ColorTexture );
+		attributes.Set( "LayerUVScale", LayerUVScale( (int)bounds.Width, (int)bounds.Height ) );
 		attributes.Set( "BoxPosition", bounds.Position );
 		attributes.Set( "BoxSize", bounds.Size );
 
 		foreach ( var shadow in shadows )
 		{
-			var offset = new Vector2( shadow.OffsetX, shadow.OffsetY );
-			var padding = MathF.Max( MathF.Abs( offset.x ), MathF.Abs( offset.y ) ) + MathF.Ceiling( shadow.Blur * 3 ) + 1;
-			var rect = bounds.Grow( padding );
-			ResetCompositeAttributes( commands );
-			attributes.Set( "FilterDropShadowScale", bounds.Size / rect.Size );
-			attributes.Set( "FilterDropShadowOffset", offset );
+			attributes.Set( "FilterDropShadowOffset", new Vector2( shadow.OffsetX, shadow.OffsetY ) );
 			attributes.Set( "FilterDropShadowBlur", shadow.Blur );
 			attributes.Set( "FilterDropShadowColor", shadow.Color );
-			commands.DrawQuad( rect, Material.UI.DropShadow, Color.White );
+			commands.DrawQuad( bounds, Material.UI.DropShadow, Color.White );
 			Output.CountDraw();
 		}
 
 		if ( borderWidth > 0 )
 		{
-			var rect = bounds.Grow( borderWidth );
-			ResetCompositeAttributes( commands );
-			attributes.Set( "FilterBorderWrapColorScale", bounds.Size / rect.Size );
 			attributes.Set( "FilterBorderWrapColor", borderColor );
 			attributes.Set( "FilterBorderWrapWidth", borderWidth );
-			commands.DrawQuad( rect, Material.UI.BorderWrap, Color.White );
+			commands.DrawQuad( bounds, Material.UI.BorderWrap, Color.White );
 			Output.CountDraw();
 		}
 
-		ResetCompositeAttributes( commands );
 		attributes.Set( "PainterSourceGamma", false );
 		attributes.Set( "PainterScissorIndex", -1 );
 		SetFilterAttributes( attributes, bounds, filter, mask, maskScope );
 
 		attributes.SetCombo( "D_BLENDMODE", InheritedBlendMode );
-		commands.DrawQuad( bounds.Grow( MathF.Ceiling( filter.Blur * 3 ) ).Ceiling(), Material.UI.Filter, Color.White );
+		commands.DrawQuad( bounds, Material.UI.Filter, Color.White );
 		Output.CountDraw();
 
 		// Restore the world-space WorldMat for batched draws.
@@ -58,6 +50,7 @@ public readonly ref partial struct Painter
 		var context = ActiveContext;
 		var output = context.Batcher;
 		output.Flush();
+		output.Volatile++;
 		var commands = output.CommandList;
 		var attributes = commands.BeginDrawAttributes();
 		var target = output.Destination;
@@ -66,6 +59,7 @@ public readonly ref partial struct Painter
 		output.BindScissor( attributes, clip );
 		attributes.Set( "HasScissor", 0 );
 		attributes.Set( "Texture", source.ColorTexture );
+		attributes.Set( "LayerUVScale", LayerUVScale( (int)MathF.Ceiling( bounds.Width ), (int)MathF.Ceiling( bounds.Height ) ) );
 		attributes.Set( "PainterSourceGamma", true );
 		attributes.Set( "LayerMat", target.LayerMatrix );
 		attributes.Set( "TransformMat", transform );
@@ -79,9 +73,20 @@ public readonly ref partial struct Painter
 		filter = filter with { Tint = filter.Tint.WithAlphaMultiplied( context.State.Opacity * context.InheritedOpacity * opacity ) };
 		SetFilterAttributes( attributes, bounds, filter, mask, MaskScope.Default );
 		attributes.SetCombo( "D_BLENDMODE", context.State.OverrideBlendMode );
-		commands.DrawQuad( bounds.Grow( MathF.Ceiling( filter.Blur * 3 ) ), Material.UI.Filter, Color.White, attributes );
+		commands.DrawQuad( bounds, Material.UI.Filter, Color.White, attributes );
 		output.CountDraw();
 	}
+
+	const int LayerTargetStep = 64;
+
+	/// <summary>
+	/// Layer targets are pooled by size, so they're rounded up to whole steps: a layer that changes size a little every
+	/// frame, like a world panel scaling with distance, keeps reusing one texture. The content fills its top left.
+	/// </summary>
+	internal static int LayerTargetSize( int size ) => Math.Max( 1, (size + LayerTargetStep - 1) / LayerTargetStep ) * LayerTargetStep;
+
+	// The part of a rounded up layer target its content covers
+	static Vector2 LayerUVScale( int width, int height ) => new( width / (float)LayerTargetSize( width ), height / (float)LayerTargetSize( height ) );
 
 	void SetFilterAttributes( CommandList.AttributeAccess attributes, Rect bounds, Filter filter, Mask? mask, MaskScope maskScope )
 	{
@@ -96,7 +101,7 @@ public readonly ref partial struct Painter
 		attributes.SetCombo( "D_MASK_IMAGE", mask.HasValue ? 1 : 0 );
 		if ( mask is Mask m )
 		{
-			Output.RetainTexture( m.Texture, true );
+			Output.RetainTexture( m.Texture, true, PainterBatcher.BoundByReference );
 			attributes.Set( "MaskTexture", m.Texture );
 			attributes.Set( "MaskPos", new Vector4( m.Rect.Left - bounds.Left, m.Rect.Top - bounds.Top, m.Rect.Width, m.Rect.Height ) );
 			attributes.Set( "MaskMode", (int)m.Mode );
@@ -118,16 +123,5 @@ public readonly ref partial struct Painter
 				Filter = m.Sampling
 			} ) );
 		}
-	}
-
-	static void ResetCompositeAttributes( CommandList commands )
-	{
-		var attributes = commands.Attributes;
-		attributes.Set( "FilterDropShadowScale", 0 );
-		attributes.Set( "FilterDropShadowOffset", 0 );
-		attributes.Set( "FilterDropShadowBlur", 0 );
-		attributes.Set( "FilterDropShadowColor", 0 );
-		attributes.Set( "FilterBorderWrapColor", 0 );
-		attributes.Set( "FilterBorderWrapWidth", 0 );
 	}
 }

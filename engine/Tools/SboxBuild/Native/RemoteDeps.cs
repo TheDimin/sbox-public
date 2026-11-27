@@ -63,9 +63,8 @@ public static class RemoteDeps
 		new( "lame", "3.100", "thirdparty/lame" ) { Rebuild = 2 },
 		new( "oidn", "v1.4.3", "thirdparty/oidn" ) { Rebuild = 2, Platforms = DESKTOP },
 		new( "embree", "v3.13.5", "thirdparty/embree" ) { Rebuild = 2, Platforms = DESKTOP },
-		new( "bc7enc", "main", "thirdparty/bc7enc" ) { Rebuild = 2, Platforms = DESKTOP },
+		new( "bc7enc", "b9438627eef73a1157e84201b6fa6eb2ffd6d9f0", "thirdparty/bc7enc" ) { Platforms = DESKTOP },
 		new( "ispc-texcomp", "master", "thirdparty/ispc-texcomp" ) { Rebuild = 2, Platforms = DESKTOP },
-		new( "openxr-loader", "release-1.1.43", "thirdparty/openxr" ) { Rebuild = 2, Platforms = DESKTOP },
 		// Qt builds far more than the editor loads. Its release names the shipped set in a
 		// runtime tree, already laid out the way it lands beside the engine.
 		new( "qt5", "master", "thirdparty/qt5" ) { Rebuild = 2, Platforms = DESKTOP, RuntimeTree = "runtime" },

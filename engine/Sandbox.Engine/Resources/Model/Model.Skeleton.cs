@@ -74,7 +74,7 @@ public partial class Model
 	/// <summary>
 	/// Number of bones this model has.
 	/// </summary>
-	public int BoneCount => GltfResource?.Metadata.Bones.Count ?? native.NumBones();
+	public int BoneCount => native.NumBones();
 
 	/// <summary>
 	/// Returns name of a bone at given bone index.
@@ -86,7 +86,7 @@ public partial class Model
 	{
 		OOBChecks.ThrowIfBoneOutOfBounds( boneIndex, BoneCount, nameof( boneIndex ) );
 
-		return GltfResource is { } gltf ? gltf.Metadata.Bones[boneIndex].Name : native.boneName( boneIndex );
+		return native.boneName( boneIndex );
 	}
 
 	/// <summary>
@@ -99,7 +99,7 @@ public partial class Model
 	{
 		OOBChecks.ThrowIfBoneOutOfBounds( boneIndex, BoneCount, nameof( boneIndex ) );
 
-		return GltfResource is { } gltf ? gltf.Metadata.Bones[boneIndex].Parent : native.boneParent( boneIndex );
+		return native.boneParent( boneIndex );
 	}
 
 	/// <summary>
@@ -110,7 +110,7 @@ public partial class Model
 	{
 		OOBChecks.ThrowIfBoneOutOfBounds( boneIndex, BoneCount, nameof( boneIndex ) );
 
-		return GltfResource is { } gltf ? GltfManagedModelMetadata.ToPublicTransform( gltf.Metadata.Bones[boneIndex].Rest ) : native.GetBoneTransform( boneIndex );
+		return native.GetBoneTransform( boneIndex );
 	}
 
 	/// <summary>
@@ -118,7 +118,7 @@ public partial class Model
 	/// </summary>
 	public Transform GetBoneTransform( string bone )
 	{
-		var idx = GltfResource is not null ? Bones.GetBone( bone )?.Index ?? -1 : native.FindBoneIndex( bone );
+		var idx = native.FindBoneIndex( bone );
 		if ( idx < 0 ) return Transform.Zero;
 
 		return GetBoneTransform( idx );

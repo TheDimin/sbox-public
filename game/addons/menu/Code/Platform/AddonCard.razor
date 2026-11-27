@@ -1,0 +1,94 @@
+@using System;
+@using Sandbox;
+@using Sandbox.UI;
+@namespace MenuProject.Platform
+@inherits Panel
+
+@*
+    An addon - its art, what it is, and on the art's corner one button for where it's at, as a game's card has them:
+    subscribed, a tick lit green when it's on in this game (its art greyed when it's off); not, a button to
+    subscribe. Unsubscribing's in its menu.
+*@
+<root class="@(Subscribed && !Enabled ? "off" : "")" onclick=@OpenMenu onrightclick=@OpenMenu>
+    <div class="art">
+        @* The picture on its own, so greying it when it's off leaves the button over it as it is *@
+        <div class="image" style=@MenuHelpers.BackgroundImage( Item.Thumb )></div>
+        @if ( string.IsNullOrEmpty( Item.Thumb ) )
+        {
+            <i class="placeholder">extension</i>
+        }
+
+        <div class="actions">
+            @if ( Subscribed )
+            {
+                <div class="action active @(Enabled ? "on" : "")" tooltip=@(Enabled ? "Disable" : "Enable") onclick=@( ( PanelEvent e ) => { e.StopPropagation(); MenuUtility.SetAddonEnabled( GameIdent, Item.Id, !Enabled ); } )>
+                    <i class="state">check</i>
+                    <i class="hover">@(Enabled ? "close" : "check")</i>
+                </div>
+            }
+            else
+            {
+                <div class="action subscribe" tooltip="Subscribe" onclick=@( ( PanelEvent e ) => { e.StopPropagation(); ToggleSubscribed(); } )>
+                    <i>add</i>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="info">
+        <label class="title" tooltip=@Item.Title>@Item.Title</label>
+        <div class="details"><label class="author">@(Item.OwnerName ?? "Workshop creator")</label><i>thumb_up</i><label>@Item.VotesUp.ToString( "N0" )</label></div>
+    </div>
+</root>
+
+@code
+{
+    /// <summary>
+    /// The addon shown on this card.
+    /// </summary>
+    [Parameter] public WorkshopItemDetails Item { get; set; }
+
+    /// <summary>
+    /// The selected game whose addon preferences this card edits.
+    /// </summary>
+    [Parameter] public string GameIdent { get; set; }
+
+    /// <summary>
+    /// Notify the containing page after a subscription changes.
+    /// </summary>
+    [Parameter] public Action OnChanged { get; set; }
+
+    bool Subscribed => MenuUtility.IsSubscribed( Item.Id );
+    bool Enabled => MenuUtility.IsAddonEnabled( GameIdent, Item.Id );
+
+    void OpenMenu()
+    {
+        var menu = MenuProject.UI.MenuPanel.Open( this );
+
+        if ( Subscribed )
+        {
+            menu.AddOption( Enabled ? "block" : "check_circle", Enabled ? "Disable" : "Enable",
+                () => MenuUtility.SetAddonEnabled( GameIdent, Item.Id, !Enabled ) );
+        }
+
+        menu.AddOption( Subscribed ? "remove_circle_outline" : "add_circle_outline", Subscribed ? "Unsubscribe" : "Subscribe", ToggleSubscribed );
+        menu.AddSpacer();
+        menu.AddOption( "open_in_new", "View on Workshop", () => MenuUtility.OpenUrl( Item.Url ) );
+    }
+
+    void ToggleSubscribed()
+    {
+        if ( Subscribed )
+        {
+            MenuUtility.Unsubscribe( Item.Id );
+        }
+        else
+        {
+            MenuUtility.SetAddonEnabled( GameIdent, Item.Id, true );
+            MenuUtility.Subscribe( Item.Id );
+        }
+
+        OnChanged?.Invoke();
+    }
+
+    protected override int BuildHash() => HashCode.Combine( Item, GameIdent, Subscribed, Enabled );
+}

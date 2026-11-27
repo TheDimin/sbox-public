@@ -73,9 +73,11 @@ internal static class EngineFileSystem
 		{
 			CoreContent.CreateAndMount( Root, "/core/" );
 			CoreContent.CreateAndMount( Root, "/addons/citizen/Assets/" );
+			CoreContent.CreateAndMount( Root, "/addons/content/Assets/" );
 
 			Assets.CreateAndMount( Root, "/core/" );
 			Assets.CreateAndMount( Root, "/addons/citizen/Assets/" );
+			Assets.CreateAndMount( Root, "/addons/content/Assets/" );
 		}
 	}
 
@@ -126,6 +128,7 @@ internal static class EngineFileSystem
 	/// </summary>
 	internal static void Shutdown()
 	{
+		BakeCache.Close();
 		Root = null;
 		Config = null;
 

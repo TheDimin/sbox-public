@@ -32,19 +32,19 @@ public partial class RenderSettings
 
 	public int MaxFrameRate
 	{
-		get => ConVarSystem.GetInt( "fps_max", 0, true );
+		get => ConVarSystem.GetNativeInt( "fps_max", 0 );
 		set => ConVarSystem.SetInt( "fps_max", value, true );
 	}
 
 	public int MaxFrameRateInactive
 	{
-		get => ConVarSystem.GetInt( "fps_max_inactive", 100, true );
+		get => ConVarSystem.GetNativeInt( "fps_max_inactive", 100 );
 		set => ConVarSystem.SetInt( "fps_max_inactive", value, true );
 	}
 
 	public int MaxFrameRateMenu
 	{
-		get => ConVarSystem.GetInt( "fps_max_menu", 0, true );
+		get => ConVarSystem.GetNativeInt( "fps_max_menu", 0 );
 		set => ConVarSystem.SetInt( "fps_max_menu", value, true );
 	}
 
@@ -82,6 +82,16 @@ public partial class RenderSettings
 		{
 			VideoSettings.Set<ShadowQuality>( "shadow.quality", value );
 			Config.SetGroupConVars( "ShadowQuality", value.ToString() );
+		}
+	}
+
+	public WaterQuality WaterQuality
+	{
+		get => VideoSettings.Get<WaterQuality>( "water.quality", WaterQuality.High );
+		set
+		{
+			VideoSettings.Set<WaterQuality>( "water.quality", value );
+			Config.SetGroupConVars( "WaterQuality", value.ToString() );
 		}
 	}
 

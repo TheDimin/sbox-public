@@ -16,6 +16,7 @@ native class ConVar as NativeEngine.ConVar
 	void SetValue( int nValue );
 
 	stable string GetString();
+	int GetInt();
 	void Revert();
 	bool HasMin();
 	bool HasMax();
@@ -41,4 +42,5 @@ managed static class Sandbox.ConVarSystem
 	static void RegisterNativeVar( ConVar convar );
 	static void RegisterNativeCommand( ConCommand concommand );
 	static void OnConVarChanged( string convarname, string value, string previous );
+	static void OnNativeConVarChanged();
 }

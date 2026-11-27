@@ -7,6 +7,18 @@ $project = Join-Path $PSScriptRoot 'Sandbox.Mounting.GtaV.csproj'
 $game = (Resolve-Path (Join-Path $PSScriptRoot '../../../game')).Path
 $cli = Join-Path $game 'bin/managed/sbox-cli.exe'
 $build = Join-Path $PSScriptRoot ("obj/editor/" + [Guid]::NewGuid().ToString('N'))
+$check = @'
+return typeof(Scene).Assembly.GetType( "Sandbox.WaterSurfaceBatch" ) is not null
+    && typeof(Scene).Assembly.GetType( "Sandbox.Mounting.GtaWorldVariant" ) is not null
+    && typeof(Sandbox.Mounting.ResourceLoader).GetProperty( "UseWeakResourceCache",
+        System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic ) is not null;
+'@
+$compatible = & $cli --connect $EditorProcessId --call run_csharp (@{ code = $check } | ConvertTo-Json -Compress)
+if ($LASTEXITCODE) { throw 'Could not check the running editor assemblies.' }
+if ("$compatible".Trim() -ne 'true') {
+    throw 'The running editor uses older Sandbox.Engine or Sandbox.Mounting assemblies. Build the engine and mount together and restart the editor before reloading the mount.'
+}
+
 & dotnet build $project -c Release --no-restore -p:BuildProjectReferences=false "-p:GameDir=$build"
 if ($LASTEXITCODE) { throw 'Mount build failed. The editor still uses the previous build.' }
 

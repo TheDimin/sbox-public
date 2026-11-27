@@ -453,7 +453,7 @@ internal partial class UISystem
 	}
 
 	/// <summary>
-	/// Delete all panels that were deferred and are no longer playing outro transitions
+	/// Delete all panels that were deferred and are no longer playing outro transitions, or whose parent isn't drawn
 	/// </summary>
 	internal void RunDeferredDeletion( bool force = false )
 	{
@@ -469,7 +469,10 @@ internal partial class UISystem
 				continue;
 			}
 
-			if ( !force && p.HasActiveTransitions ) continue;
+			// An outro under a parent that isn't drawn can't be seen, and never ends: hidden panels don't lay out their
+			// children, so its transitions don't advance. Waiting on it would keep the panel, and what it draws (a background
+			// image's texture), for as long as the parent stays hidden.
+			if ( !force && p.HasActiveTransitions && (p.Parent?.IsVisible ?? false) ) continue;
 
 			try
 			{
@@ -525,6 +528,12 @@ internal partial class UISystem
 				Log.Warning( e );
 			}
 		}
+
+		// A panel that was detached from its parent and queued for deletion is in no
+		// root's tree, so the loop above never reaches it. Nothing will run the pump
+		// after this, so delete them now or they keep whatever they own - scene panels
+		// keep an entire Scene alive.
+		RunDeferredDeletion( true );
 
 		RootPanels.Clear();
 		DeletionList.Clear();

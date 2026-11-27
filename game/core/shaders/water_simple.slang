@@ -1,0 +1,181 @@
+// water_simple: a surface, the whole shader for Borealis.Gpu (docs/reference/borealis-slang-materials.md).
+import sbox.surface;
+
+[Material, Features( "Common" ), Vertex( "Common" ), Attribute( "NeedsLightProbe" ), Attribute( "CanBatchWithDynamicShaderConstants" ),
+	AttributeExpression( "DoNotCastShadows", "F_DO_NOT_CAST_SHADOWS" ), Attribute( "SupportsMappingDimensions" ), AttributeExpression( "renderbackfaces", "F_RENDER_BACKFACES" )]
+public struct WaterSimple : ICompositeSurface
+{
+	[Engine( "RefractionTexture" ), Srgb] Texture2D g_RefractionTexture;
+	[Engine( "RefractionTexture" ), Srgb, Sampler( "MIN_MAG_MIP_LINEAR", "Clamp" )] SamplerState g_RefractionTexture_sampler;
+	[Engine( "ReflectionTexture" ), Srgb] Texture2D g_ReflectionTexture;
+	[Engine( "ReflectionTexture" ), Srgb, Sampler( "MIN_MAG_MIP_LINEAR", "Clamp" )] SamplerState g_ReflectionTexture_sampler;
+	[Default( 0.0f ), Engine( "HasRefractionTexture" )] bool g_bRefraction;
+	[Default( 0.0f ), Engine( "HasReflectionTexture" )] bool g_bReflection;
+
+	[Group( "Material,10" ), Srgb, Opacity, TextureAttribute( "RepresentativeTexture" )] Texture2D Color;
+	[Group( "Material,10" )] Texture2D Normal;
+	[Group( "Material,10" )] Rma Rma;
+	[Group( "Material,10/90" ), Source( "g_flTintColor" ), Color, Default3( 1, 1, 1 )] float3 TintColor;
+	[Default( 0.5f ), Range( 0.01f, 1.0f ), Group( "Refraction" ), Source( "RefractionNormalScale" )] float RefractionNormalScale;
+	[Default( 1.0f ), Range( 0.0f, 1.0f ), Group( "Refraction" ), Source( "Translucency" )] float Translucency;
+	[Default( 0.5f ), Range( 0.01f, 1.0f )] float RelectionNormalScale;
+	[Default( 1.0f ), Range( 0.0f, 1 ), Group( "Water" ), Source( "Refraction" )] float Refraction;
+	[Default( 0.5f ), Range( 0.0f, 1 ), Group( "Wave" ), Source( "BigWaveSize" )] float BigWaveSize;
+	[Default( 100.0f ), Range( 0.0f, 256 ), Group( "Wave" ), Source( "BigWaveScale" )] float BigWaveScale;
+	[Default( 1.0f ), Range( 0.0f, 10 ), Group( "Wave" ), Source( "BigWaveTime" )] float BigWaveTime;
+	[Default( 0.5f ), Range( 0.0f, 2 ), Group( "Tweaks" ), Source( "NormalScale" )] float NormalScale;
+	[Default( 0.02f ), Range( 0.01f, 1.0f ), Group( "Tweaks" ), Source( "g_fRoughness" )] float Roughness;
+	[Default( 0.85f ), Range( 0.01f, 1.0f ), Group( "Tweaks" ), Source( "g_fMetalness" )] float Metalness;
+	[Default( 0.5f ), Range( 0.01f, 1.0f ), Group( "Tweaks" ), Source( "g_fAmbientOcclusion" )] float AmbientOcclusion;
+	[Group( "Fog,300" ), Default( 1 )] bool FogEnabled;
+
+	Material GetWave( SurfaceInput ii, float waveTime, float waveScale, float scale )
+	{
+
+		SurfaceInput i = ii;
+
+
+
+		float3 worldPos = i.Camera + ( i.Position - i.Camera );
+
+		
+
+		worldPos.x += sin( (worldPos.x / 12) + (i.Time * 16) ) * 0.1;
+
+		worldPos.y += cos( (worldPos.y / 12) + (i.Time * 22) ) * 0.1;
+
+
+
+		worldPos /= scale;
+
+
+
+		worldPos.x += sin( (worldPos.x ) + (i.Time * waveTime) ) * waveScale;
+
+		worldPos.y += cos( (worldPos.y ) + (i.Time * waveTime) ) * waveScale;
+
+
+
+		i.Uv = worldPos.xy;
+
+
+
+		Material m = Material.FromCommonInputs( i, Color, Normal, Rma, TintColor );
+
+
+
+		return m;
+
+	}
+
+	public Material Evaluate( SurfaceInput i )
+	{
+
+		Material a = GetWave( i, BigWaveTime, BigWaveSize, BigWaveScale );
+
+		Material b = GetWave( i, BigWaveTime, BigWaveSize, BigWaveScale * -1 );
+
+
+
+		Material m = Material.Lerp( a, b, 0.5 ); // could do this with big noise to reduce tiling?
+
+
+
+		float3 camdir = normalize( i.Camera - ( ( i.Position - i.Camera ) + i.Camera ) );
+
+
+
+		// scale normals, artist adjustment
+
+		m.Normal = lerp( i.Normal, m.Normal, NormalScale );
+
+
+
+		float fresnel = pow( 1.0 - dot( ( m.Normal ), camdir ), 5 );
+
+	
+
+		m.Opacity = 1;
+
+		m.Roughness = Roughness;
+
+		m.Metalness = Metalness;
+
+		m.AmbientOcclusion = AmbientOcclusion;
+
+
+
+		// let depth write
+
+
+
+		// 
+
+		// Add reflection
+
+		//
+
+		if ( g_bReflection )
+
+        {
+
+			float2 distortion = m.Normal.xy;
+
+
+
+            float2 vPositionSs = i.ScreenPosition.xy;
+
+			float2 uv = i.ScreenUv; 
+
+			uv += distortion * 0.1;
+
+			float3 col = g_ReflectionTexture.Sample(g_ReflectionTexture_sampler, uv).rgb;
+
+
+
+			m.Emission.rgb += col * fresnel;
+
+        }
+
+
+
+		return m;
+	}
+
+	public float4 Composite( float4 shaded, Material m, SurfaceInput i )
+	{
+		float3 camdir = normalize( i.Camera - ( ( i.Position - i.Camera ) + i.Camera ) );
+		float fresnel = pow( 1.0 - dot( ( m.Normal ), camdir ), 5 );
+		float4 outCol = shaded;
+
+
+		//
+
+		// Add refraction
+
+		//
+
+		if ( g_bRefraction )
+
+		{
+
+			float colorSplit = 1;
+
+			float2 uv = i.ScreenUv; 
+
+			uv += -m.Normal.xy * Refraction * 0.1 * RefractionNormalScale;
+
+
+
+           	float3 col = g_RefractionTexture.SampleLevel( g_RefractionTexture_sampler, uv, 0 ).rgb;
+
+			outCol.rgb = lerp( outCol.rgb, col, (1-fresnel) * Translucency );
+
+		}
+
+
+
+		return outCol;
+
+	}
+}

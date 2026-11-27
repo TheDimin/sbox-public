@@ -15,14 +15,16 @@ internal partial class Test( bool noBuild = true, string filter = null, string p
 	/// </summary>
 	public const string PullRequestFilter = "TestCategory!=LiveBackend&TestCategory!=Slow";
 
-	/// <param name="Name">The project under engine/Tests/.</param>
+	/// <param name="Name">The project under engine/Tests/. For projects elsewhere, use <paramref name="Path"/>.</param>
 	/// <param name="NeedsEngine">Whether FACEPUNCH_ENGINE is set for it.</param>
 	/// <param name="Shard">Label for one part of a project split across processes, or null.</param>
 	/// <param name="ShardFilter">Which of the project's tests this part runs.</param>
 	/// <param name="Isolated">Runs one test at a time, with tiered compilation off.</param>
-	private record TestProject( string Name, bool NeedsEngine, string Shard = null, string ShardFilter = null, bool Isolated = false )
+	/// <param name="Path">The project or solution to test, relative to engine/, if it isn't under engine/Tests/.</param>
+	private record TestProject( string Name, bool NeedsEngine, string Shard = null, string ShardFilter = null, bool Isolated = false, string Path = null )
 	{
 		public string DisplayName => Shard is null ? Name : $"{Name} ({Shard})";
+		public string TestPath => Path ?? System.IO.Path.Combine( "Tests", Name, $"{Name}.csproj" );
 	}
 
 	/// <summary>
@@ -43,14 +45,14 @@ internal partial class Test( bool noBuild = true, string filter = null, string p
 
 	/// <summary>
 	/// The test projects. They run at the same time, so the whole run takes as long as the slowest one
-	/// (Sandbox.Test.Integration, which is split in two, plus its allocation tests). Sandbox.Test.Unit and Sandbox.Test.Text run with FACEPUNCH_ENGINE
-	/// removed from their environment: those tiers must work without a built native engine, so a test
-	/// that sneaks in a native dependency fails here rather than on someone's bare checkout.
+	/// (Sandbox.Test.Integration, which is split in two, plus its allocation tests). Sandbox.Test.Unit, Sandbox.Test.Text, Sandbox.Test.Navigation and Borealis.Test run with
+	/// FACEPUNCH_ENGINE removed from their environment: those tiers must work without a built native engine, so a test
+	/// that sneaks in a native dependency fails here rather than on someone's bare checkout. Borealis.Test references
+	/// nothing of the engine at all, so Borealis needing an engine type again fails its build.
 	/// New test projects under engine/Tests/ need to be added to this list.
 	/// </summary>
 	private static readonly TestProject[] Projects =
 	[
-		new( "Sandbox.Test.Gltf", NeedsEngine: false ),
 		new( "Sandbox.Test.Integration", NeedsEngine: true, Shard: "most", ShardFilter: $"{IntegrationOtherTests}&{NotAllocationTests}" ),
 		new( "Sandbox.Test.Integration", NeedsEngine: true, Shard: "compiles and exports", ShardFilter: IntegrationCompileTests ),
 		new( "Sandbox.Test.Integration", NeedsEngine: true, Shard: "allocations", ShardFilter: AllocationTests, Isolated: true ),
@@ -59,8 +61,14 @@ internal partial class Test( bool noBuild = true, string filter = null, string p
 		new( "Sandbox.Test.Engine", NeedsEngine: true, ShardFilter: NotAllocationTests ),
 		new( "Sandbox.Test.Engine", NeedsEngine: true, Shard: "allocations", ShardFilter: AllocationTests, Isolated: true ),
 		new( "Sandbox.Test.Text", NeedsEngine: false ),
+		new( "Sandbox.Test.Navigation", NeedsEngine: false ),
+		new( "Borealis.Test", NeedsEngine: false, ShardFilter: NotAllocationTests ),
+		new( "Borealis.Test", NeedsEngine: false, Shard: "allocations", ShardFilter: AllocationTests, Isolated: true ),
 		new( "Sandbox.Test.NetSim", NeedsEngine: true ),
+		new( "Addons", NeedsEngine: true, Path: AddonSolution ),
 	];
+
+	private const string AddonSolution = "../game/s&box.slnx";
 
 	/// <summary>
 	/// How many of the slowest tests to list after each project, so slow tests get noticed.
@@ -167,7 +175,7 @@ internal partial class Test( bool noBuild = true, string filter = null, string p
 		var filterFlag = filters.Length == 0 ? string.Empty : $" --filter \"{string.Join( "&", filters )}\"";
 		// Run settings after the --, overriding the assembly's [Parallelize]
 		var isolatedFlag = project.Isolated ? " -- MSTest.Parallelize.Workers=1" : string.Empty;
-		var testArgs = $"test {csproj} --logger \"console;verbosity=normal;consoleLoggerParameters=ErrorsOnly\" -c Release{noBuildFlag}{filterFlag}{isolatedFlag}";
+		var testArgs = $"test \"{project.TestPath}\" --logger \"console;verbosity=normal;consoleLoggerParameters=ErrorsOnly\" -c Release{noBuildFlag}{filterFlag}{isolatedFlag}";
 
 		string NativeSearchPath( string variable )
 		{

@@ -20,7 +20,7 @@ internal static class GpuFontText
 	const int FlagGradient = 2;
 	const int TileSize = 16; // TEXT_TILE_SIZE in ui/text.hlsl
 
-	internal struct Options
+	internal record struct Options
 	{
 		public bool Aliased;
 		public int SelectionStart;
@@ -34,6 +34,11 @@ internal static class GpuFontText
 
 		/// <summary>Draw only the text effects, without run backgrounds, selection, fill or decorations.</summary>
 		public bool EffectsOnly;
+
+		/// <summary>
+		/// Fill colour instead of the runs' own, for single style text whose layout is cached without its colour.
+		/// </summary>
+		public Color? TextColor;
 
 		public static Options Default => new() { SelectionStart = -1, SelectionEnd = -1, Opacity = 1 };
 
@@ -78,12 +83,25 @@ internal static class GpuFontText
 		public int AliasedFlag;
 		public int GradientFlag;
 
+		// Decoration metrics are shared by runs and effect passes with the same font and size.
+		SKTypeface _metricsTypeface;
+		float _metricsSize;
+		SKFontMetrics _metrics;
+
+		// Reused by AddGappedLine. Thread-static so concurrent builds can't share it.
+		[ThreadStatic] static List<Vector2> _gapSpans;
+
 		public void Build( Topten.RichTextKit.TextBlock block )
 		{
-			foreach ( var line in block.Lines )
+			// Indexed, not foreach: Lines and Runs are IReadOnlyList, so foreach boxes an enumerator per list per build.
+			var lines = block.Lines;
+			for ( int l = 0; l < lines.Count; l++ )
 			{
-				foreach ( var run in line.Runs )
+				var line = lines[l];
+				var runs = line.Runs;
+				for ( int r = 0; r < runs.Count; r++ )
 				{
+					var run = runs[r];
 					if ( run.RunKind == FontRunKind.TrailingWhitespace ) continue;
 
 					var style = run.Style;
@@ -93,13 +111,15 @@ internal static class GpuFontText
 
 					if ( Options.SkipEffects || run.RunKind == FontRunKind.Tabs || run.Glyphs.Length == 0 || style.TextEffects == null ) continue;
 
-					foreach ( var effect in style.TextEffects )
+					if ( style.TextEffects is IReadOnlyList<TextEffect> effects )
 					{
-						var color = ToColor( effect.Color );
-						float dilate = effect.Width * 0.5f;
-
-						// Each effect is one copy at its offset, including a sharp shadow with zero blur.
-						AddEffectPass( run, line, Origin + new Vector2( effect.Offset.X, effect.Offset.Y ), dilate, effect.BlurSize, color );
+						for ( int e = 0; e < effects.Count; e++ )
+							AddEffect( run, line, effects[e] );
+					}
+					else
+					{
+						foreach ( var effect in style.TextEffects )
+							AddEffect( run, line, effect );
 					}
 				}
 			}
@@ -110,19 +130,29 @@ internal static class GpuFontText
 			int selStart = Math.Min( Options.SelectionStart, Options.SelectionEnd );
 			int selEnd = Math.Max( Options.SelectionStart, Options.SelectionEnd );
 
-			foreach ( var line in block.Lines )
+			for ( int l = 0; l < lines.Count; l++ )
 			{
-				foreach ( var run in line.Runs )
+				var line = lines[l];
+				var runs = line.Runs;
+				for ( int r = 0; r < runs.Count; r++ )
 				{
+					var run = runs[r];
 					if ( selection && run.RunKind != FontRunKind.Ellipsis )
 						AddSelection( run, line, selStart, selEnd );
 
 					if ( run.RunKind == FontRunKind.Tabs || run.RunKind == FontRunKind.TrailingWhitespace ) continue;
 
-					AddGlyphs( run, Origin, 0, 0, ToColor( run.Style.TextColor ), AliasedFlag | GradientFlag, layerColors: true );
-					AddDecorations( run, line, Origin, 0, ToColor( run.Style.UnderlineColor ?? run.Style.TextColor ), GradientFlag );
+					var fill = Options.TextColor ?? ToColor( run.Style.TextColor );
+					AddGlyphs( run, Origin, 0, 0, fill, AliasedFlag | GradientFlag, layerColors: true );
+					AddDecorations( run, line, Origin, 0, run.Style.UnderlineColor is { } underline ? ToColor( underline ) : fill, GradientFlag );
 				}
 			}
+		}
+
+		/// <summary>Each effect is one copy at its offset, including a sharp shadow with zero blur.</summary>
+		void AddEffect( FontRun run, TextLine line, TextEffect effect )
+		{
+			AddEffectPass( run, line, Origin + new Vector2( effect.Offset.X, effect.Offset.Y ), effect.Width * 0.5f, effect.BlurSize, ToColor( effect.Color ) );
 		}
 
 		/// <summary>One pass of a text effect - its glyphs and the decoration lines that go with them.</summary>
@@ -156,16 +186,19 @@ internal static class GpuFontText
 		{
 			float fontSize = run.Style.FontSize;
 			var glyphs = run.Glyphs.AsSpan();
+			if ( glyphs.IsEmpty ) return;
+
+			var cache = GpuFontGlyphCache.ForTypeface( run.Typeface );
 			var positions = run.GlyphPositions.AsSpan();
 
 			for ( int i = 0; i < glyphs.Length; i++ )
 			{
 				var pos = origin + new Vector2( positions[i].X, positions[i].Y );
-				var layers = GpuFontGlyphCache.GetLayers( run.Typeface, glyphs[i] );
+				var layers = cache.GetLayers( glyphs[i] );
 
 				if ( layers == null )
 				{
-					AddGlyph( GpuFontGlyphCache.Get( run.Typeface, glyphs[i] ), pos, fontSize, dilate, sigma, color, flags );
+					AddGlyph( cache.Get( glyphs[i] ), pos, fontSize, dilate, sigma, color, flags );
 					continue;
 				}
 
@@ -178,7 +211,7 @@ internal static class GpuFontText
 						glyphColor.a *= color.a;
 					}
 
-					AddGlyph( GpuFontGlyphCache.Get( run.Typeface, layer ), pos, fontSize, dilate, sigma, glyphColor, flags & ~FlagGradient );
+					AddGlyph( cache.Get( layer ), pos, fontSize, dilate, sigma, glyphColor, flags & ~FlagGradient );
 				}
 			}
 		}
@@ -208,15 +241,21 @@ internal static class GpuFontText
 			if ( run.RunKind != FontRunKind.Normal ) return;
 			if ( style.Underline == UnderlineStyle.None && style.StrikeThrough == StrikeThroughStyle.None ) return;
 
-			using var font = new SKFont( run.Typeface, style.FontSize );
-			var metrics = font.Metrics;
+			if ( _metricsTypeface is null || _metricsTypeface != run.Typeface || _metricsSize != style.FontSize )
+			{
+				using var font = new SKFont( run.Typeface, style.FontSize );
+				_metrics = font.Metrics;
+				_metricsTypeface = run.Typeface;
+				_metricsSize = style.FontSize;
+			}
+
 			float x0 = run.XCoord, x1 = run.XCoord + run.Width;
 
-			var underlineWidth = style.StrokeThickness ?? metrics.UnderlineThickness ?? 0;
+			var underlineWidth = style.StrokeThickness ?? _metrics.UnderlineThickness ?? 0;
 			if ( underlineWidth > 0 && style.Underline != UnderlineStyle.None )
 			{
 				float t = MathF.Max( underlineWidth, 1 );
-				float underlineY = line.YCoord + line.BaseLine + (metrics.UnderlinePosition ?? 0);
+				float underlineY = line.YCoord + line.BaseLine + (_metrics.UnderlinePosition ?? 0);
 				bool hasUnderline = false;
 
 				if ( (style.Underline & UnderlineStyle.Gapped) != 0 )
@@ -235,11 +274,11 @@ internal static class GpuFontText
 					AddLine( x0, x1, underlineY + style.UnderlineOffset, t, style.UnderlineStrokeType, false, origin, sigma, color, flags );
 			}
 
-			var strikeWidth = style.StrokeThickness ?? metrics.StrikeoutThickness ?? 0;
+			var strikeWidth = style.StrokeThickness ?? _metrics.StrikeoutThickness ?? 0;
 			if ( strikeWidth > 0 && style.StrikeThrough != StrikeThroughStyle.None )
 			{
 				float t = MathF.Max( strikeWidth, 1 );
-				float y = line.YCoord + line.BaseLine + (metrics.StrikeoutPosition ?? 0) + style.StrikeThroughOffset;
+				float y = line.YCoord + line.BaseLine + (_metrics.StrikeoutPosition ?? 0) + style.StrikeThroughOffset;
 				AddLine( x0, x1, y, t, style.UnderlineStrokeType, false, origin, sigma, color, flags );
 			}
 		}
@@ -249,16 +288,18 @@ internal static class GpuFontText
 		{
 			float x = x0;
 
-			if ( style.StrokeInkSkip )
+			if ( style.StrokeInkSkip && run.Glyphs.Length != 0 )
 			{
 				float fontSize = style.FontSize;
+				var cache = GpuFontGlyphCache.ForTypeface( run.Typeface );
 				var glyphs = run.Glyphs.AsSpan();
 				var positions = run.GlyphPositions.AsSpan();
-				var spans = new List<Vector2>();
+				var spans = _gapSpans ??= new List<Vector2>();
+				spans.Clear();
 
 				for ( int i = 0; i < glyphs.Length; i++ )
 				{
-					var glyph = GpuFontGlyphCache.Get( run.Typeface, glyphs[i] );
+					var glyph = cache.Get( glyphs[i] );
 					if ( glyph.IsEmpty ) continue;
 
 					float baseline = positions[i].Y;
@@ -390,6 +431,39 @@ internal static class GpuFontText
 	}
 
 	/// <summary>
+	/// A block's instances binned into tiles over a width by height pixel area, once: what <see cref="Upload(List{GPUBoxInstance}, List{uint}, int, int)"/>
+	/// appends each frame instead of binning them again.
+	/// </summary>
+	public static List<uint> Bin( List<GPUBoxInstance> instances, int width, int height )
+	{
+		var tiles = new List<uint>();
+		BinTiles( CollectionsMarshal.AsSpan( instances ), tiles, (width + TileSize - 1) / TileSize, (height + TileSize - 1) / TileSize );
+		return tiles;
+	}
+
+	/// <summary>
+	/// <see cref="Upload(List{GPUBoxInstance}, int, int)"/> for a block binned once by <see cref="Bin"/>: its tiles are copied
+	/// into this frame's buffer, their offsets moved to where they land.
+	/// </summary>
+	public static Placement Upload( List<GPUBoxInstance> instances, List<uint> binned, int width, int height )
+	{
+		lock ( _lock )
+		{
+			var slot = AcquireSlot();
+			var start = slot.Tiles.Count;
+			var placement = new Placement( slot.Frame, slot.Instances.Count, start, (width + TileSize - 1) / TileSize, width, height );
+			slot.Tiles.AddRange( binned );
+
+			// The first tile count + 1 entries are offsets into the buffer; the rest are the block's own instance indices
+			var offsets = CollectionsMarshal.AsSpan( slot.Tiles ).Slice( start, placement.TilesX * ((height + TileSize - 1) / TileSize) + 1 );
+			for ( int i = 0; i < offsets.Length; i++ ) offsets[i] += (uint)start;
+
+			slot.Instances.AddRange( instances );
+			return placement;
+		}
+	}
+
+	/// <summary>
 	/// Bind the block buffers a frame's placements point into, and the glyph outlines, for a shader that composites
 	/// them. The render thread can be a frame or two behind, so the caller says which frame it recorded.
 	/// </summary>
@@ -432,6 +506,9 @@ internal static class GpuFontText
 	public static Texture Render( Topten.RichTextKit.TextBlock block, Vector2 origin, int width, int height, bool hdr, int mips, in Options options, Texture reuse = null )
 	{
 		using var perfScope = Performance.Scope( "GpuFontText.Render" );
+
+		// The dispatches below wait for the render thread's frame when it's drawing, and its text takes this lock: wait first
+		if ( ThreadSafe.IsMainThread && !ThreadSafe.IsRenderThread ) Graphics.Backend.FinishDrawing();
 
 		lock ( _lock )
 		{
@@ -479,12 +556,12 @@ internal static class GpuFontText
 	/// </summary>
 	static Vector4 BaseColor( Topten.RichTextKit.TextBlock block )
 	{
-		foreach ( var line in block.Lines )
+		var lines = block.Lines;
+		for ( int l = 0; l < lines.Count; l++ )
 		{
-			foreach ( var run in line.Runs )
-			{
-				return new Vector4( run.Style.TextColor.Red, run.Style.TextColor.Green, run.Style.TextColor.Blue, 1 );
-			}
+			var runs = lines[l].Runs;
+			if ( runs.Count > 0 )
+				return new Vector4( runs[0].Style.TextColor.Red, runs[0].Style.TextColor.Green, runs[0].Style.TextColor.Blue, 1 );
 		}
 
 		return Vector4.Zero;

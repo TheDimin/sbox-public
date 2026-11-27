@@ -14,16 +14,12 @@ public partial class Texture
 	[Pure]
 	public Color32[] GetPixels( int mip = 0 )
 	{
-		// BUG: Width/Height is on disk and not the currently streamed mip
-		//      I don't know what would break if I made Width/Height represent that instead
-		var desc = g_pRenderDevice.GetTextureDesc( native );
-
 		mip = Math.Clamp( mip, 0, Mips - 1 );
-		var d = 1 << mip;
+		var size = ReadSize( mip );
 
 		if ( Depth == 1 )
 		{
-			var rect = (X: 0, Y: 0, W: desc.m_nWidth / d, H: desc.m_nHeight / d);
+			var rect = (X: 0, Y: 0, W: size.Width, H: size.Height);
 			var data = new Color32[rect.W * rect.H];
 
 			GetPixels( rect, 0, mip, data.AsSpan(), ImageFormat.RGBA8888 );
@@ -32,7 +28,7 @@ public partial class Texture
 		}
 		else
 		{
-			var box = (X: 0, Y: 0, Z: 0, Width: desc.m_nWidth / d, Height: desc.m_nHeight / d, Depth: Depth / d);
+			var box = (X: 0, Y: 0, Z: 0, Width: size.Width, Height: size.Height, Depth: ReadSlices( mip ));
 			var data = new Color32[box.Width * box.Height * box.Depth];
 
 			GetPixels3D( box, mip, data.AsSpan(), ImageFormat.RGBA8888 );
@@ -49,14 +45,11 @@ public partial class Texture
 	{
 		if ( !IsValid ) throw new ObjectDisposedException( nameof( Texture ) );
 		mip = Math.Clamp( mip, 0, Mips - 1 );
-		var d = 1 << mip;
 
 		bool floatingPoint = ImageFormat == ImageFormat.RGBA16161616F;
 
-		var desc = g_pRenderDevice.GetTextureDesc( native );
-		var width = desc.m_nWidth / d;
-		var height = desc.m_nHeight / d;
-		var depth = Depth; // Cubes have 6 depth even though reports as only 1 in desc
+		var (width, height) = ReadSize( mip );
+		var depth = Depth == 1 ? Depth : ReadSlices( mip ); // Cubes have 6 depth even though reports as only 1 in desc
 		var outputFormat = floatingPoint ? ImageFormat.RGBA16161616F : ImageFormat.RGBA8888;
 		var targetMemoryRequired = NativeEngine.ImageLoader.GetMemRequired( width, height, depth, 1, outputFormat );
 
@@ -66,7 +59,7 @@ public partial class Texture
 			// If desc.m_nWidth and height are 0, this is probably the rendersystemempty, which is obviously a disaster
 			//
 
-			throw new System.Exception( $"targetMemoryRequired <= 0 ({width}x{height}x{depth} {outputFormat})" );
+			throw new System.Exception( $"targetMemoryRequired <= 0 ({width}x{height}x{depth} {outputFormat}): reading a texture's pixels needs a GPU device" );
 		}
 
 		var bitmap = new Bitmap( width, height * depth, floatingPoint );
@@ -88,7 +81,7 @@ public partial class Texture
 				else
 				{
 					var rect = new NativeRect( 0, 0, width, height );
-					if ( !g_pRenderDevice.ReadTexturePixels( native, ref rect, 0, mip, ref rect, (IntPtr)pData, outputFormat, 0 ) )
+					if ( !RenderBackend.Default.ReadPixels( this, rect, 0, mip, rect, (IntPtr)pData, outputFormat, 0 ) )
 					{
 						bitmap.Dispose();
 						return null;
@@ -108,6 +101,14 @@ public partial class Texture
 			if ( scratch is not null ) ArrayPool<byte>.Shared.Return( scratch );
 		}
 	}
+
+	/// <summary>
+	/// A mip's size as it reads back: the texture's own, which is what the drawing device holds.
+	/// </summary>
+	internal (int Width, int Height) ReadSize( int mip ) => (Math.Max( Width >> mip, 1 ), Math.Max( Height >> mip, 1 ));
+
+	/// <summary>Slices a whole read of a mip takes: a volume's shrink with its mips, an array's layers and a cube's faces don't.</summary>
+	int ReadSlices( int mip ) => GetSliceCount( mip );
 
 	private static int GetImageFormatSize( ImageFormat format )
 	{
@@ -137,6 +138,27 @@ public partial class Texture
 			default:
 				throw new NotImplementedException( $"Reading pixels with format {format} not yet implemented." );
 		}
+	}
+
+	private int GetSliceCount( int mip )
+	{
+		var desc = Desc;
+		if ( desc.m_nFlags.HasFlag( RuntimeTextureSpecificationFlags.TSPEC_VOLUME_TEXTURE ) )
+			return Math.Max( 1, desc.m_nDepth >> mip );
+
+		return Math.Max( 1, desc.ArrayCount );
+	}
+
+	private void ThrowIfSliceOutOfRange( int slice, int mip )
+	{
+		if ( slice < 0 || slice >= GetSliceCount( mip ) )
+			throw new ArgumentOutOfRangeException( nameof( slice ) );
+	}
+
+	private void ThrowIfMipOutOfRange( int mip )
+	{
+		if ( mip < 0 || mip >= Mips )
+			throw new ArgumentOutOfRangeException( nameof( mip ) );
 	}
 
 	private static int GetImageFormatSize( ImageFormat format, int width, int height )
@@ -180,6 +202,11 @@ public partial class Texture
 			throw new ArgumentException( $"{nameof( srcRect )} out of range" );
 		}
 
+		ThrowIfSliceOutOfRange( slice, mip );
+
+		if ( dstSize.X > srcRect.Width || dstSize.Y > srcRect.Height )
+			throw new ArgumentException( $"{nameof( dstSize )} can't be larger than {nameof( srcRect )}" );
+
 		var dstStrideBytes = GetImageFormatSize( dstFormat, dstSize.X, 1 );
 		if ( dstStrideBytes <= 0 )
 			throw new ArgumentException( $"{nameof( dstSize )} invalid" );
@@ -206,7 +233,7 @@ public partial class Texture
 
 		fixed ( T* dataPtr = dstData )
 		{
-			if ( !g_pRenderDevice.ReadTexturePixels( native, ref nativeSrcRect, slice, mip, ref nativeDstRect, (IntPtr)dataPtr, dstFormat, dstStrideBytes ) )
+			if ( !RenderBackend.Default.ReadPixels( this, nativeSrcRect, slice, mip, nativeDstRect, (IntPtr)dataPtr, dstFormat, dstStrideBytes ) )
 				throw new Exception( "Unable to read texture pixels" );
 		}
 	}
@@ -229,7 +256,7 @@ public partial class Texture
 	{
 		var pixelByteSize = Unsafe.SizeOf<T>();
 
-		if ( dstRect.W < 0 || dstRect.H < 0 )
+		if ( dstRect.X < 0 || dstRect.Y < 0 || dstRect.W < 0 || dstRect.H < 0 )
 			throw new ArgumentException( $"{nameof( dstRect )} can't be negative" );
 
 		if ( dstRect.W == 0 )
@@ -246,28 +273,27 @@ public partial class Texture
 			throw new ArgumentException( $"{nameof( srcRect )} out of range" );
 		}
 
-		var maxLength = (dstRect.Y + dstRect.H - 1) * dstStride + dstRect.X + dstRect.W;
-		if ( maxLength > dstData.Length )
-			throw new ArgumentException( $"Output rect size ({maxLength}) exceeds destination array size {dstData.Length}" );
+		ThrowIfSliceOutOfRange( slice, mip );
 
-		if ( maxLength <= 0 )
-			throw new ArgumentException( $"Output rect size ({maxLength}) below zero or equal to zero" );
-
-		if ( maxLength > int.MaxValue )
-			throw new ArgumentException( $"Output rect size ({maxLength}) too large" );
-
-		var sliceSize = GetImageFormatSize( dstFormat ) * maxLength;
-		if ( sliceSize <= 0 )
-			throw new ArgumentException( $"{nameof( dstRect )} invalid" );
+		if ( dstRect.W > srcRect.Width || dstRect.H > srcRect.Height )
+			throw new ArgumentException( $"{nameof( dstRect )} can't be larger than {nameof( srcRect )}" );
 
 		if ( !SandboxedUnsafe.IsAcceptablePod<T>() )
 			throw new ArgumentException( $"{nameof( T )} must be a POD type" );
 
+		long formatSize = GetImageFormatSize( dstFormat );
+		long strideBytes = (long)dstStride * pixelByteSize;
+		long rowEndBytes = ((long)dstRect.X + dstRect.W) * formatSize;
+
+		if ( strideBytes > int.MaxValue || rowEndBytes > strideBytes )
+			throw new ArgumentException( $"{nameof( dstStride )} ({dstStride}) is too small for {nameof( dstRect )}" );
+
+		var requiredBytes = ((long)dstRect.Y + dstRect.H - 1) * strideBytes + rowEndBytes;
 		var dataSize = (long)dstData.Length * pixelByteSize;
 
-		if ( dataSize < sliceSize )
+		if ( requiredBytes > dataSize || requiredBytes > int.MaxValue )
 		{
-			throw new ArgumentException( "Output array is too small to fit the given pixel range.",
+			throw new ArgumentException( $"Output rect size ({requiredBytes} bytes) exceeds destination array size ({dataSize} bytes)",
 				nameof( dstData ) );
 		}
 
@@ -276,7 +302,7 @@ public partial class Texture
 
 		fixed ( T* dataPtr = dstData )
 		{
-			if ( !g_pRenderDevice.ReadTexturePixels( native, ref nativeSrcRect, slice, mip, ref nativeDstRect, (IntPtr)dataPtr, dstFormat, (int)dstStride * pixelByteSize ) )
+			if ( !RenderBackend.Default.ReadPixels( this, nativeSrcRect, slice, mip, nativeDstRect, (IntPtr)dataPtr, dstFormat, (int)strideBytes ) )
 				throw new Exception( "Unable to read texture pixels" );
 		}
 	}
@@ -357,7 +383,7 @@ public partial class Texture
 
 		fixed ( Color32* dataPtr = data )
 		{
-			if ( !g_pRenderDevice.ReadTexturePixels( native, ref source, 0, mip, ref dest, (IntPtr)dataPtr, ImageFormat.RGBA8888, 0 ) )
+			if ( !RenderBackend.Default.ReadPixels( this, source, 0, mip, dest, (IntPtr)dataPtr, ImageFormat.RGBA8888, 0 ) )
 				return Color.Red;
 		}
 
@@ -389,7 +415,7 @@ public partial class Texture
 
 		fixed ( Color32* dataPtr = data )
 		{
-			if ( !g_pRenderDevice.ReadTexturePixels( native, ref source, (int)z, mip, ref dest, (IntPtr)dataPtr, ImageFormat.RGBA8888, 0 ) )
+			if ( !RenderBackend.Default.ReadPixels( this, source, (int)z, mip, dest, (IntPtr)dataPtr, ImageFormat.RGBA8888, 0 ) )
 				return Color.Red;
 		}
 
@@ -409,21 +435,17 @@ public partial class Texture
 	public void GetPixelsAsync( Action<ReadOnlySpan<Color32>> callback, int mip = 0 )
 	{
 		mip = Math.Clamp( mip, 0, Mips - 1 );
-		var d = 1 << mip;
-
-		var desc = g_pRenderDevice.GetTextureDesc( native );
+		var (width, height) = ReadSize( mip );
 
 		if ( Depth == 1 )
 		{
-			var width = desc.m_nWidth / d;
-			var height = desc.m_nHeight / d;
 			var rect = (X: 0, Y: 0, Width: width, Height: height);
 
 			GetPixelsAsync( callback, ImageFormat.RGBA8888, rect, 0, mip );
 		}
 		else
 		{
-			var box = (X: 0, Y: 0, Z: 0, Width: desc.m_nWidth / d, Height: desc.m_nHeight / d, Depth: Depth / d);
+			var box = (X: 0, Y: 0, Z: 0, Width: width, Height: height, Depth: ReadSlices( mip ));
 
 			GetPixelsAsync3D( callback, ImageFormat.RGBA8888, box, mip );
 		}
@@ -445,22 +467,24 @@ public partial class Texture
 	/// </remarks>
 	public void GetPixelsAsync<T>( Action<ReadOnlySpan<T>> callback, ImageFormat dstFormat = ImageFormat.Default, (int X, int Y, int Width, int Height) srcRect = default, int slice = 0, int mip = 0 ) where T : unmanaged
 	{
+		ThrowIfMipOutOfRange( mip );
+
 		if ( srcRect.X < 0 || srcRect.Y < 0 ||
 			srcRect.Width <= 0 || srcRect.Height <= 0 ||
-			((long)srcRect.X + srcRect.Width) > Width ||
-			((long)srcRect.Y + srcRect.Height) > Height )
+			((long)srcRect.X + srcRect.Width) > Math.Max( 1, Width >> mip ) ||
+			((long)srcRect.Y + srcRect.Height) > Math.Max( 1, Height >> mip ) )
 		{
 			throw new ArgumentException( $"{nameof( srcRect )} out of range" );
 		}
+
+		ThrowIfSliceOutOfRange( slice, mip );
 
 		if ( !SandboxedUnsafe.IsAcceptablePod<T>() )
 			throw new ArgumentException( $"{nameof( T )} must be a POD type" );
 
 		if ( dstFormat == ImageFormat.Default ) dstFormat = ImageFormat;
 
-		var context = g_pRenderDevice.CreateRenderContext( 0 );
-
-		context.ReadTextureAsync( this, ( readData, readFormat, readMip, readWidth, readHeight, doneWithData ) =>
+		AsyncGPUReadback.ReadTextureAsync( this, ( readData, readFormat, readMip, readWidth, readHeight, doneWithData ) =>
 		{
 			if ( dstFormat != readFormat )
 			{
@@ -470,7 +494,7 @@ public partial class Texture
 				{
 					ConvertImageDataTo( readData, readFormat, dstBuffer.AsSpan(), dstFormat, readWidth, readHeight );
 					doneWithData();
-					var typedResult = MemoryMarshal.Cast<byte, T>( dstBuffer );
+					var typedResult = MemoryMarshal.Cast<byte, T>( dstBuffer.AsSpan( 0, dstSize ) );
 					callback( typedResult );
 
 				}
@@ -485,10 +509,6 @@ public partial class Texture
 				callback( typedResult );
 			}
 		}, slice, mip, srcRect );
-
-		context.Submit();
-
-		g_pRenderDevice.ReleaseRenderContext( context );
 	}
 
 	/// <summary>
@@ -510,11 +530,13 @@ public partial class Texture
 		if ( srcBox.Depth == 0 )
 			srcBox.Depth = Depth;
 
+		ThrowIfMipOutOfRange( mip );
+
 		if ( srcBox.X < 0 || srcBox.Y < 0 || srcBox.Z < 0 ||
 			srcBox.Width <= 0 || srcBox.Height <= 0 || srcBox.Depth <= 0 ||
-			((long)srcBox.X + srcBox.Width) > Width ||
-			((long)srcBox.Y + srcBox.Height) > Height ||
-			((long)srcBox.Z + srcBox.Depth) > Depth )
+			((long)srcBox.X + srcBox.Width) > Math.Max( 1, Width >> mip ) ||
+			((long)srcBox.Y + srcBox.Height) > Math.Max( 1, Height >> mip ) ||
+			((long)srcBox.Z + srcBox.Depth) > GetSliceCount( mip ) )
 		{
 			throw new ArgumentException( $"{nameof( srcBox )} out of range" );
 		}
@@ -522,20 +544,18 @@ public partial class Texture
 		if ( !SandboxedUnsafe.IsAcceptablePod<T>() )
 			throw new ArgumentException( $"{nameof( T )} must be a POD type" );
 
+		if ( dstFormat == ImageFormat.Default ) dstFormat = ImageFormat;
+
 		var sliceSize = GetImageFormatSize( dstFormat, srcBox.Width, srcBox.Height );
 		if ( sliceSize <= 0 )
 			throw new ArgumentException( $"{nameof( srcBox )} invalid size" );
 
-		if ( dstFormat == ImageFormat.Default ) dstFormat = ImageFormat;
-
-		var totalBytes = sliceSize * srcBox.Depth;
+		var totalBytes = checked(sliceSize * srcBox.Depth);
 
 		// Create final buffer to hold all slices
 		byte[] resultBuffer = ArrayPool<byte>.Shared.Rent( totalBytes );
 
 		var completedSlices = 0;
-		var context = g_pRenderDevice.CreateRenderContext( 0 );
-
 		// Process each slice asynchronously
 		for ( var z = 0; z < srcBox.Depth; z++ )
 		{
@@ -543,13 +563,13 @@ public partial class Texture
 			var srcRect = (srcBox.X, srcBox.Y, srcBox.Width, srcBox.Height);
 			var sliceIndex = srcBox.Z + currentZ;
 
-			context.ReadTextureAsync( this, ( readData, readFormat, readMip, readWidth, readHeight, doneWithData ) =>
+			AsyncGPUReadback.ReadTextureAsync( this, ( readData, readFormat, readMip, readWidth, readHeight, doneWithData ) =>
 			{
 				var sliceOffset = currentZ * sliceSize;
 
 				if ( dstFormat != readFormat )
 				{
-					ConvertImageDataTo( readData, readFormat, resultBuffer.AsSpan( sliceOffset ), dstFormat, readWidth, readHeight );
+					ConvertImageDataTo( readData, readFormat, resultBuffer.AsSpan( sliceOffset, sliceSize ), dstFormat, readWidth, readHeight );
 				}
 				else
 				{
@@ -562,7 +582,7 @@ public partial class Texture
 				{
 					try
 					{
-						var typedResult = MemoryMarshal.Cast<byte, T>( resultBuffer );
+						var typedResult = MemoryMarshal.Cast<byte, T>( resultBuffer.AsSpan( 0, totalBytes ) );
 						// All slices are ready, call the callback with the final buffer
 						callback( typedResult );
 					}
@@ -573,10 +593,6 @@ public partial class Texture
 				}
 			}, sliceIndex, mip, srcRect );
 		}
-
-		context.Submit();
-
-		g_pRenderDevice.ReleaseRenderContext( context );
 	}
 
 	/// <summary>
@@ -592,18 +608,13 @@ public partial class Texture
 	public void GetBitmapAsync( Action<Bitmap> callback, int mip = 0 )
 	{
 		mip = Math.Clamp( mip, 0, Mips - 1 );
-		var d = 1 << mip;
 
 		bool floatingPoint = ImageFormat == ImageFormat.RGBA16161616F;
-		var desc = g_pRenderDevice.GetTextureDesc( native );
-		var width = desc.m_nWidth / d;
-		var height = desc.m_nHeight / d;
+		var (width, height) = ReadSize( mip );
 		var dstFormat = floatingPoint ? ImageFormat.RGBA16161616F : ImageFormat.RGBA8888;
 		var premultiplied = Flags.HasFlag( TextureFlags.PremultipliedAlpha );
 
-		var context = g_pRenderDevice.CreateRenderContext( 0 );
-
-		context.ReadTextureAsync( this, ( readData, readFormat, readMip, readWidth, readHeight, doneWithData ) =>
+		AsyncGPUReadback.ReadTextureAsync( this, ( readData, readFormat, readMip, readWidth, readHeight, doneWithData ) =>
 		{
 			var bitmap = new Bitmap( width, height, floatingPoint );
 			byte[] converted = null;
@@ -634,10 +645,6 @@ public partial class Texture
 
 			callback( bitmap );
 		}, 0, mip, (0, 0, width, height) );
-
-		context.Submit();
-
-		g_pRenderDevice.ReleaseRenderContext( context );
 	}
 
 	/// <summary>
@@ -651,6 +658,9 @@ public partial class Texture
 		int width,
 		int height )
 	{
+		if ( dstBuffer.Length < GetImageFormatSize( dstFormat, width, height ) )
+			throw new ArgumentException( "Destination buffer is too small for the converted image.", nameof( dstBuffer ) );
+
 		fixed ( byte* srcPtr = srcData )
 		fixed ( byte* dstPtr = dstBuffer )
 		{

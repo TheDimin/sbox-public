@@ -80,6 +80,7 @@ public static class FileSystem
 		Content = new AggregateFileSystem();
 		Content.CreateAndMount( EngineFileSystem.Root, "/core/" );
 		Content.CreateAndMount( EngineFileSystem.Root, "/addons/citizen/Assets/" );
+		Content.CreateAndMount( EngineFileSystem.Root, "/addons/content/Assets/" );
 		Content.Mount( Cloud );
 
 		foreach ( var addon in Project.All.Where( x => x.Active ) )
@@ -107,7 +108,6 @@ public static class FileSystem
 	private static void OnContentFileChanged( string filename )
 	{
 		ThreadSafe.AssertIsMainThread();
-		GltfAssetImport.ContentChanged( filename );
 
 		// Check to see if this asset was deleted from explorer - and mark it as deleted in the asset system.
 		if ( AssetSystem.FindByPath( filename ) is Asset asset )
@@ -116,12 +116,6 @@ public static class FileSystem
 			if ( !asset.IsDeleted && !fileExists )
 			{
 				asset.IsDeleted = true;
-			}
-
-			// Source file for a gameresource was edited, let's compile it (for detecting changes from version control)
-			if ( asset.TryLoadResource<GameResource>( out var gameResource ) )
-			{
-				asset.Compile( false );
 			}
 		}
 

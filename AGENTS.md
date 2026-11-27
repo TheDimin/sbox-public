@@ -5,6 +5,10 @@ s&box is a game engine built on Valve's Source 2 with a .NET 10 managed layer on
 downloads prebuilt native binaries into `game/bin/win64/`, and the managed side calls into them through a
 generated interop layer (never hand-edit `Interop.*.cs` or anything under `obj/.generated/`).
 
+## Editor instances
+
+Before launching the editor, check for running s&box editor processes on the host. Reuse the open editor for project work, tests, and profiling. If an editor is running, get the user's explicit permission before starting another instance, including one with a temporary project or an automated launcher. If you cannot verify the process count, ask before launching. Get permission before closing or restarting the user's editor for a cold-start test.
+
 ## Layout
 
 | Path | What |
@@ -27,7 +31,7 @@ dotnet run --project engine/Tools/SboxBuild/SboxBuild.csproj -- format
 
 Pull requests run the same `build`, `test`, and `format --verify` steps, so run them before pushing.
 Engine and Integration tests need the `FACEPUNCH_ENGINE` environment variable pointing at `game/`
-(the folder containing `sbox.exe`). Run the built engine from `game/bin/win64/sbox.exe`.
+(the folder containing `sbox.exe`). Run the built engine from `game/sbox.exe`.
 
 ## Documentation
 
@@ -39,6 +43,6 @@ Engine and Integration tests need the `FACEPUNCH_ENGINE` environment variable po
 ## Conventions
 
 - Standard .NET style, enforced by `.editorconfig` and `format --verify`. Match surrounding code.
-- Keep pull requests small and in scope. Reference the issue you're fixing. Add a unit test where one fits.
+- Keep pull requests small and in scope. Reference the issue you're fixing. Add tests only when asked.
 - The public API surface that addons compile against is deliberately controlled. Exposing a new .NET
-  type to game code means adding it to the access allow-list in `engine/Sandbox.Access/`, not bypassing it.
+  type to game code means adding it to the access allow-list in `engine/Sandbox.Compiling/Compiler/Access/Rules/`, not bypassing it.

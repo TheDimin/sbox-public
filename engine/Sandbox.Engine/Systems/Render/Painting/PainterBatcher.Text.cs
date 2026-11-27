@@ -1,4 +1,5 @@
 using Sandbox.UI;
+using System.Runtime.InteropServices;
 
 namespace Sandbox;
 
@@ -11,12 +12,14 @@ internal partial class PainterBatcher
 	internal void AddText( List<GPUBoxInstance> glyphs, BlendMode blendMode, in TextGradientInfo gradient,
 		Matrix transform, int clipIndex, float opacity = 1 )
 	{
-		var spatial = Destination.ResolveSpatial( this, transform );
+		if ( glyphs.Count == 0 ) return;
+
 		int gradientIndex = -1;
 		if ( !gradient.ColorOffsets.IsDefaultOrEmpty )
 		{
 			var stops = new GradientStops();
-			foreach ( var stop in gradient.ColorOffsets.Take( GradientInfo.MaxStops ) ) stops = stops.Add( stop );
+			var offsets = gradient.ColorOffsets;
+			for ( int i = 0; i < offsets.Length && i < GradientInfo.MaxStops; i++ ) stops = stops.Add( offsets[i] );
 			gradientIndex = GetOrAddGradient( new GradientInfo
 			{
 				Angle = gradient.Angle,
@@ -27,22 +30,48 @@ internal partial class PainterBatcher
 				ColorOffsets = stops
 			} );
 		}
-		foreach ( var glyph in glyphs )
+
+		// Every row has to be final before it's hashed and before the batch can flush, which can upload the table
+		int first = _textTable.Count;
+		var text = _textTable.Append( glyphs.Count );
+		CollectionsMarshal.AsSpan( glyphs ).CopyTo( text );
+		if ( gradientIndex >= 0 )
 		{
-			var text = glyph;
-			if ( GpuFontText.WantsGradient( text ) && gradientIndex >= 0 ) text.TextureIndex = -gradientIndex - 1;
-			var box = new UICssBoxBatched.BoxInstance
-			{
-				Rect = text.Rect,
-				Color = text.Color.WithAlphaMultiplied( opacity ),
-				TextureIndex = _textTable.Add( text ),
-				Flags = 1u << 14,
-				ShapeIndex = -1,
-				InverseScissorIndex = -1,
-				TextMaskIndex = -1
-			};
-			ResolveSpatial( ref box, clipIndex, spatial );
-			Append( box, blendMode );
+			foreach ( ref var glyph in text )
+				if ( GpuFontText.WantsGradient( glyph ) ) glyph.TextureIndex = -gradientIndex - 1;
 		}
+		_textTable.Fold( text );
+
+		// One label shares a clip and transform, so resolve them once
+		var box = new UICssBoxBatched.BoxInstance
+		{
+			Flags = 1u << 14,
+			ShapeIndex = -1,
+			InverseScissorIndex = -1,
+			TextMaskIndex = -1
+		};
+		ResolveSpatial( ref box, clipIndex, Destination.ResolveSpatial( this, transform ) );
+
+		SetBlendMode( blendMode );
+		var boxes = _boxTable.Append( text.Length );
+		_boxMeta.Add( (byte)((int)_blendMode | TextRunStart) );
+		for ( int i = 1; i < text.Length; i++ ) _boxMeta.Add( (byte)_blendMode );
+		var min = new Vector2( float.MaxValue );
+		var max = new Vector2( float.MinValue );
+		for ( int i = 0; i < text.Length; i++ )
+		{
+			var rect = text[i].Rect;
+			box.Rect = rect;
+			box.Color = text[i].Color.WithAlphaMultiplied( opacity );
+			box.TextureIndex = first + i;
+			boxes[i] = box;
+
+			min = Vector2.Min( min, new Vector2( rect.x, rect.y ) );
+			max = Vector2.Max( max, new Vector2( rect.x + rect.z, rect.y + rect.w ) );
+		}
+		_boxTable.Fold( boxes );
+
+		// The glyphs share a transform, so their bounds count as one write
+		TrackBackdropWrite( new Rect( min, max - min ), box.TransformIndex );
 	}
 }

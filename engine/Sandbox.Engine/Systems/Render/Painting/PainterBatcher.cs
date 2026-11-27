@@ -15,9 +15,9 @@ internal partial class PainterBatcher
 	int _frameIndex;
 	readonly GpuTable<GPUBoxInstance> _textTable = new( "PainterTextInstances" );
 	readonly GpuTable<UICssBoxBatched.BoxInstance> _boxTable = new( "BoxInstances" );
-	readonly GpuTable<(Painter.Scissoring Scissor, int Next), UICssBoxBatched.ScissorInstance> _scissorTable = new( "ScissorBuffer" );
+	readonly GpuTable<(Painter.Scissoring Scissor, int Next), UICssBoxBatched.ScissorInstance> _scissorTable = new( "ScissorBuffer", keepKeys: true );
 	readonly GpuTable<Matrix, UICssBoxBatched.TransformInstance> _transformTable = new( "TransformBuffer" );
-	readonly GpuTable<GradientInfo, UICssBoxBatched.GradientInstance> _gradientTable = new( "GradientBuffer" );
+	readonly GpuTable<GradientInfo, UICssBoxBatched.GradientInstance> _gradientTable = new( "GradientBuffer", keepKeys: true );
 	readonly GpuTable<UICssBoxBatched.BorderShape, UICssBoxBatched.BorderShape> _shapeTable = new( "BorderShapeBuffer" );
 	readonly GpuTable<UICssBoxBatched.PathPrimitive> _pathTable = new( "PathBuffer" );
 	readonly GpuTable<UICssBoxBatched.PathNode> _pathNodeTable = new( "PathNodeBuffer" );
@@ -33,10 +33,19 @@ internal partial class PainterBatcher
 	internal IReadOnlyList<UICssBoxBatched.BorderShape> Shapes => _shapeTable.Items;
 	internal IReadOnlyList<UICssBoxBatched.PathPrimitive> Paths => _pathTable.Items;
 	internal IReadOnlyList<UICssBoxBatched.PathNode> PathNodes => _pathNodeTable.Items;
+	internal IReadOnlyList<GPUBoxInstance> TextRows => _textTable.Items;
 
-	internal void Add( in UICssBoxBatched.BoxInstance instance ) => _boxTable.Add( instance );
+	internal void Add( in UICssBoxBatched.BoxInstance instance )
+	{
+		_boxTable.Add( instance );
+		_boxMeta.Add( (byte)_blendMode );
+	}
 
-	internal void Rewind( int count ) => _boxTable.Rewind( count );
+	internal void Rewind( int count )
+	{
+		_boxTable.Rewind( count );
+		_boxMeta.RemoveRange( count, _boxMeta.Count - count );
+	}
 
 	internal void Tint( int first, int count, Color color )
 	{
@@ -54,8 +63,19 @@ internal partial class PainterBatcher
 
 	internal int GpuBufferCount => _tables.Sum( table => table.BufferCount );
 
+	// Layer caching: instances are hashed while a target is pushed, so a layer's content hash is the difference between
+	// two readings. Volatile counts draws the hash can't see - native commands, backdrops, live textures
+	readonly HashState _hash = new();
+	internal int Volatile;
+	internal int ContentSum { get { var sum = 0; foreach ( var table in _tables ) sum += table.Sum; return sum + _hash.Extra; } }
+
 	internal void AdvanceFrame()
 	{
+		_previousGeneration = _generation;
+		_generation = NextGeneration();
+		(_previousBoxMeta, _boxMeta) = (_boxMeta, _previousBoxMeta);
+		_boxMeta.Clear();
+		_hash.Layers = 0;
 		_frameIndex = (_frameIndex + 1) % FrameCount;
 		foreach ( var table in _tables ) table.Clear();
 		_pathLookup.Clear();
@@ -77,7 +97,11 @@ internal partial class PainterBatcher
 		int next = inherited;
 		while ( index >= 0 )
 		{
-			if ( _drawClipLookup.TryGetValue( (index, parentTransform, inherited), out next ) ) break;
+			if ( _drawClipLookup.TryGetValue( (index, parentTransform, inherited), out next ) )
+			{
+				_scissorTable.Fold( _scissorTable.AsSpan().Slice( next, 1 ) );
+				break;
+			}
 			_drawClipStack.Add( index );
 			index = DrawClips[index].Parent;
 			next = inherited;
@@ -186,7 +210,7 @@ internal partial class PainterBatcher
 		attributes.Set( "LayerMat", target.LayerMatrix );
 		if ( target.GammaOutput.HasValue ) attributes.Set( "UIGammaOutput", target.GammaOutput.Value );
 		attributes.SetCombo( "D_POLYGON_POINTS", _polygonPointTable.Count > 0 ? 1 : 0 );
-		foreach ( var table in _tables ) table.Upload( _frameIndex, attributes );
+		foreach ( var table in _tables ) table.Bind( _frameIndex, attributes );
 		GpuFontGlyphCache.Bind( attributes );
 		attributes.Set( "InstanceOffset", offset );
 		attributes.SetCombo( "D_BLENDMODE", (int)_blendMode );
@@ -198,41 +222,87 @@ internal partial class PainterBatcher
 	internal void BindScissor( CommandList.AttributeAccess attributes, int index )
 	{
 		if ( Graphics.IsAvailable )
-			_scissorTable.Upload( _frameIndex, attributes );
+			_scissorTable.Bind( _frameIndex, attributes );
 		attributes.Set( "PainterScissorIndex", index );
 	}
+
+	/// <summary>
+	/// Writes everything recorded draws read into the GPU tables. Called when painting ends, before the commands can run.
+	/// </summary>
+	internal void UploadTables()
+	{
+		foreach ( var table in _tables ) table.Upload();
+	}
+
+	internal sealed class HashState { internal int Layers, Ordinal, Extra; }
 
 	internal interface IGpuTable
 	{
 		int BufferCount { get; }
+		int Sum { get; }
+		HashState Hash { set; }
 		void Clear();
-		void Upload( int frame, CommandList.AttributeAccess attributes );
+		void Bind( int frame, CommandList.AttributeAccess attributes );
+		void Upload();
 		void Dispose();
 	}
 
 	/// <summary>
-	/// A table of shader instances that grows through a frame and is mirrored into a GPU buffer when a draw needs it.
-	/// Only entries added since the last upload are written.
+	/// A table of shader instances that grows through a frame and is mirrored into a GPU buffer for the draws that read it.
+	/// Draws only bind the buffer; the entries are written once painting ends, in as few uploads as possible.
 	/// </summary>
 	internal class GpuTable<T>( string attribute ) : IGpuTable where T : unmanaged
 	{
-		readonly List<T> _items = [];
+		List<T> _items = [];
+
+		// Last frame's entries, which recordings of unchanged panels are replayed from (PainterBatcher.Replay)
+		List<T> _previous = [];
 		readonly GpuBuffer<T>[] _buffers = new GpuBuffer<T>[FrameCount];
 		int _uploaded;
 
-		internal IReadOnlyList<T> Items => _items;
+		// The buffer recorded draws read, which entries since _uploaded still have to be written to
+		GpuBuffer<T> _bound;
+
+		// The current frame's rows whichever list holds them, so a reference kept across a new frame sees the new rows
+		ItemsView _view;
+		internal IReadOnlyList<T> Items => _view ??= new ItemsView( this );
 		internal int Count => _items.Count;
 		internal T this[int index] => _items[index];
+
+		sealed class ItemsView( GpuTable<T> table ) : IReadOnlyList<T>
+		{
+			public T this[int index] => table._items[index];
+			public int Count => table._items.Count;
+			public IEnumerator<T> GetEnumerator() => table._items.GetEnumerator();
+			System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+		}
 		internal Span<T> AsSpan() => CollectionsMarshal.AsSpan( _items );
+		internal ReadOnlySpan<T> Previous => CollectionsMarshal.AsSpan( _previous );
 		public int BufferCount => _buffers.Count( b => b != null );
+		public int Sum { get; private set; }
+		public HashState Hash { get; set; }
 
 		internal int Add( in T item )
 		{
 			Append( 1 )[0] = item;
+			Fold( new ReadOnlySpan<T>( in item ) );
 			return _items.Count - 1;
 		}
 
-		internal void AddRange( ReadOnlySpan<T> items ) => _items.AddRange( items );
+		internal void AddRange( ReadOnlySpan<T> items )
+		{
+			_items.AddRange( items );
+			Fold( items );
+		}
+
+		internal void Fold( ReadOnlySpan<T> items )
+		{
+			var state = Hash;
+			if ( state.Layers == 0 ) return;
+			var hash = new HashCode();
+			hash.AddBytes( MemoryMarshal.AsBytes( items ) );
+			Sum += HashCode.Combine( hash.ToHashCode(), state.Ordinal++ );
+		}
 
 		// The caller must fill every element before another table mutation or upload.
 		internal Span<T> Append( int count )
@@ -248,43 +318,79 @@ internal partial class PainterBatcher
 			_uploaded = Math.Min( _uploaded, count );
 		}
 
+		/// <summary>
+		/// Starts the next frame's entries, keeping this frame's as <see cref="Previous"/>.
+		/// </summary>
 		public virtual void Clear()
 		{
+			(_previous, _items) = (_items, _previous);
 			_items.Clear();
 			_uploaded = 0;
+			_bound = null;
 		}
 
-		public void Upload( int frame, CommandList.AttributeAccess attributes )
+		public void Bind( int frame, CommandList.AttributeAccess attributes )
 		{
 			if ( _items.Count == 0 ) return;
 
-			var buffer = EnsureBuffer( ref _buffers[frame], _items.Count, out bool grew );
-			if ( grew ) _uploaded = 0;
-
-			int count = _items.Count - _uploaded;
-			if ( count > 0 )
+			ref var buffer = ref _buffers[frame];
+			if ( buffer is null || buffer.ElementCount < _items.Count )
 			{
-				buffer.SetData<T>( CollectionsMarshal.AsSpan( _items ).Slice( _uploaded, count ), _uploaded );
-				_uploaded = _items.Count;
+				// Draws already recorded read the old buffer, so it gets what fits before being replaced.
+				// Don't Dispose it here — may be called off the main thread. It's cleaned up by the GC finalizer.
+				Upload();
+				// The UI draws these on the device it records on; Source 2's copy (kept by the editor) is never read
+				buffer = new GpuBuffer<T>( GetBufferCapacity<T>( _items.Count ) );
+				_uploaded = 0;
 			}
 
+			_bound = buffer;
 			attributes.Set( attribute, (GpuBuffer)buffer );
+		}
+
+		public void Upload()
+		{
+			if ( _bound is null ) return;
+
+			int end = Math.Min( _items.Count, _bound.ElementCount );
+			if ( end > _uploaded )
+			{
+				_bound.SetData<T>( CollectionsMarshal.AsSpan( _items )[_uploaded..end], _uploaded );
+				_uploaded = end;
+			}
 		}
 
 		public void Dispose()
 		{
-			foreach ( var buffer in _buffers ) buffer?.Dispose();
+			for ( int i = 0; i < _buffers.Length; i++ )
+			{
+				_buffers[i]?.Dispose();
+				_buffers[i] = null; // painting again makes new ones
+			}
+			_bound = null;
 		}
 	}
 
 	/// <summary>
 	/// A GpuTable that also remembers which key produced each entry, so equal keys share one entry.
 	/// </summary>
-	internal sealed class GpuTable<TKey, T>( string attribute ) : GpuTable<T>( attribute ) where T : unmanaged
+	internal sealed class GpuTable<TKey, T>( string attribute, bool keepKeys = false ) : GpuTable<T>( attribute ) where T : unmanaged
 	{
 		readonly Dictionary<TKey, int> _lookup = [];
 
-		internal bool TryGet( in TKey key, out int index ) => _lookup.TryGetValue( key, out index );
+		// The key of each entry, this frame's and last frame's, for entries that can't be made again from their value alone
+		List<TKey> _keys = keepKeys ? [] : null;
+		List<TKey> _previousKeys = keepKeys ? [] : null;
+
+		/// <summary>The key last frame's entry at <paramref name="index"/> was added with. Only for tables that keep keys.</summary>
+		internal ref readonly TKey PreviousKey( int index ) => ref CollectionsMarshal.AsSpan( _previousKeys )[index];
+
+		internal bool TryGet( in TKey key, out int index )
+		{
+			if ( !_lookup.TryGetValue( key, out index ) ) return false;
+			Fold( AsSpan().Slice( index, 1 ) ); // A reused entry is content too: same index, maybe a different value than last frame
+			return true;
+		}
 
 		/// <summary>
 		/// Resolves an already constructed value with one dictionary probe, including on insertion.
@@ -292,7 +398,11 @@ internal partial class PainterBatcher
 		internal int GetOrAdd( in TKey key, in T item )
 		{
 			ref int index = ref CollectionsMarshal.GetValueRefOrAddDefault( _lookup, key, out bool exists );
-			if ( !exists ) index = Add( item );
+			if ( !exists )
+			{
+				index = Add( item );
+				_keys?.Add( key );
+			}
 			return index;
 		}
 
@@ -300,6 +410,7 @@ internal partial class PainterBatcher
 		{
 			var index = Add( item );
 			_lookup.Add( key, index );
+			_keys?.Add( key );
 			return index;
 		}
 
@@ -307,6 +418,9 @@ internal partial class PainterBatcher
 		{
 			base.Clear();
 			_lookup.Clear();
+			if ( _keys is null ) return;
+			(_previousKeys, _keys) = (_keys, _previousKeys);
+			_keys.Clear();
 		}
 	}
 
@@ -319,20 +433,6 @@ internal partial class PainterBatcher
 		if ( required < 0 || required > maximum )
 			throw new InvalidOperationException( $"The UI {typeof( T ).Name} table exceeds the GPU buffer's 32-bit byte capacity." );
 		return (int)Math.Min( maximum, Math.Max( 64u, BitOperations.RoundUpToPowerOf2( (uint)required ) ) );
-	}
-
-	static GpuBuffer<T> EnsureBuffer<T>( ref GpuBuffer<T> buffer, int capacity, out bool wasReplaced ) where T : unmanaged
-	{
-		wasReplaced = false;
-		if ( buffer == null || buffer.ElementCount < capacity )
-		{
-			// Don't Dispose here — may be called off the main thread.
-			// Old buffer is dereferenced and cleaned up by GC finalizer.
-			int size = GetBufferCapacity<T>( capacity );
-			buffer = new GpuBuffer<T>( size );
-			wasReplaced = true;
-		}
-		return buffer;
 	}
 
 	static void EnsureQuadIndexBuffer()

@@ -17,15 +17,15 @@ internal static partial class NativeResourceCache
 			((ICollection<KeyValuePair<long, WeakReference>>)WeakTable).Remove( new( key, captured ) );
 		}
 		RemoveRetainedModel( retained, key, expectedOwner );
-		RemoveRetainedModel( retainedPrevious, key, expectedOwner );
+
 		// CallstackTable has no owner token. Do not delete a replacement's
 		// diagnostic record by key. With tracking enabled it remains until the
 		// normal diagnostic cache clear; tracking-off creates no such entries.
 	}
 
-	private static void RemoveRetainedModel( ConcurrentDictionary<long, object> values, long key, Model expectedOwner )
+	private static void RemoveRetainedModel( ConcurrentDictionary<long, Retained> values, long key, Model expectedOwner )
 	{
-		if ( values.TryGetValue( key, out var captured ) && ReferenceEquals( captured, expectedOwner ) )
-			((ICollection<KeyValuePair<long, object>>)values).Remove( new( key, captured ) );
+		if ( values.TryGetValue( key, out var captured ) && ReferenceEquals( captured.Value, expectedOwner ) )
+			((ICollection<KeyValuePair<long, Retained>>)values).Remove( new( key, captured ) );
 	}
 }

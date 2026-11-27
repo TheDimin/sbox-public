@@ -1,4 +1,5 @@
-﻿using Facepunch.ActionGraphs;
+﻿using Sandbox.Engine;
+using Facepunch.ActionGraphs;
 using Sandbox.ActionGraphs;
 using System.Buffers;
 using System.Text.Json;
@@ -377,7 +378,7 @@ public partial class GameObject
 
 				// Build the (unstored) nested mappings in PostDeserialize, once the subtree has its
 				// final ids. Doing it here would run against temp ids and an empty subtree.
-				_pendingNestedMappingId = node[JsonKeys.Id].Deserialize<Guid>();
+				_pendingNestedMappingId = node[JsonKeys.Id].ReadAs<Guid>();
 			}
 		}
 		// Handle full prefab instances
@@ -443,7 +444,7 @@ public partial class GameObject
 			Assert.IsValid( prefabScene );
 
 			var fullPrefabData = prefabScene.FullPrefabInstanceJson;
-			node = Json.ApplyPatch( fullPrefabData, instancePatch, DiffObjectDefinitions );
+			node = Json.ApplyPatch( fullPrefabData, instancePatch, TrackedDiffDefinitions );
 			PrefabInstance.InitLookups( nodePrefabToInstanceId );
 			PrefabInstance.InitPatch( instancePatch );
 			PrefabInstance.RemapPrefabIdsToInstanceIds( ref node );
@@ -476,7 +477,7 @@ public partial class GameObject
 
 		DeserializeId( node );
 
-		if ( node[JsonKeys.Tags].Deserialize<string>() is { } tags )
+		if ( node[JsonKeys.Tags].ReadAs<string>() is { } tags )
 		{
 			Tags.RemoveAll();
 			Tags.Add( tags.Split( ',', StringSplitOptions.RemoveEmptyEntries ) );
@@ -523,7 +524,7 @@ public partial class GameObject
 				// This might also be useful to us when developing, where we can copy paste the component into our code
 				// and have it still work and be able to edit hotloading.
 				// This code chooses the type in a dynamic assembly (addon code) so they always have priority over the engine stuff.
-				var componentType = Game.TypeLibrary.GetType<Component>( componentTypeName, true );
+				var componentType = GlobalContext.Current.TypeLibrary.GetType<Component>( componentTypeName, true );
 
 				// We didn't find this component type. So lets cut them some slack by searching
 				// for it without the namespace - because maybe they refactored and didn't want
@@ -534,7 +535,7 @@ public partial class GameObject
 					if ( idx > 0 && idx < componentTypeName.Length - 1 )
 					{
 						var componentClassName = componentTypeName[(idx + 1)..];
-						componentType = Game.TypeLibrary.GetType<Component>( componentClassName, true );
+						componentType = GlobalContext.Current.TypeLibrary.GetType<Component>( componentClassName, true );
 					}
 				}
 
@@ -554,7 +555,7 @@ public partial class GameObject
 
 				if ( options.IsRefreshing )
 				{
-					var guid = componentJson[Component.JsonKeys.Id].Deserialize<Guid>();
+					var guid = componentJson[Component.JsonKeys.Id].ReadAs<Guid>();
 					c = Scene.Directory.FindComponentByGuid( guid );
 				}
 
@@ -644,7 +645,7 @@ public partial class GameObject
 
 				if ( options.IsRefreshing )
 				{
-					var guid = jso[JsonKeys.Id].Deserialize<Guid>();
+					var guid = jso[JsonKeys.Id].ReadAs<Guid>();
 					go = Scene.Directory.FindByGuid( guid );
 
 					if ( go is not null )
@@ -803,9 +804,9 @@ public partial class GameObject
 		if ( Flags.Contains( GameObjectFlags.PhysicsBone ) )
 		{
 			var tx = global::Transform.Zero;
-			tx.Position = node[JsonKeys.Position]?.Deserialize<Vector3>() ?? Vector3.Zero;
-			tx.Rotation = node[JsonKeys.Rotation]?.Deserialize<Rotation>() ?? Rotation.Identity;
-			tx.Scale = node[JsonKeys.Scale]?.Deserialize<Vector3>() ?? Vector3.One;
+			tx.Position = node[JsonKeys.Position]?.ReadAs<Vector3>() ?? Vector3.Zero;
+			tx.Rotation = node[JsonKeys.Rotation]?.ReadAs<Rotation>() ?? Rotation.Identity;
+			tx.Scale = node[JsonKeys.Scale]?.ReadAs<Vector3>() ?? Vector3.One;
 
 			var worldTx = Parent?.WorldTransform.ToWorld( tx ) ?? tx;
 			WorldTransform = worldTx;
@@ -818,9 +819,9 @@ public partial class GameObject
 		if ( !(options.IsRefreshing && options.IsNetworkRefresh) || !Flags.Contains( GameObjectFlags.Bone ) )
 		{
 			var tx = global::Transform.Zero;
-			tx.Position = node[JsonKeys.Position]?.Deserialize<Vector3>() ?? Vector3.Zero;
-			tx.Rotation = node[JsonKeys.Rotation]?.Deserialize<Rotation>() ?? Rotation.Identity;
-			tx.Scale = node[JsonKeys.Scale]?.Deserialize<Vector3>() ?? Vector3.One;
+			tx.Position = node[JsonKeys.Position]?.ReadAs<Vector3>() ?? Vector3.Zero;
+			tx.Rotation = node[JsonKeys.Rotation]?.ReadAs<Rotation>() ?? Rotation.Identity;
+			tx.Scale = node[JsonKeys.Scale]?.ReadAs<Vector3>() ?? Vector3.One;
 
 			// Use exact (bitwise) equality to avoid Vector3.operator== swallowing tiny
 			// differences within its 0.0001 AlmostEqual tolerance during deserialization.
@@ -869,7 +870,7 @@ public partial class GameObject
 				var component = Scene.Directory.FindComponentByGuid( guid );
 				if ( component.IsValid() )
 				{
-					var t = Game.TypeLibrary.GetType( component.GetType() );
+					var t = GlobalContext.Current.TypeLibrary.GetType( component.GetType() );
 
 					if ( value is null )
 						return;
@@ -899,7 +900,7 @@ public partial class GameObject
 					{
 						try
 						{
-							existingComponent = Scene.Directory.FindComponentByGuid( componentIdNode.Deserialize<Guid>() );
+							existingComponent = Scene.Directory.FindComponentByGuid( componentIdNode.ReadAs<Guid>() );
 						}
 						catch
 						{
@@ -938,7 +939,7 @@ public partial class GameObject
 		if ( string.IsNullOrEmpty( componentTypeName ) )
 			return;
 
-		var componentType = Game.TypeLibrary.GetType<Component>( componentTypeName, true );
+		var componentType = GlobalContext.Current.TypeLibrary.GetType<Component>( componentTypeName, true );
 		if ( componentType is null || componentType.TargetType.IsAbstract )
 			return;
 

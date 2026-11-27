@@ -1,0 +1,166 @@
+// foliage.shader written as a surface, by hand: its PS body is Evaluate, its wind is Displace and its wrap and
+// translucency from the sun are Light (ISunLitSurface: once, outside the light loop, as foliage.shader does). Its features
+// are fields a .vmat sets: alpha test (with today's alpha to coverage) and back faces through the render state, the wind
+// (F_FOLIAGE_ANIMATION), translucency (F_TRANSMISSIVE) and the grazing fade (F_GRAZING_FADE) switch their terms.
+//
+// foliage.shader's colour pass tests depth for equality without writing it (after the prepass); this one tests
+// greater-or-equal, which draws the same pixels.
+import sbox.surface;
+
+[Material, Features( "Common" ), Vertex( "Common, Color if Animation == 1" ),
+	Attribute( "NeedsLightProbe" ), AttributeIf( "alphatest", "UseAlphaTest" ), AttributeIf( "AnimatesVertices", "Animation" ),
+	Attribute( "CanBatchWithDynamicShaderConstants" ), Attribute( "VertexNeedsPropOrigin" ), AttributeExpression( "DoNotCastShadows", "F_DO_NOT_CAST_SHADOWS" ),
+	Attribute( "SupportsMappingDimensions" ), AttributeExpression( "renderbackfaces", "RenderBackfaces" )]
+public struct Foliage : IVertexSurface, ISunLitSurface
+{
+	// Features
+	[Group( "Rendering" ), Feature( "F_ALPHA_TEST" ), RenderState( "AlphaTest" )] bool UseAlphaTest;
+	[Group( "Foliage Animation" ), Feature( "F_FOLIAGE_ANIMATION" ), Options( "None | Vertex Color Based | Trunk Only" ), Range( 0, 2 )] int Animation;
+	[Group( "Rendering" ), Feature( "F_TRANSMISSIVE" )] bool Transmissive;
+	[Group( "Rendering" ), Feature( "F_GRAZING_FADE" )] bool GrazingFade;
+	[Group( "Rendering" ), Feature( "F_RENDER_BACKFACES" ), RenderState( "TwoSided" )] bool RenderBackfaces;
+
+	// The common inputs: colour with opacity, normal with tint mask, roughness/metalness/occlusion/transmission
+	[Group( "Material,10" ), Srgb, Opacity, TextureAttribute( "RepresentativeTexture" )] Texture2D Color;
+	[Group( "Material,10" )] Texture2D Normal;
+	[Group( "Material,10" )] Rma Rma;
+	[Group( "Material,10/90" ), Source( "g_flTintColor" ), Color, Default3( 1, 1, 1 )] float3 TintColor;
+	[Group( "Fog,300" ), Default( 1 )] bool FogEnabled;
+
+	// Foliage
+	[Group( "Foliage" ), Range( 0, 1 ), Default( 0.5 ), ShowIf( "Transmissive != 0" )] float WrapAmount;
+	[Group( "Foliage" ), Range( 0, 1 ), Default( 0.3 ), ShowIf( "Transmissive != 0" )] float WrapStrength;
+	[Group( "Foliage" ), Range( 0, 2 ), Default( 0 )] float RimStrength;
+	[Group( "Foliage" ), Range( 1, 8 ), Default( 4 )] float RimPower;
+	[Group( "Foliage" ), Range( 0, 0.5 ), Default( 0 )] float AmbientBoost;
+	[Group( "Foliage" ), Range( 100, 2000 ), Default( 500 )] float DetailFadeDistance;
+	[Group( "Foliage" ), Range( 0, 1 ), Default( 0.5 )] float MinRoughness;
+	[Group( "Foliage" ), Range( 0, 0.5 ), Default( 0.1 )] float NormalVariation;
+	[Group( "Foliage" ), Range( 0, 1 ), Default( 0 )] float GrassNormalUp;
+	[Group( "Foliage" ), Range( 0, 1 ), Default( 0 )] float SpecularOcclusion;   // the .shader's, which it never read
+
+	// Wrap lighting and translucency (F_TRANSMISSIVE)
+	[Group( "Material,10" ), Srgb, When( "Transmissive" ), Input( "TextureTransmissiveColor", "Material,10/60" ), Pack( "RGB: TransmissiveColor", "BC7" )] Texture2D TransmissiveColor;
+	[Group( "Transmissive" ), Range( 0, 10 ), Default( 1 ), ShowIf( "Transmissive != 0" )] float TransmissionScale;
+
+	// The alpha test's cutoff (g_flAlphaTestReference), relaxed with distance so foliage doesn't pop as its LODs change
+	[Group( "Translucent" ), Range( 0.01, 0.99 ), Default( 0.5 ), ShowIf( "UseAlphaTest != 0" )] float AlphaTestReference;
+	[Group( "Translucent" ), Range( 0, 1 ), Default( 1 ), ShowIf( "UseAlphaTest != 0" )] float AntiAliasedEdgeStrength;   // the .shader's, which it never read
+	[Group( "Alpha Test" ), Range( 0, 5000 ), Default( 500 ), ShowIf( "UseAlphaTest != 0" )] float AlphaDistanceStart;
+	[Group( "Alpha Test" ), Range( 0, 10000 ), Default( 2000 ), ShowIf( "UseAlphaTest != 0" )] float AlphaDistanceEnd;
+
+	// Leaf cards fade out as they turn edge-on (F_GRAZING_FADE)
+	[Group( "Grazing Fade" ), Range( 0, 1 ), Default( 0.5 ), ShowIf( "GrazingFade != 0" )] float GrazingFadeStart;
+	[Group( "Grazing Fade" ), Range( 0, 1 ), Default( 0.1 ), ShowIf( "GrazingFade != 0" )] float GrazingFadeEnd;
+
+	// Wind (F_FOLIAGE_ANIMATION): vertex colour red and green attenuate edge and branch bending, blue is the phase
+	[Group( "Foliage Animation,10/Detail" ), Range( 0.1, 5 ), Default( 1 ), ShowIf( "Animation == 1" )] float EdgeFrequency;
+	[Group( "Foliage Animation,10/Detail" ), Range( 0, 1 ), Default( 0.1 ), ShowIf( "Animation == 1" )] float EdgeAmplitude;
+	[Group( "Foliage Animation,10/Detail" ), Range( 0.1, 5 ), Default( 0.5 ), ShowIf( "Animation == 1" )] float BranchFrequency;
+	[Group( "Foliage Animation,10/Detail" ), Range( 0, 1 ), Default( 0.1 ), ShowIf( "Animation == 1" )] float BranchAmplitude;
+	[Group( "Foliage Animation,20/Trunk" ), Range( 0, 25 ), Default( 1 ), ShowIf( "Animation != 0" )] float SwayStrength;
+	[Group( "Foliage Animation,20/Trunk" ), Range( 0, 10 ), Default( 1 ), ShowIf( "Animation != 0" )] float SwaySpeed;
+
+	public Material Evaluate( SurfaceInput i )
+	{
+		float4 color = i.Sample( Color, i.Uv );
+		float4 normal = i.Sample( Normal, i.Uv );
+		float4 rma = i.Sample( Rma, i.Uv );
+
+		Material m = {};
+		m.Albedo = color.rgb * TintColor * i.Color.rgb;
+		m.Opacity = color.a;
+		m.Metalness = rma.g;
+		m.Roughness = max( rma.r, MinRoughness );
+		m.AmbientOcclusion = rma.b;
+		m.Transmission = rma.a;
+		m.TintMask = normal.a;
+
+		m.Normal = i.NormalFromMap( normal.xyz );
+		m.Normal = normalize( lerp( m.Normal, float3( 0, 0, 1 ), GrassNormalUp ) );
+
+		if ( NormalVariation > 0.0 )
+		{
+			float2 cell = floor( i.Uv * 2.0 );
+			float angle = frac( sin( dot( cell, float2( 12.9898, 78.233 ) ) ) * 43758.5453 ) * 6.283;
+			m.Normal = normalize( m.Normal + i.TangentU * cos( angle ) * NormalVariation + i.TangentV * sin( angle ) * NormalVariation );
+		}
+
+		// The material's cutoff relaxed with distance, against the cutoff the pass tests with (i.AlphaReference): opacity
+		// scaled by their ratio, which the sharpening's derivatives cancel, so the edge falls where the material's cutoff puts it
+		float distance = saturate( ( i.ViewDistance - AlphaDistanceStart ) / max( AlphaDistanceEnd - AlphaDistanceStart, 0.001 ) );
+		m.Opacity *= i.AlphaReference / max( lerp( AlphaTestReference, 0.1, distance ), 0.001 );
+
+		// Edge-on cards fade as whole triangles: on the coverage, after the cutoff
+		if ( GrazingFade )
+			m.Coverage = saturate( ( abs( dot( i.FaceNormal, i.View ) ) - GrazingFadeEnd ) / max( GrazingFadeStart - GrazingFadeEnd, 0.001 ) );
+
+		// Rim light close up, and an ambient boost, as emission
+		if ( RimStrength > 0.0 && i.ViewDistance < DetailFadeDistance * 10.0 )
+			m.Emission += m.Albedo * pow( 1.0 - saturate( dot( m.Normal, i.View ) ), RimPower ) * RimStrength;
+
+		if ( AmbientBoost > 0.0 )
+			m.Emission += m.Albedo * AmbientBoost;
+
+		return m;
+	}
+
+	// Wrap diffuse past the terminator, and back-scatter translucency through the leaf, from the sun: foliage.shader's cluster
+	// light loop is commented out. Lighting every light would make it an ILitSurface, at a register cost in the light loop
+	public float3 Light( Material m, SurfaceInput i, LightSample light )
+	{
+		if ( !Transmissive ) return 0;
+
+		const float boost = 1.5;
+		float scatterShadow = lerp( 0.2, 1.0, light.Visibility );
+		float3 result = 0;
+
+		if ( WrapStrength > 0.0 )
+		{
+			float ndl = dot( m.Normal, light.Direction );
+			float wrapped = saturate( ( ndl + WrapAmount ) / ( 1.0 + WrapAmount ) );
+			result += m.Albedo * light.Color * max( wrapped - saturate( ndl ), 0.0 ) * WrapStrength * light.Attenuation * boost;
+		}
+
+		{
+			float3 tint = i.Sample( TransmissiveColor, i.Uv ).rgb;
+			float3 scatter = normalize( light.Direction + m.Normal * 0.2 );
+			float backlit = pow( saturate( dot( i.View, -scatter ) ), 3.0 );
+			result += m.Albedo * tint * light.Color * ( backlit + 0.1 ) * light.Attenuation * scatterShadow * TransmissionScale * boost;
+		}
+
+		return result;
+	}
+
+	// Trunk bending (common/trunk_bending.hlsl) then detail bending (foliage.shader's FoliageDetailBending)
+	public float3 Displace( VertexSurfaceInput v )
+	{
+		float3 position = v.Position;
+		if ( Animation == 0 ) return position;
+
+		float bend = position.z * SwayStrength * 0.0001;
+		bend *= bend;
+		float windStrength = length( v.Wind );
+		float3 windDirection = windStrength > 0.01 ? v.Wind / windStrength : float3( 1, 0, 0 );
+		float sway = sin( v.Time * SwaySpeed ) + sin( v.Time * SwaySpeed * 0.7 ) * 0.5;
+		position.xy += windDirection.xy * bend * ( windStrength + sway );
+
+		const float4 frequencies = float4( 1.975, 0.793, 0.375, 0.193 );
+		float branchPhase = v.Color.b + dot( v.ObjectOrigin, 1 );
+		float vertexPhase = dot( position, v.Color.b + branchPhase );
+		float2 phase = fmod( float2( vertexPhase, branchPhase ), 50000.0 );
+		float4 waves = frac( ( v.Time * float2( EdgeFrequency, BranchFrequency ) + phase ).xxyy * frequencies ) * 2.0 - 1.0;
+		waves = abs( frac( waves + 0.5 ) * 2.0 - 1.0 );
+		waves = waves * waves * ( 3.0 - 2.0 * waves );
+		float2 sum = waves.xz + waves.yw;
+
+		float windIntensity = saturate( windStrength * 0.2 );
+		float branchBend = 1.0 - abs( dot( normalize( v.Wind + 0.001 ), normalize( float3( position.xy, 0.0 ) + 0.001 ) ) );
+		branchBend *= branchBend;
+
+		position += sum.x * v.Color.r * EdgeAmplitude * windIntensity * v.Normal;
+		position += sum.y * v.Color.g * BranchAmplitude * windIntensity * float3( 0, 0, 1 );
+		position += sum.y * v.Color.g * BranchAmplitude * branchBend * windIntensity * v.Wind;
+		return position;
+	}
+}

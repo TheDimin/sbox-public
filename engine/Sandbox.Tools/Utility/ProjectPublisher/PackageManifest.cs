@@ -36,6 +36,7 @@ public partial class ProjectPublisher
 		public bool IsPreview { get; private set; }
 
 		PublishOptions publishingOptions;
+		string mapGameRoot;
 		IProgress progress;
 		readonly HashSet<string> previewFileNames = new( StringComparer.OrdinalIgnoreCase );
 
@@ -76,9 +77,8 @@ public partial class ProjectPublisher
 
 		void ClearAssets()
 		{
-			using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
-
 			Assets.Clear();
+			mapGameRoot = null;
 			previewFileNames.Clear();
 			SceneWarnings.Clear();
 			ExcludedAssets.Clear();
@@ -100,12 +100,12 @@ public partial class ProjectPublisher
 
 		public async Task BuildFromAssets( Project project, IProgress progress = null, CancellationToken cancel = default, PublishOptions options = null, bool previewOnly = false )
 		{
-			ClearAssets();
 			using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
+			ClearAssets();
 			SetPublishExclusions( project.Config.PublishExclude );
 
+			if ( project.Config.Type == "map" ) mapGameRoot = EngineFileSystem.Root?.GetFullPath( "/" );
 			var rootFolder = project.RootDirectory.FullName;
-
 
 			this.progress = progress;
 			IsPreview = previewOnly;
@@ -168,6 +168,9 @@ public partial class ProjectPublisher
 
 		IEnumerable<string> AllCodePaths( Project project )
 		{
+			if ( !project.CanPublishCode() )
+				yield break;
+
 			if ( project.HasCodePath() )
 				yield return project.GetCodePath();
 
@@ -192,13 +195,13 @@ public partial class ProjectPublisher
 			}
 		}
 
-		internal async Task BuildFrom( Asset singleAsset, Project project = null, CancellationToken cancel = default )
+		internal async Task BuildFrom( Asset singleAsset, CancellationToken cancel = default )
 		{
 			using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
-
 			IsPreview = false;
 			ClearAssets();
-			SetPublishExclusions( project?.Config.PublishExclude );
+
+			if ( IsWorkshopAsset( singleAsset ) ) mapGameRoot = EngineFileSystem.Root?.GetFullPath( "/" );
 
 			var assetList = new List<Asset>
 			{
@@ -206,16 +209,6 @@ public partial class ProjectPublisher
 			};
 
 			await CollectAssets( assetList, cancel );
-
-			var includeCode = singleAsset.Publishing.BuildPublishContext().IncludeCode;
-
-			if ( project is not null && includeCode )
-			{
-				foreach ( var path in AllCodePaths( project ) )
-				{
-					await IncludeFiles( path, "*", cancel, IncludeSourceFiles );
-				}
-			}
 
 			progress = null;
 
@@ -226,7 +219,6 @@ public partial class ProjectPublisher
 		public async Task BuildFromSource( Project addon, IProgress progress = null, CancellationToken cancel = default )
 		{
 			using var legacyPipeline = AssetPipelineCompatibility.ForceLegacy();
-
 			IsPreview = false;
 			ClearAssets();
 			SetPublishExclusions( addon.Config.PublishExclude );
@@ -275,7 +267,7 @@ public partial class ProjectPublisher
 
 				foreach ( var path in AllAssetPaths( project ) )
 				{
-					await IncludeFiles( path, publishingOptions.Resources, cancel, matchAssetAliases: true, legacyRules: !publishingOptions.PublishUsedAssetsOnly );
+					await IncludeFiles( path, publishingOptions.Resources, cancel, allowSourceFiles: IncludeSourceFiles, matchAssetAliases: true, legacyRules: !publishingOptions.PublishUsedAssetsOnly );
 				}
 			}
 
@@ -378,8 +370,15 @@ public partial class ProjectPublisher
 
 		async Task<bool> AddAsset( Asset asset )
 		{
-			if ( !CanPublishFile( asset ) )
+			if ( mapGameRoot is null ? !CanPublishFile( asset ) : IsShippedMapContent( mapGameRoot, asset.AbsolutePath ) )
 				return false;
+
+			// Uncompiled resources always ship their source, independently of IncludeSourceFiles.
+			if ( asset.AssetType.IsUncompiled )
+			{
+				await AddFile( asset.GetSourceFile( true ), asset.GetSourceFile( false ) );
+				return true;
+			}
 
 			await asset.CompileIfNeededAsync();
 			// A false return is also used when an asset was already compiled. Check
@@ -476,8 +475,19 @@ public partial class ProjectPublisher
 			await AddFile( png, thumbName );
 		}
 
+		internal static bool IsShippedMapContent( string gameRoot, string absolutePath )
+		{
+			if ( gameRoot is null || string.IsNullOrEmpty( absolutePath ) ) return false;
+
+			var path = Path.GetRelativePath( gameRoot, absolutePath ).Replace( '\\', '/' );
+			return path.StartsWith( "core/", StringComparison.OrdinalIgnoreCase )
+				|| path.StartsWith( "addons/content/", StringComparison.OrdinalIgnoreCase );
+		}
+
 		private async Task AddFile( string absPath, string relativePath )
 		{
+			if ( IsShippedMapContent( mapGameRoot, absPath ) ) return;
+
 			await YieldPreview();
 			if ( !System.IO.File.Exists( absPath ) )
 			{
@@ -614,6 +624,8 @@ public partial class ProjectPublisher
 				if ( file.EndsWith( ".cs", StringComparison.OrdinalIgnoreCase ) ) return false;
 				if ( file.EndsWith( ".razor", StringComparison.OrdinalIgnoreCase ) ) return false;
 				if ( file.EndsWith( ".fbx", StringComparison.OrdinalIgnoreCase ) ) return false;
+				// Editor sidecars can map a compiled resource GUID back to its raw source path.
+				if ( file.EndsWith( ".meta", StringComparison.OrdinalIgnoreCase ) ) return false;
 			}
 
 			if ( DissallowedExtensions.Any( x => file.EndsWith( x, StringComparison.OrdinalIgnoreCase ) ) )

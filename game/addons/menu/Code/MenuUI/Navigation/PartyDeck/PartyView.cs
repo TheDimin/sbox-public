@@ -38,6 +38,7 @@ public static class PartyView
 	static Package mockGame;
 	static CreateGameResults? mockGameSettings;
 	static bool mockReady;
+	static RealTimeSince mockSendVoice;
 
 	/// <summary>
 	/// The last name saved for one of your parties, reused when creating a new party.
@@ -74,7 +75,7 @@ public static class PartyView
 		else
 		{
 			Party.Name = name;
-			ConsoleSystem.SetValue( "party_name", name.Trim() );
+			MenuUtility.SetConsoleVariable( "party_name", name.Trim() );
 		}
 	}
 
@@ -182,7 +183,7 @@ public static class PartyView
 		{
 			if ( gameIdent == SelectedGameIdent )
 			{
-				if ( !Modals.GameModalComponents.GameSetup.SettingsEqual( mockGameSettings, settings ) ) mockReady = false;
+				if ( !Platform.GameSetup.SettingsEqual( mockGameSettings, settings ) ) mockReady = false;
 				mockGameSettings = settings;
 			}
 		}
@@ -205,6 +206,42 @@ public static class PartyView
 		return IsMocking
 			? member.Id != Owner.Id && (member.IsMe ? mockReady : SelectedGameSettings is not null)
 			: Party?.IsMemberReady( member ) ?? false;
+	}
+
+	/// <summary>
+	/// How loud they are right now, 0 to about 1 - what a face's glow grows with. Your own voice isn't played back, so
+	/// talking's a steady level for you.
+	/// </summary>
+	internal static float MemberVoiceLevel( Friend member )
+	{
+		if ( !IsMemberTalking( member ) ) return 0f;
+		if ( IsMocking ) return 0.35f + 0.3f * MathF.Abs( MathF.Sin( RealTime.Now * 9f + (member.Id & 0xff) ) );
+
+		var level = Party?.GetMemberVoiceLevel( member ) ?? 0f;
+		return level > 0f ? level : 0.4f;
+	}
+
+	internal static bool IsMemberTalking( Friend member )
+	{
+		return IsMocking
+			? member.IsMe ? mockSendVoice < 0.1f : MockIsMemberTalking( member )
+			: Party?.IsMemberTalking( member ) ?? false;
+	}
+
+	/// <summary>
+	/// Allow the local user to transmit their voice for a short time window.
+	/// We'll still check voice mode (push to talk etc) elsewhere.
+	/// </summary>
+	internal static void SetBroadcastVoice()
+	{
+		if ( IsMocking )
+		{
+			mockSendVoice = 0;
+		}
+		else
+		{
+			Party?.SetBroadcastVoice();
+		}
 	}
 
 	/// <summary>
@@ -367,5 +404,14 @@ public static class PartyView
 		return t < 0.75
 			? new PartyRoom.MemberStatus( PartyRoom.JoinStage.Downloading, (float)(t / 0.75) )
 			: new PartyRoom.MemberStatus( PartyRoom.JoinStage.WaitingForHost, null );
+	}
+
+	static bool MockIsMemberTalking( Friend member )
+	{
+		var period = 5f + 5f * (member.Id & 0xff) / 256f;
+		var offset = 5f * ((member.Id >> 8) & 0xff);
+		var t = Cycle( period, offset );
+
+		return t < 0.5f;
 	}
 }

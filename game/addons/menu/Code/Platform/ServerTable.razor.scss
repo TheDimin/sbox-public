@@ -1,0 +1,470 @@
+@import "/Platform/_platform.scss";
+@import "/styles/_theme.scss";
+
+// A game's servers, filling what it's in - the headings, the rows scrolling under them, and the picked one's card over
+// its bottom. In a panel's body (the platform-panel mixin), whose 4px padding its headings and card reach out past.
+ServerTable
+{
+	position: relative;
+	flex-grow: 1;
+	min-height: 0;
+	flex-direction: column;
+
+	// Over the whole list, in the middle of it
+	> .empty
+	{
+		@include platform-empty;
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		justify-content: center;
+		pointer-events: none;
+	}
+
+	> table
+	{
+		@include platform-table-flush;
+	}
+
+	// A picked one's card over its bottom - the last row clears it
+	&.picked tbody
+	{
+		padding-bottom: 150px;
+	}
+
+	tr.server
+	{
+		height: 32px;
+		min-height: 32px;
+		cursor: pointer;
+
+		.game-icon, .host
+		{
+			@include platform-tile( 14px, 22px );
+			background-size: cover;
+			background-position: center;
+		}
+
+		.name
+		{
+			align-items: center;
+			gap: 8px;
+
+			.server-name
+			{
+				flex-shrink: 1;
+				font-weight: 600;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			.lock
+			{
+				font-size: 14px;
+				color: $platform-muted;
+			}
+
+			.friend
+			{
+				flex-shrink: 0;
+				font-size: 14px;
+				color: $platform-good;
+			}
+		}
+
+		.map
+		{
+			font-family: Inter;
+			color: #c3cad8;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.players
+		{
+			align-items: center;
+			gap: 10px;
+			font-variant-numeric: tabular-nums;
+
+			// Every digit as wide as the next, set on the label itself - it doesn't come down from the row - and to the
+			// right, so the counts line up over each other
+			label
+			{
+				width: 44px;
+				text-align: right;
+				font-family: Inter;
+				font-variant-numeric: tabular-nums;
+			}
+
+			.fullness
+			{
+				width: 60px;
+				height: 4px;
+				border-radius: 2px;
+				background-color: rgba( 255, 255, 255, 0.1 );
+			}
+
+			.fill
+			{
+				height: 4px;
+				border-radius: 2px;
+				background-color: $platform-primary;
+
+				&.full
+				{
+					background-color: #ff8a94;
+				}
+			}
+		}
+
+		&.full
+		{
+			opacity: 0.55;
+		}
+
+		// On another version - listed, faded back with a tag saying so, and not joined (ServerTable.WhyNotJoin)
+		&.outdated
+		{
+			opacity: 0.5;
+		}
+
+		.outdated-tag
+		{
+			flex-shrink: 0;
+			padding: 1px 6px;
+			border-radius: 3px;
+			background-color: rgba( $platform-warning, 0.16 );
+			font-size: 10px;
+			font-weight: 700;
+			text-transform: uppercase;
+			color: $platform-warning;
+		}
+
+		// A row's shape while they load - its icons, bars where its words go, an empty fullness bar. Only faded in once
+		// it's been a moment, so a quick fetch doesn't flash it.
+		&.skeleton
+		{
+			pointer-events: none;
+			transition: opacity 0.3s ease-out 0.35s;
+
+			&:intro
+			{
+				opacity: 0;
+			}
+
+			.game-icon, .host, .bone
+			{
+				background-color: rgb( 42, 50, 68 );
+				animation: server-breathe 1.4s ease-in-out infinite alternate;
+			}
+
+			.bone
+			{
+				flex-shrink: 0;
+				height: 10px;
+				border-radius: 3px;
+			}
+
+			.count
+			{
+				width: 34px;
+				margin-left: 10px;
+			}
+
+			.ping-bone
+			{
+				width: 24px;
+			}
+		}
+	}
+
+	// Its signal bars, then the number
+	.ping
+	{
+		@include platform-ping;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 8px;
+		@include platform-ping-lit;
+
+		.ping-bars
+		{
+			@include platform-ping-bars;
+		}
+	}
+
+	// Picking one doesn't push the list up.
+	// The one picked, over the table's bottom - a panel of the platform's own: dark glass with a faint edge along its
+	// top, its map's art, what it is, a tile each for what there is to know, and the way in
+	.band
+	{
+		position: absolute;
+		// Out to the edges of the panel's body, past its 4px padding
+		left: -4px;
+		right: -4px;
+		bottom: -4px;
+		z-index: 20;
+		border-bottom-left-radius: $platform-radius;
+		border-bottom-right-radius: $platform-radius;
+		border-top: 1px solid rgba( 255, 255, 255, 0.08 );
+		background-color: $platform-glass;
+		background-image: $platform-glass-fill;
+		box-shadow: 0 -12px 28px rgba( 0, 0, 0, 0.35 );
+		transition: opacity 0.25s ease-out, transform 0.3s ease-out;
+
+		&:intro
+		{
+			opacity: 0;
+			transform: translateY( 24px );
+		}
+
+		> .card
+		{
+			position: relative;
+			flex-grow: 1;
+			align-items: center;
+			gap: 16px;
+			padding: 14px 16px;
+			transition: opacity 0.2s ease-out;
+
+			&:intro
+			{
+				opacity: 0;
+			}
+		}
+
+		// Up in the corner, plain - puts it away
+		.dismiss
+		{
+			position: absolute;
+			top: 8px;
+			right: 10px;
+			cursor: pointer;
+			@include platform-sounds;
+
+			i
+			{
+				font-size: 18px;
+				color: $platform-muted;
+				transition: color 0.12s ease;
+			}
+
+			&:hover i
+			{
+				color: $platform-text;
+			}
+		}
+
+		// Its map's art, square - just to see, not to open
+		.map
+		{
+			width: 86px;
+			height: 86px;
+			flex-shrink: 0;
+			align-items: center;
+			justify-content: center;
+			border-radius: $platform-radius;
+			background-color: $platform-panel;
+			background-size: cover;
+			background-position: center;
+
+			> i
+			{
+				font-size: 30px;
+				color: $platform-faint;
+			}
+		}
+
+		// Its name, where it is under it, then its tiles
+		.about
+		{
+			flex-grow: 1;
+			min-width: 0;
+			flex-direction: column;
+			justify-content: center;
+
+			.server-name, .where
+			{
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			.server-name
+			{
+				font-size: 16px;
+				font-weight: 700;
+				color: $platform-text;
+			}
+
+			.where
+			{
+				font-size: 12px;
+				color: $platform-muted;
+			}
+		}
+
+		.stats
+		{
+			flex-wrap: wrap;
+			gap: 6px;
+			margin-top: 10px;
+		}
+
+		// A recessed box each
+		.stat
+		{
+			flex-direction: column;
+			justify-content: center;
+			gap: 4px;
+			height: 34px;
+			padding: 0 12px;
+			border-radius: $platform-radius;
+			background-color: rgba( 255, 255, 255, 0.04 );
+
+			.value
+			{
+				flex-direction: row;
+				align-items: center;
+				gap: 6px;
+				font-size: 13px;
+				font-weight: 700;
+				color: $platform-text;
+				white-space: nowrap;
+
+				i
+				{
+					font-size: 15px;
+					color: $platform-icon;
+				}
+			}
+
+			.avatar
+			{
+				width: 18px;
+				height: 18px;
+				flex-shrink: 0;
+				border-radius: 9px;
+				background-size: cover;
+				background-position: center;
+			}
+
+			// Several faces, overlapping
+			.faces
+			{
+				flex-direction: row;
+
+				.avatar + .avatar
+				{
+					margin-left: -7px;
+				}
+			}
+
+			&.friend .value label, &.host.friend .value label
+			{
+				color: $platform-good;
+			}
+
+			&.locked .value i
+			{
+				color: $front-trophy;
+			}
+		}
+
+		// How many of how many, and how full that is - a bar beside it, as the list has
+		.stat.players
+		{
+			.of
+			{
+				font-weight: 600;
+				color: $platform-muted;
+			}
+
+			.fill-track
+			{
+				flex-shrink: 0;
+				width: 64px;
+				height: 4px;
+				margin-left: 6px;
+				border-radius: 2px;
+				background-color: rgba( 255, 255, 255, 0.1 );
+				overflow: hidden;
+
+				.fill
+				{
+					height: 100%;
+					border-radius: 2px;
+					background-color: $platform-primary;
+				}
+			}
+		}
+
+		// Its bars and the number side by side, as in the table - not pushed to the right as there
+		// The list's size - its bars and number as they are in the table
+		.stat.ping .value
+		{
+			justify-content: flex-start;
+			font-family: Inter;
+			font-size: 12px;
+			font-weight: 500;
+			font-variant-numeric: tabular-nums;
+		}
+
+		.stat.ping.good .value { color: $platform-good; }
+		.stat.ping.okay .value { color: #f2c14e; }
+		.stat.ping.bad .value { color: #ff8a94; }
+		.stat.ping.unknown .value { color: $platform-faint; }
+
+		// At the end of the tiles' row, as tall as them
+		.join
+		{
+			width: 150px;
+			height: 34px;
+			margin-left: auto;
+			flex-shrink: 0;
+			align-items: center;
+			justify-content: center;
+			gap: 8px;
+			border-radius: $platform-radius;
+			font-size: 15px;
+			font-weight: 700;
+			color: white;
+			@include platform-button-primary;
+			cursor: pointer;
+			@include platform-sounds;
+			transition: background-color 0.12s ease;
+
+			i
+			{
+				font-size: 18px;
+			}
+
+			&.disabled
+			{
+				color: $platform-faint;
+				background-color: $platform-button-hover;
+				background-image: none;
+				cursor: default;
+			}
+		}
+	}
+}
+
+
+@keyframes server-breathe
+{
+	from
+	{
+		opacity: 0.6;
+	}
+
+	to
+	{
+		opacity: 1;
+	}
+}

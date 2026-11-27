@@ -79,7 +79,7 @@ internal static class MovieConsoleCommands
 	}
 
 	/// <summary>
-	/// Generate a default movie file name including a timestamp, game ident, map ident (if available),
+	/// Generate a default movie file name including a timestamp, game ident, map name (if it has one),
 	/// and clip index if the recording is split into multiple parts. Does not include a file extension
 	/// or directory.
 	/// </summary>
@@ -87,12 +87,12 @@ internal static class MovieConsoleCommands
 	{
 		var fileName = $"{_recordingStartTime:yyyy.MM.dd.HH.mm.ss}";
 
-		if ( Package.TryParseIdent( Networking.MapName, out var parsedMap ) )
+		if ( new MapReference( Networking.MapName ).ShortName is { } mapName )
 		{
-			fileName = $"{parsedMap.package}.{fileName}";
+			fileName = $"{mapName}.{fileName}";
 		}
 
-		if ( Package.TryParseIdent( Game.Ident, out var parsedGame ) )
+		if ( Package.TryParseIdentParts( Game.Ident, out var parsedGame ) )
 		{
 			fileName = $"{parsedGame.package}.{fileName}";
 		}
@@ -121,7 +121,7 @@ internal static class MovieConsoleCommands
 			? recorder.ToClip( (_lastSaveTime, recorder.Time) )
 			: recorder.ToClip();
 
-		var filePath = Path.Combine( "movies", $"{fileName ?? GenerateMovieName()}.movie" );
+		var filePath = GetMovieFilePath( fileName ?? GenerateMovieName() );
 		var directory = Path.GetDirectoryName( filePath );
 
 		if ( !string.IsNullOrEmpty( directory ) )
@@ -137,6 +137,16 @@ internal static class MovieConsoleCommands
 		_recordingCount++;
 	}
 
+
+	internal static string GetMovieFilePath( string fileName )
+	{
+		var filePath = Path.Combine( "movies", $"{SafePath.ToFileName( fileName, "movie", 128 )}.movie" );
+
+		if ( !SafePath.IsWithin( "movies", filePath ) )
+			throw new ArgumentException( "Movie path escapes 'movies'", nameof( fileName ) );
+
+		return filePath;
+	}
 
 	/// <summary>
 	/// Stops the current recording without saving it.

@@ -1,4 +1,5 @@
-﻿namespace Sandbox.UI;
+﻿using Sandbox.Engine;
+namespace Sandbox.UI;
 
 public partial class Panel
 {
@@ -11,6 +12,7 @@ public partial class Panel
 	internal void ParametersChanged( bool immediately )
 	{
 		parametersChanged = true;
+		WakeTick();
 
 		// task is still running
 		if ( parametersSetTask != null && !parametersSetTask.IsCompleted )
@@ -105,7 +107,7 @@ public partial class Panel
 
 		SetAttribute( name, value );
 
-		Game.TypeLibrary.SetProperty( this, name, value );
+		GlobalContext.Current.TypeLibrary.SetProperty( this, name, value );
 	}
 
 	Dictionary<string, string> _attributes;

@@ -12,9 +12,14 @@ namespace Sandbox;
 [Category( "Rendering" )]
 [Icon( "font_download" )]
 [EditorHandle( "materials/gizmo/text_renderer.png" )]
-public sealed class TextRenderer : Renderer, Component.ExecuteInEditor
+public sealed class TextRenderer : Renderer, Component.ExecuteInEditor, ISpriteRenderGroup
 {
 	TextSceneObject _so;
+
+	bool ISpriteRenderGroup.Opaque => false;
+	bool ISpriteRenderGroup.Additive => false;
+	bool ISpriteRenderGroup.Shadows => false;
+	bool ISpriteRenderGroup.IsSorted => true;
 
 	/// <summary>
 	/// Represents the horizontal alignment of the text.
@@ -397,7 +402,7 @@ public sealed class TextRenderer : Renderer, Component.ExecuteInEditor
 		}
 	}
 
-	class TextSceneObject : SceneCustomObject
+	internal class TextSceneObject : SceneCustomObject
 	{
 		public TextFlag TextFlags { get; set; } = TextFlag.DontClip | TextFlag.Center;
 		public BlendMode BlendMode { get; set; } = BlendMode.Normal;

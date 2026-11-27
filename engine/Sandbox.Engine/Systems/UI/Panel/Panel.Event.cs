@@ -1,10 +1,15 @@
+using Sandbox.Engine;
 using System.Reflection;
+using Sandbox.Utility;
 
 namespace Sandbox.UI;
 
 public partial class Panel
 {
-	internal struct EventCallback
+	/// <summary>
+	/// A listener registration with value equality and hashing that do not box in HashSetEx.
+	/// </summary>
+	internal record struct EventCallback
 	{
 		public string EventName;
 		public Action BaseAction;
@@ -16,66 +21,56 @@ public partial class Panel
 		public Panel Context;
 	}
 
-	internal List<EventCallback> EventListeners { get; set; }
+	private HashSetEx<EventCallback> _eventListeners;
 
 	/// <summary>
 	/// Called on creation and hotload to delete and re-initialize event listeners.
 	/// </summary>
 	protected virtual void InitializeEvents()
 	{
-		EventListeners?.RemoveAll( x => x.Automatic );
+		_eventListeners?.RemoveWhere( x => x.Automatic );
 
-		if ( Game.TypeLibrary == null || !Game.TypeLibrary.TryGetType( GetType(), out var typeDescription ) )
+		if ( GlobalContext.Current.TypeLibrary == null || !GlobalContext.Current.TypeLibrary.TryGetType( GetType(), out var typeDescription ) )
 			return;
 
 
-		foreach ( var methodDesc in typeDescription.Members.OfType<MethodDescription>() )
+		foreach ( var methodDesc in typeDescription.Methods )
 		{
 			if ( methodDesc.IsStatic ) continue;
 
-			var pea = methodDesc.Attributes.OfType<PanelEventAttribute>().FirstOrDefault();
+			var pea = methodDesc.GetCustomAttribute<PanelEventAttribute>();
 			if ( pea == null ) continue;
 
-			var method = methodDesc.MemberInfo as MethodInfo;
-			var event_name = methodDesc.Name.ToLower();
+			AddMethodEventListener( methodDesc, pea );
+		}
+	}
 
-			var args = method.GetParameters(); // todo cache
-			var ret = method.ReturnParameter;
+	// Separate so the listener closures are only allocated for event methods, not for every method we look at
+	void AddMethodEventListener( MethodDescription methodDesc, PanelEventAttribute pea )
+	{
+		var method = methodDesc.MemberInfo as MethodInfo;
+		var event_name = methodDesc.Name.ToLower();
 
-			if ( event_name.EndsWith( "event" ) ) event_name = event_name[..^5];
-			if ( pea != null && pea.Name != null ) event_name = pea.Name.ToLower();
+		var args = method.GetParameters(); // todo cache
 
-			if ( args.Length == 1 )
+		if ( event_name.EndsWith( "event" ) ) event_name = event_name[..^5];
+		if ( pea.Name != null ) event_name = pea.Name.ToLower();
+
+		if ( args.Length == 1 )
+		{
+			var argType = args[0].ParameterType;
+			var argcache = new object[1];
+
+			if ( argType == typeof( PanelEvent ) )
 			{
-				var argType = args[0].ParameterType;
-				var argcache = new object[1];
-
-				if ( argType == typeof( PanelEvent ) )
-				{
-					AddAutomaticEventListener( event_name, ( x ) => { argcache[0] = x; method.Invoke( this, argcache ); } );
-				}
-				else
-				{
-					AddAutomaticEventListener( event_name, ( x ) =>
-					{
-						argcache[0] = Convert.ChangeType( x.Value, argType );
-						var response = method.Invoke( this, argcache );
-
-						// If the response is a bool, and false, stop propogation
-						if ( response != null && response is bool bReturnedValue )
-						{
-							x.Propagate = x.Propagate && bReturnedValue;
-						}
-
-					} );
-
-				}
+				AddAutomaticEventListener( event_name, ( x ) => { argcache[0] = x; method.Invoke( this, argcache ); } );
 			}
-			else if ( args.Length == 0 )
+			else
 			{
 				AddAutomaticEventListener( event_name, ( x ) =>
 				{
-					var response = method.Invoke( this, null );
+					argcache[0] = Convert.ChangeType( x.Value, argType );
+					var response = method.Invoke( this, argcache );
 
 					// If the response is a bool, and false, stop propogation
 					if ( response != null && response is bool bReturnedValue )
@@ -84,18 +79,31 @@ public partial class Panel
 					}
 
 				} );
+
 			}
-			else
+		}
+		else if ( args.Length == 0 )
+		{
+			AddAutomaticEventListener( event_name, ( x ) =>
 			{
-				Log.Warning( $"PanelEvent {method} - couldn't set up (too many arguments)" );
-			}
+				var response = method.Invoke( this, null );
+
+				// If the response is a bool, and false, stop propogation
+				if ( response != null && response is bool bReturnedValue )
+				{
+					x.Propagate = x.Propagate && bReturnedValue;
+				}
+
+			} );
+		}
+		else
+		{
+			Log.Warning( $"PanelEvent {method} - couldn't set up (too many arguments)" );
 		}
 	}
 
 	internal void AddAutomaticEventListener( string name, Action<PanelEvent> e )
 	{
-		EventListeners ??= new List<EventCallback>();
-
 		var ev = new EventCallback
 		{
 			EventName = name,
@@ -103,12 +111,12 @@ public partial class Panel
 			Automatic = true
 		};
 
-		EventListeners.Add( ev );
+		AddEventListener( ev );
 	}
 
 	internal void RemoveEventListener( string name )
 	{
-		EventListeners?.RemoveAll( x => x.EventName == name );
+		_eventListeners?.RemoveWhere( x => x.EventName == name );
 	}
 
 	/// <summary>
@@ -137,8 +145,8 @@ public partial class Panel
 
 	internal void AddEventListener( EventCallback eventCallback )
 	{
-		EventListeners ??= new List<EventCallback>();
-		EventListeners.Add( eventCallback );
+		_eventListeners ??= new HashSetEx<EventCallback>();
+		_eventListeners.Add( eventCallback );
 	}
 
 	List<PanelEvent> PendingEvents;
@@ -199,6 +207,7 @@ public partial class Panel
 	{
 		PendingEvents ??= new List<PanelEvent>();
 		PendingEvents.Add( evnt );
+		WakeTick();
 	}
 
 	/// <summary>
@@ -270,9 +279,10 @@ public partial class Panel
 		if ( !e.Propagate )
 			return;
 
-		if ( EventListeners != null )
+		if ( _eventListeners is not null )
 		{
-			foreach ( var listener in EventListeners )
+			// Listener changes become visible after the outermost dispatch finishes.
+			foreach ( var listener in _eventListeners.EnumerateLocked() )
 			{
 				if ( !e.Is( listener.EventName ) ) continue;
 

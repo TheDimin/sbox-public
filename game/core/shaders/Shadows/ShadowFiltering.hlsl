@@ -1,7 +1,9 @@
 #ifndef SHADOWS_SHADOWFILTERING
 #define SHADOWS_SHADOWFILTERING
 
-int UserShadowFilterQuality < Attribute( "ShadowFilterQuality" ); >;
+// A specialization constant: each pipeline has one filter quality, so the driver drops the others and fully
+// unrolls the disk loop for its tap count. Changing the setting builds new pipelines.
+int UserShadowFilterQuality < Attribute( "ShadowFilterQuality" ); Default( 0 ); SpecializedConstant(); >;
 
 // HW PCF Sampler
 SamplerComparisonState ShadowDepthPCFSampler < Filter( COMPARISON_MIN_MAG_MIP_LINEAR ); AddressU( CLAMP ); AddressV( CLAMP ); ComparisonFunc( GREATER_EQUAL ); >;
@@ -25,40 +27,36 @@ struct ShadowPCFInput
 };
 
 //--------------------------------------------------------------------------------------------------
-// 5-tap Poisson disk for low quality PCF
+// Filter disk taps, generated on a golden-angle (Vogel) spiral instead of read from tables: one loop
+// serves every tap count, nothing is indexed at runtime, and the loop needn't be unrolled to stay out
+// of local memory. Taps cover the unit disk evenly; their RMS radius is 1/sqrt(2).
 //--------------------------------------------------------------------------------------------------
-static const float2 g_vPoissonDisk5[5] =
+struct ShadowDisk
 {
-    float2(  0.000000,  0.000000 ),  // Center sample
-    float2( -0.707107, -0.707107 ),
-    float2(  0.707107, -0.707107 ),
-    float2(  0.707107,  0.707107 ),
-    float2( -0.707107,  0.707107 ),
+    float2 Direction;
+    float InvCount;
+
+    static ShadowDisk Start( float flAngle, uint nTaps )
+    {
+        ShadowDisk disk;
+        sincos( flAngle, disk.Direction.y, disk.Direction.x );
+        disk.InvCount = rcp( float( nTaps ) );
+        return disk;
+    }
+
+    // Tap i in the unit disk, then turn the direction by the golden angle for the next one
+    [mutating]
+    float2 Next( uint i )
+    {
+        const float2 vGoldenAngle = float2( -0.7373688, 0.6754903 ); // cos and sin of pi * ( 3 - sqrt( 5 ) )
+        float2 vTap = Direction * sqrt( ( float( i ) + 0.5 ) * InvCount );
+        Direction = float2( Direction.x * vGoldenAngle.x - Direction.y * vGoldenAngle.y, Direction.x * vGoldenAngle.y + Direction.y * vGoldenAngle.x );
+        return vTap;
+    }
 };
 
-//--------------------------------------------------------------------------------------------------
-// 12-tap Poisson disk for medium quality PCF
-// Pre-normalized samples in [-1, 1] range, good spatial distribution
-//--------------------------------------------------------------------------------------------------
-static const float2 g_vPoissonDisk12[12] =
-{
-    float2( -0.326212, -0.405805 ),
-    float2( -0.840144, -0.073580 ),
-    float2( -0.695914,  0.457137 ),
-    float2( -0.203345,  0.620716 ),
-    float2(  0.962340, -0.194983 ),
-    float2(  0.473434, -0.480026 ),
-    float2(  0.519456,  0.767022 ),
-    float2(  0.185461, -0.893124 ),
-    float2(  0.507431,  0.064425 ),
-    float2(  0.896420,  0.412458 ),
-    float2( -0.321940, -0.932615 ),
-    float2( -0.791559, -0.597705 ),
-};
-
-//--------------------------------------------------------------------------------------------------
-// 16-tap Poisson disk for high quality PCF
-//--------------------------------------------------------------------------------------------------
+// The 16-tap Poisson disk the shadow filters used before their spiral taps. Nothing here reads it; it stays because shaders
+// built against it (a package's own shadow filtering, Little Railways' floor) still name it, and recompile against these files
 static const float2 g_vPoissonDisk16[16] =
 {
     float2( -0.942016, -0.399062 ),
@@ -99,7 +97,9 @@ float3 ComputeShadowReceiverNormal( float3 vPositionWs )
 // Holbert 2011: offset receiver along face normal by ~PCF kernel radius in texels (kills slope acne).
 float3 ApplyShadowNormalOffset( float3 vPositionWs, float3 vNormalWs, float flTexelWorldSize, float flHardness )
 {
-    const float flRadiusTexels = 1.5 * min( UserShadowFilterQuality, 3 ) * rcp( max( flHardness, 1.0 ) ) + 1.0; // matches the SampleShadowPCF_* kernels below
+    // Half-width of the SampleShadowPCF tent below: 2, 3 or 4 texels
+    const float flKernelTexels = UserShadowFilterQuality > 0 ? min( UserShadowFilterQuality, 3 ) + 1.0 : 0.0;
+    const float flRadiusTexels = flKernelTexels * rcp( max( flHardness, 1.0 ) ) + 1.0;
     return vPositionWs + vNormalWs * ( flTexelWorldSize * flRadiusTexels );
 }
 
@@ -116,146 +116,58 @@ float ShadowNoise( float2 vScreenPos )
 }
 
 //--------------------------------------------------------------------------------------------------
-// 5-tap rotated Poisson PCF - Low quality
+// Tent PCF from weighted bilinear compare taps (Castano 2013, as in Bevy and Esoterica): N x N hardware
+// 2x2 PCF taps, placed and weighted so together they filter a tent over 2N x 2N texels. Smooth and
+// noise-free: 2, 3 and 4 taps per axis give 4, 9 and 16 fetches. Soft lights (hardness below 1) spread
+// the tent over a coarser grid; hard ones (above 1) sharpen it around 0.5.
 //--------------------------------------------------------------------------------------------------
-float SampleShadowPCF_Poisson5( ShadowPCFInput i )
+float SampleShadowTent( ShadowPCFInput i, uint nAxisTaps )
 {
-    const float flFilterRadius = 1.5;
-    float2 vTexelSize = float2( i.InvShadowMapRes, i.InvShadowMapRes );
-    float flHardness = i.Hardness;
-    
-    float flNoise = ShadowNoise( i.ScreenPos );
-    float flAngle = flNoise * 6.283185307;
-    float flSin, flCos;
-    sincos( flAngle, flSin, flCos );
-    float2x2 mRotation = float2x2( flCos, -flSin, flSin, flCos );
-    
-    float2 vFilterScale = flFilterRadius * flHardness * vTexelSize;
+    const float flSpread = max( rcp( i.Hardness ), 1.0 );
+    const float flSharpen = max( i.Hardness, 1.0 );
+    const float flGrid = i.InvShadowMapRes * flSpread;
+    const float flCompareDepth = saturate( i.ShadowPos.z + i.Bias );
+    const float flTaps = float( nAxisTaps );
 
-    float flShadow = 0.0;
-    float flCompareDepth = saturate( i.ShadowPos.z + i.Bias );
+    float2 vGridPosition = i.ShadowPos.xy / flGrid - 0.5;
+    float2 vPhase = frac( vGridPosition );
 
-    [ForceUnroll]
-    for ( int s = 0; s < 5; s++ )
+    // Two taps of a row at a time, their fetches in flight together, in loops. Fully unrolled, the driver grouped every
+    // fetch with its coordinates and weights, the peak of the lit shaders' registers. Same taps, same order, and the same
+    // rounding as unrolled: a tap's whole-texel offsets come from integers, as the constants they were, so the compiler
+    // can't regroup the sums that round
+    float2 vFloor = floor( vGridPosition );
+    float flVisibility = 0.0;
+    [loop]
+    for ( uint y = 0; y < nAxisTaps; y++ )
     {
-        float2 vOffset = mul( mRotation, g_vPoissonDisk5[s] ) * vFilterScale;
-        float2 vSampleUV = i.ShadowPos.xy + vOffset;
-        flShadow += i.ShadowMap.SampleCmpLevelZero( ShadowDepthPCFSampler, vSampleUV, flCompareDepth );
-    }
-
-    return flShadow / 5.0;
-}
-
-//--------------------------------------------------------------------------------------------------
-// 12-tap rotated Poisson PCF - Medium quality
-//--------------------------------------------------------------------------------------------------
-float SampleShadowPCF_Poisson12( ShadowPCFInput i )
-{
-    const float flFilterRadius = 3.0;
-    float2 vTexelSize = float2(i.InvShadowMapRes, i.InvShadowMapRes);
-    float flHardness = i.Hardness;
-    
-    float flNoise = ShadowNoise( i.ScreenPos );
-    float flAngle = flNoise * 6.283185307;
-    float flSin, flCos;
-    sincos( flAngle, flSin, flCos );
-    float2x2 mRotation = float2x2( flCos, -flSin, flSin, flCos );
-    
-    float2 vFilterScale = flFilterRadius * flHardness * vTexelSize;
-
-    float flShadow = 0.0;
-    float flCompareDepth = saturate( i.ShadowPos.z + i.Bias );
-
-    [ForceUnroll]
-    for ( int s = 0; s < 12; s++ )
-    {
-        float2 vOffset = mul( mRotation, g_vPoissonDisk12[s] ) * vFilterScale;
-        float2 vSampleUV = i.ShadowPos.xy + vOffset;
-        flShadow += i.ShadowMap.SampleCmpLevelZero( ShadowDepthPCFSampler, vSampleUV, flCompareDepth );
-    }
-
-    return flShadow / 12.0;
-}
-
-//--------------------------------------------------------------------------------------------------
-// 16-tap rotated Poisson PCF - High quality
-//--------------------------------------------------------------------------------------------------
-float SampleShadowPCF_Poisson16( ShadowPCFInput i )
-{
-    const float flFilterRadius = 4.5;
-    float2 vTexelSize = float2( i.InvShadowMapRes, i.InvShadowMapRes );
-    float flHardness = i.Hardness;
-    
-    float flNoise = ShadowNoise( i.ScreenPos );
-    float flAngle = flNoise * 6.283185307;
-    float flSin, flCos;
-    sincos( flAngle, flSin, flCos );
-    float2x2 mRotation = float2x2( flCos, -flSin, flSin, flCos );
-    
-    float2 vFilterScale = flFilterRadius * flHardness * vTexelSize;
-
-    float flShadow = 0.0;
-    float flCompareDepth = saturate( i.ShadowPos.z + i.Bias );
-
-    [ForceUnroll]
-    for ( int s = 0; s < 16; s++ )
-    {
-        float2 vOffset = mul( mRotation, g_vPoissonDisk16[s] ) * vFilterScale;
-        float2 vSampleUV = i.ShadowPos.xy + vOffset;
-        flShadow += i.ShadowMap.SampleCmpLevelZero( ShadowDepthPCFSampler, vSampleUV, flCompareDepth );
-    }
-
-    return flShadow / 16.0;
-}
-
-// Morph the original soft Poisson kernel into an elongated tent as hardness increases.
-// Interpolate sample positions and weights instead of evaluating both filters (16 taps total).
-float SampleDirectionalShadowTent16( ShadowPCFInput i )
-{
-    if ( i.Hardness <= 1.0 )
-    {
-        i.Hardness = rcp( i.Hardness );
-        return SampleShadowPCF_Poisson16( i );
-    }
-
-    float hardness = saturate( ( i.Hardness - 1.0 ) / 3.5 );
-    float transition = smoothstep( 0.0, 1.0, hardness );
-    float sine, cosine;
-    sincos( ShadowNoise( i.ScreenPos ) * 6.283185307, sine, cosine );
-    float2x2 rotation = float2x2( cosine, -sine, sine, cosine );
-    float poissonRadius = 4.5 * rcp( i.Hardness ) * i.InvShadowMapRes;
-    float2 texelPosition = i.ShadowPos.xy / i.InvShadowMapRes - 0.5;
-    float2 baseTexel = floor( texelPosition ) - float2( 1.0, 7.0 );
-    float2 phase = frac( texelPosition );
-    float visibility = 0.0;
-    float totalWeight = 0.0;
-    [ForceUnroll]
-    for ( int y = 0; y < 8; ++y )
-    {
-        float y0 = max( 0.0, 8.0 - abs( 2.0 * y - 7.0 - phase.y ) );
-        float y1 = max( 0.0, 8.0 - abs( 2.0 * y - 6.0 - phase.y ) );
-        float wy = y0 + y1;
-        [ForceUnroll]
-        for ( int x = 0; x < 2; ++x )
+        [loop]
+        for ( uint x0 = 0; x0 < nAxisTaps; x0 += 2 )
         {
-            float x0 = max( 0.0, 2.0 - abs( 2.0 * x - 1.0 - phase.x ) );
-            float x1 = max( 0.0, 2.0 - abs( 2.0 * x - 0.0 - phase.x ) );
-            float wx = x0 + x1;
-            float2 uv = ( baseTexel + float2( 2.0 * x + x1 / wx, 2.0 * y + y1 / wy ) + 0.5 ) * i.InvShadowMapRes;
-            float2 poissonUv = i.ShadowPos.xy + mul( rotation, g_vPoissonDisk16[y * 2 + x] ) * poissonRadius;
-            uv = lerp( poissonUv, uv, transition );
-            // The tent's axis sums are 4 and 64, giving a total weight of 256.
-            float weight = lerp( 1.0 / 16.0, wx * wy / 256.0, transition );
-            visibility += weight * i.ShadowMap.SampleCmpLevelZero( ShadowDepthPCFSampler, uv, saturate( i.ShadowPos.z + i.Bias ) );
-            totalWeight += weight;
+            [unroll]
+            for ( uint dx = 0; dx < 2; dx++ )
+            {
+                uint x = x0 + dx;
+                if ( x >= nAxisTaps )
+                    break;
+
+                // k - ( taps - 1 ) and k - ( taps - 2 ), k twice the tap's index
+                int2 c0 = 2 * int2( x, y ) + 1 - int( nAxisTaps );
+                float2 w0 = flTaps - abs( float2( c0 ) - vPhase );
+                float2 w1 = flTaps - abs( float2( c0 + 1 ) - vPhase );
+                float2 vUV = ( ( vFloor + float2( 2 * c0 + 1 ) * 0.5 ) + w1 / ( w0 + w1 ) ) * flGrid;
+                flVisibility += ( w0.x + w1.x ) * ( w0.y + w1.y ) * i.ShadowMap.SampleCmpLevelZero( ShadowDepthPCFSampler, vUV, flCompareDepth );
+            }
         }
     }
-    visibility /= totalWeight;
-    return lerp( visibility, smoothstep( 0.40, 0.60, visibility ), hardness );
+
+    // The weights sum to nAxisTaps^4
+    flVisibility /= flTaps * flTaps * flTaps * flTaps;
+    return saturate( ( flVisibility - 0.5 ) * flSharpen + 0.5 );
 }
 
 //--------------------------------------------------------------------------------------------------
-// Main PCF sampling function - selects quality based on UserShadowFilterQuality
+// Spot light and cascade PCF. Quality 0 is one hardware 2x2 tap, then 4, 9 and 16-tap tents.
 //--------------------------------------------------------------------------------------------------
 float SampleShadowPCF( ShadowPCFInput i )
 {
@@ -265,30 +177,10 @@ float SampleShadowPCF( ShadowPCFInput i )
     #endif
 
     uint filter = UserShadowFilterQuality;
-
-    // christ
-    i.Hardness = rcp(i.Hardness);
-
     if ( filter == 0 )
-    {
-        // Off - single HW PCF sample
         return i.ShadowMap.SampleCmpLevelZero( ShadowDepthPCFSampler, i.ShadowPos.xy, saturate( i.ShadowPos.z + i.Bias ) );
-    }
-    else if ( filter == 1 )
-    {
-        // Low quality - 5 tap rotated Poisson
-        return SampleShadowPCF_Poisson5( i );
-    }
-    else if ( filter == 2 )
-    {
-        // Medium quality - 12 tap rotated Poisson
-        return SampleShadowPCF_Poisson12( i );
-    }
-    else
-    {
-        // High quality - 16 tap rotated Poisson
-        return SampleShadowPCF_Poisson16( i );
-    }
+
+    return SampleShadowTent( i, filter == 1 ? 2 : filter == 2 ? 3 : 4 );
 }
 
 #endif

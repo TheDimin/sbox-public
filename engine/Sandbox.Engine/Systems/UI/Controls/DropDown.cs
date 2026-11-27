@@ -200,7 +200,7 @@ namespace Sandbox.UI
 
 			if ( type.IsEnum )
 			{
-				foreach ( var item in TypeLibrary.GetEnumDescription( type ) )
+				foreach ( var item in Sandbox.Engine.GlobalContext.Current.TypeLibrary.GetEnumDescription( type ) )
 				{
 					Options.Add( new Option( item.Title, item.Icon, item.ObjectValue ) );
 				}
@@ -219,6 +219,7 @@ namespace Sandbox.UI
 			Popup = new Popup( this, Popup.PositionMode.BelowStretch, 0.0f );
 			Popup.CloseWhenParentIsHidden = true;
 			Popup.AddClass( "flat-top" );
+			Popup.AddClass( "dropdown-popup" );
 
 			if ( BuildOptions != null )
 			{
@@ -227,11 +228,8 @@ namespace Sandbox.UI
 
 			foreach ( var option in Options )
 			{
-				var o = Popup.AddOption( option.Title, option.Icon, () => Select( option ) );
-				if ( Selected != null && option.Value == Selected.Value )
-				{
-					o.AddClass( "active" );
-				}
+				var row = (Button)Popup.AddOption( option.Title, option.Icon, () => Select( option ) );
+				row.Active = Selected is not null && Equals( option.Value, Selected.Value );
 			}
 		}
 

@@ -54,6 +54,17 @@ public class ModelPropData
 	/// </summary>
 	public bool Explosive { get; set; }
 
+	/// <summary>Surface resource used to select damage and break effects for this model.</summary>
+	[ResourceType( "surface" )]
+	public string DestructionSurface { get; set; }
+
+	/// <summary>Optional resource with effects specific to this prop.</summary>
+	[ResourceType( "propfx" )]
+	public string DestructionProfile { get; set; }
+
+	[Hide]
+	public ModelDestructionCues DestructionCues { get; set; }
+
 	/// <summary>
 	/// Amount of damage to do at the center on the explosion. It will falloff over distance.
 	/// </summary>

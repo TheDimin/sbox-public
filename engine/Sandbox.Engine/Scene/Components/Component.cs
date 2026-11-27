@@ -1,4 +1,5 @@
-﻿using Sandbox.Internal;
+﻿using Sandbox.Engine;
+using Sandbox.Internal;
 using Sandbox.Utility;
 using System.Threading;
 
@@ -282,7 +283,7 @@ public abstract partial class Component : IJsonConvert, IComponentLister, IValid
 	public Action OnComponentUpdate
 	{
 		get => _onComponentUpdate;
-		set => SetUpdateAction<IUpdateSubscriber>( ref _onComponentUpdate, value, Scene.updateComponents );
+		set => SetUpdateAction( ref _onComponentUpdate, value, Scene.updateComponents, this is IUpdateSubscriber && UpdatesIn( Scene ) );
 	}
 
 	[Group( "Component" )]
@@ -290,7 +291,7 @@ public abstract partial class Component : IJsonConvert, IComponentLister, IValid
 	public Action OnComponentFixedUpdate
 	{
 		get => _onComponentFixedUpdate;
-		set => SetUpdateAction<IFixedUpdateSubscriber>( ref _onComponentFixedUpdate, value, Scene.fixedUpdateComponents );
+		set => SetUpdateAction( ref _onComponentFixedUpdate, value, Scene.fixedUpdateComponents, this is IFixedUpdateSubscriber );
 	}
 
 	[Group( "Component" )]
@@ -334,10 +335,10 @@ public abstract partial class Component : IJsonConvert, IComponentLister, IValid
 
 	/// <summary>
 	/// Replaces <paramref name="currentAction"/> with <paramref name="newAction"/>, and adds / removes this component
-	/// from the given <paramref name="updateSet"/>, depending on whether the new action is null, and this type implements
-	/// the given <typeparamref name="TSubscriber"/> interface.
+	/// from the given <paramref name="updateSet"/>, depending on whether the new action is null, unless <paramref name="listed"/>:
+	/// the component is on the set for its own update anyway (its subscriber interface, where the scene runs it).
 	/// </summary>
-	private void SetUpdateAction<TSubscriber>( ref Action currentAction, Action newAction, HashSetEx<Component> updateSet )
+	private void SetUpdateAction( ref Action currentAction, Action newAction, HashSetEx<Component> updateSet, bool listed )
 	{
 		var hadAction = currentAction is not null;
 		var hasAction = newAction is not null;
@@ -345,7 +346,7 @@ public abstract partial class Component : IJsonConvert, IComponentLister, IValid
 		currentAction = newAction;
 
 		if ( !_enabledState ) return;
-		if ( this is TSubscriber || hadAction == hasAction ) return;
+		if ( listed || hadAction == hasAction ) return;
 
 		if ( hasAction )
 		{
@@ -379,11 +380,13 @@ public abstract partial class Component : IJsonConvert, IComponentLister, IValid
 			_enabledState = false;
 			_enabled = false;
 			Scene.UnregisterComponent( this );
+		}
 
-			if ( ShouldExecute )
-			{
-				CallbackBatch.Add( CommonCallback.Disable, this, "OnDisabled" );
-			}
+		// A disable may still be queued in an outer batch. Pair the dispatched
+		// enable with a disable in the destroy batch before unlinking the component.
+		if ( _onEnabled && ShouldExecute )
+		{
+			CallbackBatch.Add( CommonCallback.Disable, this, "OnDisabled" );
 		}
 	}
 
@@ -396,8 +399,8 @@ public abstract partial class Component : IJsonConvert, IComponentLister, IValid
 	[ActionGraphInclude]
 	public virtual void Reset()
 	{
-		var t = Game.TypeLibrary.GetType( GetType() );
-		var so = Game.TypeLibrary.GetSerializedObject( this );
+		var t = GlobalContext.Current.TypeLibrary.GetType( GetType() );
+		var so = GlobalContext.Current.TypeLibrary.GetSerializedObject( this );
 
 		foreach ( var field in t.Fields.Where( x => x.HasAttribute<PropertyAttribute>() ) )
 		{
@@ -478,7 +481,7 @@ public abstract partial class Component : IJsonConvert, IComponentLister, IValid
 
 	}
 
-	internal void OnParentChangedInternal( GameObject oldParent, GameObject newParent )
+	internal virtual void OnParentChangedInternal( GameObject oldParent, GameObject newParent )
 	{
 		OnParentChanged( oldParent, newParent );
 	}

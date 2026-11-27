@@ -1,4 +1,5 @@
-﻿using Sandbox.UI;
+﻿using Sandbox.Engine;
+using Sandbox.UI;
 
 namespace Sandbox.Modals;
 
@@ -9,10 +10,13 @@ public interface IModalSystem
 	public bool HasModalsOpen();
 	public void CloseAll( bool immediate = false );
 	public void Game( string packageIdent );
-	public void Map( string packageIdent );
+	public void Map( string map );
 	public void Package( string packageIdent, string page );
-	public void Organization( Package.Organization org );
-	public void Review( Package package );
+	/// <summary>
+	/// Legacy entry point for the retired review form.
+	/// </summary>
+	[Obsolete( "Written package reviews are no longer supported." )]
+	public void Review( Package package ) { }
 	public void Report( string packageIdent );
 	public void PackageSelect( string query, Action<Package> onPackageSelected, Action<string> onFilterChanged = null );
 	public void MapSelect( Action<string> onMapSelected, string selected = null );
@@ -267,7 +271,9 @@ public struct WorkshopPublishOptions
 	/// <summary>
 	/// Defined categories to show in the workshop publish modal
 	/// </summary>
-	public Dictionary<string, SerializedProperty> Categories { get; } = [];
+	public Dictionary<string, SerializedProperty> Categories { get; internal set; } = [];
+
+	internal List<(string Name, Type EnumType, Func<Dictionary<string, string>, SerializedProperty> Create)> CategoryFactories { get; } = [];
 
 	/// <summary>
 	/// Adds a new category associated with the specified enum type to the collection. 
@@ -276,18 +282,18 @@ public struct WorkshopPublishOptions
 	/// </summary>
 	public void AddCategory<TEnum>( string name ) where TEnum : struct, Enum
 	{
-		var t = Game.TypeLibrary.GetEnumDescription( typeof( TEnum ) );
-		if ( t == null )
-			throw new Exception( $"Type {typeof( TEnum ).FullName} is not registered in the TypeLibrary" );
-
 		KeyValues ??= [];
-		var kv = KeyValues;
+
+		Categories[name] = CreateCategory<TEnum>( name, KeyValues );
+		CategoryFactories.Add( (name, typeof( TEnum ), kv => CreateCategory<TEnum>( name, kv )) );
+	}
+
+	static SerializedProperty CreateCategory<TEnum>( string name, Dictionary<string, string> kv ) where TEnum : struct, Enum
+	{
 		var get = () => kv.TryGetValue( name, out string val ) ? (Enum.TryParse( val, true, out TEnum r ) ? r : default) : default;
 		var set = ( TEnum x ) => { kv[name] = x.ToString(); };
 
-		var prop = Game.TypeLibrary.CreateProperty( name, get, set );
-
-		Categories[name] = prop;
+		return GlobalContext.Current.TypeLibrary.CreateProperty( name, get, set );
 	}
 }
 

@@ -1,4 +1,4 @@
-﻿using Sandbox.Internal;
+using Sandbox.Internal;
 using System.Text.RegularExpressions;
 
 namespace Sandbox;
@@ -29,14 +29,17 @@ static class AssetDownloadCache
 	}
 
 	/// <summary>
+	/// Files a game server sent us. A crc can be forged, so these are kept apart from package
+	/// downloads, which only ever look up their own. Cache filenames never start with a dot.
+	/// </summary>
+	const string HostFolder = ".network";
+
+	/// <summary>
 	/// We have downloaded an asset file. Store it for reuse in the future
 	/// </summary>
-	public static string StoreFile( string relativePath, ulong crc, byte[] data )
+	public static string StoreFile( string relativePath, ulong crc, byte[] data, bool fromHost = false )
 	{
-		var cachePath = CreateCacheFilename( relativePath, crc );
-		var absPath = System.IO.Path.Combine( cacheFolder, cachePath );
-
-		// todo - check crc of data
+		var absPath = GetAbsolutePath( relativePath, crc, fromHost );
 
 		// make sure the directory tree exists
 		string directory = System.IO.Path.GetDirectoryName( absPath );
@@ -95,11 +98,14 @@ static class AssetDownloadCache
 	/// <summary>
 	/// Generate the absolute path for this, whether it exists or not
 	/// </summary>
-	internal static string GetAbsolutePath( string path, ulong crc )
+	internal static string GetAbsolutePath( string path, ulong crc, bool fromHost = false )
 	{
-		return System.IO.Path.Combine( cacheFolder, CreateCacheFilename( path, crc ) );
+		var cachePath = CreateCacheFilename( path, crc );
+		return fromHost ? System.IO.Path.Combine( cacheFolder, HostFolder, cachePath ) : System.IO.Path.Combine( cacheFolder, cachePath );
 	}
 
+
+	static readonly System.Buffers.SearchValues<char> LegalExtensionChars = System.Buffers.SearchValues.Create( "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_" );
 
 	static string[] _neverDownloadExtensions = new[] { ".dll", ".exe", ".bat", ".cmd", ".msi", ".scr", ".com", ".cpl", ".vbs", ".ps1", ".reg" };
 
@@ -112,8 +118,14 @@ static class AssetDownloadCache
 		if ( path.Length < 3 ) return false;
 		if ( path.Contains( ".." ) ) return false;
 
+		// Windows drops trailing spaces and dots and writes "::$DATA" streams to the file itself, so "x.dll " is x.dll
+		if ( path.Contains( ':' ) ) return false;
+
 		var ext = System.IO.Path.GetExtension( path );
 		if ( string.IsNullOrWhiteSpace( ext ) )
+			return false;
+
+		if ( ext.AsSpan( 1 ).ContainsAnyExcept( LegalExtensionChars ) )
 			return false;
 
 		if ( _neverDownloadExtensions.Contains( ext, StringComparer.OrdinalIgnoreCase ) )
@@ -131,19 +143,23 @@ static class AssetDownloadCache
 	/// Where a cached copy of this file is: the absolute path in the download cache,
 	/// <see cref="CoreContent"/>, or null when it has to be downloaded. Only reads, safe off the main thread.
 	/// </summary>
-	internal static string ResolveCached( string path, ulong crc )
+	internal static string ResolveCached( string path, ulong crc, bool includeHostFiles = false )
 	{
-		if ( !IsFileDownloaded( path, crc, out var wasCoreContent ) )
+		if ( IsFileDownloaded( path, crc, out var wasCoreContent ) )
+			return wasCoreContent
+				? EngineFileSystem.CoreContent.GetPhysicalPaths( path ).FirstOrDefault() ?? CoreContent
+				: GetAbsolutePath( path, crc );
+
+		if ( !includeHostFiles )
 			return null;
 
-		return wasCoreContent
-			? EngineFileSystem.CoreContent.GetPhysicalPaths( path ).FirstOrDefault() ?? CoreContent
-			: GetAbsolutePath( path, crc );
+		var hostFile = GetAbsolutePath( path.NormalizeFilename( true ).Trim( '/', '\\' ), crc, fromHost: true );
+		return System.IO.File.Exists( hostFile ) ? hostFile : null;
 	}
 
-	internal static bool TryMount( RedirectFileSystem fs, string path, ulong crc )
+	internal static bool TryMount( RedirectFileSystem fs, string path, ulong crc, bool includeHostFiles = false )
 	{
-		var resolved = ResolveCached( path, crc );
+		var resolved = ResolveCached( path, crc, includeHostFiles );
 		if ( resolved is null ) return false;
 		if ( ReferenceEquals( resolved, CoreContent ) )
 			return TryAddPhysicalRedirect( EngineFileSystem.CoreContent, path,

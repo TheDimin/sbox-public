@@ -1,10 +1,14 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Sandbox.Rendering;
 
-
+/// <summary>
+/// Records rendering commands for deferred playback on the render thread.
+/// </summary>
+[Expose]
 public sealed unsafe partial class CommandList
 {
 	readonly Lock _lock = new Lock();
@@ -79,13 +83,113 @@ public sealed unsafe partial class CommandList
 	}
 
 	/// <summary>
-	/// An ordered list of entries that will execute on the render thread. All access (record and
-	/// execute) is serialized by <see cref="_lock"/> - recording and executing the same list from
-	/// two threads at once is caller misuse, but the lock guarantees it can't crash or corrupt state.
+	/// What a list has recorded: its entries in order and the data they carry. A list keeps one, and a second while a render
+	/// thread's frame may replay it (<see cref="Writing"/>).
 	/// </summary>
-	readonly List<Entry> _entries = new List<Entry>( 8 );
+	sealed class Recorded
+	{
+		public readonly List<Entry> Entries = new List<Entry>( 8 );
 
+		// Struct payloads too big for an Entry, written here instead of boxed. Reused across Reset.
+		public byte[] Payload = [];
+		public int PayloadUsed;
 
+		// Struct payloads that hold references (view setups), kept in typed lists instead of boxed. Cleared on Reset.
+		public List<ViewSetup> ViewSetups;
+		public List<ReflectionSetup> ReflectionSetups;
+		public List<RefractionSetup> RefractionSetups;
+		public List<RendererSetup> RendererSetups;
+
+		public void Clear()
+		{
+			Entries.Clear();
+			PayloadUsed = 0;
+			ViewSetups?.Clear();
+			ReflectionSetups?.Clear();
+			RefractionSetups?.Clear();
+			RendererSetups?.Clear();
+		}
+
+		/// <summary>Become a copy of <paramref name="other"/>, keeping this set's storage: nothing allocates once it's grown.</summary>
+		public void CopyFrom( Recorded other )
+		{
+			Clear();
+			Entries.AddRange( other.Entries );
+			if ( Payload.Length < other.PayloadUsed ) Payload = new byte[other.Payload.Length];
+			other.Payload.AsSpan( 0, other.PayloadUsed ).CopyTo( Payload );
+			PayloadUsed = other.PayloadUsed;
+			Copy( other.ViewSetups, ref ViewSetups );
+			Copy( other.ReflectionSetups, ref ReflectionSetups );
+			Copy( other.RefractionSetups, ref RefractionSetups );
+			Copy( other.RendererSetups, ref RendererSetups );
+		}
+
+		static void Copy<T>( List<T> from, ref List<T> to )
+		{
+			if ( from is null || from.Count == 0 ) return;
+			to ??= new List<T>( from.Count );
+			to.AddRange( from );
+		}
+	}
+
+	/// <summary>
+	/// An ordered list of entries that will execute on the render thread, and what they carry. Recording and resetting are
+	/// serialized by <see cref="_lock"/>; a replay reads the set it took under it (<see cref="Playback"/>).
+	/// </summary>
+	Recorded _recorded = new();
+
+	/// <summary>
+	/// What the render thread's frame replays while the main thread records the next frame into <see cref="_recorded"/>: the
+	/// list as it was when the frame was handed over (<see cref="RenderSync.Epoch"/> <see cref="_splitEpoch"/>). Null until
+	/// the main thread first records into a list a render thread's frame may replay.
+	/// </summary>
+	Recorded _held;
+	long _splitEpoch = -1;
+
+	// What the entries executing now read their payloads and setups from: the set being replayed
+	Recorded _playing;
+
+	/// <summary>
+	/// Called under <see cref="_lock"/> before anything changes what's recorded. While a render thread's frame may be replaying
+	/// the list (<see cref="RenderSync.Overlapping"/>), the main thread's first change since that frame was handed over keeps
+	/// the recorded set for the frame and goes on in the other, as a copy of it or, when <paramref name="clearing"/>, empty: the
+	/// frame replays the list as it was handed over, as a frame replays a list on the main thread before the game records the
+	/// next one. A list the game leaves alone is never copied. Nothing in serial mode, or on the render thread.
+	/// </summary>
+	void Writing( bool clearing = false )
+	{
+		if ( !RenderSync.Overlapping || RenderSync.OnRenderThread ) return;
+		var epoch = RenderSync.Epoch;
+		if ( _splitEpoch == epoch ) return;
+		_splitEpoch = epoch;
+
+		// The other set isn't read in this frame: a replay reads the one recorded until the split, and the held one after.
+		// Written in this order for Playback, which reads them in the other order without the lock
+		var held = _recorded;
+		var fresh = _held ?? new Recorded();
+		_splitEpoch = epoch;
+		if ( clearing ) fresh.Clear();
+		else fresh.CopyFrom( held );
+		Volatile.Write( ref _held, held );
+		Volatile.Write( ref _splitEpochPublished, epoch );
+		Volatile.Write( ref _recorded, fresh );
+		RenderSync.CountListSplit();
+	}
+
+	// The epoch of the last split as replays read it (Playback), written after the held set
+	long _splitEpochPublished = -1;
+
+	/// <summary>
+	/// The set a replay on this thread reads: on the render thread, the list as its frame was handed over (the held set once the
+	/// main thread has recorded since); anywhere else, what's recorded now. Without the lock: the main thread may hold it while
+	/// it waits for the render thread (a panel's painting, uploading its tables).
+	/// </summary>
+	Recorded Playback()
+	{
+		var recorded = Volatile.Read( ref _recorded );
+		if ( !RenderSync.OnRenderThread ) return recorded;
+		return Volatile.Read( ref _splitEpochPublished ) == RenderSync.Epoch ? Volatile.Read( ref _held ) : recorded;
+	}
 
 	[System.Runtime.CompilerServices.MethodImpl( System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining )]
 	void AddEntry( delegate*< ref Entry, CommandList, void > execute, Entry data )
@@ -94,9 +198,83 @@ public sealed unsafe partial class CommandList
 
 		lock ( _lock )
 		{
-			_entries.Add( data );
+			Writing();
+			_recorded.Entries.Add( data );
 		}
 	}
+
+	/// <summary>
+	/// Add an entry with a struct payload, read back with <see cref="ReadPayload{T}"/>. Uses <see cref="Entry.Count"/>.
+	/// </summary>
+	void AddEntry<T>( delegate*< ref Entry, CommandList, void > execute, Entry data, in T payload ) where T : unmanaged
+	{
+		data.Execute = execute;
+
+		lock ( _lock )
+		{
+			Writing();
+			var recorded = _recorded;
+			var size = Unsafe.SizeOf<T>();
+			if ( recorded.PayloadUsed + size > recorded.Payload.Length )
+				Array.Resize( ref recorded.Payload, Math.Max( Math.Max( recorded.Payload.Length * 2, 256 ), recorded.PayloadUsed + size ) );
+
+			MemoryMarshal.Write( recorded.Payload.AsSpan( recorded.PayloadUsed ), in payload );
+			data.Count = recorded.PayloadUsed;
+			recorded.PayloadUsed += size;
+			recorded.Entries.Add( data );
+		}
+	}
+
+	/// <summary>Add an entry with bytes copied into the payload, at <see cref="Entry.Count"/>.</summary>
+	void AddEntryBytes( delegate*< ref Entry, CommandList, void > execute, Entry data, ReadOnlySpan<byte> bytes )
+	{
+		data.Execute = execute;
+
+		lock ( _lock )
+		{
+			Writing();
+			var recorded = _recorded;
+			if ( recorded.PayloadUsed + bytes.Length > recorded.Payload.Length )
+				Array.Resize( ref recorded.Payload, Math.Max( Math.Max( recorded.Payload.Length * 2, 256 ), recorded.PayloadUsed + bytes.Length ) );
+
+			bytes.CopyTo( recorded.Payload.AsSpan( recorded.PayloadUsed ) );
+			data.Count = recorded.PayloadUsed;
+			recorded.PayloadUsed += bytes.Length;
+			recorded.Entries.Add( data );
+		}
+	}
+
+	// Read while the entry executes, from the set being replayed
+	T ReadPayload<T>( in Entry entry ) where T : unmanaged => MemoryMarshal.Read<T>( (_playing ?? _recorded).Payload.AsSpan( entry.Count ) );
+
+	// A setup payload of an executing entry, from the set being replayed
+	ViewSetup PlayedViewSetup( in Entry entry ) => (_playing ?? _recorded).ViewSetups[entry.Count];
+	ReflectionSetup PlayedReflectionSetup( in Entry entry ) => (_playing ?? _recorded).ReflectionSetups[entry.Count];
+	RefractionSetup PlayedRefractionSetup( in Entry entry ) => (_playing ?? _recorded).RefractionSetups[entry.Count];
+	RendererSetup PlayedRendererSetup( in Entry entry ) => (_playing ?? _recorded).RendererSetups[entry.Count];
+
+	/// <summary>
+	/// Add an entry with a struct payload that holds references, kept in the store <paramref name="store"/> picks from the
+	/// recorded set (made the first time) at <see cref="Entry.Count"/>.
+	/// </summary>
+	void AddEntry<T>( delegate*< ref Entry, CommandList, void > execute, Entry data, Func<Recorded, List<T>> store, in T payload ) where T : struct
+	{
+		data.Execute = execute;
+
+		lock ( _lock )
+		{
+			Writing();
+			var list = store( _recorded );
+			data.Count = list.Count;
+			list.Add( payload );
+			_recorded.Entries.Add( data );
+		}
+	}
+
+	static readonly Func<Recorded, List<ViewSetup>> ViewSetupStore = static r => r.ViewSetups ??= new List<ViewSetup>( 2 );
+	static readonly Func<Recorded, List<ReflectionSetup>> ReflectionSetupStore = static r => r.ReflectionSetups ??= new List<ReflectionSetup>( 2 );
+	static readonly Func<Recorded, List<RefractionSetup>> RefractionSetupStore = static r => r.RefractionSetups ??= new List<RefractionSetup>( 2 );
+	static readonly Func<Recorded, List<RendererSetup>> RendererSetupStore = static r => r.RendererSetups ??= new List<RendererSetup>( 2 );
 
 	[Obsolete]
 	RenderAttributes attributes => Graphics.Attributes;
@@ -152,16 +330,25 @@ public sealed unsafe partial class CommandList
 		// another thread is mid-execute would corrupt them. The lock makes that safe.
 		lock ( _lock )
 		{
+			Writing( clearing: true );
 			if ( _resources is not null )
 			{
 				foreach ( var resource in _resources )
 					resource.Reset();
 			}
 
-			Attributes.ClearRenderTargets();
-			drawAttributeAccess?.ClearRenderTargets();
-			drawAttributes?.Clear( false );
-			_entries.Clear();
+			// The playback state (the draw attributes a replay fills, its grabs) is the replay's: while a frame handed over may be
+			// replaying the list on the render thread it's left to that replay, which starts each from empty
+			if ( !RenderSync.Overlapping )
+			{
+				Attributes.ClearRenderTargets();
+				drawAttributeAccess?.ClearRenderTargets();
+				drawAttributes?.Clear( false );
+				managedDrawAttributes?.Clear( false );
+				currentDrawAttributes = null;
+			}
+
+			_recorded.Clear();
 		}
 	}
 
@@ -331,9 +518,9 @@ public sealed unsafe partial class CommandList
 	{
 		static void Execute( ref Entry entry, CommandList commandList )
 		{
-			Graphics.Attributes.SetData( entry.Token, (T)entry.Object2 );
+			Graphics.Attributes.SetData( entry.Token, commandList.ReadPayload<T>( entry ) );
 		}
-		AddEntry( &Execute, new Entry { Token = token, Object2 = data } );
+		AddEntry( &Execute, new Entry { Token = token }, data );
 	}
 
 	[Obsolete]
@@ -466,22 +653,29 @@ public sealed unsafe partial class CommandList
 			var previousState = other.state;
 			other.state = commandList.state;
 
-			// Lock the inserted list while we iterate it, so it can't be recorded/reset out from
-			// under us on another thread.
-			lock ( other._lock )
+			// The set this thread replays (the list as the render thread's frame was handed over, there), which recording
+			// leaves alone meanwhile; one replay of a list at a time
+			var played = other.Playback();
+			lock ( other._playLock )
 			{
-				// Inserted lists need the same resource preparation as direct execution.
-				// In particular, Painter must invalidate its previous execution's GPU copy.
-				if ( other._resources is not null )
+				var previousPlaying = other._playing;
+				other._playing = played;
+				try
 				{
-					foreach ( var resource in other._resources )
-						resource.BeginExecute();
-				}
+					// Inserted lists need the same resource preparation as direct execution.
+					// In particular, Painter must invalidate its previous execution's GPU copy.
+					other.BeginResources();
 
-				for ( int i = 0; i < other._entries.Count; i++ )
+					var entries = CollectionsMarshal.AsSpan( played.Entries );
+					for ( int i = 0; i < entries.Length; i++ )
+					{
+						var e = entries[i];
+						e.Execute( ref e, other );
+					}
+				}
+				finally
 				{
-					var e = other._entries[i];
-					e.Execute( ref e, other );
+					other._playing = previousPlaying;
 				}
 			}
 
@@ -500,7 +694,7 @@ public sealed unsafe partial class CommandList
 			return;
 
 		// One execution at a time: the render-target stack is per-list state.
-		lock ( _lock )
+		lock ( _playLock )
 		{
 			var listScope = OpenScopeFor( _sampler );
 
@@ -510,11 +704,11 @@ public sealed unsafe partial class CommandList
 			}
 			catch ( System.Exception e )
 			{
-				Log.Warning( e, $"Error when executing CommandList {_debugName}" );
+				if ( BorealisGpuErrors.ShouldLog( e ) ) Log.Warning( e, $"Error when executing CommandList {_debugName}" );
 			}
 			finally
 			{
-				CloseScope( Graphics.Context, listScope );
+				CloseScope( listScope );
 			}
 		}
 	}
@@ -921,14 +1115,20 @@ public sealed unsafe partial class CommandList
 	/// <param name="numMips">Number of mips you want in this texture. You probably don't want this unless you want to generate mips in a second pass.</param>
 	/// <returns>A RenderTarget that is ready to render to.</returns>
 	public RenderTargetHandle GetRenderTarget( string name, int width, int height, ImageFormat colorFormat = ImageFormat.Default, ImageFormat depthFormat = ImageFormat.Default, MultisampleAmount msaa = MultisampleAmount.MultisampleNone, int numMips = 1 )
+		=> GetRenderTarget( name, width, height, colorFormat, depthFormat, msaa, numMips, engineOwned: false );
+
+	/// <summary>
+	/// As above, from the engine's own pool. The UI painter's layers hold menu pixels.
+	/// </summary>
+	internal RenderTargetHandle GetRenderTarget( string name, int width, int height, ImageFormat colorFormat, ImageFormat depthFormat, MultisampleAmount msaa, int numMips, bool engineOwned )
 	{
 		static void Execute( ref Entry entry, CommandList commandList )
 		{
-			var temp = Sandbox.RenderTarget.GetTemporary( (int)entry.Data1.x, (int)entry.Data1.y, (ImageFormat)(int)entry.Data1.z, (ImageFormat)(int)entry.Data1.w, (MultisampleAmount)(int)entry.Data2.x, (int)entry.Data2.y, targetName: (string)entry.Object5 );
+			var temp = Sandbox.RenderTarget.GetTemporary( (int)entry.Data1.x, (int)entry.Data1.y, (ImageFormat)(int)entry.Data1.z, (ImageFormat)(int)entry.Data1.w, (MultisampleAmount)(int)entry.Data2.x, (int)entry.Data2.y, (string)entry.Object5, 0, entry.Data2.z != 0 );
 			commandList.state.renderTargets[(string)entry.Object5] = temp;
 		}
 
-		AddEntry( &Execute, new Entry { Object5 = name, Data1 = new Vector4( width, height, (int)colorFormat, (int)depthFormat ), Data2 = new Vector4( (int)msaa, numMips, 0, 0 ) } );
+		AddEntry( &Execute, new Entry { Object5 = name, Data1 = new Vector4( width, height, (int)colorFormat, (int)depthFormat ), Data2 = new Vector4( (int)msaa, numMips, engineOwned ? 1 : 0, 0 ) } );
 		return new RenderTargetHandle { Name = name };
 	}
 
@@ -987,7 +1187,7 @@ public sealed unsafe partial class CommandList
 	{
 		static void Execute( ref Entry entry, CommandList commandList )
 		{
-			commandList.state.renderTargetStack.Push( (Graphics.RenderTarget, Graphics.Context.GetViewport()) );
+			commandList.state.renderTargetStack.Push( (Graphics.RenderTarget, Graphics.Backend.GetViewport()) );
 		}
 
 		AddEntry( &Execute, default );
@@ -1002,7 +1202,7 @@ public sealed unsafe partial class CommandList
 		{
 			var saved = commandList.state.renderTargetStack.Pop();
 			Graphics.RenderTarget = saved.Target;
-			Graphics.Context.SetViewport( saved.Viewport );
+			Graphics.Backend.SetViewport( saved.Viewport );
 		}
 
 		AddEntry( &Execute, default );
@@ -1034,12 +1234,8 @@ public sealed unsafe partial class CommandList
 	public void SetGlobal( StringToken token, RenderTargetHandle.ColorIndexRef buffer ) => GlobalAttributes.Set( token, buffer );
 
 	/// <summary>
-	/// Binds the given render target's color texture to a stable, pipeline-level bindless slot
-	/// for this frame. This is how full-screen pipeline resources (ambient occlusion, screen-space
-	/// reflections) are published to the rest of the pipeline: consumers read a fixed descriptor
-	/// binding rather than a per-view render attribute. Because procedural layers build their
-	/// command lists on threaded jobs, writing the result index into the shared frame attributes
-	/// would race - this fixed slot is resolved single-threaded at submit, so it doesn't.
+	/// Publishes the color texture in the current view's pipeline slots.
+	/// Producers fill their slots without changing attributes while other layers record.
 	/// </summary>
 	internal void SetPipelineTexture( PipelineTextureSlot slot, RenderTargetHandle.ColorTextureRef buffer )
 	{
@@ -1051,7 +1247,9 @@ public sealed unsafe partial class CommandList
 				return;
 			}
 
-			NativeEngine.CSceneSystem.SetPipelineTextureIndex( (int)entry.Data1.x, target.ColorTarget.Index );
+			// Borealis.Gpu's table is its backend's, written in the block's list; a headless process has none
+			if ( Graphics.Backend is BorealisGpuRenderBackend gpu )
+				gpu.SetPipelineTexture( (int)entry.Data1.x, target.ColorTarget );
 		}
 
 		// Dont write out of bounds of the pipeline slots
@@ -1087,28 +1285,6 @@ public sealed unsafe partial class CommandList
 		AddEntry( &Execute, new Entry { Object1 = compute, Object2 = indirectBuffer, Data1 = new Vector4( indirectElementOffset, 0, 0, 0 ) } );
 	}
 
-	/// <inheritdoc cref="RayTracingShader.DispatchRaysWithAttributes(RenderAttributes, int, int, int)"/>
-	internal void DispatchRays( RayTracingShader raytracing, int threadsX, int threadsY, int threadsZ )
-	{
-		static void Execute( ref Entry entry, CommandList commandList )
-		{
-			((RayTracingShader)entry.Object1).DispatchRaysWithAttributes( Graphics.Attributes, (int)entry.Data1.x, (int)entry.Data1.y, (int)entry.Data1.z );
-		}
-
-		AddEntry( &Execute, new Entry { Object1 = raytracing, Data1 = new Vector4( threadsX, threadsY, threadsZ, 0 ) } );
-	}
-
-	/// <inheritdoc cref="RayTracingShader.DispatchRaysIndirect(GpuBuffer, uint)"/>
-	internal void DispatchRaysIndirect( RayTracingShader raytracing, GpuBuffer indirectBuffer, uint indirectElementOffset = 0 )
-	{
-		static void Execute( ref Entry entry, CommandList commandList )
-		{
-			((RayTracingShader)entry.Object1).DispatchRaysIndirectWithAttributes( Graphics.Attributes, (GpuBuffer)entry.Object2, (uint)entry.Data1.x );
-		}
-
-		AddEntry( &Execute, new Entry { Object1 = raytracing, Object2 = indirectBuffer, Data1 = new Vector4( indirectElementOffset, 0, 0, 0 ) } );
-	}
-
 	/// <summary>
 	/// A handle to the viewport size
 	/// </summary>
@@ -1134,22 +1310,6 @@ public sealed unsafe partial class CommandList
 		}
 
 		AddEntry( &Execute, new Entry { Object1 = compute, Object5 = dimension.Name, Data1 = new Vector4( dimension.Divisor, 0, 0, 0 ) } );
-	}
-
-	/// <summary>
-	/// Dispatch a ray tracing shader
-	/// </summary>
-	internal void DispatchRays( RayTracingShader raytracing, RenderTargetHandle.SizeHandle dimension )
-	{
-		static void Execute( ref Entry entry, CommandList commandList )
-		{
-			var xyz = commandList.GetDimension( (string)entry.Object5, (int)entry.Data1.x );
-			if ( !xyz.HasValue ) return;
-
-			((RayTracingShader)entry.Object1).DispatchRaysWithAttributes( Graphics.Attributes, xyz.Value.x, xyz.Value.y, xyz.Value.z );
-		}
-
-		AddEntry( &Execute, new Entry { Object1 = raytracing, Object5 = dimension.Name, Data1 = new Vector4( dimension.Divisor, 0, 0, 0 ) } );
 	}
 
 	/// <summary>
@@ -1211,7 +1371,7 @@ public sealed unsafe partial class CommandList
 	{
 		static void Execute( ref Entry entry, CommandList commandList )
 		{
-			Graphics.Context.ClearTexture( ((Texture)entry.Object1).native, new Color( entry.Data1.x, entry.Data1.y, entry.Data1.z, entry.Data1.w ) );
+			Graphics.Backend.ClearTexture( (Texture)entry.Object1, new Color( entry.Data1.x, entry.Data1.y, entry.Data1.z, entry.Data1.w ) );
 		}
 
 		AddEntry( &Execute, new Entry { Object1 = texture, Data1 = new Vector4( color.r, color.g, color.b, color.a ) } );
@@ -1232,7 +1392,7 @@ public sealed unsafe partial class CommandList
 				return;
 			}
 
-			Graphics.Context.ClearTexture( target.ColorTarget.native, new Color( entry.Data1.x, entry.Data1.y, entry.Data1.z, entry.Data1.w ) );
+			Graphics.Backend.ClearTexture( target.ColorTarget, new Color( entry.Data1.x, entry.Data1.y, entry.Data1.z, entry.Data1.w ) );
 		}
 
 		AddEntry( &Execute, new Entry { Object5 = handle.ColorTexture.Name, Data1 = new Vector4( color.r, color.g, color.b, color.a ) } );
@@ -1468,10 +1628,26 @@ public sealed unsafe partial class CommandList
 	/// Zero-copy: the array reference is stored directly without copying.
 	/// The caller must ensure the array contents remain stable until the command list
 	/// has finished executing (i.e. until the next <see cref="Reset"/> call).
+	/// While a frame handed over may replay the list on the render thread (<see cref="RenderSync.Overlapping"/>), the main
+	/// thread goes on writing the array for the next frame (a particle system's sprites, a pooled array given back): the
+	/// bytes are copied into the list as they are when recorded instead.
 	/// </summary>
 	internal void SetBufferData<T>( GpuBuffer<T> buffer, T[] data, int sourceOffset = 0, int count = -1, int elementOffset = 0 ) where T : unmanaged
 	{
 		if ( count < 0 ) count = data.Length - sourceOffset;
+
+		static void ExecuteCopied( ref Entry entry, CommandList commandList )
+		{
+			var buf = (GpuBuffer<T>)entry.Object1;
+			var bytes = (commandList._playing ?? commandList._recorded).Payload.AsSpan( entry.Count, (int)entry.Data1.y * Unsafe.SizeOf<T>() );
+			buf.SetData( (ReadOnlySpan<T>)MemoryMarshal.Cast<byte, T>( bytes ), (int)entry.Data1.x );
+		}
+
+		if ( RenderSync.Overlapping && !RenderSync.OnRenderThread )
+		{
+			AddEntryBytes( &ExecuteCopied, new Entry { Object1 = buffer, Data1 = new Vector4( elementOffset, count, 0, 0 ) }, MemoryMarshal.AsBytes( data.AsSpan( sourceOffset, count ) ) );
+			return;
+		}
 
 		static void Execute( ref Entry entry, CommandList commandList )
 		{

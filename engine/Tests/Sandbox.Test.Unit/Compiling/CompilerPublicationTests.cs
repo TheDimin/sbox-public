@@ -133,7 +133,7 @@ public class CompilerPublicationTests
 			Assert.AreEqual( output.Archive.SyntaxTrees.Single().ToString(), restored.SyntaxTrees.Single().ToString() );
 			Assert.AreEqual( output.Archive.AdditionalFiles.Single(), restored.AdditionalFiles.Single() );
 			CollectionAssert.AreEquivalent( output.Archive.References.ToArray(), restored.References.ToArray() );
-			Assert.AreEqual( output.Archive.FileMap["test.cs"], restored.FileMap["test.cs"] );
+			Assert.AreEqual( output.Archive.FileMap["test.cs"], restored.SyntaxTrees.Single().FilePath );
 		} );
 		CollectionAssert.AreEqual( outputs, published );
 	}

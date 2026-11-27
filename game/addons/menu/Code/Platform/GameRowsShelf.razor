@@ -1,0 +1,139 @@
+@using System;
+@using System.Linq;
+@using Sandbox;
+@using Sandbox.UI;
+@namespace MenuProject.Platform
+@page "/shelf/games"
+@inherits ShelfPage
+
+<root class="game-rows">
+    <GameShelf Row=@PlatformMenu.YourGames MaxRows=@(1) OnPicked=@Pressed OnPickedItem=@PressedItem />
+    @if ( FavouritesLeft )
+    {
+        <GameShelf Row=@PlatformMenu.Favourites OnPicked=@Pressed OnPickedItem=@PressedItem Skip=@ShownGames />
+    }
+    @if ( DownloadedLeft )
+    {
+        <GameShelf Row=@PlatformMenu.Downloaded OnPicked=@Pressed OnPickedItem=@PressedItem Skip=@ShownAbove />
+    }
+</root>
+
+@code
+{
+    /// <summary>
+    /// How much taller than its first row your games have been scrolled open - see <see cref="OnMouseWheel"/>
+    /// </summary>
+    float grown;
+
+    float growRoom;
+
+    const float WheelGrow = 90;
+
+    /// <summary>
+    /// The row <paramref name="index"/> down, or null - by index, as the shelf asks how tall it is every frame
+    /// </summary>
+    GameShelf ShelfAt( int index )
+    {
+        for ( var i = 0; i < ChildrenCount; i++ )
+        {
+            if ( GetChild( i ) is not GameShelf shelf ) continue;
+            if ( index-- == 0 ) return shelf;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Any of your favourites that aren't in your recent games already - none, and there's no row for them rather than an
+    /// empty one
+    /// </summary>
+    bool FavouritesLeft => PlatformMenu.Favourites.Games is { Length: > 0 } favourites
+        && favourites.Select( x => x.Id ).Except( ShownGames ?? [] ).Any();
+
+    HashSet<ulong> ShownGames => ShelfAt( 0 )?.ShownIds.ToHashSet();
+
+    /// <summary>
+    /// The games on the rows above the downloaded ones - your first row, and your favourites
+    /// </summary>
+    HashSet<ulong> ShownAbove
+    {
+        get
+        {
+            var shown = ShownGames ?? new HashSet<ulong>();
+            if ( ShelfOf( PlatformMenu.Favourites ) is { } favourites ) shown.UnionWith( favourites.ShownIds );
+            return shown;
+        }
+    }
+
+    /// <summary>
+    /// Any downloaded games not on a row above - none, and there's no row for them
+    /// </summary>
+    bool DownloadedLeft => PlatformMenu.Downloaded.Games is { Length: > 0 } downloaded
+        && downloaded.Select( x => x.Id ).Except( ShownAbove ).Any();
+
+    GameShelf ShelfOf( GameRow row ) => Children.OfType<GameShelf>().FirstOrDefault( x => x.Row == row );
+
+    public override void OnShelfShown()
+    {
+        grown = 0;
+
+        _ = PlatformMenu.YourGames.RefreshAsync();
+        _ = PlatformMenu.Favourites.RefreshAsync();
+        _ = PlatformMenu.Downloaded.RefreshAsync();
+    }
+
+    public override bool Fills => false;
+
+    /// <summary>
+    /// Your games with the rows under them peeking out scroll - faded off over the next row's art. Just their
+    /// first row, they don't - all of it shown, not faded off over its names.
+    /// </summary>
+    public override bool Scrolls => grown > 0 || ShelfAt( 1 ) is not null;
+
+
+    public override float Height( float room, float tall )
+    {
+        if ( ShelfAt( 0 ) is not { } first ) return 0;
+        var second = ShelfAt( 1 );
+
+        // Leave the top of the favourites visible so players can see there's more to scroll to.
+        var opens = second is not null
+            ? (second.Box.Rect.Top - Box.Rect.Top) * ScaleFromScreen + second.PeekHeight
+            : first.CollapsedHeight;
+
+        growRoom = Math.Max( 0, Math.Min( tall, room ) - opens );
+        return opens + Math.Min( grown, growRoom );
+    }
+
+    void PressedItem( WorkshopItemDetails item ) => PlatformRoot.Instance?.Picked( item );
+
+    void Pressed( Package local ) => PlatformRoot.Instance?.Picked( local );
+
+    /// <summary>
+    /// Your games grow with the wheel before they scroll - up to their full height first, then scrolling on past the top
+    /// of the screen; back up at the top, they shrink back down to their first row
+    /// </summary>
+    public override void OnMouseWheel( Vector2 value )
+    {
+        if ( value.y != 0 )
+        {
+            if ( value.y > 0 && grown < growRoom )
+            {
+                grown = Math.Min( growRoom, grown + value.y * WheelGrow );
+                return;
+            }
+
+            if ( value.y < 0 && grown > 0 && ShelfPanel.Of( this )?.AtTop != false )
+            {
+                grown = Math.Max( 0, Math.Min( grown, growRoom ) + value.y * WheelGrow );
+                return;
+            }
+        }
+
+        base.OnMouseWheel( value );
+    }
+
+    // What the rows are made from, not the rows - they're worked out from it when it's built, not every frame. A row's
+    // games are a new array each time they change; how many of your recent games show goes by how many fit across.
+    protected override int ShownHash() => HashCode.Combine( PlatformMenu.YourGames.Games, PlatformMenu.Favourites.Games, PlatformMenu.Downloaded.Games, ShelfAt( 0 )?.ColumnCount, ShelfOf( PlatformMenu.Favourites )?.ShownIds.Count() );
+}

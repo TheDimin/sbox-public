@@ -1,0 +1,58 @@
+include "animationsystem2/animationclipresource.h"
+include "animationsystem2/animationresourcebuilder.h"
+
+native class CAnimClipBuilder as NativeEngine.AnimationClipBuilder
+{
+	static AnimationClipBuilder Create( HAnimSkeleton skeleton ); [new]
+	void DeleteThis(); [delete]
+	bool AddFrame( CastTo[CTransformUnaligned*] void* transforms, int count, Transform rootMotion );
+	bool AddFloatChannelTrack( string set, string channel, CastTo[float*] void* values, int count );
+	void AddSyncEvent( float time, string name );
+	void AddManagedEvent( float time, float duration, string type, string json );
+	HAnimClip CreateResource( string name, string skeletonName, float frameRate, bool additive, bool disableInterpolation );
+}
+
+
+[ResourceHandle:HAnimClip]
+native class CAnimClipResource as NativeEngine.HAnimClip
+{
+	int GetNumFrames();
+	float GetDuration();
+	float GetFPS();
+	bool IsAdditive();
+
+	int GetNumTracks();
+	int GetNumSyncEvents();
+
+	inline int GetNumEvents()
+	{
+		return self->GetData().m_authoredEvents.Count();
+	}
+
+	inline string GetEventName( int index )
+	{
+		const CAnimEvent* pEvent = self->GetData().m_authoredEvents[index];
+		if ( pEvent->GetEventType() == EventType_t::Generic )
+			return static_cast<const CGenericEvent*>( pEvent )->GetName();
+		return pEvent->GetTypeName();
+	}
+
+	inline KeyValues3 GetEventData( int index, out float startTime, out float duration )
+	{
+		const CAnimEvent* pEvent = self->GetData().m_authoredEvents[index];
+		*startTime = pEvent->GetStartTime() * self->GetDuration();
+		*duration = pEvent->GetDuration() * self->GetDuration();
+		if ( pEvent->GetEventType() == EventType_t::Generic )
+			return static_cast<const CGenericEvent*>( pEvent )->GetEventData();
+		return nullptr;
+	}
+
+	string GetSkeletonName();
+	HAnimSkeleton GetSkeleton();
+
+	bool IsBound();
+	bool GetFloatChannelValue( float percentageThrough, string set, string channel, out float value );
+	Transform GetBoneParentSpaceTransformS2( float percentageThrough, int boneIdx );
+	Transform GetRootMotionTransformS2( float percentageThrough );
+	float GetAverageLinearVelocity();
+}

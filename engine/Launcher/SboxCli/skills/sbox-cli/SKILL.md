@@ -16,6 +16,17 @@ shows you what actually happened. Hand-edited `.scene`/`.prefab` JSON is easy to
 Everything runs locally, as the current user, against the user's own editor. There is no network
 listener and no port to configure.
 
+## Building and testing a source checkout
+
+Use the checkout selected by the user. Run SboxBuild from that checkout and follow its
+AGENTS.md for build, test, and format commands. For native tests, set FACEPUNCH_ENGINE
+to that checkout's game directory. Build products belong in the paths selected by the
+build tool. Leave generated binaries, caches, and test-project editor settings out of commits.
+
+If an editor holds a build file open, use the project's supported reload command or ask
+the user to save and close that editor. Create a second checkout, runtime copy, or custom
+build project only if the user requests isolation or approves it after you explain why.
+
 ## 1. Find sbox-cli
 
 It is `<engine>/bin/managed/sbox-cli.exe` on Windows and

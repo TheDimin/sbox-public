@@ -17,17 +17,7 @@ public class LightProbeVolumeTests
 	static SceneLightProbe FindProbe( Scene scene, LightProbeVolume component )
 		=> scene.SceneWorld.SceneObjects.OfType<SceneLightProbe>().SingleOrDefault( x => x.Component == component );
 
-	static void AssertTexture( Texture expected, ITexture handle )
-	{
-		try
-		{
-			Assert.AreEqual( expected.native.GetBindingPtr(), handle.GetBindingPtr() );
-		}
-		finally
-		{
-			handle.DestroyStrongHandle();
-		}
-	}
+	static void AssertTexture( Texture expected, Texture actual ) => Assert.AreSame( expected, actual );
 
 	[TestMethod]
 	public void Lifecycle()
@@ -41,8 +31,8 @@ public class LightProbeVolumeTests
 		component.Texture = texture;
 		var first = FindProbe( scene, component );
 		Assert.IsNotNull( first );
-		Assert.AreEqual( component.Bounds.Mins, ((CSceneLightProbeVolumeObject)first.native).m_vBoxMins );
-		Assert.AreEqual( component.Bounds.Maxs, ((CSceneLightProbeVolumeObject)first.native).m_vBoxMaxs );
+		Assert.AreEqual( component.Bounds.Mins, first.BoxMins );
+		Assert.AreEqual( component.Bounds.Maxs, first.BoxMaxs );
 
 		component.Enabled = false;
 		Assert.IsFalse( first.IsValid() );
@@ -55,7 +45,7 @@ public class LightProbeVolumeTests
 		var second = FindProbe( scene, component );
 		Assert.IsNotNull( second );
 		Assert.AreEqual( go.WorldPosition, second.Position );
-		Assert.AreEqual( 2, ((CSceneLightProbeVolumeObject)second.native).m_nRenderPriority );
+		Assert.AreEqual( 2, second.RenderPriority );
 
 		component.Texture = null;
 		Assert.IsFalse( second.IsValid() );
@@ -91,11 +81,11 @@ public class LightProbeVolumeTests
 		Assert.IsFalse( first.IsValid() );
 		Assert.AreEqual( go.WorldTransform.WithScale( 1 ), current.Transform );
 		Assert.IsTrue( current.Tags.Has( "probe_test" ) );
-		var native = (CSceneLightProbeVolumeObject)current.native;
-		Assert.AreEqual( component.Bounds.Mins, native.m_vBoxMins );
-		Assert.AreEqual( component.Bounds.Maxs, native.m_vBoxMaxs );
-		Assert.AreEqual( -2, native.m_nRenderPriority );
-		Assert.AreEqual( 123, native.m_nHandshake );
+		var probeObject = current;
+		Assert.AreEqual( component.Bounds.Mins, probeObject.BoxMins );
+		Assert.AreEqual( component.Bounds.Maxs, probeObject.BoxMaxs );
+		Assert.AreEqual( -2, probeObject.RenderPriority );
+		Assert.AreEqual( 123, probeObject.Handshake );
 	}
 
 	[TestMethod]
@@ -116,12 +106,12 @@ public class LightProbeVolumeTests
 
 		var probe = FindProbe( scene, component );
 		Assert.IsNotNull( probe );
-		var native = (CSceneLightProbeVolumeObject)probe.native;
-		AssertTexture( texture, native.m_hLightProbeTexture );
+		var probeObject = probe;
+		AssertTexture( texture, probeObject.ProbeTexture );
 		if ( indices )
-			AssertTexture( indicesTexture, native.m_hLightProbeDirectLightIndicesTexture );
+			AssertTexture( indicesTexture, probeObject.IndicesTexture );
 		if ( scalars )
-			AssertTexture( scalarsTexture, native.m_hLightProbeDirectLightScalarsTexture );
+			AssertTexture( scalarsTexture, probeObject.ScalarsTexture );
 
 		component.IndicesTexture = null;
 		component.ScalarsTexture = null;
@@ -197,10 +187,31 @@ public class LightProbeVolumeTests
 		clone.Enabled = true;
 		var loaded = clone.Components.Get<LightProbeVolume>();
 		Assert.IsNotNull( loaded );
-		var native = (CSceneLightProbeVolumeObject)FindProbe( scene, loaded ).native;
-		AssertTexture( ambient, native.m_hLightProbeTexture );
-		AssertTexture( indices, native.m_hLightProbeDirectLightIndicesTexture );
-		AssertTexture( scalars, native.m_hLightProbeDirectLightScalarsTexture );
+		var probeObject = FindProbe( scene, loaded );
+		AssertTexture( ambient, probeObject.ProbeTexture );
+		AssertTexture( indices, probeObject.IndicesTexture );
+		AssertTexture( scalars, probeObject.ScalarsTexture );
+	}
+
+	/// <summary>
+	/// A client can load a probe before the map VPK holding its textures is mounted. The engine
+	/// then hands back an error texture, and the probe must not render black ambient lighting from it.
+	/// </summary>
+	[TestMethod]
+	public void ErrorTextureCreatesNoProbe()
+	{
+		using var scope = scene.Push();
+		using var texture = Texture.CreateVolume( 2, 2, 12 ).Finish();
+		var missing = Texture.FromNative( NativeGlue.Resources.GetTexture( $"maps/{Guid.NewGuid():N}/lightmaps/env_light_probe_volume_1.vtex", Guid.Empty ) );
+		Assert.IsNotNull( missing );
+		Assert.IsTrue( missing.IsError );
+
+		var component = scene.CreateObject().Components.Create<LightProbeVolume>();
+		component.Texture = missing;
+		Assert.IsNull( FindProbe( scene, component ) );
+
+		component.Texture = texture;
+		Assert.IsNotNull( FindProbe( scene, component ) );
 	}
 
 	[TestMethod]
@@ -215,13 +226,13 @@ public class LightProbeVolumeTests
 		Light light = directional ? go.Components.Create<DirectionalLight>() : go.Components.Create<PointLight>();
 		light.MixedShadows = mixed;
 		light.BakeLightIndex = 254;
-		var native = light.SceneObject.lightNative;
-		Assert.AreNotEqual( 0u, native.GetLightFlags() & 32u );
-		Assert.AreEqual( mixed ? 16u : 0u, native.GetLightFlags() & 16u );
+		// The light's own description
+		Assert.AreNotEqual( 0u, light.SceneObject.Description.Flags & 32u );
+		Assert.AreEqual( mixed ? 16u : 0u, light.SceneObject.Description.Flags & 16u );
 		light.Enabled = false;
 		light.Enabled = true;
-		Assert.AreNotEqual( 0u, light.SceneObject.lightNative.GetLightFlags() & 32u );
-		Assert.AreEqual( mixed ? 16u : 0u, light.SceneObject.lightNative.GetLightFlags() & 16u );
+		Assert.AreNotEqual( 0u, light.SceneObject.Description.Flags & 32u );
+		Assert.AreEqual( mixed ? 16u : 0u, light.SceneObject.Description.Flags & 16u );
 		var json = go.Serialize();
 		go.Destroy();
 		scene.ProcessDeletes();
@@ -232,13 +243,13 @@ public class LightProbeVolumeTests
 		var loaded = clone.Components.Get<Light>();
 		Assert.AreEqual( 254, loaded.BakeLightIndex );
 		Assert.AreEqual( mixed, loaded.MixedShadows );
-		Assert.AreNotEqual( 0u, loaded.SceneObject.lightNative.GetLightFlags() & 32u );
-		Assert.AreEqual( mixed ? 16u : 0u, loaded.SceneObject.lightNative.GetLightFlags() & 16u );
+		Assert.AreNotEqual( 0u, loaded.SceneObject.Description.Flags & 32u );
+		Assert.AreEqual( mixed ? 16u : 0u, loaded.SceneObject.Description.Flags & 16u );
 		loaded.MixedShadows = !mixed;
-		Assert.AreEqual( mixed ? 0u : 16u, loaded.SceneObject.lightNative.GetLightFlags() & 16u );
+		Assert.AreEqual( mixed ? 0u : 16u, loaded.SceneObject.Description.Flags & 16u );
 		loaded.BakeLightIndex = -1;
-		Assert.AreEqual( 0u, loaded.SceneObject.lightNative.GetLightFlags() & 32u );
-		Assert.AreEqual( 0u, loaded.SceneObject.lightNative.GetLightFlags() & 16u );
+		Assert.AreEqual( 0u, loaded.SceneObject.Description.Flags & 32u );
+		Assert.AreEqual( 0u, loaded.SceneObject.Description.Flags & 16u );
 		Assert.ThrowsException<ArgumentOutOfRangeException>( () => loaded.BakeLightIndex = 255 );
 		Assert.ThrowsException<ArgumentOutOfRangeException>( () => loaded.BakeLightIndex = -2 );
 		Assert.AreEqual( -1, loaded.BakeLightIndex );

@@ -12,12 +12,12 @@ internal sealed class SnapshotCapture
 	internal SnapshotMsg Snapshot = SnapshotMsg.Create();
 	internal Lazy<string> SceneJson;
 	internal Lazy<byte[]> SceneBlobs;
-	readonly List<JsonNode> objectJson = new();
+	readonly List<byte[]> objectJson = new();
 	readonly List<BlobDataSerializer.CapturedBlob[]> objectBlobs = new();
 
-	internal void AddObject( JsonNode node, BlobDataSerializer.BlobContext blobs = null )
+	internal void AddObject( byte[] json, BlobDataSerializer.BlobContext blobs = null )
 	{
-		objectJson.Add( Detach( node ) );
+		objectJson.Add( json );
 		objectBlobs.Add( blobs?.Detach() );
 	}
 
@@ -29,9 +29,24 @@ internal sealed class SnapshotCapture
 			stream.Write( InternalMessageType.Packed );
 			serializer.SerializeTo( ref stream, envelope( Materialize() ) );
 			var packet = Connection.EncodePacket( stream );
-			var packets = Connection.CreatePackets( packet.Span, flags );
-			packet.Release();
-			return packets;
+			try
+			{
+				// Keep the complete encoded message for a possible host relay. Prepare large direct-send
+				// chunks here on the worker, rather than copying the snapshot on the network frame.
+				var encoded = packet.Span.ToArray();
+				if ( (flags & NetFlags.Reliable) == 0 || encoded.Length <= Connection.MaxChunkSize )
+					return [encoded];
+
+				var chunks = Connection.CreatePackets( encoded, flags );
+				var result = new byte[chunks.Length + 1][];
+				result[0] = encoded;
+				chunks.CopyTo( result, 1 );
+				return result;
+			}
+			finally
+			{
+				packet.Release();
+			}
 		}
 		finally
 		{
@@ -53,7 +68,7 @@ internal sealed class SnapshotCapture
 		for ( int i = 0; i < Snapshot.NetworkObjects.Count; i++ )
 		{
 			var message = (ObjectCreateMsg)Snapshot.NetworkObjects[i];
-			message.JsonData = objectJson[i].ToJsonString();
+			message.JsonData = objectJson[i];
 			if ( objectBlobs[i] is { } blobs )
 			{
 				message.BlobData = BlobDataSerializer.PackBlobs( blobs );

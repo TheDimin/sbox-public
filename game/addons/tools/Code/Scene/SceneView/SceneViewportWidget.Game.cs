@@ -1,4 +1,4 @@
-﻿namespace Editor;
+namespace Editor;
 
 public partial class SceneViewportWidget
 {
@@ -21,6 +21,8 @@ public partial class SceneViewportWidget
 			_editorCamera.DestroyGameObject();
 			_editorCamera = Renderer.CreateSceneEditorCamera();
 		}
+
+		if ( _activeCamera.IsValid() ) _activeCamera.GameObject.Tags.Remove( "selected_scene_viewport" );
 
 		_activeCamera = viewMode switch
 		{

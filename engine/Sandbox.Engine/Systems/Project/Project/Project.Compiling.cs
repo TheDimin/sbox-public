@@ -29,17 +29,67 @@ public partial class Project
 	int lastCompilerHash;
 
 	// anything that means we need to re-create the compiler and recompile should be here
-	int CompilerHash => HashCode.Combine( Active, Current == this, Json.SerializeAsObject( Config.GetCompileSettings() ).ToJsonString(), Config.IsStandaloneOnly, Config.Org, Config.Ident, Config.Type, string.Join( ";", PackageReferences() ) );
+	int CompilerHash => HashCode.Combine( Active, Current == this, Json.SerializeAsObject( Config.GetCompileSettings() ).ToJsonString(), Config.IsStandaloneOnly, Config.Org, Config.Ident, Config.Type, string.Join( ";", PackageReferences().Concat( EditorPackageReferences() ).Select( x => x.FullIdent ) ) );
 
 	/// <summary>
 	/// Whether to save/load compiled assemblies to disk.
 	/// </summary>
-	bool CacheAssemblies => IsBuiltIn && Application.IsRetail && Application.IsEditor;
+	bool CacheAssemblies => IsBuiltIn && Application.IsEditor && !Application.IsUnitTest;
+
+	/// <summary>
+	/// What a cached assembly was compiled from: this project's compile settings and code files, the code files of
+	/// every project the engine ships (built-in ones reference each other), and the engine's managed assemblies this
+	/// process loaded. Any difference compiles it again.
+	/// </summary>
+	string CacheFingerprint( string engineCode )
+	{
+		var code = Stamps( [GetCodePath(), GetEditorPath()] );
+		var inputs = $"{Json.SerializeAsObject( Config.GetCompileSettings() ).ToJsonString()}\n{Sandbox.Engine.Protocol.Api}\n{EngineAssemblies.Value}{engineCode}{code}";
+		return Convert.ToHexString( System.Security.Cryptography.SHA256.HashData( System.Text.Encoding.UTF8.GetBytes( inputs ) ) );
+	}
+
+	static readonly Lazy<string> EngineAssemblies = new( () => Stamps( [EngineFileSystem.Root.GetFullPath( "bin/managed" )], "*.dll" ) );
+
+	static string EngineCode() => Stamps( new[] { "addons", "editor" }.Select( x => EngineFileSystem.Root.GetFullPath( x ) ).Where( Directory.Exists )
+		.SelectMany( Directory.EnumerateDirectories ).SelectMany( x => new[] { Path.Combine( x, "Code" ), Path.Combine( x, "Editor" ) } ) );
+
+	static string Stamps( IEnumerable<string> folders, string pattern = "*" )
+	{
+		// The enumeration fills in each file's size and time, so nothing is opened or queried again per file
+		var stamps = new System.Text.StringBuilder();
+		var files = folders.Where( Directory.Exists ).SelectMany( x => new DirectoryInfo( x ).EnumerateFiles( pattern, SearchOption.AllDirectories ) )
+			.Where( x => pattern != "*" || x.Name.EndsWith( ".cs", StringComparison.OrdinalIgnoreCase ) || x.Name.EndsWith( ".razor", StringComparison.OrdinalIgnoreCase ) );
+
+		foreach ( var file in files.OrderBy( x => x.FullName, StringComparer.OrdinalIgnoreCase ) )
+			stamps.AppendLine( $"{file.FullName}|{file.Length}|{file.LastWriteTimeUtc.Ticks}" );
+		return stamps.ToString();
+	}
+
+	/// <summary>
+	/// The fingerprint of what the compile in progress reads, taken before it reads anything: whatever changes during
+	/// it fails the next startup's check.
+	/// </summary>
+	string compileFingerprint;
+
+	internal static void TakeCacheFingerprints()
+	{
+		var projects = All.Where( x => x.CacheAssemblies ).ToList();
+		if ( projects.Count == 0 ) return;
+
+		var engineCode = EngineCode();
+		foreach ( var project in projects ) project.compileFingerprint = project.CacheFingerprint( engineCode );
+	}
+
+	static void WriteCacheFile( string path, Action<string> write )
+	{
+		write( path + ".tmp" );
+		File.Move( path + ".tmp", path, true );
+	}
 
 	private void UpdateCompiler()
 	{
 		// Menu can be precompiled, load that and don't bother making a compiler if so
-		if ( LoadPrecompiled() )
+		if ( Active && LoadPrecompiled() )
 			return;
 
 		// Only update the compiler if the config has changed
@@ -76,7 +126,7 @@ public partial class Project
 				}
 			}
 
-			if ( Config.Type == "game" )
+			if ( Config.Type is "game" or "menu" )
 			{
 				compilerSettings.IgnoreFolders.Add( "editor" );
 				compilerSettings.IgnoreFolders.Add( "unittest" );
@@ -150,9 +200,9 @@ public partial class Project
 			if ( Config.Type == "addon" )
 			{
 				var parentPackage = Config.GetMetaOrDefault<string>( "ParentPackage", null );
-				if ( !string.IsNullOrWhiteSpace( parentPackage ) && Package.TryParseIdent( parentPackage, out var parentParts ) )
+				if ( !string.IsNullOrWhiteSpace( parentPackage ) && Package.TryParseIdentParts( parentPackage, out var parentParts ) )
 				{
-					var currentAp = PackageManager.Find( Config.FullIdent, true, false );
+					var currentAp = PackageManager.Find( Config.FullIdent );
 					if ( currentAp is not null )
 					{
 						CompileGroup.ReferenceProvider = currentAp;
@@ -168,7 +218,7 @@ public partial class Project
 		{
 			// update editor compiler if we're running in the editor
 
-			if ( Config.Type == "game" || Config.Type == "library" || Config.Type == "addon" )
+			if ( Config.Type is "game" or "menu" or "library" or "addon" )
 			{
 				UpdateEditorCompiler();
 			}
@@ -177,11 +227,12 @@ public partial class Project
 		if ( CacheAssemblies )
 		{
 			// see if we've got cached assemblies from a previous compile
+			var fingerprint = CacheFingerprint( EngineCode() );
 			foreach ( var compiler in new[] { Compiler, EditorCompiler } )
 			{
 				if ( compiler is null ) continue;
 
-				LoadCachedAssembly( compiler );
+				LoadCachedAssembly( compiler, fingerprint );
 
 				if ( compiler.BuildSuccess )
 					compiler.Group.ClearForRecompile( compiler );
@@ -189,13 +240,14 @@ public partial class Project
 		}
 	}
 
-	private bool LoadCachedAssembly( Compiler compiler )
+	private bool LoadCachedAssembly( Compiler compiler, string fingerprint )
 	{
 		try
 		{
 			string directory = Path.Combine( GetRootPath(), ".sbox", "bin" );
 			string binPath = Path.Combine( directory, $"{compiler.AssemblyName}.dll" );
-			if ( !File.Exists( binPath ) )
+			string fingerprintPath = Path.Combine( directory, $"{compiler.AssemblyName}.fingerprint" );
+			if ( !File.Exists( binPath ) || !File.Exists( fingerprintPath ) || File.ReadAllText( fingerprintPath ) != fingerprint )
 				return false;
 
 			byte[] bytes = File.ReadAllBytes( binPath );
@@ -269,9 +321,23 @@ public partial class Project
 
 	IEnumerable<Package> PackageReferences()
 	{
-		if ( (Config.Type == "game" || Config.Type == "addon") && !IsBuiltIn )
+		if ( Config.Type is "game" or "addon" )
 		{
 			foreach ( var library in Project.Libraries.Where( x => x.HasCodePath() ) )
+			{
+				yield return library.Package;
+			}
+		}
+	}
+
+	/// <summary>
+	/// Libraries whose editor code the editor compiler references.
+	/// </summary>
+	IEnumerable<Package> EditorPackageReferences()
+	{
+		if ( Config.Type is "game" or "addon" )
+		{
+			foreach ( var library in Project.Libraries.Where( x => x.HasEditorPath() ) )
 			{
 				yield return library.Package;
 			}
@@ -289,13 +355,13 @@ public partial class Project
 		if ( !Active )
 			return;
 
-		// Horrific, but Current isn't avaliable yet, so this is the only way to tell if we're in the menu project
-		var path = Sandbox.Utility.CommandLine.GetSwitch( "-project", "" ).TrimQuoted();
-		var isMenu = path.EndsWith( "menu\\.sbproj" );
-
-		// only want menu editor code if we're in the menu project
-		if ( Config.Ident == "menu" && !isMenu )
-			return;
+		// Current isn't assigned during startup yet. Only compile menu editor code when that project is open.
+		if ( Config.Type == "menu" )
+		{
+			var path = Sandbox.Utility.CommandLine.GetSwitch( "-project", "" ).TrimQuoted();
+			if ( !string.Equals( NormalizeConfigFilePath( path ), ConfigFilePath, StringComparison.OrdinalIgnoreCase ) )
+				return;
+		}
 
 		if ( !HasEditorPath() )
 			return;
@@ -339,13 +405,9 @@ public partial class Project
 			EditorCompiler.AddReference( reference );
 		}
 
-		if ( (Config.Type == "game" || Config.Type == "addon") && !IsBuiltIn )
+		foreach ( var reference in EditorPackageReferences() )
 		{
-			// editor libraries
-			foreach ( var library in Libraries.Where( x => x.HasEditorPath() ) )
-			{
-				EditorCompiler.AddEditorReference( library.Package );
-			}
+			EditorCompiler.AddEditorReference( reference );
 		}
 
 		EditorCompiler.AddReference( "package.local.actiongraph" );
@@ -353,6 +415,7 @@ public partial class Project
 		EditorCompiler.AddReference( "package.local.moviemaker" );
 		EditorCompiler.AddReference( "package.local.hammer" );
 		EditorCompiler.AddReference( "package.local.dooeditor" );
+		EditorCompiler.AddReference( "package.local.animgraph" );
 
 		foreach ( var reference in compilerSettings.DistinctAssemblyReferences )
 		{

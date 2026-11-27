@@ -2,18 +2,24 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <NativeBuild>$(MSBuildProjectDirectory)/obj/native</NativeBuild>
     <GameDir>$(MSBuildProjectDirectory)/../../../game</GameDir>
+    <OutputPath Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(GameDir)/mounts/gtav</OutputPath>
+    <OutputPath Condition="'$(GtaVMountOutputPath)' != ''">$(GtaVMountOutputPath)</OutputPath>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(GtaVUseBorealisGeometry)' == 'true'">
+    <DefineConstants>$(DefineConstants);GTAV_BOREALIS_GEOMETRY</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../Sandbox.Engine/Sandbox.Engine.csproj" />
-    <ProjectReference Include="../Sandbox.Mounting/Sandbox.Mounting.csproj" />
+    <AssemblyMetadata Include="Ident" Value="gtav" />
+    <ProjectReference Include="../../Sandbox.Engine/Sandbox.Engine.csproj" Private="false" />
+    <ProjectReference Include="../../Sandbox.Mounting/Sandbox.Mounting.csproj" Private="false" />
+    <None Update="ManagedReader/ThirdPartyNotices.txt" TargetPath="licenses/ThirdPartyNotices.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
-  <Target Name="BuildGtaReader" AfterTargets="Build" Condition="$([MSBuild]::IsOSPlatform('Windows'))">
-    <Exec Command="cmake -S &quot;$(MSBuildProjectDirectory)/Native&quot; -B &quot;$(NativeBuild)&quot; -A x64 $(GtaReaderCMakeOptions)" />
-    <Exec Command="cmake --build &quot;$(NativeBuild)&quot; --config Release --target gta_mount_reader --parallel" />
-    <Copy SkipUnchangedFiles="true" SourceFiles="$(NativeBuild)/Release/gta_mount_reader.dll" DestinationFolder="$(GameDir)/bin/win64" />
-    <Copy SkipUnchangedFiles="true" SourceFiles="$(NativeBuild)/ragekit.txt;$(NativeBuild)/miniz.txt;$(NativeBuild)/clipper2.txt" DestinationFolder="$(GameDir)/mount/gtav/licenses" />
-    <Copy SkipUnchangedFiles="true" SourceFiles="$(TargetPath)" DestinationFiles="$(GameDir)/mount/gtav/gtav.dll" />
+  <Target Name="UseHostMountDependencies" BeforeTargets="_CopyFilesMarkedCopyLocal">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" />
+    </ItemGroup>
   </Target>
 </Project>

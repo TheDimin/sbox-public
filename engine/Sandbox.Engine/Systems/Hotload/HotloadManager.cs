@@ -84,56 +84,9 @@ internal class HotloadManager : IDisposable
 		Name = name;
 
 		Hotload = new Hotload( logger: log );
-
-		//
-		// This will skip types that it automatically decides are safe. This is
-		// just for performance, so if it seems over-zealous just comment out this
-		// line until it's fixed.
-		//
-		Hotload.AddUpgrader<Upgraders.AutoSkipUpgrader>();
-
-		//
-		// Sandbox.Reflection has some instance upgraders we need to add.
-		//
-		Hotload.AddUpgraders( typeof( TypeLibrary ).Assembly );
-
-		//
-		// During hotloads, recurse into the static fields of types in these assemblies to
-		// find instances to upgrade
-		//
-		Hotload.WatchAssembly( "Sandbox.Engine" );
-		Hotload.WatchAssembly( "Sandbox.System" );
-		Hotload.WatchAssembly( typeof( Sandbox.Internal.EventSystem ).Assembly );
-
-		//
-		// Ignore these assemblies because they can't hold anything
-		// that can be swappable.
-		//
-		Hotload.IgnoreAssembly<NLog.Logger>();
-		Hotload.IgnoreAssembly<Sentry.SentryStackFrame>();
-		Hotload.IgnoreAssembly<System.Net.Http.HttpClient>();
-		Hotload.IgnoreAssembly<System.Text.RegularExpressions.Regex>();
-		Hotload.IgnoreAssembly<LiteDB.LiteDatabase>();
-		Hotload.IgnoreAssembly<SkiaSharp.SKBitmap>();
-		Hotload.IgnoreAssembly<Microsoft.CodeAnalysis.Diagnostic>();
-		Hotload.IgnoreAssembly<Refit.PostAttribute>();
-
-		var skipUpgrader = Hotload.GetUpgrader<Upgraders.SkipUpgrader>();
-
-		//
-		// Skip types that reference things that often cause errors during hotload.
-		//
-		skipUpgrader.AddSkippedType<ExceptionDispatchInfo>();
-		skipUpgrader.AddSkippedType<NodeLibrary>();
-		skipUpgrader.AddSkippedType<NodeDefinition>();
-
-		//
-		// These are safe to skip for speed.
-		//
-		skipUpgrader.AddSkippedType<JsonNode>();
-		skipUpgrader.AddSkippedType<JsonElement>();
-		skipUpgrader.AddSkippedType<JsonObject>();
-		skipUpgrader.AddSkippedType<JsonArray>();
+		Hotload.AddDefaultUpgraders();
+		Hotload.AddDefaultWatchAssemblies();
+		Hotload.AddDefaultSkips();
 	}
 
 	internal void Watch( Assembly assembly )
@@ -164,11 +117,18 @@ internal class HotloadManager : IDisposable
 	}
 
 	/// <summary>
-	/// Does the actual hotload
+	/// Runs pending hotload, invoking an optional callback after migration and before success notifications.
+	/// Individual upgrade errors are logged. A completed migration still runs the callbacks so the new types are registered.
 	/// </summary>
-	public void DoSwap()
+	/// <param name="beforeSuccess">Called after reference migration and before normal hotload callbacks.</param>
+	/// <returns>Returns false for a notification failure without a registration callback. An interrupted migration propagates to the caller.</returns>
+	public bool DoSwap( Action beforeSuccess = null )
 	{
 		log.Trace( "DoSwap Start" );
+
+		// The render thread drawing a frame is joined first and stays parked until the next frame's hand-over, so nothing
+		// draws while references are swapped (docs/reference/borealis-render-thread.md)
+		Sandbox.BorealisGpuRenderBackend.JoinRenderThread();
 		MainThread.RunQueues(); // dispose of any threaded IDisposables waiting
 
 		var timer = Stopwatch.StartNew();
@@ -221,21 +181,24 @@ internal class HotloadManager : IDisposable
 				};
 			} );
 
+			HotloadResult info = null;
 			try
 			{
-				HotloadResult info = null;
 
-				using ( var gr = new HeavyGarbageRegion() )
 				using ( var t = eventRecord.ScopeTimer( "UpdateReferences" ) )
 				{
-					Json.WarmUpCts?.Cancel();
+					Json.StopWarmUp();
 					info = Hotload.UpdateReferences();
 				}
+
+				foreach ( var scene in Scene.AllLive )
+					scene.RebuildTraceProviders();
 
 				if ( info.NoAction )
 				{
 					eventRecord = null; // don't bother with the event
-					return;
+					beforeSuccess?.Invoke();
+					return true;
 				}
 
 				// stats
@@ -279,15 +242,21 @@ internal class HotloadManager : IDisposable
 
 				{
 					using var timerSuccess = eventRecord.ScopeTimer( "OnSuccess" );
+					beforeSuccess?.Invoke();
 					OnSuccess?.Invoke();
 				}
 			}
-			catch ( System.Exception e )
+			catch ( System.Exception e ) when ( e is not OutOfMemoryException )
 			{
 				log.Warning( e, "Hotload exception" );
 				Sentry.SentrySdk.CaptureException( e );
 
 				OnFail?.Invoke();
+				if ( info is null || beforeSuccess is not null )
+				{
+					throw;
+				}
+				return false;
 			}
 			finally
 			{
@@ -309,6 +278,8 @@ internal class HotloadManager : IDisposable
 				}
 			}
 		}
+
+		return true;
 	}
 
 	private static string FormatMessageGroup( string message, IEnumerable<HotloadResultEntry> entries )
@@ -396,6 +367,83 @@ internal class HotloadManager : IDisposable
 		if ( Hotload.ReplacingAssembly( oldAssembly, newAssembly ) )
 		{
 			NeedsSwap = true;
+		}
+	}
+}
+
+internal static class HotloadExtensions
+{
+	extension( Hotload hotload )
+	{
+		/// <summary>
+		/// Add Sandbox-specific instance upgraders defined in the <c>Sandbox.Reflection</c> project.
+		/// </summary>
+		public void AddDefaultUpgraders()
+		{
+			hotload.AddUpgraders( typeof( TypeLibrary ).Assembly );
+		}
+
+		/// <summary>
+		/// Watch static fields in Sandbox assemblies so we can find instances to upgrade.
+		/// </summary>
+		public void AddDefaultWatchAssemblies()
+		{
+			hotload.WatchAssembly( "Sandbox.Engine" );
+			hotload.WatchAssembly( "Sandbox.System" );
+			hotload.WatchAssembly( typeof( Sandbox.Internal.EventSystem ).Assembly );
+		}
+
+		/// <summary>
+		/// Ignore assemblies and types that we know can't contain instances that need
+		/// upgrading, or that we intentionally don't want to upgrade for whatever reason.
+		/// </summary>
+		public void AddDefaultSkips()
+		{
+			// This will skip types that it automatically decides are safe. This is
+			// just for performance, so if it seems over-zealous just comment out this
+			// line until it's fixed.
+
+			hotload.AddUpgrader<Upgraders.AutoSkipUpgrader>();
+
+			// Ignore these assemblies because they can't hold anything
+			// that can be swappable.
+
+			hotload.IgnoreAssembly<NLog.Logger>();
+			hotload.IgnoreAssembly<Sentry.SentryStackFrame>();
+			hotload.IgnoreAssembly<System.Net.Http.HttpClient>();
+
+			// The runtime's sockets and pipes: their state is the runtime's own, used by its threads (the socket engine's
+			// event loop holds its event queue, so a copy left every socket in the process deaf)
+			hotload.IgnoreAssembly<System.Net.Sockets.Socket>();
+			hotload.IgnoreAssembly<System.IO.Pipes.NamedPipeServerStream>();
+			hotload.IgnoreAssembly<System.Text.RegularExpressions.Regex>();
+			hotload.IgnoreAssembly<LiteDB.LiteDatabase>();
+			hotload.IgnoreAssembly<SkiaSharp.SKBitmap>();
+			hotload.IgnoreAssembly<Microsoft.CodeAnalysis.Diagnostic>();
+			hotload.IgnoreAssembly<Refit.PostAttribute>();
+			hotload.IgnoreAssembly<Nav.NavMesh>();
+
+			var skipUpgrader = hotload.GetUpgrader<Upgraders.SkipUpgrader>();
+
+			// Skip types that reference things that often cause errors during hotload.
+
+			skipUpgrader.AddSkippedType<ExceptionDispatchInfo>();
+			skipUpgrader.AddSkippedType<NodeLibrary>();
+			skipUpgrader.AddSkippedType<NodeDefinition>();
+
+			// Compiler plans are rebuilt on binding invalidation. Runtime stores still migrate normally.
+
+			foreach ( var type in Breen.ScriptSystem.CompilationCacheTypes )
+			{
+				skipUpgrader.AddSkippedType( type );
+			}
+
+			// These are safe to skip for speed.
+
+			skipUpgrader.AddSkippedType<JsonNode>();
+			skipUpgrader.AddSkippedType<JsonElement>();
+			skipUpgrader.AddSkippedType<JsonObject>();
+			skipUpgrader.AddSkippedType<JsonArray>();
 		}
 	}
 }

@@ -10,10 +10,23 @@ internal class PostProcessLayers
 	public Dictionary<Stage, List<PostProcessLayer>> Layers = new();
 	readonly HashSet<Stage> _earlyScheduled = [];
 
+	// Layers are rebuilt every frame, so reuse them (and their blit command lists) in creation order
+	readonly List<PostProcessLayer> _pool = [];
+	int _poolUsed;
+
+	public bool HasLayers => _poolUsed > 0;
+
+	/// <summary>Cleared to be built again since the camera last took these for drawing (<c>CameraComponent.TakePostProcess</c>).</summary>
+	internal bool Rebuilt;
+
 	public void Clear()
 	{
-		Layers.Clear();
+		Rebuilt = true;
+		foreach ( var list in Layers.Values )
+			list.Clear();
+
 		_earlyScheduled.Clear();
+		_poolUsed = 0;
 	}
 
 	/// <summary>
@@ -21,7 +34,11 @@ internal class PostProcessLayers
 	/// </summary>
 	public PostProcessLayer CreateLayer( Stage stage )
 	{
-		PostProcessLayer layer = new();
+		if ( _poolUsed == _pool.Count )
+			_pool.Add( new PostProcessLayer() );
+
+		var layer = _pool[_poolUsed++];
+		layer.Reset();
 
 		if ( !Layers.TryGetValue( stage, out var list ) )
 		{
@@ -146,6 +163,21 @@ internal class PostProcessLayer : IComparable<PostProcessLayer>
 	/// </summary>
 	public PostProcessQueue? EarlyQueue;
 	public bool RanEarly;
+
+	/// <summary>
+	/// Owned by this layer for <see cref="BasePostProcess"/> blits, reused while the layer is.
+	/// </summary>
+	public CommandList BlitCommandList;
+
+	public void Reset()
+	{
+		CommandList = null;
+		Order = 0;
+		Name = null;
+		NeedsDepthNormals = false;
+		EarlyQueue = null;
+		RanEarly = false;
+	}
 
 	public int CompareTo( PostProcessLayer other ) => Order.CompareTo( other.Order );
 

@@ -15,11 +15,6 @@ public partial class Model
 	{
 		ThreadSafe.AssertIsMainThread();
 
-		// Explicit glTF paths enter the managed resource backend. GUID-only loading
-		// continues through the established native resource path.
-		if ( GltfModelLoader.IsGltfPath( id.Path ) )
-			return GltfModelLoader.Load( id.Path );
-
 		if ( id.Guid is Guid guid )
 		{
 			if ( Game.Resources.TryGet<Model>( guid, out var resource ) )
@@ -57,9 +52,6 @@ public partial class Model
 
 		if ( string.IsNullOrWhiteSpace( filename ) )
 			return Error;
-
-		if ( GltfModelLoader.IsGltfPath( filename ) )
-			return Load( filename );
 
 		filename = filename?.Replace( ".vmdl_c", ".vmdl" );
 

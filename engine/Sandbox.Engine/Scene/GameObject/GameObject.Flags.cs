@@ -86,6 +86,9 @@ public enum GameObjectFlags
 	/// Lets rendering, physics and navmesh make static optimizations.
 	/// </summary>
 	Static = 32768,
+
+	/// <summary>Children of this organizational object are independent roots for gameplay interactions.</summary>
+	GroupRoots = 65536,
 }
 
 

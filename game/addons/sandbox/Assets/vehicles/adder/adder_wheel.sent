@@ -1,0 +1,12 @@
+{
+  "Prefab": {
+    "Path": "vehicles/adder/adder_wheel.prefab",
+    "Id": "323e5d8c-a670-58f8-98e1-abbef785559d"
+  },
+  "Title": "Adder Wheel",
+  "Description": "Release this wheel near an empty Adder wheel mount to fit it.",
+  "Category": "Vehicle",
+  "RequiredMount": "gtav",
+  "PreviewModel": "models/fragments/adder/wheel",
+  "__version": 0
+}

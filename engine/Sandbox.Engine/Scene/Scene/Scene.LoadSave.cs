@@ -1,4 +1,5 @@
-﻿using Facepunch.ActionGraphs;
+﻿using Sandbox.Engine;
+using Facepunch.ActionGraphs;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -8,7 +9,7 @@ public partial class Scene : GameObject
 {
 	/// <summary>
 	/// Load from the provided <see cref="SceneFile"/>. This will not load the scene for other clients in a
-	/// multiplayer session, you should instead use <see cref="Game.ChangeScene"/>
+	/// multiplayer session, you should instead use <see cref="Game.ChangeScene(SceneFile)"/>
 	/// if you want to bring other clients.
 	/// </summary>
 	public virtual bool Load( GameResource resource )
@@ -28,7 +29,7 @@ public partial class Scene : GameObject
 
 	/// <summary>
 	/// Load from the provided <see cref="SceneLoadOptions"/>. This will not load the scene for other clients in a
-	/// multiplayer session, you should instead use <see cref="Game.ChangeScene"/>
+	/// multiplayer session, you should instead use <see cref="Game.ChangeScene(SceneFile)"/>
 	/// if you want to bring other clients.
 	/// </summary>
 	public bool Load( SceneLoadOptions options )
@@ -42,6 +43,9 @@ public partial class Scene : GameObject
 		}
 
 		sceneFile.EnsureManifest();
+		// Changing scene is how a game leaves its menu, and goes back to it
+		var startingGame = !options.IsAdditive && !options.IsSystemScene && !IsEditor && this == Game.ActiveScene
+			&& (IGameInstance.Current?.OnSceneChange( sceneFile ) ?? false);
 
 		if ( sceneFile.ResourceName != null )
 		{
@@ -85,6 +89,17 @@ public partial class Scene : GameObject
 
 			ProcessDeletes();
 			NavMesh.Reset();
+			_navMeshLoadPending = !IsEditor && !options.ShowLoadingScreen;
+
+			if ( HasPhysicsWorld )
+			{
+				var worldBody = _physicsWorld.Body;
+				if ( worldBody.IsValid() && _physicsWorld.BodyCount == 1 && worldBody.ShapeCount == 0 )
+				{
+					_physicsWorld.Delete();
+					_physicsWorld = null;
+				}
+			}
 		}
 
 		if ( !IsEditor && options.ShowLoadingScreen )
@@ -107,6 +122,12 @@ public partial class Scene : GameObject
 			Source = sceneFile;
 		}
 
+		// The game's starting - off its menu scene by now, the same as a game launched without one
+		if ( startingGame )
+		{
+			RunEvent<ISceneStartup>( x => x.OnHostPreInitialize( sceneFile ) );
+		}
+
 		{
 			using var optionsScope = ActionGraph.PushSerializationOptions( sceneFile.SerializationOptions with { ForceUpdateCached = IsEditor } );
 			using var sceneScope = Push();
@@ -114,6 +135,9 @@ public partial class Scene : GameObject
 			// Depending on if we load a scene from file or from memory, we need to account for that here
 			using var blobs = BlobDataSerializer.Load( sceneFile.BinaryData, sceneFile.ResourcePath );
 			using var batchGroup = CallbackBatch.Batch();
+
+			if ( IsEditor )
+				DeserializeInstances( sceneFile.SceneProperties?[InstancesKey], options.IsAdditive );
 
 			if ( sceneFile.GameObjects is not null )
 			{
@@ -126,7 +150,7 @@ public partial class Scene : GameObject
 
 			if ( sceneFile.SceneProperties is not null )
 			{
-				DeserializeProperties( sceneFile.SceneProperties, options.IsSystemScene );
+				DeserializeProperties( sceneFile.SceneProperties, options.IsSystemScene, loadInstances: false );
 			}
 
 			//
@@ -166,12 +190,21 @@ public partial class Scene : GameObject
 			Signal( GameObjectSystem.Stage.SceneLoaded );
 		}
 
+		if ( startingGame )
+		{
+			RunEvent<ISceneStartup>( x => x.OnHostInitialize() );
+			RunEvent<ISceneStartup>( x => x.OnClientInitialize() );
+		}
+
+		// Drop unused definitions, including broken links recovered as ordinary objects.
+		InstanceState = IsEditor ? ExportInstanceState( InstanceState.Instances.Keys ) : SceneInstanceState.Empty;
+
 		return true;
 	}
 
 	/// <summary>
 	/// Load from the provided file name. This will not load the scene for other clients in a
-	/// multiplayer session, you should instead use <see cref="Game.ChangeScene"/>
+	/// multiplayer session, you should instead use <see cref="Game.ChangeScene(SceneFile)"/>
 	/// if you want to bring other clients.
 	/// </summary>
 	public bool LoadFromFile( string filename )
@@ -262,8 +295,10 @@ public partial class Scene : GameObject
 	public JsonObject SerializeProperties()
 	{
 		var jso = new JsonObject();
+		if ( SerializeInstances() is { } instances )
+			jso.Add( InstancesKey, instances );
 
-		foreach ( var prop in Game.TypeLibrary.GetType<Scene>()
+		foreach ( var prop in GlobalContext.Current.TypeLibrary.GetType<Scene>()
 			.Properties
 			.Where( x => x.HasAttribute<PropertyAttribute>() )
 			.OrderBy( x => x.Name ) )
@@ -297,7 +332,7 @@ public partial class Scene : GameObject
 
 		foreach ( var system in GetSystems() )
 		{
-			var systemType = Game.TypeLibrary.GetType( system.GetType() );
+			var systemType = GlobalContext.Current.TypeLibrary.GetType( system.GetType() );
 			if ( systemType is null ) continue;
 
 			var systemTypeName = systemType.FullName;
@@ -349,9 +384,12 @@ public partial class Scene : GameObject
 		return metadata;
 	}
 
-	void DeserializeProperties( JsonObject data, bool isSystemScene = false )
+	void DeserializeProperties( JsonObject data, bool isSystemScene = false, bool loadInstances = true )
 	{
-		var sceneType = Game.TypeLibrary.GetType<Scene>();
+		if ( IsEditor && !isSystemScene && loadInstances )
+			DeserializeInstances( data[InstancesKey] );
+
+		var sceneType = GlobalContext.Current.TypeLibrary.GetType<Scene>();
 		Assert.NotNull( sceneType, "Scene type is inaccessible!" );
 
 		foreach ( var prop in sceneType.Properties.Where( x => x.HasAttribute<PropertyAttribute>() ) )
@@ -416,6 +454,7 @@ public partial class Scene : GameObject
 		using var blobs = BlobDataSerializer.Capture();
 
 		target.Id = Id;
+		// SceneFile consumers, including MapInstance, can deserialize these objects directly.
 		target.GameObjects = Children.Select( x => x.Serialize() ).Where( x => x is not null ).ToArray();
 		target.SceneProperties = SerializeProperties();
 		target.BinaryData = blobs.ToByteArray();

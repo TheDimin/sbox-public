@@ -47,6 +47,10 @@ public partial class Model
 		/// </summary>
 		public float ImpactDamage { get; set; } = -1;
 
+		internal string DestructionSurface { get; }
+		internal string DestructionProfile { get; }
+		internal ModelDestructionCues DestructionCues { get; }
+
 		internal void Dispose()
 		{
 			// nothing needed
@@ -58,6 +62,9 @@ public partial class Model
 			{
 				Health = propData.Health;
 				Flammable = propData.Flammable;
+				DestructionSurface = propData.DestructionSurface;
+				DestructionProfile = propData.DestructionProfile;
+				DestructionCues = propData.DestructionCues;
 
 				if ( propData.Explosive )
 				{

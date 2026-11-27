@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using Sandbox.Engine;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Sandbox.Internal;
@@ -110,7 +111,7 @@ public sealed record MovieRecorderOptions(
 
 		// Add recorders from TypeLibrary
 
-		foreach ( var type in GlobalGameNamespace.TypeLibrary.GetTypes<IComponentCapturer>() )
+		foreach ( var type in GlobalContext.Current.TypeLibrary.GetTypes<IComponentCapturer>() )
 		{
 			if ( type.IsAbstract ) continue;
 			if ( type.IsGenericType ) continue;
@@ -146,10 +147,17 @@ public sealed record MovieRecorderOptions(
 			.WithCaptureAll<CubemapFog>()
 #pragma warning restore CS0618
 			.WithCaptureAll<VolumetricFogVolume>()
+			.WithCaptureAll<AmbientOcclusion>()
+			.WithCaptureAll<Vignette>()
+			.WithCaptureAll<Tonemapping>()
+			.WithCaptureAll<Bloom>()
 			.WithCaptureAll<SkyBox2D>()
 			.WithCaptureAll<ParticleEffect>()
 			.WithCaptureAll<ParticleEmitter>()
+			.WithCaptureAll<Decal>()
 			.WithCaptureAll<BeamEffect>()
+			.WithCaptureAll<HighlightOutline>()
+			.WithCaptureAll<Highlight>()
 			.WithCaptureAll<SoundPointComponent>();
 	}
 
@@ -168,7 +176,7 @@ public sealed record MovieRecorderOptions(
 			.WithDefaultCaptureActions()
 			.WithDefaultComponentCapturers();
 
-		foreach ( var (method, _) in GlobalGameNamespace.TypeLibrary.GetMethodsWithAttribute<DefaultMovieRecorderOptionsAttribute>() )
+		foreach ( var (method, _) in GlobalContext.Current.TypeLibrary.GetMethodsWithAttribute<DefaultMovieRecorderOptionsAttribute>() )
 		{
 			try
 			{

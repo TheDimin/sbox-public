@@ -19,20 +19,20 @@ public abstract partial class Component
 	/// </summary>
 	protected virtual void OnFixedUpdate() { }
 
-	bool _startCalled;
+	internal bool StartCalled;
 
 	internal void InternalOnStart()
 	{
 		if ( !Enabled ) return;
 		if ( !ShouldExecute ) return;
 
-		if ( _startCalled ) return;
+		if ( StartCalled ) return;
 
 		// Disable any interpolation during OnStart. We might be created in a Fixed Update context.
 		using ( GameTransform.DisableInterpolation() )
 		{
 			Scene.pendingStartComponents.Remove( this );
-			_startCalled = true;
+			StartCalled = true;
 
 			try { OnStart(); }
 			catch ( System.Exception e ) { Log.Error( e, $"Exception when calling 'Start' on {this}" ); }
@@ -44,6 +44,9 @@ public abstract partial class Component
 			}
 		}
 	}
+
+	/// <summary>Whether this component goes on <paramref name="scene"/>'s update list; read once as it joins.</summary>
+	internal virtual bool UpdatesIn( Scene scene ) => true;
 
 	internal virtual void InternalUpdate()
 	{

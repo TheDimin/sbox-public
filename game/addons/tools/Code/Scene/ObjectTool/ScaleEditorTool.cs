@@ -27,12 +27,12 @@ public class ScaleEditorTool : EditorTool
 		var positions = nonSceneGos.Select( x => x.WorldPosition ).ToArray();
 		var centroid = positions.Aggregate( Vector3.Zero, ( sum, p ) => sum + p ) / positions.Length;
 
-		if ( !Gizmo.Pressed.Any && Gizmo.HasMouseFocus )
+		if ( Gizmo.WasLeftMousePressed || (!Gizmo.Pressed.Any && Gizmo.HasMouseFocus) )
 		{
 			startState.Clear();
 			scaleDelta = default;
 			handlePosition = centroid;
-			handleRotation = nonSceneGos.FirstOrDefault()?.WorldRotation ?? Rotation.Identity;
+			handleRotation = Gizmo.Settings.GlobalSpace ? WorkPlane.Current.Rotation : nonSceneGos.FirstOrDefault()?.WorldRotation ?? Rotation.Identity;
 			startBoundsSize = BBox.FromPoints( positions ).Size;
 			undoScope?.Dispose();
 			undoScope = null;
@@ -47,7 +47,7 @@ public class ScaleEditorTool : EditorTool
 		{
 			Gizmo.Hitbox.DepthBias = 0.01f;
 
-			if ( Gizmo.Control.Scale( "scale", Vector3.Zero, out var delta, handleRotation ) )
+			if ( Gizmo.Control.UpdateScale( "scale", Vector3.Zero, out var delta, handleRotation ) )
 			{
 				scaleDelta += delta / 0.01f;
 
@@ -79,18 +79,40 @@ public class ScaleEditorTool : EditorTool
 						1.0f + snap.z / newSize
 					);
 
-					go.WorldScale = startScale * scaleFactor;
+					var localFactor = Gizmo.Settings.GlobalSpace ? WorldToLocalScale( scaleFactor, handleRotation.Inverse * go.WorldRotation ) : scaleFactor;
+
+					go.WorldScale = startScale * localFactor;
 
 					if ( scaleAsGroup )
 					{
-						go.WorldPosition = origin + (startPosition - origin) * scaleFactor;
+						var offset = handleRotation.Inverse * (startPosition - origin);
+						go.WorldPosition = origin + handleRotation * (offset * scaleFactor);
 					}
 
 					go.DispatchEdited( nameof( GameObject.LocalScale ) );
 					if ( scaleAsGroup ) go.DispatchEdited( nameof( GameObject.LocalPosition ) );
 				}
 			}
+			Gizmo.Draw.Scale( "scale", handleRotation );
 		}
+		if ( Gizmo.WasLeftMouseReleased )
+		{
+			undoScope?.Dispose();
+			undoScope = null;
+		}
+	}
+
+	/// <summary>
+	/// How much each of the object's own axes gets stretched by a scale along world axes.
+	/// Exact when the object is axis aligned, otherwise the shear it would need is dropped.
+	/// </summary>
+	static Vector3 WorldToLocalScale( Vector3 worldScale, Rotation rotation )
+	{
+		return new Vector3(
+			worldScale.Dot( rotation.Forward * rotation.Forward ),
+			worldScale.Dot( rotation.Left * rotation.Left ),
+			worldScale.Dot( rotation.Up * rotation.Up )
+		);
 	}
 
 	[Shortcut( "tools.scale-tool", "r", typeof( SceneViewWidget ) )]

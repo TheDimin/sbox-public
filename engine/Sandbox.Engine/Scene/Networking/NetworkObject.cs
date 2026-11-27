@@ -418,11 +418,15 @@ internal sealed partial class NetworkObject : IValid, IDeltaSnapshot, INetworkWa
 		var snapshot = WriteRefreshSnapshot();
 
 		using var blobs = BlobDataSerializer.Capture();
+		var jsonData = NetworkJson.Serialize( GameObject, _refreshSerializeOptions );
+		if ( jsonData is null )
+			throw new( $"Unable to serialize {GameObject.Id} ({GameObject.Name})" );
+
 		var msg = new ObjectRefreshMsg
 		{
 			Guid = GameObject.Id,
 			Parent = GameObject.Parent.Id,
-			JsonData = GameObject.Serialize( _refreshSerializeOptions ).ToJsonString(),
+			JsonData = jsonData,
 			BlobData = blobs.ToByteArray(),
 			TableData = WriteReliableData(),
 			Snapshot = system.DeltaSnapshots.GetFullSnapshotData( snapshot )
@@ -431,15 +435,23 @@ internal sealed partial class NetworkObject : IValid, IDeltaSnapshot, INetworkWa
 		return msg;
 	}
 
-	private static readonly GameObject.SerializeOptions _refreshDescendantSerializeOptions = new() { IgnoreChildren = true, SkipNulls = true };
+	private static readonly GameObject.SerializeOptions _refreshDescendantSerializeOptions = new() { SingleNetworkObject = true, IgnoreChildren = true, SkipNulls = true };
 
-	private static readonly GameObject.SerializeOptions _componentRefreshSerializeOptions = new() { SkipNulls = true };
+	// A prefab instance goes with its children, like the whole instance it used to be sent as
+	private static readonly GameObject.SerializeOptions _refreshDescendantInstanceSerializeOptions = new() { SingleNetworkObject = true, SkipNulls = true };
+
+	private static readonly GameObject.SerializeOptions _componentRefreshSerializeOptions = new() { SingleNetworkObject = true, SkipNulls = true };
 
 	internal void SendNetworkRefresh( GameObject go )
 	{
 		var system = SceneNetworkSystem.Instance;
 		if ( system is null ) return;
 		if ( go is null ) return;
+		if ( !system.HasBroadcastRecipients() )
+		{
+			MarkDirty();
+			return;
+		}
 
 		if ( go == GameObject )
 		{
@@ -465,14 +477,20 @@ internal sealed partial class NetworkObject : IValid, IDeltaSnapshot, INetworkWa
 			return;
 
 		{
+			using var blobs = BlobDataSerializer.Capture();
+
+			// Not networked
+			var json = NetworkJson.Serialize( go, go.IsOutermostPrefabInstanceRoot ? _refreshDescendantInstanceSerializeOptions : _refreshDescendantSerializeOptions );
+			if ( json is null )
+				return;
+
 			var snapshot = WriteRefreshSnapshot();
 
-			using var blobs = BlobDataSerializer.Capture();
 			var msg = new ObjectRefreshDescendantMsg
 			{
 				GameObjectId = GameObject.Id,
 				ParentId = go.Parent.Id,
-				JsonData = go.Serialize( _refreshDescendantSerializeOptions ).ToJsonString(),
+				JsonData = json,
 				BlobData = blobs.ToByteArray(),
 				TableData = WriteReliableData(),
 				Snapshot = system.DeltaSnapshots.GetFullSnapshotData( snapshot )
@@ -488,8 +506,14 @@ internal sealed partial class NetworkObject : IValid, IDeltaSnapshot, INetworkWa
 		if ( system is null ) return;
 
 		if ( component is null ) return;
+		if ( !system.HasBroadcastRecipients() )
+		{
+			MarkDirty();
+			return;
+		}
 
-		if ( !component.IsValid() )
+		// Destroying a component takes it out of the directory straight away, but it stays valid until its callback batch ends.
+		if ( !component.IsValid() || component.Scene.Directory.FindComponentByGuid( component.Id ) != component )
 		{
 			// We want to tell clients that this component has been destroyed...
 			var msg = new ObjectDestroyComponentMsg
@@ -502,12 +526,18 @@ internal sealed partial class NetworkObject : IValid, IDeltaSnapshot, INetworkWa
 		}
 
 		{
+			using var blobs = BlobDataSerializer.Capture();
+
+			// Not networked
+			var json = NetworkJson.Serialize( component, _componentRefreshSerializeOptions );
+			if ( json is null )
+				return;
+
 			var snapshot = WriteRefreshSnapshot();
 
-			using var blobs = BlobDataSerializer.Capture();
 			var msg = new ObjectRefreshComponentMsg
 			{
-				JsonData = component.Serialize( _componentRefreshSerializeOptions ).ToJsonString(),
+				JsonData = json,
 				BlobData = blobs.ToByteArray(),
 				GameObjectId = component.GameObject.Id,
 				TableData = WriteReliableData(),
@@ -522,6 +552,12 @@ internal sealed partial class NetworkObject : IValid, IDeltaSnapshot, INetworkWa
 	{
 		var system = SceneNetworkSystem.Instance;
 		if ( system is null ) return;
+		if ( !system.HasBroadcastRecipients() )
+		{
+			// Registration still happens in Network.Refresh. A later join captures the current hierarchy and table.
+			MarkDirty();
+			return;
+		}
 
 		var msg = GetRefreshMessage();
 		system.Broadcast( msg );
@@ -859,7 +895,7 @@ internal sealed partial class NetworkObject : IValid, IDeltaSnapshot, INetworkWa
 		}
 
 		using var blobs = BlobDataSerializer.Capture();
-		var jsonData = GameObject.Serialize( includeLocalObjects ? _handoffSerializeOptions : _createSerializeOptions );
+		var jsonData = NetworkJson.Serialize( GameObject, includeLocalObjects ? _handoffSerializeOptions : _createSerializeOptions );
 		if ( jsonData is null )
 		{
 			throw new( $"Unable to serialize {GameObject.Id} ({GameObject.Name})" );
@@ -871,7 +907,7 @@ internal sealed partial class NetworkObject : IValid, IDeltaSnapshot, INetworkWa
 			Guid = GameObject.Id,
 			SnapshotVersion = GameObject._net.LocalSnapshotState.Version,
 			Transform = includeLocalObjects ? GameObject.Transform.TargetLocal : SampleLocal( Time.NowDouble ),
-			JsonData = capture is null ? jsonData.ToJsonString() : null,
+			JsonData = capture is null ? jsonData : null,
 			BlobData = capture is null ? blobs.ToByteArray() : null,
 			Creator = Creator,
 			Parent = GameObject.Parent.Id,
@@ -988,7 +1024,7 @@ internal sealed partial class NetworkObject : IValid, IDeltaSnapshot, INetworkWa
 		var system = SceneNetworkSystem.Instance;
 		if ( system is null ) return;
 
-		ReadDataTable( tableData );
+		ReadDataTable( tableData, source: source );
 		// Owner and host can refresh at once, an older refresh must not roll the version back
 		var version = DeltaSnapshotSystem.ReadVersion( snapshotData );
 		if ( (short)(version - LocalSnapshotState.Version) > 0 )
@@ -1004,8 +1040,14 @@ internal sealed partial class NetworkObject : IValid, IDeltaSnapshot, INetworkWa
 		LocalSnapshotState.Version = msg.SnapshotVersion;
 
 		var parent = GameObject.Scene.Directory.FindByGuid( msg.Parent );
-		GameObject.Transform.SetLocalTransformFast( msg.Transform );
+		var oldParent = GameObject.Parent;
+		var moved = GameObject.Transform.SetLocalTransformFast( msg.Transform );
 		GameObject.SetParentFromNetwork( parent );
+
+		// Reparenting already notified
+		if ( moved && GameObject.Parent == oldParent )
+			GameObject.Transform.TransformChanged();
+
 		GameObject.Enabled = msg.Enabled;
 		ReadDataTable( msg.TableData );
 	}

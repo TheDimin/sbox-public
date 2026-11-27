@@ -127,6 +127,28 @@ public struct LobbyInformation
 	public bool IsPasswordProtected => Data.TryGetValue( "pw", out var value ) && value == "1";
 
 	/// <summary>
+	/// The engine API version it's running - 0 if it doesn't say (a dedicated server's tags can be cut short).
+	/// </summary>
+	public int ApiVersion => Data is not null && Data.TryGetValue( "api", out var value ) && int.TryParse( value, out var api ) ? api : 0;
+
+	/// <summary>
+	/// The network protocol it talks - 0 if it doesn't say.
+	/// </summary>
+	public int NetworkProtocol => Data is not null && Data.TryGetValue( "protocol", out var value ) && int.TryParse( value, out var protocol ) ? protocol : 0;
+
+	/// <summary>
+	/// True if it can't be joined from this version of the game - it runs a different API version or network protocol.
+	/// Lobbies like this are only listed when asked for (Networking.QueryLobbies with includeOutdated). What it doesn't say
+	/// isn't held against it.
+	/// </summary>
+	public bool IsOutdated => (ApiVersion != 0 && ApiVersion != Protocol.Api) || (NetworkProtocol != 0 && NetworkProtocol != Protocol.Network);
+
+	/// <summary>
+	/// True if it's <see cref="IsOutdated"/> the other way - on a newer version than this one, which is what needs updating.
+	/// </summary>
+	public bool IsNewerVersion => ApiVersion > Protocol.Api || ((ApiVersion == 0 || ApiVersion == Protocol.Api) && NetworkProtocol > Protocol.Network);
+
+	/// <summary>
 	/// Return true if this lobby contains a friend.
 	/// </summary>
 	internal bool ContainsFriends => false;
@@ -289,7 +311,17 @@ internal static class DedicatedServer
 
 		if ( !IsGameServerActive )
 		{
-			await LogOnToSteamAsync();
+			// Without a Steam game server there are no sockets to listen on: say so, rather than run on unjoinable
+			if ( !await LogOnToSteamAsync() )
+			{
+				var noSteamClient = !Steam.SteamGameServer().IsValid;
+				Log.Error( noSteamClient && OperatingSystem.IsLinux()
+					? "Couldn't start the Steam game server, so no one can join: steamclient.so wasn't found. Put bin/linuxsteamrt64 on LD_LIBRARY_PATH, or link it at ~/.steam/sdk64/steamclient.so."
+					: "Couldn't start the Steam game server, so no one can join." );
+				Shutdown();
+				return false;
+			}
+
 			Networking.Bootstrap();
 
 			// Conna: we can abstract this stuff out later, but for now we only use Steam networking for dedicated servers.
@@ -303,7 +335,7 @@ internal static class DedicatedServer
 		await Task.Delay( 1000 );
 
 		var gameTitle = Application.GamePackage?.Title ?? "s&box";
-		var mapName = Application.MapPackage?.Title ?? GameNetworkSystem.CurrentSceneName ?? gameTitle;
+		var mapName = Application.Map?.Title ?? GameNetworkSystem.CurrentSceneName ?? gameTitle;
 
 		try
 		{
@@ -320,7 +352,7 @@ internal static class DedicatedServer
 				{ "revision", Application.GamePackage?.Revision?.VersionId.ToString() ?? string.Empty },
 				{ "protocol", Protocol.Network.ToString() },
 				{ "gameident", Application.GameIdent },
-				{ "mapident", Application.MapPackage?.Ident ?? string.Empty },
+				{ "mapident", Application.Map?.ServerTag ?? string.Empty },
 				{ "buildid", Application.Version },
 				{ "hdn", config.Hidden ? "1" : "0" },
 				{ "api", Protocol.Api.ToString() }
@@ -352,6 +384,7 @@ internal static class DedicatedServer
 
 			Networking.UpdateServerName( hostname );
 			Networking.MaxPlayers = config.MaxPlayers;
+			Networking.IsDedicatedServer = Application.IsDedicatedServer;
 
 			_mapName = mapName;
 			_name = hostname;

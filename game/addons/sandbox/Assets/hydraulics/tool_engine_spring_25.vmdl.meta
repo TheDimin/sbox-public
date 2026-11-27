@@ -1,0 +1,32 @@
+{
+  "guid": "33002ad6-3d7f-4763-ad8d-bde0fa9d3eca",
+  "publish": {
+    "Enabled": false,
+    "ProjectConfig": {
+      "Title": "Tool Engine Spring 25",
+      "Type": "model",
+      "Org": "local",
+      "OrgTitle": null,
+      "Ident": "toolenginespring25",
+      "Schema": 0,
+      "IncludeSourceFiles": false,
+      "Resources": null,
+      "PublishExclude": null,
+      "PublishUsedAssetsOnly": false,
+      "PackageReferences": null,
+      "EditorReferences": [
+        "facepunch.rubbera#313530"
+      ],
+      "Mounts": null,
+      "IsStandaloneOnly": false,
+      "AI": {
+        "EnableMcpCommunication": true
+      },
+      "Metadata": {
+        "SingleAssetSource": "hydraulics/tool_engine_spring_25.vmdl",
+        "ParentPackage": "facepunch.sandbox"
+      }
+    },
+    "HammerAutoPackageReferences": null
+  }
+}

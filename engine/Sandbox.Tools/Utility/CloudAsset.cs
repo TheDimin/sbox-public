@@ -1,4 +1,6 @@
-﻿using System;
+using System;
+using System.Collections.Concurrent;
+using System.IO;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
@@ -19,7 +21,10 @@ public class CloudAsset
 	private static bool IsInstalled( string ident )
 	{
 		// this shouldn't really happen, but I guess just in case someone fudges a file
-		if ( !Package.TryParseIdent( ident, out var parts ) )
+		if ( !Package.TryParseIdentParts( ident, out var parts ) )
+			return true;
+
+		if ( Project.FindByIdent( parts.org, parts.package ) is not null )
 			return true;
 
 		var packageIdentNoVersion = $"{parts.org}.{parts.package}";
@@ -29,7 +34,7 @@ public class CloudAsset
 			return true;
 
 		// Do we have this package on disk already?
-		var localPackage = AssetSystem.CloudDirectory.FindPackage( packageIdentNoVersion );
+		var localPackage = AssetSystem.CloudDirectory?.FindPackage( packageIdentNoVersion );
 		if ( localPackage is null )
 			return false;
 
@@ -49,8 +54,15 @@ public class CloudAsset
 	[ConCmd( "install", ConVarFlags.Protected )]
 	public static async Task InstallSingle( string ident )
 	{
-		var asset = await AssetSystem.InstallAsync( ident );
-		EditorUtility.InspectorObject = asset;
+		try
+		{
+			var asset = await AssetSystem.InstallAsync( ident );
+			EditorUtility.InspectorObject = asset;
+		}
+		catch ( AggregateException ex )
+		{
+			Log.Warning( ex, $"Error installing package {ident}" );
+		}
 	}
 
 
@@ -65,7 +77,7 @@ public class CloudAsset
 		Dictionary<string, int?> versions = new();
 		foreach ( var ident in packages )
 		{
-			if ( !Package.TryParseIdent( ident, out var parts ) )
+			if ( !Package.TryParseIdentParts( ident, out var parts ) )
 				continue;
 
 			string fullIdent = Package.FormatIdent( parts.org, parts.package );
@@ -98,7 +110,8 @@ public class CloudAsset
 	/// </summary>
 	public static async Task<bool> Install( string windowTitle, IEnumerable<string> packages )
 	{
-		if ( packages.Count() == 0 ) return true;
+		var undownloaded = DeduplicateReferences( packages ).Where( x => !IsInstalled( x ) ).ToArray();
+		if ( undownloaded.Length == 0 ) return true;
 
 		if ( Backend.Package is null )
 		{
@@ -110,15 +123,13 @@ public class CloudAsset
 		progress.Title = windowTitle;
 		var cancel = progress.GetCancel();
 
-		var undownloaded = DeduplicateReferences( packages ).Where( x => !IsInstalled( x ) ).ToArray();
-
-		int total = undownloaded.Count();
+		int total = undownloaded.Length;
 		int i = 0;
 
 		await undownloaded.ForEachTaskAsync( async ident =>
 		{
 			Package package = await Package.FetchAsync( ident, true );
-			if ( package == null )
+			if ( package?.Revision is null )
 				return;
 
 			progress.Title = $"Installing '{package.Title}'";
@@ -126,7 +137,14 @@ public class CloudAsset
 			progress.Current = ++i;
 
 			Log.Info( $"Installing '{package.FullIdent}' (version: {package.Revision.VersionId})" );
-			await AssetSystem.InstallAsync( package, false, null, cancel );
+			try
+			{
+				await AssetSystem.InstallAsync( package, false, null, cancel );
+			}
+			catch ( AggregateException ex )
+			{
+				Log.Warning( ex, $"Error installing package {ident}" );
+			}
 
 		}, token: cancel, maxRunning: 8 );
 
@@ -139,7 +157,8 @@ public class CloudAsset
 	/// </summary>
 	public static async Task<bool> Install( IEnumerable<string> packages, CancellationToken token )
 	{
-		if ( !packages.Any() ) return true;
+		var undownloaded = DeduplicateReferences( packages ).Where( x => !IsInstalled( x ) ).ToArray();
+		if ( undownloaded.Length == 0 ) return true;
 
 		if ( Backend.Package is null )
 		{
@@ -147,10 +166,7 @@ public class CloudAsset
 			return false;
 		}
 
-		var undownloaded = DeduplicateReferences( packages ).Where( x => !IsInstalled( x ) ).ToArray();
-
-		int total = undownloaded.Count();
-		if ( total == 0 ) return true;
+		int total = undownloaded.Length;
 
 		Log.Info( $"Installing {total:n0} missing cloud assets.." );
 		var tasks = undownloaded.Select( ident => InstallPackage( ident, total, token ) ).ToList();
@@ -211,10 +227,11 @@ public class CloudAsset
 		int count = 0;
 		foreach ( var ident in packages )
 		{
-			if ( !Package.TryParseIdent( ident, out var parts ) )
+			if ( !Package.TryParseIdentParts( ident, out var parts ) )
 				continue;
 
-			var package = AssetSystem.CloudDirectory.FindPackage( Package.FormatIdent( parts.org, parts.package ) );
+			var package = Project.FindByIdent( parts.org, parts.package )?.Package
+				?? AssetSystem.CloudDirectory.FindPackage( Package.FormatIdent( parts.org, parts.package ) );
 			if ( package is null )
 				continue;
 			if ( string.Equals( package.FullIdent, gamePackage.FullIdent, StringComparison.OrdinalIgnoreCase ) )
@@ -296,8 +313,19 @@ public class CloudAsset
 			}
 		}
 
+		var cacheStore = FileSystem.ProjectTemporary;
+		LoadReferenceCache( cacheStore );
 		ReferenceIndex.Build( AssetSystem.All, x => x.AbsolutePath, ReadReferences );
-		return ReferenceIndex.Snapshot( asset => !currentProjectOnly || validAssetPaths.Any( path => asset.AbsolutePath.StartsWith( path, StringComparison.OrdinalIgnoreCase ) ) );
+		var result = ReferenceIndex.Snapshot( asset => !currentProjectOnly || validAssetPaths.Any( path => asset.AbsolutePath.StartsWith( path, StringComparison.OrdinalIgnoreCase ) ) );
+		var currentFiles = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
+		foreach ( var asset in AssetSystem.All.Where( x => x.AssetType.IsGameResource ) )
+		{
+			var file = asset.GetSourceFile( true );
+			if ( string.IsNullOrWhiteSpace( file ) ) file = asset.GetCompiledFile( true );
+			if ( !string.IsNullOrWhiteSpace( file ) ) currentFiles.Add( file );
+		}
+		SaveReferenceCache( cacheStore, currentFiles );
+		return result;
 	}
 
 	internal static void UpdateReferenceIndex( Asset asset, string json = null )
@@ -330,11 +358,9 @@ public class CloudAsset
 	{
 		if ( asset.AssetType.IsGameResource )
 		{
-			string json = null;
 			try
 			{
-				json = asset.ReadJson();
-				return ReadGameResourceReferences( asset, json );
+				return GetGameResourceReferences( asset, new HashSet<string>( StringComparer.OrdinalIgnoreCase ) );
 			}
 			catch ( Exception e )
 			{
@@ -365,6 +391,120 @@ public class CloudAsset
 			Log.Info( json );
 			return Array.Empty<string>();
 		}
+	}
+
+	internal readonly record struct CachedReferences( DateTime WriteTime, long Length, string[] Packages );
+
+	/// <summary>
+	/// Parsed <c>__references</c> per resource file, so repeated scans only re-read files that changed.
+	/// Saved to the project's .sbox folder so the scan on startup doesn't open every resource again.
+	/// </summary>
+	static readonly ConcurrentDictionary<string, CachedReferences> _referenceCache = new( StringComparer.OrdinalIgnoreCase );
+
+	const string ReferenceCacheFile = "cloud_references.json";
+
+	/// <summary>
+	/// The store <see cref="_referenceCache"/> was loaded from. A different one means another project was opened.
+	/// </summary>
+	static BaseFileSystem _referenceCacheStore;
+
+	/// <summary>
+	/// <see cref="_referenceCache"/> differs from what's saved in <see cref="_referenceCacheStore"/>.
+	/// </summary>
+	static bool _referenceCacheDirty;
+
+	internal static void LoadReferenceCache( BaseFileSystem store )
+	{
+		if ( store == _referenceCacheStore )
+			return;
+
+		_referenceCacheStore = store;
+		_referenceCache.Clear();
+		_referenceCacheDirty = false;
+
+		var saved = store?.ReadJsonOrDefault<Dictionary<string, CachedReferences>>( ReferenceCacheFile );
+		if ( saved is null )
+			return;
+
+		foreach ( var (file, entry) in saved )
+		{
+			if ( entry.Packages is not null )
+				_referenceCache[file] = entry;
+		}
+	}
+
+	/// <summary>
+	/// Forget files the scan no longer saw (deleted, moved, or not in the project anymore) and save if anything changed.
+	/// </summary>
+	internal static void SaveReferenceCache( BaseFileSystem store, HashSet<string> scannedFiles )
+	{
+		if ( scannedFiles is not null )
+			foreach ( var file in _referenceCache.Keys )
+			{
+				if ( !scannedFiles.Contains( file ) && _referenceCache.TryRemove( file, out _ ) )
+					_referenceCacheDirty = true;
+			}
+
+		if ( !_referenceCacheDirty || store is null )
+			return;
+
+		try
+		{
+			store.WriteJson( ReferenceCacheFile, _referenceCache );
+			_referenceCacheDirty = false;
+		}
+		catch ( Exception e )
+		{
+			// Not fatal, the next scan reads the resources again
+			Log.Warning( e, $"Couldn't save cloud reference cache: {e.Message}" );
+		}
+	}
+
+	static string[] GetGameResourceReferences( Asset asset, HashSet<string> scannedFiles )
+	{
+		// Same file ReadJson reads: source if present, compiled otherwise
+		var file = asset.GetSourceFile( true );
+		if ( string.IsNullOrWhiteSpace( file ) )
+			file = asset.GetCompiledFile( true );
+
+		if ( string.IsNullOrWhiteSpace( file ) )
+			return [];
+
+		scannedFiles.Add( file );
+		return GetCachedReferences( file, asset.ReadJson );
+	}
+
+	/// <summary>
+	/// The top level <c>__references</c> of a resource's json, re-read only when the file's write time or
+	/// length changes. Length catches two saves landing on the same write time.
+	/// </summary>
+	internal static string[] GetCachedReferences( string file, Func<string> readJson )
+	{
+		var info = new FileInfo( file );
+		var writeTime = info.Exists ? info.LastWriteTimeUtc : default;
+		var length = info.Exists ? info.Length : 0;
+
+		if ( _referenceCache.TryGetValue( file, out var cached ) && cached.WriteTime == writeTime && cached.Length == length )
+			return cached.Packages;
+
+		string[] packages = [];
+		try
+		{
+			var json = readJson();
+			if ( !string.IsNullOrWhiteSpace( json ) && JsonNode.Parse( json ) is JsonObject jso && jso["__references"] is JsonArray refs )
+			{
+				packages = refs.Select( x => x?.ToString() ).ToArray();
+			}
+		}
+		catch ( Exception e )
+		{
+			// Cached below, so this only fires again once the file changes
+			Log.Warning( e, $"Couldn't read cloud references from {file}: {e.Message}" );
+		}
+
+		_referenceCache[file] = new CachedReferences( writeTime, length, packages );
+		_referenceCacheDirty = true;
+		return packages;
 	}
 }
 

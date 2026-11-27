@@ -47,6 +47,8 @@ public static unsafe partial class Sound
 
 		handle.Distance = soundEvent.Distance;
 		handle.Falloff = soundEvent.Falloff;
+		handle.FalloffMode = soundEvent.FalloffMode;
+		handle.MinDistance = soundEvent.MinDistance;
 		handle.TargetMixer = soundEvent.DefaultMixer.Get();
 
 		if ( soundEvent.UI )
@@ -67,6 +69,7 @@ public static unsafe partial class Sound
 			handle.AirAbsorption = soundEvent.AirAbsorption;
 			handle.OcclusionEnabled = soundEvent.OcclusionEnabled;
 			handle.ReverbEnabled = soundEvent.ReverbEnabled;
+			handle.DopplerScale = soundEvent.Doppler ? 1f : 0f;
 		}
 
 		return handle;

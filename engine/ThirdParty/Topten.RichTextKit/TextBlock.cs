@@ -47,10 +47,43 @@ namespace Topten.RichTextKit
 					value = 0;
 				if ( _maxWidth != value )
 				{
+					var keep = LayoutHoldsAtMaxWidth( value );
 					_maxWidth = value;
-					InvalidateLayout();
+					if ( keep )
+						_maxWidthResolved = _noWrap && _overflow == TextOverflow.None ? float.MaxValue : (value ?? float.MaxValue);
+					else
+						InvalidateLayout();
 				}
 			}
+		}
+
+		/// <summary>
+		/// Whether laying out again at a new max width would give the current layout: it's up to date, left aligned (other
+		/// alignments place lines against the max width), with no line limit or overflow handling (which use the width to
+		/// cut lines), laid out without a width (or at this one), and every line, trailing whitespace included, fits the new
+		/// width: lines only wrap where they don't. A label measured unbounded and then laid out at its own width keeps its
+		/// layout this way.
+		/// </summary>
+		bool LayoutHoldsAtMaxWidth( float? value )
+		{
+			if ( _needsLayout || _truncated || _maxLines.HasValue || _overflow != TextOverflow.None ) return false;
+			if ( ResolveTextAlignment() != TextAlignment.Left ) return false;
+
+			var resolved = _noWrap ? float.MaxValue : (value ?? float.MaxValue);
+			if ( resolved == _maxWidthResolved ) return true;
+
+			// Only from a layout made without a width, so no line was wrapped, while every line still fits, with room to spare
+			// for rounding in the line breaker's sums
+			if ( _maxWidthResolved != float.MaxValue ) return false;
+			foreach ( var line in _lines )
+			{
+				foreach ( var run in line.RunsInternal )
+				{
+					if ( run.XCoord + run.Width + 0.5f > resolved ) return false;
+				}
+			}
+
+			return true;
 		}
 
 		/// <summary>
@@ -268,6 +301,8 @@ namespace Topten.RichTextKit
 			if ( _truncated )
 				return;
 
+			_layoutVersion++;
+
 			if ( _lines.Count == 0 )
 				throw new InvalidOperationException( "Ellipsis can't be appended to a text block with no lines" );
 
@@ -336,6 +371,7 @@ namespace Topten.RichTextKit
 			if ( !force && !_needsLayout )
 				return;
 			_needsLayout = false;
+			_layoutVersion++;
 
 			// Resolve max width/height
 			_maxWidthResolved = _maxWidth ?? float.MaxValue;
@@ -463,6 +499,20 @@ namespace Topten.RichTextKit
 				return _fontRuns;
 			}
 		}
+
+		/// <summary>
+		/// Changes whenever the lines, font runs or glyph positions do, so whatever is built from them can be cached
+		/// </summary>
+		public int LayoutVersion
+		{
+			get
+			{
+				Layout();
+				return _layoutVersion;
+			}
+		}
+
+		int _layoutVersion;
 
 		/// <summary>
 		/// Get all the lines for this text block
@@ -1325,8 +1375,9 @@ namespace Topten.RichTextKit
 			if ( length == 0 )
 				return;
 
-			// Get the typeface
+			// Match fallback fonts before applying low-level axis overrides to the selected faces.
 			var typeface = TypefaceFromStyle( style );
+			var primary = VariableTypeface.Resolve( typeface, style );
 
 			// Get the slice of code points
 			var codePointsSlice = _codePoints.SubSlice( start, length );
@@ -1334,7 +1385,8 @@ namespace Topten.RichTextKit
 			// Split into font fallback runs
 			foreach ( var fontRun in FontFallback.GetFontRuns( codePointsSlice, typeface, style.ReplacementCharacter ) )
 			{
-				AddFontRun( styleRun, start + fontRun.Start, fontRun.Length, direction, style, fontRun.Typeface, typeface );
+				var face = fontRun.Typeface == typeface ? primary : VariableTypeface.Resolve( fontRun.Typeface, style );
+				AddFontRun( styleRun, start + fontRun.Start, fontRun.Length, direction, style, face, primary );
 			}
 		}
 
@@ -1475,7 +1527,7 @@ namespace Topten.RichTextKit
 			fontRun.Descent = shaped.Descent;
 			fontRun.Leading = shaped.Leading;
 			fontRun.Width = shaped.EndXCoord.X;
-			fontRun.SpaceWidth = typeface.ToFont( fontRun.Style.FontSize ).MeasureText( spaceCharacter );
+			fontRun.SpaceWidth = shaper.GetSpaceWidth( style.FontSize );
 
 			return fontRun;
 		}
@@ -1668,7 +1720,7 @@ namespace Topten.RichTextKit
 					if ( fr.Direction != _resolvedBaseDirection )
 					{
 						// What is this a fallback for?
-						var asFallbackFor = TypefaceFromStyle( fr.Style, false );
+						var asFallbackFor = VariableTypeface.Resolve( TypefaceFromStyle( fr.Style ), fr.Style );
 
 						// Create a new font run over the same text span but using the base direction
 						_fontRuns[i] = CreateFontRun( fr.StyleRun, fr.CodePoints, _resolvedBaseDirection, fr.Style, fr.Typeface, asFallbackFor );
@@ -2105,8 +2157,6 @@ namespace Topten.RichTextKit
 		/// </summary>
 		static Utf32Buffer ellipsis = new Utf32Buffer( "…" );
 
-		static ushort[] spaceCharacter = { ' ' };
-
 		/// <summary>
 		/// Create a special font run containing the ellipsis character
 		/// based on an existing run
@@ -2120,9 +2170,11 @@ namespace Topten.RichTextKit
 
 			// Split into font fallback runs (there should only ever be just one)
 			var fontRun = FontFallback.GetFontRuns( ellipsis.AsSlice(), typeface ).Single();
+			var primary = VariableTypeface.Resolve( typeface, basedOn.Style );
+			var face = fontRun.Typeface == typeface ? primary : VariableTypeface.Resolve( fontRun.Typeface, basedOn.Style );
 
 			// Create the new run and mark is as a special run type for ellipsis
-			var fr = CreateFontRun( basedOn.StyleRun, ellipsis.SubSlice( fontRun.Start, fontRun.Length ), _resolvedBaseDirection, basedOn.Style, fontRun.Typeface, typeface );
+			var fr = CreateFontRun( basedOn.StyleRun, ellipsis.SubSlice( fontRun.Start, fontRun.Length ), _resolvedBaseDirection, basedOn.Style, face, primary );
 			fr.RunKind = FontRunKind.Ellipsis;
 
 			// Done

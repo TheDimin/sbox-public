@@ -15,6 +15,10 @@ public sealed class WebSurface : IDisposable
 
 	Task<HTML_BrowserReady_t> initTask;
 	Action _initQueue;
+	bool _disposed;
+
+	readonly Sandbox.Engine.GlobalContext _context;
+	readonly System.Threading.CancellationToken _session;
 
 	uint BrowserId;
 
@@ -67,6 +71,13 @@ public sealed class WebSurface : IDisposable
 	internal WebSurface( bool isLimited )
 	{
 		IsLimited = isLimited;
+
+		if ( isLimited )
+		{
+			_context = Sandbox.Engine.GlobalContext.Current;
+			_session = _context.CancellationTokenSource?.Token ?? default;
+		}
+
 		_ = CreateAsync();
 	}
 
@@ -88,8 +99,18 @@ public sealed class WebSurface : IDisposable
 		if ( initTask == null )
 			return;
 
-		BrowserId = s.UnBrowserHandle;
 		initTask = null;
+
+		// Disposed while waiting for the browser, remove it before it loads anything
+		if ( _disposed )
+		{
+			if ( s.UnBrowserHandle != 0 )
+				steamHTMLSurface.RemoveBrowser( s.UnBrowserHandle );
+
+			return;
+		}
+
+		BrowserId = s.UnBrowserHandle;
 
 		lock ( All )
 		{
@@ -107,6 +128,11 @@ public sealed class WebSurface : IDisposable
 
 	public void Dispose()
 	{
+		_disposed = true;
+		_initQueue = null;
+		OnTexture = null;
+		GC.SuppressFinalize( this );
+
 		if ( BrowserId == 0 )
 			return;
 
@@ -249,6 +275,16 @@ public sealed class WebSurface : IDisposable
 
 		var size = new Vector2( x.UnWide, x.UnTall );
 		_size = size;
+
+		if ( _context is null )
+		{
+			OnTexture?.Invoke( s, size );
+			return;
+		}
+
+		if ( _session.IsCancellationRequested ) return;
+
+		using var scope = new Sandbox.Engine.GlobalContext.GlobalContextScope( _context );
 		OnTexture?.Invoke( s, size );
 	}
 

@@ -111,7 +111,7 @@ public partial class PackagePopup : PopupWidget
 			bool isFav = Package.Interaction.Favourite;
 			var favBtn = panel.Layout.Add( new Button.Clear(
 				isFav ? "Remove Favourite" : "Add to Favourites",
-				isFav ? "favorite" : "favorite_border" ) );
+				isFav ? "heart_minus" : "heart_plus" ) );
 			favBtn.SetProperty( "is-active", isFav );
 			favBtn.MouseClick = () => _ = Package.SetFavouriteAsync( !Package.Interaction.Favourite );
 		}
@@ -312,7 +312,14 @@ public partial class PackagePopup : PopupWidget
 
 	async Task OpenInEditor()
 	{
-		(await AssetSystem.InstallAsync( Package.FullIdent ))?.OpenInEditor();
+		try
+		{
+			(await AssetSystem.InstallAsync( Package.FullIdent ))?.OpenInEditor();
+		}
+		catch ( AggregateException ex )
+		{
+			Log.Warning( ex, $"Error installing package {Package.FullIdent}" );
+		}
 	}
 
 	async Task Install()
@@ -321,11 +328,19 @@ public partial class PackagePopup : PopupWidget
 		isInstalling = true;
 		if ( installButton.IsValid() ) installButton.Text = "Installing..";
 
-		await AssetSystem.InstallAsync( Package.FullIdent, false );
-
-		if ( !IsValid ) return;
-		isInstalling = false;
-		Rebuild();
+		try
+		{
+			await AssetSystem.InstallAsync( Package.FullIdent, false );
+		}
+		catch ( AggregateException ex )
+		{
+			Log.Warning( ex, $"Error installing package {Package.FullIdent}" );
+		}
+		finally
+		{
+			isInstalling = false;
+			if ( IsValid ) Rebuild();
+		}
 	}
 
 	protected override void OnPaint()

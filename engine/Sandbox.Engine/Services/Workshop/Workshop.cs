@@ -1,5 +1,6 @@
 using Sandbox.Services;
 using Sandbox.Services.Players;
+using Steamworks;
 using System.Text.Json.Serialization;
 using System.Threading;
 
@@ -11,6 +12,16 @@ namespace Sandbox;
 /// </summary>
 internal static partial class Workshop
 {
+	/// <summary>
+	/// The tags a game's publisher can pick for it - what it is
+	/// </summary>
+	internal static readonly string[] GameTags = ["Action", "Adventure", "Arcade", "Building", "Casual", "Competitive", "Cozy", "Exploration", "Horror", "Idle", "Party", "Physics", "Platformer", "Puzzle", "Racing", "Roguelike", "Roleplay", "Sandbox", "Shooter", "Simulation", "Social", "Sports", "Strategy", "Survival", "Tycoon"];
+
+	/// <summary>
+	/// The tags a game gets from its player settings - how it's played
+	/// </summary>
+	internal static readonly string[] PlayerTags = ["Singleplayer", "Multiplayer", "Co-op", "Versus"];
+
 	/// <summary>
 	/// An item on the Steam Workshop - a map, a game, someone's saved dupe - as the Workshop describes it. Read straight
 	/// from Steam's answer to a query.
@@ -24,6 +35,11 @@ internal static partial class Workshop
 
 		public string Title { get; init; }
 		public string Description { get; init; }
+
+		/// <summary>
+		/// What this is
+		/// </summary>
+		public WorkshopFileType FileType { get; init; }
 
 		/// <summary>
 		/// Its preview image
@@ -77,6 +93,11 @@ internal static partial class Workshop
 		public DateTimeOffset Updated { get; init; }
 
 		public IReadOnlyList<string> Tags { get; init; } = Array.Empty<string>();
+
+		/// <summary>
+		/// Required Workshop items. Null if Steam couldn't return the dependency list.
+		/// </summary>
+		public IReadOnlyList<ulong> Children { get; init; }
 		public IReadOnlyDictionary<string, string> KeyValues { get; init; } = new Dictionary<string, string>();
 
 		/// <summary>
@@ -170,10 +191,17 @@ internal static partial class Workshop
 	/// <summary>
 	/// <see cref="DownloadAsync"/>, to the folder it's installed in - telling <paramref name="progress"/> how it's going
 	/// </summary>
-	internal static Task<string> InstallAsync( ulong id, Action<State> progress = null, CancellationToken token = default )
+	internal static async Task<string> InstallAsync( ulong id, Action<State> progress = null, CancellationToken token = default )
 	{
-		return Ugc.InstallAsync( id, progress is null ? null : x => progress( GetState( id, x ) ), token );
+		var folder = await Ugc.InstallAsync( id, progress is null ? null : x => progress( GetState( id, x ) ), token );
+		return folder ?? InstallFallback?.Invoke( id );
 	}
+
+	/// <summary>
+	/// Where an item is installed when Steam couldn't install it - for apps without Steam's workshop, like SceneLab, which
+	/// points it at what the game installed. Null in a game.
+	/// </summary>
+	internal static Func<ulong, string> InstallFallback { get; set; }
 
 	/// <summary>
 	/// How we've voted on this item - true for up, false for down, null if we haven't, or Steam couldn't be asked
@@ -184,6 +212,11 @@ internal static partial class Workshop
 	/// Vote this item up or down. There's no taking a vote back, only changing it. False if Steam didn't take it.
 	/// </summary>
 	internal static Task<bool> VoteAsync( ulong id, bool up, CancellationToken token = default ) => Ugc.SetVoteAsync( id, up, token );
+
+	/// <summary>
+	/// Add this item to the user's favourites, or take it off. False if Steam didn't take it.
+	/// </summary>
+	internal static Task<bool> FavouriteAsync( ulong id, bool favourite, CancellationToken token = default ) => Ugc.SetFavouriteAsync( id, favourite, token );
 
 	/// <summary>
 	/// Are we subscribed to this item? Cheap - it's kept up to date as subscriptions change.
@@ -242,4 +275,23 @@ internal static partial class Workshop
 	/// An item's page on the Steam Workshop
 	/// </summary>
 	internal static string GetUrl( ulong id ) => $"https://steamcommunity.com/sharedfiles/filedetails/?id={id}";
+
+	/// <summary>
+	/// Ask the backend which item an ident is linked to. 0 if there isn't one, or we couldn't ask.
+	/// </summary>
+	internal static async Task<ulong> LookupAsync( string ident )
+	{
+		if ( string.IsNullOrWhiteSpace( ident ) ) return 0;
+		if ( Backend.Workshop is null ) return 0;
+
+		try
+		{
+			var result = await Backend.Workshop.Lookup( ident );
+			return result.WorkshopId;
+		}
+		catch ( Exception e ) when ( e is System.Net.Http.HttpRequestException or TaskCanceledException or Refit.ApiException )
+		{
+			return 0;
+		}
+	}
 }

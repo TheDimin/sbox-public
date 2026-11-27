@@ -5,6 +5,7 @@ namespace Sandbox.UI;
 /// <summary>
 /// Keyboard (and mouse) key press <see cref="PanelEvent"/>.
 /// </summary>
+[Expose]
 public record ButtonEvent
 {
 	/// <summary>
@@ -48,7 +49,7 @@ public record ButtonEvent
 
 	internal ButtonEvent( ButtonCode button, bool pressed, KeyboardModifiers modifiers )
 	{
-		Button = InputEventQueue.NormalizeButtonName( button.ToString() );
+		Button = InputEventQueue.NormalizeButtonName( button );
 		Pressed = pressed;
 		VirtualKey = Sandbox.Engine.KeyTranslation.ButtonCodeToVirtualKey( button );
 		KeyboardModifiers = modifiers;
@@ -56,7 +57,7 @@ public record ButtonEvent
 
 	internal ButtonEvent( ButtonCode button, bool pressed )
 	{
-		Button = InputEventQueue.NormalizeButtonName( button.ToString() );
+		Button = InputEventQueue.NormalizeButtonName( button );
 		Pressed = pressed;
 	}
 

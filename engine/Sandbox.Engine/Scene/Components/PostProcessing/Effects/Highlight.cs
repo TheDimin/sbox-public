@@ -11,13 +11,15 @@ namespace Sandbox;
 public sealed class Highlight : BasePostProcess<Highlight>
 {
 	CommandList commands = new();
+	readonly List<Renderer> _targets = new();
 
 	private static Material Shader = Material.FromShader( "shaders/postprocess/objecthighlight/objecthighlight.shader" );
 
 	public override void Render()
 	{
-		var outlines = Scene.GetAll<HighlightOutline>();
-		if ( !outlines.Any() ) return;
+		if ( Scene.Get<HighlightOutline>() is null ) return;
+
+		var outlines = Scene.Query<HighlightOutline>();
 
 		commands.Reset();
 
@@ -50,7 +52,10 @@ public sealed class Highlight : BasePostProcess<Highlight>
 	{
 		var attributes = commands.Attributes;
 
-		foreach ( var model in glow.GetOutlineTargets() )
+		_targets.Clear();
+		glow.GetOutlineTargets( _targets );
+
+		foreach ( var model in _targets )
 		{
 			var shapeMat = glow.Material ?? Shader;
 

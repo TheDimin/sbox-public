@@ -49,6 +49,11 @@ public abstract class AssetPicker : Dialog
 	/// </summary>
 	public Action<Package> OnPackagePicked { get; set; }
 
+	/// <summary>
+	/// A Workshop item was picked. The asset picker will be closed after this.
+	/// </summary>
+	public Action<ulong> OnWorkshopItemPicked { get; set; }
+
 	public AssetType AssetType { get; init; }
 
 	public PickerOptions Options { get; init; }
@@ -80,6 +85,12 @@ public abstract class AssetPicker : Dialog
 
 	public void SetSelection( string resource )
 	{
+		if ( ulong.TryParse( resource, out var workshopId ) )
+		{
+			SetSelection( workshopId );
+			return;
+		}
+
 		Asset asset = AssetSystem.FindByPath( resource );
 		if ( asset is null && Package.TryGetCached( resource, out Package package ) )
 		{
@@ -129,7 +140,16 @@ public abstract class AssetPicker : Dialog
 			if ( !AssetSystem.IsCloudInstalled( package ) )
 			{
 				Hide();
-				a = await AssetSystem.InstallAsync( package.FullIdent );
+				try
+				{
+					a = await AssetSystem.InstallAsync( package.FullIdent );
+				}
+				catch ( AggregateException ex )
+				{
+					Log.Error( ex, $"Failed to install package: {package.FullIdent}" );
+					if ( IsValid ) Show();
+					return;
+				}
 				if ( a is null )
 				{
 					Log.Error( $"Failed to install package: {package.FullIdent}" );
@@ -157,6 +177,11 @@ public abstract class AssetPicker : Dialog
 
 	public virtual void SetSelection( Asset asset ) { }
 	public virtual void SetSelection( Package package ) { }
+
+	/// <summary>
+	/// The current value is a Workshop item.
+	/// </summary>
+	public virtual void SetSelection( ulong workshopId ) { }
 
 	public virtual void SetSearchText( string value ) { }
 

@@ -1,4 +1,4 @@
-﻿using Sandbox.Audio;
+using Sandbox.Audio;
 using Sandbox.Engine;
 using Sandbox.Internal;
 using Sentry;
@@ -20,7 +20,9 @@ internal sealed partial class PackageLoader : IDisposable
 	private List<LoadedAssembly> Loaded { get; set; } = new();
 	private LoadContext LoadContext { get; set; }
 	private ILHotload ILHotload { get; set; }
-	private HotloadManager HotloadManager { get; set; }
+	internal HotloadManager HotloadManager { get; private set; }
+	private bool retryPackageMigration;
+	private Assembly retainedScriptAssembly;
 	private List<LoadedAssembly> IncomingThisHotload { get; } = new();
 
 	/// <summary>
@@ -28,10 +30,6 @@ internal sealed partial class PackageLoader : IDisposable
 	/// </summary>
 	public bool ToolsMode { get; set; }
 
-	/// <summary>
-	/// Disables access control on all loaded local packages, but not remote packages.
-	/// </summary>
-	private bool DisableAccessControl { get; init; }
 
 	Logger log { get; } = new Logger( "PackageLoader" );
 	HashSet<PackageManager.ActivePackage> loadedPackages = new();
@@ -40,7 +38,7 @@ internal sealed partial class PackageLoader : IDisposable
 	/// <summary>
 	/// Called on Game Loop Init
 	/// </summary>
-	public PackageLoader( string name, Assembly parentAssembly, bool disableAccessControl = false )
+	public PackageLoader( string name, Assembly parentAssembly )
 	{
 		log = new Logger( $"PackageLoader/{name}" );
 		LoadContext = new LoadContext( parentAssembly );
@@ -50,9 +48,8 @@ internal sealed partial class PackageLoader : IDisposable
 			ILHotload = new ILHotload( name );
 		}
 		HotloadManager = new HotloadManager( name );
-		HotloadManager.OnSuccess += OnFullHotloadSuccess;
-		HotloadManager.AssemblyResolver = PackageManager.AccessControl;
-		DisableAccessControl = disableAccessControl;
+		HotloadManager.OnSuccess += OnHotloadSuccess;
+		HotloadManager.AssemblyResolver = PackageManager.AssemblyResolver;
 
 		loadedPackages.Clear();
 		changedPackageDlls.Clear();
@@ -80,61 +77,24 @@ internal sealed partial class PackageLoader : IDisposable
 		dllWatchers.Clear();
 
 		OnAfterHotload = null;
+		retryPackageMigration = false;
+		retainedScriptAssembly = null;
 
 		Loaded.Clear();
 		Loaded = null;
 
+		LoadContext.UnloadChildren();
 		LoadContext.Unload();
 		LoadContext = null;
+
+		// The runtime's cache of reflected generic instantiations would keep the contexts alive
+		ReflectionUtility.ForgetCollectibleMethodInstantiations();
 
 		ILHotload?.Dispose();
 		ILHotload = null;
 
 		HotloadManager.Dispose();
 		HotloadManager = null;
-	}
-
-	/// <summary>
-	/// Make sure we should be able to load this dll
-	/// </summary>
-	bool TestAccessControl( System.IO.Stream dll, out TrustedBinaryStream trustedDll )
-	{
-		var eventRecord = new Api.Events.EventRecord( $"TestAccessControl" );
-		eventRecord.SetValue( "AssemblySize", dll.Length );
-		eventRecord.StartTimer( "Time" );
-
-		AccessControlResult result = new AccessControlResult();
-		try
-		{
-			result = PackageManager.AccessControl.VerifyAssembly( dll, out trustedDll );
-			if ( result.Success )
-			{
-				eventRecord.FinishTimer( "Time" );
-				eventRecord.Submit();
-
-				return true;
-			}
-		}
-		catch ( System.Exception e )
-		{
-			log.Warning( e, $"Assembly Exception: {e.Message}" );
-		}
-
-		foreach ( var error in result.Errors )
-		{
-			log.Warning( $"Whitelist Error: {error}" );
-		}
-
-		foreach ( var error in result.WhitelistErrors )
-		{
-			var metric = new Api.Events.EventRecord( $"accesscontrol.whitelist" );
-			metric.SetValue( "type", error.Name );
-			metric.SetValue( "locations", error.Locations );
-			metric.Submit();
-		}
-
-		trustedDll = null;
-		return false;
 	}
 
 
@@ -151,8 +111,9 @@ internal sealed partial class PackageLoader : IDisposable
 
 		// Entries without a package come from a stream (e.g. assemblies sent by a server)
 		// and were already swapped in by AddAssembly when they arrived.
+		loadedPackages.RemoveWhere( x => x.FileSystem is null );
 		var changedPackageDlls = allChangedDlls
-										.Where( x => x.ap is not null )
+										.Where( x => x.ap?.FileSystem is not null )
 										.ToArray();
 
 		var changedPackages = new HashSet<PackageManager.ActivePackage>();
@@ -279,17 +240,24 @@ internal sealed partial class PackageLoader : IDisposable
 	{
 		assembly = null;
 
-		if ( !TestAccessControl( stream, out var trustedDll ) )
+		byte[] bytes;
+		using ( var ms = new System.IO.MemoryStream() )
 		{
-			log.Warning( $"Couldn't load {assmName} - access control error" );
-			trustedDll?.Dispose();
-			return false;
+			stream.CopyTo( ms );
+			bytes = ms.ToArray();
 		}
 
-		assembly = AddAssembly( null, assmName, trustedDll, null );
+		try
+		{
+			assembly = AddAssembly( null, assmName, bytes, null );
+		}
+		catch ( Exception e )
+		{
+			log.Warning( e, $"Couldn't load streamed assembly '{assmName}'" );
+			return false;
+		}
 		changedPackageDlls.Add( (null, assmName) );
 
-		trustedDll?.Dispose();
 		return assembly is not null;
 	}
 
@@ -312,48 +280,6 @@ internal sealed partial class PackageLoader : IDisposable
 			var loaded = Loaded.FirstOrDefault( x => string.Equals( x.Name, assmName, StringComparison.OrdinalIgnoreCase ) );
 			if ( loaded?.CompiledAssemblyBytes is { } previous && bytes.AsSpan().SequenceEqual( previous ) )
 				return null;
-		}
-
-		var dll_stream = new System.IO.MemoryStream( bytes );
-
-		TrustedBinaryStream trustedDll = null;
-
-		//
-		// Careful now. Remote packages should ALWAYS be access controlled.
-		// Local packages, doesn't matter so much.
-		//
-		bool needsAccessControl = true;
-		if ( ap.Package is LocalPackage localPackage )
-		{
-			if ( DisableAccessControl ) needsAccessControl = false;
-			if ( ToolsMode && isToolAssembly ) needsAccessControl = false;
-			if ( localPackage.Project.Config.IsStandaloneOnly ) needsAccessControl = false;
-		}
-
-		//
-		// If this is a locally compiled package, and it's enabled - then skip
-		// access control. This is used for tool packages which are ALWAYS local.
-		//
-		if ( !needsAccessControl )
-		{
-			// Nothing is verified against a loader's first assemblies when access control is disabled, but a reload
-			// needs its cached metadata refreshed or later hotloads resolve the old version.
-			var isReload = Loaded.Any( x => string.Equals( x.Name, assmName, StringComparison.OrdinalIgnoreCase ) );
-			trustedDll = PackageManager.AccessControl.TrustUnsafe( bytes, resolvable: !DisableAccessControl || isReload );
-		}
-
-		//
-		// otherwise, we need to do access control
-		//
-		else
-		{
-			if ( !TestAccessControl( dll_stream, out trustedDll ) )
-			{
-				trustedDll?.Dispose();
-				log.Warning( $"Couldn't load {assmName} - access control error" );
-				return null;
-			}
-			trustedDll?.Dispose();
 		}
 
 		//
@@ -381,7 +307,7 @@ internal sealed partial class PackageLoader : IDisposable
 			codeArchive = ap.AssemblyFileSystem.ReadAllBytes( codearchivefilename ).ToArray();
 		}
 
-		var result = AddAssembly( ap.Package, assmName, trustedDll, codeArchive, forceFull );
+		var result = AddAssembly( ap.Package, assmName, bytes, codeArchive, forceFull );
 
 		if ( result.FastHotload && ap.Package is LocalPackage lp )
 		{
@@ -413,7 +339,7 @@ internal sealed partial class PackageLoader : IDisposable
 		log.Trace( $"LoadPackage( {ident} )" );
 		var sw = Stopwatch.StartNew();
 
-		var ap = PackageManager.Find( ident, true, exactName );
+		var ap = PackageManager.Find( ident, exactName );
 		if ( ap == null )
 		{
 			var packages = string.Join( " - \n", PackageManager.ActivePackages.Select( x => x.Package.FullIdent ) );
@@ -421,6 +347,7 @@ internal sealed partial class PackageLoader : IDisposable
 			throw new System.Exception( $"LoadPackage: Couldn't find active package '{ident}' ({exactName}:exactName)\n{packages}" );
 		}
 
+		loadedPackages.RemoveWhere( x => x.FileSystem is null );
 		if ( loadedPackages.Contains( ap ) )
 			return true;
 
@@ -444,7 +371,7 @@ internal sealed partial class PackageLoader : IDisposable
 
 				if ( needsToolsPackage )
 				{
-					LoadPackage( "local.toolbase#local" );
+					LoadPackage( "local.toolbase" );
 				}
 			}
 		}
@@ -454,7 +381,7 @@ internal sealed partial class PackageLoader : IDisposable
 		//
 		foreach ( var child in ap.Package.EnumeratePackageReferences() )
 		{
-			if ( PackageManager.Find( child, true, false ) == null )
+			if ( PackageManager.Find( child ) == null )
 			{
 				log.Warning( $"LoadPackage: skipping missing dependency '{child}'" );
 				continue;
@@ -465,11 +392,11 @@ internal sealed partial class PackageLoader : IDisposable
 
 		try
 		{
-			using var gr = new HeavyGarbageRegion();
 			LoadAllAssembliesFromPackage( ap );
 
 			// Make sure we load the loose content as well
 			FileSystem.Mounted.Mount( ap.FileSystem );
+			System.Threading.Interlocked.Increment( ref PackageManager.MountGeneration );
 		}
 		catch
 		{
@@ -519,23 +446,23 @@ internal sealed partial class PackageLoader : IDisposable
 		}
 	}
 
-	LoadedAssembly AddAssembly( Package package, string assemblyName, TrustedBinaryStream dllStream, byte[] codeArchive, bool forceFull = false )
+	LoadedAssembly AddAssembly( Package package, string assemblyName, byte[] dllBytes, byte[] codeArchive, bool forceFull = false )
 	{
+		// A remote or streamed assembly picks its own name, it can't take the place of one the access check never ran on
+		if ( package is not LocalPackage && PackageManager.ActivePackages.Any( x => PackageManager.ActivePackage.IsUncheckedLocalAssembly( x, assemblyName ) ) )
+			throw new InvalidDataException( $"'{assemblyName}' from {package?.FullIdent ?? "the network"} has the name of a local assembly" );
+
 		LoadedAssembly loaded = new LoadedAssembly();
 		loaded.Name = assemblyName;
 		loaded.Package = package;
 		loaded.CodeArchiveBytes = codeArchive;
+		loaded.CompiledAssemblyBytes = dllBytes;
 
-		// read the compiled binary to a byte array
+		if ( dllBytes is not null )
 		{
-			using var ms = new MemoryStream();
-			dllStream.CopyTo( ms );
-			loaded.CompiledAssemblyBytes = ms.ToArray();
-		}
-
-		if ( dllStream is not null )
-		{
-			loaded.Assembly = LoadContext.LoadWithEmbeds( loaded.CompiledAssemblyBytes, false );
+			PackageManager.AssemblyResolver.AddAssembly( dllBytes, assemblyName );
+			loaded.Assembly = LoadContext.LoadWithEmbeds( dllBytes, false );
+			PackageManager.AssemblyResolver.TrackLoadedImage( loaded.Assembly, dllBytes );
 			loaded.Version = loaded.Assembly?.GetName().Version;
 			loaded.Name = loaded.Assembly?.GetName().Name;
 		}
@@ -582,6 +509,7 @@ internal sealed partial class PackageLoader : IDisposable
 		{
 			Loaded.Remove( outgoing );
 			log.Trace( $"	Unloading {outgoing}" );
+			ILHotload?.RemoveDetours( outgoing.Assembly );
 			LoadContext?.UnloadChild( outgoing.Assembly );
 		}
 
@@ -783,7 +711,7 @@ internal sealed partial class PackageLoader : IDisposable
 	/// </summary>
 	public LoadedAssembly[] GetLoadedAssemblies( string packageIdent, bool deep, bool allowEditor )
 	{
-		var package = PackageManager.Find( packageIdent, true );
+		var package = PackageManager.Find( packageIdent );
 		if ( package is null ) return Array.Empty<LoadedAssembly>();
 
 		var assemblyList = package.AssemblyFileSystem.FindFile( "", "*.dll", true ).ToArray();
@@ -831,43 +759,123 @@ internal sealed partial class PackageLoader : IDisposable
 		HotloadManager.Ignore( assembly );
 	}
 
+	/// <summary>
+	/// While this says so, changed assemblies wait to load: code that runs across frames (a content build's managed
+	/// compile in the editor) finishes with the code it started with.
+	/// </summary>
+	internal static Func<bool> HoldHotload { get; set; }
+
+	/// <summary>
+	/// Migrates an emitted script assembly using the same roots and completion callbacks as package hotload.
+	/// A pending package replacement includes the script change in its next swap.
+	/// </summary>
+	/// <returns>The migration error if the replacement was queued but its reference walk was interrupted.</returns>
+	internal Exception ReplaceScriptAssembly( Assembly previous, Assembly incoming )
+	{
+		if ( HotloadManager is null )
+		{
+			// Context teardown can follow disposal of its package loader.
+			if ( incoming is null ) return null;
+			throw new ObjectDisposedException( nameof( PackageLoader ) );
+		}
+
+		HotloadManager.Replace( previous, incoming );
+
+		// If a package is changing too, Tick rebuilds script dependencies and migrates both changes together.
+		if ( previous is null || incoming is null || IncomingThisHotload.Count > 0 || retryPackageMigration )
+		{
+			return null;
+		}
+
+		lock ( MixingThread.LockObject )
+		{
+			try
+			{
+				HotloadManager.DoSwap();
+				return null;
+			}
+			catch ( Exception e ) when ( e is not OutOfMemoryException )
+			{
+				return e;
+			}
+		}
+	}
+
 	public void Tick()
 	{
-		if ( !changedPackageDlls.Any() && IncomingThisHotload.Count == 0 )
+		if ( !changedPackageDlls.Any() && IncomingThisHotload.Count == 0 && !retryPackageMigration )
 		{
 			return;
 		}
 
-		LoadPendingChanges();
+		if ( HoldHotload?.Invoke() == true ) return;
 
-		try
-		{
-			// We want to lock the mixing thread,
-			// so things don't get modified while it's using them
-			lock ( MixingThread.LockObject )
-			{
-				HotloadManager.DoSwap();
-			}
-		}
-		finally
-		{
-			IncomingThisHotload.Clear();
-		}
+		LoadPendingChanges();
+		SwapIncoming();
 	}
 
-	void OnFullHotloadSuccess()
+	// Separate from Tick so its closure isn't allocated on every frame
+	void SwapIncoming()
 	{
-		foreach ( var loadedAssembly in IncomingThisHotload )
+		lock ( MixingThread.LockObject )
 		{
-			TriggerRegisterEvent( loadedAssembly );
-		}
+			var batch = IncomingThisHotload.ToArray();
+			IncomingThisHotload.Clear();
+			var incoming = batch.Where( assembly => !assembly.IsEditorAssembly ).Select( assembly => assembly.Assembly ).ToArray();
+			using var scripts = GlobalContext.Current?.PrepareScriptHotload( incoming, HotloadManager );
 
-		OnHotloadSuccess();
+			// The old packages have already been unregistered. Publish the replacements even if migration stops partway.
+			var registered = false;
+			void RegisterPackages()
+			{
+				foreach ( var assembly in batch )
+				{
+					TriggerRegisterEvent( assembly );
+				}
+				registered = true;
+			}
+
+			var hotload = HotloadManager.Hotload;
+			if ( scripts is null ) hotload.RetainedAssembly = retainedScriptAssembly;
+			retainedScriptAssembly = null;
+			retryPackageMigration = false;
+
+			try
+			{
+				HotloadManager.DoSwap( batch.Length > 0 ? RegisterPackages : null );
+			}
+			catch ( Exception e ) when ( e is not OutOfMemoryException )
+			{
+				if ( batch.Length > 0 && !registered )
+				{
+					RegisterPackages();
+					OnHotloadSuccess();
+				}
+				// Retry an unconsumed batch once, with the same script generation retained during the walk.
+				if ( hotload.GetOutgoingAssemblies().Length > 0 )
+				{
+					retainedScriptAssembly = hotload.RetainedAssembly;
+					retryPackageMigration = batch.Length > 0;
+				}
+				log.Warning( e, "Package hotload was incomplete. The replacement packages are available." );
+			}
+			finally
+			{
+				hotload.RetainedAssembly = null;
+			}
+		}
 	}
 
 	void OnHotloadSuccess()
 	{
-		OnAfterHotload?.Invoke();
+		try
+		{
+			OnAfterHotload?.Invoke();
+		}
+		catch ( Exception e ) when ( e is not OutOfMemoryException )
+		{
+			log.Warning( e, "Error notifying the game about the completed hotload." );
+		}
 	}
 
 	public Action OnAfterHotload { get; set; }

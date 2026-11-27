@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Runtime;
 
@@ -12,14 +12,15 @@ public class TestAppSystem : AppSystem
 		var gameFolder = Environment.GetEnvironmentVariable( "FACEPUNCH_ENGINE", EnvironmentVariableTarget.Process );
 		if ( gameFolder is null ) throw new Exception( "FACEPUNCH_ENGINE not found" );
 
+		// bin/win64/engine2.dll, bin/linuxsteamrt64/libengine2.so, ...
 		var nativeDllPath = Path.GetFullPath( Path.Combine( gameFolder, NetCore.NativeDllPath ) );
-		var engineLibrary = Interop.GetNativeLibraryName( "engine2" );
+		var engine2 = Path.Combine( nativeDllPath, Interop.GetNativeLibraryName( "engine2" ) );
 
 		// Some tests would set FACEPUNCH_ENGINE to a temp dir that got deleted, make it really clear if that happened
 
-		if ( !File.Exists( Path.Combine( nativeDllPath, engineLibrary ) ) )
+		if ( !File.Exists( engine2 ) )
 		{
-			throw new Exception( $"FACEPUNCH_ENGINE ({gameFolder}) doesn't contain {Path.Combine( NetCore.NativeDllPath, engineLibrary )}" );
+			throw new Exception( $"FACEPUNCH_ENGINE ({gameFolder}) doesn't contain {Path.GetRelativePath( gameFolder, engine2 )}" );
 		}
 
 		NetCore.InitializeInterop( gameFolder );
@@ -39,9 +40,21 @@ public class TestAppSystem : AppSystem
 			Flags = AppSystemFlags.IsGameApp | AppSystemFlags.IsUnitTest
 		};
 
-		// Opt in to the real renderer for bitmap comparisons; ordinary tests stay headless.
-		InitGame( createInfo, Environment.GetEnvironmentVariable( "SBOX_TEST_GRAPHICS" ) == "1"
-			? "-vulkan -noassert -novr " + Environment.GetEnvironmentVariable( "SBOX_TEST_GRAPHICS_ARGS" )
-			: "" );
+		// Opt in to the real renderer for bitmap comparisons; ordinary tests stay headless. SBOX_TEST_GRAPHICS=1 draws on
+		// Borealis.Gpu, as the game and the editor do
+		var arguments = Environment.GetEnvironmentVariable( "SBOX_TEST_GRAPHICS_ARGS" );
+		switch ( Environment.GetEnvironmentVariable( "SBOX_TEST_GRAPHICS" ) )
+		{
+			case "1":
+				// Draws wait for their shaders and models load at once, so what a test renders is all there the first time
+				DrawOnBorealisGpu();
+				Utility.CommandLine.CommandLineString = (Utility.CommandLine.CommandLineString ?? Environment.CommandLine) + " -wait-for-shaders -borealisgpu-syncload";
+				Utility.CommandLine.Parse();
+				InitGame( createInfo, "-borealisgpu -wait-for-shaders -borealisgpu-syncload -noassert -novr " + arguments );
+				break;
+			default:
+				InitGame( createInfo, "" );
+				break;
+		}
 	}
 }

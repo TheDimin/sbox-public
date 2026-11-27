@@ -1,4 +1,5 @@
-﻿using Sandbox.Utility;
+using Sandbox.Engine;
+using Sandbox.Utility;
 using System.Diagnostics;
 
 namespace Sandbox;
@@ -126,7 +127,7 @@ sealed partial class NetworkDebugSystem : GameObjectSystem<NetworkDebugSystem>
 		int msgSize;
 		try
 		{
-			Game.TypeLibrary.ToBytes( message, ref bs );
+			GlobalContext.Current.TypeLibrary.ToBytes( message, ref bs );
 			msgSize = bs.Length;
 		}
 		finally
@@ -218,7 +219,7 @@ sealed partial class NetworkDebugSystem : GameObjectSystem<NetworkDebugSystem>
 		int msgSize;
 		try
 		{
-			Game.TypeLibrary.ToBytes( message, ref bs );
+			GlobalContext.Current.TypeLibrary.ToBytes( message, ref bs );
 			msgSize = bs.Length;
 		}
 		finally
@@ -273,12 +274,12 @@ sealed partial class NetworkDebugSystem : GameObjectSystem<NetworkDebugSystem>
 
 	void DrawPvs()
 	{
-		using var _ = Gizmo.Scope();
+		using var _ = Gizmo.PushScope();
 		Gizmo.Draw.IgnoreDepth = true;
 
 		foreach ( var no in Scene.networkedObjects )
 		{
-			using ( Gizmo.ObjectScope( no, no.GameObject.WorldTransform ) )
+			using ( Gizmo.PushObjectScope( no, no.GameObject.WorldTransform ) )
 			{
 				var bounds = no.GameObject.GetLocalBounds();
 				var isVisible = Scene.IsPointVisibleToConnection( Connection.Local, no.GameObject.WorldPosition );

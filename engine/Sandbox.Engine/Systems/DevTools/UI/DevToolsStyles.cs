@@ -40,6 +40,30 @@ internal static class DevToolsStyles
 	];
 
 	/// <summary>
+	/// A GPU pass's colour, by what it does (<see cref="DevTools.KindOf"/>): from the series palette, so the timeline and the
+	/// pass tree's swatches agree.
+	/// </summary>
+	internal static Color PassColor( DevTools.PassKind kind ) => kind switch
+	{
+		DevTools.PassKind.Depth => Series[0],
+		DevTools.PassKind.Opaque => Series[1],
+		DevTools.PassKind.Translucent => Series[2],
+		DevTools.PassKind.Post => Series[4],
+		DevTools.PassKind.Ui => Series[7],
+		_ => Series[6],
+	};
+
+	internal static string PassKindName( DevTools.PassKind kind ) => kind switch
+	{
+		DevTools.PassKind.Depth => "depth, shadows",
+		DevTools.PassKind.Opaque => "opaque",
+		DevTools.PassKind.Translucent => "translucent",
+		DevTools.PassKind.Post => "post, compute",
+		DevTools.PassKind.Ui => "ui",
+		_ => "other",
+	};
+
+	/// <summary>
 	/// The main thread categories, muted like the rest. The ones that usually carry the frame get colours of their own;
 	/// the rest share greys.
 	/// </summary>
@@ -130,22 +154,19 @@ internal static class DevToolsStyles
 			border-bottom: 1px solid $line;
 		}
 
-		.devtools .strip .title
+		// The frame rate at the right of the tabs, on every tab
+		.devtools .strip-fps
 		{
+			flex-shrink: 0;
 			align-items: center;
 			padding: 0px 10px;
-			color: $dim;
-			font-weight: 600;
+			color: $text;
+			font-family: Roboto Mono;
+			white-space: nowrap;
 		}
 
-		.devtools .sampling-notice
-		{
-			align-items: center;
-			flex-shrink: 0;
-			padding: 0px 8px;
-			font-size: 11px;
-			color: $dim;
-		}
+		.devtools .strip-fps.warning { color: $warn; }
+		.devtools .strip-fps.bad { color: $bad; }
 
 		.devtools .tabs
 		{
@@ -203,7 +224,7 @@ internal static class DevToolsStyles
 			text-align: center;
 			align-items: center;
 			color: $dim;
-			font-family: Material Icons;
+			font-family: Material Symbols Outlined;
 			font-size: 16px;
 			cursor: pointer;
 		}
@@ -329,7 +350,7 @@ internal static class DevToolsStyles
 			flex-shrink: 0;
 			width: 16px;
 			text-align: center;
-			font-family: Material Icons;
+			font-family: Material Symbols Outlined;
 			font-size: 14px;
 			color: $dim;
 		}
@@ -402,7 +423,7 @@ internal static class DevToolsStyles
 
 		.devtools .badge-icon
 		{
-			font-family: Material Icons;
+			font-family: Material Symbols Outlined;
 			font-size: 15px;
 		}
 
@@ -411,7 +432,7 @@ internal static class DevToolsStyles
 
 		.devtools .section-title.bad { color: $bad; }
 
-		// The budget ruler, and the strip of recent frames under it
+		// The budget ruler
 		.devtools .budget
 		{
 			flex-shrink: 0;
@@ -419,158 +440,228 @@ internal static class DevToolsStyles
 			cursor: pointer;
 		}
 
-		.devtools .dock-history
-		{
-			flex-shrink: 0;
-			height: 34px;
-			margin: 0px 64px 0px 56px;
-			cursor: pointer;
-		}
-
-		.devtools .gauge
-		{
-			flex-grow: 1;
-			flex-shrink: 1;
-			flex-basis: 0px;
-			min-width: 0px;
-			flex-direction: column;
-			padding: 8px 12px 10px 12px;
-			border-right: 1px solid $line-soft;
-			border-top: 2px solid transparent;
-			cursor: pointer;
-		}
-
-		.devtools .gauge:hover
-		{
-			background-color: $hover;
-		}
-
-		.devtools .gauge.warning { border-top: 2px solid $warn; }
-		.devtools .gauge.bad { border-top: 2px solid $bad; }
-
-		.devtools .gauge-key
-		{
-			color: $dim;
-			font-size: 11px;
-			white-space: nowrap;
-		}
-
-		.devtools .gauge-line
-		{
-			align-items: flex-end;
-			gap: 4px;
-			height: 38px;
-		}
-
-		.devtools .gauge-value
-		{
-			font-family: Roboto Mono;
-			font-size: 28px;
-			font-weight: 600;
-			color: $bright;
-			white-space: nowrap;
-		}
-
-		.devtools .gauge.warning .gauge-value { color: $warn; }
-		.devtools .gauge.bad .gauge-value { color: $bad; }
-
-		.devtools .gauge-unit
-		{
-			color: $dim;
-			padding-bottom: 6px;
-			white-space: nowrap;
-		}
-
-		.devtools .gauge-chart
-		{
-			flex-grow: 1;
-			flex-direction: column;
-			justify-content: flex-end;
-			gap: 6px;
-			margin-top: 8px;
-			min-height: 40px;
-		}
-
-		.devtools .gauge-chart .sparkline
-		{
-			height: 40px;
-		}
-
-		.devtools .gauge-chart .histogram
-		{
-			height: 56px;
-			background-color: transparent;
-		}
-
-		.devtools .stack-bar
-		{
-			flex-shrink: 0;
-			height: 8px;
-		}
-
-		// Glance: a row of gauges - a name, a number, a chart - over the budget ruler. The words are in tooltips.
-		.devtools .page.dock-glance
+		// Overview: the frame on one line, recent frames, what's out of line, the counters, then the ruler
+		.devtools .page.glance
 		{
 			grid-template-columns: minmax(0, 1fr);
 		}
 
-		.devtools .glance-gauges
+		.devtools .stat-line
 		{
-			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+			flex-direction: row;
 			flex-shrink: 0;
 			min-width: 0px;
 			border-bottom: 1px solid $line;
 		}
 
-		.devtools .glance-gauges .gauge
+		.devtools .stat
 		{
-			min-height: 92px;
-			padding: 6px 12px 8px 12px;
+			flex-direction: row;
+			align-items: flex-end;
+			gap: 6px;
+			min-width: 0px;
+			padding: 8px 18px 8px 12px;
+			border-right: 1px solid $line-soft;
 		}
 
-		.devtools .glance-gauges .gauge-line
+		.devtools .stat.link
 		{
-			height: 34px;
-		}
-
-		.devtools .glance-gauges .gauge-value
-		{
-			font-size: 26px;
-		}
-
-		.devtools .glance-gauges .gauge-unit
-		{
-			padding-bottom: 5px;
-			font-size: 11px;
-		}
-
-		.devtools .glance-gauges .gauge-chart
-		{
-			margin-top: 4px;
-			min-height: 22px;
-			gap: 3px;
-		}
-
-		.devtools .glance-gauges .gauge-chart .sparkline,
-		.devtools .glance-gauges .gauge-chart .histogram
-		{
-			height: 22px;
-		}
-
-		.devtools .gpu-zoom
-		{
-			flex-shrink: 0;
-			margin: 4px 0px 6px 0px;
-			border-top: 1px solid $line;
 			cursor: pointer;
 		}
 
-		.devtools .glance-ruler
+		.devtools .stat.link:hover
 		{
-			flex-direction: column;
+			background-color: $hover;
+		}
+
+		.devtools .stat-key
+		{
+			color: $dim;
+			padding-bottom: 5px;
+			margin-right: 4px;
+			white-space: nowrap;
+		}
+
+		.devtools .stat-value
+		{
+			font-family: Roboto Mono;
+			font-size: 24px;
+			font-weight: 600;
+			color: $bright;
+			white-space: nowrap;
+		}
+
+		.devtools .stat-unit
+		{
+			color: $dim;
+			padding-bottom: 5px;
+			white-space: nowrap;
+		}
+
+		.devtools .stat.warning .stat-value { color: $warn; }
+		.devtools .stat.bad .stat-value { color: $bad; }
+
+		.devtools .stat.stat-verdict
+		{
+			flex-grow: 1;
+			border-right: 0px solid transparent;
+		}
+
+		.devtools .stat.stat-verdict .stat-value
+		{
+			font-family: Inter;
+			font-size: 18px;
+			padding-bottom: 2px;
+		}
+
+		.devtools .glance-history
+		{
 			flex-shrink: 0;
-			padding-top: 6px;
+			height: 40px;
+			margin: 6px 12px;
+			cursor: pointer;
+		}
+
+		// Rendering: GPU history, the pass tree beside the picked pass, the timeline, the counters
+		.devtools .render-history
+		{
+			flex-direction: row;
+			flex-shrink: 0;
+			align-items: flex-end;
+			height: 48px;
+			padding: 6px 12px 6px 10px;
+			gap: 10px;
+			border-bottom: 1px solid $line;
+		}
+
+		.devtools .render-history-key
+		{
+			flex-shrink: 0;
+			width: 44px;
+			color: $dim;
+			font-size: 11px;
+		}
+
+		.devtools .render-history .sparkline
+		{
+			flex-grow: 1;
+			height: 36px;
+			cursor: pointer;
+		}
+
+		.devtools .pass-split
+		{
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) 340px;
+			min-width: 0px;
+		}
+
+		.devtools.narrow .pass-split
+		{
+			grid-template-columns: minmax(0, 1fr);
+		}
+
+		.devtools .pass-detail
+		{
+			border-left: 1px solid $line;
+		}
+
+		.devtools .pass-detail .facts
+		{
+			grid-template-columns: minmax(0, 1fr);
+			border-bottom: 0px solid transparent;
+		}
+
+		.devtools .pass-chart
+		{
+			flex-shrink: 0;
+			flex-direction: column;
+			height: 44px;
+			padding: 6px 10px;
+		}
+
+		.devtools .pass-chart .sparkline
+		{
+			flex-grow: 1;
+		}
+
+		.devtools .pass-filter
+		{
+			flex-shrink: 0;
+			width: 160px;
+			height: 18px;
+			padding: 0px 6px;
+			background-color: $bg;
+			border: 1px solid $line;
+			font-family: Roboto Mono;
+			font-size: 11px;
+			color: $text;
+			align-items: center;
+		}
+
+		.devtools .pass-filter:focus
+		{
+			border: 1px solid $faint;
+		}
+
+		.devtools .head-button
+		{
+			flex-shrink: 0;
+			padding: 2px 10px;
+			margin-left: 4px;
+			color: $text;
+			font-size: 11px;
+			font-weight: 600;
+			background-color: #2e2e2e;
+			border: 1px solid #484848;
+			border-radius: 3px;
+			cursor: pointer;
+		}
+
+		.devtools .head-button:hover
+		{
+			color: $bright;
+			background-color: #3d3d3d;
+			border: 1px solid #5e5e5e;
+		}
+
+		.devtools .head-button:active
+		{
+			background-color: #262626;
+		}
+
+		// An icon in front of a button's text
+		.devtools .button-icon
+		{
+			font-family: Material Symbols Outlined;
+			font-size: 14px;
+			font-weight: 400;
+			margin-right: 5px;
+		}
+
+		.devtools .data-row.heading > .cell
+		{
+			color: $text;
+			font-weight: 600;
+		}
+
+		.devtools .pass-skipped
+		{
+			flex-shrink: 0;
+			padding: 4px 10px;
+			color: $faint;
+			cursor: pointer;
+		}
+
+		.devtools .pass-skipped:hover
+		{
+			color: $bright;
+		}
+
+		.devtools .frame-timeline
+		{
+			flex-shrink: 0;
+			margin: 6px 0px 6px 0px;
 		}
 
 		.devtools .page-scroll
@@ -642,16 +733,6 @@ internal static class DevToolsStyles
 			grid-column: 1 / -1;
 		}
 
-		.devtools .split.render-details
-		{
-			grid-template-columns: minmax(0, 1fr);
-		}
-
-		.devtools.wide .split.render-details
-		{
-			grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr));
-		}
-
 		.devtools .good { color: $good; }
 		.devtools .info { color: $dim; }
 		.devtools .warning { color: $warn; }
@@ -712,7 +793,7 @@ internal static class DevToolsStyles
 		.devtools .section-link
 		{
 			flex-shrink: 0;
-			font-family: Material Icons;
+			font-family: Material Symbols Outlined;
 			font-size: 16px;
 			color: $faint;
 			margin-right: -4px;
@@ -761,7 +842,7 @@ internal static class DevToolsStyles
 
 		.devtools .section-chevron
 		{
-			font-family: Material Icons;
+			font-family: Material Symbols Outlined;
 			font-size: 16px;
 			color: $dim;
 			margin-left: -4px;
@@ -1181,28 +1262,57 @@ internal static class DevToolsStyles
 			flex-grow: 1;
 		}
 
-		.devtools .net-actions
-		{
-			flex-shrink: 0;
-			align-items: center;
-			gap: 6px;
-		}
-
+		// Raised, so they read as buttons rather than as status icons
 		.devtools .net-toolbar .icon-button
 		{
-			height: 26px;
-			width: 28px;
+			height: 24px;
+			width: 30px;
+			color: $text;
+			background-color: #2e2e2e;
+			border: 1px solid #484848;
+			border-radius: 3px;
 		}
 
-		.devtools .net-toolbar .icon-button.record.on
+		// A labelled button in the bar stands as tall as the icon ones beside it
+		.devtools .net-toolbar .head-button
+		{
+			height: 24px;
+			padding: 0px 10px;
+			margin-left: 0px;
+			align-items: center;
+		}
+
+		.devtools .net-toolbar .icon-button:hover
+		{
+			color: $bright;
+			background-color: #3d3d3d;
+			border: 1px solid #5e5e5e;
+		}
+
+		.devtools .net-toolbar .icon-button:active
+		{
+			background-color: #262626;
+		}
+
+		.devtools .net-toolbar .icon-button.active
+		{
+			color: $bright;
+			background-color: #484848;
+			border: 1px solid #6a6a6a;
+		}
+
+		.devtools .net-toolbar .icon-button.record.on, .devtools .net-toolbar .icon-button.record.on:hover
 		{
 			color: $bad;
 		}
 
+		// Raised like the buttons, with the one that's showing lit
 		.devtools .segments
 		{
 			flex-shrink: 0;
-			border: 1px solid $line;
+			border: 1px solid #484848;
+			border-radius: 3px;
+			overflow: hidden;
 		}
 
 		.devtools .segment
@@ -1210,21 +1320,23 @@ internal static class DevToolsStyles
 			height: 24px;
 			padding: 0px 12px;
 			align-items: center;
-			color: $dim;
+			color: $text;
+			font-weight: 600;
+			background-color: #2e2e2e;
 			cursor: pointer;
-			border-right: 1px solid $line;
+			border-right: 1px solid #484848;
 		}
 
 		.devtools .segment:hover
 		{
-			color: $text;
-			background-color: $hover;
+			color: $bright;
+			background-color: #3d3d3d;
 		}
 
 		.devtools .segment.active
 		{
 			color: $bright;
-			background-color: $line;
+			background-color: #5c5c5c;
 		}
 
 		.devtools .net-session
@@ -1315,7 +1427,7 @@ internal static class DevToolsStyles
 
 		.devtools .net-select-icon, .devtools .net-icon
 		{
-			font-family: Material Icons;
+			font-family: Material Symbols Outlined;
 			color: $dim;
 		}
 

@@ -8,7 +8,7 @@ public static partial class Game
 	/// <summary>
 	/// Provides static methods for displaying various modal overlays in the game UI.
 	/// <para>
-	/// The <see cref="Overlay"/> class allows you to open modals for packages, maps, news, organizations, reviews, friends lists, server lists, settings, input bindings, and player profiles.
+	/// The <see cref="Overlay"/> class allows you to open modals for packages, maps, news, organizations, friends lists, server lists, settings, input bindings, and player profiles.
 	/// It serves as a central point for invoking user interface overlays that interact with core game and community features.
 	/// </para>
 	/// </summary>
@@ -38,14 +38,14 @@ public static partial class Game
 		}
 
 		/// <summary>
-		/// Opens a modal for the specified map package
+		/// Opens the details of a Workshop map or local map project.
 		/// </summary>
-		/// <param name="packageIdent"></param>
-		public static void ShowMapModal( string packageIdent )
+		/// <param name="map">The Workshop item ID or local project's primary asset path.</param>
+		public static void ShowMapModal( string map )
 		{
 			using var scope = GlobalContext.MenuScope();
 
-			IModalSystem.Current?.Map( packageIdent );
+			IModalSystem.Current?.Map( map );
 		}
 
 		/// <summary>
@@ -82,26 +82,19 @@ public static partial class Game
 		}
 
 		/// <summary>
-		/// Opens a modal for the specified organization. 
-		/// This is most likely called from a Package - so get the organization from there.
+		/// Used to open a modal for the specified organization. There isn't one any more - this does nothing.
 		/// </summary>
-		/// <param name="org"></param>
+		[Obsolete( "Organizations no longer have a modal - this does nothing." )]
 		public static void ShowOrganizationModal( Package.Organization org )
 		{
-			using var scope = GlobalContext.MenuScope();
-
-			IModalSystem.Current?.Organization( org );
 		}
 
 		/// <summary>
-		/// Opens a modal to review the specified package
+		/// Retained for addons that opened the former package review form.
 		/// </summary>
-		/// <param name="package"></param>
+		[Obsolete( "Written package reviews are no longer supported." )]
 		public static void ShowReviewModal( Package package )
 		{
-			using var scope = GlobalContext.MenuScope();
-
-			IModalSystem.Current?.Review( package );
 		}
 
 		/// <summary>
@@ -119,6 +112,9 @@ public static partial class Game
 		/// </summary>
 		public static void ShowPackageSelector( string query, Action<Package> onSelect, Action<string> onFilterChanged = null )
 		{
+			onSelect = InCallerContext( onSelect );
+			onFilterChanged = InCallerContext( onFilterChanged );
+
 			using var scope = GlobalContext.MenuScope();
 
 			IModalSystem.Current?.PackageSelect( query, onSelect, onFilterChanged );
@@ -130,6 +126,8 @@ public static partial class Game
 		/// </summary>
 		public static void ShowMapSelector( Action<string> onSelect, string selected = null )
 		{
+			onSelect = InCallerContext( onSelect );
+
 			using var scope = GlobalContext.MenuScope();
 
 			IModalSystem.Current?.MapSelect( onSelect, selected );
@@ -198,9 +196,24 @@ public static partial class Game
 		/// </summary>
 		public static void CreateGame( in CreateGameOptions options )
 		{
+			if ( options.Package is not null && !IsEnginePackage( options.Package ) )
+			{
+				Log.Warning( "CreateGame: needs a package from Package.FetchAsync" );
+				return;
+			}
+
+			var safe = options;
+			safe.OnComplete = InCallerContext( options.OnComplete );
+
+			if ( options.InitialSettings is { } initial )
+			{
+				initial.GameSettings = initial.GameSettings is null ? null : new Dictionary<string, string>( initial.GameSettings );
+				safe.InitialSettings = initial;
+			}
+
 			using var scope = GlobalContext.MenuScope();
 
-			IModalSystem.Current?.CreateGame( options );
+			IModalSystem.Current?.CreateGame( safe );
 		}
 
 		/// <summary>
@@ -228,8 +241,30 @@ public static partial class Game
 		/// </summary>
 		public static void WorkshopPublish( in WorkshopPublishOptions options )
 		{
+			var safe = options;
+			safe.OnComplete = InCallerContext( options.OnComplete );
+			safe.KeyValues = options.KeyValues is null ? null : new Dictionary<string, string>( options.KeyValues );
+			safe.Tags = options.Tags is null ? null : new HashSet<string>( options.Tags );
+			safe.Categories = new();
+
+			if ( options.Categories?.Keys.Except( (options.CategoryFactories ?? []).Select( x => x.Name ) ).Any() == true )
+				Log.Warning( "WorkshopPublish: only categories added with AddCategory are shown" );
+
+			// Only categories from AddCategory, rebuilt by the engine over our copy of the keyvalues
+			foreach ( var (name, enumType, create) in options.CategoryFactories ?? [] )
+			{
+				if ( UsesGameAttributes( enumType ) )
+				{
+					Log.Warning( $"WorkshopPublish: skipping category {name}, its enum uses attributes from game code" );
+					continue;
+				}
+
+				safe.KeyValues ??= [];
+				safe.Categories[name] = create( safe.KeyValues );
+			}
+
 			using var scope = GlobalContext.MenuScope();
-			IModalSystem.Current?.WorkshopPublish( options );
+			IModalSystem.Current?.WorkshopPublish( safe );
 		}
 
 		/// <summary>
@@ -247,8 +282,10 @@ public static partial class Game
 		/// </summary>
 		public static void ShowBenchmarkResults( Guid batchId, IReadOnlyList<BenchmarkTestSummary> summaries )
 		{
+			var copy = summaries?.ToArray() ?? [];
+
 			using var scope = GlobalContext.MenuScope();
-			IModalSystem.Current?.BenchmarkResults( batchId, summaries );
+			IModalSystem.Current?.BenchmarkResults( batchId, copy );
 		}
 
 		/// <summary>
@@ -315,6 +352,29 @@ public static partial class Game
 			using var scope = GlobalContext.MenuScope();
 
 			IModalSystem.Current?.OpenUrl( safeUrl );
+		}
+
+		// A subclass from anywhere else would run its overrides in the menu
+		static bool IsEnginePackage( Package package ) => package?.GetType().Assembly == typeof( Package ).Assembly;
+
+		// The menu builds the enum's description, which constructs its attributes, and a game's would run game code there
+		static bool UsesGameAttributes( Type enumType )
+		{
+			return enumType.GetCustomAttributesData()
+				.Concat( enumType.GetFields().SelectMany( x => x.GetCustomAttributesData() ) )
+				.Any( x => Sandbox.Internal.IsolatedAssemblyContext.IsPackageType( x.AttributeType ) );
+		}
+
+		internal static Action<T> InCallerContext<T>( Action<T> callback )
+		{
+			if ( callback is null ) return null;
+
+			var context = GlobalContext.Current;
+			return value =>
+			{
+				using var scope = new GlobalContext.GlobalContextScope( context );
+				callback( value );
+			};
 		}
 
 		/// <summary>

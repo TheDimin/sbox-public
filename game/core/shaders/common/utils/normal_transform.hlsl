@@ -1,6 +1,18 @@
 #ifndef NORMAL_TRANSFORM_H
 #define NORMAL_TRANSFORM_H
 
+// Uncompressed meshes can omit a tangent. Use the normal to pick an orthogonal axis.
+float4 ResolveUncompressedTangent( float3 normal, float4 tangent )
+{
+    if ( dot( tangent.xyz, tangent.xyz ) < 0.000001f )
+    {
+        float3 direction = normal * rsqrt( max( dot( normal, normal ), 1e-20f ) );
+        float3 axis = abs( direction.z ) < 0.9f ? float3( 0.0, 0.0, 1.0 ) : float3( 1.0, 0.0, 0.0 );
+        tangent = float4( cross( axis, direction ), tangent.w < 0.0f ? -1.0f : 1.0f );
+    }
+    return tangent;
+}
+
 /// <summary>
 /// Transforms a normal by the inverse transpose, including nonuniform scale and shear.
 /// Returns the transform's handedness for reconstructing the tangent frame.

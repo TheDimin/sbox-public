@@ -40,6 +40,13 @@ internal sealed class GpuPassTimings
 	int droppedPassSamples;
 	string renderer = "unknown";
 
+	// Paths by StableId, name and parent path, so they're built once per scope and parent: a scope's id doesn't follow its
+	// parent, and one whose parent changes from frame to frame (a list another queue's overlaps) has a path for each
+	readonly Dictionary<(uint StableId, string Name, string ParentPath), string> scopePaths = new();
+
+	// This frame's path per row, for its children
+	string[] rowPaths = [];
+
 	// On enabling timestamps, the native snapshot may still contain the previous sampling window.
 	internal void SkipFrame( ulong frameId ) => lastFrame = frameId;
 
@@ -61,7 +68,10 @@ internal sealed class GpuPassTimings
 		renderer = frameRenderer;
 		sampledFrames++;
 		framePasses.Clear();
-		var paths = new string[rows.Length];
+		if ( rowPaths.Length < rows.Length )
+		{
+			Array.Resize( ref rowPaths, rows.Length );
+		}
 
 		for ( int i = 0; i < rows.Length; i++ )
 		{
@@ -69,8 +79,10 @@ internal sealed class GpuPassTimings
 
 			// Native emits parents first. Reject malformed/oversized paths without following cycles.
 			if ( string.IsNullOrEmpty( row.Name ) || row.Name.Length > MaxPathLength || row.Parent < -1 || row.Parent >= i
-				|| (row.Parent >= 0 && paths[row.Parent] is null) )
+				|| (row.Parent >= 0 && rowPaths[row.Parent] is null) )
 			{
+				rowPaths[i] = null;
+
 				if ( row.Measured )
 				{
 					droppedPassSamples++;
@@ -79,20 +91,32 @@ internal sealed class GpuPassTimings
 				continue;
 			}
 
-			// Escape separators so a marker named "A/B" cannot collide with nested A -> B.
-			var name = row.Name.Replace( "%", "%25" ).Replace( "/", "%2F" );
-			var path = row.Parent < 0 ? name : $"{paths[row.Parent]}/{name}";
-			if ( path.Length > MaxPathLength )
+			var parentPath = row.Parent < 0 ? null : rowPaths[row.Parent];
+
+			var key = (row.StableId, row.Name, parentPath);
+			if ( !scopePaths.TryGetValue( key, out var path ) )
 			{
-				if ( row.Measured )
+				// Escape separators so a marker named "A/B" cannot collide with nested A -> B.
+				var name = row.Name.Replace( "%", "%25" ).Replace( "/", "%2F" );
+				path = parentPath is null ? name : $"{parentPath}/{name}";
+				if ( path.Length > MaxPathLength )
 				{
-					droppedPassSamples++;
+					rowPaths[i] = null;
+
+					if ( row.Measured )
+					{
+						droppedPassSamples++;
+					}
+
+					continue;
 				}
 
-				continue;
+				// Bounded, scopes only come and go with renderer changes
+				if ( scopePaths.Count >= MaxPasses * 4 ) scopePaths.Clear();
+				scopePaths[key] = path;
 			}
 
-			paths[i] = path;
+			rowPaths[i] = path;
 
 			// View/group rows have no timestamp of their own.
 			if ( !row.Measured )

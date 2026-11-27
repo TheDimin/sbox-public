@@ -20,53 +20,21 @@ public partial class ModelRenderer : Renderer, ExecuteInEditor, ITintable, IMate
 		set
 		{
 			if ( field == value ) return;
-			var previous = field;
-			var previousBodyGroups = _bodyGroups;
-			if ( value?.GltfResource is not null || previous?.GltfResource is not null )
-			{
-				// Prepare without disposing or publishing the previous presentation.
-				PrepareGltfChange( value, value?.GltfResource );
-				field = value;
-				try
-				{
-					if ( !GameObject.Flags.Contains( GameObjectFlags.Deserializing ) )
-					{
-						_bodyGroups = ulong.MaxValue;
-						if ( field is not null && field.GltfResource is null && field.native.GetNumMeshGroups() > 0 )
-							_bodyGroups = field.native.GetDefaultMeshGroupMask();
-					}
-					ApplyGltfReload(); ValidateGltfReload(); PublishGltfReload();
-				}
-				catch ( Exception error )
-				{
-					field = previous; _bodyGroups = previousBodyGroups;
-					Sandbox.Gltf.DirectGpu.GltfGpuCleanup.Rollback( error, [RollbackGltfReload] );
-					throw;
-				}
-				// The assignment is committed; later cleanup/notification failures
-				// cannot safely restore a possibly disposed previous instance.
-				try { FinishGltfReload(); }
-				catch ( Exception error ) { Log.Warning( error, "Could not clean up the previous model renderer after assignment." ); }
-				try { OnModelChanged(); }
-				catch ( Exception error ) { Log.Warning( error, "Model assignment succeeded, but a change notification failed." ); }
-				return;
-			}
-			field = value;
-			try
-			{
-				if ( !GameObject.Flags.Contains( GameObjectFlags.Deserializing ) )
-				{
-					_bodyGroups = ulong.MaxValue;
 
-					if ( field is not null && field.GltfResource is null && field.native.GetNumMeshGroups() > 0 )
-					{
-						_bodyGroups = field.native.GetDefaultMeshGroupMask();
-					}
+			field = value;
+
+			if ( !GameObject.Flags.Contains( GameObjectFlags.Deserializing ) )
+			{
+				_bodyGroups = ulong.MaxValue;
+
+				if ( field is not null && field.native.GetNumMeshGroups() > 0 )
+				{
+					_bodyGroups = field.native.GetDefaultMeshGroupMask();
 				}
-				UpdateObject();
-				OnModelChanged();
 			}
-			catch { throw; }
+
+			UpdateObject();
+			OnModelChanged();
 		}
 	}
 
@@ -265,7 +233,6 @@ public partial class ModelRenderer : Renderer, ExecuteInEditor, ITintable, IMate
 
 	protected virtual void UpdateObject()
 	{
-		if ( UpdateGltfObject() ) return;
 		BuildAttachmentHierarchy();
 
 		if ( !_sceneObject.IsValid() )
@@ -278,7 +245,7 @@ public partial class ModelRenderer : Renderer, ExecuteInEditor, ITintable, IMate
 		_sceneObject.MeshGroupMask = BodyGroups;
 		_sceneObject.Flags.CastShadows = RenderType == ShadowRenderType.On || RenderType == ShadowRenderType.ShadowsOnly;
 		_sceneObject.Flags.IsStatic = GameObject.IsStatic && !_hasActiveDeformations;
-		_sceneObject.RenderingEnabled = gltfReloadPlan is { } plan && ReferenceEquals( plan.CandidateObject, _sceneObject ) ? false : model.HasRenderMeshes();
+		_sceneObject.RenderingEnabled = model.HasRenderMeshes();
 
 		if ( _lodOverride.HasValue )
 			_sceneObject.LodOverride = _lodOverride.Value;
@@ -307,20 +274,10 @@ public partial class ModelRenderer : Renderer, ExecuteInEditor, ITintable, IMate
 
 		var model = Model ?? Model.Load( "models/dev/box.vmdl" );
 
-		try
-		{
-			_sceneObject = CreateSceneObject( model );
-			OnSceneObjectCreated( _sceneObject );
-			CommitGltfCreationVariant();
-			Transform.OnTransformChanged += OnTransformChanged;
-		}
-		catch when ( gltfInstance is not null )
-		{
-			RollbackGltfCreationVariant();
-			try { DisposeGltfInstance(); }
-			finally { _sceneObject?.Delete(); _sceneObject = null; }
-			throw;
-		}
+		_sceneObject = CreateSceneObject( model );
+		OnSceneObjectCreated( _sceneObject );
+
+		Transform.OnTransformChanged += OnTransformChanged;
 	}
 
 	internal override void OnSceneObjectCreated( SceneObject o )
@@ -329,7 +286,7 @@ public partial class ModelRenderer : Renderer, ExecuteInEditor, ITintable, IMate
 
 		if ( o.IsValid() )
 		{
-			o.Transform = gltfInstance is not null ? global::Transform.Zero : WorldTransform;
+			o.Transform = WorldTransform;
 			o.Component = this;
 			o.Tags.SetFrom( GameObject.Tags );
 		}
@@ -337,9 +294,7 @@ public partial class ModelRenderer : Renderer, ExecuteInEditor, ITintable, IMate
 		ApplyMaterialOverrides();
 		UpdateObject();
 		OnTransformChanged();
-		gltfInstance?.SyncSortObjects();
 	}
-
 
 	internal override void OnDisabledInternal()
 	{
@@ -351,14 +306,10 @@ public partial class ModelRenderer : Renderer, ExecuteInEditor, ITintable, IMate
 		{
 			Transform.OnTransformChanged -= OnTransformChanged;
 
-			BackupRenderAttributes( _sceneObject?.Attributes );
-			try { DisposeGltfInstance(); }
-			finally
-			{
-				_sceneObject?.Delete();
-				_sceneObject = null;
-				ResetDeformations();
-			}
+			BackupRenderAttributes( _sceneObject?.HasNativeObject == true ? _sceneObject.Attributes : _sceneObject?.CreatedAttributes );
+			_sceneObject?.Delete();
+			_sceneObject = null;
+			ResetDeformations();
 		}
 
 		base.OnDisabledInternal();
@@ -366,7 +317,6 @@ public partial class ModelRenderer : Renderer, ExecuteInEditor, ITintable, IMate
 
 	private void OnTransformChanged()
 	{
-		if ( gltfInstance is not null ) { UpdateGltfPlacement(); return; }
 		if ( _sceneObject.IsValid() )
 		{
 			_sceneObject.Transform = Transform.InterpolatedWorld;

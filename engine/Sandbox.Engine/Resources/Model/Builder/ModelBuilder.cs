@@ -4,6 +4,7 @@ namespace Sandbox;
 /// Provides the ability to generate <see cref="Model"/>s at runtime.
 /// A new instance is available from <see cref="Model.Builder"/>.
 /// </summary>
+[Expose]
 public sealed partial class ModelBuilder
 {
 	private string modelName;
@@ -104,6 +105,7 @@ public sealed partial class ModelBuilder
 			result.AuthoringMeshGroupNames = meshGroups.ToArray();
 			result.AuthoringMaterialGroups = _materialGroups.Select( g => new ModelSaveMaterialGroup( g.Name, g.Materials.Select( m => m.ResourcePath ).ToArray() ) ).ToArray();
 			ApplyBodyMetadataOverrides( result );
+			result.BuilderMeshes = appliedMeshes;
 			return result;
 		}
 		finally

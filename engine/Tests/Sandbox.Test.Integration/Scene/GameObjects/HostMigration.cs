@@ -30,6 +30,7 @@ public class HostMigrationTest
 		Assert.IsFalse( connection.HasPendingSends, "Snapshot encoding timed out" );
 	}
 	private TypeLibrary _oldTypeLibrary;
+	private Scene _oldActiveScene;
 
 	[TestMethod]
 	public void CapturedSnapshotKeepsStateAfterSceneChanges()
@@ -50,7 +51,7 @@ public class HostMigrationTest
 		Assert.AreEqual( expected.SceneData, actual.SceneData );
 		var before = expected.NetworkObjects.OfType<ObjectCreateMsg>().Single( x => x.Guid == go.Id );
 		var after = actual.NetworkObjects.OfType<ObjectCreateMsg>().Single( x => x.Guid == go.Id );
-		Assert.AreEqual( before.JsonData, after.JsonData );
+		CollectionAssert.AreEqual( before.JsonData, after.JsonData );
 		CollectionAssert.AreEqual( before.TableData, after.TableData );
 	}
 
@@ -58,6 +59,7 @@ public class HostMigrationTest
 	public void TestInitialize()
 	{
 		_oldTypeLibrary = Game.TypeLibrary;
+		_oldActiveScene = Game.ActiveScene;
 
 		Game.TypeLibrary = SharedTypeLibrary.EngineAndTests;
 
@@ -70,6 +72,13 @@ public class HostMigrationTest
 	public void TestCleanup()
 	{
 		Game.TypeLibrary = _oldTypeLibrary;
+
+		// Applying a snapshot replaces the active scene, so the test's push scope won't restore it
+		if ( Game.ActiveScene != _oldActiveScene )
+		{
+			Game.ActiveScene?.Destroy();
+			Game.ActiveScene = _oldActiveScene;
+		}
 	}
 
 	/// <summary>

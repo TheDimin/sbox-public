@@ -417,8 +417,7 @@ public class BetterFogTests
 		Assert.AreEqual( 0.0f, ResolveFog( visibleCamera ).Value.SkyAffect );
 
 		var constants = ResolveFog( visibleCamera ).Value.ToConstants();
-		var expectedIndex = g_pRenderDevice.GetTextureViewIndex( sky.SkyTexture.native,
-			(byte)NativeEngine.RenderColorSpace.RENDER_SRGB, NativeEngine.RenderTextureDimension.RENDER_TEXTURE_DIMENSION_INVALID );
+		var expectedIndex = sky.SkyTexture.Index;
 		Assert.AreEqual( expectedIndex, constants.SkyTextureIndex );
 		Assert.AreEqual( sky.SkyTexture.Desc.IsArray ? 1f : 0f, constants.SkyFormat.y );
 
@@ -722,8 +721,7 @@ public class BetterFogTests
 		Assert.AreEqual( sky.SkyTexture, ResolveFog( camera ).Value.SkyTexture );
 		Assert.AreEqual( 1.0f, ResolveFog( camera ).Value.SkyContribution );
 		var constants = ResolveFog( camera ).Value.ToConstants();
-		var expectedIndex = g_pRenderDevice.GetTextureViewIndex( sky.SkyTexture.native,
-			(byte)NativeEngine.RenderColorSpace.RENDER_SRGB, NativeEngine.RenderTextureDimension.RENDER_TEXTURE_DIMENSION_INVALID );
+		var expectedIndex = sky.SkyTexture.Index;
 		Assert.AreEqual( expectedIndex, constants.SkyTextureIndex );
 		Assert.AreEqual( sky.SkyTexture.Desc.IsArray ? 1f : 0f, constants.SkyFormat.y );
 	}
@@ -763,7 +761,7 @@ public class BetterFogTests
 	}
 
 	/// <summary>
-	/// Enabling fog and height density through a partially weighted volume produces continuous intermediate settings.
+	/// Fog, height and directional color transitions through a partially weighted volume remain continuous.
 	/// </summary>
 	[TestMethod]
 	public void EnabledAndHeightTransitionsKeepFractionalInfluence()
@@ -794,6 +792,33 @@ public class BetterFogTests
 		scene.GameTick();
 		Assert.IsTrue( ResolveFog( camera ).Value.HeightEnabled, "Height density remains active while fading away" );
 		Assert.AreEqual( 0.5f, ResolveFog( camera ).Value.HeightContribution.Value, 0.0001f );
+
+		global.Color = Color.Red;
+		global.ColorDirection = Vector3.Forward;
+		fog.Color = Color.Blue;
+		fog.SecondaryColor = Color.Green;
+		fog.ColorDirection = Vector3.Left;
+		foreach ( var outgoingDirectional in new[] { false, true } )
+		{
+			global.DirectionalColorEnabled = outgoingDirectional;
+			fog.DirectionalColorEnabled = !outgoingDirectional;
+			foreach ( var weight in new[] { 0f, 0.01f, 0.49f, 0.5f, 0.51f, 0.99f, 1f } )
+			{
+				volume.BlendWeight = weight;
+				scene.GameTick();
+				var resolved = ResolveFog( camera ).Value;
+				foreach ( var direction in new[] { Vector3.Forward, Vector3.Backward, Vector3.Left, Vector3.Right } )
+				{
+					var from = global.GetSettings( camera ).ToConstants( viewDirection: direction ).Color;
+					var to = fog.GetSettings( camera ).ToConstants( viewDirection: direction ).Color;
+					var expected = Vector3.Lerp( from, to, weight );
+					var actual = resolved.ToConstants( viewDirection: direction ).Color;
+					Assert.AreEqual( expected.x, actual.x, 0.0001f, $"Directional transition at weight {weight}, looking {direction}" );
+					Assert.AreEqual( expected.y, actual.y, 0.0001f, $"Directional transition at weight {weight}, looking {direction}" );
+					Assert.AreEqual( expected.z, actual.z, 0.0001f, $"Directional transition at weight {weight}, looking {direction}" );
+				}
+			}
+		}
 	}
 
 	/// <summary>

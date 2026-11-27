@@ -9,7 +9,7 @@ namespace Sandbox
 		/// <summary>
 		/// Number of material groups this model has.
 		/// </summary>
-		public int MaterialGroupCount => GltfResource is not null ? 0 : native.GetNumMaterialGroups();
+		public int MaterialGroupCount => native.GetNumMaterialGroups();
 
 		/// <summary>
 		/// Returns name of a material group at given group index.
@@ -34,7 +34,6 @@ namespace Sandbox
 		/// <returns>The index of the material group, or a negative value if the group does not exist.</returns>
 		public int GetMaterialGroupIndex( string groupIndex )
 		{
-			if ( GltfResource is not null ) return -1;
 			return native.GetMaterialGroupIndex( groupIndex );
 		}
 
@@ -49,7 +48,7 @@ namespace Sandbox
 			{
 				if ( _materials.IsDefault )
 				{
-					_materials = GltfResource is { } gltf ? gltf.GetMaterials().ToImmutableArray() : Enumerable.Range( 0, native.GetMaterialIndexCount() )
+					_materials = Enumerable.Range( 0, native.GetMaterialIndexCount() )
 						.Select( i => Material.FromNative( native.GetMaterialByIndex( i ) ) )
 						.ToImmutableArray();
 				}

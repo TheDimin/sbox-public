@@ -38,11 +38,9 @@ public class ResourceGuidAccessTests
 		using var stream = new MemoryStream();
 		var emitted = compilation.Emit( stream );
 		Assert.IsTrue( emitted.Success, string.Join( "\n", emitted.Diagnostics ) );
-		stream.Position = 0;
-		using var access = new AccessControl();
-		var result = access.VerifyAssembly( stream, out var trusted );
-		trusted?.Dispose();
-		Assert.IsTrue( result.Success, string.Join( "\n", result.Errors ) );
+		var result = CompilingTests.CodeAccess.CodeAccessGate.Verify( System.Linq.Enumerable.Single( compilation.SyntaxTrees ).ToString() );
+		Assert.IsFalse( result.EmitFailed, result.ToString() );
+		Assert.AreEqual( 0, result.Denied.Count, result.ToString() );
 	}
 
 	[TestMethod]

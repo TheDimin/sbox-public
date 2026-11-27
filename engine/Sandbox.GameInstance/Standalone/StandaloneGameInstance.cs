@@ -26,7 +26,7 @@ internal partial class StandaloneGameInstance : GameInstance
 
 		PackageManager.CmdList();
 
-		Application.GameIdent = Package is null ? Ident : $"{_package.Org.Ident}.{_package.Ident}";
+		Application.GameIdent = Package?.FullIdent ?? Ident;
 		Application.GamePackage = _package;
 
 		{
@@ -34,7 +34,6 @@ internal partial class StandaloneGameInstance : GameInstance
 			{
 				PackageIdent = Package.FullIdent,
 				ContextTag = "gamemenu",
-				AllowLocalPackages = true,
 				CancellationToken = token
 			};
 
@@ -115,7 +114,7 @@ internal partial class StandaloneGameInstance : GameInstance
 		_packageAssembly = null;
 
 
-		if ( Package.TryParseIdent( Package.FullIdent, out var ident ) )
+		if ( Package.TryParseIdentParts( Package.FullIdent, out var ident ) )
 		{
 			var loaded = enroller.FindAssembly( Package, $"package.{ident.org}.{ident.package}" );
 			if ( loaded is not null )
@@ -123,6 +122,9 @@ internal partial class StandaloneGameInstance : GameInstance
 				_packageAssembly = loaded.Assembly;
 			}
 		}
+
+		// Its code and content are in, so its own loading screen can cover the rest
+		StandaloneLoadingScene.Path = Package.GetMeta<string>( "LoadingScene", null );
 
 		return true;
 	}

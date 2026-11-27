@@ -17,7 +17,7 @@ public static partial class TextureLoader
 			.WithData( reader.GetMipData( bytes ) )
 			.WithMips( (int)reader.MipMapCount )
 			.WithStaticUsage()
-			.Finish();
+			.FinishWithOwnedData();
 	}
 }
 

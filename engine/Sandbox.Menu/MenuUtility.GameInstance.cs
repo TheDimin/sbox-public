@@ -13,7 +13,7 @@ public static partial class MenuUtility
 		CloseAllModals();
 		Api.Activity.GameRequested( new( "menu", ident ), replace: false );
 
-		if ( gameSettings is not null ) LaunchArguments.GameSettings = gameSettings;
+		if ( gameSettings is not null ) LaunchArguments.SetTrustedGameSettings( gameSettings );
 		_ = LoadAsync( ident, allowLaunchOverride );
 	}
 
@@ -23,19 +23,43 @@ public static partial class MenuUtility
 	public static void OpenGameWithMap( string gameident, string mapName, Dictionary<string, string> gameSettings = null )
 	{
 		LaunchArguments.Map = mapName;
-		if ( gameSettings is not null ) LaunchArguments.GameSettings = gameSettings;
+		if ( gameSettings is not null ) LaunchArguments.SetTrustedGameSettings( gameSettings );
 
 		OpenGame( gameident, false );
 	}
 
-	static async Task LoadAsync( string ident, bool allowLaunchOverride, CancellationToken ct = default )
+	/// <summary>
+	/// Joining someone else's game - see <see cref="OpenGameMenu"/>.
+	/// </summary>
+	public static bool IsJoining => Networking.IsJoining;
+
+	/// <summary>
+	/// Load a game onto its menu scene. It starts when it changes scene. Returns false without loading while
+	/// <see cref="IsJoining"/>, since loading would leave the session being joined. Leaves the modals to the caller,
+	/// which might want to keep a notice up, such as why a join failed.
+	/// </summary>
+	public static async Task<bool> OpenGameMenu( string ident )
+	{
+		if ( IsJoining )
+		{
+			Log.Info( $"Not opening {ident}'s menu while joining a game" );
+			return false;
+		}
+
+		Api.Activity.GameRequested( new( "menu", ident ), replace: false );
+
+		await LoadAsync( ident, false, GameLoadingFlags.Menu );
+		return true;
+	}
+
+	static async Task LoadAsync( string ident, bool allowLaunchOverride, GameLoadingFlags extraFlags = default, CancellationToken ct = default )
 	{
 		ThreadSafe.AssertIsMainThread();
 		LoadingScreen.IsVisible = true;
 		LoadingScreen.Media = null;
 		LoadingScreen.Title = null;
 
-		var flags = GameLoadingFlags.Host | GameLoadingFlags.Reload;
+		var flags = GameLoadingFlags.Host | GameLoadingFlags.Reload | extraFlags;
 		if ( Application.IsEditor ) flags |= GameLoadingFlags.Developer; // todo - is the package we're loading a local package
 
 		await IGameInstanceDll.Current.LoadGamePackageAsync( ident, flags, ct );

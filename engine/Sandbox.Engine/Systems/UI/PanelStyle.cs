@@ -78,6 +78,12 @@ public sealed class PanelStyle : Styles
 	public bool HasBeforeElement => _hasBeforeElement;
 
 	/// <summary>
+	/// Set when building the rules finds a ::before or ::after element appearing or going, which the panel's tick makes or
+	/// removes. Cleared by the root once it has woken the panel's tick.
+	/// </summary>
+	internal bool PseudoElementsChanged;
+
+	/// <summary>
 	/// This style has a ::after element available. This is signalling to the panel system that if we 
 	/// apply this style, we should also create a ::after element.
 	/// </summary>
@@ -149,6 +155,8 @@ public sealed class PanelStyle : Styles
 		}
 		broadPhaseHash = hash;
 
+		var hadBefore = _hasBeforeElement;
+		var hadAfter = _hasAfterElement;
 		_hasBeforeElement = false;
 		_hasAfterElement = false;
 
@@ -190,6 +198,7 @@ public sealed class PanelStyle : Styles
 
 		rulesChanged = rulesChanged || ruleguid != ActiveRulesGuid;
 		ActiveRulesGuid = ruleguid;
+		PseudoElementsChanged |= hadBefore != _hasBeforeElement || hadAfter != _hasAfterElement;
 
 		return rulesChanged;
 	}
@@ -241,7 +250,7 @@ public sealed class PanelStyle : Styles
 		return true;
 	}
 
-	internal Styles BuildFinal( ref LayoutCascade cascade, out bool changed )
+	internal Styles BuildFinal( ref LayoutCascade cascade, out bool changed, out bool paintOnly )
 	{
 		var time = panel.TimeNow;
 		var timeDelta = panel.TimeDelta;
@@ -280,6 +289,8 @@ public sealed class PanelStyle : Styles
 		if ( Final.HasCurrentColor )
 			Final.ResolveCurrentColor( cascade.ParentStyles );
 
+		// Check before Run removes finished transitions. Their last tick also applies the target value.
+		paintOnly = !changed && panel.Transitions.HasAny && panel.Transitions.Entries.TrueForAll( entry => entry.Property is "opacity" or "transform" );
 		if ( panel.Transitions.Run( Final, time ) )
 		{
 			changed = true;
@@ -287,6 +298,7 @@ public sealed class PanelStyle : Styles
 
 		if ( Final.ApplyAnimation( panel ) )
 		{
+			paintOnly = false;
 			changed = true;
 		}
 

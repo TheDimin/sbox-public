@@ -178,6 +178,18 @@ public partial class AssetList
 		popup.OpenAtCursor( false );
 	}
 
+	static async Task InstallPackageFromMenu( string ident )
+	{
+		try
+		{
+			await AssetSystem.InstallAsync( ident );
+		}
+		catch ( AggregateException ex )
+		{
+			Log.Warning( ex, $"Error installing package {ident}" );
+		}
+	}
+
 	private void OpenItemContextMenu( object item )
 	{
 		var packageEntries = SelectedItems.OfType<PackageEntry>();
@@ -194,7 +206,7 @@ public partial class AssetList
 			{
 				foreach ( var entry in packageEntries )
 				{
-					AssetSystem.InstallAsync( entry.Package.FullIdent );
+					_ = InstallPackageFromMenu( entry.Package.FullIdent );
 				}
 			} );
 
@@ -346,6 +358,12 @@ public partial class AssetList
 
 		if ( meshes.Count == 1 )
 		{
+			var session = SceneEditorSession.Active;
+			if ( session?.Scene is not null && !Game.IsPlaying )
+			{
+				e.Menu.AddOption( "Create Scene Mesh", "polyline", () => CreateSceneMesh( session, meshes[0] ) );
+			}
+
 			e.Menu.AddOption( "Create Model", "open_in_new", () => _ = new CreateModelFromMeshDialog( meshes ) );
 		}
 		else
@@ -354,6 +372,24 @@ public partial class AssetList
 			menu.AddOption( "Separate Models", "call_split", () => _ = new CreateModelFromMeshDialog( meshes ) );
 			menu.AddOption( "Single Model", "join_inner", () => _ = new CreateSingleModelFromMeshDialog( meshes ) );
 		}
+	}
+
+	private static void CreateSceneMesh( SceneEditorSession session, Asset asset )
+	{
+		var mesh = EditorUtility.CreatePolygonMeshFromMeshFile( asset.AbsolutePath );
+		if ( mesh is null )
+		{
+			Log.Warning( $"Could not import polygons from {asset.RelativePath}" );
+			return;
+		}
+
+		using var sceneScope = session.Scene.Push();
+		using var undo = session.UndoScope( "Create Scene Mesh" ).WithGameObjectCreations().Push();
+		var go = new GameObject( true, Path.GetFileNameWithoutExtension( asset.Name ) );
+		var component = go.Components.Create<MeshComponent>();
+		component.SmoothingAngle = 45;
+		component.Mesh = mesh;
+		session.Selection.Set( go );
 	}
 
 	static void RebuildTagMenu( Menu tag_menu, List<AssetEntry> entries )

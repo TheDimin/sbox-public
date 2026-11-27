@@ -22,6 +22,14 @@ internal static partial class ConVarSystem
 		AddCommand( command );
 	}
 
+	/// <summary>
+	/// Read a native ConVar as an integer, as native code does, without going through a string.
+	/// </summary>
+	internal static int GetNativeInt( string name, int defaultValue )
+	{
+		return Find( name ) is NativeConVar native ? native.GetInt() : defaultValue;
+	}
+
 	internal static void ClearNativeCommands()
 	{
 		if ( Members.Count == 0 )
@@ -45,6 +53,8 @@ internal static partial class ConVarSystem
 		{
 			Members.Remove( name );
 		}
+
+		Changed();
 	}
 }
 
@@ -109,5 +119,7 @@ file class NativeConVar : Command
 	}
 
 	public override string DefaultValue => _native.GetDefault();
+
+	public int GetInt() => _native.GetInt();
 }
 

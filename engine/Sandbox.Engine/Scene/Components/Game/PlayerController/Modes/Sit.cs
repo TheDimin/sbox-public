@@ -28,7 +28,11 @@ public sealed class SitMoveMode : MoveMode, PlayerController.IEvents
 			return;
 
 		OnUpdateAnimatorVelocity( renderer );
+		SetAnimatorParameter( renderer, "move_rotationspeed", 0f );
+
 		chair.UpdatePlayerAnimator( Controller, renderer );
+		if ( renderer.Animation.Graph is not null )
+			OnUpdateAnimationGraph( renderer );
 	}
 
 	/// <summary>

@@ -284,33 +284,16 @@ public partial class Panel : IPanel, IValid, IComponent
 	/// <summary>
 	/// Returns true if this panel would like the mouse cursor to be visible.
 	/// </summary>
-	public virtual bool WantsMouseInput()
-	{
-		if ( ComputedStyle == null )
-			return false;
+	public virtual bool WantsMouseInput() => WantsMouseInputCached( out _ );
 
-		if ( !IsVisibleSelf )
-			return false;
+	internal void TickInternal() => TickInternal( FindRootPanel()?.TickStack ?? [] );
 
-		if ( ComputedStyle.PointerEvents == PointerEvents.All )
-			return true;
-
-		if ( _children is null )
-			return false;
-
-		foreach ( var child in _children )
-		{
-			if ( child?.WantsMouseInput() ?? false )
-				return true;
-		}
-
-		return false;
-	}
-
-	internal void TickInternal()
+	void TickInternal( List<Panel> tickStack )
 	{
 		if ( Application.IsHeadless )
 			return;
+
+		_tickQuietAt = 0;
 
 		if ( IsDeleting )
 		{
@@ -336,8 +319,9 @@ public partial class Panel : IPanel, IValid, IComponent
 
 			var didBuildRenderTree = false;
 			var isFirstRender = renderTree == null;
+			var hasRenderTree = HasRenderTree;
 
-			if ( HasRenderTree || parametersChanged )
+			if ( hasRenderTree || parametersChanged )
 			{
 				InternalTreeBinds();
 
@@ -376,18 +360,10 @@ public partial class Panel : IPanel, IValid, IComponent
 			//
 			// Don't tick our children if we're not visible
 			//
+			var childrenQuiet = true;
 			if ( IsVisible && _children is not null && _children.Count > 0 )
 			{
-				using var pooledChildren = new PooledSpan<Panel>( _children.Count, true );
-				_children.CopyTo( pooledChildren.Array );
-
-				var children = pooledChildren.Span;
-				for ( int i = children.Length - 1; i >= 0; i-- )
-				{
-					var child = children[i];
-					if ( !child.IsValid() ) continue;
-					child.TickInternal();
-				}
+				childrenQuiet = TickChildren( tickStack );
 			}
 
 			//
@@ -410,6 +386,9 @@ public partial class Panel : IPanel, IValid, IComponent
 			RunClassBinds();
 			_paintCache.CheckTextures( this );
 
+			// Nothing to do here or below: skipped until something in the subtree changes. Stamps made during this paint
+			// clock period, even before this, aren't below it, so a change this period is ticked again next frame
+			if ( childrenQuiet && TickedQuietly( hasRenderTree ) ) _tickQuietAt = PaintClock;
 
 		}
 		catch ( System.Exception e )
@@ -417,6 +396,43 @@ public partial class Panel : IPanel, IValid, IComponent
 			Log.Error( e );
 		}
 
+	}
+
+	/// <summary>
+	/// Children can be added or removed while they tick, so each level ticks a snapshot. Every level shares
+	/// the root's stack, pushing its children on top and popping them when done. True when every child is quiet
+	/// (<see cref="_tickQuietAt"/>).
+	/// </summary>
+	bool TickChildren( List<Panel> tickStack )
+	{
+		int start = tickStack.Count;
+		tickStack.AddRange( _children );
+		var quiet = true;
+
+		try
+		{
+			for ( int i = tickStack.Count - 1; i >= start; i-- )
+			{
+				var child = tickStack[i];
+				if ( !child.IsValid() ) continue;
+
+				// A subtree that had nothing to do and hasn't changed since
+				if ( child.CanSkipTick( this ) )
+				{
+					SkippedTicks++;
+					continue;
+				}
+
+				child.TickInternal( tickStack );
+				quiet &= child._tickQuietAt != 0;
+			}
+		}
+		finally
+		{
+			tickStack.RemoveRange( start, tickStack.Count - start );
+		}
+
+		return quiet;
 	}
 
 	internal int GetRenderOrderIndex()

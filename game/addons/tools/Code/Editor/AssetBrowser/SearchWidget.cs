@@ -137,7 +137,9 @@ public class SearchWidget : Widget
 		if ( token.IsCancellationRequested )
 			yield break;
 
-		foreach ( var file in location.GetFiles() )
+		// Mounted resources already have full paths. Scan the mount once for the whole subtree.
+		var files = location is MountLocation mount ? mount.GetFiles( showRecursiveFiles, token ) : location.GetFiles();
+		foreach ( var file in files )
 		{
 			if ( token.IsCancellationRequested )
 				yield break;
@@ -154,7 +156,7 @@ public class SearchWidget : Widget
 			yield return file;
 		}
 
-		if ( showRecursiveFiles )
+		if ( showRecursiveFiles && location is not MountLocation )
 		{
 			foreach ( var subDir in location.GetDirectories() )
 			{
@@ -182,78 +184,37 @@ public class SearchWidget : Widget
 
 		var splitValues = query.Split( " " );
 		bool hasExtension = query.Contains( '.' );
-		if ( asset != null && !hasExtension )
+		foreach ( var splitValue in splitValues )
 		{
-			foreach ( var splitValue in splitValues )
-			{
-				var search = splitValue;
-				var negated = false;
-				if ( splitValue.StartsWith( "-" ) )
-				{
-					search = splitValue.Substring( 1 );
-					negated = true;
-				}
+			var negated = splitValue.StartsWith( "-" );
+			var search = negated ? splitValue[1..] : splitValue;
+			bool matches;
 
-				var assetName = asset.Name;
-				if ( AssetLocations.IncludePathNames )
-				{
-					assetName = asset.RelativePath;
-				}
-				if ( !negated )
-				{
-					if ( !(
-						assetName.Contains( search, StringComparison.OrdinalIgnoreCase )
-						|| asset.AssetType.FriendlyName.Contains( search, StringComparison.OrdinalIgnoreCase )
-						|| asset.Tags.Any( x => x.Contains( search, StringComparison.OrdinalIgnoreCase ) )
-					) )
-					{
-						return true;
-					}
-				}
-				else
-				{
-					if ( assetName.Contains( search, StringComparison.OrdinalIgnoreCase )
-						|| asset.AssetType.FriendlyName.Contains( search, StringComparison.OrdinalIgnoreCase )
-						|| asset.Tags.Any( x => x.Contains( search, StringComparison.OrdinalIgnoreCase ) ) )
-					{
-						return true;
-					}
-				}
+			if ( search.Contains( '*' ) || search.Contains( '?' ) )
+			{
+				// Use the source asset path so compiled-only assets also match their source extension.
+				var path = (asset?.Path ?? file.Name).Replace( '\\', '/' );
+				search = search.Replace( '\\', '/' );
+				var name = search.Contains( '/' ) ? path : Path.GetFileName( path );
+				matches = name.WildcardMatch( search );
+			}
+			else if ( asset != null && !hasExtension )
+			{
+				var assetName = AssetLocations.IncludePathNames ? asset.RelativePath : asset.Name;
+				matches = assetName.Contains( search, StringComparison.OrdinalIgnoreCase )
+					|| asset.AssetType.FriendlyName.Contains( search, StringComparison.OrdinalIgnoreCase )
+					|| asset.Tags.Any( x => x.Contains( search, StringComparison.OrdinalIgnoreCase ) );
+			}
+			else
+			{
+				matches = file.Name.Contains( search, StringComparison.OrdinalIgnoreCase );
 			}
 
-			return false;
+			if ( matches == negated )
+				return true;
 		}
-		else
-		{
-			// Loose file filtering
-			foreach ( var splitValue in splitValues )
-			{
-				var search = splitValue;
-				var negated = false;
-				if ( splitValue.StartsWith( "-" ) )
-				{
-					search = splitValue.Substring( 1 );
-					negated = true;
-				}
 
-				if ( !negated )
-				{
-					if ( !file.Name.Contains( search, StringComparison.OrdinalIgnoreCase ) )
-					{
-						return true;
-					}
-				}
-				else
-				{
-					if ( file.Name.Contains( search, StringComparison.OrdinalIgnoreCase ) )
-					{
-						return true;
-					}
-				}
-			}
-
-			return false;
-		}
+		return false;
 	}
 
 	private bool FilterAssetType( FileInfo file )

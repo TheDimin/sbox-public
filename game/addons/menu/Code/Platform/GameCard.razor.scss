@@ -1,0 +1,323 @@
+@import "/Platform/_platform.scss";
+
+// A game on a shelf or in Browse's grid - inset in the cell it's in (a shelf's, or the grid's), so there's room round
+// it to scale up into under the mouse without being cut off.
+GameCard
+{
+	position: absolute;
+	left: 6px;
+	top: 6px;
+	right: 6px;
+	bottom: 6px;
+	// Nothing clips in here - a clip's worked out from where it is before it's scaled, so a card lifted under the
+	// mouse would be cut back to its old size. The art rounds its own top corners; names are shortened in code.
+	border-radius: $platform-radius;
+	cursor: pointer;
+	@include platform-sounds;
+	pointer-events: all;
+	transform: scale( 1 );
+	transition: transform 0.15s ease-out;
+
+	&:hover
+	{
+		transform: scale( 1.03 );
+		z-index: 1;
+	}
+
+	&.selected
+	{
+		border: 3px solid $platform-primary;
+	}
+
+	flex-direction: column;
+	background-color: rgba( 22, 28, 40, 0.95 );
+
+	// On top - square, as the card's as tall as it's wide plus the strip under it
+	.art
+	{
+		position: relative;
+		flex-grow: 1;
+		flex-shrink: 1;
+		background-size: cover;
+		background-position: center;
+		background-color: $platform-panel;
+		border-top-left-radius: $platform-radius;
+		border-top-right-radius: $platform-radius;
+	}
+
+	// Inside the selected border its corners are tighter - the radius less the border (4px - 3px)
+	&.selected .art
+	{
+		border-top-left-radius: 1px;
+		border-top-right-radius: 1px;
+	}
+
+	&:hover .art
+	{
+		filter: brightness( 1.12 );
+	}
+
+	.pill
+	{
+		position: absolute;
+		top: 10px;
+		left: 10px;
+		padding: 2px 6px;
+		border-radius: $platform-pill;
+		background-color: $platform-primary;
+		font-size: 10px;
+		font-weight: 700;
+		text-transform: uppercase;
+		color: $platform-primary-text;
+	}
+
+	// Downloaded, but there's a newer one - an amber glyph in a dark chip on the art's top right corner
+	.outdated
+	{
+		position: absolute;
+		top: 8px;
+		right: 8px;
+		width: 26px;
+		height: 26px;
+		align-items: center;
+		justify-content: center;
+		border-radius: $platform-radius;
+		border: 1px solid rgba( $front-trophy, 0.45 );
+		background-color: rgba( 12, 15, 22, 0.85 );
+		color: $front-trophy;
+
+		i
+		{
+			font-size: 17px;
+		}
+	}
+
+	// What it is, under the art - its rating, what it's called, who made it. GameCard.InfoHeight tall.
+	.info
+	{
+		flex-direction: column;
+		flex-shrink: 0;
+		height: 70px;
+		justify-content: center;
+		padding: 6px 12px 8px;
+	}
+
+	.top
+	{
+		align-items: center;
+		height: 16px;
+	}
+
+	// Growing to push what's after it to the right
+	.stars
+	{
+		flex-grow: 1;
+
+		i
+		{
+			font-family: "Material Symbols Outlined";
+			font-variation-settings: $menu-icon-outlined;
+			font-size: 14px;
+			color: $platform-faint;
+
+			&.lit
+			{
+				font-variation-settings: $menu-icon-filled;
+				color: $platform-steam-blue;
+			}
+		}
+
+		&.unrated i
+		{
+			opacity: 0.5;
+		}
+	}
+
+	// On the art's bottom right corner - favourite it, and subscribe to it. The same button twice: dark with a lit glyph once
+	// it's on (a gold star, a green tick - an x pointed at to unsubscribe), and only with the pointer on the card when
+	// it isn't, a gold and a green gradient with a dark glyph so it's plain what they're for. They pop in with the
+	// pointer, swell under it, sink when pressed, and their glyph bounces when they're turned on
+	.actions
+	{
+		position: absolute;
+		bottom: 8px;
+		right: 8px;
+		gap: 6px;
+	}
+
+	// One that's off isn't there at all without the pointer on the card, so one that's on sits in the corner
+	.action
+	{
+		display: none;
+		width: 30px;
+		height: 30px;
+		align-items: center;
+		justify-content: center;
+		border-radius: $platform-radius;
+		border: 1px solid rgba( 255, 255, 255, 0.08 );
+		background-color: rgba( 12, 15, 22, 0.85 );
+		background-image: linear-gradient( 180deg, rgba( 40, 46, 62, 0.95 ), rgba( 12, 15, 22, 0.95 ) );
+		box-shadow: 0 2px 6px rgba( 0, 0, 0, 0.45 );
+		color: $platform-text;
+		cursor: pointer;
+		@include platform-press-sound;
+		transform: scale( 1 );
+		transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, border-color 0.15s ease-out;
+		animation-name: action-in;
+		animation-duration: 0.22s;
+		animation-timing-function: ease-out;
+
+		i
+		{
+			font-size: 20px;
+		}
+
+		.hover
+		{
+			display: none;
+		}
+
+		&.on
+		{
+			display: flex;
+
+			i
+			{
+				animation-name: action-pop;
+				animation-duration: 0.35s;
+				animation-timing-function: ease-out;
+			}
+		}
+
+		&:hover
+		{
+			transform: scale( 1.1 );
+			box-shadow: 0 4px 12px rgba( 0, 0, 0, 0.55 );
+		}
+
+		&:active
+		{
+			transform: scale( 0.92 );
+			transition: transform 0.06s ease-out;
+		}
+	}
+
+	&:hover .action
+	{
+		display: flex;
+	}
+
+	.favourite
+	{
+		border-color: rgba( 255, 236, 180, 0.55 );
+		background-color: $front-trophy;
+		background-image: linear-gradient( 160deg, #ffe08f, $front-trophy 55%, #c98a1c );
+		color: #2a1c02;
+
+		&:hover
+		{
+			box-shadow: 0 4px 14px rgba( $front-trophy, 0.55 );
+		}
+
+		&.on
+		{
+			border-color: rgba( $front-trophy, 0.45 );
+			background-color: rgba( 12, 15, 22, 0.85 );
+			background-image: linear-gradient( 160deg, rgba( 74, 58, 26, 0.95 ), rgba( 12, 15, 22, 0.95 ) 70% );
+			box-shadow: 0 2px 10px rgba( $front-trophy, 0.3 );
+			color: $front-trophy;
+		}
+
+		&.on:hover
+		{
+			box-shadow: 0 4px 14px rgba( $front-trophy, 0.5 );
+		}
+	}
+
+	.subscribe
+	{
+		border-color: rgba( 190, 255, 215, 0.5 );
+		background-color: $platform-good;
+		background-image: linear-gradient( 160deg, #8ef0b2, $platform-good 55%, #239a55 );
+		color: #06210f;
+
+		&:hover
+		{
+			box-shadow: 0 4px 14px rgba( $platform-good, 0.55 );
+
+			.state
+			{
+				display: none;
+			}
+
+			.hover
+			{
+				display: flex;
+			}
+		}
+
+		&.on
+		{
+			border-color: rgba( $platform-good, 0.45 );
+			background-color: rgba( 12, 15, 22, 0.85 );
+			background-image: linear-gradient( 160deg, rgba( 22, 70, 44, 0.95 ), rgba( 12, 15, 22, 0.95 ) 70% );
+			box-shadow: 0 2px 10px rgba( $platform-good, 0.3 );
+			color: $platform-good;
+		}
+
+		// Pointed at to unsubscribe - red
+		&.on:hover
+		{
+			border-color: rgba( 255, 190, 195, 0.5 );
+			background-color: $platform-danger;
+			background-image: linear-gradient( 160deg, #ff8f98, $platform-danger 55%, #c93542 );
+			box-shadow: 0 4px 14px rgba( $platform-danger, 0.5 );
+			color: $platform-primary-text;
+		}
+	}
+
+	.name
+	{
+		flex-shrink: 0;
+		width: 100%;
+		margin-top: 2px;
+		font-size: 15px;
+		font-weight: 600;
+		color: $platform-text;
+		white-space: nowrap;
+	}
+
+	.by-row
+	{
+		flex-shrink: 0;
+		width: 100%;
+		align-items: center;
+		gap: 4px;
+	}
+
+	.by
+	{
+		flex-shrink: 1;
+		min-width: 0;
+		font-size: 12px;
+		color: $platform-muted;
+		white-space: nowrap;
+	}
+
+	@include platform-verified( 13px );
+}
+
+// Up with the pointer - from small and low
+@keyframes action-in
+{
+	0% { opacity: 0; transform: scale( 0.6 ) translateY( 6px ); }
+	100% { opacity: 1; transform: scale( 1 ) translateY( 0 ); }
+}
+
+// Turned on - the glyph bounces
+@keyframes action-pop
+{
+	0% { transform: scale( 0.4 ); }
+	55% { transform: scale( 1.35 ); }
+	100% { transform: scale( 1 ); }
+}

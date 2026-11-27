@@ -40,13 +40,13 @@ public static partial class EditorUtility
 				Assembly replacement = null;
 				try
 				{
-					replacement = context.LoadFromAssemblyPath( Path.Combine( build, "mount", ident, ident + ".dll" ) );
+					replacement = context.LoadFromAssemblyPath( Path.Combine( build, "mounts", ident, ident + ".dll" ) );
 					var type = replacement.GetType( previous.GetType().FullName, throwOnError: true );
 					if ( !typeof( Sandbox.Mounting.BaseGameMount ).IsAssignableFrom( type ) )
 						throw new InvalidDataException( "The new assembly does not contain the mount type." );
 					if ( mounted ) await MountDirectory.SetMountState( ident, false );
 					MountDirectory.RemoveAssembly( previousAssembly );
-					MountDirectory.AddAssembly( replacement );
+					MountDirectory.AddAssembly( replacement, exposeMountTypes: true );
 					if ( Get( ident )?.GetType().Assembly != replacement )
 						throw new InvalidDataException( "The new mount failed to register." );
 					if ( mounted ) await MountDirectory.SetMountState( ident, true );
@@ -56,7 +56,7 @@ public static partial class EditorUtility
 					if ( replacement is not null && Get( ident )?.GetType().Assembly != previousAssembly )
 					{
 						MountDirectory.RemoveAssembly( replacement );
-						MountDirectory.AddAssembly( previousAssembly );
+						MountDirectory.AddAssembly( previousAssembly, exposeMountTypes: true );
 					}
 					if ( mounted && Get( ident )?.IsMounted == false ) await MountDirectory.SetMountState( ident, true );
 					context.Unload();

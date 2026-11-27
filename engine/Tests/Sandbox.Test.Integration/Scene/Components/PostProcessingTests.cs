@@ -105,7 +105,6 @@ public class PostProcessingComponentTest
 		CreateAndCycle<HighlightOutline>( scene );
 		CreateAndCycle<MotionBlur>( scene );
 		CreateAndCycle<Pixelate>( scene );
-		CreateAndCycle<ScreenSpaceReflections>( scene );
 		CreateAndCycle<Sharpen>( scene );
 		CreateAndCycle<Tonemapping>( scene );
 		CreateAndCycle<Vignette>( scene );
@@ -194,9 +193,6 @@ public class PostProcessingComponentTest
 
 		var pixelate = go.Components.Create<Pixelate>( false );
 		Assert.AreEqual( 0.25f, pixelate.Scale );
-
-		var ssr = go.Components.Create<ScreenSpaceReflections>( false );
-		Assert.AreEqual( 0.5f, ssr.RoughnessCutoff, 0.001f, "SSR roughness cutoff is a hardcoded constant" );
 
 		var sharpen = go.Components.Create<Sharpen>( false );
 		Assert.AreEqual( 2.0f, sharpen.Scale );
@@ -393,7 +389,6 @@ public class PostProcessingComponentTest
 		outline.Width = 2.0f;
 		outline.OverrideTargets = true;
 
-		go.Components.Create<ScreenSpaceReflections>();
 		go.Components.Create<Highlight>();
 
 		var clone = SerializeRoundTrip( scene, go );
@@ -447,7 +442,6 @@ public class PostProcessingComponentTest
 		Assert.AreEqual( 2.0f, loadedOutline.Width );
 		Assert.IsTrue( loadedOutline.OverrideTargets );
 
-		Assert.IsNotNull( clone.Components.Get<ScreenSpaceReflections>(), "SSR should survive the round trip" );
 		Assert.IsNotNull( clone.Components.Get<Highlight>(), "Highlight should survive the round trip" );
 
 		clone.Destroy();
@@ -489,6 +483,48 @@ public class PostProcessingComponentTest
 
 		clone.Destroy();
 		scene.ProcessDeletes();
+	}
+
+	/// <summary>
+	/// Every camera renders screen-space reflections as part of the renderer, with no effect to add, and reads the
+	/// depth-normals G-buffer they trace from. The obsolete component adds nothing.
+	/// </summary>
+	[TestMethod]
+	public void ScreenSpaceReflectionsArePartOfEveryCamera()
+	{
+		var oldRatio = ScreenSpaceReflectionsPass.DownsampleRatio;
+		ScreenSpaceReflectionsPass.DownsampleRatio = 2;
+
+		var scene = new Scene();
+		try
+		{
+			using var sceneScope = scene.Push();
+
+			var camGo = scene.CreateObject();
+			var cam = camGo.Components.Create<CameraComponent>();
+
+			Update();
+			Assert.IsNotNull( cam.SceneCamera.ScreenSpaceReflections, "A camera should render screen-space reflections by default" );
+			Assert.AreEqual( 0, TotalLayerCount( cam ), "Screen-space reflections aren't a post process effect" );
+			Assert.IsTrue( cam.SceneCamera.Attributes.GetBool( "NeedsDepthNormals" ), "The trace reads the depth-normals G-buffer" );
+
+#pragma warning disable CS0618 // The obsolete component is what's being tested
+			camGo.Components.Create<ScreenSpaceReflections>();
+#pragma warning restore CS0618
+			Update();
+			Assert.AreEqual( 0, TotalLayerCount( cam ), "The obsolete component should add nothing" );
+
+			void Update()
+			{
+				scene.GameTick();
+				scene.PreCameraRender();
+			}
+		}
+		finally
+		{
+			ScreenSpaceReflectionsPass.DownsampleRatio = oldRatio;
+			scene.Destroy();
+		}
 	}
 
 	/// <summary>
@@ -583,6 +619,43 @@ public class PostProcessingComponentTest
 		finally
 		{
 			PostProcessSystem.EnablePostProcess = oldEnable;
+		}
+	}
+
+	/// <summary>
+	/// Disabling DepthOfField disposes its tile buffers while the camera still holds this frame's layer (until its next
+	/// build): the layer's command list is emptied with them, so the frame doesn't run it against disposed buffers.
+	/// </summary>
+	[TestMethod]
+	public void DisabledDepthOfFieldLeavesNothingQueued()
+	{
+		var oldEnable = PostProcessSystem.EnablePostProcess;
+		var oldDofQuality = DepthOfField.Quality;
+		PostProcessSystem.EnablePostProcess = true;
+		DepthOfField.Quality = 3;
+
+		try
+		{
+			var scene = new Scene();
+			using var sceneScope = scene.Push();
+
+			var camGo = scene.CreateObject();
+			var cam = camGo.Components.Create<CameraComponent>();
+			var dof = camGo.Components.Create<DepthOfField>();
+			scene.GameTick();
+
+			var layer = FindLayer( cam, Stage.AfterTransparent, "Dof" );
+			Assert.IsNotNull( layer );
+			Assert.IsTrue( layer.CommandList.GetCheckpoint() > 0, "the layer's list holds this frame's commands" );
+
+			dof.Enabled = false;
+			Assert.AreSame( layer, FindLayer( cam, Stage.AfterTransparent, "Dof" ), "the camera keeps the layer until its next build" );
+			Assert.AreEqual( 0, layer.CommandList.GetCheckpoint(), "nothing left to run against the disposed buffers" );
+		}
+		finally
+		{
+			PostProcessSystem.EnablePostProcess = oldEnable;
+			DepthOfField.Quality = oldDofQuality;
 		}
 	}
 
@@ -748,6 +821,61 @@ public class PostProcessingComponentTest
 		{
 			PostProcessSystem.EnablePostProcess = oldEnable;
 			Bloom.UserEnabled = oldBloom;
+		}
+	}
+
+	/// <summary>
+	/// A full-weight volume can turn Bloom on or off even when the camera has its own Bloom.
+	/// With graphics available, also verify the composite mode sent to the shader.
+	/// </summary>
+	[TestMethod]
+	public void VolumeOverridesCameraBloom()
+	{
+		var oldEnable = PostProcessSystem.EnablePostProcess;
+		var oldBloom = Bloom.UserEnabled;
+		PostProcessSystem.EnablePostProcess = true;
+		Bloom.UserEnabled = true;
+		try
+		{
+			var scene = new Scene();
+			using var scope = scene.Push();
+			var camera = scene.CreateObject().AddComponent<CameraComponent>();
+			var cameraBloom = camera.GameObject.AddComponent<Bloom>();
+			cameraBloom.Strength = 0;
+
+			var volume = scene.CreateObject().AddComponent<PostProcessVolume>();
+			volume.SceneVolume = new SceneVolume { Type = SceneVolume.VolumeTypes.Infinite };
+			var bloom = volume.GameObject.AddComponent<Bloom>();
+			bloom.Mode = SceneCamera.BloomAccessor.BloomMode.Blur;
+
+			scene.GameTick();
+			var layer = FindLayer( camera, Stage.BeforePostProcess, "Bloom" );
+			Assert.IsNotNull( layer );
+
+			if ( Graphics.IsAvailable )
+			{
+				int mode = -1;
+				layer.CommandList.AddAction( () => mode = Graphics.Attributes.GetInt( "CompositeMode" ) );
+				using var target = Texture.CreateRenderTarget().WithSize( 128, 128 ).Create( "Bloom volume test" );
+				scene.PreRender();
+				Assert.IsTrue( camera.RenderToTexture( target, new ViewSetup { EnablePostprocessing = true } ) );
+				g_pRenderDevice.ForceFlushGPU( System.IntPtr.Zero );
+				Assert.AreEqual( (int)bloom.Mode, mode );
+			}
+
+			cameraBloom.Strength = 1;
+			bloom.Strength = 0;
+			scene.GameTick();
+			Assert.IsNull( FindLayer( camera, Stage.BeforePostProcess, "Bloom" ) );
+
+			volume.GameObject.Enabled = false;
+			scene.GameTick();
+			Assert.IsNotNull( FindLayer( camera, Stage.BeforePostProcess, "Bloom" ) );
+		}
+		finally
+		{
+			Bloom.UserEnabled = oldBloom;
+			PostProcessSystem.EnablePostProcess = oldEnable;
 		}
 	}
 

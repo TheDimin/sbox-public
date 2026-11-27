@@ -1,4 +1,4 @@
-﻿using Sandbox.Diagnostics;
+using Sandbox.Diagnostics;
 using Sandbox.Engine;
 using Sandbox.Internal;
 using Sandbox.Network;
@@ -38,7 +38,7 @@ public class AppSystem
 		}
 
 		// check core count, ram, os?
-		// rendersystemvulkan ends up checking gpu, driver, vram later on
+		// Borealis.Gpu checks the GPU, driver and VRAM when it makes its device
 
 	}
 
@@ -62,12 +62,12 @@ public class AppSystem
 	}
 
 	/// <summary>
-	/// Native's rendering pipeline gets its layers from Sandbox.SceneRenderer, which also renders cameras when
-	/// <c>r_managed_scene</c> is on. It references the engine, so it's registered with it here.
+	/// Native's rendering pipeline gets its layers from Sandbox.Rendering, which also renders cameras through Borealis on a
+	/// Borealis.Gpu device (<c>-borealisgpu</c>). It references the engine, so it's registered with it here.
 	/// </summary>
 	protected static void InstallRenderers()
 	{
-		SceneRenderer.EngineHooks.Install();
+		Rendering.EngineHooks.Install();
 	}
 
 	void SetupEnvironment()
@@ -186,6 +186,8 @@ public class AppSystem
 
 	public virtual void Shutdown()
 	{
+		// The render thread finishes the last frame handed to it and stops before anything it draws with is let go of
+		gameWindow?.StopRenderThread();
 		// Stop queued shader work and join native calls before engine resources are released.
 		Engine.Shaders.ShaderCompilerWorkers.Shutdown();
 
@@ -226,6 +228,9 @@ public class AppSystem
 		SoundFile.Shutdown();
 		SoundHandle.Shutdown();
 		DedicatedServer.Shutdown();
+
+		// Game and menu code can keep scenes alive in statics, along with the models and textures they draw
+		Scene.DestroyAll();
 
 		// Flush queued scene object/world deletes that normally run at
 		// end-of-frame. During shutdown no frame is rendered, so native
@@ -270,6 +275,7 @@ public class AppSystem
 				continue;
 
 			ReflectionUtility.NullStaticReferencesOfType( asm, typeof( Texture ) );
+			ReflectionUtility.NullStaticReferencesOfType( asm, typeof( GpuBuffer ) );
 			ReflectionUtility.NullStaticReferencesOfType( asm, typeof( Model ) );
 			ReflectionUtility.NullStaticReferencesOfType( asm, typeof( Material ) );
 			ReflectionUtility.NullStaticReferencesOfType( asm, typeof( ComputeShader ) );
@@ -281,11 +287,8 @@ public class AppSystem
 		TextRendering.Shutdown();
 		NativeResourceCache.ClearCache();
 
-		// Renderpipeline may hold onto native resources, clear them out
-		RenderPipeline.Shutdown();
-
-		// So may the managed scene renderer, if r_managed_scene loaded it
-		Rendering.ManagedSceneRendering.Shutdown();
+		// Borealis holds GPU resources on its Borealis.Gpu device
+		Rendering.SceneRenderer.Shutdown();
 
 		// Destroy all cached render targets immediately — must happen before
 		// GlobalContext.Shutdown() so ResourceSystem is still alive for Unregister calls.
@@ -308,6 +311,10 @@ public class AppSystem
 		EngineLoop.DrainFrameEndDisposables();
 		MainThread.RunQueues();
 
+		// No more frames: the game window's frame target goes now, not after the leak check with the window
+		gameWindow?.ReleaseFrameTarget();
+		Graphics.ReleaseFrameState();
+
 		// Run GC and finalizers to clear any resources held by managed
 		GC.Collect();
 		GC.WaitForPendingFinalizers();
@@ -320,9 +327,11 @@ public class AppSystem
 		GC.WaitForPendingFinalizers();
 
 		NativeResourceCache.HandleShutdownLeaks();
+		MainThread.RunQueues();
+		SceneWorld.FlushQueuedDeletes();
 
-		// print each scene that is leaked
-		foreach ( var leakedScene in Scene.All )
+		// Print each scene that is leaked
+		foreach ( var leakedScene in Scene.AllIncludingUnlisted )
 		{
 			log.Warning( $"Leaked scene {leakedScene.Id} during shutdown." );
 		}
@@ -331,6 +340,11 @@ public class AppSystem
 		Graphics.Shutdown();
 		WindowInput.Shutdown();
 		SdlGamepads.Shutdown();
+
+		// No task continuation runs from here on: one left queued (a menu's Workshop query, say) would run in a later
+		// wait on this thread, the runtime's own at exit included, after the native dlls are unloaded
+		Tasks.SyncContext.Shutdown();
+
 		NativeEngine.EngineGlobal.SourceEngineShutdown( _appSystem, false );
 		// Qt window destruction during PreShutdown can enqueue more frame-end cleanup.
 		EngineLoop.DrainFrameEndDisposables();
@@ -370,12 +384,25 @@ public class AppSystem
 		Application.Shutdown();
 	}
 
+	/// <summary>
+	/// Draw on Borealis.Gpu (<c>-borealisgpu</c>) whatever the command line says: the game and the editor do, and there is
+	/// no switch back to Source 2's renderer. Adds the switch to the command line native and managed code read, so call it
+	/// before anything starts.
+	/// </summary>
+	protected static void DrawOnBorealisGpu()
+	{
+		if ( Utility.CommandLine.HasSwitch( "-borealisgpu" ) ) return;
+
+		Utility.CommandLine.CommandLineString = (Utility.CommandLine.CommandLineString ?? System.Environment.CommandLine) + " -borealisgpu";
+		Utility.CommandLine.Parse();
+	}
+
 	protected void InitGame( AppSystemCreateInfo createInfo, string commandLine = null )
 	{
 		Bootstrap.StartStartupClock();
 		InstallRenderers();
 
-		commandLine ??= System.Environment.CommandLine;
+		commandLine ??= Utility.CommandLine.CommandLineString ?? System.Environment.CommandLine;
 		commandLine = commandLine.Replace( ".dll", ".exe" ); // uck
 
 		_appSystem = CMaterialSystem2AppSystemDict.Create( createInfo.ToMaterialSystem2AppSystemDictCreateInfo() );
@@ -412,14 +439,14 @@ public class AppSystem
 
 
 		Bootstrap.PrepareTypeLibraries();
-		startupWindow?.UpdateProgress( 0.02f, "Initializing Vulkan" );
+		startupWindow?.UpdateProgress( 0.05f, "Starting graphics" );
 		if ( !NativeEngine.EngineGlobal.SourceEnginePreInit( commandLine, _appSystem ) )
 		{
 			startupWindow?.Dispose();
 			throw new System.Exception( "SourceEnginePreInit failed" );
 		}
 		if ( !Application.IsInitialized ) Bootstrap.InitApplication( _appSystem );
-		startupWindow?.UpdateProgress( 0.04f, "Creating game window" );
+		startupWindow?.UpdateProgress( 0.16f, "Loading the engine" );
 
 		Bootstrap.PreInit( () =>
 		{
@@ -445,10 +472,9 @@ public class AppSystem
 		}
 
 		Bootstrap.BeginResourceScan();
-		gameWindow?.InitializeRendering();
-		gameWindow?.UpdateStartupProgress( 0.5f, "Loading materials" );
+		gameWindow?.UpdateStartupProgress( 0.22f, "Loading shaders" );
 		Bootstrap.Init();
-		gameWindow?.UpdateStartupProgress( 1.0f, "Ready" );
+		gameWindow?.UpdateStartupProgress( 0.4f, Application.IsStandalone ? "Loading the game" : "Building the menu" );
 	}
 
 	protected void SetWindowTitle( string title )

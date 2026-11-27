@@ -15,19 +15,57 @@ internal abstract class DevToolsTab : Panel
 	public abstract string Title { get; }
 
 	/// <summary>
-	/// Developer detail rather than something a player needs. Hidden unless <see cref="DevTools.ShowAdvanced"/>.
-	/// </summary>
-	public virtual bool Advanced => true;
-
-	/// <summary>
 	/// Whether this tab can be shown right now.
 	/// </summary>
-	public virtual bool Available => !Advanced || DevTools.ShowAdvanced;
+	public virtual bool Available => true;
 
 	/// <summary>
 	/// Takes the page's whole height and scrolls itself - a log or a list - instead of scrolling with the page.
 	/// </summary>
 	public virtual bool FillsPage => false;
+
+	/// <summary>
+	/// Whether the strip's copy button copies this tab. Tabs that fill the page - the console, the network log - have a
+	/// copy of their own.
+	/// </summary>
+	public virtual bool Copyable => !FillsPage;
+
+	/// <summary>
+	/// What's on the tab as text: its facts and tables in the order they're shown, under their sections' titles - for
+	/// pasting into a bug report or a chat.
+	/// </summary>
+	public string ToText()
+	{
+		var text = new System.Text.StringBuilder();
+		Write( this, text );
+		return text.ToString();
+
+		static void Write( Panel panel, System.Text.StringBuilder into )
+		{
+			foreach ( var child in panel.Children )
+			{
+				if ( child.HasClass( "hidden" ) ) continue;
+				switch ( child )
+				{
+					case DevToolsFacts facts:
+						facts.WriteText( into );
+						into.AppendLine();
+						break;
+					case DevToolsTable table:
+						table.WriteText( into );
+						into.AppendLine();
+						break;
+					case DevToolsSection section:
+						into.AppendLine( string.IsNullOrEmpty( section.Aside.Text ) ? $"== {section.TitleLabel.Text}" : $"== {section.TitleLabel.Text} ({section.Aside.Text})" );
+						if ( !section.IsCollapsed ) Write( section.Body, into );
+						break;
+					default:
+						Write( child, into );
+						break;
+				}
+			}
+		}
+	}
 
 	protected DevToolsTab()
 	{
@@ -48,10 +86,11 @@ internal abstract class DevToolsTab : Panel
 internal sealed class DevToolsWindow : Panel
 {
 	readonly Panel _strip;
-	readonly Label _title;
+	readonly Label _fps;
 	readonly Label _maximize;
 	readonly Label _visualization;
 	readonly Label _pause;
+	readonly Label _copy;
 	readonly Panel _tabBar;
 	readonly Panel _badges;
 	readonly Label _sampling;
@@ -61,6 +100,8 @@ internal sealed class DevToolsWindow : Panel
 	readonly Dictionary<DevToolsTab, float> _scroll = new();
 	DevToolsTab _shown;
 	DevTools.Summary _refreshedWith;
+	long? _refreshedFor;
+	string _refreshedPass;
 	DevTools.Summary _badgedWith;
 
 	/// <param name="host">What it's drawn in. Only a window of its own gets window buttons and a strip that drags it.</param>
@@ -71,8 +112,10 @@ internal sealed class DevToolsWindow : Panel
 		var window = host == DevTools.Host.Window;
 
 		_strip = AddChild( new Panel( null, window ? "strip window-drag" : "strip" ) );
-		_title = _strip.AddChild( new Label( "Dev Tools", "title" ) );
 		_tabBar = _strip.AddChild( new Panel( null, "tabs" ) );
+
+		// The frame rate, always in view whatever the tab
+		_fps = _strip.AddChild( new Label( "", "strip-fps" ) );
 
 		// Counts of what's out of line, the way a browser's dev tools count errors and warnings
 		_badges = _strip.AddChild( new Panel( null, "badges window-nodrag" ) );
@@ -83,6 +126,9 @@ internal sealed class DevToolsWindow : Panel
 		_sampling.Tooltip = "Frame statistics are held at the last foreground samples. Background-throttled frames remain in the history, but are excluded from averages, percentiles and the frame-time distribution.";
 
 		var controls = _strip.AddChild( new Panel( null, "host-controls" ) );
+
+		// The tab as text, for a bug report
+		_copy = Button( controls, "content_copy", "Copy this tab as text", CopyTab );
 
 		// Picking a frame pauses; this is the way back
 		_pause = Button( controls, "pause", null, () => DevTools.Paused = !DevTools.Paused );
@@ -116,8 +162,8 @@ internal sealed class DevToolsWindow : Panel
 		AddTab( new DevToolsConsoleTab() );
 		AddTab( new DevToolsGlanceTab() );
 		AddTab( new DevToolsCpuTab() );
-		AddTab( new DevToolsGpuTab() );
 		AddTab( new DevToolsMemoryTab() );
+		AddTab( new DevToolsVramTab() );
 		AddTab( new DevToolsRenderingTab() );
 		AddTab( new DevToolsNetworkTab() );
 		AddTab( new DevToolsUiTab() );
@@ -158,14 +204,10 @@ internal sealed class DevToolsWindow : Panel
 	{
 		base.Tick();
 
-		var advanced = DevTools.ShowAdvanced;
-		_sampling.SetClass( "hidden", !DevTools.Current.BackgroundThrottled );
-
 		// Width classes: grids rearrange themselves to fit
 		var width = Box.Rect.Width / ScaleToScreen;
 		SetClass( "narrow", width > 0 && width < 600 );
 		SetClass( "wide", width >= 1000 );
-		SetClass( "player", !advanced );
 
 		if ( _maximize is not null ) _maximize.Text = Window?.IsMaximized == true ? "filter_none" : "crop_square";
 
@@ -179,7 +221,8 @@ internal sealed class DevToolsWindow : Panel
 		_visualization.Tooltip = $"Tools visualization: {DevToolsMenus.VisualizationTitle( mode )}";
 
 		UpdateBadges();
-		UpdateTabs( advanced );
+		UpdateTabs();
+		_copy.SetClass( "hidden", _shown is not { Copyable: true } );
 	}
 
 	void UpdateBadges()
@@ -188,6 +231,18 @@ internal sealed class DevToolsWindow : Panel
 		if ( s == _badgedWith ) return;
 		_badgedWith = s;
 
+		var none = s.Frames == 0;
+
+		// The frame rate is with the dev tools running: the tooltip says what they take, and the frame rate without them
+		// when that's different
+		var without = s.FpsWithoutSelf;
+		var cost = $"+{s.SelfAvg:0.0}ms devtools" + (without > s.Fps * 1.01f ? $", ~{without:0} fps without" : "");
+
+		_fps.Text = none ? "" : $"{s.Fps:0} fps  {s.FrameAvg:0.00} ms";
+		_fps.Tooltip = none ? null : $"Over the last {s.WindowMs / 1000:0.0} s, target {s.TargetFps:0} fps from {s.TargetSource}\nLimited by {s.LimitText}: {LimitTooltip( s )}\n{cost}";
+		_fps.SetClass( "warning", !none && !s.MeetingTarget && s.Rating == DevTools.Severity.Warning );
+		_fps.SetClass( "bad", !none && !s.MeetingTarget && s.Rating == DevTools.Severity.Bad );
+
 		var errors = s.CountIssues( DevTools.Severity.Bad );
 		var warnings = s.CountIssues( DevTools.Severity.Warning );
 		_errors.Text = $"{errors}";
@@ -195,6 +250,19 @@ internal sealed class DevToolsWindow : Panel
 		_errors.Parent.SetClass( "hidden", errors == 0 );
 		_warnings.Parent.SetClass( "hidden", warnings == 0 );
 		_badges.Tooltip = string.Join( "\n", s.Issues.Select( x => $"{x.Title}: {x.Detail}" ) );
+	}
+
+	/// <summary>
+	/// Copy the tab on show, under a line saying what and when.
+	/// </summary>
+	void CopyTab()
+	{
+		if ( _shown is not { Copyable: true } tab ) return;
+
+		var s = DevTools.Current;
+		var picked = DevTools.SelectedFrame is { } frame ? $", frame {frame} picked" : "";
+		var header = $"s&box dev tools: {tab.Title}, {DateTime.Now:yyyy-MM-dd HH:mm:ss}{picked}\n{s.Fps:0} fps, {s.FrameAvg:0.00} ms over {s.WindowMs / 1000:0.0} s, likely bound by {s.LimitText}\n\n";
+		NativeEngine.Sdl.SetClipboardText( header + tab.ToText() );
 	}
 
 	internal static string LimitTooltip( DevTools.Summary s ) => s.Limiter switch
@@ -206,7 +274,7 @@ internal sealed class DevToolsWindow : Panel
 		_ => null,
 	};
 
-	void UpdateTabs( bool advanced )
+	void UpdateTabs()
 	{
 		DevToolsTab active = null;
 
@@ -222,13 +290,9 @@ internal sealed class DevToolsWindow : Panel
 		// An unknown or unavailable tab falls back to the overview
 		if ( active is null )
 		{
-			active = _tabs.First( x => x.Tab.TabId == DevTools.OverviewTabId || !x.Tab.Advanced ).Tab;
+			active = _tabs.First( x => x.Tab.TabId == DevTools.OverviewTabId ).Tab;
 			DevTools.ActiveTab = active.TabId;
 		}
-
-		// Players get the overview alone - a title rather than a one-item tab bar
-		_tabBar.SetClass( "hidden", !advanced );
-		_title.SetClass( "hidden", advanced );
 
 		if ( active != _shown )
 		{
@@ -250,9 +314,12 @@ internal sealed class DevToolsWindow : Panel
 			button.SetClass( "active", tab == active );
 
 		var summary = DevTools.Current;
-		if ( summary != _refreshedWith )
+		// A frame or pass picked while paused changes what's shown without a new analysis
+		if ( summary != _refreshedWith || DevTools.SelectedFrame != _refreshedFor || DevTools.SelectedPass != _refreshedPass )
 		{
 			_refreshedWith = summary;
+			_refreshedFor = DevTools.SelectedFrame;
+			_refreshedPass = DevTools.SelectedPass;
 			active.Refresh( summary );
 		}
 	}

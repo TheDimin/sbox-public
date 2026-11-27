@@ -1,4 +1,4 @@
-﻿using Sandbox.Engine;
+using Sandbox.Engine;
 using Sandbox.Network;
 using Sandbox.Utility;
 using Sentry;
@@ -14,6 +14,7 @@ namespace Sandbox;
 /// <summary>
 /// Global manager to hold and tick the singleton instance of NetworkSystem.
 /// </summary>
+[Expose]
 public static partial class Networking
 {
 	internal const int ReceiveBatchSize = 32;
@@ -36,6 +37,21 @@ public static partial class Networking
 
 	[ConVar( "net_host_migration_timeout", ConVarFlags.Protected, Help = "How long a client waits for the new host to show up before giving up, in seconds." )]
 	internal static float HostMigrationTimeout { get; set; } = 15f;
+
+	/// <summary>
+	/// Seconds without hearing from the other end before a connection times out.
+	/// </summary>
+	internal const int ConnectionTimeout = 120;
+
+	/// <summary>
+	/// Seconds a client goes without hearing from the host's game before it disconnects.
+	/// </summary>
+	internal const int HostTimeout = 60;
+
+	/// <summary>
+	/// How long to wait without hearing from the host before we show a "connection problem" warning.
+	/// </summary>
+	internal const float ConnectionProblemTime = 4f;
 
 	internal static Dictionary<string, string> ServerData { get; set; } = new();
 
@@ -130,6 +146,11 @@ public static partial class Networking
 	/// The maximum number of players allowed on the server you're connected to.
 	/// </summary>
 	public static int MaxPlayers { get; internal set; }
+
+	/// <summary>
+	/// Is the current server running on a dedicated server.
+	/// </summary>
+	public static bool IsDedicatedServer { get; internal set; }
 
 	/// <summary>
 	/// The last connection string used to connect to a server.
@@ -243,6 +264,24 @@ public static partial class Networking
 	/// </summary>
 	public static bool IsConnecting => System?.IsConnecting ?? false;
 
+	static int _joinsStarting;
+
+	/// <summary>
+	/// Joining someone else's game: from the moment the join starts, finding a Steam lobby included, until the game
+	/// it joins is loaded, or the join fails. Loading another game meanwhile would leave the session.
+	/// </summary>
+	internal static bool IsJoining => Volatile.Read( ref _joinsStarting ) > 0 || (IsClient && !Game.InGame);
+
+	/// <summary>
+	/// A join is starting, before there's a <see cref="System"/> to show for it. Taken synchronously, before the
+	/// first await, so nothing sees a gap.
+	/// </summary>
+	internal static DisposeAction JoinScope()
+	{
+		Interlocked.Increment( ref _joinsStarting );
+		return new DisposeAction( () => Interlocked.Decrement( ref _joinsStarting ) );
+	}
+
 	/// <summary>
 	/// True if we're currently connecting to the server
 	/// </summary>
@@ -286,7 +325,7 @@ public static partial class Networking
 		utils.SetConfig( NetConfig.RecvBufferMessages, 256 * 256 );
 
 		// conna: allow 120s before a client will disconnect from a timeout.
-		utils.SetConfig( NetConfig.TimeoutConnected, 120 * 1000 );
+		utils.SetConfig( NetConfig.TimeoutConnected, ConnectionTimeout * 1000 );
 
 		// conna: when these two values are not the same, there seems to be a bug that causes the send buffer
 		// to often become clogged up and not clear properly. Ultimately resulting in heavier load and backlog.
@@ -339,6 +378,7 @@ public static partial class Networking
 	internal static void Reset()
 	{
 		MaxPlayers = 0;
+		IsDedicatedServer = false;
 		ServerData.Clear();
 		LocalStats = default;
 	}
@@ -661,7 +701,10 @@ public static partial class Networking
 
 		var socket = await SteamLobbySocket.Create( net.Config );
 		if ( socket is null )
+		{
+			await DisconnectAfterLoad( ActiveSceneLoad(), token );
 			return false;
+		}
 
 		lock ( NetworkThreadLock )
 		{
@@ -675,6 +718,26 @@ public static partial class Networking
 			AddLocalListenSocket( net );
 			return true;
 		}
+	}
+
+	/// <summary>
+	/// The load the active scene is in the middle of, or null. The host joins the game it hosts at a load's end
+	/// (<see cref="GameNetworkSystem.OnLoadedScene"/>), which is where a game spawns its player.
+	/// </summary>
+	static Task ActiveSceneLoad() => Game.ActiveScene is { } scene && scene.IsValid() && scene.IsLoading ? scene.WaitForLoading() : null;
+
+	/// <summary>
+	/// Disconnect after a lobby that couldn't be made, once <paramref name="load"/> (the active scene's, if it's loading) is
+	/// over. The host joins at the load's end: a lobby failing after the load leaves the host's player in the game, but
+	/// disconnecting during the load meant the host never joined and no player spawned. Which comes first is a race between
+	/// the lobby's answer and the map's load. Nothing happens if another lobby or a disconnect came meanwhile (<paramref name="token"/>).
+	/// </summary>
+	internal static async Task DisconnectAfterLoad( Task load, CancellationToken token )
+	{
+		if ( load is not null ) await Task.WhenAny( load );
+		if ( token.IsCancellationRequested ) return;
+
+		Disconnect();
 	}
 
 	/// <summary>
@@ -721,6 +784,7 @@ public static partial class Networking
 
 			System.Disconnect();
 			System = null;
+			IsDedicatedServer = false;
 
 			DedicatedServer.Hide();
 		}
@@ -852,6 +916,7 @@ public static partial class Networking
 	{
 		var request = Api.Activity.PendingRequest;
 		var result = ConnectResult.Interrupted;
+		using var joining = JoinScope();
 		try
 		{
 			return result = await TryConnectCore( target, retries, token );
@@ -973,6 +1038,7 @@ public static partial class Networking
 	{
 		var request = Api.Activity.PendingRequest;
 		var result = ConnectResult.Interrupted;
+		using var joining = JoinScope();
 		try
 		{
 			result = await TryConnectSteamIdInternal( steamId, retries );

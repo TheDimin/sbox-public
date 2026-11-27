@@ -68,6 +68,12 @@ public class ControlSheetGroup : Widget
 					var enabler = ControlWidget.Create( toggleGroup );
 
 					headerWidget.Title = toggleAttr.Label ?? groupName;
+
+					if ( toggleGroup.TryGetAttribute<TitleAttribute>( out var titleAttr ) && !string.IsNullOrWhiteSpace( titleAttr.Value ) )
+					{
+						headerWidget.Title = titleAttr.Value;
+					}
+
 					headerWidget.ToolTip = toggleGroup.Description;
 					headerWidget.AddToggle( toggleGroup, enabler );
 
@@ -160,6 +166,10 @@ public class ControlSheetGroup : Widget
 	[EditorEvent.Frame]
 	public void UpdateVisibility()
 	{
+		// Nothing to do between debounces: return before asking Qt for the parent, as this runs every frame for every group
+		if ( !_deferredExpand && visibilityDebounce < 0.2f )
+			return;
+
 		if ( Parent is null )
 			return;
 

@@ -1,5 +1,5 @@
 using NativeEngine;
-using System.Text;
+using MeshField = Borealis.Source2.Models.VertexField;
 
 namespace Sandbox;
 
@@ -64,40 +64,41 @@ internal partial struct VertexBufferHandle
 	private struct RawVertexMarker { }
 	internal static Type RawElementType => typeof( RawVertexMarker );
 
-	internal static unsafe VertexBufferHandle CreateRaw( int stride, int vertexCount, ReadOnlySpan<RawVertexField> layout )
+	internal static VertexBufferHandle CreateRaw( int stride, int vertexCount, ReadOnlySpan<byte> data, ReadOnlySpan<RawVertexField> layout )
 	{
-		var fields = new VertexField[layout.Length];
-		var names = new StringBuilder();
+		RawVertexLayout.Validate( stride, vertexCount, data.Length, layout );
+		var fields = new MeshField[layout.Length];
 		for ( int i = 0; i < layout.Length; ++i )
 		{
 			var field = layout[i];
-			fields[i] = new VertexField { Format = field.Format, Offset = field.Offset, NameOffset = names.Length, NameSize = field.Semantic.Length, SemanticIndex = field.SemanticIndex };
-			names.Append( field.Semantic );
+			fields[i] = new MeshField( field.Semantic, field.SemanticIndex, (Borealis.Source2.Models.ColorFormat)field.Format, field.Offset, 0, false, 0 );
 		}
-		fixed ( VertexField* pointer = fields )
+		int capacity = checked(stride * vertexCount);
+		return new VertexBufferHandle
 		{
-			var handle = MeshGlue.CreateVertexBuffer( stride, vertexCount, names.ToString(), (IntPtr)pointer, fields.Length, IntPtr.Zero, 0 );
-			if ( handle == IntPtr.Zero ) throw new Exception( "Failed to create raw vertex buffer." );
-			return new VertexBufferHandle { _native = handle, _elementCount = vertexCount, _elementSize = stride, _elementType = RawElementType };
-		}
+			_data = data.Length == capacity ? data.ToArray() : RawVertexLayout.PadTrailingBytes( data, capacity ),
+			_fields = fields,
+			_elementCount = vertexCount,
+			_elementSize = stride,
+			_elementType = RawElementType,
+		};
 	}
 }
 
 public partial class Mesh
 {
+	internal bool UsesStoredVertexLayout => vertexType == VertexBufferHandle.RawElementType;
+	internal Matrix? GeometryToModel { get; private set; }
+	internal Borealis.Backend.StoredGeometryUpload.Slice? StoredUpload { get; set; }
+
 	/// <summary>Create a single vertex stream from explicitly described fields without repacking its bytes.</summary>
-	internal unsafe void CreateRawVertexBuffer( int stride, int vertexCount, ReadOnlySpan<byte> data, ReadOnlySpan<RawVertexField> fields )
+	internal unsafe void CreateRawVertexBuffer( int stride, int vertexCount, ReadOnlySpan<byte> data, ReadOnlySpan<RawVertexField> fields, Matrix? geometryToModel = null )
 	{
 		if ( vb.IsValid ) throw new InvalidOperationException( "Vertex buffer has already been created." );
-		var snapshot = fields.ToArray();
-		RawVertexLayout.Validate( stride, vertexCount, data.Length, snapshot );
-		var capacity = checked( stride * vertexCount );
-		// Complete only missing tail padding. Preserve all supplied source bytes.
-		if ( data.Length != capacity ) data = RawVertexLayout.PadTrailingBytes( data, capacity );
-		vb = VertexBufferHandle.CreateRaw( stride, vertexCount, snapshot );
+		vb = VertexBufferHandle.CreateRaw( stride, vertexCount, data, fields );
 		vertexType = VertexBufferHandle.RawElementType;
-		MeshGlue.SetMeshVertexBuffer( native, vb, IntPtr.Zero, 0 );
-		fixed ( byte* bytes = data ) MeshGlue.SetVertexBufferData( vb, (IntPtr)bytes, data.Length, 0 );
+		GeometryToModel = geometryToModel;
+		fixed ( byte* bytes = vb.Data ) MeshGlue.SetMeshVertexBuffer( native, vb, (IntPtr)bytes, vertexCount );
 		SetVertexRange( 0, vertexCount );
 	}
 }

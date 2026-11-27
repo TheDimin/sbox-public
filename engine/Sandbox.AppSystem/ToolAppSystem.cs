@@ -2,6 +2,7 @@
 using Sandbox.Tasks;
 using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -45,6 +46,11 @@ public class ToolAppSystem : AppSystem, IDisposable
 		AddSearchPaths( System.Environment.GetCommandLineArgs() );
 	}
 
+	/// <summary>
+	/// The managed engine's startup, as an app's.
+	/// </summary>
+	protected virtual void PreInit() => Bootstrap.PreInit();
+
 	protected void InitTool( AppSystemCreateInfo createInfo )
 	{
 		var commandLine = System.Environment.CommandLine;
@@ -65,7 +71,7 @@ public class ToolAppSystem : AppSystem, IDisposable
 		_appSystem.AddSystem( "resourcecompiler", "ResourceCompilerSystem001" );
 
 		Bootstrap.InitApplication( _appSystem );
-		Bootstrap.PreInit();
+		PreInit();
 
 		//Bootstrap.Init();
 	}

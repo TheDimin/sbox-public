@@ -63,15 +63,32 @@ partial class ViewportTools
 		if ( FrameTimeLabel == null || FrameRateLabel == null || ResolutionComboBox == null )
 			return;
 
-		FrameTimeLabel.Text = $"{PerformanceStats.LastSecond.FrameAvg:0.00}ms";
-		FrameRateLabel.Text = $"{(1000.0f / PerformanceStats.LastSecond.FrameAvg):0} FPS";
-		ResolutionComboBox.Suffix = ResolutionComboBox.GetSizeString();
+		// The stats change once a second and the size rarely: the text is made when they change, not every frame
+		var frameAvg = PerformanceStats.LastSecond.FrameAvg;
+		if ( frameAvg != lastFrameAvg )
+		{
+			lastFrameAvg = frameAvg;
+			FrameTimeLabel.Text = $"{frameAvg:0.00}ms";
+			FrameRateLabel.Text = $"{(1000.0f / frameAvg):0} FPS";
+		}
+	}
+
+	float lastFrameAvg = -1;
+
+	/// <summary>
+	/// The game view changed size: the resolution button shows the new size (read when it paints).
+	/// </summary>
+	internal void OnGameViewResized()
+	{
+		if ( ResolutionComboBox.IsValid() )
+			ResolutionComboBox.Update();
 	}
 }
 
 class ResolutionModeButton : Button
 {
 	private int _selectedIndex = 0;
+	private int _shownIndex = -1;
 	private List<Option> _options;
 
 	public string Suffix { get; set; } = "";
@@ -139,10 +156,33 @@ class ResolutionModeButton : Button
 
 	public string GetSizeString()
 	{
-		var viewport = _sceneViewWidget.GetGameTarget();
-		var size = viewport.Renderer.Size * viewport.Renderer.DpiScale;
-
+		var size = GameSize();
 		return $"{size.x:0}x{size.y:0}";
+	}
+
+	Vector2 GameSize()
+	{
+		var viewport = _sceneViewWidget.GetGameTarget();
+		return viewport.Renderer.Size * viewport.Renderer.DpiScale;
+	}
+
+	Vector2 suffixSize = new( -1 );
+
+	/// <summary>
+	/// Shows the game view's size in <see cref="Suffix"/>, made again only when it changes. Read when the button paints: the
+	/// game view repaints it when it's resized (<see cref="ViewportTools.OnGameViewResized"/>), and a DPI change repaints it.
+	/// </summary>
+	internal void UpdateSuffix()
+	{
+		if ( !_sceneViewWidget.GetGameTarget().IsValid() )
+			return;
+
+		var size = GameSize();
+		if ( size == suffixSize )
+			return;
+
+		suffixSize = size;
+		Suffix = $"{size.x:0}x{size.y:0}";
 	}
 
 	private void UpdateButtonText()
@@ -153,6 +193,11 @@ class ResolutionModeButton : Button
 		if ( _selectedIndex < 0 )
 			return;
 
+		// Called every frame: the button's text and icon only change with the selection
+		if ( _selectedIndex == _shownIndex )
+			return;
+
+		_shownIndex = _selectedIndex;
 		Text = _options[_selectedIndex].Text;
 		Icon = _options[_selectedIndex].Icon;
 	}
@@ -185,6 +230,8 @@ class ResolutionModeButton : Button
 
 	protected override void OnPaint()
 	{
+		UpdateSuffix();
+
 		Paint.Antialiasing = true;
 		Paint.ClearPen();
 		Paint.SetBrush( Theme.ControlBackground );

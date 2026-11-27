@@ -9,7 +9,8 @@
 
 	<ItemGroup>
 		<Compile Remove="Data\**\*.cs" />
-		<None Include="Data\**\*.*" CopyToOutputDirectory="PreserveNewest" TargetPath="data\%(RecursiveDir)%(Filename)%(Extension)" />
+		<None Include="Data\**\*.*" CopyToOutputDirectory="Always" />
+		<EmbeddedResource Include="..\..\..\game\core\fonts\Roboto-Regular.ttf" LogicalName="Roboto-Regular.ttf" />
 		<!-- Exercise the menu's pure party grouping without Steam or the UI runtime. -->
 		<Compile Include="..\..\..\game\addons\menu\Code\MenuUI\Front\FriendPartyGrouping.cs" Link="Menu\FriendPartyGrouping.cs" />
 		<Compile Include="..\..\..\game\addons\tools\Code\Editor\AssetPicker\AssetPickerState.cs" Link="Editor\AssetPickerState.cs" />
@@ -34,7 +35,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\Fixtures\HotloadTestAssembly\Sandbox.Test.AfterHotload.csproj" Aliases="After" />
+		<ProjectReference Include="..\Fixtures\HotloadTestAssembly\Sandbox.Test.BeforeHotload.csproj" Aliases="Before" />
 		<ProjectReference Include="..\..\Sandbox.Bind\Sandbox.Bind.csproj" />
+		<ProjectReference Include="..\..\Sandbox.ContentBuild\Sandbox.ContentBuild.csproj" />
 		<ProjectReference Include="..\..\Sandbox.Compiling\Sandbox.Compiling.csproj" />
 		<ProjectReference Include="..\..\Sandbox.Engine\Sandbox.Engine.csproj" />
 		<ProjectReference Include="..\..\Sandbox.Event\Sandbox.Event.csproj" />
@@ -42,16 +46,14 @@
 		<ProjectReference Include="..\..\Sandbox.Hotload\Sandbox.Hotload.csproj" />
 		<ProjectReference Include="..\..\Sandbox.Layout\Sandbox.Layout.csproj" />
 		<ProjectReference Include="..\..\Sandbox.Reflection\Sandbox.Reflection.csproj" />
-		<ProjectReference Include="..\..\Sandbox.SceneRenderer\Sandbox.SceneRenderer.csproj" />
+		<ProjectReference Include="..\..\Borealis\Borealis.csproj" />
+		<ProjectReference Include="..\..\Sandbox.Rendering\Sandbox.Rendering.csproj" />
 		<ProjectReference Include="..\..\Sandbox.System\Sandbox.System.csproj" />
 		<ProjectReference Include="..\..\Sandbox.Tools\Sandbox.Tools.csproj" />
 		<ProjectReference Include="..\..\Tools\InteropGen\InteropGen.csproj" />
-		<ProjectReference Include="..\Fixtures\HotloadTestAssembly\Sandbox.Test.AfterHotload.csproj">
-			<Aliases>After</Aliases>
-		</ProjectReference>
-		<ProjectReference Include="..\Fixtures\HotloadTestAssembly\Sandbox.Test.BeforeHotload.csproj">
-			<Aliases>Before</Aliases>
-		</ProjectReference>
 	</ItemGroup>
 
+	<ItemGroup>
+		<Compile Include="../../Mounting/Sandbox.Mounting.GtaV/LodVisibility.cs" Link="Mounting/LodVisibility.cs" />
+	</ItemGroup>
 </Project>

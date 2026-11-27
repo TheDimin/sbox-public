@@ -3,13 +3,17 @@ using System.Runtime.InteropServices;
 
 namespace Sandbox
 {
-	public struct Texture2DBuilder
+	/// <summary>
+	/// Configures and creates a two-dimensional texture.
+	/// </summary>
+	[Expose]
+	public partial struct Texture2DBuilder
 	{
 		internal TextureBuilder config = new();
 		internal int Width { set => config._config.m_nWidth = (short)value; }
 		internal int Height { set => config._config.m_nHeight = (short)value; }
 		internal int Depth { set => config._config.m_nDepth = (short)value; }
-		internal ImageFormat Format { set => config._config.m_nImageFormat = value; }
+		internal ImageFormat Format { set => config.WithFormat( value ); }
 
 
 		internal string _name = null;
@@ -17,6 +21,7 @@ namespace Sandbox
 		internal int _dataLength = 0;
 		internal IntPtr _dataPtr = IntPtr.Zero;
 		internal bool _asAnonymous = true;
+		private Sequence[] _sequences;
 
 		internal bool HasData
 		{
@@ -229,7 +234,20 @@ namespace Sandbox
 		/// <summary>
 		/// Build and create the actual texture
 		/// </summary>
-		public Texture Finish()
+		public Texture Finish() => FinishCore( false );
+
+		/// <summary>
+		/// Transfers the entire data array to the texture. The caller must not modify or reuse the array.
+		/// </summary>
+		internal Texture FinishWithOwnedData()
+		{
+			if ( _data is null || _dataLength != _data.Length || _dataPtr != IntPtr.Zero || _sequences is not null )
+				throw new InvalidOperationException( "Ownership transfer requires a complete texture data array." );
+
+			return FinishCore( true );
+		}
+
+		private Texture FinishCore( bool transferDataOwnership )
 		{
 			config._config.m_nNumMipLevels = Math.Max( config._config.m_nNumMipLevels, (short)1 );
 			config._config.m_nWidth = Math.Max( config._config.m_nWidth, (short)1 );
@@ -248,6 +266,20 @@ namespace Sandbox
 				{
 					throw new Exception( $"{_dataLength} is wrong for this texture! {memoryRequiredForTexture:n0} bytes are required (or {memoryRequiredForTextureWithMips:n0} with mips)! You sent {_dataLength:n0} bytes!" );
 				}
+			}
+
+			if ( _sequences is not null )
+				return FinishWithSequences();
+
+			return FinishTexture( transferDataOwnership );
+		}
+
+		private unsafe Texture FinishTexture( bool transferDataOwnership = false )
+		{
+			if ( transferDataOwnership )
+			{
+				fixed ( byte* pixels = _data )
+					return Texture.Create( _name, _asAnonymous, config, (IntPtr)pixels, _dataLength, _data );
 			}
 
 			if ( _dataPtr != IntPtr.Zero )

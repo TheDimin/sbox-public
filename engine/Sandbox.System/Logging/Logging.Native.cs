@@ -3,11 +3,13 @@ namespace Sandbox.Diagnostics;
 internal static partial class Logging
 {
 	static Logger nativeLogger;
-	static string nativePartial = "";
+
+	// Each thread's own: native code on several threads logs at once
+	[ThreadStatic] static string nativePartial;
 
 	internal static void PrintNative( int severity, string logger, string message )
 	{
-		nativePartial += message;
+		nativePartial = (nativePartial ?? "") + message;
 
 		var newline = nativePartial.LastIndexOf( '\n' );
 		if ( newline < 0 ) return;
@@ -24,6 +26,7 @@ internal static partial class Logging
 
 		var logName = $"engine/{logger}";
 		nativeLogger ??= GetLogger( "Native" );
-		nativeLogger.WriteToTargets( level, null, $"{message}", logName );
+		// Native messages come from anywhere, often job threads, so a managed stack only helps for errors
+		nativeLogger.WriteToTargets( level, null, $"{message}", logName, captureStack: level >= NLog.LogLevel.Error );
 	}
 }

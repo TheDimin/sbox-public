@@ -1,4 +1,5 @@
-﻿namespace Sandbox.UI;
+﻿using Sandbox.Engine;
+namespace Sandbox.UI;
 
 public partial class Panel
 {
@@ -56,6 +57,18 @@ public partial class Panel
 	// Worked out once per type - every panel that gets built asks for this, and a type's attributes
 	// can't change. A hotload makes new types, which miss the cache and get looked up again.
 	static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, InlineStyleSheet[]> inlineStyleSheets = new();
+
+	/// <summary>
+	/// Forget package types' inline sheets (games, the menu): a cached type kept its assembly, and with it a closed game's
+	/// code and everything its statics reach, from unloading.
+	/// </summary>
+	internal static void ForgetPackageInlineStyleSheets()
+	{
+		foreach ( var type in inlineStyleSheets.Keys )
+		{
+			if ( Sandbox.Internal.IsolatedAssemblyContext.IsPackageType( type ) ) inlineStyleSheets.TryRemove( type, out _ );
+		}
+	}
 
 	/// <summary>
 	/// Every [StyleSheet.Inline] declared on <paramref name="type"/> and on the types it derives
@@ -127,7 +140,7 @@ public partial class Panel
 	/// <returns>True if the attribute exists and we loaded from it, otherwise false</returns>
 	private bool LoadStyleSheetFromAttribute()
 	{
-		var type = Game.TypeLibrary?.GetType( GetType() );
+		var type = GlobalContext.Current.TypeLibrary?.GetType( GetType() );
 		var attr = type?.GetAttribute<StyleSheetAttribute>( false );
 
 		if ( attr == null )
@@ -158,7 +171,7 @@ public partial class Panel
 	/// <returns>True if the attribute exists and we loaded from it, otherwise false</returns>
 	private bool LoadStyleSheetAuto()
 	{
-		var type = Game.TypeLibrary?.GetType( GetType() );
+		var type = GlobalContext.Current.TypeLibrary?.GetType( GetType() );
 
 		// Get the shortest class file (incase we have MyPanel.SomeStuff.Blah)
 		var classFileLocation = type?.GetAttributes<Internal.ClassFileLocationAttribute>()

@@ -24,6 +24,7 @@ sealed class DDGIVolumeSystem : GameObjectSystem<DDGIVolumeSystem>
 		ReleaseBuffer();
 
 		Scene?.RenderAttributes?.Set( "DDGI_VolumeCount", 0 );
+		Scene?.RenderAttributes?.Set( "DDGI_Enabled", 0 );
 		Scene?.RenderAttributes?.Set( "DDGI_Volumes", (GpuBuffer)null );
 
 		base.Dispose();
@@ -83,14 +84,15 @@ sealed class DDGIVolumeSystem : GameObjectSystem<DDGIVolumeSystem>
 			EnsureBufferCapacity( volumeData.Count );
 			GpuBuffer.SetData( volumeData );
 			Scene.RenderAttributes.Set( "DDGI_VolumeCount", volumeData.Count );
+			Scene.RenderAttributes.Set( "DDGI_Enabled", 1 ); // Specialization constant: pixel shaders leave DDGI out when 0
 			Scene.RenderAttributes.Set( "DDGI_Volumes", GpuBuffer );
 			return;
 		}
 
-		// No valid volumes: clear renderer attributes to avoid stale data.
-		ReleaseBuffer();
+		// No valid volumes: DDGI off. The buffer stays until the system goes: cameras keep the scene's attributes they merged
+		// (a value cleared here isn't cleared there), so a buffer freed now would still be bound by their views
 		Scene.RenderAttributes.Set( "DDGI_VolumeCount", 0 );
-		Scene.RenderAttributes.Set( "DDGI_Volumes", (GpuBuffer)null );
+		Scene.RenderAttributes.Set( "DDGI_Enabled", 0 );
 	}
 
 	private void EnsureBufferCapacity( int count )

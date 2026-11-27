@@ -2,7 +2,11 @@ namespace Sandbox;
 
 /// <summary>
 /// Makes objects float, sink and drift. Attach to any trigger collider to create water.
+/// Use <see cref="WaterBody"/> instead, which draws the water and gives it buoyancy, drag, swimming and waves.
+/// This still works so scenes that have it keep behaving the same.
 /// </summary>
+[Obsolete( "Use WaterBody, which draws the water and gives it buoyancy, drag, swimming and waves." )]
+[Hide]
 [Title( "Water Volume" )]
 [Category( "Physics" )]
 [Icon( "water" )]
@@ -125,7 +129,7 @@ public sealed class WaterVolume : Component
 		var origin = WorldTransform.PointToWorld( collider.LocalBounds.Center );
 		var wave = _smoothAmplitude > 0f ? (MathF.Sin( _wavePhase ) - 1f) * 0.5f * _smoothAmplitude : 0f;
 
-		using ( Gizmo.Scope( "WaterSurface" ) )
+		using ( Gizmo.PushScope( "WaterSurface" ) )
 		{
 			Gizmo.Transform = global::Transform.Zero;
 

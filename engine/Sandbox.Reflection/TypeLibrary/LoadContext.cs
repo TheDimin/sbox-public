@@ -14,7 +14,13 @@ class IsolatedAssemblyContext : AssemblyLoadContext
 
 	public IsolatedAssemblyContext() : base( "IsolatedAssemblyContext", true )
 	{
+		Unloading += Sandbox.Diagnostics.LoggedStack.FormatCollectibleStacks;
 	}
+
+	/// <summary>
+	/// True for types from package code (games, libraries, the menu addon), false for the engine and .NET
+	/// </summary>
+	internal static bool IsPackageType( Type type ) => type is not null && GetLoadContext( type.Assembly ) is IsolatedAssemblyContext;
 
 	protected override Assembly Load( AssemblyName assemblyName )
 	{
@@ -126,6 +132,7 @@ class LoadContext : AssemblyLoadContext
 		{
 			using var pdbStream = new System.IO.MemoryStream( pdbData );
 			lc.Assembly = lc.LoadFromStream( stream, pdbStream );
+			Sandbox.Diagnostics.LoggedStack.AddSymbols( lc.Assembly, pdbData );
 		}
 		else
 		{
@@ -152,6 +159,23 @@ class LoadContext : AssemblyLoadContext
 
 		return lc.Assembly;
 	}
+
+	/// <summary>
+	/// Every child context starts unloading. A collectible context holds itself until it's told to unload, so children left
+	/// alone kept a closed game's assemblies, their statics and what those reach (its last scene) for good.
+	/// </summary>
+	public void UnloadChildren()
+	{
+		foreach ( var child in Children )
+		{
+			child.Assembly = null;
+			child.Unload();
+		}
+
+		Children.Clear();
+	}
+
+	internal int ChildCount => Children.Count;
 
 	public void UnloadChild( Assembly asm )
 	{

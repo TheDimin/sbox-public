@@ -6,8 +6,6 @@ namespace Sandbox;
 
 public static partial class Graphics
 {
-	const int maxDynamicVertexBuffer = 512 * 1024;
-
 	/// <summary>
 	/// This is our entry point into the engine for all draws
 	/// </summary>
@@ -19,39 +17,16 @@ public static partial class Graphics
 
 		AssertRenderBlock();
 
-		// Get the layout for this vertex. This will create if not found.
-		var vertexType = VertexLayout.Get<T>();
-		if ( !vertexType.IsValid ) return;
+		Backend.DrawVertices( typeof( T ), sizeof( T ), (IntPtr)vertices, vertCount, (IntPtr)indices, indexCount, material, attributes, primitiveType );
+	}
 
-		// Set the material etc
-		if ( !RenderTools.SetRenderState( Context, attributes.Get(), ModeFor( material ), vertexType, Graphics.Stats ) )
-			return;
+	internal static void ValidateDrawCounts( int vertCount, int vertexLength, int indexCount = 0, int indexLength = 0 )
+	{
+		if ( vertCount < 0 || vertCount > vertexLength )
+			throw new ArgumentOutOfRangeException( nameof( vertCount ), $"{nameof( vertCount )} ({vertCount}) must be between 0 and the number of vertices ({vertexLength})" );
 
-		var totalSize = sizeof( T ) * vertCount;
-		if ( indices is not null || totalSize < maxDynamicVertexBuffer )
-		{
-			RenderTools.Draw( Context, (NativeEngine.RenderPrimitiveType)primitiveType, vertexType, (IntPtr)vertices, vertCount, (IntPtr)indices, indexCount, Graphics.Stats );
-			return;
-		}
-
-		int verticesPerChunk = maxDynamicVertexBuffer / sizeof( T );
-
-		// if we're drawing triangles, and have no indices, round to chunks of 3 so we don't
-		// get geometry split between chunks.. because that would be a disaster
-		if ( primitiveType == PrimitiveType.Triangles && indices is null )
-		{
-			verticesPerChunk = verticesPerChunk.SnapToGrid( 3 );
-		}
-
-		//
-		// todo - for lines chunk size needs to be multiple of 2, for triangles multiple of 3
-		//
-
-		for ( int i = 0; i < vertCount; i += verticesPerChunk )
-		{
-			var chunkCount = Math.Min( verticesPerChunk, vertCount - i );
-			RenderTools.Draw( Context, (NativeEngine.RenderPrimitiveType)primitiveType, vertexType, (IntPtr)(vertices + i), chunkCount, default, default, Graphics.Stats );
-		}
+		if ( indexCount < 0 || indexCount > indexLength )
+			throw new ArgumentOutOfRangeException( nameof( indexCount ), $"{nameof( indexCount )} ({indexCount}) must be between 0 and the number of indices ({indexLength})" );
 	}
 
 	/// <summary>
@@ -59,6 +34,8 @@ public static partial class Graphics
 	/// </summary>
 	public static unsafe void Draw( Span<Vertex> vertices, int vertCount, Material material, RenderAttributes attributes = null, PrimitiveType primitiveType = PrimitiveType.Triangles )
 	{
+		ValidateDrawCounts( vertCount, vertices.Length );
+
 		fixed ( Vertex* ptr = vertices )
 		{
 			DrawInternal( ptr, vertCount, default, default, material, attributes, primitiveType );
@@ -73,6 +50,8 @@ public static partial class Graphics
 	/// </summary>
 	internal static unsafe void Draw<T>( Span<T> vertices, int vertCount, Material material, RenderAttributes attributes = null, PrimitiveType primitiveType = PrimitiveType.Triangles ) where T : unmanaged
 	{
+		ValidateDrawCounts( vertCount, vertices.Length );
+
 		fixed ( T* ptr = vertices )
 		{
 			DrawInternal( ptr, vertCount, default, default, material, attributes, primitiveType );
@@ -103,6 +82,8 @@ public static partial class Graphics
 	/// </summary>
 	public static unsafe void Draw( Span<Vertex> vertices, int vertCount, Span<ushort> indices, int indexCount, Material material, RenderAttributes attributes = null, PrimitiveType primitiveType = PrimitiveType.Triangles )
 	{
+		ValidateDrawCounts( vertCount, vertices.Length, indexCount, indices.Length );
+
 		fixed ( Vertex* vptr = vertices )
 		fixed ( ushort* iptr = indices )
 		{
@@ -150,9 +131,10 @@ public static partial class Graphics
 
 		if ( !obj.IsValid() ) return;
 
-		// Native draws it through its layer's view; a managed frame (r_managed_scene) draws it from its own copy of the object
-		if ( obj.ManualRenderScope is { } scope ) scope( transform, color, material );
-		else _state.view?.RenderSceneObject( Context, obj, transform ?? obj.Transform, color ?? Color.White, material, Attributes );
+		// Native draws it through its layer's view; a Borealis frame draws it from its own copy of the object. On the render
+		// thread the object's transform is its render object's, as the sync point wrote it: the game may be moving it meanwhile
+		var at = transform ?? (Rendering.RenderSync.OnRenderThread && obj.RenderObject is { } drawn ? drawn.Transform : obj.Transform);
+		_state.view?.RenderSceneObject( obj, at, color ?? Color.White, material, Attributes );
 	}
 
 	/// <summary>
@@ -282,7 +264,7 @@ public static partial class Graphics
 		if ( string.IsNullOrEmpty( iconName ) )
 			iconName = "people";
 
-		return DrawText( rect, iconName?.ToLower(), color, "Material Icons", fontSize, flags: alignment );
+		return DrawText( rect, iconName?.ToLower(), color, "Material Symbols Outlined", fontSize, flags: alignment );
 	}
 
 	/// <summary>
